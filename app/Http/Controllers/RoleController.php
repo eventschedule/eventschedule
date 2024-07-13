@@ -8,16 +8,16 @@ class RoleController extends Controller
 {
     public function newVenue()
     {
-        return view('role/new');
+        return view('role/edit');
     }
 
     public function newVendor()
     {
-        return view('role/new');
+        return view('role/edit');
     }
 
     public function newTalent()
     {
-        return view('role/new');
+        return view('role/edit');
     }
 }
