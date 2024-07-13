@@ -44,4 +44,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function eventRoles()
+    {
+        return $this->belongsToMany(EventRole::class);
+    }
 }
