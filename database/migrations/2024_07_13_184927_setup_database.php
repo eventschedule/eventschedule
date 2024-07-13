@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('subdomain')->unique();
             $table->enum('type', ['venue', 'talent', 'vendor'])->index();
             $table->string('name');
+            $table->string('phone')->nullable();
+            $table->string('email')->nullable();
             $table->text('address')->nullable();
             $table->string('country_id');
             $table->text('description');
