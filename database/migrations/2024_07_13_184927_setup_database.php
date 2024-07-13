@@ -19,7 +19,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('subdomain')->unique();
-            $table->enum('role', ['venue', 'talent', 'vendor'])->index();
+            $table->enum('type', ['venue', 'talent', 'vendor'])->index();
             $table->string('name');
             $table->text('address')->nullable();
             $table->string('country_id');
