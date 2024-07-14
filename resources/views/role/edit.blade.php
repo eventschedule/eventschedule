@@ -65,14 +65,6 @@
                             {{ __('Contact Info') }}
                         </h2>
 
-
-                        <div class="mb-6">
-                            <x-input-label for="website" :value="__('Website')" />
-                            <x-text-input id="website" name="website" type="url" class="mt-1 block w-full"
-                                :value="old('address1', '')" />
-                            <x-input-error class="mt-2" :messages="$errors->get('website')" />
-                        </div>
-
                         <div class="mb-6">
                             <x-input-label for="email" :value="__('Email')" />
                             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
@@ -85,6 +77,13 @@
                             <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full"
                                 :value="old('name', '')" />
                             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="website" :value="__('Website')" />
+                            <x-text-input id="website" name="website" type="url" class="mt-1 block w-full"
+                                :value="old('address1', '')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('website')" />
                         </div>
 
                     </div>
@@ -128,6 +127,18 @@
 
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div class="flex items-center gap-4">
+                <x-primary-button>{{ __('Save') }}</x-primary-button>
+
+                @if (session('status') === 'role-saved')
+                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
+                    class="text-sm text-gray-600 dark:text-gray-400">{{ __('Saved.') }}</p>
+                @endif
+
             </div>
         </div>
 
