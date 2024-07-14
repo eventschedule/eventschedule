@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
+    <head class="h-full bg-gray-100">
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -14,23 +14,28 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased">
+    <body class="font-sans antialiased h-full">
         <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-            @include('layouts.navigation')
 
-            <!-- Page Heading -->
-            @isset($header)
-                <header class="bg-white dark:bg-gray-800 shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
+            <div class="min-h-full">
+                <div class="bg-gray-800 pb-32">        
+                    @include('layouts.navigation')
+
+                    <header class="py-10">
+                        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                            <h1 class="text-3xl font-bold tracking-tight text-white">{{ $header }}</h1>
+                        </div>
+                    </header>
+                </div>
+
+                <main class="-mt-32">
+                    <div class="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
+                        <div class="rounded-lg bg-white px-5 py-6 shadow sm:px-6">
+                            {{ $slot }}
+                        </div>
                     </div>
-                </header>
-            @endisset
-
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
+                </main>
+            </div>
         </div>
     </body>
 </html>
