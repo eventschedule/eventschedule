@@ -47,23 +47,10 @@
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                         </div>
 
-                        <!--
-                    <div class="mb-6">
-                        <x-input-label for="email" :value="__('Email')" />
-                        <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', '')"/>
-                        <x-input-error class="mt-2" :messages="$errors->get('email')" />
-                    </div>
-
-                    <div class="mb-6">
-                        <x-input-label for="phone" :value="__('Phone')" />
-                        <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full" :value="old('name', '')"/>
-                        <x-input-error class="mt-2" :messages="$errors->get('phone')" />
-                    </div>
-                    -->
-
                         <div class="mb-6">
                             <x-input-label for="description" :value="__('Description')" />
-                            <textarea id="description" name="description" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                            <textarea id="description" name="description"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                 :value="old('description', '')"></textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
@@ -75,34 +62,67 @@
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                            {{ __('Contact Info') }}
+                        </h2>
+
+
+                        <div class="mb-6">
+                            <x-input-label for="website" :value="__('Website')" />
+                            <x-text-input id="website" name="website" type="url" class="mt-1 block w-full"
+                                :value="old('address1', '')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('website')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="email" :value="__('Email')" />
+                            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
+                                :value="old('email', '')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('email')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="phone" :value="__('Phone')" />
+                            <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full"
+                                :value="old('name', '')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                    <div class="max-w-xl">
+
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                             {{ __('Address') }}
                         </h2>
 
                         <div class="mb-6">
                             <x-input-label for="address1" :value="__('Street Address')" />
                             <x-text-input id="address1" name="address1" type="text" class="mt-1 block w-full"
-                                :value="old('address1', '')" required autofocus />
+                                :value="old('address1', '')" />
                             <x-input-error class="mt-2" :messages="$errors->get('address1')" />
                         </div>
 
                         <div class="mb-6">
                             <x-input-label for="city" :value="__('City')" />
                             <x-text-input id="city" name="city" type="text" class="mt-1 block w-full"
-                                :value="old('city', '')" required autofocus />
+                                :value="old('city', '')" />
                             <x-input-error class="mt-2" :messages="$errors->get('city')" />
                         </div>
 
                         <div class="mb-6">
                             <x-input-label for="state" :value="__('State / Province')" />
                             <x-text-input id="city" name="city" type="text" class="mt-1 block w-full"
-                                :value="old('city', '')" required autofocus />
+                                :value="old('city', '')" />
                             <x-input-error class="mt-2" :messages="$errors->get('city')" />
                         </div>
 
                         <div class="mb-6">
                             <x-input-label for="postal_code" :value="__('Postal Code')" />
                             <x-text-input id="postal_code" name="postal_code" type="text" class="mt-1 block w-full"
-                                :value="old('postal_code', '')" required autofocus />
+                                :value="old('postal_code', '')" />
                             <x-input-error class="mt-2" :messages="$errors->get('postal_code')" />
                         </div>
 
