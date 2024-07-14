@@ -10,4 +10,9 @@ class RoleController extends Controller
     {
         return view('role/edit');
     }
+
+    public function store()
+    {
+        //
+    }
 }
