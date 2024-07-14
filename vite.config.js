@@ -10,9 +10,11 @@ export default defineConfig({
             origin: '*',
         },
         host: "192.168.10.10",
+        /*
         watch: {
             usePolling: true,
         },
+        */
     },
     plugins: [
         laravel({
