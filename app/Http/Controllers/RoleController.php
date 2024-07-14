@@ -14,15 +14,16 @@ class RoleController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $user = $request->user();
         $subdomain = str_replace([' ', '.'], ['-', ''], strtolower(trim($request->name)));
 
         $role = new Role;
         $role->fill($request->all());
         $role->subdomain = $subdomain;
-        $role->user_id = $request->user()->id;
+        $role->user_id = $user->id;
         $role->save();
 
-        dd('role: ' . $role->id);
+        $user->roles()->attach($role->id);
 
         return redirect(route('dashboard'));
     }
