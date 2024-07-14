@@ -13,7 +13,8 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/sign_up', [RoleController::class, 'create'])->name('sign_up');
+    Route::get('/sign_up', [RoleController::class, 'create'])->name('role.create');
+    Route::post('/store', [RoleController::class, 'store'])->name('role.store');
     
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
