@@ -23,7 +23,11 @@ return new class extends Migration
             $table->string('name');
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
-            $table->text('address')->nullable();
+            $table->text('address1')->nullable();
+            $table->text('address2')->nullable();
+            $table->text('city')->nullable();
+            $table->text('state')->nullable();
+            $table->text('postal_code')->nullable();
             $table->string('country_id');
             $table->text('description');
             $table->text('social_urls')->nullable();
