@@ -32,6 +32,7 @@ return new class extends Migration
             $table->text('description');
             $table->text('social_urls')->nullable();
             $table->text('payment_urls')->nullable();
+            $table->text('youtube_urls')->nullable();
             $table->timestamps();
         });
 
