@@ -28,7 +28,7 @@ return new class extends Migration
             $table->text('city')->nullable();
             $table->text('state')->nullable();
             $table->text('postal_code')->nullable();
-            $table->string('country_id');
+            $table->string('country_code')->nullable();
             $table->text('description');
             $table->text('social_urls')->nullable();
             $table->text('payment_urls')->nullable();

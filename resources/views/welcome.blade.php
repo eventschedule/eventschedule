@@ -110,7 +110,7 @@
                     </div>
                     </div>
                     <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl"><span class="text-gray-600">your</span>.eventschedule.com</h1>
-                    <p class="mt-6 text-lg leading-8 text-gray-600">Enabling venues, talent and vendors to connect with their audience</p>
+                    <p class="mt-6 text-lg leading-8 text-gray-600">Connecting venues, talent, and vendors with their audience</p>
                     <div class="mt-10 flex items-center gap-x-6">
                     @auth
                         <a href="{{ url('/dashboard') }}" class="group inline-flex items-center justify-center rounded-full py-2 px-4 text-sm font-semibold focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 bg-blue-600 text-white hover:text-slate-100 hover:bg-blue-500 active:bg-blue-800 active:text-blue-100 focus-visible:outline-blue-600">Dashboard</a>
@@ -137,8 +137,8 @@
     <div class="bg-gray-900 py-24 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:mx-0">
-      <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Stay on top of customer support</h2>
-      <p class="mt-6 text-lg leading-8 text-gray-300">Lorem ipsum dolor sit amet consect adipisicing elit. Possimus magnam voluptatum cupiditate veritatis in accusamus quisquam.</p>
+      <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Revolutionize Your Event Coordination</h2>
+      <p class="mt-6 text-lg leading-8 text-gray-300">At Event Schedule, we understand that organizing events can be a complex and time-consuming process. That's why we've created an innovative platform where venues, talent, and vendors can seamlessly collaborate to bring unforgettable experiences to life.</p>
     </div>
     <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
       <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
@@ -152,7 +152,7 @@
             Venues
           </dt>
           <dd class="mt-1 flex flex-auto flex-col text-base leading-7 text-gray-300">
-            <p class="flex-auto">Non quo aperiam repellendus quas est est. Eos aut dolore aut ut sit nesciunt. Ex tempora quia. Sit nobis consequatur dolores incidunt.</p>
+            <p class="flex-auto">Streamline Your Scheduling: Save precious time by allowing talent and vendors to manage their own pages. No more back-and-forth emails or endless phone calls—everything you need is in one place.</p>            
             <!--
             <p class="mt-6">
               <a href="#" class="text-sm font-semibold leading-6 text-indigo-400">Learn more <span aria-hidden="true">→</span></a>
@@ -171,8 +171,8 @@
             Talent
           </dt>
           <dd class="mt-1 flex flex-auto flex-col text-base leading-7 text-gray-300">
-            <p class="flex-auto">Vero eum voluptatem aliquid nostrum voluptatem. Vitae esse natus. Earum nihil deserunt eos quasi cupiditate. A inventore et molestiae natus.</p>
-            <!--
+          <p class="flex-auto">Manage Your Presence: Create and update your own page with upcoming shows, ensuring your fans always know where to find you. Share exclusive content, gather feedback, and build a stronger fan base.</p>
+          <!--
             <p class="mt-6">
               <a href="#" class="text-sm font-semibold leading-6 text-indigo-400">Learn more <span aria-hidden="true">→</span></a>
             </p>
@@ -189,8 +189,8 @@
             Vendors
           </dt>
           <dd class="mt-1 flex flex-auto flex-col text-base leading-7 text-gray-300">
-            <p class="flex-auto">Et quod quaerat dolorem quaerat architecto aliquam accusantium. Ex adipisci et doloremque autem quia quam. Quis eos molestiae at iure impedit.</p>
-            <!--
+          <p class="flex-auto">Simplify Your Workflow: Stay organized by managing your event schedules directly on our platform. Highlight your offerings to venues and talent, making it easier to secure gigs and grow your business.</p>
+          <!--
             <p class="mt-6">
               <a href="#" class="text-sm font-semibold leading-6 text-indigo-400">Learn more <span aria-hidden="true">→</span></a>
             </p>

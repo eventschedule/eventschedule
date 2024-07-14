@@ -1,4 +1,29 @@
 <x-app-layout>
+
+    @vite([
+    'resources/js/jquery-3.3.1.min.js',
+    'resources/js/countrySelect.min.js',
+    'resources/css/countrySelect.min.css',
+    ])
+
+    <x-slot name="head">
+
+        <style>
+        .country-select {
+            width: 100%;
+        }
+        </style>
+
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            $("#country_code").countrySelect({
+                //defaultCountry: '',
+            });
+        });
+        </script>
+
+    </x-slot>
+
     <x-slot name="header">
         {{ __('Sign Up') }}
     </x-slot>
@@ -123,6 +148,13 @@
                             <x-text-input id="postal_code" name="postal_code" type="text" class="mt-1 block w-full"
                                 :value="old('postal_code', '')" />
                             <x-input-error class="mt-2" :messages="$errors->get('postal_code')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="country_code" :value="__('Country')" />
+                            <x-text-input id="country_code" name="country_code" type="text" class="mt-1 block w-full"
+                                :value="old('country_code', '')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('country_code')" />
                         </div>
 
                     </div>

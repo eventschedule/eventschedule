@@ -18,7 +18,10 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/css/app.css',
+                'resources/css/countrySelect.min.css',
                 'resources/js/app.js',
+                'resources/js/jquery-3.3.1.min.js',
+                'resources/js/countrySelect.min.js',
             ],
             refresh: true,
         }),
