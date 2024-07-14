@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Http\RedirectResponse;
-
 use Illuminate\Http\Request;
+use App\Models\Role;
 
 class RoleController extends Controller
 {
@@ -14,17 +14,15 @@ class RoleController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $subdomain = $request->name;
+        $subdomain = str_replace([' ', '.'], ['-', ''], strtolower(trim($request->name)));
 
-        $role = Role::create([
-            'name' => $request->name,
-            'subdomain' => $subdomain,
-            'user_id' => $request->user()->id,
-            'type' => $request->type,
-            'phone' => $request->phone,
-            'email' => $request->email,
-            'address1' => $request->address1,
-        ]);
+        $role = new Role;
+        $role->fill($request->all());
+        $role->subdomain = $subdomain;
+        $role->user_id = $request->user()->id;
+        $role->save();
+
+        dd('role: ' . $role->id);
 
         return redirect(route('dashboard'));
     }
