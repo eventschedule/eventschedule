@@ -26,12 +26,7 @@ return new class extends Migration
             $table->text('address')->nullable();
             $table->string('country_id');
             $table->text('description');
-            $table->string('website_url')->nullable();
-            $table->string('instagram_url')->nullable();
-            $table->string('whatsapp_url')->nullable();
-            $table->string('youtube_url')->nullable();
-            $table->string('facebook_url')->nullable();
-            $table->string('x_url')->nullable();
+            $table->text('social_urls')->nullable();
             $table->timestamps();
         });
 
