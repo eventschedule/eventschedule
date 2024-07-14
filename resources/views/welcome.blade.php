@@ -110,7 +110,7 @@
                     </div>
                     </div>
                     <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl"><span class="text-gray-600">your</span>.eventschedule.com</h1>
-                    <p class="mt-6 text-lg leading-8 text-gray-600">Enabling venues, vendors and talent to connect with their audience</p>
+                    <p class="mt-6 text-lg leading-8 text-gray-600">Enabling venues, talent and vendors to connect with their audience</p>
                     <div class="mt-10 flex items-center gap-x-6">
                     @auth
                         <a href="{{ url('/dashboard') }}" class="group inline-flex items-center justify-center rounded-full py-2 px-4 text-sm font-semibold focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 bg-blue-600 text-white hover:text-slate-100 hover:bg-blue-500 active:bg-blue-800 active:text-blue-100 focus-visible:outline-blue-600">Dashboard</a>
