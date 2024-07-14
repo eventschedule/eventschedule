@@ -45,19 +45,19 @@
                             <x-input-label for="type" :value="__('Type')" />
                             <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                                 <div class="flex items-center">
-                                    <input id="venue" name="type" type="radio" checked
+                                    <input id="venue" name="type" type="radio" value="venue" checked
                                         class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                     <label for="venue"
                                         class="ml-3 block text-sm font-medium leading-6 text-gray-900">Venue</label>
                                 </div>
                                 <div class="flex items-center">
-                                    <input id="talent" name="type" type="radio"
+                                    <input id="talent" name="type" type="radio" value="talent"
                                         class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                     <label for="talent"
                                         class="ml-3 block text-sm font-medium leading-6 text-gray-900">Talent</label>
                                 </div>
                                 <div class="flex items-center">
-                                    <input id="vendor" name="type" type="radio"
+                                    <input id="vendor" name="type" type="radio" value="vendor"
                                         class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                     <label for="vendor"
                                         class="ml-3 block text-sm font-medium leading-6 text-gray-900">Vendor</label>
@@ -138,9 +138,9 @@
 
                         <div class="mb-6">
                             <x-input-label for="state" :value="__('State / Province')" />
-                            <x-text-input id="city" name="city" type="text" class="mt-1 block w-full"
-                                :value="old('city', '')" />
-                            <x-input-error class="mt-2" :messages="$errors->get('city')" />
+                            <x-text-input id="state" name="state" type="text" class="mt-1 block w-full"
+                                :value="old('state', '')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('state')" />
                         </div>
 
                         <div class="mb-6">
