@@ -18,7 +18,7 @@
     'resources/js/jquery-3.3.1.min.js',
     ])
 
-    {{ $head }}
+    {{ isset($head) ? $head : '' }}
 </head>
 
 <body class="font-sans antialiased h-full">
