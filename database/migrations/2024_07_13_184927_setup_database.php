@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('country_id');
             $table->text('description');
             $table->text('social_urls')->nullable();
+            $table->text('payment_urls')->nullable();
             $table->timestamps();
         });
 
