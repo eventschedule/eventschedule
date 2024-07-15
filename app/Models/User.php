@@ -62,6 +62,6 @@ class User extends Authenticatable
 
     public function vendors()
     {
-        return $this->roles()->type('vendors');
+        return $this->roles()->type('vendor');
     }
 }
