@@ -16,7 +16,7 @@
             <nav class="hidden sm:flex" aria-label="Breadcrumb">
                 <ol role="list" class="flex items-center space-x-4">
                     <li>
-                        <div class="flex items-center">
+                        <div class="flex">
                             <a href="#"
                                 class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">{{ __(ucwords($role->type)) }}</a>
                         </div>
@@ -38,7 +38,8 @@
         </div>
         <div class="mt-2 md:flex md:items-center md:justify-between">
             <div class="min-w-0 flex-1">
-                <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">{{ $role->name }}</h2>
+                <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                    {{ $role->name }}</h2>
             </div>
             <div class="mt-4 flex flex-shrink-0 md:ml-4 md:mt-0">
 
@@ -81,6 +82,41 @@
                 </span>
 
             </div>
+
+
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <!-- Dropdown menu on small screens -->
+        <div class="sm:hidden">
+            <label for="current-tab" class="sr-only">Select a tab</label>
+            <select id="current-tab" name="current-tab"
+                class="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600">
+                <option>Applied</option>
+                <option>Phone Screening</option>
+                <option selected>Interview</option>
+                <option>Offer</option>
+                <option>Hired</option>
+            </select>
+        </div>
+        <!-- Tabs at small breakpoint and up -->
+        <div class="hidden sm:block">
+            <nav class="-mb-px flex space-x-8">
+                <!-- Current: "border-indigo-500 text-indigo-600", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
+                <a href="#"
+                    class="whitespace-nowrap border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">Applied</a>
+                <a href="#"
+                    class="whitespace-nowrap border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">Phone
+                    Screening</a>
+                <a href="#"
+                    class="whitespace-nowrap border-b-2 border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600"
+                    aria-current="page">Interview</a>
+                <a href="#"
+                    class="whitespace-nowrap border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">Offer</a>
+                <a href="#"
+                    class="whitespace-nowrap border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">Hired</a>
+            </nav>
         </div>
     </div>
 
