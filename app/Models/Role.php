@@ -11,6 +11,7 @@ class Role extends Model
         'name',
         'phone',
         'email',
+        'website',
         'address1',
         'address2',
         'city',
