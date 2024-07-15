@@ -65,10 +65,9 @@
                     $vendors = $user->vendors()->get();
                 ?>
 
+                @if (count($venues) > 0)
                 <li>
-                    @if (count($venues) > 0)
                     <div class="text-xs font-semibold leading-6 text-gray-400">{{ __('Your Venues') }}</div>
-                    @endif
 
                     <ul role="list" class="-mx-2 mt-2 space-y-1">
 
@@ -85,11 +84,12 @@
 
                     </ul>
                 </li>
+                @endif
 
+
+                @if (count($talent) > 0)
                 <li>
-                    @if (count($talent) > 0)
                     <div class="text-xs font-semibold leading-6 text-gray-400">{{ __('Your Talent') }}</div>
-                    @endif
 
                     <ul role="list" class="-mx-2 mt-2 space-y-1">
 
@@ -106,11 +106,11 @@
 
                     </ul>
                 </li>
+                @endif
 
+                @if (count($vendors) > 0)
                 <li>
-                    @if (count($vendors) > 0)
                     <div class="text-xs font-semibold leading-6 text-gray-400">{{ __('Your Vendors') }}</div>
-                    @endif
 
                     <ul role="list" class="-mx-2 mt-2 space-y-1">
 
@@ -127,6 +127,7 @@
 
                     </ul>
                 </li>
+                @endif
 
                 <!--
                 <li class="mt-auto">
