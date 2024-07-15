@@ -17,7 +17,7 @@ class RoleController extends Controller
 
     public function store(RoleCreateRequest $request): RedirectResponse
     {
-        $user = $request->user();
+        $user = $request->user();        
         $subdomain = str_replace([' ', '.'], ['-', ''], strtolower(trim($request->name)));
 
         $role = new Role;
