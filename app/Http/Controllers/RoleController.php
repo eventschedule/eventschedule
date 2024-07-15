@@ -44,7 +44,7 @@ class RoleController extends Controller
             'role' => $role,
         ];
 
-        return view('role/edit');
+        return view('role/edit', $data);
     }
 
     public function store(RoleCreateRequest $request): RedirectResponse
@@ -71,12 +71,12 @@ class RoleController extends Controller
             'role' => $role,
         ];
 
-        return view('role/edit');
+        return view('role/edit', $data);
     }
 
-    public function update(RoleUpdateRequest $request): RedirectResponse
+    public function update(RoleUpdateRequest $request, $subdomain): RedirectResponse
     {
-        $role = new Role;
+        $role = Role::subdomain($subdomain)->firstOrFail();
         $role->fill($request->all());
         $role->save();
 

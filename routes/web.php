@@ -16,7 +16,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/sign_up', [RoleController::class, 'create'])->name('role.create');
     Route::post('/store', [RoleController::class, 'store'])->name('role.store');
     Route::get('/edit/{subdomain}', [RoleController::class, 'edit'])->name('role.edit');
-    Route::post('/update/{subdomain}', [RoleController::class, 'update'])->name('role.update');
+    Route::put('/update/{subdomain}', [RoleController::class, 'update'])->name('role.update');
     
     Route::get('/venues', [RoleController::class, 'viewVenues'])->name('venues');
     Route::get('/talent', [RoleController::class, 'viewTalent'])->name('talent');
