@@ -33,9 +33,11 @@
 
     </x-slot>
 
-    <form method="post" action="{{ route('role.store') }}">
+    <form method="{{ $role->exists ? 'put' : 'post' }}" 
+        action="{{ $role->exists ? url('/update/' . $role->subdomain) : route('role.store') }}">
+
         @csrf
-        @method('post')
+        @method($role->exists ? 'put' : 'post')
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">

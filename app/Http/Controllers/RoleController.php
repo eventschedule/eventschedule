@@ -38,6 +38,12 @@ class RoleController extends Controller
 
     public function create()
     {
+        $role = new Role;
+
+        $data = [
+            'role' => $role,
+        ];
+
         return view('role/edit');
     }
 
@@ -54,6 +60,26 @@ class RoleController extends Controller
 
         $user->roles()->attach($role->id);
 
-        return redirect(route($role->type . '/' . $role->subdomain));
+        return redirect(url($role->type . '/' . $role->subdomain));
+    }
+
+    public function edit($subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $data = [
+            'role' => $role,
+        ];
+
+        return view('role/edit');
+    }
+
+    public function update(RoleUpdateRequest $request): RedirectResponse
+    {
+        $role = new Role;
+        $role->fill($request->all());
+        $role->save();
+
+        return redirect(url($role->type . '/' . $role->subdomain));
     }
 }
