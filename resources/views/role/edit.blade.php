@@ -100,7 +100,7 @@
                         <div class="mb-6">
                             <x-input-label for="phone" :value="__('Phone')" />
                             <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full"
-                                :value="old('name', '')" />
+                                :value="old('phone', '')" />
                             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
                         </div>
 
