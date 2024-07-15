@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Http\Requests\RoleCreateRequest;
+use App\Http\Requests\RoleUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Models\Role;
@@ -12,7 +15,7 @@ class RoleController extends Controller
         return view('role/edit');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(RoleCreateRequest $request): RedirectResponse
     {
         $user = $request->user();
         $subdomain = str_replace([' ', '.'], ['-', ''], strtolower(trim($request->name)));
