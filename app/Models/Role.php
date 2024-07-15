@@ -29,4 +29,9 @@ class Role extends Model
     {
         return $query->where('type', $type);
     }
+
+    public function scopeSubdomain($query, $subdomain)
+    {
+        return $query->where('subdomain', $subdomain);
+    }
 }
