@@ -20,9 +20,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/talent', [RoleController::class, 'viewTalents'])->name('talent');
     Route::get('/vendors', [RoleController::class, 'viewVendors'])->name('vendors');
 
-    Route::get('/venue/{venue}', [RoleController::class, 'viewVenue'])->name('role.view_venue');
-    Route::get('/talent/{talent}', [RoleController::class, 'viewTalent'])->name('role.view_talent');
-    Route::get('/vendor/{vendor}', [RoleController::class, 'viewVendor'])->name('role.view_vendor');
+    Route::get('/venue/{venue}', [RoleController::class, 'view'])->name('role.view');
+    Route::get('/talent/{talent}', [RoleController::class, 'view'])->name('role.view');
+    Route::get('/vendor/{vendor}', [RoleController::class, 'view'])->name('role.view');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
