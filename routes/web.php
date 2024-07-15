@@ -9,7 +9,7 @@ Route::get('/', function () {
 })->name('landing');
 
 Route::get('/home', function () {
-    return view('dashboard');
+    return view('home');
 })->middleware(['auth', 'verified'])->name('home');
 
 Route::middleware('auth')->group(function () {
