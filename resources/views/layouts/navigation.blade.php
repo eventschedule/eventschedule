@@ -25,7 +25,7 @@
                             <a href="{{ route('venues') }}"
                             class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('venues') ? 'bg-gray-800 text-white' : '' }}">
                                 <svg class="h-6 w-6 shrink-0" viewBox="0 0 24 24" fill="{{ request()->is('venues') ? '#ccc' : '#666' }}" aria-hidden="true">
-                                    <path d="M12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5M12,2A7,7 0 0,1 19,9C19,14.25 12,22 12,22C12,22 5,14.25 5,9A7,7 0 0,1 12,2M12,4A5,5 0 0,0 7,9C7,10 7,12 12,18.71C17,12 17,10 17,9A5,5 0 0,0 12,4Z" />
+                                    <path d="M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z" />
                                 </svg>
                                 {{ __('Venues') }}
                             </a>
@@ -65,8 +65,8 @@
                         @foreach ($venues as $venue)
                         <li>
                             <a href="{{ url('/venue/'. $venue->subdomain) }}"
-                                class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('venue/'. $venue->subdomain) ? 'bg-gray-800 text-white' : '' }}">
-                                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium text-gray-400 group-hover:text-white">{{ strtoupper(substr($venue->name, 0, 1)) }}</span>
+                                class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is('venue/'. $venue->subdomain) ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
+                                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is('venue/'. $venue->subdomain) ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($venue->name, 0, 1)) }}</span>
                                 <span class="truncate">{{ $venue->name }}</span>
                             </a>
                         </li>
