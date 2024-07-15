@@ -17,7 +17,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/store', [RoleController::class, 'store'])->name('role.store');
     
     Route::get('/venues', [RoleController::class, 'viewVenues'])->name('venues');
-    Route::get('/talent', [RoleController::class, 'viewTalents'])->name('talent');
+    Route::get('/talent', [RoleController::class, 'viewTalent'])->name('talent');
     Route::get('/vendors', [RoleController::class, 'viewVendors'])->name('vendors');
 
     Route::get('/venue/{venue}', [RoleController::class, 'view'])->name('role.view');
