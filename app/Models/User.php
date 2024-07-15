@@ -49,4 +49,19 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Role::class);
     }
+
+    public function venues()
+    {
+        return $this->roles()->type('venue');
+    }
+
+    public function talent()
+    {
+        return $this->roles()->type('talent');
+    }
+
+    public function vendors()
+    {
+        return $this->roles()->type('vendors');
+    }
 }

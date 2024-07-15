@@ -24,4 +24,9 @@ class Role extends Model
     {
         return $this->belongsToMany(User::class);
     }    
+
+    public function scopeType($query, $type)
+    {
+        return $query->where('type', $type);
+    }
 }

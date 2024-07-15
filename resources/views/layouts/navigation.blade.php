@@ -26,18 +26,29 @@
                         </li>
                     </ul>
                 </li>
+
+                <?php
+                    $venues = auth()->user()->venues()->get();
+                ?>
+
                 <li>
-                    <div class="text-xs font-semibold leading-6 text-gray-400">Your Venues</div>
+                    @if (count($venues) > 0)
+                    <div class="text-xs font-semibold leading-6 text-gray-400">{{ __('Your Venues') }}</div>
+                    @endif
+
                     <ul role="list" class="-mx-2 mt-2 space-y-1">
+
+                        @foreach ($venues as $venue)
                         <li>
                             <!-- Current: "bg-gray-800 text-white", Default: "text-gray-400 hover:text-white hover:bg-gray-800" -->
                             <a href="#"
                                 class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white">
-                                <span
-                                    class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium text-gray-400 group-hover:text-white">H</span>
-                                <span class="truncate">Heroicons</span>
+                                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium text-gray-400 group-hover:text-white">{{ substr($venue->name, 0, 1) }}</span>
+                                <span class="truncate">{{ $venue->name }}</span>
                             </a>
                         </li>
+                        @endforeach
+
                     </ul>
                 </li>
 
