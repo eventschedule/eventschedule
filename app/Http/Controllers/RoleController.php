@@ -54,6 +54,6 @@ class RoleController extends Controller
 
         $user->roles()->attach($role->id);
 
-        return redirect(route('home'));
+        return redirect(route($role->type . '/' . $role->subdomain));
     }
 }
