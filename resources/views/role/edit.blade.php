@@ -33,10 +33,6 @@
 
     </x-slot>
 
-    <x-slot name="header">
-        {{ __('Sign Up') }}
-    </x-slot>
-
     <form method="post" action="{{ route('role.store') }}">
         @csrf
         @method('post')
