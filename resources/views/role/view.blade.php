@@ -18,7 +18,7 @@
                     <li>
                         <div class="flex">
                             <a href="#"
-                                class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">{{ __(ucwords($role->type)) }}</a>
+                                class="ml-1 mr-4 text-sm font-medium text-gray-500 hover:text-gray-700">{{ __(ucwords($role->type)) }}</a>
                         </div>
                     </li>
                     <li>
@@ -30,7 +30,7 @@
                                     clip-rule="evenodd" />
                             </svg>
                             <a href="#" aria-current="page"
-                                class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">{{ $role->name }}</a>
+                                class="ml-1 mr-4 text-sm font-medium text-gray-500 hover:text-gray-700">{{ $role->name }}</a>
                         </div>
                     </li>
                 </ol>
@@ -38,7 +38,7 @@
         </div>
         <div class="mt-2 md:flex md:items-center md:justify-between">
             <div class="min-w-0 flex-1">
-                <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                <h2 class="ml-1 mt-2 text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
                     {{ $role->name }}</h2>
             </div>
             <div class="mt-4 flex flex-shrink-0 md:ml-4 md:mt-0">
