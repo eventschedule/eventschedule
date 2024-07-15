@@ -28,6 +28,6 @@ class RoleController extends Controller
 
         $user->roles()->attach($role->id);
 
-        return redirect(route('dashboard'));
+        return redirect(route('home'));
     }
 }
