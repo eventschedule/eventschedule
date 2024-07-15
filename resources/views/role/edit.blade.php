@@ -17,9 +17,18 @@
         <script>
         document.addEventListener('DOMContentLoaded', () => {
             $("#country_code").countrySelect({
-                //defaultCountry: '',
+                defaultCountry: '',
             });
         });
+
+        function toggleAddress() {
+            var type = $('input[name="type"]:checked').val();
+            if (type == 'talent') {
+                $('#address').hide();
+            } else {
+                $('#address').show();
+            }
+        }
         </script>
 
     </x-slot>
@@ -43,7 +52,7 @@
 
                         <fieldset>
                             <x-input-label for="type" :value="__('Type')" />
-                            <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
+                            <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0" onclick="toggleAddress()">
                                 <div class="flex items-center">
                                     <input id="venue" name="type" type="radio" value="venue" checked
                                         class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
@@ -115,7 +124,7 @@
                 </div>
 
 
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg" id="address">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
