@@ -17,7 +17,7 @@
         <script>
         document.addEventListener('DOMContentLoaded', () => {
             $("#country_code").countrySelect({
-                defaultCountry: '',
+                defaultCountry: '{{ $role->country_code }}',
             });
         });
 
@@ -79,7 +79,7 @@
                         <div class="mb-6">
                             <x-input-label for="name" :value="__('Name')" />
                             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
-                                :value="old('name', auth()->user()->name)" required autofocus />
+                                :value="old('name', $role->exists ? $role->name : auth()->user()->name)" required autofocus />
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                         </div>
 
@@ -87,7 +87,7 @@
                             <x-input-label for="description" :value="__('Description')" />
                             <textarea id="description" name="description"
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                :value="old('description', '')"></textarea>
+                                :value="old('description', $role->description)"></textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
 
@@ -104,21 +104,21 @@
                         <div class="mb-6">
                             <x-input-label for="email" :value="__('Email')" />
                             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
-                                :value="old('email', auth()->user()->email)" />
+                                :value="old('email', $role->exists ? $role->email : auth()->user()->email)" />
                             <x-input-error class="mt-2" :messages="$errors->get('email')" />
                         </div>
 
                         <div class="mb-6">
                             <x-input-label for="phone" :value="__('Phone')" />
                             <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full"
-                                :value="old('phone', '')" />
+                                :value="old('phone', $role->phone)" />
                             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
                         </div>
 
                         <div class="mb-6">
                             <x-input-label for="website" :value="__('Website')" />
                             <x-text-input id="website" name="website" type="url" class="mt-1 block w-full"
-                                :value="old('address1', '')" />
+                                :value="old('address1', $role->website)" />
                             <x-input-error class="mt-2" :messages="$errors->get('website')" />
                         </div>
 
@@ -136,35 +136,35 @@
                         <div class="mb-6">
                             <x-input-label for="address1" :value="__('Street Address')" />
                             <x-text-input id="address1" name="address1" type="text" class="mt-1 block w-full"
-                                :value="old('address1', '')" />
+                                :value="old('address1', $role->address1)" />
                             <x-input-error class="mt-2" :messages="$errors->get('address1')" />
                         </div>
 
                         <div class="mb-6">
                             <x-input-label for="city" :value="__('City')" />
                             <x-text-input id="city" name="city" type="text" class="mt-1 block w-full"
-                                :value="old('city', '')" />
+                                :value="old('city', $role->city)" />
                             <x-input-error class="mt-2" :messages="$errors->get('city')" />
                         </div>
 
                         <div class="mb-6">
                             <x-input-label for="state" :value="__('State / Province')" />
                             <x-text-input id="state" name="state" type="text" class="mt-1 block w-full"
-                                :value="old('state', '')" />
+                                :value="old('state', $role->state)" />
                             <x-input-error class="mt-2" :messages="$errors->get('state')" />
                         </div>
 
                         <div class="mb-6">
                             <x-input-label for="postal_code" :value="__('Postal Code')" />
                             <x-text-input id="postal_code" name="postal_code" type="text" class="mt-1 block w-full"
-                                :value="old('postal_code', '')" />
+                                :value="old('postal_code', $role->postal_code)" />
                             <x-input-error class="mt-2" :messages="$errors->get('postal_code')" />
                         </div>
 
                         <div class="mb-6">
                             <x-input-label for="country_code" :value="__('Country')" />
                             <x-text-input id="country_code" name="country_code" type="text" class="mt-1 block w-full"
-                                :value="old('country_code', '')" />
+                                :value="old('country_code', $role->country_code)" />
                             <x-input-error class="mt-2" :messages="$errors->get('country_code')" />
                         </div>
 
