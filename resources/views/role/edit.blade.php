@@ -33,11 +33,13 @@
 
     </x-slot>
 
-    <form method="{{ $role->exists ? 'put' : 'post' }}" 
+    <form method="POST" 
         action="{{ $role->exists ? url('/update/' . $role->subdomain) : route('role.store') }}">
 
         @csrf
-        @method($role->exists ? 'put' : 'post')
+        @if($role->exists)        
+            @method('put')
+        @endif
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
@@ -48,6 +50,7 @@
                             {{ __('Details') }}
                         </h2>
 
+                        @if(! $role->exists)
                         <fieldset>
                             <x-input-label for="type" :value="__('Type')" />
                             <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0" onclick="toggleAddress()">
@@ -71,6 +74,7 @@
                                 </div>
                             </div>
                         </fieldset>
+                        @endif
 
                         <div class="mb-6">
                             <x-input-label for="name" :value="__('Name')" />
