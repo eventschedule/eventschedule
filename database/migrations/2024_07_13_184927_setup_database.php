@@ -49,7 +49,7 @@ return new class extends Migration
             $table->foreignId('role_id')->constrained()->onDelete('cascade');
             $table->foreignId('venue_id')->constrained('roles')->onDelete('cascade');
             $table->enum('role', ['talent', 'vendor']);
-            $table->enum('status', ['pending', 'accepted', 'declined'])->default('pending');
+            $table->enum('status', ['pending', 'accepted', 'declined', 'published'])->default('pending');
             $table->string('start_time')->nullable();
             $table->integer('duration')->nullable();
             $table->timestamps();
