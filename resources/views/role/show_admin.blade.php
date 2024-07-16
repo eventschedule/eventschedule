@@ -229,17 +229,17 @@
 
     </div>
 
-    <div class="py-5">
-        <div id="map" style="height: 200px;"></div>
-    </div>
-
-    <div class="overflow-hidden rounded-lg bg-white shadow">
+    <div class="pt-5 overflow-hidden rounded-lg bg-white shadow-md">
         <div class="px-4 py-5 sm:p-6">
             {{ $role->description }}
         </div>
     </div>
 
-    <div class="pt-5 container mx-auto">
+    <div class="py-5">
+        <div id="map" style="height: 200px;"></div>
+    </div>
+
+    <div class="container mx-auto">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
             <div class="bg-white rounded-lg shadow-md p-6">
