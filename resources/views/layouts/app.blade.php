@@ -15,6 +15,7 @@
     @vite([
     'resources/css/app.css',
     'resources/js/app.js',
+    'resources/js/jquery-3.3.1.min.js',
     ])
 
     {{ isset($head) ? $head : '' }}
