@@ -10,7 +10,7 @@ use App\Models\Role;
 
 class RoleController extends Controller
 {
-    public function view($subdomain)
+    public function viewAdmin($subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
@@ -18,7 +18,18 @@ class RoleController extends Controller
             'role' => $role,
         ];
 
-        return view('role/show', $data);
+        return view('role/show_admin', $data);
+    }
+
+    public function viewGuest($subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $data = [
+            'role' => $role,
+        ];
+
+        return view('role/show_guest', $data);
     }
 
     public function viewVenues()

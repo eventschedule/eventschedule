@@ -12,6 +12,8 @@ Route::get('/home', function () {
     return view('home');
 })->middleware(['auth', 'verified'])->name('home');
 
+Route::get('/view/{subdomain}', [RoleController::class, 'viewGuest'])->name('role.view_guest');
+
 Route::middleware('auth')->group(function () {
     Route::get('/sign_up', [RoleController::class, 'create'])->name('role.create');
     Route::post('/store', [RoleController::class, 'store'])->name('role.store');
@@ -22,9 +24,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/talent', [RoleController::class, 'viewTalent'])->name('talent');
     Route::get('/vendors', [RoleController::class, 'viewVendors'])->name('vendors');
 
-    Route::get('/venue/{subdomain}', [RoleController::class, 'view'])->name('role.view');
-    Route::get('/talent/{subdomain}', [RoleController::class, 'view'])->name('role.view');
-    Route::get('/vendor/{subdomain}', [RoleController::class, 'view'])->name('role.view');
+    Route::get('/venue/{subdomain}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
+    Route::get('/talent/{subdomain}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
+    Route::get('/vendor/{subdomain}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
