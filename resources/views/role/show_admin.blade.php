@@ -229,7 +229,7 @@
 
     </div>
 
-    <div class="pt-5 overflow-hidden rounded-lg bg-white shadow-md">
+    <div class="mt-5 overflow-hidden rounded-lg bg-white shadow-md">
         <div class="px-4 py-5 sm:p-6">
             {{ $role->description }}
         </div>
