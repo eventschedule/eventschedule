@@ -91,7 +91,7 @@
         </div>
     </div>
 
-    <div class="mt-4">
+    <div class="mt-6">
         <!-- Dropdown menu on small screens -->
         <div class="sm:hidden">
             <label for="current-tab" class="sr-only">Select a tab</label>

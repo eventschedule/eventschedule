@@ -18,7 +18,7 @@ class RoleController extends Controller
             'role' => $role,
         ];
 
-        return view('role/view', $data);
+        return view('role/show', $data);
     }
 
     public function viewVenues()
