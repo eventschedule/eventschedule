@@ -84,10 +84,7 @@
                         Publish
                     </button>
                 </span>
-
             </div>
-
-
         </div>
     </div>
 
