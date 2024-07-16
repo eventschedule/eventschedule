@@ -83,7 +83,7 @@
                         </svg>
                         <div class="mt-1">
                             <a href="{{ $role->website }}" target="_blank">
-                                {{ $role->website }}
+                                {{ \App\Utils\UrlUtils::clean($role->website) }}
                             </a>
                         </div>
                     </div>
