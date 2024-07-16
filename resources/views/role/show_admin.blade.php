@@ -229,11 +229,11 @@
 
     </div>
 
-    <div class="pt-5">
+    <div class="py-5">
         <div id="map" style="height: 200px;"></div>
     </div>
 
-    <div class="pt-5 overflow-hidden rounded-lg bg-white shadow">
+    <div class="overflow-hidden rounded-lg bg-white shadow">
         <div class="px-4 py-5 sm:p-6">
             {{ $role->description }}
         </div>
