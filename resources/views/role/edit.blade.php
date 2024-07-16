@@ -24,11 +24,12 @@
         function toggleAddress() {
             var type = $('input[name="type"]:checked').val();
             if (type == 'talent') {
-                $('#address').hide();
+                $('#address').fadeOut();
             } else {
-                $('#address').show();
+                $('#address').fadeIn();
             }
         }
+
         </script>
 
     </x-slot>
