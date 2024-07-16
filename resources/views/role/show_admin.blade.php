@@ -239,4 +239,36 @@
         </div>
     </div>
 
+    <div class="pt-5 container mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+
+                <h2 class="font-bold mb-2 flex justify-between items-center">
+                    {{ __('Social Links') }}
+                    <button type="button"
+                        class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                        {{ __('Add') }}
+                    </button>
+                </h2>
+                <p class="text-gray-700">...</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="font-bold mb-2 flex justify-between items-center">
+                    {{ __('Payment Links') }}
+                </h2>
+                <p class="text-gray-700">...</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="font-bold mb-2 flex justify-between items-center">
+                    {{ __('YouTube Videos') }}
+                </h2>
+                <p class="text-gray-700">...</p>
+            </div>
+
+        </div>
+    </div>
+
 </x-app-layout>
