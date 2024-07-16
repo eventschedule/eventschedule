@@ -35,4 +35,9 @@ class Role extends Model
     {
         return $query->where('subdomain', $subdomain);
     }
+ 
+    public function fullAddress()
+    {
+        return $this->address1 . ', ' . $this->state . ', ' . $this->postal_code . ', ' . $this->country_code;
+    }
 }

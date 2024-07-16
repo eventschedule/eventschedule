@@ -1,5 +1,61 @@
 <x-app-layout>
 
+    <x-slot name="head">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    </x-slot>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var map = L.map('map');
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        //L.marker([51.505, -0.09]).addTo(map);
+        //.bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
+        //.openPopup();
+
+        function geocodeAddress(address) {
+            const nominatimUrl =
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+
+            //console.log('## ADDRESS: ' + nominatimUrl);
+
+            var parts = address.split(', ');
+            if (parts.length <= 1) {
+                return;
+            }
+            parts.shift();
+            var next_address = parts.join(', ');
+
+            axios.get(nominatimUrl)
+                .then(response => {
+                    if (response.data.length > 0) {
+                        const result = response.data[0];
+                        const lat = result.lat;
+                        const lon = result.lon;
+
+                        map.setView([lat, lon], 13);
+
+                        //L.marker([lat, lon]).addTo(map);
+                    } else {
+                        console.log('Address not found.');
+                        geocodeAddress(next_address);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error geocoding address:', error);
+                    geocodeAddress(next_address);
+                });
+        }
+
+        geocodeAddress('{{ $role->fullAddress() }}');
+    });
+    </script>
+
     <div class="pt-2">
         <div>
             <nav class="sm:hidden" aria-label="Back">
@@ -139,7 +195,7 @@
         </div>
     </div>
 
-    <div class="mt-6">
+    <div class="pt-5">
         <!-- Dropdown menu on small screens -->
         <div class="sm:hidden">
             <label for="current-tab" class="sr-only">Select a tab</label>
@@ -170,6 +226,17 @@
             </nav>
         </div>
 
+
+    </div>
+
+    <div class="pt-5">
+        <div id="map" style="height: 200px;"></div>
+    </div>
+
+    <div class="pt-5 overflow-hidden rounded-lg bg-white shadow">
+        <div class="px-4 py-5 sm:p-6">
+            {{ $role->description }}
+        </div>
     </div>
 
 </x-app-layout>
