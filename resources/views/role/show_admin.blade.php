@@ -29,6 +29,11 @@
         $('#add_modal').fadeOut();
     }
 
+    function removeLink(link) {
+        $('#remove_link').val(link);
+        $('#remove_link_form').submit();
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
         var map = L.map('map');
 
@@ -77,6 +82,14 @@
         geocodeAddress('{{ $role->fullAddress() }}');
     });
     </script>
+
+    <form method="POST" action="{{ url('/remove/links/' . $role->subdomain) }}" id="remove_link_form">
+
+        <input type="hidden" name="remove_link" id="remove_link" />
+
+        @csrf
+
+    </form>
 
     <div class="pt-2">
         <div>
@@ -277,29 +290,29 @@
                 <p class="text-gray-700">
                 <ul role="list" class="divide-y divide-gray-200">
                     @foreach(json_decode($role->social_links) as $link)
-                    <a href="{{ $link->url }}" target="_blank">
-                        <li class="py-4">
-                            <div class="flex">
-                                <div class="mr-4 flex-shrink-0 self-center">
-                                    <svg class="h-16 w-16 border border-gray-300 bg-white text-gray-300"
-                                        preserveAspectRatio="none" stroke="currentColor" fill="none"
-                                        viewBox="0 0 200 200" aria-hidden="true">
-                                        <path vector-effect="non-scaling-stroke" stroke-width="1"
-                                            d="M0 0l200 200M0 200L200 0" />
-                                    </svg>
-                                </div>
-                                <div>
+                    <li class="py-4">
+                        <div class="flex">
+                            <div class="mr-4 flex-shrink-0 self-center">
+                                <svg class="h-16 w-16 border border-gray-300 bg-white text-gray-300"
+                                    preserveAspectRatio="none" stroke="currentColor" fill="none" viewBox="0 0 200 200"
+                                    aria-hidden="true">
+                                    <path vector-effect="non-scaling-stroke" stroke-width="1"
+                                        d="M0 0l200 200M0 200L200 0" />
+                                </svg>
+                            </div>
+                            <div>
+                                <a href="{{ $link->url }}" target="_blank">
                                     <h4 class="text-lg font-bold break-all">{{ $link->name }}</h4>
                                     <p class="mt-1 break-all">{{ \App\Utils\UrlUtils::clean($link->url) }}</p>
-                                    <button type="button"
-                                        class="mt-3 inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                                        onclick="showAdd()">
-                                        {{ __('Remove') }}
-                                    </button>
-                                </div>
+                                </a>
+                                <button type="button"
+                                    class="mt-3 inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                                    onclick="removeLink('{{ $link->url }}')">
+                                    {{ __('Remove') }}
+                                </button>
                             </div>
-                        </li>
-                    </a>
+                        </div>
+                    </li>
                     @endforeach
                 </ul>
                 </p>

@@ -19,6 +19,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/store', [RoleController::class, 'store'])->name('role.store');
     Route::get('/edit/{subdomain}', [RoleController::class, 'edit'])->name('role.edit');
     Route::post('/update/links/{subdomain}', [RoleController::class, 'updateLinks'])->name('role.update_links');
+    Route::post('/remove/links/{subdomain}', [RoleController::class, 'removeLinks'])->name('role.remove_links');
     Route::put('/update/{subdomain}', [RoleController::class, 'update'])->name('role.update');
     
     Route::get('/venues', [RoleController::class, 'viewVenues'])->name('venues');
