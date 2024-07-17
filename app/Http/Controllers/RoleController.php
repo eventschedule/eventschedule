@@ -179,11 +179,11 @@ class RoleController extends Controller
         $new_links = json_encode($new_links);
 
         if ($request->remove_link_type == 'social_links') {
-            $role->social_links = $links;
+            $role->social_links = $new_links;
         } else if ($request->remove_link_type == 'payment_links') {
-            $role->payment_links = $links;
+            $role->payment_links = $new_links;
         } else {
-            $role->youtube_links = $links;
+            $role->youtube_links = $new_links;
         }
 
         $role->save();
