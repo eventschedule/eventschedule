@@ -123,8 +123,7 @@ class RoleController extends Controller
             $links = '[]';
         }
 
-        $links = json_decode('[]');
-        //$links = json_decode($links);
+        $links = json_decode($links);
 
         $obj = new \stdClass;
         $obj->name = $title;
@@ -135,5 +134,29 @@ class RoleController extends Controller
         $role->save();
 
         return redirect(url($role->type . '/' . $role->subdomain));
+    }
+
+    public function removeLinks(Request $request, $subdomain): RedirectResponse
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        
+        $links = $role->social_links;
+        if (!$links) {
+            $links = '[]';
+        }
+
+        $links = json_decode($links);
+        $new_links = [];
+
+        foreach ($links as $link) {
+            if ($link->url != $request->remove_link) {
+                $new_links[] = $link;
+            }
+        }
+
+        $role->social_links = json_encode($new_links);
+        $role->save();
+
+        return redirect(url($role->type . '/' . $role->subdomain)); 
     }
 }
