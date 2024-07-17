@@ -97,6 +97,8 @@ class RoleController extends Controller
     public function updateLinks(Request $request, $subdomain): RedirectResponse
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
+
+        //$links = $r
         $role->social_links = $request->link;
         $role->save();
 
