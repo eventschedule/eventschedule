@@ -155,9 +155,9 @@ class RoleController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
         
-        if ($request->link_type == 'social_links') {
+        if ($request->remove_link_type == 'social_links') {
             $links = $role->social_links;
-        } else if ($request->link_type == 'payment_links') {
+        } else if ($request->remove_link_type == 'payment_links') {
             $links = $role->payment_links;
         } else {
             $links = $role->youtube_links;
@@ -178,9 +178,9 @@ class RoleController extends Controller
 
         $new_links = json_encode($new_links);
 
-        if ($request->link_type == 'social_links') {
+        if ($request->remove_link_type == 'social_links') {
             $role->social_links = $links;
-        } else if ($request->link_type == 'payment_links') {
+        } else if ($request->remove_link_type == 'payment_links') {
             $role->payment_links = $links;
         } else {
             $role->youtube_links = $links;
