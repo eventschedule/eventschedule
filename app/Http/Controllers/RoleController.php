@@ -134,7 +134,7 @@ class RoleController extends Controller
 
         $obj = new \stdClass;
         $obj->name = $title;
-        $obj->url = $request->link;
+        $obj->url = rtrim($request->link, '/');
         $links[] = $obj;
         $links = json_encode($links);
 
