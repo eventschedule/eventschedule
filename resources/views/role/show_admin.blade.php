@@ -30,8 +30,12 @@
     }
 
     function removeLink(link) {
-        $('#remove_link').val(link);
-        $('#remove_link_form').submit();
+        var confirmed = confirm("{{ __('Are you sure?') }}");
+
+        if (confirmed) {
+            $('#remove_link').val(link);
+            $('#remove_link_form').submit();
+        }
     }
 
     document.addEventListener("DOMContentLoaded", function() {
