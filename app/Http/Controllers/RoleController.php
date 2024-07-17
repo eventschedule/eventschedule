@@ -93,4 +93,13 @@ class RoleController extends Controller
 
         return redirect(url($role->type . '/' . $role->subdomain));
     }
+
+    public function updateLinks(Request $request, $subdomain): RedirectResponse
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $role->social_links = $request->link;
+        $role->save();
+
+        return redirect(url($role->type . '/' . $role->subdomain));
+    }
 }
