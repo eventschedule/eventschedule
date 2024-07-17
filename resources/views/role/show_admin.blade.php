@@ -30,11 +30,12 @@
         $('#add_modal').fadeOut();
     }
 
-    function removeLink(link) {
+    function removeLink(link_type, link) {
         var confirmed = confirm("{{ __('Are you sure?') }}");
 
         if (confirmed) {
             $('#remove_link').val(link);
+            $('#remove_link_type').val(link_type);
             $('#remove_link_form').submit();
         }
     }
@@ -91,6 +92,7 @@
     <form method="POST" action="{{ url('/remove/links/' . $role->subdomain) }}" id="remove_link_form">
 
         <input type="hidden" name="remove_link" id="remove_link" />
+        <input type="hidden" name="remove_link_type" id="remove_link_type" />
 
         @csrf
 
@@ -309,12 +311,12 @@
                             </div>
                             <div>
                                 <a href="{{ $link->url }}" target="_blank">
-                                    <h4 class="text-lg font-bold break-all">{{ $link->name }}</h4>
+                                    <h4 class="text-lg font-bold break-all line-clamp-2">{{ $link->name }}</h4>
                                     <p class="mt-1 break-all">{{ \App\Utils\UrlUtils::clean($link->url) }}</p>
                                 </a>
                                 <button type="button"
                                     class="mt-3 inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                                    onclick="removeLink('{{ $link->url }}')">
+                                    onclick="removeLink('social_links', '{{ $link->url }}')">
                                     {{ __('Remove') }}
                                 </button>
                             </div>
@@ -351,12 +353,12 @@
                             </div>
                             <div>
                                 <a href="{{ $link->url }}" target="_blank">
-                                    <h4 class="text-lg font-bold break-all">{{ $link->name }}</h4>
+                                    <h4 class="text-lg font-bold break-all line-clamp-2">{{ $link->name }}</h4>
                                     <p class="mt-1 break-all">{{ \App\Utils\UrlUtils::clean($link->url) }}</p>
                                 </a>
                                 <button type="button"
                                     class="mt-3 inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                                    onclick="removeLink('{{ $link->url }}')">
+                                    onclick="removeLink('payment_links', '{{ $link->url }}')">
                                     {{ __('Remove') }}
                                 </button>
                             </div>
@@ -395,12 +397,12 @@
                             </div>
                             <div>
                                 <a href="{{ $link->url }}" target="_blank">
-                                    <h4 class="text-lg font-bold break-all">{{ $link->name }}</h4>
+                                    <h4 class="text-lg font-bold break-all line-clamp-2">{{ $link->name }}</h4>
                                     <p class="mt-1 break-all">{{ \App\Utils\UrlUtils::clean($link->url) }}</p>
                                 </a>
                                 <button type="button"
                                     class="mt-3 inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                                    onclick="removeLink('{{ $link->url }}')">
+                                    onclick="removeLink('youtube_links', '{{ $link->url }}')">
                                     {{ __('Remove') }}
                                 </button>
                             </div>
