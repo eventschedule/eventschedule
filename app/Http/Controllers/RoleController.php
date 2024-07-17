@@ -118,7 +118,14 @@ class RoleController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
         
-        $links = $role->social_links;
+        if ($request->link_type == 'social_links') {
+            $links = $role->social_links;
+        } else if ($request->link_type == 'payment_links') {
+            $links = $role->payment_links;
+        } else {
+            $links = $role->youtube_links;
+        }
+        
         if (!$links) {
             $links = '[]';
         }
@@ -129,8 +136,16 @@ class RoleController extends Controller
         $obj->name = $title;
         $obj->url = $request->link;
         $links[] = $obj;
+        $links = json_encode($links);
+
+        if ($request->link_type == 'social_links') {
+            $role->social_links = $links;
+        } else if ($request->link_type == 'payment_links') {
+            $role->payment_links = $links;
+        } else {
+            $role->youtube_links = $links;
+        }
         
-        $role->social_links = json_encode($links);
         $role->save();
 
         return redirect(url($role->type . '/' . $role->subdomain));
@@ -140,7 +155,14 @@ class RoleController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
         
-        $links = $role->social_links;
+        if ($request->link_type == 'social_links') {
+            $links = $role->social_links;
+        } else if ($request->link_type == 'payment_links') {
+            $links = $role->payment_links;
+        } else {
+            $links = $role->youtube_links;
+        }
+
         if (!$links) {
             $links = '[]';
         }
@@ -154,7 +176,16 @@ class RoleController extends Controller
             }
         }
 
-        $role->social_links = json_encode($new_links);
+        $new_links = json_encode($new_links);
+
+        if ($request->link_type == 'social_links') {
+            $role->social_links = $links;
+        } else if ($request->link_type == 'payment_links') {
+            $role->payment_links = $links;
+        } else {
+            $role->youtube_links = $links;
+        }
+
         $role->save();
 
         return redirect(url($role->type . '/' . $role->subdomain)); 

@@ -19,9 +19,10 @@
     </x-slot>
 
     <script>
-    function showAdd() {
+    function showAdd(link_type) {
         $('#add_modal').fadeIn(function() {
             $('#link').focus();
+            $('#link_type').val(link_type);
         });
     }
 
@@ -287,7 +288,7 @@
                     {{ __('Social Links') }}
                     <button type="button"
                         class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                        onclick="showAdd()">
+                        onclick="showAdd('social_links')">
                         {{ __('Add') }}
                     </button>
                 </h2>
@@ -325,6 +326,11 @@
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="font-bold mb-2 flex justify-between items-center">
                     {{ __('Payment Links') }}
+                    <button type="button"
+                        class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                        onclick="showAdd('payment_links')">
+                        {{ __('Add') }}
+                    </button>
                 </h2>
                 <p class="text-gray-700">...</p>
             </div>
@@ -332,6 +338,11 @@
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="font-bold mb-2 flex justify-between items-center">
                     {{ __('YouTube Videos') }}
+                    <button type="button"
+                        class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                        onclick="showAdd('youtube_links')">
+                        {{ __('Add') }}
+                    </button>
                 </h2>
                 <p class="text-gray-700">...</p>
             </div>
@@ -368,6 +379,8 @@
                 <form method="POST" action="{{ url('/update/links/' . $role->subdomain) }}">
 
                     @csrf
+
+                    <input type="hidden" id="link_type" name="link_type"/>
 
                     <div
                         class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2x1 sm:p-6">
