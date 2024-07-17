@@ -96,10 +96,42 @@ class RoleController extends Controller
 
     public function updateLinks(Request $request, $subdomain): RedirectResponse
     {
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        $title = '';
 
-        //$links = $r
-        $role->social_links = $request->link;
+        if (strpos($request->link, 'facebook.com')) {
+            $title = 'Facebook';
+        } else {
+
+            $html = @file_get_contents($request->link);    
+            if ($html) {    
+                $dom = new \DOMDocument();        
+                libxml_use_internal_errors(true);        
+                $dom->loadHTML($html);            
+                libxml_clear_errors();    
+                
+                $titleElements = $dom->getElementsByTagName('title');        
+                if ($titleElements->length > 0) {
+                    $title = $titleElements->item(0)->textContent;
+                }        
+            }
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        
+        $links = $role->social_links;
+        if (!$links) {
+            $links = '[]';
+        }
+
+        $links = json_decode('[]');
+        //$links = json_decode($links);
+
+        $obj = new \stdClass;
+        $obj->name = $title;
+        $obj->url = $request->link;
+        $links[] = $obj;
+        
+        $role->social_links = json_encode($links);
         $role->save();
 
         return redirect(url($role->type . '/' . $role->subdomain));
