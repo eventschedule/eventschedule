@@ -20,7 +20,9 @@
 
     <script>
     function showAdd() {
-        $('#add_modal').fadeIn();
+        $('#add_modal').fadeIn(function() {
+            $('#link').focus();
+        });
     }
 
     function hideAdd() {
@@ -323,7 +325,7 @@
                     @csrf
 
                     <div
-                        class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                        class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2x1 sm:p-6">
                         <div>
                             <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
                                 <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -337,7 +339,8 @@
                                     {{ __('Add Link') }}</h3>
                                 <div class="mt-2">
 
-                                    <x-text-input id="link" name="link" type="url" class="mt-1 block w-full" required autofocus/>
+                                    <x-text-input id="link" name="link" type="url" class="mt-1 block w-full" required
+                                        autofocus />
                                     <x-input-error class="mt-2" :messages="$errors->get('url')" />
                                 </div>
                             </div>
