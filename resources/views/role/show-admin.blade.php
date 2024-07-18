@@ -89,7 +89,7 @@
     });
     </script>
 
-    <form method="POST" action="{{ url($role->subdomain . '/links/remove') }}" id="remove_link_form">
+    <form method="POST" action="{{ url($role->subdomain . '/remove_links') }}" id="remove_link_form">
 
         <input type="hidden" name="remove_link" id="remove_link" />
         <input type="hidden" name="remove_link_type" id="remove_link_type" />
