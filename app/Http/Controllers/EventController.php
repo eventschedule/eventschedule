@@ -17,7 +17,7 @@ class EventController extends Controller
         $vendor = $this->getVendor($role1, $role2);
         $talent = $this->getTalent($role1, $role2);
         
-        if (! auth()->user()->hasRole($venue->subdomain)) {
+        if (! auth()->user()->hasRole($subdomain1)) {
             return redirect('/');
         }
 
@@ -33,7 +33,7 @@ class EventController extends Controller
         return view('event/edit', $data);
     }
 
-    public function store($subdomain1, $subdomain2 = '')
+    public function store(Request $request, $subdomain1, $subdomain2 = '')
     {
         $role1 = Role::subdomain($subdomain1)->firstOrFail();
         $role2 = $subdomain2 ? Role::subdomain($subdomain2)->firstOrFail() : false;
@@ -42,11 +42,38 @@ class EventController extends Controller
         $vendor = $this->getVendor($role1, $role2);
         $talent = $this->getTalent($role1, $role2);
         
-        if (! auth()->user()->hasRole($venue->subdomain)) {
+        if (! auth()->user()->hasRole($subdomain1)) {
             return redirect('/');
         }
 
+        if (! $venue) {
+            $venue = new Role;
+            $venue->name = $request->venue_name;
+            $venue->email = $request->venue_email;
+            $venue->type = 'venue';
+            $venue->save();
+        }
+
+        $role = false;
+
+        if ($vendor) {
+            $role = $vendor;            
+        } else if ($talent) {
+            $role = $talent;
+        } else {
+            $role = new Role;
+            $role->name = $request->role_name;
+            $role->email = $request->role_email;
+            $role->type = $request->role_type;
+            $role->save();
+        }
+
         $event = new Event;       
+        $event->user_id = auth()->user()->id;
+        $event->venue_id = $venue->id;
+        $event->role_id = $role->id;
+        $event->role = $role->type;        
+
         $event->save();
 
        return redirect('/' . $subdomain1 . '/' . '');

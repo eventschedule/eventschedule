@@ -52,16 +52,16 @@
                         @else
 
                         <fieldset>
-                            <x-input-label for="type" :value="__('Type')" />
+                            <x-input-label for="role_type" :value="__('Type')" />
                             <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                                 <div class="flex items-center">
-                                    <input id="talent" name="type" type="radio" value="talent"
+                                    <input id="talent" name="role_type" type="radio" value="talent"
                                         class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                     <label for="talent"
                                         class="ml-3 block text-sm font-medium leading-6 text-gray-900">Talent</label>
                                 </div>
                                 <div class="flex items-center">
-                                    <input id="vendor" name="type" type="radio" value="vendor"
+                                    <input id="vendor" name="role_type" type="radio" value="vendor"
                                         class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                     <label for="vendor"
                                         class="ml-3 block text-sm font-medium leading-6 text-gray-900">Vendor</label>
