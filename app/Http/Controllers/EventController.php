@@ -51,4 +51,8 @@ class EventController extends Controller
         return view('event/edit', $data);
     }
 
+    public function store($subdomain1, $subdomain2 = '')
+    {
+        
+    }
 }
