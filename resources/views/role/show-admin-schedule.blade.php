@@ -1,4 +1,4 @@
-<div class="text-center pt-10">
+<div class="text-center pt-20">
     <svg class="mx-auto h-12 w-12 text-gray-400" fill="#ccc" viewBox="0 0 24 24" stroke="currentColor"
         aria-hidden="true">
         <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

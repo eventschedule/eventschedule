@@ -47,7 +47,7 @@ class User extends Authenticatable
 
     public function roles()
     {
-        return $this->belongsToMany(Role::class)->withPivot('level')->wherePivotIn('level', ['owner', 'member']);
+        return $this->belongsToMany(Role::class)->withPivot('level')->wherePivotIn('level', ['owner', 'admin']);
     }
 
     public function venues()
