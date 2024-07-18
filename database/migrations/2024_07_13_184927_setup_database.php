@@ -17,7 +17,7 @@ return new class extends Migration
 
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('subdomain')->unique();
             $table->enum('type', ['venue', 'talent', 'vendor'])->index();
             $table->string('name');
@@ -41,7 +41,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('role_id')->constrained()->onDelete('cascade');
+            $table->enum('level', ['owner', 'member', 'follower'])->index();
             $table->timestamps();
+            $table->unique(['user_id', 'role_id']);
         });
 
         Schema::create('events', function (Blueprint $table) {
