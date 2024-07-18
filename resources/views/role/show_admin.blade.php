@@ -302,12 +302,9 @@
                     <li class="py-4">
                         <div class="flex">
                             <div class="mr-4 flex-shrink-0 self-center">
-                                <svg class="h-16 w-16 border border-gray-300 bg-white text-gray-300"
-                                    preserveAspectRatio="none" stroke="currentColor" fill="none" viewBox="0 0 200 200"
-                                    aria-hidden="true">
-                                    <path vector-effect="non-scaling-stroke" stroke-width="1"
-                                        d="M0 0l200 200M0 200L200 0" />
-                                </svg>
+                                <x-url-icon :url="'{{ $link->url }}'">
+                                    {{ \App\Utils\UrlUtils::clean($link->url) }}
+                                </x-url-icon>
                             </div>
                             <div>
                                 <a href="{{ $link->url }}" target="_blank">
