@@ -16,9 +16,10 @@ class RoleController extends Controller
 
         $data = [
             'role' => $role,
+            'tab' => $tab,
         ];        
 
-        return view("role/show_admin_$tab", $data);
+        return view("role/show-admin", $data);
     }
 
     public function viewGuest($subdomain)
@@ -29,7 +30,7 @@ class RoleController extends Controller
             'role' => $role,
         ];
 
-        return view('role/show_guest', $data);
+        return view('role/show-guest', $data);
     }
 
     public function viewVenues()
