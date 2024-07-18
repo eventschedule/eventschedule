@@ -255,15 +255,15 @@
         <div class="hidden sm:block">
             <nav class="-mb-px flex space-x-8">
                 <!-- Current: "border-indigo-500 text-indigo-600", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
-                <a href="#" aria-current="page"
+                <a href="{{ url($role->type . '/' . $role->subdomain) }}" aria-current="page"
                     class="whitespace-nowrap border-b-2 border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600">Overview</a>
-                <a href="#"
+                <a href="{{ url($role->type . '/' . $role->subdomain . '/events') }}"
                     class="whitespace-nowrap border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">Events</a>
-                <a href="#"
+                <a href="{{ url($role->type . '/' . $role->subdomain . '/requests') }}"
                     class="whitespace-nowrap border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">Requests</a>
-                <a href="#"
+                <a href="{{ url($role->type . '/' . $role->subdomain . '/audience') }}"
                     class="whitespace-nowrap border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">Audience</a>
-                <a href="#"
+                <a href="{{ url($role->type . '/' . $role->subdomain . '/team') }}"
                     class="whitespace-nowrap border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">Team</a>
             </nav>
         </div>
@@ -272,6 +272,8 @@
 
     @if ($tab == 'overview')
     @include('role.show-admin-overview')
+    @elseif ($tab == 'events')
+    @include('role.show-admin-events')
     @endif
 
 </x-app-layout>
