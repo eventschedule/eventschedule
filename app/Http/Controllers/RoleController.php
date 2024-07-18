@@ -56,6 +56,7 @@ class RoleController extends Controller
     public function create()
     {
         $role = new Role;
+        $role->accept_talent_requests = true;
 
         $data = [
             'role' => $role,
