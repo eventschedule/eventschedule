@@ -1,9 +1,9 @@
 <x-app-layout>
 
-    <form method="POST" action="{{ $role->exists ? url('/update/' . $role->subdomain) : route('role.store') }}">
+    <form method="POST" action="{{ $event->exists ? url('/update') : route('role.store') }}">
 
         @csrf
-        @if($role->exists)
+        @if($event->exists)
         @method('put')
         @endif
 
