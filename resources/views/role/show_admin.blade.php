@@ -302,13 +302,14 @@
                     <li class="py-4">
                         <div class="flex">
                             <div class="mr-4 flex-shrink-0 self-center">
-                                <x-url-icon :url="'{{ $link->url }}'">
+                                <x-url-icon>
                                     {{ \App\Utils\UrlUtils::clean($link->url) }}
                                 </x-url-icon>
                             </div>
                             <div>
                                 <a href="{{ $link->url }}" target="_blank">
-                                    <h4 class="text-lg font-bold break-all line-clamp-2">{{ \App\Utils\UrlUtils::getBrand($link->url) }}</h4>
+                                    <h4 class="text-lg font-bold break-all line-clamp-2">
+                                        {{ \App\Utils\UrlUtils::getBrand($link->url) }}</h4>
                                     <p class="mt-1 break-all">{{ \App\Utils\UrlUtils::clean($link->url) }}</p>
                                 </a>
                                 <button type="button"
@@ -341,16 +342,14 @@
                     <li class="py-4">
                         <div class="flex">
                             <div class="mr-4 flex-shrink-0 self-center">
-                                <svg class="h-16 w-16 border border-gray-300 bg-white text-gray-300"
-                                    preserveAspectRatio="none" stroke="currentColor" fill="none" viewBox="0 0 200 200"
-                                    aria-hidden="true">
-                                    <path vector-effect="non-scaling-stroke" stroke-width="1"
-                                        d="M0 0l200 200M0 200L200 0" />
-                                </svg>
+                                <x-url-icon>
+                                    {{ \App\Utils\UrlUtils::clean($link->url) }}
+                                </x-url-icon>
                             </div>
                             <div>
                                 <a href="{{ $link->url }}" target="_blank">
-                                    <h4 class="text-lg font-bold break-all line-clamp-2">{{ \App\Utils\UrlUtils::getBrand($link->url) }}</h4>
+                                    <h4 class="text-lg font-bold break-all line-clamp-2">
+                                        {{ \App\Utils\UrlUtils::getBrand($link->url) }}</h4>
                                     <p class="mt-1 break-all">{{ \App\Utils\UrlUtils::clean($link->url) }}</p>
                                 </a>
                                 <button type="button"
@@ -385,12 +384,9 @@
                     <li class="py-4">
                         <div class="flex">
                             <div class="mr-4 flex-shrink-0 self-center">
-                                <svg class="h-16 w-16 border border-gray-300 bg-white text-gray-300"
-                                    preserveAspectRatio="none" stroke="currentColor" fill="none" viewBox="0 0 200 200"
-                                    aria-hidden="true">
-                                    <path vector-effect="non-scaling-stroke" stroke-width="1"
-                                        d="M0 0l200 200M0 200L200 0" />
-                                </svg>
+                                <x-url-icon>
+                                    {{ \App\Utils\UrlUtils::clean($link->url) }}
+                                </x-url-icon>
                             </div>
                             <div>
                                 <a href="{{ $link->url }}" target="_blank">

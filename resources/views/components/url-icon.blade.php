@@ -1,4 +1,4 @@
-<svg class="h-16 w-16 border border-gray-300 bg-white text-gray-300" preserveAspectRatio="none" stroke="currentColor"
+<svg class="h-16 w-16 bg-white text-gray-300" preserveAspectRatio="none" stroke="currentColor"
     fill="none" viewBox="0 0 24 24" aria-hidden="true">
     <path stroke-width="1" 
     @if(strpos($slot, 'facebook.com') === 0)
