@@ -62,6 +62,10 @@ class EventController extends Controller
         }
 
         if (! $venue) {
+            $venue = Role::whereType('venue')->whereEmail($request->venue_email)->first();
+        }
+
+        if (! $venue) {
             $venue = new Role;
             $venue->name = $request->venue_name;
             $venue->subdomain = UrlUtils::createDomain($request->venue_name);
@@ -77,12 +81,17 @@ class EventController extends Controller
         } else if ($talent) {
             $role = $talent;
         } else {
-            $role = new Role;
-            $role->name = $request->role_name;
-            $role->subdomain = UrlUtils::createDomain($request->role_name);
-            $role->email = $request->role_email;
-            $role->type = $request->role_type;
-            $role->save();
+
+            $role = Role::whereType($request->role_type)->whereEmail($request->role_email)->first();
+
+            if (! $role) {
+                $role = new Role;
+                $role->name = $request->role_name;
+                $role->subdomain = UrlUtils::createDomain($request->role_name);
+                $role->email = $request->role_email;
+                $role->type = $request->role_type;
+                $role->save();            
+            }
         }
 
         $event = new Event;       
