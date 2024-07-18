@@ -26,9 +26,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/talent', [RoleController::class, 'viewTalent'])->name('talent');
     Route::get('/vendors', [RoleController::class, 'viewVendors'])->name('vendors');
 
-    Route::get('/venue/{subdomain}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
-    Route::get('/talent/{subdomain}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
-    Route::get('/vendor/{subdomain}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
+    Route::get('/venue/{subdomain}/{tab?}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
+    Route::get('/talent/{subdomain}/{tab?}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
+    Route::get('/vendor/{subdomain}/{tab?}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

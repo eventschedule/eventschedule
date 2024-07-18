@@ -10,15 +10,15 @@ use App\Models\Role;
 
 class RoleController extends Controller
 {
-    public function viewAdmin($subdomain)
+    public function viewAdmin($subdomain, $tab = 'overview')
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         $data = [
             'role' => $role,
-        ];
+        ];        
 
-        return view('role/show_admin', $data);
+        return view("role/show_admin_$tab", $data);
     }
 
     public function viewGuest($subdomain)
