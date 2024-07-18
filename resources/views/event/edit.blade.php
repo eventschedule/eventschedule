@@ -1,6 +1,7 @@
 <x-app-layout>
 
-    <form method="POST" action="{{ $event->exists ? url('/update') : route('role.store') }}">
+    <form method="POST"
+        action="{{ $event->exists ? url('/update') : url('/' . $subdomain1 . '/store_event/' . $subdomain2) }}">
 
         @csrf
         @if($event->exists)

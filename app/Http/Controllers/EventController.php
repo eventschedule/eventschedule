@@ -24,6 +24,8 @@ class EventController extends Controller
         $event = new Event;
 
         $data = [
+            'subdomain1' => $subdomain1,
+            'subdomain2' => $subdomain2,
             'event' => $event,
             'venue' => $venue,
             'talent' => $talent,
