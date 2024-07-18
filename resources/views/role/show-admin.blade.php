@@ -244,9 +244,9 @@
             <select id="current-tab" name="current-tab"
                 class="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600">
                 <option {{ $tab == 'overview' ? 'selected' : '' }}>Overview</option>
-                <option {{ $tab == 'events' ? 'selected' : '' }}>Events</option>
+                <option {{ $tab == 'schedule' ? 'selected' : '' }}>Schedule</option>
                 <option {{ $tab == 'requests' ? 'selected' : '' }}>Requests</option>
-                <option {{ $tab == 'audience' ? 'selected' : '' }}>Audience</option>
+                <option {{ $tab == 'followers' ? 'selected' : '' }}>Followers</option>
                 <option {{ $tab == 'team' ? 'selected' : '' }}>Team</option>
             </select>
         </div>
@@ -254,15 +254,14 @@
         <!-- Tabs at small breakpoint and up -->
         <div class="hidden sm:block">
             <nav class="-mb-px flex space-x-8">
-                <!-- Current: "border-indigo-500 text-indigo-600", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
-                <a href="{{ url($role->type . '/' . $role->subdomain) }}" aria-current="page"
+                <a href="{{ url($role->type . '/' . $role->subdomain) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'overview' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">Overview</a>
-                <a href="{{ url($role->type . '/' . $role->subdomain . '/events') }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'events' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Events</a>
+                <a href="{{ url($role->type . '/' . $role->subdomain . '/schedule') }}"
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'schedule' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Schedule</a>
                 <a href="{{ url($role->type . '/' . $role->subdomain . '/requests') }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'requests' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Requests</a>
-                <a href="{{ url($role->type . '/' . $role->subdomain . '/audience') }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'audience' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Audience</a>
+                <a href="{{ url($role->type . '/' . $role->subdomain . '/followers') }}"
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'followers' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Followers</a>
                 <a href="{{ url($role->type . '/' . $role->subdomain . '/team') }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'team' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Team</a>
             </nav>
@@ -272,12 +271,12 @@
 
     @if ($tab == 'overview')
     @include('role.show-admin-overview')
-    @elseif ($tab == 'events')
-    @include('role.show-admin-events')
+    @elseif ($tab == 'schedule')
+    @include('role.show-admin-schedule')
     @elseif ($tab == 'requests')
     @include('role.show-admin-requests')
-    @elseif ($tab == 'audience')
-    @include('role.show-admin-audience')
+    @elseif ($tab == 'followers')
+    @include('role.show-admin-followers')
     @elseif ($tab == 'team')
     @include('role.show-admin-team')
     @endif
