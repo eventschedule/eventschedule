@@ -9,4 +9,13 @@ class UrlUtils
         $pattern = '/^(https?:\/\/)?(www\.)?/';
         return preg_replace($pattern, '', $url);
     }
+
+    public static function getBrand($url)
+    {
+        $url = self::clean($url);
+
+        $parts = explode('.', $url);
+
+        return ucfirst($parts[0]);
+    }
 }
