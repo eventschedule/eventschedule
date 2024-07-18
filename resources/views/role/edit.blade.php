@@ -16,7 +16,7 @@
 
         <script>
         document.addEventListener('DOMContentLoaded', () => {
-            $("#country_code").countrySelect({
+            $("#country").countrySelect({
                 defaultCountry: '{{ $role->country_code }}',
             });
         });
@@ -28,6 +28,11 @@
             } else {
                 $('#address').fadeIn();
             }
+        }
+
+        function onCountryChange() {
+            var selected = $('#country').countrySelect('getSelectedCountryData');
+            $('#country_code').val(selected.iso2);
         }
 
         </script>
@@ -163,10 +168,11 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="country_code" :value="__('Country')" />
-                            <x-text-input id="country_code" name="country_code" type="text" class="mt-1 block w-full"
-                                :value="old('country_code', $role->country_code)" />
-                            <x-input-error class="mt-2" :messages="$errors->get('country_code')" />
+                            <x-input-label for="country" :value="__('Country')" />
+                            <x-text-input id="country" name="country" type="text" class="mt-1 block w-full"
+                                :value="old('country', $role->country)" onchange="onCountryChange()"/>
+                            <x-input-error class="mt-2" :messages="$errors->get('country')" />
+                            <input type="hidden" id="country_code" name="country_code"/>
                         </div>
 
                     </div>

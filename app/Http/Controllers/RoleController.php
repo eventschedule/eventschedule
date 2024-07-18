@@ -12,6 +12,10 @@ class RoleController extends Controller
 {
     public function viewAdmin($subdomain, $tab = 'overview')
     {
+        if (! auth()->user()->hasRole($subdomain)) {
+            return redirect('/');
+        }
+
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         $data = [
@@ -88,6 +92,10 @@ class RoleController extends Controller
 
     public function update(RoleUpdateRequest $request, $subdomain): RedirectResponse
     {
+        if (! auth()->user()->hasRole($subdomain)) {
+            return redirect('/');
+        }
+
         $role = Role::subdomain($subdomain)->firstOrFail();
         $role->fill($request->all());
         $role->save();
@@ -97,6 +105,10 @@ class RoleController extends Controller
 
     public function updateLinks(Request $request, $subdomain): RedirectResponse
     {
+        if (! auth()->user()->hasRole($subdomain)) {
+            return redirect('/');
+        }
+
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if ($request->link_type == 'social_links') {
@@ -152,6 +164,10 @@ class RoleController extends Controller
 
     public function removeLinks(Request $request, $subdomain): RedirectResponse
     {
+        if (! auth()->user()->hasRole($subdomain)) {
+            return redirect('/');
+        }
+
         $role = Role::subdomain($subdomain)->firstOrFail();
         
         if ($request->remove_link_type == 'social_links') {
