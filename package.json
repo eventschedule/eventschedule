@@ -16,6 +16,6 @@
         "vite": "^5.0"
     },
     "dependencies": {
-        "@tailwindcss/line-clamp": "^0.4.4"
+        "flatpickr": "^4.6.13"
     }
 }
