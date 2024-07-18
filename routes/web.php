@@ -31,7 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/talent/{subdomain}/{tab?}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
     Route::get('/vendor/{subdomain}/{tab?}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
 
-    Route::get('/event/create', [EventController::class, 'create'])->name('event.create');
+    Route::get('/event/create/{subdomain1}/{subdomain2?}', [EventController::class, 'create'])->name('event.create');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

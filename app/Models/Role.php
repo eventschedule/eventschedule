@@ -40,4 +40,19 @@ class Role extends Model
     {
         return $this->address1 . ', ' . $this->state . ', ' . $this->postal_code . ', ' . $this->country_code;
     }
+
+    public function isVenue()
+    {
+        return $this->type == 'venue';
+    }
+
+    public function isVendor()
+    {
+        return $this->type == 'vendor';
+    }
+
+    public function isTalent()
+    {
+        return $this->type == 'talent';
+    }
 }
