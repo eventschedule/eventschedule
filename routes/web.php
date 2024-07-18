@@ -28,10 +28,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/{subdomain}/edit', [RoleController::class, 'edit'])->name('role.edit');
-    Route::post('/{subdomain}/links/update', [RoleController::class, 'updateLinks'])->name('role.update_links');
-    Route::post('/{subdomain}/links/remove', [RoleController::class, 'removeLinks'])->name('role.remove_links');
+    Route::post('/{subdomain}/update_links', [RoleController::class, 'updateLinks'])->name('role.update_links');
+    Route::post('/{subdomain}/remove_links', [RoleController::class, 'removeLinks'])->name('role.remove_links');
     Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
-    Route::get('/{subdomain1}/event/create/{subdomain2?}', [EventController::class, 'create'])->name('event.create');
+    Route::get('/{subdomain1}/create_event/{subdomain2?}', [EventController::class, 'create'])->name('event.create');
 
 
     Route::get('/{subdomain}/{tab?}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
