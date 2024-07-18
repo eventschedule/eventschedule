@@ -18,6 +18,9 @@ return new class extends Migration
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
             $table->bool('is_published')->default(false);
+            $table->bool('accept_talent_requests')->default(true);
+            $table->bool('accept_vendor_requests')->default(true);
+            $table->bool('is_published')->default(false);
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('subdomain')->unique();
             $table->enum('type', ['venue', 'talent', 'vendor'])->index();
