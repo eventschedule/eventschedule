@@ -167,7 +167,7 @@ Leaving: "ease-in duration-200"
         From: "opacity-100 translate-y-0 sm:scale-100"
         To: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
     -->
-            <form method="POST" action="{{ url('/update/links/' . $role->subdomain) }}">
+            <form method="POST" action="{{ url($role->subdomain . '/links/update') }}">
 
                 @csrf
 
