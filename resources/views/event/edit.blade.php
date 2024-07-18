@@ -52,6 +52,8 @@
                         <div>{{ $vendor->name }}</div>
                         @else
 
+                        @if($venue)
+                        @if($venue->accept_talent_requests && $venue->accept_vendor_requests)
                         <fieldset>
                             <x-input-label for="role_type" :value="__('Type')" />
                             <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
@@ -69,7 +71,12 @@
                                 </div>
                             </div>
                         </fieldset>
-
+                        @elseif($venue->accept_talent_requests)
+                        <input type="hidden" name="role_type" value="talent" />
+                        @elseif($venue->accept_vendor_requests)
+                        <input type="hidden" name="role_type" value="vendor" />
+                        @endif
+                        @endif
 
                         <div class="mb-6">
                             <x-input-label for="role_name" :value="__('Name')" />
