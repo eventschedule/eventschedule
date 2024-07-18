@@ -13,6 +13,7 @@ class UrlUtils
     public static function getBrand($url)
     {
         $url = self::clean($url);
+        $url = strtolower($url);
 
         $parts = explode('.', $url);
 

@@ -96,28 +96,8 @@ class RoleController extends Controller
 
     public function updateLinks(Request $request, $subdomain): RedirectResponse
     {
-        $title = '';
-
-        if (strpos($request->link, 'facebook.com')) {
-            $title = 'Facebook';
-        } else {
-
-            $html = @file_get_contents($request->link);    
-            if ($html) {    
-                $dom = new \DOMDocument();        
-                libxml_use_internal_errors(true);        
-                $dom->loadHTML($html);            
-                libxml_clear_errors();    
-                
-                $titleElements = $dom->getElementsByTagName('title');        
-                if ($titleElements->length > 0) {
-                    $title = $titleElements->item(0)->textContent;
-                }        
-            }
-        }
-
         $role = Role::subdomain($subdomain)->firstOrFail();
-        
+
         if ($request->link_type == 'social_links') {
             $links = $role->social_links;
         } else if ($request->link_type == 'payment_links') {
@@ -132,10 +112,28 @@ class RoleController extends Controller
 
         $links = json_decode($links);
 
-        $obj = new \stdClass;
-        $obj->name = $title;
-        $obj->url = strtolower(rtrim($request->link, '/'));
-        $links[] = $obj;
+        foreach(explode(',', $request->link) as $link) {
+            $title = '';
+            $html = @file_get_contents($link);    
+
+            if ($html) {    
+                $dom = new \DOMDocument();        
+                libxml_use_internal_errors(true);        
+                $dom->loadHTML($html);            
+                libxml_clear_errors();    
+                
+                $titleElements = $dom->getElementsByTagName('title');        
+                if ($titleElements->length > 0) {
+                    $title = $titleElements->item(0)->textContent;
+                }        
+            }
+            
+            $obj = new \stdClass;
+            $obj->name = $title;
+            $obj->url = rtrim($link, '/');
+            $links[] = $obj;
+        }
+
         $links = json_encode($links);
 
         if ($request->link_type == 'social_links') {
