@@ -22,7 +22,7 @@ return new class extends Migration
             $table->enum('type', ['venue', 'talent', 'vendor'])->index();
             $table->string('name');
             $table->string('phone')->nullable();
-            $table->string('email')->nullable();
+            $table->string('email')->unique();
             $table->string('website')->nullable();
             $table->text('address1')->nullable();
             $table->text('address2')->nullable();

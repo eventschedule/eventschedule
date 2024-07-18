@@ -110,7 +110,7 @@
                         <div class="mb-6">
                             <x-input-label for="email" :value="__('Email')" />
                             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
-                                :value="old('email', $role->exists ? $role->email : auth()->user()->email)" />
+                                :value="old('email', $role->exists ? $role->email : auth()->user()->email)" required />
                             <x-input-error class="mt-2" :messages="$errors->get('email')" />
                         </div>
 
