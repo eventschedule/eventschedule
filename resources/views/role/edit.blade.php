@@ -187,14 +187,14 @@
 
                         <div class="mb-6">
                             <x-checkbox name="accept_talent_requests" label="{{ __('Accept talent requests') }}"
-                                checked="{{ old('accept_talent_requests', $venue ? $venue->accept_talent_requests : true) }}"
+                                checked="{{ old('accept_talent_requests', $role->accept_talent_requests) }}"
                                 data-custom-attribute="value" />
                             <x-input-error class="mt-2" :messages="$errors->get('accept_talent_requests')" />
                         </div>
 
                         <div class="mb-6">
                             <x-checkbox name="accept_vendor_requests" label="{{ __('Accept vendor requests') }}"
-                                checked="{{ old('accept_vendor_requests', $venue ? $venue->accept_vendor_requests : false) }}"
+                                checked="{{ old('accept_vendor_requests', $role->accept_vendor_requests) }}"
                                 data-custom-attribute="value" />
                             <x-input-error class="mt-2" :messages="$errors->get('accept_vendor_requests')" />
                         </div>
