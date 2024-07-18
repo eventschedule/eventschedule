@@ -13,27 +13,9 @@ class EventController extends Controller
         $role1 = Role::subdomain($subdomain1)->firstOrFail();
         $role2 = $subdomain2 ? Role::subdomain($subdomain2)->firstOrFail() : false;
 
-        $venue = false;
-        $vendor = false;
-        $talent = false;
-
-        if ($role1->isVenue()) {
-            $venue = $role1;
-        } else if ($role2 && $role2->isVenue()) {
-            $venue = $role2;
-        }
-
-        if ($role1->isVendor()) {
-            $vendor = $role1;
-        } else if ($role2 && $role2->isVendor()) {
-            $vendor = $role2;
-        }
-
-        if ($role1->isTalent()) {
-            $talent = $role1;
-        } else if ($role2 && $role2->isTalent()) {
-            $talent = $role2;
-        }
+        $venue = $this->getVenue($role1, $role2);
+        $vendor = $this->getVendor($role1, $role2);
+        $talent = $this->getTalent($role1, $role2);
         
         if (! auth()->user()->hasRole($venue->subdomain)) {
             return redirect('/');
@@ -53,6 +35,47 @@ class EventController extends Controller
 
     public function store($subdomain1, $subdomain2 = '')
     {
+        $role1 = Role::subdomain($subdomain1)->firstOrFail();
+        $role2 = $subdomain2 ? Role::subdomain($subdomain2)->firstOrFail() : false;
+
+        $venue = $this->getVenue($role1, $role2);
+        $vendor = $this->getVendor($role1, $role2);
+        $talent = $this->getTalent($role1, $role2);
         
+        if (! auth()->user()->hasRole($venue->subdomain)) {
+            return redirect('/');
+        }
+
+        $event = new Event;       
+        $event->save();
+
+       return redirect('/' . $subdomain1 . '/' . '');
+    }
+
+    private function getVenue($role1, $role2) 
+    {
+        if ($role1->isVenue()) {
+            return $role1;
+        } else if ($role2 && $role2->isVenue()) {
+            return $role2;
+        }      
+    }
+
+    private function getTalent($role1, $role2) 
+    {
+        if ($role1->isTalent()) {
+            return $role1;
+        } else if ($role2 && $role2->isTalent()) {
+            return $role2;
+        }      
+    }
+
+    private function getVendor($role1, $role2) 
+    {
+        if ($role1->isVendor()) {
+            return $role1;
+        } else if ($role2 && $role2->isVendor()) {
+            return $role2;
+        }      
     }
 }
