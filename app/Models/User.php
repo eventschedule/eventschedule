@@ -64,4 +64,9 @@ class User extends Authenticatable
     {
         return $this->roles()->type('vendor');
     }
+
+    public function hasRole($subdomain): bool
+    {
+        return $this->roles()->where('subdomain', $subdomain)->exists();
+    }
 }
