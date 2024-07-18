@@ -7,6 +7,7 @@ use App\Http\Requests\RoleUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Models\Role;
+use App\Utils\UrlUtils;
 
 class RoleController extends Controller
 {
@@ -66,11 +67,10 @@ class RoleController extends Controller
     public function store(RoleCreateRequest $request): RedirectResponse
     {
         $user = $request->user();        
-        $subdomain = str_replace([' ', '.'], ['-', ''], strtolower(trim($request->name)));
 
         $role = new Role;
         $role->fill($request->all());
-        $role->subdomain = $subdomain;
+        $role->subdomain = UrlUtils::createDomain($request->name);
         $role->user_id = $user->id;
         $role->save();
 

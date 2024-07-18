@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Role;
+use App\Utils\UrlUtils;
 
 class EventController extends Controller
 {
@@ -51,6 +52,7 @@ class EventController extends Controller
         if (! $venue) {
             $venue = new Role;
             $venue->name = $request->venue_name;
+            $venue->subdomain = UrlUtils::createDomain($request->venue_name);
             $venue->email = $request->venue_email;
             $venue->type = 'venue';
             $venue->save();
@@ -65,6 +67,7 @@ class EventController extends Controller
         } else {
             $role = new Role;
             $role->name = $request->role_name;
+            $role->subdomain = UrlUtils::createDomain($request->role_name);
             $role->email = $request->role_email;
             $role->type = $request->role_type;
             $role->save();
@@ -78,7 +81,7 @@ class EventController extends Controller
 
         $event->save();
 
-       return redirect('/' . $subdomain1 . '/' . '');
+        return redirect('/' . $subdomain1 . '/' . '');
     }
 
     private function getVenue($role1, $role2) 

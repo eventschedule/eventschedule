@@ -19,4 +19,9 @@ class UrlUtils
 
         return ucfirst($parts[0]);
     }
+
+    public static function createDomain($name)
+    {
+        return str_replace([' ', '.'], ['-', ''], strtolower(trim($name)));
+    }
 }
