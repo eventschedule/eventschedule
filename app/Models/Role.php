@@ -19,6 +19,8 @@ class Role extends Model
         'postal_code',
         'country_code',
         'description',
+        'accept_talent_requests',
+        'accept_vendor_requests',
     ];
 
     public function users()

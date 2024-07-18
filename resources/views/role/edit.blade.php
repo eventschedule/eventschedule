@@ -34,17 +34,15 @@
             var selected = $('#country').countrySelect('getSelectedCountryData');
             $('#country_code').val(selected.iso2);
         }
-
         </script>
 
     </x-slot>
 
-    <form method="POST" 
-        action="{{ $role->exists ? url($role->subdomain . '/update') : route('role.store') }}">
+    <form method="POST" action="{{ $role->exists ? url($role->subdomain . '/update') : route('role.store') }}">
 
         @csrf
-        @if($role->exists)        
-            @method('put')
+        @if($role->exists)
+        @method('put')
         @endif
 
         <div class="py-12">
@@ -59,7 +57,8 @@
                         @if(! $role->exists)
                         <fieldset>
                             <x-input-label for="type" :value="__('Type')" />
-                            <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0" onclick="toggleAddress()">
+                            <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0"
+                                onclick="toggleAddress()">
                                 <div class="flex items-center">
                                     <input id="venue" name="type" type="radio" value="venue" checked
                                         class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
@@ -92,8 +91,7 @@
                         <div class="mb-6">
                             <x-input-label for="description" :value="__('Description')" />
                             <textarea id="description" name="description"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                >{{ old('description', $role->description) }}</textarea>
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">{{ old('description', $role->description) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
 
@@ -170,13 +168,41 @@
                         <div class="mb-6">
                             <x-input-label for="country" :value="__('Country')" />
                             <x-text-input id="country" name="country" type="text" class="mt-1 block w-full"
-                                :value="old('country', $role->country)" onchange="onCountryChange()"/>
+                                :value="old('country', $role->country)" onchange="onCountryChange()" />
                             <x-input-error class="mt-2" :messages="$errors->get('country')" />
-                            <input type="hidden" id="country_code" name="country_code"/>
+                            <input type="hidden" id="country_code" name="country_code" />
                         </div>
 
                     </div>
                 </div>
+
+
+
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="address">
+                    <div class="max-w-xl">
+
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                            {{ __('Settings') }}
+                        </h2>
+
+                        <div class="mb-6">
+                            <x-checkbox name="accept_talent_requests" label="{{ __('Accept talent requests') }}"
+                                checked="{{ old('accept_talent_requests', $venue ? $venue->accept_talent_requests : true) }}"
+                                data-custom-attribute="value" />
+                            <x-input-error class="mt-2" :messages="$errors->get('accept_talent_requests')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-checkbox name="accept_vendor_requests" label="{{ __('Accept vendor requests') }}"
+                                checked="{{ old('accept_vendor_requests', $venue ? $venue->accept_vendor_requests : false) }}"
+                                data-custom-attribute="value" />
+                            <x-input-error class="mt-2" :messages="$errors->get('accept_vendor_requests')" />
+                        </div>
+
+                    </div>
+                </div>
+
+
             </div>
         </div>
 
