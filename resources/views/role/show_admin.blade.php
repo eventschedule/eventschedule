@@ -308,7 +308,7 @@
                             </div>
                             <div>
                                 <a href="{{ $link->url }}" target="_blank">
-                                    <h4 class="text-lg font-bold break-all line-clamp-2">{{ $link->name }}</h4>
+                                    <h4 class="text-lg font-bold break-all line-clamp-2">{{ \App\Utils\UrlUtils::getBrand($link->url) }}</h4>
                                     <p class="mt-1 break-all">{{ \App\Utils\UrlUtils::clean($link->url) }}</p>
                                 </a>
                                 <button type="button"
@@ -350,7 +350,7 @@
                             </div>
                             <div>
                                 <a href="{{ $link->url }}" target="_blank">
-                                    <h4 class="text-lg font-bold break-all line-clamp-2">{{ $link->name }}</h4>
+                                    <h4 class="text-lg font-bold break-all line-clamp-2">{{ \App\Utils\UrlUtils::getBrand($link->url) }}</h4>
                                     <p class="mt-1 break-all">{{ \App\Utils\UrlUtils::clean($link->url) }}</p>
                                 </a>
                                 <button type="button"
