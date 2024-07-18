@@ -41,7 +41,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('role_id')->constrained()->onDelete('cascade');
-            $table->enum('level', ['owner', 'member', 'follower'])->index();
+            $table->enum('level', ['owner', 'admin', 'follower'])->index();
             $table->timestamps();
             $table->unique(['user_id', 'role_id']);
         });

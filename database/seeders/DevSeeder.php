@@ -23,8 +23,8 @@ class DevSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Member',
-                'email' => 'hillelcoren+member@gmail.com',
+                'name' => 'Admin',
+                'email' => 'hillelcoren+admin@gmail.com',
                 'password' => Hash::make('password'),
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -59,7 +59,7 @@ class DevSeeder extends Seeder
             [
                 'user_id' => 2,
                 'role_id' => 1,
-                'level' => 'member',
+                'level' => 'admin',
             ],
             [
                 'user_id' => 3,
