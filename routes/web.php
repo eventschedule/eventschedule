@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\EventController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -29,6 +30,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/venue/{subdomain}/{tab?}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
     Route::get('/talent/{subdomain}/{tab?}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
     Route::get('/vendor/{subdomain}/{tab?}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
+
+    Route::get('/event/create', [EventController::class, 'create'])->name('event.create');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
