@@ -5,6 +5,8 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\EventController;
 use Illuminate\Support\Facades\Route;
 
+require __DIR__.'/auth.php';
+
 Route::get('/', function () {
     return view('welcome');
 })->name('landing');
@@ -40,4 +42,3 @@ Route::middleware('auth')->group(function () {
     Route::get('/{subdomain}/{tab?}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
 });
 
-require __DIR__.'/auth.php';
