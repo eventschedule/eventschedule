@@ -9,6 +9,18 @@ use App\Utils\UrlUtils;
 
 class EventController extends Controller
 {
+    public function view($hash)
+    {
+        $event_id = base64_decode($hash);
+        $event = Event::findOrFail($event_id);
+
+        $data = [
+            'event' => $event,
+        ];
+
+        return view('events/view', $data);
+    }
+
     public function create($subdomain1, $subdomain2 = '')
     {
         $role1 = Role::subdomain($subdomain1)->firstOrFail();
