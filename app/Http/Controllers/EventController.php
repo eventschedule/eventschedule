@@ -38,7 +38,7 @@ class EventController extends Controller
             'vendor' => $event->role->type == 'vendor' ? $event->role : false,
         ];
 
-        return view('events/edit', $data);
+        return view('event/edit', $data);
     }
 
     public function create(Request $request, $subdomain1, $subdomain2 = '')
@@ -69,6 +69,17 @@ class EventController extends Controller
         ];
 
         return view('event/edit', $data);
+    }
+
+    public function update(Request $request, $subdomain, $hash)
+    {
+        $event_id = base64_decode($hash);
+        $event = Event::findOrFail($event_id);
+
+        $event->fill($request->all());
+        $event->save();
+        
+        return redirect('/' . $subdomain . '/schedule' );
     }
 
     public function store(Request $request, $subdomain1, $subdomain2 = '')
