@@ -24,7 +24,7 @@
 
 @else
 
-<div class="lg:flex lg:h-full lg:flex-col">
+<div class="lg:flex lg:h-full lg:flex-col pt-1">
     <header class="flex items-center justify-between border-b border-gray-200 px-6 py-4 lg:flex-none">
         <h1 class="text-base font-semibold leading-6 text-gray-900">
             <time
@@ -80,7 +80,8 @@
                     class="ml-6 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
                     {{ __('Add Event') }}
                 </button>
-            </div>
+            </div>            
+            <!--
             <div class="relative ml-6 md:hidden">
                 <button type="button"
                     class="-mx-2 flex items-center rounded-full border border-transparent p-2 text-gray-400 hover:text-gray-500"
@@ -113,6 +114,7 @@
                     </div>
                 </div>
             </div>
+            -->
         </div>
     </header>
     <div class="shadow ring-1 ring-black ring-opacity-5 lg:flex lg:flex-auto lg:flex-col">
@@ -135,7 +137,7 @@
             <div class="hidden w-full lg:grid lg:grid-cols-7 lg:grid-rows-{{ $totalWeeks }} lg:gap-px">
                 @while ($currentDate->lte($endOfMonth))
                 <div
-                    class="relative {{ $currentDate->month == $month ? 'bg-white' : 'bg-gray-50 text-gray-500' }} px-3 py-2">
+                    class="relative {{ $currentDate->month == $month ? 'bg-white' : 'bg-gray-50 text-gray-500' }} px-3 py-5">
                     <time datetime="{{ $currentDate->format('Y-m-d') }}">{{ $currentDate->day }}</time>
                     <ol class="mt-2">
                         @foreach ($events as $event)
