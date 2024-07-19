@@ -8,8 +8,3 @@ Alpine.start();
 
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.css";
-
-// Example: Initialize Flatpickr on elements with the class 'datepicker'
-document.addEventListener('DOMContentLoaded', function () {
-    flatpickr('.datepicker');
-});

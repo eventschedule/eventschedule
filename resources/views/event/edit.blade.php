@@ -1,5 +1,20 @@
 <x-app-layout>
 
+    <x-slot name="head">
+        <script>
+        // Example: Initialize Flatpickr on elements with the class 'datepicker'
+        document.addEventListener('DOMContentLoaded', function() {
+            flatpickr('.datepicker', {
+                enableTime: true,
+                altInput: true,
+                time_24hr: false,
+                //dateFormat: "Y-m-d H:i",
+                //altFormat: "F j, Y H:i",
+            });
+        });
+        </script>
+    </x-slot>
+
     <form method="POST"
         action="{{ $event->exists ? url('/update') : url('/' . $subdomain1 . '/store_event/' . $subdomain2) }}">
 
@@ -45,8 +60,8 @@
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                             @if($venue && ! $venue->accept_talent_requests)
-                            {{ __('Vendor') }}    
-                            @elseif($venue && ! $venue->accept_vendor_requests)                            
+                            {{ __('Vendor') }}
+                            @elseif($venue && ! $venue->accept_vendor_requests)
                             {{ __('Talent') }}
                             @else
                             {{ __('Details') }}
@@ -120,7 +135,7 @@
             </div>
         </div>
 
-        
+
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <div class="flex items-center gap-4">
