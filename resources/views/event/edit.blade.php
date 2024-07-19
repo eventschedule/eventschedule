@@ -127,7 +127,7 @@
                             {{ __('Date & Time') }}
                         </h2>
 
-                        <input type="text" class="datepicker" placeholder="Select Date">
+                        <x-text-input type="text" class="datepicker" placeholder="Select Date"/>
 
                     </div>
                 </div>
