@@ -18,7 +18,7 @@ return new class extends Migration
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
             $table->boolean('is_published')->default(false);
-            $table->enum('status', ['pending', 'unlisted', 'published'])->default('pending');
+            $table->enum('status', ['private', 'unlisted', 'public'])->default('private');
             $table->boolean('use_24_hour_time')->default(false);
             $table->boolean('accept_talent_requests')->default(true);
             $table->boolean('accept_vendor_requests')->default(false);
@@ -57,9 +57,10 @@ return new class extends Migration
             $table->foreignId('role_id')->constrained()->onDelete('cascade');
             $table->foreignId('venue_id')->constrained('roles')->onDelete('cascade');
             $table->enum('role', ['talent', 'vendor']);
-            $table->enum('status', ['pending', 'accepted', 'declined', 'unlisted', 'published'])->default('pending');
+            $table->enum('status', ['private', 'unlisted', 'public'])->default('private');
+            $table->boolean('is_accepted')->default(false);
             $table->string('start_time')->nullable();
-            $table->integer('duration')->nullable();
+            $table->float('duration', 8, 3)->nullable();
             $table->timestamps();
         });
     }
