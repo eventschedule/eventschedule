@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Role;
 use App\Utils\UrlUtils;
+use Carbon\Carbon;
 
 class EventController extends Controller
 {
@@ -63,8 +64,13 @@ class EventController extends Controller
     {
         $event_id = base64_decode($hash);
         $event = Event::findOrFail($event_id);
-
         $event->fill($request->all());
+
+        $timezone = auth()->user()->timezone;
+        $event->start_time = Carbon::createFromFormat('Y-m-d H:i', $request->start_time, $timezone)
+            ->setTimezone('UTC')
+            ->format('Y-m-d H:i');
+        
         $event->save();
         
         return redirect('/' . $subdomain . '/schedule' );
@@ -122,6 +128,11 @@ class EventController extends Controller
         $event->venue_id = $venue->id;
         $event->role_id = $role->id;
 
+        $timezone = auth()->user()->timezone;
+        $event->start_time = Carbon::createFromFormat('Y-m-d H:i', $event->start_time, $timezone)
+            ->setTimezone('UTC')
+            ->format('Y-m-d H:i');
+        
         $event->save();
 
         return redirect('/' . $subdomain1 . '/schedule');
