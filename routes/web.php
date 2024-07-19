@@ -35,7 +35,8 @@ Route::middleware('auth')->group(function () {
     Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
     Route::get('/{subdomain1}/add_event/{subdomain2?}', [EventController::class, 'create'])->name('event.create');
     Route::post('/{subdomain1}/store_event/{subdomain2?}', [EventController::class, 'store'])->name('event.store');
-    Route::get('/{subdomain1}/event/{hash}', [EventController::class, 'view'])->name('event.view');
+    Route::get('/{subdomain}/edit_event/{hash?}', [EventController::class, 'edit'])->name('event.create');
+    Route::get('/{subdomain}/event/{hash}', [EventController::class, 'view'])->name('event.view');
     Route::get('/{subdomain}/{tab?}/{year?}/{month?}/', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
 });
 

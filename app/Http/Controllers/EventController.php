@@ -9,7 +9,7 @@ use App\Utils\UrlUtils;
 
 class EventController extends Controller
 {
-    public function view($hash)
+    public function view(Request $request, $subdomain, $hash)
     {
         $event_id = base64_decode($hash);
         $event = Event::findOrFail($event_id);
@@ -19,6 +19,26 @@ class EventController extends Controller
         ];
 
         return view('events/view', $data);
+    }
+
+    public function edit(Request $request, $subdomain, $hash)
+    {
+        $event_id = base64_decode($hash);
+        $event = Event::findOrFail($event_id);
+
+        $venueSubdomain = $event->venue->subdomain;
+        $roleSubdomain = $event->role->subdomain;
+
+        $data = [
+            'event' => $event,
+            'subdomain1' => $subdomain,
+            'subdomain2' => $subdomain == $venueSubdomain ? $roleSubdomain : $venueSubdomain,
+            'venue' => $event->venue,
+            'talent' => $event->role->type == 'talent' ? $event->role : false,
+            'vendor' => $event->role->type == 'vendor' ? $event->role : false,
+        ];
+
+        return view('events/edit', $data);
     }
 
     public function create(Request $request, $subdomain1, $subdomain2 = '')
