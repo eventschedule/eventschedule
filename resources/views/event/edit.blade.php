@@ -64,7 +64,7 @@
                             @elseif($venue && ! $venue->accept_vendor_requests)
                             {{ __('Talent') }}
                             @else
-                            {{ __('Details') }}
+                            {{ __('Talent/Vendor') }}
                             @endif
                         </h2>
 
@@ -124,10 +124,16 @@
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('Date & Time') }}
+                            {{ __('Details') }}
                         </h2>
 
-                        <x-text-input type="text" class="datepicker" placeholder="Select Date"/>
+                        <x-input-label for="start_time" :value="__('Date & Time')" />
+                        <x-text-input type="text" id="start_time" name="end_time" class="datepicker"/>
+                        <x-input-error class="mt-2" :messages="$errors->get('start_time')" />
+
+                        <x-input-label for="duration" :value="__('Duration')" />
+                        <x-text-input type="text" id="duration" name="duration" class=""/>
+                        <x-input-error class="mt-2" :messages="$errors->get('duration')" />
 
                     </div>
                 </div>
