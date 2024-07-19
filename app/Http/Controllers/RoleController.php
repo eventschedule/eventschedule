@@ -7,11 +7,13 @@ use App\Http\Requests\RoleUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Models\Role;
+use App\Models\Event;
 use App\Utils\UrlUtils;
+use Carbon\Carbon;
 
 class RoleController extends Controller
 {
-    public function viewAdmin($subdomain, $tab = 'overview')
+    public function viewAdmin(Request $request, $subdomain, $tab = 'overview', $year = null, $month = null)
     {
         if (! auth()->user()->hasRole($subdomain)) {
             return redirect('/');
@@ -21,16 +23,35 @@ class RoleController extends Controller
         $events = [];
         
         if ($tab == 'schedule') {
-            $events = $role->venueEvents()->get();
+            if (! $month) {
+                $month = now()->month;
+            }
+            if (! $year) {
+                $year = now()->year;
+            }
+
+            $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
+            $endOfMonth = $startOfMonth->copy()->endOfMonth();
+
+            $events = Event::with(['role'])
+                //->whereBetween('start_time', [$startOfMonth, $endOfMonth])
+                ->get();
+
+            return view('role/show-admin', compact(
+                'role',
+                'tab',
+                'events',
+                'month',
+                'year',
+                'startOfMonth',
+                'endOfMonth',
+            ));
         }
 
-        $data = [
-            'role' => $role,
-            'tab' => $tab,
-            'events' => $events,
-        ];        
-
-        return view("role/show-admin", $data);
+        return view('role/show-admin', compact(
+            'role',
+            'tab',
+        ));
     }
 
     public function viewGuest($subdomain)
