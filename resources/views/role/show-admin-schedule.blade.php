@@ -151,7 +151,7 @@
                         @if ($event->start_time &&
                         Carbon\Carbon::parse($event->start_time)->isSameDay($currentDate))
                         <li>
-                            <a href="{{ url('/') }}" class="group flex">
+                            <a href="{{ url('/' . $role->subdomain . '/edit_event/' . base64_encode($event->id)) }}" class="group flex">
                                 <p class="flex-auto truncate font-medium text-gray-900 group-hover:text-indigo-600">
                                     {{ $event->role->name }}</p>
                                 <time datetime="{{ $event->start_time }}"
