@@ -56,7 +56,6 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('role_id')->constrained()->onDelete('cascade');
             $table->foreignId('venue_id')->constrained('roles')->onDelete('cascade');
-            $table->enum('role', ['talent', 'vendor']);
             $table->enum('status', ['private', 'unlisted', 'public'])->default('private');
             $table->boolean('is_accepted')->default(false);
             $table->string('start_time')->nullable();
