@@ -129,7 +129,7 @@
 
                         <div class="mb-6">
                             <x-input-label for="start_time" :value="__('Date and Time')" />
-                            <x-text-input type="text" id="start_time" name="end_time" class="datepicker" />
+                            <x-text-input type="text" id="start_time" name="start_time" class="datepicker" />
                             <x-input-error class="mt-2" :messages="$errors->get('start_time')" />
                         </div>
 
