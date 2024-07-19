@@ -199,6 +199,13 @@
                             <x-input-error class="mt-2" :messages="$errors->get('accept_vendor_requests')" />
                         </div>
 
+                        <div class="mb-6">
+                            <x-checkbox name="use_24_hour_time" label="{{ __('Use 24-hour time format') }}"
+                                checked="{{ old('use_24_hour_time', $role->use_24_hour_time) }}"
+                                data-custom-attribute="value" />
+                            <x-input-error class="mt-2" :messages="$errors->get('use_24_hour_time')" />
+                        </div>
+
                     </div>
                 </div>
 
