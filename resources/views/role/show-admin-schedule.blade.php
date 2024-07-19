@@ -141,26 +141,27 @@
             @endphp
             <div class="hidden w-full lg:grid lg:grid-cols-7 lg:grid-rows-{{ $totalWeeks }} lg:gap-px">
                 @while ($currentDate->lte($endOfMonth))
-                    <div
-                        class="relative {{ $currentDate->month == $month ? 'bg-white hover:bg-gray-100 hover:border-gray-300' : 'bg-gray-50 text-gray-500' }} px-3 py-2 min-h-[100px] border-2 border-transparent hover:border-gray-300">                        
-                        <time datetime="{{ $currentDate->format('Y-m-d') }}"
-                            class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
-                        <ol class="mt-2">
-                            @foreach ($events as $event)
-                            @if ($event->start_time &&
-                            Carbon\Carbon::parse($event->start_time)->isSameDay($currentDate))
-                            <li>
-                                <a href="#" class="group flex">
-                                    <p class="flex-auto truncate font-medium text-gray-900 group-hover:text-indigo-600">
-                                        {{ $event->role->name }}</p>
-                                    <time datetime="{{ $event->start_time }}"
-                                        class="ml-3 hidden flex-none text-gray-500 group-hover:text-indigo-600 xl:block">{{ Carbon\Carbon::parse($event->start_time)->format('g:i A') }}</time>
-                                </a>
-                            </li>
-                            @endif
-                            @endforeach
-                        </ol>
-                    </div>
+                <div
+                    class="cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white hover:bg-gray-100 hover:border-gray-300' : 'bg-gray-50 text-gray-500' }} px-3 py-2 min-h-[100px] border-2 border-transparent hover:border-gray-300"
+                    onclick="window.location = '{{ url('/' . $role->subdomain . '/add_event') }}';">
+                    <time datetime="{{ $currentDate->format('Y-m-d') }}"
+                        class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
+                    <ol class="mt-2">
+                        @foreach ($events as $event)
+                        @if ($event->start_time &&
+                        Carbon\Carbon::parse($event->start_time)->isSameDay($currentDate))
+                        <li>
+                            <a href="{{ url('/') }}" class="group flex">
+                                <p class="flex-auto truncate font-medium text-gray-900 group-hover:text-indigo-600">
+                                    {{ $event->role->name }}</p>
+                                <time datetime="{{ $event->start_time }}"
+                                    class="ml-3 hidden flex-none text-gray-500 group-hover:text-indigo-600 xl:block">{{ Carbon\Carbon::parse($event->start_time)->format('g:i A') }}</time>
+                            </a>
+                        </li>
+                        @endif
+                        @endforeach
+                    </ol>
+                </div>
                 @php $currentDate->addDay(); @endphp
                 @endwhile
             </div>
