@@ -21,6 +21,7 @@ class Role extends Model
         'description',
         'accept_talent_requests',
         'accept_vendor_requests',
+        'use_24_hour_time',
     ];
 
     public function users()
