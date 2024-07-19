@@ -129,13 +129,13 @@
 
                         <div class="mb-6">
                             <x-input-label for="start_time" :value="__('Date and Time')" />
-                            <x-text-input type="text" id="start_time" name="start_time" class="datepicker" />
+                            <x-text-input type="text" id="start_time" name="start_time" class="datepicker" :value="old('start_time', $event->start_time)"/>
                             <x-input-error class="mt-2" :messages="$errors->get('start_time')" />
                         </div>
 
                         <div class="mb-6">
                             <x-input-label for="duration" :value="__('Duration in Hours')" />
-                            <x-text-input type="number" id="duration" name="duration" class="" />
+                            <x-text-input type="number" id="duration" name="duration" :value="old('duration', $event->duration)"/>
                             <x-input-error class="mt-2" :messages="$errors->get('duration')" />
                         </div>
                     </div>
