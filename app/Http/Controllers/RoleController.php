@@ -35,6 +35,7 @@ class RoleController extends Controller
 
             $events = Event::with(['role'])
                 //->whereBetween('start_time', [$startOfMonth, $endOfMonth])
+                ->orderBy('start_time')
                 ->get();
 
             return view('role/show-admin', compact(
