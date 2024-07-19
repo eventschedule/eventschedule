@@ -95,6 +95,7 @@ class EventController extends Controller
         }
 
         $event = new Event;       
+        $event->fill($request->all());
         $event->user_id = auth()->user()->id;
         $event->venue_id = $venue->id;
         $event->role_id = $role->id;

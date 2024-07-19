@@ -27,8 +27,14 @@ class Role extends Model
     public function users()
     {
         return $this->belongsToMany(User::class);
+        // return $this->belongsToMany(User::class, 'role_user')->withPivot('level')->withTimestamps();
     }    
 
+    public function venueEvents()
+    {
+        return $this->hasMany(Event::class, 'venue_id');
+    }
+    
     public function scopeType($query, $type)
     {
         return $query->where('roles.type', $type);

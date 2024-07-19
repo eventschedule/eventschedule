@@ -18,10 +18,16 @@ class RoleController extends Controller
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
+        $events = [];
+        
+        if ($tab == 'schedule') {
+            $events = $role->venueEvents()->get();
+        }
 
         $data = [
             'role' => $role,
             'tab' => $tab,
+            'events' => $events,
         ];        
 
         return view("role/show-admin", $data);
