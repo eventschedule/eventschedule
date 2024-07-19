@@ -142,8 +142,9 @@
             <div class="hidden w-full lg:grid lg:grid-cols-7 lg:grid-rows-{{ $totalWeeks }} lg:gap-px">
                 @while ($currentDate->lte($endOfMonth))
                 <div
-                    class="relative {{ $currentDate->month == $month ? 'bg-white' : 'bg-gray-50 text-gray-500' }} px-3 py-5">
-                    <time datetime="{{ $currentDate->format('Y-m-d') }}">{{ $currentDate->day }}</time>
+                    class="relative {{ $currentDate->month == $month ? 'bg-white' : 'bg-gray-50 text-gray-500' }} px-3 py-2 min-h-[100px]">
+                    <time datetime="{{ $currentDate->format('Y-m-d') }}"
+                        class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
                     <ol class="mt-2">
                         @foreach ($events as $event)
                         @if ($event->start_time && Carbon\Carbon::parse($event->start_time)->isSameDay($currentDate))
