@@ -21,7 +21,7 @@ class EventController extends Controller
         return view('events/view', $data);
     }
 
-    public function create($subdomain1, $subdomain2 = '')
+    public function create(Request $request, $subdomain1, $subdomain2 = '')
     {
         $role1 = Role::subdomain($subdomain1)->firstOrFail();
         $role2 = $subdomain2 ? Role::subdomain($subdomain2)->firstOrFail() : false;
@@ -35,6 +35,9 @@ class EventController extends Controller
         }
 
         $event = new Event;
+        if ($request->date) {
+            $event->start_time = $request->date . ' 20:00';
+        }
 
         $data = [
             'subdomain1' => $subdomain1,

@@ -142,8 +142,8 @@
             <div class="hidden w-full lg:grid lg:grid-cols-7 lg:grid-rows-{{ $totalWeeks }} lg:gap-px">
                 @while ($currentDate->lte($endOfMonth))
                 <div
-                    class="cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white hover:bg-gray-100 hover:border-gray-300' : 'bg-gray-50 text-gray-500' }} px-3 py-2 min-h-[100px] border-2 border-transparent hover:border-gray-300"
-                    onclick="window.location = '{{ url('/' . $role->subdomain . '/add_event') }}';">
+                    class="cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white hover:bg-gray-100 hover:border-gray-300' : 'bg-gray-50 text-gray-500' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300"
+                    onclick="window.location = '{{ url('/' . $role->subdomain . '/add_event?date=' . $currentDate->format('Y-m-d') ) }}';">
                     <time datetime="{{ $currentDate->format('Y-m-d') }}"
                         class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
                     <ol class="mt-2">
