@@ -1,3 +1,74 @@
+<script>
+function showAdd(link_type) {
+    $('#add_modal').fadeIn(function() {
+        $('#link').focus();
+        $('#link_type').val(link_type);
+    });
+}
+
+function hideAdd() {
+    $('#add_modal').fadeOut();
+}
+
+function removeLink(link_type, link) {
+    var confirmed = confirm("{{ __('Are you sure?') }}");
+
+    if (confirmed) {
+        $('#remove_link').val(link);
+        $('#remove_link_type').val(link_type);
+        $('#remove_link_form').submit();
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    var map = L.map('map');
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    //L.marker([51.505, -0.09]).addTo(map);
+    //.bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
+    //.openPopup();
+
+    function geocodeAddress(address) {
+        const nominatimUrl =
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+
+        //console.log('## ADDRESS: ' + nominatimUrl);
+
+        var parts = address.split(', ');
+        if (parts.length <= 1) {
+            return;
+        }
+        parts.shift();
+        var next_address = parts.join(', ');
+
+        axios.get(nominatimUrl)
+            .then(response => {
+                if (response.data.length > 0) {
+                    const result = response.data[0];
+                    const lat = result.lat;
+                    const lon = result.lon;
+
+                    map.setView([lat, lon], 13);
+
+                    //L.marker([lat, lon]).addTo(map);
+                } else {
+                    console.log('Address not found.');
+                    geocodeAddress(next_address);
+                }
+            })
+            .catch(error => {
+                console.error('Error geocoding address:', error);
+                geocodeAddress(next_address);
+            });
+    }
+
+    geocodeAddress('{{ $role->fullAddress() }}');
+});
+</script>
+
 <div class="mt-5 overflow-hidden rounded-lg bg-white shadow-md">
     <div class="px-4 py-5 sm:p-6">
         {{ $role->description }}

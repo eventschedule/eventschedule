@@ -46,7 +46,8 @@ class DevSeeder extends Seeder
                 'description' => 'Music Venue',
                 'email' => 'truklin@example.com',
                 'phone' => '(212) 555-1010',
-                'website' => 'https://google.com',                
+                'website' => 'https://google.com',
+                'city' => 'New York',
             ]
         ]);
 

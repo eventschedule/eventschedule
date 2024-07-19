@@ -18,77 +18,6 @@
         </style>
     </x-slot>
 
-    <script>
-    function showAdd(link_type) {
-        $('#add_modal').fadeIn(function() {
-            $('#link').focus();
-            $('#link_type').val(link_type);
-        });
-    }
-
-    function hideAdd() {
-        $('#add_modal').fadeOut();
-    }
-
-    function removeLink(link_type, link) {
-        var confirmed = confirm("{{ __('Are you sure?') }}");
-
-        if (confirmed) {
-            $('#remove_link').val(link);
-            $('#remove_link_type').val(link_type);
-            $('#remove_link_form').submit();
-        }
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-        var map = L.map('map');
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-
-        //L.marker([51.505, -0.09]).addTo(map);
-        //.bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
-        //.openPopup();
-
-        function geocodeAddress(address) {
-            const nominatimUrl =
-                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
-
-            //console.log('## ADDRESS: ' + nominatimUrl);
-
-            var parts = address.split(', ');
-            if (parts.length <= 1) {
-                return;
-            }
-            parts.shift();
-            var next_address = parts.join(', ');
-
-            axios.get(nominatimUrl)
-                .then(response => {
-                    if (response.data.length > 0) {
-                        const result = response.data[0];
-                        const lat = result.lat;
-                        const lon = result.lon;
-
-                        map.setView([lat, lon], 13);
-
-                        //L.marker([lat, lon]).addTo(map);
-                    } else {
-                        console.log('Address not found.');
-                        geocodeAddress(next_address);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error geocoding address:', error);
-                    geocodeAddress(next_address);
-                });
-        }
-
-        geocodeAddress('{{ $role->fullAddress() }}');
-    });
-    </script>
-
     <form method="POST" action="{{ url($role->subdomain . '/remove_links') }}" id="remove_link_form">
 
         <input type="hidden" name="remove_link" id="remove_link" />
@@ -258,11 +187,11 @@
                     class="whitespace-nowrap border-b-2 {{ $tab == 'overview' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">Overview</a>
                 <a href="{{ url($role->subdomain . '/schedule') }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'schedule' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Schedule</a>
-                <a href="{{ url($role->subdomain . '/requests') }}"
+                <a href=" {{ url($role->subdomain . '/requests') }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'requests' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Requests</a>
-                <a href="{{ url($role->subdomain . '/followers') }}"
+                <a href=" {{ url($role->subdomain . '/followers') }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'followers' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Followers</a>
-                <a href="{{ url($role->subdomain . '/team') }}"
+                <a href=" {{ url($role->subdomain . '/team') }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'team' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Team</a>
             </nav>
         </div>
