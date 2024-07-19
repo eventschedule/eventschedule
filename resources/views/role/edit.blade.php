@@ -82,7 +82,7 @@
                         @endif
 
                         <div class="mb-6">
-                            <x-input-label for="name" :value="__('Name')" />
+                            <x-input-label for="name" :value="__('Name') . ' *'" />
                             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
                                 :value="old('name', $role->name)" required autofocus />
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
@@ -106,7 +106,7 @@
                         </h2>
 
                         <div class="mb-6">
-                            <x-input-label for="email" :value="__('Email')" />
+                            <x-input-label for="email" :value="__('Email' . ' *')" />
                             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
                                 :value="old('email', $role->exists ? $role->email : auth()->user()->email)" required />
                             <x-input-error class="mt-2" :messages="$errors->get('email')" />

@@ -38,14 +38,14 @@
                         <div>{{ $venue->name }}</div>
                         @else
                         <div class="mb-6">
-                            <x-input-label for="venue_name" :value="__('Name')" />
+                            <x-input-label for="venue_name" :value="__('Name' . ' *')" />
                             <x-text-input id="venue_name" name="venue_name" type="text" class="mt-1 block w-full"
                                 :value="old('venue_name')" required autofocus />
                             <x-input-error class="mt-2" :messages="$errors->get('venue_name')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="venue_email" :value="__('Email')" />
+                            <x-input-label for="venue_email" :value="__('Email' . ' *')" />
                             <x-text-input id="venue_email" name="venue_email" type="email" class="mt-1 block w-full"
                                 :value="old('venue_email')" required />
                             <x-input-error class="mt-2" :messages="$errors->get('venue_name')" />
@@ -101,14 +101,14 @@
                         @endif
 
                         <div class="mb-6">
-                            <x-input-label for="role_name" :value="__('Name')" />
+                            <x-input-label for="role_name" :value="__('Name' . ' *')" />
                             <x-text-input id="role_name" name="role_name" type="text" class="mt-1 block w-full"
                                 :value="old('role_name')" required autofocus />
                             <x-input-error class="mt-2" :messages="$errors->get('role_name')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="role_email" :value="__('Email')" />
+                            <x-input-label for="role_email" :value="__('Email' . ' *')" />
                             <x-text-input id="role_email" name="role_email" type="email" class="mt-1 block w-full"
                                 :value="old('role_email')" required />
                             <x-input-error class="mt-2" :messages="$errors->get('role_email')" />
