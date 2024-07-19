@@ -9,18 +9,6 @@ use App\Utils\UrlUtils;
 
 class EventController extends Controller
 {
-    public function view(Request $request, $subdomain, $hash)
-    {
-        $event_id = base64_decode($hash);
-        $event = Event::findOrFail($event_id);
-
-        $data = [
-            'event' => $event,
-        ];
-
-        return view('events/view', $data);
-    }
-
     public function edit(Request $request, $subdomain, $hash)
     {
         $event_id = base64_decode($hash);
