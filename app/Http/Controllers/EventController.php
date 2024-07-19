@@ -103,7 +103,7 @@ class EventController extends Controller
 
         $event->save();
 
-        return redirect('/' . $subdomain1 . '/' . '');
+        return redirect('/' . $subdomain1 . '/schedule');
     }
 
     private function getVenue($role1, $role2) 
