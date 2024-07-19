@@ -25,7 +25,7 @@
 @else
 
 <div class="lg:flex lg:h-full lg:flex-col pt-1">
-    <header class="flex items-center justify-between border-b border-gray-200 px-6 py-4 lg:flex-none">
+    <header class="flex items-center justify-between pl-6 py-4 lg:flex-none">
         <h1 class="text-base font-semibold leading-6 text-gray-900">
             <time
                 datetime="{{ sprintf('%04d-%02d', $year, $month) }}">{{ Carbon\Carbon::create($year, $month, 1)->format('F Y') }}</time>
@@ -56,7 +56,7 @@
                     </svg>
                 </a>
             </div>
-            <div class="hidden md:ml-4 md:flex md:items-center">
+            <div class="hidden md:flex md:items-center">
                 <!--
                 <div class="relative">
                 <button type="button" class="flex items-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="false" aria-haspopup="true">
@@ -75,13 +75,18 @@
                 </div>
                 </div>
                 -->
-                <div class="ml-6 h-6 w-px bg-gray-300"></div>
-                <button type="button"
-                    class="ml-6 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
-                    {{ __('Add Event') }}
-                </button>
-            </div>            
-            <!--
+                <div class="ml-3 h-6 w-px bg-gray-300"></div>
+                <a href="{{ url($role->subdomain . '/add_event') }}">
+                    <button type="button"
+                        class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                        <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path
+                                d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                        </svg>
+                        {{ __('Add Event') }}
+                    </button>
+                </a>
+                <!--
             <div class="relative ml-6 md:hidden">
                 <button type="button"
                     class="-mx-2 flex items-center rounded-full border border-transparent p-2 text-gray-400 hover:text-gray-500"
@@ -115,7 +120,7 @@
                 </div>
             </div>
             -->
-        </div>
+            </div>
     </header>
     <div class="shadow ring-1 ring-black ring-opacity-5 lg:flex lg:flex-auto lg:flex-col">
         <div
