@@ -145,7 +145,7 @@
                         <li>
                             <a href="#" class="group flex">
                                 <p class="flex-auto truncate font-medium text-gray-900 group-hover:text-indigo-600">
-                                    {{ $event->name }}</p>
+                                    {{ $event->role->name }}</p>
                                 <time datetime="{{ $event->start_time }}"
                                     class="ml-3 hidden flex-none text-gray-500 group-hover:text-indigo-600 xl:block">{{ Carbon\Carbon::parse($event->start_time)->format('g:i A') }}</time>
                             </a>
