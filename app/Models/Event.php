@@ -8,7 +8,8 @@ use Carbon\Carbon;
 class Event extends Model
 {
     protected $fillable = [
-        'start_time',
+        'visibility',
+        'starts_at',
         'duration',
     ];
 

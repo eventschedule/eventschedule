@@ -148,14 +148,14 @@
                         class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
                     <ol class="mt-2">
                         @foreach ($events as $event)
-                        @if ($event->start_time &&
-                        Carbon\Carbon::parse($event->start_time)->isSameDay($currentDate))
+                        @if ($event->starts_at &&
+                        Carbon\Carbon::parse($event->starts_at)->isSameDay($currentDate))
                         <li>
                             <a href="{{ url('/' . $role->subdomain . '/event/' . base64_encode($event->id)) }}" class="group flex">
                                 <p class="flex-auto truncate font-medium text-gray-900 group-hover:text-indigo-600">
                                     {{ $event->role->name }}</p>
-                                <time datetime="{{ $event->start_time }}"
-                                    class="ml-3 hidden flex-none text-gray-500 group-hover:text-indigo-600 xl:block">{{ Carbon\Carbon::parse($event->start_time)->format('g:i A') }}</time>
+                                <time datetime="{{ $event->starts_at }}"
+                                    class="ml-3 hidden flex-none text-gray-500 group-hover:text-indigo-600 xl:block">{{ Carbon\Carbon::parse($event->starts_at)->format('g:i A') }}</time>
                             </a>
                         </li>
                         @endif
@@ -174,14 +174,14 @@
             <li class="group flex p-4 pr-6 focus-within:bg-gray-50 hover:bg-gray-50">
                 <div class="flex-auto">
                     <p class="font-semibold text-gray-900">{{ $event->name }}</p>
-                    <time datetime="{{ $event->start_time }}" class="mt-2 flex items-center text-gray-700">
+                    <time datetime="{{ $event->starts_at }}" class="mt-2 flex items-center text-gray-700">
                         <svg class="mr-2 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"
                             aria-hidden="true">
                             <path fill-rule="evenodd"
                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z"
                                 clip-rule="evenodd" />
                         </svg>
-                        {{ Carbon\Carbon::parse($event->start_time)->format('g:i A') }}
+                        {{ Carbon\Carbon::parse($event->starts_at)->format('g:i A') }}
                     </time>
                 </div>
                 <a href="#"

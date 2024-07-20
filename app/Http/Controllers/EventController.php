@@ -45,7 +45,7 @@ class EventController extends Controller
 
         $event = new Event;
         if ($request->date) {
-            $event->start_time = $request->date . ' 20:00';
+            $event->starts_at = $request->date . ' 20:00';
         }
 
         $data = [
@@ -67,7 +67,7 @@ class EventController extends Controller
         $event->fill($request->all());
 
         $timezone = auth()->user()->timezone;
-        $event->start_time = Carbon::createFromFormat('Y-m-d H:i', $request->start_time, $timezone)
+        $event->starts_at = Carbon::createFromFormat('Y-m-d H:i', $request->starts_at, $timezone)
             ->setTimezone('UTC')
             ->format('Y-m-d H:i');
         
@@ -129,7 +129,7 @@ class EventController extends Controller
         $event->role_id = $role->id;
 
         $timezone = auth()->user()->timezone;
-        $event->start_time = Carbon::createFromFormat('Y-m-d H:i', $event->start_time, $timezone)
+        $event->starts_at = Carbon::createFromFormat('Y-m-d H:i', $event->starts_at, $timezone)
             ->setTimezone('UTC')
             ->format('Y-m-d H:i');
         

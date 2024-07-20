@@ -128,9 +128,9 @@
                         </h2>
 
                         <div class="mb-6">
-                            <x-input-label for="start_time" :value="__('Date and Time')" />
-                            <x-text-input type="text" id="start_time" name="start_time" class="datepicker" :value="old('start_time', $event->start_time)"/>
-                            <x-input-error class="mt-2" :messages="$errors->get('start_time')" />
+                            <x-input-label for="starts_at" :value="__('Date and Time')" />
+                            <x-text-input type="text" id="starts_at" name="starts_at" class="datepicker" :value="old('starts_at', $event->starts_at)"/>
+                            <x-input-error class="mt-2" :messages="$errors->get('starts_at')" />
                         </div>
 
                         <div class="mb-6">
