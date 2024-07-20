@@ -21,6 +21,7 @@ class DevSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'created_at' => now(),
                 'updated_at' => now(),
+                'timezone' => 'Asia/Jerusalem',
             ],
             [
                 'name' => 'Admin',
@@ -28,6 +29,7 @@ class DevSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'created_at' => now(),
                 'updated_at' => now(),
+                'timezone' => 'Asia/Jerusalem',
             ],
             [
                 'name' => 'Follower',
@@ -35,6 +37,7 @@ class DevSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'created_at' => now(),
                 'updated_at' => now(),
+                'timezone' => 'Asia/Jerusalem',
             ],
         ]);
 

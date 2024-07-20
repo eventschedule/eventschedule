@@ -128,11 +128,13 @@ class EventController extends Controller
         $event->venue_id = $venue->id;
         $event->role_id = $role->id;
 
-        $timezone = auth()->user()->timezone;
-        $event->starts_at = Carbon::createFromFormat('Y-m-d H:i', $event->starts_at, $timezone)
-            ->setTimezone('UTC')
-            ->format('Y-m-d H:i');
-        
+        if ($event->starts_at) {
+            $timezone = auth()->user()->timezone;
+            $event->starts_at = Carbon::createFromFormat('Y-m-d H:i', $event->starts_at, $timezone)
+                ->setTimezone('UTC')
+                ->format('Y-m-d H:i');
+        }
+
         $event->save();
 
         return redirect('/' . $subdomain1 . '/schedule');
