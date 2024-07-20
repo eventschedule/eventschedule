@@ -7,7 +7,11 @@
             flatpickr('.datepicker', {
                 enableTime: true,
                 altInput: true,
-                time_24hr: {{ $venue && $venue->use_24_hour_time ? 'true' : 'false' }},
+                time_24hr: {
+                    {
+                        $venue && $venue - > use_24_hour_time ? 'true' : 'false'
+                    }
+                },
                 altFormat: "{{ $venue && $venue->use_24_hour_time ? 'F j, Y H:i' : 'F j, Y h:i K' }}",
                 //dateFormat: "Y-m-d H:i",
             });
@@ -129,15 +133,30 @@
 
                         <div class="mb-6">
                             <x-input-label for="starts_at" :value="__('Date and Time')" />
-                            <x-text-input type="text" id="starts_at" name="starts_at" class="datepicker" :value="old('starts_at', $event->starts_at)"/>
+                            <x-text-input type="text" id="starts_at" name="starts_at" class="datepicker"
+                                :value="old('starts_at', $event->starts_at)" />
                             <x-input-error class="mt-2" :messages="$errors->get('starts_at')" />
                         </div>
 
                         <div class="mb-6">
                             <x-input-label for="duration" :value="__('Duration in Hours')" />
-                            <x-text-input type="number" id="duration" name="duration" :value="old('duration', $event->duration)"/>
+                            <x-text-input type="number" id="duration" name="duration"
+                                :value="old('duration', $event->duration)" />
                             <x-input-error class="mt-2" :messages="$errors->get('duration')" />
                         </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="visibility" :value="__('Visibility')" />
+                            <select id="visibility" name="visibility"
+                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                @foreach(['private', 'unlisted', 'public'] as $level)
+                                <option value="{{ $level }}" {{ $event->visibility == $level ? 'SELECTED' : '' }}>
+                                    {{ __(ucwords($level)) }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('visibility')" />
+                        </div>
+
                     </div>
                 </div>
 
