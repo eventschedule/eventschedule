@@ -19,6 +19,7 @@ class Role extends Model
         'postal_code',
         'country_code',
         'description',
+        'visibility',
         'accept_talent_requests',
         'accept_vendor_requests',
         'use_24_hour_time',
