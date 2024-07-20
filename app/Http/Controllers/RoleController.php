@@ -34,6 +34,7 @@ class RoleController extends Controller
             $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
             $events = Event::with(['role'])
+                ->whereVenueId($role->id)
                 //->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
                 ->orderBy('starts_at')
                 ->get();
@@ -46,6 +47,19 @@ class RoleController extends Controller
                 'year',
                 'startOfMonth',
                 'endOfMonth',
+            ));
+        } else if ($tab == 'requests') {
+            $events = Event::with(['role'])
+                ->whereVenueId($role->id)
+                ->whereNull('is_accepted')
+                //->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
+                ->orderBy('starts_at')
+                ->get();
+
+            return view('role/show-admin', compact(
+                'role',
+                'tab',
+                'events',
             ));
         }
 
