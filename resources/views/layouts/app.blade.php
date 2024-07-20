@@ -21,7 +21,7 @@
     {{ isset($head) ? $head : '' }}
 </head>
 
-<body class="font-sans antialiased h-full bg-gray-100">
+<body class="font-sans antialiased h-full bg-gray-50">
 
     <div>
         <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
