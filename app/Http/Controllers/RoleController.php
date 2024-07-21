@@ -35,8 +35,6 @@ class RoleController extends Controller
         
         $events = [];
         $unscheduled = [];
-        $month = '';
-        $year = '';
         $startOfMonth = '';
         $endOfMonth = '';
 
