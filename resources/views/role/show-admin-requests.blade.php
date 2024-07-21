@@ -17,10 +17,10 @@
 
 @else
 
-<ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+<ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 pt-5">
     @foreach($events as $event)
-    <a href="{{ route('role.view_guest', ['subdomain' => $role->subdomain]) }}" target="_blank">
-        <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow">
+    <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow">
+        <a href="{{ route('role.view_guest', ['subdomain' => $role->subdomain]) }}" target="_blank">
             <div class="flex flex-1 flex-col p-8">
                 <img class="mx-auto h-32 w-32 flex-shrink-0 rounded-full"
                     src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60"
@@ -30,35 +30,33 @@
                     <dd class="text-sm text-gray-500 line-clamp-3">{{ $event->role->description }}</dd>
                 </dl>
             </div>
-            <div>
-                <div class="-mt-px flex divide-x divide-gray-200">
-                    <div class="flex w-0 flex-1">
-                        <div onclick="location.href = '{{ route('event.accept', ['subdomain' => $role->subdomain, 'hash' => base64_encode($event->id)]) }}'; return false;"
-                            class="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900">
-                            <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor"
-                                aria-hidden="true">
-                                <path fill-rule="evenodd"
-                                    d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                            {{ __('Accept') }}
-                        </div>
+        </a>
+        <div>
+            <div class="-mt-px flex divide-x divide-gray-200">
+                <div class="flex w-0 flex-1">
+                    <div onclick="location.href = '{{ route('event.accept', ['subdomain' => $role->subdomain, 'hash' => base64_encode($event->id)]) }}'; return false;"
+                        class="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900">
+                        <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd"
+                                d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        {{ __('Accept') }}
                     </div>
-                    <div class="-ml-px flex w-0 flex-1">
-                        <div onclick="location.href = '{{ route('event.decline', ['subdomain' => $role->subdomain, 'hash' => base64_encode($event->id)]) }}'; return false;"
-                            class="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900">
-                            <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor"
-                                aria-hidden="true">
-                                <path
-                                    d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z" />
-                            </svg>
-                            {{ __('Decline') }}
-                        </div>
+                </div>
+                <div class="-ml-px flex w-0 flex-1">
+                    <div onclick="location.href = '{{ route('event.decline', ['subdomain' => $role->subdomain, 'hash' => base64_encode($event->id)]) }}'; return false;"
+                        class="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900">
+                        <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path
+                                d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z" />
+                        </svg>
+                        {{ __('Decline') }}
                     </div>
                 </div>
             </div>
-        </li>
-    </a>
+        </div>
+    </li>
     @endforeach
 </ul>
 @endif
