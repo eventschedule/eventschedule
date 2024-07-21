@@ -79,4 +79,9 @@ class User extends Authenticatable
     {
         return $this->roles()->where('subdomain', $subdomain)->exists();
     }
+
+    public function isFollowing($subdomain): bool
+    {
+        return $this->following()->where('subdomain', $subdomain)->exists();
+    }
 }
