@@ -120,7 +120,7 @@ class RoleController extends Controller
 
         $user->roles()->attach($role->id);
 
-        return redirect(url($role->subdomain));
+        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]));
     }
 
     public function edit($subdomain)
@@ -144,7 +144,7 @@ class RoleController extends Controller
         $role->fill($request->all());
         $role->save();
 
-        return redirect(url($role->subdomain));
+        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]));
     }
 
     public function updateLinks(Request $request, $subdomain): RedirectResponse
@@ -203,7 +203,7 @@ class RoleController extends Controller
         
         $role->save();
 
-        return redirect(url($role->subdomain));
+        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]));
     }
 
     public function removeLinks(Request $request, $subdomain): RedirectResponse
@@ -247,6 +247,6 @@ class RoleController extends Controller
 
         $role->save();
 
-        return redirect(url($role->subdomain)); 
+        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]));
     }
 }

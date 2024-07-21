@@ -38,7 +38,7 @@
 
     </x-slot>
 
-    <form method="POST" action="{{ $role->exists ? url($role->subdomain . '/update') : route('role.store') }}">
+    <form method="POST" action="{{ $role->exists ? route('role.update', ['subdomain' => $role->subdomain]) : route('role.store') }}">
 
         @csrf
         @if($role->exists)

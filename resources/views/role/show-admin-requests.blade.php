@@ -9,8 +9,8 @@
     <h3 class="mt-2 text-sm font-semibold text-gray-900">{{ __('No requests') }}</h3>
     <p class="mt-1 text-sm text-gray-500">{{ __('Share your sign up link to get more requests') }}</p>
     <div class="mt-3">
-        <a href="{{ url($role->subdomain . '/sign_up') }}" target="_blank">
-            {{ \App\Utils\UrlUtils::clean(url($role->subdomain . '/sign_up')) }}
+        <a href="{{ route('event.sign_up, ['subdomain1' => $role->subdomain]) }}" target="_blank">
+            {{ \App\Utils\UrlUtils::clean(route('event.sign_up, ['subdomain1' => $role->subdomain])) }}
         </a>
     </div>
 </div>
@@ -19,7 +19,7 @@
 
 <ul role="list" class="divide-y divide-gray-100">
     @foreach($events as $event)
-    <a href="{{ url('/' . $role->subdomain . '/view') }}" target="_blank">
+    <a href="{{ route('role.view_guest', ['subdomain' => $role->subdomain]) }}" target="_blank">
         <li class="relative flex justify-between gap-x-6 px-5 py-5 bg-white hover:bg-gray-100 hover:border-gray-300 cursor-pointer">
             <div class="flex min-w-0 gap-x-4">
                 <img class="h-12 w-12 flex-none rounded-full bg-gray-50"
@@ -36,7 +36,7 @@
             </div>
             <div class="flex shrink-0 items-center gap-x-4">
 
-                <div onclick="location.href = '{{ url('/' . $role->subdomain . '/accept_event/' . base64_encode($event->id)) }}'; return false;"
+                <div onclick="location.href = '{{ route('event.accept', ['subdomain' => $role->subdomain, 'hash' => base64_encode($event->id)]) }}'; return false;"
                     class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
                     <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path fill-rule="evenodd"
@@ -46,7 +46,7 @@
                     {{ __('Accept') }}
                 </div>
 
-                <div onclick="location.href = '{{ url('/' . $role->subdomain . '/decline_event/' . base64_encode($event->id)) }}'; return false;"
+                <div onclick="location.href = '{{ route('event.decline', ['subdomain' => $role->subdomain, 'hash' => base64_encode($event->id)]) }}'; return false;"
                     class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                     <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor"
                         aria-hidden="true">
