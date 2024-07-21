@@ -41,6 +41,13 @@ class RoleController extends Controller
                 ->orderBy('starts_at')
                 ->get();
 
+            $hasUnscheduled = false;
+            foreach($events as $event) {
+                if (! $event->starts_at) {
+                    $hasUnscheduled = true;
+                }
+            }
+    
             return view('role/show-admin', compact(
                 'role',
                 'tab',
@@ -49,6 +56,7 @@ class RoleController extends Controller
                 'year',
                 'startOfMonth',
                 'endOfMonth',
+                'hasUnscheduled',
             ));
         } else if ($tab == 'requests') {
             $events = Event::with(['role'])
@@ -56,7 +64,7 @@ class RoleController extends Controller
                 ->whereNull('is_accepted')
                 ->orderBy('created_at', 'desc')
                 ->get();
-
+            
             return view('role/show-admin', compact(
                 'role',
                 'tab',

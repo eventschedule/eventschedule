@@ -195,24 +195,33 @@
     -->
 </div>
 
-<ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 pt-5">
-    @foreach($events as $event)
-    @if(! $event->starts_at)
-    <a href="{{ route('role.view_guest', ['subdomain' => $role->subdomain]) }}" target="_blank">
-        <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow">
-            <div class="flex flex-1 flex-col p-8">
-                <img class="mx-auto h-32 w-32 flex-shrink-0 rounded-full"
-                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60"
-                    alt="">
-                <h3 class="mt-6 text-sm font-medium text-gray-900">{{ $event->role->name }}</h3>
-                <dl class="mt-1 flex flex-grow flex-col justify-between">
-                    <dd class="text-sm text-gray-500 line-clamp-3">{{ $event->role->description }}</dd>
-                </dl>
-            </div>
-        </li>
-    </a>
-    @endif
-    @endforeach
-</ul>
+@if ($hasUnscheduled)
+<div class="lg:flex lg:h-full lg:flex-col pt-5">
+    <header class="flex items-center justify-between pl-6 py-4 lg:flex-none">
+        <h1 class="text-base font-semibold leading-6 text-gray-900">
+            {{ __('Unscheduled') }}
+        </h1>
+    </header>
+    <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 pt-5">
+        @foreach($events as $event)
+        @if(! $event->starts_at)
+        <a href="{{ route('role.view_guest', ['subdomain' => $role->subdomain]) }}" target="_blank">
+            <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow">
+                <div class="flex flex-1 flex-col p-8">
+                    <img class="mx-auto h-32 w-32 flex-shrink-0 rounded-full"
+                        src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60"
+                        alt="">
+                    <h3 class="mt-6 text-sm font-medium text-gray-900">{{ $event->role->name }}</h3>
+                    <dl class="mt-1 flex flex-grow flex-col justify-between">
+                        <dd class="text-sm text-gray-500 line-clamp-3">{{ $event->role->description }}</dd>
+                    </dl>
+                </div>
+            </li>
+        </a>
+        @endif
+        @endforeach
+    </ul>
+</div>
+@endif
 
 @endif
