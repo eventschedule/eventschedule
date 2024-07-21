@@ -87,7 +87,7 @@ class RoleController extends Controller
         ));
     }
 
-    public function addMember(Request $request, $subdomain)
+    public function createMember(Request $request, $subdomain)
     {
         if (! auth()->user()->hasRole($subdomain)) {
             return redirect('/');
