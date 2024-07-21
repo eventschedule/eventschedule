@@ -105,7 +105,13 @@ class EventController extends Controller
         $event->is_accepted = false;
         $event->save();
         
-        return redirect('/' . $subdomain . '/requests');
+        if ($request->redirect_to == 'schedule') {
+            return redirect('/' . $subdomain . '/schedule');
+        } else {
+            return redirect('/' . $subdomain . '/requests');
+        }
+
+        
     }
 
     /*
