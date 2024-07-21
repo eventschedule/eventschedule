@@ -24,8 +24,22 @@ class RoleController extends Controller
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-        $events = [];
+        $followers = $role->followers()->get();
+        $members = $role->members()->get();
+        $requests = Event::with(['role'])
+            ->whereVenueId($role->id)
+            ->whereNull('is_accepted')
+            ->orderBy('created_at', 'desc')
+            ->get();
         
+        
+        $events = [];
+        $unscheduled = [];
+        $month = '';
+        $year = '';
+        $startOfMonth = '';
+        $endOfMonth = '';
+
         if ($tab == 'schedule') {
             if (! $month) {
                 $month = now()->month;
@@ -40,8 +54,7 @@ class RoleController extends Controller
             $events = Event::with(['role'])
                 ->whereVenueId($role->id)
                 ->whereNotNull('is_accepted')
-                //->whereNotNull('starts_at')
-                //->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
+                ->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
                 ->orderBy('starts_at')
                 ->get();
 
@@ -50,52 +63,21 @@ class RoleController extends Controller
                 ->where('is_accepted', true)
                 ->whereNull('starts_at')
                 ->orderBy('created_at', 'desc')
-                ->get();
-    
-            return view('role/show-admin', compact(
-                'role',
-                'tab',
-                'events',
-                'month',
-                'year',
-                'startOfMonth',
-                'endOfMonth',
-                'unscheduled',
-            ));
-        } else if ($tab == 'requests') {
-            $events = Event::with(['role'])
-                ->whereVenueId($role->id)
-                ->whereNull('is_accepted')
-                ->orderBy('created_at', 'desc')
-                ->get();
-            
-            return view('role/show-admin', compact(
-                'role',
-                'tab',
-                'events',
-            ));
-        } else if ($tab == 'followers') {
-            $followers = $role->followers()->get();
-
-            return view('role/show-admin', compact(
-                'role',
-                'tab',
-                'followers',
-            ));
-        } else if ($tab == 'team') {
-            $members = $role->members()->get();
-
-            return view('role/show-admin', compact(
-                'role',
-                'tab',
-                'members',
-            ));
-
+                ->get();    
         }
 
         return view('role/show-admin', compact(
             'role',
             'tab',
+            'events',
+            'members',
+            'followers',
+            'requests',
+            'month',
+            'year',
+            'startOfMonth',
+            'endOfMonth',
+            'unscheduled',
         ));
     }
 
