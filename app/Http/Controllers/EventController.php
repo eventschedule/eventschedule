@@ -25,6 +25,7 @@ class EventController extends Controller
             'venue' => $event->venue,
             'talent' => $event->role->type == 'talent' ? $event->role : false,
             'vendor' => $event->role->type == 'vendor' ? $event->role : false,
+            'title' => __('Edit Event'),
         ];
 
         return view('event/edit', $data);
@@ -55,6 +56,7 @@ class EventController extends Controller
             'venue' => $venue,
             'talent' => $talent,
             'vendor' => $vendor,
+            'title' => __('Add Event'),
         ];
 
         return view('event/edit', $data);
