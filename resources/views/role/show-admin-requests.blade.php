@@ -1,4 +1,4 @@
-@if(count($events) == 0)
+@if(count($requests) == 0)
 
 <div class="text-center pt-20">
     <svg class="mx-auto h-12 w-12 text-gray-400" fill="#ccc" viewBox="0 0 24 24" stroke="currentColor"
@@ -18,7 +18,7 @@
 @else
 
 <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 pt-5">
-    @foreach($events as $event)
+    @foreach($requests as $event)
     <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow">
         <a href="{{ route('role.view_guest', ['subdomain' => $role->subdomain]) }}" target="_blank">
             <div class="flex flex-1 flex-col p-8">
