@@ -51,6 +51,7 @@ class DevSeeder extends Seeder
                 'phone' => '(212) 555-1010',
                 'website' => 'https://google.com',
                 'city' => 'New York',
+                'postal_code' => '10022',
             ]
         ]);
 
