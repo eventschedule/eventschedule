@@ -1,4 +1,4 @@
-@if (count($events) == 0 && count($unscheduled) == 0 && ! $month)
+@if (count($events) == 0 && count($unscheduled) == 0 && ! request()->year)
 
 <div class="text-center pt-20">
     <svg class="mx-auto h-12 w-12 text-gray-400" fill="#ccc" viewBox="0 0 24 24" stroke="currentColor"
