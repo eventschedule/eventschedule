@@ -18,7 +18,8 @@
         </style>
     </x-slot>
 
-    <form method="POST" action="{{ route('role.remove_links', ['subdomain' => $role->subdomain]) }}" id="remove_link_form">
+    <form method="POST" action="{{ route('role.remove_links', ['subdomain' => $role->subdomain]) }}"
+        id="remove_link_form">
 
         <input type="hidden" name="remove_link" id="remove_link" />
         <input type="hidden" name="remove_link_type" id="remove_link_type" />
@@ -175,10 +176,13 @@
                 <option {{ $tab == 'overview' ? 'selected' : '' }}>Overview</option>
                 <option {{ $tab == 'schedule' ? 'selected' : '' }}>Schedule</option>
                 @if($role->acceptRequests())
-                <option {{ $tab == 'requests' ? 'selected' : '' }}>Requests</option>
+                <option {{ $tab == 'requests' ? 'selected' : '' }}>
+                    Requests{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</option>
                 @endif
-                <option {{ $tab == 'followers' ? 'selected' : '' }}>Followers</option>
-                <option {{ $tab == 'team' ? 'selected' : '' }}>Team</option>
+                <option {{ $tab == 'followers' ? 'selected' : '' }}>
+                    Followers{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</option>
+                <option {{ $tab == 'team' ? 'selected' : '' }}>
+                    Team{{ count($members) ? ' (' . count($members) . ')' : '' }}</option>
             </select>
         </div>
 
@@ -188,15 +192,15 @@
                 <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain]) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'overview' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">Overview</a>
                 <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'schedule' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Schedule</a>
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'schedule' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">Schedule</a>
                 @if($role->acceptRequests())
-                <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'requests']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'requests' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Requests</a>
+                <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'requests']) }}"
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'requests' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">Requests{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</a>
                 @endif
-                <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'followers']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'followers' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Followers</a>
-                <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'team' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Team</a>
+                <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'followers']) }}"
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'followers' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">Followers{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</a>
+                <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']) }}"
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'team' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">Team{{ count($members) ? ' (' . count($members) . ')' : '' }}</a>
             </nav>
         </div>
 
