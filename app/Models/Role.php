@@ -65,4 +65,10 @@ class Role extends Model
     {
         return $this->type == 'talent';
     }
+
+    public function acceptRequests()
+    {
+        return $this->accept_talent_requests || $this->accept_vendor_requests;
+    }
+
 }

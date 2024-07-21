@@ -174,7 +174,9 @@
                 class="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600">
                 <option {{ $tab == 'overview' ? 'selected' : '' }}>Overview</option>
                 <option {{ $tab == 'schedule' ? 'selected' : '' }}>Schedule</option>
+                @if($role->acceptRequests())
                 <option {{ $tab == 'requests' ? 'selected' : '' }}>Requests</option>
+                @endif
                 <option {{ $tab == 'followers' ? 'selected' : '' }}>Followers</option>
                 <option {{ $tab == 'team' ? 'selected' : '' }}>Team</option>
             </select>
@@ -187,8 +189,10 @@
                     class="whitespace-nowrap border-b-2 {{ $tab == 'overview' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">Overview</a>
                 <a href="{{ url($role->subdomain . '/schedule') }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'schedule' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Schedule</a>
+                @if($role->acceptRequests())
                 <a href=" {{ url($role->subdomain . '/requests') }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'requests' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Requests</a>
+                @endif
                 <a href=" {{ url($role->subdomain . '/followers') }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'followers' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Followers</a>
                 <a href=" {{ url($role->subdomain . '/team') }}"
