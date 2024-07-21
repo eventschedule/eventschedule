@@ -149,7 +149,7 @@ class EventController extends Controller
             $venue = Role::whereType('venue')->whereEmail($request->venue_email)->first();
         }
 
-        if ($venue && ! auth()->user()->hasRole($venue) && ! $venue->acceptRequests()) {
+        if ($venue && ! auth()->user()->hasRole($venue->subdomain) && ! $venue->acceptRequests()) {
             return redirect('/');
         }
 
@@ -195,7 +195,7 @@ class EventController extends Controller
                 ->format('Y-m-d H:i');
         }
 
-        if (auth()->user()->hasRole($venue)) {
+        if (auth()->user()->hasRole($venue->subdomain)) {
             $event->is_accepted = true;
         }
 
