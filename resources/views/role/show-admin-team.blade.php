@@ -21,9 +21,7 @@
                             {{ __('Name') }}</th>
                         <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{{ __('Email') }}</th>
                         <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{{ __('Role') }}</th>
-                        <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
-                            {{ __('Remove') }}
-                        </th>
+                        <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
@@ -35,8 +33,7 @@
                                 href="mailto:{{ $user->email }}">{{ $user->email }}</td>
                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ $user->pivot->level }}</td>
                         <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                            <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit<span class="sr-only">,
-                                    Lindsay Walton</span></a>
+                            <a href="#" class="text-indigo-600 hover:text-indigo-900">{{ __('Remove') }}</a>
                         </td>
                     </tr>
                     @endforeach
