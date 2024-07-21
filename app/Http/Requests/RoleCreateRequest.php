@@ -17,7 +17,7 @@ class RoleCreateRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(Role::class)],
             //'subdomain' => ['required', 'string', 'lowercase', 'max:255', Rule::unique(Role::class)],
         ];
     }
