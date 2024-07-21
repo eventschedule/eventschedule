@@ -49,6 +49,11 @@ class EventController extends Controller
             $event->starts_at = $request->date . ' 20:00';
         }
 
+        $title = __('Add Event');
+        if (strpos($request->url(), '/sign_up') > 0) {
+            $title = __('Sign Up');
+        }
+
         $data = [
             'subdomain1' => $subdomain1,
             'subdomain2' => $subdomain2,
@@ -56,7 +61,7 @@ class EventController extends Controller
             'venue' => $venue,
             'talent' => $talent,
             'vendor' => $vendor,
-            'title' => __('Add Event'),
+            'title' => $title,
         ];
 
         return view('event/edit', $data);

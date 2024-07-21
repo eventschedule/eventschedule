@@ -111,6 +111,7 @@ class RoleController extends Controller
 
         $data = [
             'role' => $role,
+            'title' => __('Register'),
         ];
 
         return view('role/edit', $data);
@@ -137,6 +138,7 @@ class RoleController extends Controller
 
         $data = [
             'role' => $role,
+            'title' => __('Edit ' . ucwords($role->type)),
         ];
 
         return view('role/edit', $data);
