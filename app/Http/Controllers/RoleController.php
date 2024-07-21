@@ -118,7 +118,7 @@ class RoleController extends Controller
         $data = $request->validated();
         $user = User::whereEmail($data['email'])->first();
 
-        if ($user->hasRole($subdomain)) {
+        if ($user && $user->hasRole($subdomain)) {
             return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']));    
         }
 
@@ -140,7 +140,7 @@ class RoleController extends Controller
             $roleUser->save();
 
         } else {
-            $user->roles()->attach($role->id);
+            $user->roles()->attach($role->id, ['level' => 'admin']);
         }
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']));
