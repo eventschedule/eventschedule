@@ -195,7 +195,7 @@
     -->
 </div>
 
-@if ($hasUnscheduled)
+@if (count($unscheduled))
 <div class="lg:flex lg:h-full lg:flex-col pt-5">
     <header class="flex items-center justify-between pl-6 py-4 lg:flex-none">
         <h1 class="text-base font-semibold leading-6 text-gray-900">
@@ -203,7 +203,7 @@
         </h1>
     </header>
     <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 pt-5">
-        @foreach($events as $event)
+        @foreach($unscheduled as $event)
         @if(! $event->starts_at)
         <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow">
             <a href="{{ route('role.view_guest', ['subdomain' => $role->subdomain]) }}" target="_blank">
