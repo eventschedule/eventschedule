@@ -77,7 +77,7 @@ class EventController extends Controller
         
         $event->save();
         
-        return redirect('/' . $subdomain . '/schedule' );
+        return redirect('/' . $subdomain . '/schedule');
     }
 
     public function accept(Request $request, $subdomain, $hash)
@@ -91,7 +91,7 @@ class EventController extends Controller
         $event->is_accepted = true;
         $event->save();
         
-        return redirect('/' . $subdomain . '/requests' );
+        return redirect('/' . $subdomain . '/requests');
     }
 
     public function decline(Request $request, $subdomain, $hash)
@@ -105,8 +105,23 @@ class EventController extends Controller
         $event->is_accepted = false;
         $event->save();
         
-        return redirect('/' . $subdomain . '/requests' );
+        return redirect('/' . $subdomain . '/requests');
     }
+
+    /*
+    public function delete(Request $request, $subdomain, $hash)
+    {
+        if (! auth()->user()->hasRole($subdomain)) {
+            return redirect('/');
+        }
+
+        $event_id = base64_decode($hash);
+        $event = Event::findOrFail($event_id);        
+        $event->delete();
+        
+        return redirect('/' . $subdomain . '/schedule');
+    }
+    */
 
     public function store(Request $request, $subdomain1, $subdomain2 = '')
     {
