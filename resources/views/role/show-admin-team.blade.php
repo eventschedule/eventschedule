@@ -26,7 +26,8 @@
                 <table class="min-w-full divide-y divide-gray-300">
                     <thead>
                         <tr>
-                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
+                            <th scope="col"
+                                class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
                                 {{ __('Name') }}
                             </th>
                             <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
@@ -50,10 +51,11 @@
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                 {{ __(ucwords($member->pivot->level)) }}
                             </td>
-                            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                                <a href="{{ route('role.remove_member', ['subdomain' => $role->subdomain, 'hash' => base64_encode($member->id)]) }}" 
-                                onclick="return confirm('{{ __('Are you sure?') }}');"
-                                class="text-indigo-600 hover:text-indigo-900">{{ __('Remove') }}</a>
+                            <td
+                                class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
+                                <a href="{{ route('role.remove_member', ['subdomain' => $role->subdomain, 'hash' => base64_encode($member->id)]) }}"
+                                    onclick="return confirm('{{ __('Are you sure?') }}');"
+                                    class="text-indigo-600 hover:text-indigo-900">{{ __('Remove') }}</a>
                             </td>
                         </tr>
                         @endforeach
