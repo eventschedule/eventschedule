@@ -35,13 +35,13 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
-                    @foreach ($users as $user)
+                    @foreach ($members as $member)
                     <tr>
                         <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
-                            {{ $user->name }}</td>
+                            {{ $member->name }}</td>
                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><a
-                                href="mailto:{{ $user->email }}">{{ $user->email }}</td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ __(ucwords($user->pivot->level)) }}</td>
+                                href="mailto:{{ $member->email }}">{{ $member->email }}</td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ __(ucwords($member->pivot->level)) }}</td>
                         <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
                             <a href="#" class="text-indigo-600 hover:text-indigo-900">{{ __('Remove') }}</a>
                         </td>
