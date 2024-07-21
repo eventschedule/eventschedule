@@ -25,12 +25,22 @@ class Role extends Model
         'use_24_hour_time',
     ];
 
-    public function users()
+    public function members()
     {
-        return $this->belongsToMany(User::class)
-                    ->orderBy('name')
+        return $this->belongsToMany(User::class)                    
+                    ->withTimestamps()
                     ->withPivot('level')
-                    ->withTimestamps();
+                    ->where('level', '!=', 'follower')
+                    ->orderBy('name');
+    }    
+
+    public function followers()
+    {
+        return $this->belongsToMany(User::class)                    
+                    ->withTimestamps()
+                    ->withPivot('level')
+                    ->where('level', 'follower')
+                    ->orderBy('name');
     }    
 
     public function venueEvents()
