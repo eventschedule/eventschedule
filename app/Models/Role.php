@@ -27,7 +27,10 @@ class Role extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class)->withPivot('level')->withTimestamps();
+        return $this->belongsToMany(User::class)
+                    ->orderBy('name')
+                    ->withPivot('level')
+                    ->withTimestamps();
     }    
 
     public function venueEvents()
