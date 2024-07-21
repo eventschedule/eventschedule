@@ -70,6 +70,15 @@ class RoleController extends Controller
                 'tab',
                 'events',
             ));
+        } else if ($tab == 'team') {
+            $users = $role->users()->get();
+
+            return view('role/show-admin', compact(
+                'role',
+                'tab',
+                'users',
+            ));
+
         }
 
         return view('role/show-admin', compact(
