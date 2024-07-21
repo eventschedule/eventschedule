@@ -36,7 +36,7 @@ class RoleController extends Controller
             $events = Event::with(['role'])
                 ->whereVenueId($role->id)
                 ->whereNotNull('is_accepted')
-                ->whereNotNull('starts_at')
+                //->whereNotNull('starts_at')
                 //->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
                 ->orderBy('starts_at')
                 ->get();
