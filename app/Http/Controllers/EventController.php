@@ -145,12 +145,12 @@ class EventController extends Controller
         $vendor = $this->getVendor($role1, $role2);
         $talent = $this->getTalent($role1, $role2);
         
-        if (! auth()->user()->hasRole($subdomain1)) {
-            return redirect('/');
-        }
-
         if (! $venue) {
             $venue = Role::whereType('venue')->whereEmail($request->venue_email)->first();
+        }
+
+        if ($venue && ! auth()->user()->hasRole($venue) && ! $venue->acceptsRequests()) {
+            return redirect('/');
         }
 
         if (! $venue) {
@@ -193,6 +193,10 @@ class EventController extends Controller
             $event->starts_at = Carbon::createFromFormat('Y-m-d H:i', $event->starts_at, $timezone)
                 ->setTimezone('UTC')
                 ->format('Y-m-d H:i');
+        }
+
+        if (auth()->user()->hasRole($venue)) {
+            $event->is_accepted = true;
         }
 
         $event->save();
