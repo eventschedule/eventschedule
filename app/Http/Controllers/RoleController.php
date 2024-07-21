@@ -148,7 +148,19 @@ class RoleController extends Controller
 
     public function removeMember(Request $request, $subdomain, $hash)
     {
+        if (! auth()->user()->hasRole($subdomain)) {
+            return redirect('/');
+        }
 
+        $userId = base64_decode($hash);
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $roleUser = RoleUser::where('user_id', $userId)
+            ->where('role_id', $role->id)
+            ->first();        
+        $roleUser->delete();
+
+        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']));
     }
 
     public function viewGuest($subdomain)
