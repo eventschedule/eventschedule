@@ -87,6 +87,27 @@ class RoleController extends Controller
         ));
     }
 
+    public function addMember(Request $request, $subdomain)
+    {
+        if (! auth()->user()->hasRole($subdomain)) {
+            return redirect('/');
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $data = [
+            'role' => $role,
+            'title' => __('Add Member'),
+        ];
+
+        return view('role/add-member', $data);
+    }
+
+    public function removeMember(Request $request, $subdomain, $hash)
+    {
+
+    }
+
     public function viewGuest($subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
