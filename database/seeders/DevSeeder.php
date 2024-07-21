@@ -52,6 +52,8 @@ class DevSeeder extends Seeder
                 'website' => 'https://google.com',
                 'city' => 'New York',
                 'postal_code' => '10022',
+                'created_at' => now(),
+                'updated_at' => now(),
             ]
         ]);
 
@@ -60,16 +62,22 @@ class DevSeeder extends Seeder
                 'user_id' => 1,
                 'role_id' => 1,
                 'level' => 'owner',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'user_id' => 2,
                 'role_id' => 1,
                 'level' => 'admin',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'user_id' => 3,
                 'role_id' => 1,
                 'level' => 'follower',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
         ]);
     }
