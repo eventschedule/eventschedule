@@ -74,6 +74,14 @@ class RoleController extends Controller
                 'tab',
                 'events',
             ));
+        } else if ($tab == 'followers') {
+            $followers = $role->followers()->get();
+
+            return view('role/show-admin', compact(
+                'role',
+                'tab',
+                'followers',
+            ));
         } else if ($tab == 'team') {
             $members = $role->members()->get();
 
