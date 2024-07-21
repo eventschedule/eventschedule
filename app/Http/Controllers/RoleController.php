@@ -155,6 +155,10 @@ class RoleController extends Controller
         $userId = base64_decode($hash);
         $role = Role::subdomain($subdomain)->firstOrFail();
 
+        if ($userId == $role->user_id) {
+            return redirect('/');
+        }
+
         $roleUser = RoleUser::where('user_id', $userId)
             ->where('role_id', $role->id)
             ->first();        
