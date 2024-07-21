@@ -30,9 +30,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/{subdomain}/edit', [RoleController::class, 'edit'])->name('role.edit');
+    Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
     Route::post('/{subdomain}/update_links', [RoleController::class, 'updateLinks'])->name('role.update_links');
     Route::post('/{subdomain}/remove_links', [RoleController::class, 'removeLinks'])->name('role.remove_links');
-    Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
+    Route::get('/{subdomain}/add_member', [RoleController::class, 'createMember'])->name('role.create_member');
+    Route::post('/{subdomain}/add_member', [RoleController::class, 'storeMember'])->name('role.store_member');
+    Route::get('/{subdomain}/remove_member/{hash}', [RoleController::class, 'removeMember'])->name('role.remove_member');
     Route::get('/{subdomain1}/add_event/{subdomain2?}', [EventController::class, 'create'])->name('event.create');
     Route::get('/{subdomain1}/sign_up/{subdomain2?}', [EventController::class, 'create'])->name('event.sign_up');
     Route::post('/{subdomain1}/store_event/{subdomain2?}', [EventController::class, 'store'])->name('event.store');
