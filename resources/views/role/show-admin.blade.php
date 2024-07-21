@@ -18,7 +18,7 @@
         </style>
     </x-slot>
 
-    <form method="POST" action="{{ url($role->subdomain . '/remove_links') }}" id="remove_link_form">
+    <form method="POST" action="{{ route('role.remove_links', ['subdomain' => $role->subdomain]) }}" id="remove_link_form">
 
         <input type="hidden" name="remove_link" id="remove_link" />
         <input type="hidden" name="remove_link_type" id="remove_link_type" />
@@ -122,7 +122,7 @@
             <div class="mt-4 flex flex-shrink-0 md:ml-4 md:mt-0">
 
                 <span class="hidden sm:block">
-                    <a href="{{ url($role->subdomain . '/edit') }}">
+                    <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}">
                         <button type="button"
                             class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"
@@ -136,7 +136,7 @@
                 </span>
 
                 <span class="ml-3 hidden sm:block">
-                    <a href="{{ url($role->subdomain . '/view') }}" target="_blank">
+                    <a href="{{ route('role.view_guest', ['subdomain' => $role->subdomain]) }}" target="_blank">
                         <button type="button"
                             class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"
@@ -185,17 +185,17 @@
         <!-- Tabs at small breakpoint and up -->
         <div class="hidden sm:block">
             <nav class="-mb-px flex space-x-8">
-                <a href="{{ url($role->subdomain) }}"
+                <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain]) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'overview' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">Overview</a>
-                <a href="{{ url($role->subdomain . '/schedule') }}"
+                <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'schedule' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Schedule</a>
                 @if($role->acceptRequests())
-                <a href=" {{ url($role->subdomain . '/requests') }}"
+                <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'requests']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'requests' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Requests</a>
                 @endif
-                <a href=" {{ url($role->subdomain . '/followers') }}"
+                <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'followers']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'followers' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Followers</a>
-                <a href=" {{ url($role->subdomain . '/team') }}"
+                <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'team' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}"">Team</a>
             </nav>
         </div>

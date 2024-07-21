@@ -9,7 +9,7 @@
     <h3 class="mt-2 text-sm font-semibold text-gray-900">{{ __('No events') }}</h3>
     <p class="mt-1 text-sm text-gray-500">{{ __('Get started by creating a new event') }}</p>
     <div class="mt-6">
-        <a href="{{ url($role->subdomain . '/add_event') }}">
+        <a href="{{ route('event.create', ['subdomain1' => $role->subdomain]) }}">
             <button type="button"
                 class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
                 <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -32,7 +32,7 @@
         </h1>
         <div class="flex items-center justify-center">
             <div class="relative flex items-center rounded-md bg-white shadow-sm md:items-stretch">
-                <a href="{{ url('/' . $role->subdomain . '/schedule/' . Carbon\Carbon::create($year, $month, 1)->subMonth()->year . '/' . Carbon\Carbon::create($year, $month, 1)->subMonth()->month) }}"
+                <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}"
                     class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50">
                     <span class="sr-only">Previous month</span>
                     <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -41,12 +41,12 @@
                             clip-rule="evenodd" />
                     </svg>
                 </a>
-                <a href="{{ url('/' . $role->subdomain . '/schedule/' . now()->year . '/' . now()->month) }}"
+                <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'year' => now->year, 'month' => now()->month]) }}"
                     class="flex items-center justify-center border-y border-gray-300 px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative md:block">
                     <div class="mt-2">Today</div>
                 </a>
                 <span class="relative -mx-px h-5 w-px bg-gray-300 md:hidden"></span>
-                <a href="{{ url('/' . $role->subdomain . '/schedule/' . Carbon\Carbon::create($year, $month, 1)->addMonth()->year . '/' . Carbon\Carbon::create($year, $month, 1)->addMonth()->month) }}"
+                <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) }}"
                     class="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50">
                     <span class="sr-only">Next month</span>
                     <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -76,7 +76,7 @@
                 </div>
                 -->
                 <div class="ml-3 h-6 w-px bg-gray-300"></div>
-                <a href="{{ url($role->subdomain . '/add_event') }}">
+                <a href="{{ route('event.create', ['subdomain1' => $role->subdomain]) }}">
                     <button type="button"
                         class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -143,7 +143,7 @@
                 @while ($currentDate->lte($endOfMonth))
                 <div
                     class="cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white hover:bg-gray-100 hover:border-gray-300' : 'bg-gray-50 text-gray-500' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300"
-                    onclick="window.location = '{{ url('/' . $role->subdomain . '/add_event?date=' . $currentDate->format('Y-m-d') ) }}';">
+                    onclick="window.location = '{{ route('event.create', ['subdomain1' => $role->subdomain, 'date' => $currentDate->format('Y-m-d')]) }}';">
                     <time datetime="{{ $currentDate->format('Y-m-d') }}"
                         class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
                     <ol class="mt-2">
@@ -151,7 +151,7 @@
                         @if ($event->starts_at &&
                         Carbon\Carbon::parse($event->starts_at)->isSameDay($currentDate))
                         <li>
-                            <a href="{{ url('/' . $role->subdomain . '/event/' . base64_encode($event->id)) }}" class="group flex">
+                            <a href="{{ route('event.edit', ['subdomain' => $role->subdomain, 'hash' => base64_encode($event->id)]) }}" class="group flex">
                                 <p class="flex-auto truncate font-medium text-gray-900 group-hover:text-indigo-600">
                                     {{ $event->role->name }}</p>
                                 <time datetime="{{ $event->starts_at }}"

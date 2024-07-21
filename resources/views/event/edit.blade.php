@@ -20,7 +20,7 @@
     </x-slot>
 
     <form method="POST"
-        action="{{ $event->exists ? url('/' . $subdomain1 . '/update_event/' . base64_encode($event->id)) : url('/' . $subdomain1 . '/store_event/' . $subdomain2) }}">
+        action="{{ $event->exists ? route('event.update', ['subdomain' => $subdomain1, 'hash' => base64_encode($event->id)]) : route('event.store', ['subdomain1' => $subdomain1, 'subdomain2' => $subdomain2]) }}">
 
         @csrf
 
