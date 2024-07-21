@@ -15,6 +15,10 @@
         </script>
     </x-slot>
 
+    <h2 class="pt-2 mt-4 text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+        {{ $title }}
+    </h2>
+
     <form method="POST"
         action="{{ $event->exists ? route('event.update', ['subdomain' => $subdomain1, 'hash' => base64_encode($event->id)]) : route('event.store', ['subdomain1' => $subdomain1, 'subdomain2' => $subdomain2]) }}">
 
