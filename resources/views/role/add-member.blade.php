@@ -4,33 +4,46 @@
         {{ $title }}
     </h2>
 
-    <div class="py-5">
-        <div class="max-w-7xl mx-auto space-y-6">
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
-                <div class="max-w-xl">
+    <form method="post" action="{{ route('role.store_member', ['subdomain' => $role->subdomain]) }}"
+        class="mt-6 space-y-6">
+        @csrf
+        @method('post')
 
-                    <form method="post" action="{{ route('role.store_member', ['subdomain' => $role->subdomain]) }}"
-                        class="mt-6 space-y-6">
-                        @csrf
-                        @method('post')
+        <div class="py-5">
+            <div class="max-w-7xl mx-auto space-y-6">
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                    <div class="max-w-xl">
 
-                        <div>
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                            {{ __('Details') }}
+                        </h2>
+
+                        <div class="mb-6">
                             <x-input-label for="name" :value="__('Name' . ' *')" />
                             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
                                 :value="old('name')" required autofocus autocomplete="name" />
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                         </div>
 
-                        <div>
+                        <div class="mb-6">
                             <x-input-label for="email" :value="__('Email' . ' *')" />
                             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
                                 :value="old('email')" required autocomplete="username" />
                             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
                         </div>
-                    </form>
 
+                    </div>
                 </div>
             </div>
         </div>
+
+        <div class="max-w-7xl mx-auto space-y-6">
+            <div class="flex items-center gap-4">
+                <x-primary-button>{{ __('Save') }}</x-primary-button>
+            </div>
+        </div>
+
+    </form>
+
 </x-app-layout>

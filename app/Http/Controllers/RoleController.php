@@ -4,10 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RoleCreateRequest;
 use App\Http\Requests\RoleUpdateRequest;
+use App\Http\Requests\MemberAddRequest;
+use Illuminate\Support\Str;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Models\Role;
 use App\Models\Event;
+use App\Models\User;
+use App\Models\RoleUser;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 
@@ -101,6 +105,45 @@ class RoleController extends Controller
         ];
 
         return view('role/add-member', $data);
+    }
+
+    public function storeMember(MemberAddRequest $request, $subdomain)
+    {
+        if (! auth()->user()->hasRole($subdomain)) {
+            return redirect('/');
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $data = $request->validated();
+        $user = User::whereEmail($data['email'])->first();
+
+        if ($user->hasRole($subdomain)) {
+            return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']));    
+        }
+
+        if (! $user) {
+            $user = new User;
+            $user->email = $data['email'];
+            $user->name = $data['name'];
+            $user->password = bcrypt(Str::random(32));
+            $user->timezone = $request->user()->timezone;
+            $user->save();
+        }
+
+        if ($user->isFollowing($subdomain)) {
+            $roleUser = RoleUser::where('user_id', $user->id)
+                ->where('role_id', $role->id)
+                ->first();
+            
+            $roleUser->level = 'admin';
+            $roleUser->save();
+
+        } else {
+            $user->roles()->attach($role->id);
+        }
+
+        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']));
     }
 
     public function removeMember(Request $request, $subdomain, $hash)
