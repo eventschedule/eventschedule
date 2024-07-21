@@ -63,7 +63,7 @@ class RoleController extends Controller
                 ->where('is_accepted', true)
                 ->whereNull('starts_at')
                 ->orderBy('created_at', 'desc')
-                ->get();    
+                ->get();
         }
 
         return view('role/show-admin', compact(
