@@ -41,7 +41,7 @@
                             clip-rule="evenodd" />
                     </svg>
                 </a>
-                <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'year' => now->year, 'month' => now()->month]) }}"
+                <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'year' => now()->year, 'month' => now()->month]) }}"
                     class="flex items-center justify-center border-y border-gray-300 px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative md:block">
                     <div class="mt-2">Today</div>
                 </a>

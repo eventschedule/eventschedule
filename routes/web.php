@@ -43,3 +43,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/{subdomain}/{tab?}/{year?}/{month?}/', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
 });
 
+/*
+Route::group(['domain' => 'dev.eventschedule.com'], function() {
+    //
+});
+
+Route::group(['domain' => '{subdomain}.eventschedule.com'], function() {
+    //
+});
+*/
