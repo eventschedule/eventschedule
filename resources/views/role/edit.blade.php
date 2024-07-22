@@ -269,7 +269,7 @@
                         <div class="mb-6">
                             <x-input-label for="font_color" :value="__('Font Color')" />
                             <x-text-input id="font_color" name="font_color" type="color" class="mt-1 block w-1/2"
-                                :value="old('font_color', $role->font_color)" />
+                                :value="old('font_color', $role->font_color)" oninput="updatePreview()"/>
                             <x-input-error class="mt-2" :messages="$errors->get('font_color')" />
                         </div>
 
@@ -277,7 +277,7 @@
                             <x-input-label for="background" :value="__('Background')" />
                             <select id="background" name="background"
                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                onchange="onChangeBackground()">
+                                oninput="onChangeBackground(); updatePreview();">
                                 @foreach(['default', 'image', 'gradient'] as $background)
                                 <option value="{{ $background }}"
                                     {{ $role->background == $background ? 'SELECTED' : '' }}>
@@ -291,7 +291,7 @@
                         <div class="mb-6" id="style_background_image" style="display:none">
                             <x-input-label for="background_image" :value="__('Image')" />
                             <input id="background_image" name="background_image" type="file" class="mt-1 block w-full"
-                                :value="old('background_image')" />
+                                :value="old('background_image')" oninput="updatePreview()"/>
                             <x-input-error class="mt-2" :messages="$errors->get('background_image')" />
 
                             @if ($role->background_image_url)
@@ -302,7 +302,7 @@
                         <div id="style_background_gradient" style="display:none">
                             <div class="mb-6">
                                 <x-input-label for="background_colors" :value="__('Colors')" />
-                                <select id="background_colors" name="background_colors"
+                                <select id="background_colors" name="background_colors" oninput="updatePreview()"
                                     class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                     @foreach($gradients as $gradient => $name)
                                     <option value="{{ $gradient }}"
@@ -316,7 +316,7 @@
                             <div class="mb-6">
                                 <x-input-label for="background_rotation" :value="__('Rotation')" />
                                 <x-text-input id="background_rotation" name="background_rotation" type="number"
-                                    class="mt-1 block w-1/2"
+                                    class="mt-1 block w-1/2" oninput="updatePreview()"
                                     :value="old('background_rotation', $role->background_rotation)" min="0" max="360" />
                                 <x-input-error class="mt-2" :messages="$errors->get('background_rotation')" />
                             </div>
@@ -376,7 +376,7 @@
             </div>
         </div>
 
-        <div class="max-w-7xl mx-auto space-y-6">
+        <div class="max-w-7xl mx-auto space-y-6 mt-3">
             <div class="flex items-center gap-4">
                 <x-primary-button>{{ __('Save') }}</x-primary-button>
             </div>
