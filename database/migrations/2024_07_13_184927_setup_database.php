@@ -27,7 +27,6 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('subdomain')->unique();
             $table->enum('type', ['venue', 'talent', 'vendor'])->index();
-            $table->string('design')->default('clean');
             $table->enum('background', ['default', 'image', 'gradient'])->default('default');
             $table->string('background_colors')->nullable();
             $table->integer('background_rotation')->nullable();
