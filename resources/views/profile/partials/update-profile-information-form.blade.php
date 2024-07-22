@@ -13,7 +13,7 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data" class="mt-6 space-y-6">
         @csrf
         @method('patch')
 
@@ -51,15 +51,25 @@
         </div>
 
         <div>
-
             <x-input-label for="timezone" :value="__('Timezone' . ' *')" />
             <select name="timezone" id="timezone">
                 @foreach(\Carbon\CarbonTimeZone::listIdentifiers() as $timezone)
-                <option value="{{ $timezone }}" {{ $user->timezone == $timezone ? 'SELECTED' : '' }}>{{ $timezone }}</option>
+                <option value="{{ $timezone }}" {{ $user->timezone == $timezone ? 'SELECTED' : '' }}>{{ $timezone }}
+                </option>
                 @endforeach
             </select>
             <x-input-error class="mt-2" :messages="$errors->get('timezone')" />
+        </div>
 
+        <div>
+            <x-input-label for="profile_image" :value="__('Profile Image')" />
+            <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full"
+                :value="old('profile_image')" />
+            <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
+
+            @if ($user->profile_image_url)
+                <img src="{{ $user->profile_image_url }}" style="max-height:120px" class="pt-3"/>
+            @endif
         </div>
 
         <div class="flex items-center gap-4">

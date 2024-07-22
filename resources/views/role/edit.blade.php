@@ -194,6 +194,10 @@
                             <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full"
                                 :value="old('profile_image')" />
                             <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
+
+                            @if ($role->profile_image_url)
+                            <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="pt-3" />
+                            @endif
                         </div>
 
                         <div class="mb-6">
@@ -201,6 +205,10 @@
                             <input id="background_image" name="background_image" type="file" class="mt-1 block w-full"
                                 :value="old('background_image')" />
                             <x-input-error class="mt-2" :messages="$errors->get('background_image')" />
+
+                            @if ($role->profile_image_url)
+                            <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="pt-3" />
+                            @endif
                         </div>
 
                     </div>

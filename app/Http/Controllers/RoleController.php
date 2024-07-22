@@ -6,7 +6,6 @@ use App\Http\Requests\RoleCreateRequest;
 use App\Http\Requests\RoleUpdateRequest;
 use App\Http\Requests\MemberAddRequest;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Models\Role;
@@ -234,23 +233,19 @@ class RoleController extends Controller
 
         if ($request->hasFile('profile_image')) {
             $file = $request->file('profile_image');
-            $filename = 'profile_' . Str::random(10) . '_' . time() . '.' . $file->getClientOriginalExtension();            
-
+            $filename = 'profile_' . Str::random(10) . '_' . time() . '.' . $file->getClientOriginalExtension();
             $path = $file->storeAs('images', $filename, 'public');
-            $url = Storage::url($path);
 
-            $role->profile_image_url = config('filesystems.default') == 'local' ? url($url) : $url;
+            $role->profile_image_url = $path;
             $role->save();
         }
 
         if ($request->hasFile('background_image')) {
             $file = $request->file('background_image');
-            $filename = 'background_' . Str::random(10) . '_' . time() . '.' . $file->getClientOriginalExtension();                        
-            
+            $filename = 'background_' . Str::random(10) . '_' . time() . '.' . $file->getClientOriginalExtension();
             $path = $file->storeAs('images', $filename, 'public');
-            $url = Storage::url($path);
 
-            $role->background_image_url = config('filesystems.default') == 'local' ? url($url) : $url;
+            $role->background_image_url = $path;
             $role->save();
         }
 
