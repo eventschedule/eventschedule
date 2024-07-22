@@ -217,7 +217,6 @@ class RoleController extends Controller
     public function create()
     {
         $role = new Role;
-        $role->design = 'clean';
         $role->background = 'default';
         $role->background_colors = '#7468E6, #C44B85';
         $role->background_rotation = 135;
