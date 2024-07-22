@@ -223,6 +223,11 @@ class RoleController extends Controller
         $role->fill($request->all());
         $role->subdomain = UrlUtils::createDomain($request->name);
         $role->user_id = $user->id;
+
+        if (! $request->background_colors) {
+            $role->background_colors = $request->custom_color1 . ', ' . $request->custom_color2;
+        }
+
         $role->save();
 
         $user->roles()->attach($role->id);
@@ -266,6 +271,11 @@ class RoleController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
         $role->fill($request->all());
+
+        if (! $request->background_colors) {
+            $role->background_colors = $request->custom_color1 . ', ' . $request->custom_color2;
+        }
+
         $role->save();
 
         if ($request->hasFile('profile_image')) {

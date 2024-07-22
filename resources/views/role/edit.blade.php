@@ -269,7 +269,7 @@
                         <div class="mb-6">
                             <x-input-label for="font_color" :value="__('Font Color')" />
                             <x-text-input id="font_color" name="font_color" type="color" class="mt-1 block w-1/2"
-                                :value="old('font_color', $role->font_color)" oninput="updatePreview()"/>
+                                :value="old('font_color', $role->font_color)" oninput="updatePreview()" />
                             <x-input-error class="mt-2" :messages="$errors->get('font_color')" />
                         </div>
 
@@ -291,7 +291,7 @@
                         <div class="mb-6" id="style_background_image" style="display:none">
                             <x-input-label for="background_image" :value="__('Image')" />
                             <input id="background_image" name="background_image" type="file" class="mt-1 block w-full"
-                                :value="old('background_image')" oninput="updatePreview()"/>
+                                :value="old('background_image')" oninput="updatePreview()" />
                             <x-input-error class="mt-2" :messages="$errors->get('background_image')" />
 
                             @if ($role->background_image_url)
@@ -311,6 +311,15 @@
                                     @endforeach
                                 </select>
                                 <x-input-error class="mt-2" :messages="$errors->get('background_colors')" />
+
+                                <div id="custom_colors" style="display:none">
+                                    <x-text-input id="custom_color1" name="custom_color1" type="color"
+                                        class="mt-1 block w-1/2" :value="old('custom_color1', $role->custom_color1)"
+                                        oninput="updatePreview()" />
+                                    <x-text-input id="custom_color2" name="custom_color2" type="color"
+                                        class="mt-1 block w-1/2" :value="old('custom_color1', $role->custom_color2)"
+                                        oninput="updatePreview()" />
+                                </div>
                             </div>
 
                             <div class="mb-6">
