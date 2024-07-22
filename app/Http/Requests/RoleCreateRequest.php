@@ -19,6 +19,8 @@ class RoleCreateRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(Role::class)],
             //'subdomain' => ['required', 'string', 'lowercase', 'max:255', Rule::unique(Role::class)],
+            'profile_image' => ['image', 'max:2500'],
+            'background_image_url' => ['image', 'max:2500'],
         ];
     }
 }
