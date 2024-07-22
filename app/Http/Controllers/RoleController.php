@@ -17,6 +17,17 @@ use Carbon\Carbon;
 
 class RoleController extends Controller
 {
+    public function viewGuest($subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $data = [
+            'role' => $role,
+        ];
+
+        return view('role/show-guest', $data);
+    }
+
     public function viewAdmin(Request $request, $subdomain, $tab = 'overview', $year = null, $month = null)
     {
         if (! auth()->user()->hasRole($subdomain)) {
@@ -153,17 +164,6 @@ class RoleController extends Controller
         $roleUser->delete();
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']));
-    }
-
-    public function viewGuest($subdomain)
-    {
-        $role = Role::subdomain($subdomain)->firstOrFail();
-
-        $data = [
-            'role' => $role,
-        ];
-
-        return view('role/show-guest', $data);
     }
 
     public function viewVenues()
