@@ -285,18 +285,6 @@
                         </h2>
 
                         <div class="mb-6">
-                            <x-input-label for="design" :value="__('Design')" />
-                            <select id="design" name="design"
-                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
-                                @foreach(['clean', 'compact', 'dark'] as $design)
-                                <option value="{{ $design }}" {{ $role->design == $design ? 'SELECTED' : '' }}>
-                                    {{ __(ucwords($design)) }}</option>
-                                @endforeach
-                            </select>
-                            <x-input-error class="mt-2" :messages="$errors->get('design')" />
-                        </div>
-
-                        <div class="mb-6">
                             <x-input-label for="font_family" :value="__('Font Family')" />
                             <select id="font_family" name="font_family" onchange="onChangeFont()"
                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
