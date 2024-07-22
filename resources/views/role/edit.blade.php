@@ -83,30 +83,40 @@
         }
 
         function updatePreview() {
+            var background = $('#background').find(":selected").val();
             var backgroundColors = $('#background_colors').val();
             var backgroundRotation = $('#background_rotation').val();
             var fontColor = $('#font_color').val();
             var fontFamily = $('#font_family').find(":selected").val();
             var name = $('#name').val();
-
-            $('#custom_colors').toggle(backgroundColors == '');
-            if (backgroundColors == '') {
-                var customColor1 = $('#custom_color1').val();
-                var customColor2 = $('#custom_color2').val();
-                backgroundColors = customColor1 + ', ' + customColor2;
-            }
-
-            if (! backgroundRotation) {
-                backgroundRotation = '0';
-            }
-
-            var gradient = 'linear-gradient(' + backgroundRotation + 'deg, ' + backgroundColors + ')';
-
+            
             $('#preview')
-                .css('background-image', gradient)
                 .css('color', fontColor)
                 .css('font-family', fontFamily)
+                .css('background-size', 'cover')
+                .css('background-position', 'center')
                 .text(name);
+
+            if (background == 'gradient') {
+                $('#custom_colors').toggle(backgroundColors == '');
+                if (backgroundColors == '') {
+                    var customColor1 = $('#custom_color1').val();
+                    var customColor2 = $('#custom_color2').val();
+                    backgroundColors = customColor1 + ', ' + customColor2;
+                }
+
+                if (! backgroundRotation) {
+                    backgroundRotation = '0';
+                }
+
+                var gradient = 'linear-gradient(' + backgroundRotation + 'deg, ' + backgroundColors + ')';
+
+                $('#preview').css('background-image', gradient);
+            } else if (background == 'image') {
+                $('#preview').css('background-image', 'url("{{ $role->background_image_url }}")');
+            } else {
+                $('#preview').css('background-image', '');
+            }
         }
         </script>
 
