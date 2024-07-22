@@ -83,4 +83,21 @@ class Role extends Model
         return $this->accept_talent_requests || $this->accept_vendor_requests;
     }
 
+    public function getProfileImageUrlAttribute($value)
+    {
+        if (! $value) {
+            return '';
+        }
+
+        return config('filesystems.default') == 'local' ? url('/storage/' . $value) : $value;
+    }
+
+    public function getBackgroundImageUrlAttribute($value)
+    {
+        if (! $value) {
+            return '';
+        }
+
+        return config('filesystems.default') == 'local' ? url('/storage/' . $value) : $value;
+    }
 }

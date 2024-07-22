@@ -84,4 +84,13 @@ class User extends Authenticatable
     {
         return $this->following()->where('subdomain', $subdomain)->exists();
     }
+
+    public function getProfileImageUrlAttribute($value)
+    {
+        if (! $value) {
+            return '';
+        }
+
+        return config('filesystems.default') == 'local' ? url('/storage/' . $value) : $value;
+    }
 }

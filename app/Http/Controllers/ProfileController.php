@@ -7,6 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -33,6 +34,17 @@ class ProfileController extends Controller
         }
 
         $request->user()->save();
+
+        if ($request->hasFile('profile_image')) {
+            $file = $request->file('profile_image');
+            $filename = 'profile_' . Str::random(10) . '_' . time() . '.' . $file->getClientOriginalExtension();            
+            $path = $file->storeAs('images', $filename, 'public');
+            
+            $user = $request->user();
+            $user->profile_image_url = $path;
+            $user->save();
+        }
+
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
