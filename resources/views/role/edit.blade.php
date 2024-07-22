@@ -31,7 +31,7 @@
         <script>
         document.addEventListener('DOMContentLoaded', () => {
             onChangeBackground();
-            updatePreview();
+            onChangeFont();
 
             $("#country").countrySelect({
                 defaultCountry: '{{ $role->country_code }}',
