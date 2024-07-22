@@ -20,6 +20,8 @@ class RoleUpdateRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($this->user()->id)],
             //'subdomain' => ['required', 'string', 'lowercase', 'max:255', Rule::unique(Role::class)->ignore($this->route('role'),
+            'profile_image' => ['image', 'max:2500'],
+            'background_image_url' => ['image', 'max:2500'],
         ];
     }
 }

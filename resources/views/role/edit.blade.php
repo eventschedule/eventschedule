@@ -42,7 +42,9 @@
         {{ $title }}
     </h2>
 
-    <form method="POST" action="{{ $role->exists ? route('role.update', ['subdomain' => $role->subdomain]) : route('role.store') }}">
+    <form method="POST"
+        action="{{ $role->exists ? route('role.update', ['subdomain' => $role->subdomain]) : route('role.store') }}"
+        enctype="multipart/form-data">
 
         @csrf
         @if($role->exists)
@@ -180,6 +182,29 @@
                     </div>
                 </div>
 
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="address">
+                    <div class="max-w-xl">
+
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                            {{ __('Images') }}
+                        </h2>
+
+                        <div class="mb-6">
+                            <x-input-label for="profile_image" :value="__('Profile Image')" />
+                            <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full"
+                                :value="old('profile_image')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="background_image" :value="__('Background Image')" />
+                            <input id="background_image" name="background_image" type="file" class="mt-1 block w-full"
+                                :value="old('background_image')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('background_image')" />
+                        </div>
+
+                    </div>
+                </div>
 
 
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="address">

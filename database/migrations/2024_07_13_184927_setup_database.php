@@ -11,6 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::dropIfExists('role_images');
+        Schema::dropIfExists('event_images');
         Schema::dropIfExists('events');
         Schema::dropIfExists('role_user');
         Schema::dropIfExists('roles');
@@ -39,6 +41,8 @@ return new class extends Migration
             $table->text('social_links')->nullable();
             $table->text('payment_links')->nullable();
             $table->text('youtube_links')->nullable();
+            $table->string('profile_image_url')->nullable();
+            $table->string('background_image_url')->nullable();
             $table->timestamps();
         });
 
@@ -70,6 +74,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('role_images');
+        Schema::dropIfExists('event_images');
         Schema::dropIfExists('events');
         Schema::dropIfExists('role_user');
         Schema::dropIfExists('roles');
