@@ -16,6 +16,8 @@
 
         <script>
         document.addEventListener('DOMContentLoaded', () => {
+            onChangeBackground();
+
             $("#country").countrySelect({
                 defaultCountry: '{{ $role->country_code }}',
             });
@@ -30,9 +32,25 @@
             }
         }
 
-        function onCountryChange() {
+        function onChangeCountry() {
             var selected = $('#country').countrySelect('getSelectedCountryData');
             $('#country_code').val(selected.iso2);
+        }
+
+        function onChangeBackground() {
+            var background = $('#background').find(":selected").val();
+
+            if (background == 'image') {
+                $('#style_background_image').fadeIn();
+            } else {
+                $('#style_background_image').fadeOut();
+            }
+
+            if (background == 'gradient') {
+                $('#style_background_gradient').fadeIn();
+            } else {
+                $('#style_background_gradient').fadeOut();
+            }
         }
         </script>
 
@@ -185,7 +203,7 @@
                         <div class="mb-6">
                             <x-input-label for="country" :value="__('Country')" />
                             <x-text-input id="country" name="country" type="text" class="mt-1 block w-full"
-                                :value="old('country', $role->country)" onchange="onCountryChange()" />
+                                :value="old('country', $role->country)" onchange="onChangeCountry()" />
                             <x-input-error class="mt-2" :messages="$errors->get('country')" />
                             <input type="hidden" id="country_code" name="country_code" />
                         </div>
@@ -215,7 +233,8 @@
                         <div class="mb-6">
                             <x-input-label for="background" :value="__('Background')" />
                             <select id="background" name="background"
-                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                onchange="onChangeBackground()">
                                 @foreach(['default', 'image', 'gradient'] as $background)
                                 <option value="{{ $background }}"
                                     {{ $role->background == $background ? 'SELECTED' : '' }}>
@@ -225,7 +244,19 @@
                             <x-input-error class="mt-2" :messages="$errors->get('background')" />
                         </div>
 
-                        <div class="mb-6">
+                        
+                        <div class="mb-6" id="style_background_image" style="display:none">
+                            <x-input-label for="background_image" :value="__('Image')" />
+                            <input id="background_image" name="background_image" type="file" class="mt-1 block w-full"
+                                :value="old('background_image')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('background_image')" />
+
+                            @if ($role->background_image_url)
+                            <img src="{{ $role->background_image_url }}" style="max-height:120px" class="pt-3" />
+                            @endif
+                        </div>
+
+                        <div class="mb-6" id="style_background_gradient" class="mb-6" style="display:none">
                             <x-input-label for="background_colors" :value="__('Colors')" />
                             <select id="background_colors" name="background_colors"
                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
@@ -236,17 +267,6 @@
                                 @endforeach
                             </select>
                             <x-input-error class="mt-2" :messages="$errors->get('background_colors')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="background_image" :value="__('Background Image')" />
-                            <input id="background_image" name="background_image" type="file" class="mt-1 block w-full"
-                                :value="old('background_image')" />
-                            <x-input-error class="mt-2" :messages="$errors->get('background_image')" />
-
-                            @if ($role->background_image_url)
-                            <img src="{{ $role->background_image_url }}" style="max-height:120px" class="pt-3" />
-                            @endif
                         </div>
 
                     </div>
