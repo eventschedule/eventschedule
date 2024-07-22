@@ -233,7 +233,7 @@ class RoleController extends Controller
 
         if ($request->hasFile('profile_image')) {
             $file = $request->file('profile_image');
-            $filename = 'profile_' . Str::random(10) . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $filename = strtolower('profile_' . Str::random(10) . '_' . time() . '.' . $file->getClientOriginalExtension());
             $path = $file->storeAs('images', $filename, 'public');
 
             $role->profile_image_url = $path;
@@ -242,7 +242,7 @@ class RoleController extends Controller
 
         if ($request->hasFile('background_image')) {
             $file = $request->file('background_image');
-            $filename = 'background_' . Str::random(10) . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $filename = strtolower('background_' . Str::random(10) . '_' . time() . '.' . $file->getClientOriginalExtension());
             $path = $file->storeAs('images', $filename, 'public');
 
             $role->background_image_url = $path;
