@@ -231,6 +231,13 @@
                         </div>
 
                         <div class="mb-6">
+                            <x-input-label for="font_color" :value="__('Font Color' . ' *')" />
+                            <x-text-input id="font_color" name="font_color" type="color" class="mt-1 block w-1/2"
+                                :value="old('font_color', $role->font_color)"/>
+                            <x-input-error class="mt-2" :messages="$errors->get('font_color')" />
+                        </div>
+
+                        <div class="mb-6">
                             <x-input-label for="background" :value="__('Background')" />
                             <select id="background" name="background"
                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
@@ -272,7 +279,7 @@
 
                             <div class="mb-6">
                                 <x-input-label for="background_rotation" :value="__('Rotation')" />
-                                <x-text-input id="background_rotation" name="background_rotation" type="number" class="mt-1 block w-full"
+                                <x-text-input id="background_rotation" name="background_rotation" type="number" class="mt-1 block w-1/2"
                                     :value="old('background_rotation', $role->background_rotation)" min="0" max="360"/>
                                 <x-input-error class="mt-2" :messages="$errors->get('background_rotation')" />
                             </div>
