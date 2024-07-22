@@ -58,13 +58,13 @@
             if (background == 'image') {
                 $('#style_background_image').fadeIn();
             } else {
-                $('#style_background_image').fadeOut();
+                $('#style_background_image').hide();
             }
 
             if (background == 'gradient') {
                 $('#style_background_gradient').fadeIn();
             } else {
-                $('#style_background_gradient').fadeOut();
+                $('#style_background_gradient').hide();
             }
         }
 
