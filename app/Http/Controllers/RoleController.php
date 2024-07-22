@@ -17,9 +17,42 @@ use Carbon\Carbon;
 
 class RoleController extends Controller
 {
-    public function viewGuest($subdomain)
+    public function viewGuest(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
+        $user = auth()->user();
+
+        if ($role->visibility == 'private' && (! $user || ! $user->hasRole($subdomain))) {
+            return redirect('/');
+        }
+
+        $month = $request->month;
+        $year = $request->year;
+
+        if (! $month) {
+            $month = now()->month;
+        }
+
+        if (! $year) {
+            $year = now()->year;
+        }
+
+        $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
+        $endOfMonth = $startOfMonth->copy()->endOfMonth();
+
+        $events = Event::with(['role']);
+
+        if ($role->isVendor()) {
+            $events->whereVenueId($role->id);
+        } else {
+            $events->whereRoleId($role->id);
+        }
+            
+        $events->where('is_accepted', true)
+            ->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
+            ->where('visibility', '!=', 'private')
+            ->orderBy('starts_at')
+            ->get();
 
         $data = [
             'role' => $role,
