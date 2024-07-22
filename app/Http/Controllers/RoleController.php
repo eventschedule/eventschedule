@@ -205,11 +205,15 @@ class RoleController extends Controller
             '#7468E6, #C44B85' => 'Default', 
             '' => 'Custom',
         ] + $gradientOptions;
-        
+
+        $fonts = file_get_contents(base_path('storage/fonts.json'));
+        $fonts = json_decode($fonts);
+
         $data = [
             'role' => $role,
             'title' => __('Register'),
             'gradients' => $gradientOptions,
+            'fonts' => $fonts,
         ];
 
         return view('role/edit', $data);
@@ -254,10 +258,14 @@ class RoleController extends Controller
             '' => 'Custom',
         ] + $gradientOptions;
 
+        $fonts = file_get_contents(base_path('storage/fonts.json'));
+        $fonts = json_decode($fonts);
+
         $data = [
             'role' => $role,
             'title' => __('Edit ' . ucwords($role->type)),
             'gradients' => $gradientOptions,
+            'fonts' => $fonts,
         ];
 
         return view('role/edit', $data);
