@@ -101,6 +101,17 @@
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
 
+                        <div class="mb-6">
+                            <x-input-label for="profile_image" :value="__('Profile Image')" />
+                            <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full"
+                                :value="old('profile_image')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
+
+                            @if ($role->profile_image_url)
+                            <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="pt-3" />
+                            @endif
+                        </div>
+
                     </div>
                 </div>
 
@@ -186,27 +197,6 @@
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('Images') }}
-                        </h2>
-
-                        <div class="mb-6">
-                            <x-input-label for="profile_image" :value="__('Profile Image')" />
-                            <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full"
-                                :value="old('profile_image')" />
-                            <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
-
-                            @if ($role->profile_image_url)
-                            <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="pt-3" />
-                            @endif
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="address">
-                    <div class="max-w-xl">
-
-                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                             {{ __('Page Style') }}
                         </h2>
 
@@ -254,8 +244,8 @@
                                 :value="old('background_image')" />
                             <x-input-error class="mt-2" :messages="$errors->get('background_image')" />
 
-                            @if ($role->profile_image_url)
-                            <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="pt-3" />
+                            @if ($role->background_image_url)
+                            <img src="{{ $role->background_image_url }}" style="max-height:120px" class="pt-3" />
                             @endif
                         </div>
 

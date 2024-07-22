@@ -11,6 +11,7 @@ class Role extends Model
         'design',
         'background',
         'background_rotation',
+        'background_colors',
         'font_color',
         'name',
         'phone',
