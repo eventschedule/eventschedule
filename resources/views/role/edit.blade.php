@@ -96,6 +96,10 @@
                 backgroundColors = customColor1 + ', ' + customColor2;
             }
 
+            if (! backgroundRotation) {
+                backgroundRotation = '0';
+            }
+
             var gradient = 'linear-gradient(' + backgroundRotation + 'deg, ' + backgroundColors + ')';
 
             $('#preview')
