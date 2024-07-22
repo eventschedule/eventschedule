@@ -68,10 +68,25 @@
             }
         }
 
+        function onChangeFont() {
+            var font_family = $('#font_family').find(":selected").val();
+
+            var link = document.createElement('link');
+            link.href = 'https://fonts.googleapis.com/css2?family=' + font_family + ':wght@400;700&display=swap';
+            link.rel = 'stylesheet';
+            document.head.appendChild(link);
+
+            link.onload = function() {
+                updatePreview();
+                //document.getElementById("title").style.fontFamily = "'Roboto', sans-serif";
+            };            
+        }
+
         function updatePreview() {
             var backgroundColors = $('#background_colors').val();
             var backgroundRotation = $('#background_rotation').val();
             var fontColor = $('#font_color').val();
+            var fontFamily = $('#font_family').find(":selected").val();
             var name = $('#name').val();
 
             $('#custom_colors').toggle(backgroundColors == '');
@@ -86,6 +101,7 @@
             $('#preview')
                 .css('background-image', gradient)
                 .css('color', fontColor)
+                .css('font-family', fontFamily)
                 .text(name);
         }
         </script>
@@ -267,6 +283,18 @@
                         </div>
 
                         <div class="mb-6">
+                            <x-input-label for="font_family" :value="__('Font Family')" />
+                            <select id="font_family" name="font_family" onchange="onChangeFont()"
+                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                @foreach($fonts as $font)
+                                <option value="{{ $font->value }}" {{ $role->font_family == $font->value ? 'SELECTED' : '' }}>
+                                    {{ $font->label }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('font_family')" />
+                        </div>
+
+                        <div class="mb-6">
                             <x-input-label for="font_color" :value="__('Font Color')" />
                             <x-text-input id="font_color" name="font_color" type="color" class="mt-1 block w-1/2"
                                 :value="old('font_color', $role->font_color)" oninput="updatePreview()" />
@@ -314,10 +342,10 @@
 
                                 <div id="custom_colors" style="display:none">
                                     <x-text-input id="custom_color1" name="custom_color1" type="color"
-                                        class="mt-1 block w-1/2" :value="old('custom_color1', explode(', ', $role->background_colors)[0])"
+                                        class="mt-1 block w-1/2" :value="old('custom_color1', $role->background_colors ? explode(', ', $role->background_colors)[0] : '')"
                                         oninput="updatePreview()" />
                                     <x-text-input id="custom_color2" name="custom_color2" type="color"
-                                        class="mt-1 block w-1/2" :value="old('custom_color2', explode(', ', $role->background_colors)[1])"
+                                        class="mt-1 block w-1/2" :value="old('custom_color2', $role->background_colors ? explode(', ', $role->background_colors)[1] : '')"
                                         oninput="updatePreview()" />
                                 </div>
                             </div>

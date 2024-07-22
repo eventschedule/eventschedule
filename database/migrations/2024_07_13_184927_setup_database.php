@@ -32,7 +32,7 @@ return new class extends Migration
             $table->string('background_colors')->nullable();
             $table->integer('background_rotation')->nullable();
             $table->string('font_color')->nullable();
-            $table->string('font_name')->nullable();
+            $table->string('font_family')->nullable();
             $table->string('name');
             $table->string('phone')->nullable();
             $table->string('email')->unique();

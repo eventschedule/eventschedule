@@ -13,7 +13,7 @@ class Role extends Model
         'background_rotation',
         'background_colors',
         'font_color',
-        'font_name',
+        'font_family',
         'name',
         'phone',
         'email',
