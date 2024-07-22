@@ -8,6 +8,10 @@ class Role extends Model
 {
     protected $fillable = [
         'type',
+        'design',
+        'background',
+        'background_rotation',
+        'font_color',
         'name',
         'phone',
         'email',

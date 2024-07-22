@@ -200,6 +200,54 @@
                             @endif
                         </div>
 
+                    </div>
+                </div>
+
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="address">
+                    <div class="max-w-xl">
+
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                            {{ __('Page Style') }}
+                        </h2>
+
+                        <div class="mb-6">
+                            <x-input-label for="design" :value="__('Design')" />
+                            <select id="design" name="design"
+                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                @foreach(['clean', 'compact', 'dark'] as $design)
+                                <option value="{{ $design }}" {{ $role->design == $design ? 'SELECTED' : '' }}>
+                                    {{ __(ucwords($design)) }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('visibility')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="background" :value="__('Background')" />
+                            <select id="background" name="background"
+                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                @foreach(['default', 'image', 'gradient'] as $background)
+                                <option value="{{ $background }}"
+                                    {{ $role->background == $background ? 'SELECTED' : '' }}>
+                                    {{ __(ucwords($background)) }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('visibility')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="background" :value="__('Background')" />
+                            <select id="background" name="background"
+                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                @foreach($gradients as $gradient => $name)
+                                <option value="{{ $gradient }}"
+                                    {{ $role->background_colors == $gradient ? 'SELECTED' : '' }}>
+                                    {{ $name }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('visibility')" />
+                        </div>
+
                         <div class="mb-6">
                             <x-input-label for="background_image" :value="__('Background Image')" />
                             <input id="background_image" name="background_image" type="file" class="mt-1 block w-full"
@@ -213,7 +261,6 @@
 
                     </div>
                 </div>
-
 
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="address">
                     <div class="max-w-xl">
