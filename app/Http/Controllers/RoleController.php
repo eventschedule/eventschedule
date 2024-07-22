@@ -266,7 +266,6 @@ class RoleController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
         $role->fill($request->all());
-        dd($request->all());
         $role->save();
 
         if ($request->hasFile('profile_image')) {
