@@ -219,7 +219,7 @@
                                     {{ __(ucwords($design)) }}</option>
                                 @endforeach
                             </select>
-                            <x-input-error class="mt-2" :messages="$errors->get('visibility')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('design')" />
                         </div>
 
                         <div class="mb-6">
@@ -232,12 +232,12 @@
                                     {{ __(ucwords($background)) }}</option>
                                 @endforeach
                             </select>
-                            <x-input-error class="mt-2" :messages="$errors->get('visibility')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('background')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="background" :value="__('Background')" />
-                            <select id="background" name="background"
+                            <x-input-label for="background_colors" :value="__('Colors')" />
+                            <select id="background_colors" name="background_colors"
                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                 @foreach($gradients as $gradient => $name)
                                 <option value="{{ $gradient }}"
@@ -245,7 +245,7 @@
                                     {{ $name }}</option>
                                 @endforeach
                             </select>
-                            <x-input-error class="mt-2" :messages="$errors->get('visibility')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('background_colors')" />
                         </div>
 
                         <div class="mb-6">
