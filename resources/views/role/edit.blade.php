@@ -144,7 +144,7 @@
                         <div class="mb-6">
                             <x-input-label for="name" :value="__('Name') . ' *'" />
                             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
-                                :value="old('name', $role->name)" required autofocus />
+                                :value="old('name', $role->name)" required autofocus onchange="updatePreview()"/>
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                         </div>
 
@@ -306,7 +306,7 @@
                                     class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                     @foreach($gradients as $gradient => $name)
                                     <option value="{{ $gradient }}"
-                                        {{ $role->background_colors == $gradient ? 'SELECTED' : '' }}>
+                                        {{ $role->background_colors == $gradient || (! array_key_exists($role->background_colors, $gradients) && ! $gradient) ? 'SELECTED' : '' }}>
                                         {{ $name }}</option>
                                     @endforeach
                                 </select>
@@ -314,10 +314,10 @@
 
                                 <div id="custom_colors" style="display:none">
                                     <x-text-input id="custom_color1" name="custom_color1" type="color"
-                                        class="mt-1 block w-1/2" :value="old('custom_color1', $role->custom_color1)"
+                                        class="mt-1 block w-1/2" :value="old('custom_color1', explode(', ', $role->background_colors)[0])"
                                         oninput="updatePreview()" />
                                     <x-text-input id="custom_color2" name="custom_color2" type="color"
-                                        class="mt-1 block w-1/2" :value="old('custom_color1', $role->custom_color2)"
+                                        class="mt-1 block w-1/2" :value="old('custom_color2', explode(', ', $role->background_colors)[1])"
                                         oninput="updatePreview()" />
                                 </div>
                             </div>
