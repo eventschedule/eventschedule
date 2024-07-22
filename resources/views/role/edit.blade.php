@@ -244,7 +244,7 @@
                             <x-input-error class="mt-2" :messages="$errors->get('background')" />
                         </div>
 
-                        
+
                         <div class="mb-6" id="style_background_image" style="display:none">
                             <x-input-label for="background_image" :value="__('Image')" />
                             <input id="background_image" name="background_image" type="file" class="mt-1 block w-full"
@@ -256,18 +256,28 @@
                             @endif
                         </div>
 
-                        <div class="mb-6" id="style_background_gradient" class="mb-6" style="display:none">
-                            <x-input-label for="background_colors" :value="__('Colors')" />
-                            <select id="background_colors" name="background_colors"
-                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
-                                @foreach($gradients as $gradient => $name)
-                                <option value="{{ $gradient }}"
-                                    {{ $role->background_colors == $gradient ? 'SELECTED' : '' }}>
-                                    {{ $name }}</option>
-                                @endforeach
-                            </select>
-                            <x-input-error class="mt-2" :messages="$errors->get('background_colors')" />
+                        <div id="style_background_gradient" style="display:none">
+                            <div class="mb-6">
+                                <x-input-label for="background_colors" :value="__('Colors')" />
+                                <select id="background_colors" name="background_colors"
+                                    class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                    @foreach($gradients as $gradient => $name)
+                                    <option value="{{ $gradient }}"
+                                        {{ $role->background_colors == $gradient ? 'SELECTED' : '' }}>
+                                        {{ $name }}</option>
+                                    @endforeach
+                                </select>
+                                <x-input-error class="mt-2" :messages="$errors->get('background_colors')" />
+                            </div>
+
+                            <div class="mb-6">
+                                <x-input-label for="background_rotation" :value="__('Rotation')" />
+                                <x-text-input id="background_rotation" name="background_rotation" type="number" class="mt-1 block w-full"
+                                    :value="old('background_rotation', $role->background_rotation)" min="0" max="360"/>
+                                <x-input-error class="mt-2" :messages="$errors->get('background_rotation')" />
+                            </div>
                         </div>
+
 
                     </div>
                 </div>
