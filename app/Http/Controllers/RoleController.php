@@ -184,11 +184,32 @@ class RoleController extends Controller
     public function create()
     {
         $role = new Role;
+        $role->design = 'clean';
+        $role->background = 'default';
+        $role->background_colors = '#7468E6, #C44B85';
+        $role->background_rotation = 135;
+        $role->font_color = '#FFFFFF';
         $role->accept_talent_requests = true;
 
+        $gradients = file_get_contents(base_path('storage/gradients.json'));
+        $gradients = json_decode($gradients);
+
+        $gradientOptions = [];
+        foreach ($gradients as $gradient) {            
+            $gradientOptions[join(', ', $gradient->colors)] = $gradient->name;
+        }
+
+        asort($gradientOptions);
+
+        $gradientOptions = [
+            '#7468E6, #C44B85' => 'Default', 
+            '' => 'Custom',
+        ] + $gradientOptions;
+        
         $data = [
             'role' => $role,
             'title' => __('Register'),
+            'gradients' => $gradientOptions,
         ];
 
         return view('role/edit', $data);
@@ -213,9 +234,25 @@ class RoleController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
+        $gradients = file_get_contents(base_path('storage/gradients.json'));
+        $gradients = json_decode($gradients);
+
+        $gradientOptions = [];
+        foreach ($gradients as $gradient) {
+            $gradientOptions[join(', ', $gradient->colors)] = $gradient->name;
+        }
+
+        asort($gradientOptions);
+
+        $gradientOptions = [
+            '#7468E6, #C44B85' => 'Default', 
+            '' => 'Custom',
+        ] + $gradientOptions;
+
         $data = [
             'role' => $role,
             'title' => __('Edit ' . ucwords($role->type)),
+            'gradients' => $gradientOptions,
         ];
 
         return view('role/edit', $data);
