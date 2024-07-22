@@ -79,7 +79,7 @@
             link.onload = function() {
                 updatePreview();
                 //document.getElementById("title").style.fontFamily = "'Roboto', sans-serif";
-            };            
+            };
         }
 
         function updatePreview() {
@@ -89,7 +89,7 @@
             var fontColor = $('#font_color').val();
             var fontFamily = $('#font_family').find(":selected").val();
             var name = $('#name').val();
-            
+
             $('#preview')
                 .css('color', fontColor)
                 .css('font-family', fontFamily)
@@ -105,7 +105,7 @@
                     backgroundColors = customColor1 + ', ' + customColor2;
                 }
 
-                if (! backgroundRotation) {
+                if (!backgroundRotation) {
                     backgroundRotation = '0';
                 }
 
@@ -174,7 +174,7 @@
                         <div class="mb-6">
                             <x-input-label for="name" :value="__('Name') . ' *'" />
                             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
-                                :value="old('name', $role->name)" required autofocus oninput="updatePreview()"/>
+                                :value="old('name', $role->name)" required autofocus oninput="updatePreview()" />
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                         </div>
 
@@ -301,7 +301,8 @@
                             <select id="font_family" name="font_family" onchange="onChangeFont()"
                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                 @foreach($fonts as $font)
-                                <option value="{{ $font->value }}" {{ $role->font_family == $font->value ? 'SELECTED' : '' }}>
+                                <option value="{{ $font->value }}"
+                                    {{ $role->font_family == $font->value ? 'SELECTED' : '' }}>
                                     {{ $font->label }}</option>
                                 @endforeach
                             </select>
@@ -352,14 +353,19 @@
                                         {{ $name }}</option>
                                     @endforeach
                                 </select>
+                                <div class="text-xs">
+                                    <a href="https://uigradients.com" target="_blank">Gradients from uiGradients</a>
+                                </div>
                                 <x-input-error class="mt-2" :messages="$errors->get('background_colors')" />
 
                                 <div id="custom_colors" style="display:none">
                                     <x-text-input id="custom_color1" name="custom_color1" type="color"
-                                        class="mt-1 block w-1/2" :value="old('custom_color1', $role->background_colors ? explode(', ', $role->background_colors)[0] : '')"
+                                        class="mt-1 block w-1/2"
+                                        :value="old('custom_color1', $role->background_colors ? explode(', ', $role->background_colors)[0] : '')"
                                         oninput="updatePreview()" />
                                     <x-text-input id="custom_color2" name="custom_color2" type="color"
-                                        class="mt-1 block w-1/2" :value="old('custom_color2', $role->background_colors ? explode(', ', $role->background_colors)[1] : '')"
+                                        class="mt-1 block w-1/2"
+                                        :value="old('custom_color2', $role->background_colors ? explode(', ', $role->background_colors)[1] : '')"
                                         oninput="updatePreview()" />
                                 </div>
                             </div>
