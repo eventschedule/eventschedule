@@ -12,11 +12,26 @@
         .country-select {
             width: 100%;
         }
+
+        #preview {
+            border: 1px solid #dbdbdb;
+            border-radius: 4px;
+            height: 150px;
+            width: 100%;
+            text-align: center;
+            vertical-align: middle;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: auto;
+            font-size: 3rem;
+        }
         </style>
 
         <script>
         document.addEventListener('DOMContentLoaded', () => {
             onChangeBackground();
+            updatePreview();
 
             $("#country").countrySelect({
                 defaultCountry: '{{ $role->country_code }}',
@@ -51,6 +66,27 @@
             } else {
                 $('#style_background_gradient').fadeOut();
             }
+        }
+
+        function updatePreview() {
+            var backgroundColors = $('#background_colors').val();
+            var backgroundRotation = $('#background_rotation').val();
+            var fontColor = $('#font_color').val();
+            var name = $('#name').val();
+
+            $('#custom_colors').toggle(backgroundColors == '');
+            if (backgroundColors == '') {
+                var customColor1 = $('#custom_color1').val();
+                var customColor2 = $('#custom_color2').val();
+                backgroundColors = customColor1 + ', ' + customColor2;
+            }
+
+            var gradient = 'linear-gradient(' + backgroundRotation + 'deg, ' + backgroundColors + ')';
+
+            $('#preview')
+                .css('background-image', gradient)
+                .css('color', fontColor)
+                .text(name);
         }
         </script>
 
@@ -231,9 +267,9 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="font_color" :value="__('Font Color' . ' *')" />
+                            <x-input-label for="font_color" :value="__('Font Color')" />
                             <x-text-input id="font_color" name="font_color" type="color" class="mt-1 block w-1/2"
-                                :value="old('font_color', $role->font_color)"/>
+                                :value="old('font_color', $role->font_color)" />
                             <x-input-error class="mt-2" :messages="$errors->get('font_color')" />
                         </div>
 
@@ -279,14 +315,19 @@
 
                             <div class="mb-6">
                                 <x-input-label for="background_rotation" :value="__('Rotation')" />
-                                <x-text-input id="background_rotation" name="background_rotation" type="number" class="mt-1 block w-1/2"
-                                    :value="old('background_rotation', $role->background_rotation)" min="0" max="360"/>
+                                <x-text-input id="background_rotation" name="background_rotation" type="number"
+                                    class="mt-1 block w-1/2"
+                                    :value="old('background_rotation', $role->background_rotation)" min="0" max="360" />
                                 <x-input-error class="mt-2" :messages="$errors->get('background_rotation')" />
                             </div>
                         </div>
 
-
+                        <div class="mb-6">
+                            <x-input-label :value="__('Preview')" />
+                            <div id="preview"></div>
+                        </div>
                     </div>
+
                 </div>
 
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="address">
@@ -331,7 +372,6 @@
 
                     </div>
                 </div>
-
 
             </div>
         </div>
