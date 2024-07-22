@@ -37,7 +37,7 @@ class ProfileController extends Controller
 
         if ($request->hasFile('profile_image')) {
             $file = $request->file('profile_image');
-            $filename = 'profile_' . Str::random(10) . '_' . time() . '.' . $file->getClientOriginalExtension();            
+            $filename = strtolower('profile_' . Str::random(10) . '_' . time() . '.' . $file->getClientOriginalExtension());
             $path = $file->storeAs('images', $filename, 'public');
             
             $user = $request->user();
