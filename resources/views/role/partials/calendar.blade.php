@@ -7,7 +7,7 @@
         <div class="flex items-center justify-center">
             <div class="relative flex items-center rounded-md bg-white shadow-sm md:items-stretch">
                 <a href="{{ route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month] : ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}"
-                    class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50">
+                    class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50">
                     <span class="sr-only">{{ __('Previous month') }}</span>
                     <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path fill-rule="evenodd"
@@ -16,12 +16,12 @@
                     </svg>
                 </a>
                 <a href="{{ route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => now()->year, 'month' => now()->month] : ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'year' => now()->year, 'month' => now()->month]) }}"
-                    class="flex items-center justify-center border-y border-gray-300 px-3.5 text-sm font-semibold hover:bg-gray-50 focus:relative md:block">
+                    class="flex items-center justify-center border-y border-gray-300 px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative md:block">
                     <div class="mt-2">{{ __('Today') }}</div>
                 </a>
                 <span class="relative -mx-px h-5 w-px bg-gray-300 md:hidden"></span>
                 <a href="{{ route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month] : ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) }}"
-                    class="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50">
+                    class="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50">
                     <span class="sr-only">{{ __('Next month') }}</span>
                     <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path fill-rule="evenodd"
@@ -100,14 +100,14 @@
     </header>
     <div class="shadow ring-1 ring-black ring-opacity-5 lg:flex lg:flex-auto lg:flex-col">
         <div
-            class="grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center text-xs font-semibold leading-6 lg:flex-none">
+            class="grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center text-xs font-semibold leading-6 text-gray-700 lg:flex-none">
             @foreach (['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as $day)
             <div class="flex justify-center bg-white py-2">
                 <span class="sr-only sm:not-sr-only">{{ $day }}</span>
             </div>
             @endforeach
         </div>
-        <div class="flex bg-gray-200 text-xs leading-6 lg:flex-auto">
+        <div class="flex bg-gray-200 text-xs leading-6 text-gray-700 lg:flex-auto">
             @php
             $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth()->startOfWeek(Carbon\Carbon::SUNDAY);
             $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth()->endOfWeek(Carbon\Carbon::SATURDAY);
@@ -118,10 +118,10 @@
             <div class="hidden w-full lg:grid lg:grid-cols-7 lg:grid-rows-{{ $totalWeeks }} lg:gap-px">
                 @while ($currentDate->lte($endOfMonth))
                 @if ($showAdd)
-                    <div class="cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white hover:bg-gray-100 hover:border-gray-300' : 'bg-gray-50' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300"
+                    <div class="cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white hover:bg-gray-100 hover:border-gray-300' : 'bg-gray-50 text-gray-500' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300"
                         onclick="window.location = '{{ route('event.create', ['subdomain1' => $role->subdomain, 'date' => $currentDate->format('Y-m-d')]) }}';">
                 @else
-                <div class="relative {{ $currentDate->month == $month ? 'bg-white' : 'bg-gray-50' }} px-3 py-2 min-h-[100px] border-1 border-transparent">
+                <div class="relative {{ $currentDate->month == $month ? 'bg-white' : 'bg-gray-50 text-gray-500' }} px-3 py-2 min-h-[100px] border-1 border-transparent">
                 @endif
                     <time datetime="{{ $currentDate->format('Y-m-d') }}"
                         class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
@@ -132,10 +132,10 @@
                         <li>
                             <a href="{{ route('event.edit', ['subdomain' => $role->subdomain, 'hash' => base64_encode($event->id)]) }}"
                                 class="group flex">
-                                <p class="flex-auto truncate font-medium group-hover:text-indigo-600">
+                                <p class="flex-auto truncate font-medium text-gray-900 group-hover:text-indigo-600">
                                     {{ $event->role->name }}</p>
                                 <time datetime="{{ $event->starts_at }}"
-                                    class="ml-3 hidden flex-none group-hover:text-indigo-600 xl:block">{{ Carbon\Carbon::parse($event->starts_at)->format('g:i A') }}</time>
+                                    class="ml-3 hidden flex-none text-gray-500 group-hover:text-indigo-600 xl:block">{{ Carbon\Carbon::parse($event->starts_at)->format('g:i A') }}</time>
                             </a>
                         </li>
                         @endif
