@@ -23,7 +23,7 @@
                 @if ($role->profile_image_url)
                 <img src="{{ $role->profile_image_url }}" style="max-height:100px" />
                 @else
-                <div class="text-5xl font-bold">
+                <div class="text-4xl font-bold">
                     {{ $role->name }}
                 </div>
                 @endif
@@ -38,7 +38,7 @@
             </div>
         </div>
 
-        @include('role/partials/calendar', ['showAdd' => false])
+        @include('role/partials/calendar', ['showAdd' => false, 'route' => 'guest'])
 
     </div>
 
