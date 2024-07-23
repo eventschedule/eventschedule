@@ -54,11 +54,14 @@ class RoleController extends Controller
             ->orderBy('starts_at')
             ->get();
 
-        $data = [
-            'role' => $role,
-        ];
-
-        return view('role/show-guest', $data);
+        return view('role/show-guest', compact(
+            'events',
+            'role',
+            'month', 
+            'year',
+            'startOfMonth',
+            'endOfMonth',
+        ));
     }
 
     public function viewAdmin(Request $request, $subdomain, $tab = 'overview', $year = null, $month = null)
