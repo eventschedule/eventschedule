@@ -91,6 +91,10 @@
             var fontFamily = $('#font_family').find(':selected').val();
             var name = $('#name').val();
 
+            if (! name) {
+                name = "{{ __('Preview') }}";
+            }
+
             $('#preview')
                 .css('color', fontColor)
                 .css('font-family', fontFamily)
@@ -304,6 +308,13 @@
                             <x-text-input id="font_color" name="font_color" type="color" class="mt-1 block w-1/2"
                                 :value="old('font_color', $role->font_color)" oninput="updatePreview()" />
                             <x-input-error class="mt-2" :messages="$errors->get('font_color')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="accent_color" :value="__('Accent Color')" />
+                            <x-text-input id="accent_color" name="accent_color" type="color" class="mt-1 block w-1/2"
+                                :value="old('accent_color', $role->accent_color)" />
+                            <x-input-error class="mt-2" :messages="$errors->get('accent_color')" />
                         </div>
 
                         <div class="mb-6">
