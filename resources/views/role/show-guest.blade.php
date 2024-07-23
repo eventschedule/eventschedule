@@ -18,7 +18,7 @@
 <body class="font-sans antialiased dark:bg-black dark:text-white/50">
 
     <div class="p-10 max-w-4xl mx-auto px-4">
-        <div class="flex items-center justify-between pb-5">
+        <div class="flex items-center justify-between pb-6">
             <div>
                 @if ($role->profile_image_url)
                 <img src="{{ $role->profile_image_url }}" style="max-height:100px" />

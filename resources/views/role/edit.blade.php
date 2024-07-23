@@ -55,16 +55,16 @@
         function onChangeBackground() {
             var background = $('#background').find(":selected").val();
 
+            $('#style_background_image').hide();
+            $('#style_background_gradient').hide();
+            $('#style_background_color').hide();
+
             if (background == 'image') {
                 $('#style_background_image').fadeIn();
-            } else {
-                $('#style_background_image').hide();
-            }
-
-            if (background == 'gradient') {
+            } else if (background == 'gradient') {
                 $('#style_background_gradient').fadeIn();
-            } else {
-                $('#style_background_gradient').hide();
+            } else if (background == 'color') {
+                $('#style_background_color').fadeIn();
             }
         }
 
@@ -84,6 +84,7 @@
 
         function updatePreview() {
             var background = $('#background').find(":selected").val();
+            var backgroundColor = $('#background_color').val();
             var backgroundColors = $('#background_colors').val();
             var backgroundRotation = $('#background_rotation').val();
             var fontColor = $('#font_color').val();
@@ -115,7 +116,8 @@
             } else if (background == 'image') {
                 $('#preview').css('background-image', 'url("{{ $role->background_image_url }}")');
             } else {
-                $('#preview').css('background-image', '');
+                $('#preview').css('background-image', '')
+                    .css('background-color', backgroundColor);
             }
         }
         </script>
@@ -309,7 +311,7 @@
                             <select id="background" name="background"
                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                 oninput="onChangeBackground(); updatePreview();">
-                                @foreach(['default', 'image', 'gradient'] as $background)
+                                @foreach(['color', 'gradient', 'image'] as $background)
                                 <option value="{{ $background }}"
                                     {{ $role->background == $background ? 'SELECTED' : '' }}>
                                     {{ __(ucwords($background)) }}</option>
@@ -318,6 +320,12 @@
                             <x-input-error class="mt-2" :messages="$errors->get('background')" />
                         </div>
 
+                        <div class="mb-6" id="style_background_color" style="display:none">
+                            <x-input-label for="background_color" :value="__('Background Color')" />
+                            <input id="background_color" name="background_color" type="color" class="mt-1 block w-full"
+                                :value="old('background_color', $role->background_color)" oninput="updatePreview()" />
+                            <x-input-error class="mt-2" :messages="$errors->get('background_color')" />
+                        </div>
 
                         <div class="mb-6" id="style_background_image" style="display:none">
                             <x-input-label for="background_image" :value="__('Image')" />
