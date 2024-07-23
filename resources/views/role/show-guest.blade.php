@@ -8,14 +8,22 @@
     <title>{{ str_replace(':name', $role->name, __(':name Event Schedule'))  }}</title>
 
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family={{ $role->font_family }}:wght@400;700&display=swap"
+        rel="stylesheet">
 
     <!-- Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+    body {
+        font-family: '{{ $role->font_family }}', sans-serif !important;
+        color: {{ $role->font_color }} !important;
+    }
+    </style>
+
 </head>
 
-<body class="font-sans antialiased dark:bg-black dark:text-white/50">
+<body class="antialiased dark:bg-black dark:text-white/50">
 
     <div class="p-10 max-w-4xl mx-auto px-4">
         <div class="flex items-center justify-between pb-6">
