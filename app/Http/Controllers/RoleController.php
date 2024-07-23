@@ -52,17 +52,11 @@ class RoleController extends Controller
         $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
         $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
-        $events = Event::with(['role']);
-
-        if ($role->isVendor()) {
-            $events->whereVenueId($role->id);
-        } else {
-            $events->whereRoleId($role->id);
-        }
-            
-        $events->where('is_accepted', true)
+        $events = Event::with(['role'])
+            ->where($role->isVenue() ? 'venue_id' : 'role_id', $role->id)
+            ->where('is_accepted', true)
             ->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
-            ->where('visibility', '!=', 'private')
+            ->where('visibility', 'public')
             ->orderBy('starts_at')
             ->get();
 
