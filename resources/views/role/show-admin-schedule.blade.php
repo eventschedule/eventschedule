@@ -1,4 +1,4 @@
-@include('role/partials/calendar')
+@include('role/partials/calendar', ['showAdd' => true])
 
 @if (count($unscheduled))
 <div class="lg:flex lg:h-full lg:flex-col pt-5">
