@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{{ str_replace(':name', $role->name, __(':name Event Schedule'))  }}</title>
+    <title>{{ str_replace(':name', $role->name, __(':name | Event Schedule'))  }}</title>
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family={{ $role->font_family }}:wght@400;700&display=swap"
@@ -20,6 +20,15 @@
         color: {{ $role->font_color }} !important;
         @if ($role->background == 'color')
             background-color: {{ $role->background_color }};
+        @elseif ($role->background == 'gradient')
+            background-image: linear-gradient({{ $role->background_rotation }}deg, {{ $role->background_colors }});
+        @elseif ($role->background == 'image')
+            background-image: url("{{ $role->background_image_url }}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 100vh;
+            margin: 0;
         @endif
     }
     </style>
