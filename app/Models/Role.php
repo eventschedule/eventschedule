@@ -117,6 +117,17 @@ class Role extends Model
         return $this->accept_talent_requests || $this->accept_vendor_requests;
     }
 
+    public function getTypePlural()
+    {
+        if ($this->type == 'venue') {
+            return 'venues';
+        } else if ($this->type = 'talent') {
+            return 'talent';
+        } else {
+            return 'vendors';
+        }
+    }
+
     public function getProfileImageUrlAttribute($value)
     {
         if (! $value) {

@@ -63,7 +63,7 @@
                 </a>
                 @endif
 
-                <a href="" class="pl-1">
+                <a href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}" class="pl-1">
                     <button type="button" style="background-color: {{ $role->accent_color }}"
                         class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
