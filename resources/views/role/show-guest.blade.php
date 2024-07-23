@@ -27,7 +27,7 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            height: 100vh;
+            height: 100%;
             margin: 0;
         @endif
     }
@@ -60,6 +60,26 @@
 
         @include('role/partials/calendar', ['showAdd' => false, 'route' => 'guest'])
 
+        <div class="py-6">
+            {{ $role->description }}
+        </div>
+
+        <div class="flex items-center justify-between pb-6">
+            <div class="py-6 text-xs">
+                &copy; {{ now()->year }} {{ $role->name }}. {{ __('All rights reserved') }}.
+            </div>
+            <div>
+                @if ($role->social_links)
+                @foreach (json_decode($role->social_links) as $link)
+                    <a href="{{ $link->url }}" target="_blank">
+                        <x-url-icon>
+                            {{ \App\Utils\UrlUtils::clean($link->url) }}
+                        </x-url-icon>
+                    </a>
+                @endforeach
+                @endif
+            </div>
+        </div>
     </div>
 
 </body>
