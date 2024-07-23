@@ -53,7 +53,7 @@
         }
 
         function onChangeBackground() {
-            var background = $('#background').find(":selected").val();
+            var background = $('#background').find(':selected').val();
 
             $('#style_background_image').hide();
             $('#style_background_gradient').hide();
@@ -69,7 +69,7 @@
         }
 
         function onChangeFont() {
-            var font_family = $('#font_family').find(":selected").val();
+            var font_family = $('#font_family').find(':selected').val();
 
             var link = document.createElement('link');
             link.href = 'https://fonts.googleapis.com/css2?family=' + font_family + ':wght@400;700&display=swap';
@@ -83,12 +83,12 @@
         }
 
         function updatePreview() {
-            var background = $('#background').find(":selected").val();
+            var background = $('#background').find(':selected').val();
             var backgroundColor = $('#background_color').val();
             var backgroundColors = $('#background_colors').val();
             var backgroundRotation = $('#background_rotation').val();
             var fontColor = $('#font_color').val();
-            var fontFamily = $('#font_family').find(":selected").val();
+            var fontFamily = $('#font_family').find(':selected').val();
             var name = $('#name').val();
 
             $('#preview')
