@@ -221,10 +221,10 @@ class RoleController extends Controller
     {
         $role = new Role;
         $role->background = 'default';
+        $role->background_color = '#FFFFFF';
         $role->background_colors = '#7468E6, #C44B85';
         $role->background_rotation = 135;
         $role->font_color = '#000000';
-        $role->background_color = '#FFFFFF';
         $role->accent_color = '#007BFF';
         $role->accept_talent_requests = true;
 
