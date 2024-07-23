@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         </div>
                         <div>
                             <a href="{{ $link->url }}" target="_blank">
-                                <h4 class="text-lg font-bold break-all line-clamp-2">
+                                <h4 class="text-lg font-bold break-words line-clamp-2">
                                     {{ \App\Utils\UrlUtils::getBrand($link->url) }}</h4>
                                 <p class="mt-1 line-clamp-2 break-all">{{ \App\Utils\UrlUtils::clean($link->url) }}
                                 </p>
@@ -147,7 +147,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         </div>
                         <div>
                             <a href="{{ $link->url }}" target="_blank">
-                                <h4 class="text-lg font-bold break-all line-clamp-2">
+                                <h4 class="text-lg font-bold break-words line-clamp-2">
                                     {{ \App\Utils\UrlUtils::getBrand($link->url) }}</h4>
                                 <p class="mt-1 line-clamp-2 break-all">{{ \App\Utils\UrlUtils::clean($link->url) }}
                                 </p>
@@ -190,7 +190,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         </div>
                         <div>
                             <a href="{{ $link->url }}" target="_blank">
-                                <h4 class="text-lg font-bold break-all line-clamp-2">{{ $link->name }}</h4>
+                                <h4 class="text-lg font-bold break-words line-clamp-2">{{ $link->name }}</h4>
                                 <p class="mt-1  line-clamp-2 break-all">{{ \App\Utils\UrlUtils::clean($link->url) }}
                                 </p>
                             </a>
