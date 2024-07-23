@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 @foreach(json_decode($role->social_links) as $link)
                 <li class="py-4">
                     <div class="flex">
-                        <div class="mr-4 flex-shrink-0 pt-1">
+                        <div class="mr-4 flex-shrink-0 pt-1 text-gray-500">
                             <x-url-icon>
                                 {{ \App\Utils\UrlUtils::clean($link->url) }}
                             </x-url-icon>
@@ -140,7 +140,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 @foreach(json_decode($role->payment_links) as $link)
                 <li class="py-4">
                     <div class="flex">
-                        <div class="mr-4 flex-shrink-0">
+                        <div class="mr-4 flex-shrink-0 pt-1 text-gray-500">
                             <x-url-icon>
                                 {{ \App\Utils\UrlUtils::clean($link->url) }}
                             </x-url-icon>
@@ -183,7 +183,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 @foreach(json_decode($role->youtube_links) as $link)
                 <li class="py-4">
                     <div class="flex">
-                        <div class="mr-4 flex-shrink-0">
+                        <div class="mr-4 flex-shrink-0 text-gray-500">
                             <x-url-icon>
                                 {{ \App\Utils\UrlUtils::clean($link->url) }}
                             </x-url-icon>
