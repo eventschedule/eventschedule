@@ -24,4 +24,25 @@ class UrlUtils
     {
         return str_replace([' ', '.'], ['-', ''], strtolower(trim($name)));
     }
+
+    public static function getYouTubeEmbed($url)
+    {
+        $parsedUrl = parse_url($url);
+
+        if (isset($parsedUrl['host']) && (strpos($parsedUrl['host'], 'youtube.com') !== false || strpos($parsedUrl['host'], 'youtu.be') !== false)) {
+            
+            if ($parsedUrl['host'] == 'youtu.be') {
+                $videoId = ltrim($parsedUrl['path'], '/');
+            } else {
+                parse_str($parsedUrl['query'], $queryParams);
+                $videoId = $queryParams['v'];
+            }
+    
+            if (isset($videoId)) {
+                return 'https://www.youtube.com/embed/' . $videoId;
+            }
+        }
+    
+        return false;
+    }
 }

@@ -64,11 +64,23 @@
             {{ $role->description }}
         </div>
 
+        @if ($role->youtube_links)
+            <div class="container mx-auto py-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    @foreach (json_decode($role->youtube_links) as $link)
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                        <iframe class="w-full h-64" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
         <div class="flex items-center justify-between pb-6">
             <div class="py-6 text-xs">
                 &copy; {{ now()->year }} {{ $role->name }}. {{ __('All rights reserved') }}.
             </div>
-            <div>
+            <div class="flex space-x-4">
                 @if ($role->social_links)
                 @foreach (json_decode($role->social_links) as $link)
                     <a href="{{ $link->url }}" target="_blank">
