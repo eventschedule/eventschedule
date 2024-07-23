@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 use App\Http\Requests\RoleCreateRequest;
 use App\Http\Requests\RoleUpdateRequest;
 use App\Http\Requests\MemberAddRequest;
@@ -452,5 +454,23 @@ class RoleController extends Controller
         $role->save();
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]));
+    }
+
+    public function qrCode($subdomain)
+    {
+        $url = route('role.follow', ['subdomain' => $subdomain]);
+
+        $qrCode = QrCode::create($url)            
+            ->setSize(300)
+            ->setMargin(10);
+
+        $writer = new PngWriter();
+        $result = $writer->write($qrCode);
+        
+        header('Content-Type: ' . $result->getMimeType());
+        
+        echo $result->getString();
+
+        exit;
     }
 }
