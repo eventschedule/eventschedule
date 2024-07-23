@@ -18,6 +18,9 @@
     body {
         font-family: '{{ $role->font_family }}', sans-serif !important;
         color: {{ $role->font_color }} !important;
+        @if ($role->background == 'color')
+            background-color: {{ $role->background_color }};
+        @endif
     }
     </style>
 

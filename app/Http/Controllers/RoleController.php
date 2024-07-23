@@ -220,7 +220,7 @@ class RoleController extends Controller
     public function create()
     {
         $role = new Role;
-        $role->font_color = '#111827'
+        $role->font_color = '#111827';
         $role->accent_color = '#007BFF';
         $role->background = 'default';
         $role->background_color = '#FFFFFF';
