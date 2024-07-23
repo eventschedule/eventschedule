@@ -468,7 +468,8 @@ class RoleController extends Controller
         $result = $writer->write($qrCode);
         
         header('Content-Type: ' . $result->getMimeType());
-        
+        header('Content-Disposition: attachment; filename="qr-code.png"');
+            
         echo $result->getString();
 
         exit;
