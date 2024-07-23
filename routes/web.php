@@ -34,6 +34,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
     Route::post('/{subdomain}/update_links', [RoleController::class, 'updateLinks'])->name('role.update_links');
     Route::post('/{subdomain}/remove_links', [RoleController::class, 'removeLinks'])->name('role.remove_links');
+    Route::get('/{subdomain}/qr_code', [RoleController::class, 'qrCode'])->name('role.qr_code');
     Route::get('/{subdomain}/add_member', [RoleController::class, 'createMember'])->name('role.create_member');
     Route::post('/{subdomain}/add_member', [RoleController::class, 'storeMember'])->name('role.store_member');
     Route::get('/{subdomain}/remove_member/{hash}', [RoleController::class, 'removeMember'])->name('role.remove_member');
