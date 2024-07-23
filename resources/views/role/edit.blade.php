@@ -30,6 +30,7 @@
 
         <script>
         document.addEventListener('DOMContentLoaded', () => {
+            updatePreview();
             onChangeBackground();
             onChangeFont();
 
@@ -70,15 +71,15 @@
 
         function onChangeFont() {
             var font_family = $('#font_family').find(':selected').val();
-
             var link = document.createElement('link');
+
             link.href = 'https://fonts.googleapis.com/css2?family=' + font_family + ':wght@400;700&display=swap';
             link.rel = 'stylesheet';
+
             document.head.appendChild(link);
 
             link.onload = function() {
                 updatePreview();
-                //document.getElementById("title").style.fontFamily = "'Roboto', sans-serif";
             };
         }
 
@@ -91,7 +92,7 @@
             var fontFamily = $('#font_family').find(':selected').val();
             var name = $('#name').val();
 
-            if (! name) {
+            if (!name) {
                 name = "{{ __('Preview') }}";
             }
 
@@ -116,9 +117,13 @@
 
                 var gradient = 'linear-gradient(' + backgroundRotation + 'deg, ' + backgroundColors + ')';
 
-                $('#preview').css('background-image', gradient);
+                $('#preview')
+                    .css('background-color', '')
+                    .css('background-image', gradient);
             } else if (background == 'image') {
-                $('#preview').css('background-image', 'url("{{ $role->background_image_url }}")');
+                $('#preview')
+                    .css('background-color', '')
+                    .css('background-image', 'url("{{ $role->background_image_url }}")');
             } else {
                 $('#preview').css('background-image', '')
                     .css('background-color', backgroundColor);
@@ -333,8 +338,9 @@
 
                         <div class="mb-6" id="style_background_color" style="display:none">
                             <x-input-label for="background_color" :value="__('Background Color')" />
-                            <x-text-input id="background_color" name="background_color" type="color" class="mt-1 block w-1/2"
-                                :value="old('background_color', $role->background_color)" oninput="updatePreview()" />
+                            <x-text-input id="background_color" name="background_color" type="color"
+                                class="mt-1 block w-1/2" :value="old('background_color', $role->background_color)"
+                                oninput="updatePreview()" />
                             <x-input-error class="mt-2" :messages="$errors->get('background_color')" />
                         </div>
 
