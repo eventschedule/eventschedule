@@ -18,7 +18,7 @@
 <body class="font-sans antialiased dark:bg-black dark:text-white/50">
 
     <div class="p-10 max-w-4xl mx-auto px-4">
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between pb-4">
             <div>
                 @if ($role->profile_image_url)
                 <img src="{{ $role->profile_image_url }}" style="max-height:100px" />
@@ -29,7 +29,12 @@
                 @endif
             </div>
             <div>
-                Follow
+                <a href="">
+                    <button type="button"
+                        class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                        {{ __('Follow') }}
+                    </button>
+                </a>
             </div>
         </div>
 
