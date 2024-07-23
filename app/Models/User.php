@@ -85,6 +85,11 @@ class User extends Authenticatable
         return $this->following()->where('subdomain', $subdomain)->exists();
     }
 
+    public function isConnected($subdomain): bool
+    {
+        return $this->hasRole($subdomain) || $this->isFollowing($subdomain);
+    }
+
     public function getProfileImageUrlAttribute($value)
     {
         if (! $value) {

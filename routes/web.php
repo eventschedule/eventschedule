@@ -30,6 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/{subdomain}/edit', [RoleController::class, 'edit'])->name('role.edit');
+    Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
     Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
     Route::post('/{subdomain}/update_links', [RoleController::class, 'updateLinks'])->name('role.update_links');
     Route::post('/{subdomain}/remove_links', [RoleController::class, 'removeLinks'])->name('role.remove_links');
