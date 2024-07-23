@@ -124,16 +124,16 @@
                 <div class="relative {{ $currentDate->month == $month ? 'bg-white' : 'bg-gray-50 text-gray-500' }} px-3 py-2 min-h-[100px] border-1 border-transparent">
                 @endif
                     @if ($showAdd)
-                        <time datetime="{{ $currentDate->format('Y-m-d') }}" class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
+                        <time datetime="{{ $currentDate->format('Y-m-d') }}" class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded bg-indigo-600 font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
                     @else
-                        <time datetime="{{ $currentDate->format('Y-m-d') }}" style="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'background-color: ' . $role->accent_color : '' }}" class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded-full font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
+                        <time datetime="{{ $currentDate->format('Y-m-d') }}" style="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'background-color: ' . $role->accent_color : '' }}" class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
                     @endif
                     <ol class="mt-2">
                         @foreach ($events as $event)
                         @if ($event->starts_at &&
                         Carbon\Carbon::parse($event->starts_at)->isSameDay($currentDate))
                         <li>
-                            <a href="{{ route('event.edit', ['subdomain' => $role->subdomain, 'hash' => base64_encode($event->id)]) }}"
+                            <a href="{{ route($showAdd ? 'event.edit' : 'event.view', ['subdomain' => $role->subdomain, 'hash' => base64_encode($event->id)]) }}"
                                 class="group flex">
                                 <p class="flex-auto truncate font-medium text-gray-900 group-hover:text-indigo-600">
                                     {{ $event->role->name }}</p>
