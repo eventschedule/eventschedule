@@ -73,6 +73,7 @@ class RoleController extends Controller
             'year',
             'startOfMonth',
             'endOfMonth',
+            'user',
         ));
     }
 

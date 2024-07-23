@@ -62,7 +62,8 @@
                     </button>
                 </a>
                 @endif
-
+                
+                @if ($user && ! $user->isConnected($role->subdomain))
                 <a href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}" class="pl-1">
                     <button type="button" style="background-color: {{ $role->accent_color }}"
                         class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
@@ -74,6 +75,7 @@
                         {{ __('Follow') }}
                     </button>
                 </a>
+                @endif
             </div>
         </div>
 
