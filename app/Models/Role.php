@@ -68,7 +68,33 @@ class Role extends Model
  
     public function fullAddress()
     {
-        return $this->address1 . ', ' . $this->state . ', ' . $this->postal_code . ', ' . $this->country_code;
+        $str = '';
+
+        if ($this->address1) {
+            $str .= $this->address1 . ', ';
+        }
+
+        if ($this->address2) {
+            $str .= $this->address2 . ', ';
+        }
+
+        if ($this->city) {
+            $str .= $this->city . ', ';
+        }
+
+        if ($this->state) {
+            $str .= $this->state . ', ';
+        }
+
+        if ($this->postal_code) {
+            $str .= $this->postal_code . ', ';
+        }
+
+        if ($this->country_code) {
+            $str .= $this->country_code;
+        }
+
+        return $str;
     }
 
     public function isVenue()

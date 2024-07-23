@@ -49,7 +49,14 @@
                 @endif
             </div>
             <div>
-                <a href="">
+                <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($role->fullAddress()) }}" target="_blank">
+                    <button type="button" style="background-color: #ccc"
+                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                        {{ __('Map') }}
+                    </button>
+                </a>
+
+                <a href="" class="pl-4">
                     <button type="button" style="background-color: {{ $role->accent_color }}"
                         class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                         {{ __('Follow') }}
