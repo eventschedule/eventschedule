@@ -41,7 +41,7 @@
         <div class="flex items-start justify-between pb-6">
             <div>
                 @if ($role->profile_image_url)
-                <img src="{{ $role->profile_image_url }}" style="max-height:100px" />
+                <img src="{{ $role->profile_image_url }}" style="max-height:100px" class="shadow-md"/>
                 @else
                 <div class="text-4xl font-bold">
                     {{ $role->name }}
@@ -52,7 +52,7 @@
                 @if ($role->isVenue())
                 <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($role->fullAddress()) }}" target="_blank">
                     <button type="button" style="background-color: #444"
-                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
                                 aria-hidden="true">
                                 <path
@@ -66,7 +66,7 @@
                 @if ($user && ! $user->isConnected($role->subdomain))
                 <a href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}" class="pl-1">
                     <button type="button" style="background-color: {{ $role->accent_color }}"
-                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
                                 aria-hidden="true">
                                 <path
@@ -90,7 +90,7 @@
                 @if ($role->accept_talent_requests)
                 <a href="{{ route('event.sign_up', ['subdomain1' => $role->subdomain, 'subdomain2' => ''])}}">
                     <button type="button" style="background-color: {{ $role->accent_color }}"
-                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
                                 aria-hidden="true">
                                 <path
@@ -104,7 +104,7 @@
                 @if ($role->accept_vendor_requests)
                 <a href="{{ route('event.sign_up', ['subdomain1' => $role->subdomain, 'subdomain2' => ''])}}">
                     <button type="button" style="background-color: {{ $role->accent_color }}"
-                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
                                 aria-hidden="true">
                                 <path
@@ -122,7 +122,7 @@
             <div class="container mx-auto py-8">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     @foreach (json_decode($role->youtube_links) as $link)
-                    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
                         <iframe class="w-full h-64" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                     </div>
                     @endforeach
