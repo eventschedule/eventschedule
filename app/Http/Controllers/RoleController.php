@@ -239,7 +239,7 @@ class RoleController extends Controller
         asort($gradientOptions);
 
         $gradientOptions = [
-            '#7468E6, #C44B85' => 'Default', 
+            '#7468e6, #c44b85' => 'Default', 
             '' => 'Custom',
         ] + $gradientOptions;
 
