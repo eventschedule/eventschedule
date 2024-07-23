@@ -10,6 +10,11 @@ use Carbon\Carbon;
 
 class EventController extends Controller
 {
+    public function view(Request $request, $subdomain, $hash)
+    {
+        dd('here');
+    }
+
     public function edit(Request $request, $subdomain, $hash)
     {
         $event_id = base64_decode($hash);
