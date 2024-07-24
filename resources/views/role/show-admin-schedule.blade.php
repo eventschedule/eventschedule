@@ -27,7 +27,7 @@
             <div>
                 <div class="-mt-px flex divide-x divide-gray-200">
                     <div class="flex w-0 flex-1 cursor-pointer"
-                        onclick="location.href = '{{ route('event.edit', ['subdomain' => $role->subdomain, 'hash' => base64_encode($event->id)]) }}'; return false;">
+                        onclick="location.href = '{{ route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) }}'; return false;">
                         <div
                             class="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900">
                             <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor"
@@ -40,7 +40,7 @@
                         </div>
                     </div>
                     <div class="-ml-px flex w-0 flex-1 cursor-pointer"
-                        onclick="var confirmed = confirm('{{ __('Are you sure?') }}'); if (confirmed) { location.href = '{{ route('event.decline', ['subdomain' => $role->subdomain, 'hash' => base64_encode($event->id), 'redirect_to' => 'schedule']) }}'; }">
+                        onclick="var confirmed = confirm('{{ __('Are you sure?') }}'); if (confirmed) { location.href = '{{ route('event.decline', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id), 'redirect_to' => 'schedule']) }}'; }">
                         <div
                             class="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900">
                             <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor"
