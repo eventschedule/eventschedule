@@ -196,7 +196,7 @@ class RoleController extends Controller
             return redirect('/');
         }
 
-        $userId = base64_decode($hash);
+        $userId = UrlUtils::decodeId($hash);
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if ($userId == $role->user_id) {

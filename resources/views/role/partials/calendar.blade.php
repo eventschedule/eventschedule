@@ -133,7 +133,7 @@
                         @if ($event->starts_at &&
                         Carbon\Carbon::parse($event->starts_at)->isSameDay($currentDate))
                         <li>
-                            <a href="{{ route($showAdd ? 'event.edit' : 'event.view', ['subdomain' => $role->subdomain, 'hash' => base64_encode($event->id)]) }}"
+                            <a href="{{ route($showAdd ? 'event.edit' : 'event.view', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) }}"
                                 class="group flex">
                                 <p class="flex-auto truncate font-medium text-gray-900 group-hover:text-indigo-600">
                                     {{ $event->role->name }}</p>

@@ -17,7 +17,7 @@ class EventController extends Controller
 
     public function edit(Request $request, $subdomain, $hash)
     {
-        $event_id = base64_decode($hash);
+        $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
 
         $venueSubdomain = $event->venue->subdomain;
@@ -78,7 +78,7 @@ class EventController extends Controller
             return redirect('/');
         }
 
-        $event_id = base64_decode($hash);
+        $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
         $event->fill($request->all());
 
@@ -98,7 +98,7 @@ class EventController extends Controller
             return redirect('/');
         }
 
-        $event_id = base64_decode($hash);
+        $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);        
         $event->is_accepted = true;
         $event->save();
@@ -112,7 +112,7 @@ class EventController extends Controller
             return redirect('/');
         }
 
-        $event_id = base64_decode($hash);
+        $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);        
         $event->is_accepted = false;
         $event->save();
@@ -133,7 +133,7 @@ class EventController extends Controller
             return redirect('/');
         }
 
-        $event_id = base64_decode($hash);
+        $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);        
         $event->delete();
         

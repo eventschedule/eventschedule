@@ -54,7 +54,7 @@
                             <td
                                 class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
                                 @if ($member->pivot->level != 'owner')
-                                    <a href="{{ route('role.remove_member', ['subdomain' => $role->subdomain, 'hash' => base64_encode($member->id)]) }}"
+                                    <a href="{{ route('role.remove_member', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($member->id)]) }}"
                                         onclick="return confirm('{{ __('Are you sure?') }}');"
                                         class="text-indigo-600 hover:text-indigo-900">{{ __('Remove') }}</a>
                                 @endif

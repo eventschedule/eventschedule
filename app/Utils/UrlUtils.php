@@ -4,6 +4,16 @@ namespace App\Utils;
 
 class UrlUtils
 {
+    public static function encodeId($value)
+    {
+        return base64_encode($value + 100000);
+    }
+
+    public static function decodeId($value)
+    {
+        return base64_decode($value) - 100000;
+    }
+
     public static function clean($url)
     {
         $pattern = '/^(https?:\/\/)?(www\.)?/';
