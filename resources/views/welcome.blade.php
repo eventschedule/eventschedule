@@ -24,8 +24,7 @@
                     <nav class="flex items-center justify-between lg:justify-start" aria-label="Global">
                         <a href="#" class="-m-1.5 p-1.5">
                             <span class="sr-only">Event Schedule</span>
-                            <img alt="Event Schedule" class="h-8 w-auto"
-                                src="{{ url('resources/dark-logo.png') }}">
+                            <img alt="Event Schedule" class="h-8 w-auto" src="{{ url('resources/dark-logo.png') }}">
                         </a>
                         <button type="button" class="-m-2.5 rounded-md p-2.5 text-gray-700 lg:hidden">
                             <span class="sr-only">Open main menu</span>
@@ -141,7 +140,7 @@
                                 <!--
                                 <a href="#" class="text-sm font-semibold leading-6 text-gray-900">Learn more <span
                                         aria-hidden="true">→</span></a>
-                                -->      
+                                -->
                             </div>
                         </div>
                     </div>
@@ -319,9 +318,11 @@
                         </div>
                     </div>
                     <h2 class="text-3xl font-bold tracking-tight text-white">Get in touch</h2>
-                    <p class="mt-6 text-lg leading-8 text-gray-300">We'd love to hear from you! Whether you have questions, 
-                            feedback, or need assistance, you can reach out to us by sending an email to <a href="mailto:contact@eventschedule.com">contact@eventschedule.com</a>
-                            or by filling out the contact form.</p>
+                    <p class="mt-6 text-lg leading-8 text-gray-300">We'd love to hear from you! Whether you have
+                        questions,
+                        feedback, or need assistance, you can reach out to us by sending an email to <a
+                            href="mailto:contact@eventschedule.com">contact@eventschedule.com</a>
+                        or by filling out the contact form.</p>
                     <dl class="mt-10 space-y-4 text-base leading-7 text-gray-300">
                         <!--
                         <div class="flex gap-x-4">
@@ -356,48 +357,56 @@
                                         d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                                 </svg>
                             </dt>
-                            <dd><a class="hover:text-white" href="mailto:contact@eventschedule.com">contact@eventschedule.com</a></dd>
+                            <dd><a class="hover:text-white"
+                                    href="mailto:contact@eventschedule.com">contact@eventschedule.com</a></dd>
                         </div>
                     </dl>
                 </div>
             </div>
-            <form action="#" method="POST" class="px-6 pb-24 pt-20 sm:pb-32 lg:px-8 lg:py-48">
+            <form action="{{ route('message') }}" method="POST" class="px-6 pb-24 pt-20 sm:pb-32 lg:px-8 lg:py-48">
+
+                @csrf
+
                 <div class="mx-auto max-w-xl lg:mr-0 lg:max-w-lg">
+
+
                     <div class="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
                         <div>
-                            <label for="first-name" class="block text-sm font-semibold leading-6 text-white">First
-                                name</label>
+                            <label for="first_name" class="block text-sm font-semibold leading-6 text-white">
+                                {{ __('First name') }}
+                            </label>
                             <div class="mt-2.5">
-                                <input type="text" name="first-name" id="first-name" autocomplete="given-name"
+                                <input type="text" name="first_name" id="first_name" autocomplete="given-name"
                                     class="block w-full rounded-md border-0 bg-white/5 px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
                             </div>
                         </div>
                         <div>
-                            <label for="last-name" class="block text-sm font-semibold leading-6 text-white">Last
-                                name</label>
+                            <label for="last_name" class="block text-sm font-semibold leading-6 text-white">
+                                {{ __('Last name') }}</label>
                             <div class="mt-2.5">
-                                <input type="text" name="last-name" id="last-name" autocomplete="family-name"
+                                <input type="text" name="last_name" id="last_name" autocomplete="family-name"
                                     class="block w-full rounded-md border-0 bg-white/5 px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
                             </div>
                         </div>
                         <div class="sm:col-span-2">
-                            <label for="email" class="block text-sm font-semibold leading-6 text-white">Email</label>
+                            <label for="email" class="block text-sm font-semibold leading-6 text-white">
+                                {{ __('Email') }}</label>
                             <div class="mt-2.5">
                                 <input type="email" name="email" id="email" autocomplete="email"
                                     class="block w-full rounded-md border-0 bg-white/5 px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
                             </div>
                         </div>
                         <div class="sm:col-span-2">
-                            <label for="phone-number" class="block text-sm font-semibold leading-6 text-white">Phone
-                                number</label>
+                            <label for="phone" class="block text-sm font-semibold leading-6 text-white">
+                                {{ __('Phone number') }}</label>
                             <div class="mt-2.5">
-                                <input type="tel" name="phone-number" id="phone-number" autocomplete="tel"
+                                <input type="tel" name="phone" id="phone" autocomplete="tel"
                                     class="block w-full rounded-md border-0 bg-white/5 px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
                             </div>
                         </div>
                         <div class="sm:col-span-2">
-                            <label for="message"
-                                class="block text-sm font-semibold leading-6 text-white">Message</label>
+                            <label for="message" class="block text-sm font-semibold leading-6 text-white">
+                                {{ __('Message') }}</label>
                             <div class="mt-2.5">
                                 <textarea name="message" id="message" rows="4"
                                     class="block w-full rounded-md border-0 bg-white/5 px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"></textarea>
@@ -406,8 +415,8 @@
                     </div>
                     <div class="mt-8 flex justify-end">
                         <button type="submit"
-                            class="rounded-md bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Send
-                            message</button>
+                            class="rounded-md bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                            {{ __('Send message') }}</button>
                     </div>
                 </div>
             </form>
@@ -418,10 +427,11 @@
         <div class="px-6 py-24 sm:px-6 sm:py-32 lg:px-8">
             <div class="mx-auto max-w-2xl text-center">
                 <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                    Join the Future of Event Planning. Sign up today and experience a new level of efficiency and collaboration.
+                    Sign up today and experience a new level of efficiency and collaboration.
                 </h2>
                 <p class="mx-auto mt-6 max-w-xl text-lg leading-8 text-gray-600">
-                    Stay Connected: Use QR codes at events to engage with your audience and keep them informed about upcoming shows.
+                    Stay Connected: Use QR codes at events to engage with your audience and keep them informed about
+                    upcoming shows.
                 </p>
                 <div class="mt-10 flex items-center justify-center gap-x-6">
                     @auth
@@ -440,9 +450,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="relative isolate overflow-hidden bg-gray-900 py-10">
     </div>
 
     <!--

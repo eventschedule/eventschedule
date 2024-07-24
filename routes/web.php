@@ -18,6 +18,7 @@ Route::get('/home', function () {
 
 Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
+Route::post('/message', [HomeController::class, 'message'])->name('message');
 
 Route::get('/{subdomain}/view', [RoleController::class, 'viewGuest'])->name('role.view_guest');
 

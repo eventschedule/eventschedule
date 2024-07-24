@@ -15,4 +15,10 @@ class HomeController extends Controller
     {
         return view('terms');
     }
+
+    public function message(Request $request)
+    {
+        dd($request->all());
+        // TODO implement me
+    }
 }
