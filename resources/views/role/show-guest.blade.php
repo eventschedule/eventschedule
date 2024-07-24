@@ -18,9 +18,8 @@
     body {
         font-family: '{{ $role->font_family }}', sans-serif !important;
         color: {{ $role->font_color }} !important;
-        @if ($role->background == 'color')
-            background-color: {{ $role->background_color }};
-        @elseif ($role->background == 'gradient')
+        background-color: {{ $role->background_color }};
+        @if ($role->background == 'gradient')
             background-image: linear-gradient({{ $role->background_rotation }}deg, {{ $role->background_colors }});
         @elseif ($role->background == 'image')
             background-image: url("{{ $role->background_image_url }}");
