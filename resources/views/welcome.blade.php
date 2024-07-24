@@ -116,12 +116,14 @@
 
                     <div class="relative px-6 py-32 sm:py-40 lg:px-8 lg:py-56 lg:pr-0">
                         <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl">
+                            <!--
                             <div class="hidden sm:mb-10 sm:flex">
                                 <div
                                     class="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-500 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
                                     Join the beta
                                 </div>
                             </div>
+                            -->
                             <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl"><span
                                     class="text-gray-600">your</span>.eventschedule.com</h1>
                             <p class="mt-6 text-lg leading-8 text-gray-600">Connecting venues, talent, and vendors with
@@ -415,10 +417,12 @@
     <div class="bg-white">
         <div class="px-6 py-24 sm:px-6 sm:py-32 lg:px-8">
             <div class="mx-auto max-w-2xl text-center">
-                <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Boost your
-                    productivity.<br>Start using our app today.</h2>
-                <p class="mx-auto mt-6 max-w-xl text-lg leading-8 text-gray-600">Incididunt sint fugiat pariatur
-                    cupidatat consectetur sit cillum anim id veniam aliqua proident excepteur commodo do ea.</p>
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                    Join the Future of Event Planning. Sign up today and experience a new level of efficiency and collaboration.
+                </h2>
+                <p class="mx-auto mt-6 max-w-xl text-lg leading-8 text-gray-600">
+                    Stay Connected: Use QR codes at events to engage with your audience and keep them informed about upcoming shows.
+                </p>
                 <div class="mt-10 flex items-center justify-center gap-x-6">
                     @auth
                     <a href="{{ route('home') }}"
@@ -429,14 +433,19 @@
                         class="group inline-flex items-center justify-center rounded-full py-2 px-4 text-sm font-semibold focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 bg-blue-600 text-white hover:text-slate-100 hover:bg-blue-500 active:bg-blue-800 active:text-blue-100 focus-visible:outline-blue-600">Get
                         started</a>
                     @endauth
+                    <!--
                     <a href="#" class="text-sm font-semibold leading-6 text-gray-900">Learn more <span
                             aria-hidden="true">→</span></a>
+                    -->
                 </div>
             </div>
         </div>
     </div>
 
+    <div class="relative isolate overflow-hidden bg-gray-900 py-10">
+    </div>
 
+    <!--
     <div class="relative isolate overflow-hidden bg-gray-900 py-16 sm:py-24 lg:py-32">
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2">
@@ -488,6 +497,7 @@
             </div>
         </div>
     </div>
+    -->
 
 </body>
 
