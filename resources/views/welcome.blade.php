@@ -23,9 +23,9 @@
                 <div class="px-6 pt-6 lg:max-w-2xl lg:pl-8 lg:pr-0">
                     <nav class="flex items-center justify-between lg:justify-start" aria-label="Global">
                         <a href="#" class="-m-1.5 p-1.5">
-                            <span class="sr-only">Your Company</span>
-                            <img alt="Your Company" class="h-8 w-auto"
-                                src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600">
+                            <span class="sr-only">Event Schedule</span>
+                            <img alt="Event Schedule" class="h-8 w-auto"
+                                src="{{ url('resources/dark-logo.png') }}">
                         </a>
                         <button type="button" class="-m-2.5 rounded-md p-2.5 text-gray-700 lg:hidden">
                             <span class="sr-only">Open main menu</span>
@@ -119,10 +119,7 @@
                             <div class="hidden sm:mb-10 sm:flex">
                                 <div
                                     class="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-500 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
-                                    Join the early beta <a href="#"
-                                        class="whitespace-nowrap font-semibold text-indigo-600"><span
-                                            class="absolute inset-0" aria-hidden="true"></span>Read more <span
-                                            aria-hidden="true">&rarr;</span></a>
+                                    Join the beta
                                 </div>
                             </div>
                             <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl"><span
@@ -139,8 +136,10 @@
                                     class="group inline-flex items-center justify-center rounded-full py-2 px-4 text-sm font-semibold focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 bg-blue-600 text-white hover:text-slate-100 hover:bg-blue-500 active:bg-blue-800 active:text-blue-100 focus-visible:outline-blue-600">Get
                                     started</a>
                                 @endauth
+                                <!--
                                 <a href="#" class="text-sm font-semibold leading-6 text-gray-900">Learn more <span
                                         aria-hidden="true">→</span></a>
+                                -->      
                             </div>
                         </div>
                     </div>
@@ -318,10 +317,11 @@
                         </div>
                     </div>
                     <h2 class="text-3xl font-bold tracking-tight text-white">Get in touch</h2>
-                    <p class="mt-6 text-lg leading-8 text-gray-300">Proin volutpat consequat porttitor cras nullam
-                        gravida at. Orci molestie a eu arcu. Sed ut tincidunt integer elementum id sem. Arcu sed
-                        malesuada et magna.</p>
+                    <p class="mt-6 text-lg leading-8 text-gray-300">We'd love to hear from you! Whether you have questions, 
+                            feedback, or need assistance, you can reach out to us by sending an email to <a href="mailto:contact@eventschedule.com">contact@eventschedule.com</a>
+                            or by filling out the contact form.</p>
                     <dl class="mt-10 space-y-4 text-base leading-7 text-gray-300">
+                        <!--
                         <div class="flex gap-x-4">
                             <dt class="flex-none">
                                 <span class="sr-only">Address</span>
@@ -344,6 +344,7 @@
                             </dt>
                             <dd><a class="hover:text-white" href="tel:+1 (555) 234-5678">+1 (555) 234-5678</a></dd>
                         </div>
+                        -->
                         <div class="flex gap-x-4">
                             <dt class="flex-none">
                                 <span class="sr-only">Email</span>
@@ -353,7 +354,7 @@
                                         d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                                 </svg>
                             </dt>
-                            <dd><a class="hover:text-white" href="mailto:hello@example.com">hello@example.com</a></dd>
+                            <dd><a class="hover:text-white" href="mailto:contact@eventschedule.com">contact@eventschedule.com</a></dd>
                         </div>
                     </dl>
                 </div>
