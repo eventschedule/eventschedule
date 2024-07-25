@@ -164,7 +164,20 @@ class Role extends Model
         $originalSubdomain = $subdomain;
         $count = 1;
 
-        while (self::where('subdomain', $subdomain)->exists()) {
+        $reserved = [
+            'home',
+            'privacy',
+            'terms',
+            'register',
+            'venues',
+            'talent',
+            'vendors',
+            'profile',
+            'view',
+            'edit',
+        ];
+
+        while (self::where('subdomain', $subdomain)->exists() || in_array($subdomain, $reserved)) {
             $subdomain = $originalSubdomain . $count;
             $count++;
         }
