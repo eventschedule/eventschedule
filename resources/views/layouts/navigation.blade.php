@@ -74,9 +74,9 @@
                         @foreach ($venues as $venue)
                         <li>
                             <a href="{{ route('role.view_admin', ['subdomain' => $venue->subdomain]) }}"
-                                class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is('venue/'. $venue->subdomain) ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
+                                class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is($venue->subdomain) || request()->is($venue->subdomain . '/*') ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
                                 <span
-                                    class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is('venue/'. $venue->subdomain) ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($venue->name, 0, 1)) }}</span>
+                                    class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($venue->subdomain) || request()->is($venue->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($venue->name, 0, 1)) }}</span>
                                 <span class="truncate">{{ $venue->name }}</span>
                             </a>
                         </li>
@@ -96,9 +96,9 @@
                         @foreach ($talent as $each)
                         <li>
                             <a href="{{ route('role.view_admin', ['subdomain' => $venue->subdomain]) }}"
-                                class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is('talent/'. $each->subdomain) ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
+                                class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is($each->subdomain) || request()->is($each->subdomain . '/*') ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
                                 <span
-                                    class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is('talent/'. $each->subdomain) ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($each->name, 0, 1)) }}</span>
+                                    class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($each->subdomain) || request()->is($each->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($each->name, 0, 1)) }}</span>
                                 <span class="truncate">{{ $each->name }}</span>
                             </a>
                         </li>
@@ -117,9 +117,9 @@
                         @foreach ($vendors as $vendor)
                         <li>
                             <a href="{{ route('role.view_admin', ['subdomain' => $venue->subdomain]) }}"
-                                class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is('vendor/'. $vendor->subdomain) ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
+                                class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is($vendor->subdomain) || request()->is($vendor->subdomain . '/*') ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
                                 <span
-                                    class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is('vendor/'. $vendor->subdomain) ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($vendor->name, 0, 1)) }}</span>
+                                    class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($vendor->subdomain) || request()->is($vendor->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($vendor->name, 0, 1)) }}</span>
                                 <span class="truncate">{{ $vendor->name }}</span>
                             </a>
                         </li>
