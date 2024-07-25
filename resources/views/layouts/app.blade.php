@@ -293,6 +293,17 @@
 
             <main class="pb-10">
                 <div class="px-4 sm:px-6 lg:px-8">
+                    @if ($errors->any())
+                        <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                            <b>{{ __('There was a problem' . ':')}}</b>
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     {{ $slot }}
                 </div>
             </main>
