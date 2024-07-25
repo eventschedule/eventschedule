@@ -23,7 +23,7 @@ Route::post('/message', [HomeController::class, 'message'])->name('message');
 Route::get('/{subdomain}/view', [RoleController::class, 'viewGuest'])->name('role.view_guest');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/sign_up', [RoleController::class, 'create'])->name('role.create');
+    Route::get('/register', [RoleController::class, 'create'])->name('register');
     Route::post('/store', [RoleController::class, 'store'])->name('role.store');
     
     Route::get('/venues', [RoleController::class, 'viewVenues'])->name('venues');
