@@ -175,6 +175,12 @@ class Role extends Model
             'profile',
             'view',
             'edit',
+            'sign_up',
+            'login',
+            'logout',
+            'app',
+            'www',
+            'dev',
         ];
 
         while (self::where('subdomain', $subdomain)->exists() || in_array($subdomain, $reserved)) {
