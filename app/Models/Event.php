@@ -11,6 +11,7 @@ class Event extends Model
         'visibility',
         'starts_at',
         'duration',
+        'description',
     ];
 
     public function role()

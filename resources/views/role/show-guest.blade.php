@@ -83,7 +83,7 @@
         <div class="py-6">
             <div class="flex items-start justify-between pb-6">
                 <div>
-                    {{ $role->description }}
+                    {!! $role->description_html !!}
                 </div>
                 <div>
                 @if ($role->accept_talent_requests)

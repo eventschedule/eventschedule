@@ -15,6 +15,7 @@ use App\Models\Event;
 use App\Models\User;
 use App\Models\RoleUser;
 use App\Utils\UrlUtils;
+use App\Utils\MarkdownUtils;
 use Carbon\Carbon;
 
 class RoleController extends Controller
@@ -271,6 +272,7 @@ class RoleController extends Controller
 
         $role = new Role;
         $role->fill($request->all());
+        $role->description_html = MarkdownUtils::convertToHtml($role->description);
         $role->subdomain = UrlUtils::createDomain($request->name);
         $role->user_id = $user->id;
 
@@ -325,6 +327,7 @@ class RoleController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
         $role->fill($request->all());
+        $role->description_html = MarkdownUtils::convertToHtml($role->description);
 
         if (! $request->background_colors) {
             $role->background_colors = $request->custom_color1 . ', ' . $request->custom_color2;
