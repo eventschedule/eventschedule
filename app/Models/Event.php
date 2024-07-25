@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Utils\MarkdownUtils;
 use Carbon\Carbon;
 
 class Event extends Model
@@ -13,6 +14,15 @@ class Event extends Model
         'duration',
         'description',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($model) {
+            $model->description_html = MarkdownUtils::convertToHtml($model->description);
+        });
+    }
 
     public function role()
     {

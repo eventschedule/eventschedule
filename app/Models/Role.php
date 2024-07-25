@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Utils\MarkdownUtils;
 
 class Role extends Model
 {
@@ -32,6 +33,15 @@ class Role extends Model
         'accept_vendor_requests',
         'use_24_hour_time',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($model) {
+            $model->description_html = MarkdownUtils::convertToHtml($model->description);
+        });
+    }
 
     public function members()
     {
