@@ -155,4 +155,20 @@ class Role extends Model
 
         return config('filesystems.default') == 'local' ? url('/storage/' . $value) : $value;
     }
+
+    public static function generateSubdomain($name)
+    {
+        $subdomain = preg_replace('/[^a-zA-Z0-9- ]/', '', trim($name));
+        $subdomain = str_replace([' '], ['-'], strtolower(trim($subdomain)));
+        
+        $originalSubdomain = $subdomain;
+        $count = 1;
+
+        while (self::where('subdomain', $subdomain)->exists()) {
+            $subdomain = $originalSubdomain . $count;
+            $count++;
+        }
+
+        return $subdomain;
+    }
 }

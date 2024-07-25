@@ -271,7 +271,7 @@ class RoleController extends Controller
 
         $role = new Role;
         $role->fill($request->all());
-        $role->subdomain = UrlUtils::createDomain($request->name);
+        $role->subdomain = Role::generateSubdomain($request->name);
         $role->user_id = $user->id;
 
         if (! $request->background_colors) {

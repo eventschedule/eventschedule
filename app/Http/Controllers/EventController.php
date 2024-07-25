@@ -161,7 +161,7 @@ class EventController extends Controller
         if (! $venue) {
             $venue = new Role;
             $venue->name = $request->venue_name;
-            $venue->subdomain = UrlUtils::createDomain($request->venue_name);
+            $venue->subdomain = Role::generateSubdomain($request->venue_name);
             $venue->email = $request->venue_email;
             $venue->type = 'venue';
             $venue->save();
@@ -180,7 +180,7 @@ class EventController extends Controller
             if (! $role) {
                 $role = new Role;
                 $role->name = $request->role_name;
-                $role->subdomain = UrlUtils::createDomain($request->role_name);
+                $role->subdomain = Role::generateSubdomain($request->role_name);
                 $role->email = $request->role_email;
                 $role->type = $request->role_type;
                 $role->save();            

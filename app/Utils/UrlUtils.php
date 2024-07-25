@@ -30,11 +30,6 @@ class UrlUtils
         return ucfirst($parts[0]);
     }
 
-    public static function createDomain($name)
-    {
-        return str_replace([' ', '.'], ['-', ''], strtolower(trim($name)));
-    }
-
     public static function getYouTubeEmbed($url)
     {
         $parsedUrl = parse_url($url);
