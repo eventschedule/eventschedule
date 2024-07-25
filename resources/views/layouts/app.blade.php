@@ -18,6 +18,8 @@
     'resources/js/jquery-3.3.1.min.js',
     ])
 
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
     {{ isset($head) ? $head : '' }}
 </head>
 
@@ -293,6 +295,24 @@
 
             <main class="pb-10">
                 <div class="px-4 sm:px-6 lg:px-8">
+                    @if (session('message'))
+                        <script>
+                            document.addEventListener('DOMContentLoaded', () => {
+                                Toastify({
+                                    text: "{{ session('message') }}",
+                                    duration: 3000,
+                                    //newWindow: true,
+                                    gravity: 'bottom',
+                                    position: 'center',
+                                    stopOnFocus: true,
+                                    style: {
+                                        background: '#4BB543',
+                                    }
+                                }).showToast();
+                            });
+                        </script>
+                    @endif
+
                     @if ($errors->any())
                         <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                             <b>{{ __('There was a problem' . ':')}}</b>
@@ -311,5 +331,7 @@
     </div>
 
 </body>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
 </html>

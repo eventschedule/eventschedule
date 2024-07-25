@@ -89,7 +89,8 @@ class EventController extends Controller
         
         $event->save();
         
-        return redirect('/' . $subdomain . '/schedule');
+        return redirect('/' . $subdomain . '/schedule')
+                ->with('message', __('Successfully updated event'));
     }
 
     public function accept(Request $request, $subdomain, $hash)
@@ -103,7 +104,8 @@ class EventController extends Controller
         $event->is_accepted = true;
         $event->save();
         
-        return redirect('/' . $subdomain . '/requests');
+        return redirect('/' . $subdomain . '/requests')
+                    ->with('message', __('Request has been accepted'));
     }
 
     public function decline(Request $request, $subdomain, $hash)
@@ -118,9 +120,11 @@ class EventController extends Controller
         $event->save();
         
         if ($request->redirect_to == 'schedule') {
-            return redirect('/' . $subdomain . '/schedule');
+            return redirect('/' . $subdomain . '/schedule')
+                ->with('message', __('Request has been declined'));
         } else {
-            return redirect('/' . $subdomain . '/requests');
+            return redirect('/' . $subdomain . '/requests')
+                ->with('message', __('Request has been declined'));
         }
 
         
@@ -206,7 +210,8 @@ class EventController extends Controller
 
         $event->save();
 
-        return redirect('/' . $subdomain1 . '/schedule');
+        return redirect('/' . $subdomain1 . '/schedule')
+                ->with('message', __('Successfully created event'));
     }
 
     private function getVenue($role1, $role2) 
