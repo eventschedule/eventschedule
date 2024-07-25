@@ -9,6 +9,9 @@ Alpine.start();
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.css';
 
+//import Toastify from 'toastify-js';
+//import 'toastify-js/src/toastify.css';
+
 import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
 
