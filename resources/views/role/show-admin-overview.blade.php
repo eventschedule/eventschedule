@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <div class="mt-5 overflow-hidden rounded-lg bg-white shadow-md">
     <div class="px-4 py-5 sm:p-6">
-        {{ $role->description }}
+        {!! $role->description_html !!}
     </div>
 </div>
 

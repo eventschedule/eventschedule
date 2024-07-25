@@ -45,6 +45,7 @@ return new class extends Migration
             $table->text('postal_code')->nullable();
             $table->string('country_code')->nullable();
             $table->text('description')->nullable();
+            $table->text('description_html')->nullable();
             $table->text('social_links')->nullable();
             $table->text('payment_links')->nullable();
             $table->text('youtube_links')->nullable();
@@ -72,6 +73,8 @@ return new class extends Migration
             $table->boolean('is_accepted')->nullable();
             $table->dateTime('starts_at')->nullable();
             $table->float('duration', 8, 3)->nullable();
+            $table->text('description')->nullable();
+            $table->text('description_html')->nullable();
             $table->timestamps();
         });
     }

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Role;
 use App\Utils\UrlUtils;
+use App\Utils\MarkdownUtils;
 use Carbon\Carbon;
 
 class EventController extends Controller
@@ -81,6 +82,7 @@ class EventController extends Controller
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
         $event->fill($request->all());
+        $event->description_html = MarkdownUtils::convertToHtml($event->description);
 
         $timezone = auth()->user()->timezone;
         $event->starts_at = Carbon::createFromFormat('Y-m-d H:i', $request->starts_at, $timezone)
@@ -189,6 +191,7 @@ class EventController extends Controller
 
         $event = new Event;       
         $event->fill($request->all());
+        $event->description_html = MarkdownUtils::convertToHtml($event->description);
         $event->user_id = auth()->user()->id;
         $event->venue_id = $venue->id;
         $event->role_id = $role->id;
