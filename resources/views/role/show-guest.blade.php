@@ -7,7 +7,7 @@
 
     <title>{{ str_replace(':name', $role->name, __(':name | Event Schedule'))  }}</title>
 
-    <!-- Fonts -->
+    <!-- Fonts -->     
     <link href="https://fonts.googleapis.com/css2?family={{ $role->font_family }}:wght@400;700&display=swap"
         rel="stylesheet">
 
