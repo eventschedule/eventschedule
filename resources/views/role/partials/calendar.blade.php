@@ -103,7 +103,7 @@
             class="grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center text-xs font-semibold leading-6 text-gray-700 lg:flex-none">
             @foreach (['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as $day)
             <div class="flex justify-center bg-white py-2">
-                <span class="sr-only sm:not-sr-only">{{ $day }}</span>
+                {{ $day }}
             </div>
             @endforeach
         </div>
