@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'analytics' => [
+        'account_id' => env('ANALYTICS_ID'),
+    ],
+
 ];

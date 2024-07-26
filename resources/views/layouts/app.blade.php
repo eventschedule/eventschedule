@@ -2,6 +2,18 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head class="h-full bg-white">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.analytics.account_id') }}"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+    gtag('config', '{{ config('services.analytics.account_id') }}');
+    </script>
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -296,32 +308,32 @@
             <main class="pb-10">
                 <div class="px-4 sm:px-6 lg:px-8">
                     @if (session('message'))
-                        <script>
-                            document.addEventListener('DOMContentLoaded', () => {
-                                Toastify({
-                                    text: "{{ session('message') }}",
-                                    duration: 3000,
-                                    //newWindow: true,
-                                    gravity: 'bottom',
-                                    position: 'center',
-                                    stopOnFocus: true,
-                                    style: {
-                                        background: '#4BB543',
-                                    }
-                                }).showToast();
-                            });
-                        </script>
+                    <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        Toastify({
+                            text: "{{ session('message') }}",
+                            duration: 3000,
+                            //newWindow: true,
+                            gravity: 'bottom',
+                            position: 'center',
+                            stopOnFocus: true,
+                            style: {
+                                background: '#4BB543',
+                            }
+                        }).showToast();
+                    });
+                    </script>
                     @endif
 
                     @if ($errors->any())
-                        <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
-                            <b>{{ __('There was a problem' . ':')}}</b>
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
+                    <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                        <b>{{ __('There was a problem' . ':')}}</b>
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                     @endif
 
                     {{ $slot }}
