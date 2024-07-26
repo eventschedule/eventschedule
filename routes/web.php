@@ -52,7 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/{subdomain}/accept_event/{hash}', [EventController::class, 'accept'])->name('event.accept');
     Route::get('/{subdomain}/decline_event/{hash}', [EventController::class, 'decline'])->name('event.decline');
     //Route::get('/{subdomain}/delete_event/{hash}', [EventController::class, 'delete'])->name('event.delete');
-    Route::get('/{subdomain}/{tab?}/{year?}/{month?}/', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
+    Route::get('/{subdomain}/{tab?}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
 });
 
 /*

@@ -74,7 +74,7 @@ class RoleController extends Controller
         ));
     }
 
-    public function viewAdmin(Request $request, $subdomain, $tab = 'schedule', $year = null, $month = null)
+    public function viewAdmin(Request $request, $subdomain, $tab)
     {
         if (! auth()->user()->hasRole($subdomain)) {
             return redirect('/');
@@ -92,6 +92,8 @@ class RoleController extends Controller
         
         $events = [];
         $unscheduled = [];
+        $month = $request->month;
+        $year = $request->year;
         $startOfMonth = '';
         $endOfMonth = '';
 
