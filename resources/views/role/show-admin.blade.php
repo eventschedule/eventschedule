@@ -171,45 +171,45 @@
             <label for="current-tab" class="sr-only">Select a tab</label>
             <select id="current-tab" name="current-tab"
                 class="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600">
-                <option {{ $tab == 'overview' ? 'selected' : '' }}>Overview</option>
-                <option {{ $tab == 'schedule' ? 'selected' : '' }}>Schedule</option>
+                <option {{ $tab == 'schedule' ? 'selected' : '' }}>{{ __('Schedule') }}</option>
                 @if($role->acceptRequests())
                 <option {{ $tab == 'requests' ? 'selected' : '' }}>
-                    Requests{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</option>
+                    {{ __('Requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</option>
                 @endif
+                <option {{ $tab == 'profile' ? 'selected' : '' }}>{{ __('Profile') }}</option>
                 <option {{ $tab == 'followers' ? 'selected' : '' }}>
-                    Followers{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</option>
+                    {{ __('Followers') }}{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</option>
                 <option {{ $tab == 'team' ? 'selected' : '' }}>
-                    Team{{ count($members) ? ' (' . count($members) . ')' : '' }}</option>
+                    {{ __('Team') }}{{ count($members) ? ' (' . count($members) . ')' : '' }}</option>
             </select>
         </div>
 
         <!-- Tabs at small breakpoint and up -->
         <div class="hidden sm:block">
             <nav class="-mb-px flex space-x-8">
-                <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain]) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'overview' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">Overview</a>
                 <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'schedule' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">Schedule</a>
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'schedule' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('Schedule') }}</a>
                 @if($role->acceptRequests())
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'requests']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'requests' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">Requests{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</a>
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'requests' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('Requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</a>
                 @endif
+                <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain]) }}"
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'profile' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('Profile') }}</a>
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'followers']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'followers' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">Followers{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</a>
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'followers' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('Followers') }}{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</a>
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'team' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">Team{{ count($members) ? ' (' . count($members) . ')' : '' }}</a>
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'team' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('Team') }}{{ count($members) ? ' (' . count($members) . ')' : '' }}</a>
             </nav>
         </div>
 
     </div>
 
-    @if ($tab == 'overview')
-    @include('role.show-admin-overview')
-    @elseif ($tab == 'schedule')
+    @if ($tab == 'schedule' || ! $tab)
     @include('role.show-admin-schedule')
     @elseif ($tab == 'requests')
     @include('role.show-admin-requests')
+    @elseif ($tab == 'profile')
+    @include('role.show-admin-profile')
     @elseif ($tab == 'followers')
     @include('role.show-admin-followers')
     @elseif ($tab == 'team')

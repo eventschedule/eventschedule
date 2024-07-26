@@ -74,7 +74,7 @@ class RoleController extends Controller
         ));
     }
 
-    public function viewAdmin(Request $request, $subdomain, $tab = 'overview', $year = null, $month = null)
+    public function viewAdmin(Request $request, $subdomain, $tab = 'schedule', $year = null, $month = null)
     {
         if (! auth()->user()->hasRole($subdomain)) {
             return redirect('/');
