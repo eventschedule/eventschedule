@@ -35,8 +35,9 @@ return [
         ],
     ],
 
-    'analytics' => [
-        'account_id' => env('ANALYTICS_ID'),
+    'google' => [
+        'maps' => env('MAPS_API_KEY'),
+        'analytics' => env('ANALYTICS_ID'),
     ],
 
 ];

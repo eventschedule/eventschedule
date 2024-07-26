@@ -1,21 +1,21 @@
 <x-app-layout>
 
     <x-slot name="head">
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-
+        @if ($tab == 'profile')
+        <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps') }}&callback=initMap" loading="async" defer></script>
         <style>
-        /* Ensure the modal overlay covers everything */
         .modal-overlay {
             z-index: 50;
         }
 
-        /* Adjust the z-index of the Leaflet map container if needed */
         #map {
+            height: 400px;
+            width: 100%;
             z-index: 1;
         }
         </style>
+        @endif
+
     </x-slot>
 
     <form method="POST" action="{{ route('role.remove_links', ['subdomain' => $role->subdomain]) }}"
@@ -137,7 +137,8 @@
                 </span>
 
                 <span class="ml-3 hidden sm:block">
-                    <a href="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'year' => $year, 'month' => $month]) }}" target="_blank">
+                    <a href="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'year' => $year, 'month' => $month]) }}"
+                        target="_blank">
                         <button type="button"
                             class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor"

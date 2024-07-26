@@ -3,7 +3,7 @@
 
 <head class="h-full bg-white">
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.analytics.account_id') }}"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics') }}"></script>
     <script>
     window.dataLayer = window.dataLayer || [];
 
@@ -11,7 +11,7 @@
         dataLayer.push(arguments);
     }
     gtag('js', new Date());
-    gtag('config', '{{ config('services.analytics.account_id') }}');
+    gtag('config', '{{ config('services.google.analytics') }}');
     </script>
 
     <meta charset="utf-8">
