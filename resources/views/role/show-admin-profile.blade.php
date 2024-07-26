@@ -1,74 +1,3 @@
-<script>
-function showAdd(link_type) {
-    $('#add_modal').fadeIn(function() {
-        $('#link').focus();
-        $('#link_type').val(link_type);
-    });
-}
-
-function hideAdd() {
-    $('#add_modal').fadeOut();
-}
-
-function removeLink(link_type, link) {
-    var confirmed = confirm("{{ __('Are you sure?') }}");
-
-    if (confirmed) {
-        $('#remove_link').val(link);
-        $('#remove_link_type').val(link_type);
-        $('#remove_link_form').submit();
-    }
-}
-
-document.addEventListener("DOMContentLoaded", function() {
-    var map = L.map('map');
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    //L.marker([51.505, -0.09]).addTo(map);
-    //.bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
-    //.openPopup();
-
-    function geocodeAddress(address) {
-        const nominatimUrl =
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
-
-        //console.log('## ADDRESS: ' + nominatimUrl);
-
-        var parts = address.split(', ');
-        if (parts.length <= 1) {
-            return;
-        }
-        parts.shift();
-        var next_address = parts.join(', ');
-
-        axios.get(nominatimUrl)
-            .then(response => {
-                if (response.data.length > 0) {
-                    const result = response.data[0];
-                    const lat = result.lat;
-                    const lon = result.lon;
-
-                    map.setView([lat, lon], 13);
-
-                    //L.marker([lat, lon]).addTo(map);
-                } else {
-                    console.log('Address not found.');
-                    geocodeAddress(next_address);
-                }
-            })
-            .catch(error => {
-                console.error('Error geocoding address:', error);
-                geocodeAddress(next_address);
-            });
-    }
-
-    geocodeAddress('{{ $role->fullAddress() }}');
-});
-</script>
-
 <div class="mt-5 overflow-hidden rounded-lg bg-white shadow-md">
     <div class="px-4 py-5 sm:p-6">
         {!! $role->description_html !!}
@@ -278,3 +207,56 @@ Leaving: "ease-in duration-200"
         </div>
     </div>
 </div>
+
+<script>
+function showAdd(link_type) {
+    $('#add_modal').fadeIn(function() {
+        $('#link').focus();
+        $('#link_type').val(link_type);
+    });
+}
+
+function hideAdd() {
+    $('#add_modal').fadeOut();
+}
+
+function removeLink(link_type, link) {
+    var confirmed = confirm("{{ __('Are you sure?') }}");
+
+    if (confirmed) {
+        $('#remove_link').val(link);
+        $('#remove_link_type').val(link_type);
+        $('#remove_link_form').submit();
+    }
+}
+
+function initMap() {
+    geocoder = new google.maps.Geocoder();
+    map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 15,
+    });
+
+    geocodeAddress(geocoder, map);
+}
+
+// Function to geocode an address and center the map on it
+function geocodeAddress(geocoder, resultsMap) {
+    var address = "{{ $role->fullAddress() }}";
+    geocoder.geocode({
+        'address': address
+    }, function(results, status) {
+        if (status === 'OK') {
+            resultsMap.setCenter(results[0].geometry.location);
+            /*
+            var marker = new google.maps.Marker({
+                map: resultsMap,
+                position: results[0].geometry.location
+            });
+            */
+        } else {
+            console.log('Geocode was not successful for the following reason: ' + status);
+        }
+    });
+}
+
+</script>
