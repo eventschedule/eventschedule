@@ -43,9 +43,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/{subdomain}/add_member', [RoleController::class, 'createMember'])->name('role.create_member');
     Route::post('/{subdomain}/add_member', [RoleController::class, 'storeMember'])->name('role.store_member');
     Route::get('/{subdomain}/remove_member/{hash}', [RoleController::class, 'removeMember'])->name('role.remove_member');
-    Route::get('/{subdomain1}/add_event/{subdomain2?}', [EventController::class, 'create'])->name('event.create');
-    Route::get('/{subdomain1}/sign_up/{subdomain2?}', [EventController::class, 'create'])->name('event.sign_up');
-    Route::post('/{subdomain1}/store_event/{subdomain2?}', [EventController::class, 'store'])->name('event.store');
+    Route::get('/{subdomain}/add_event/{subdomain2?}', [EventController::class, 'create'])->name('event.create');
+    Route::get('/{subdomain}/sign_up/{subdomain2?}', [EventController::class, 'create'])->name('event.sign_up');
+    Route::post('/{subdomain}/store_event/{subdomain2?}', [EventController::class, 'store'])->name('event.store');
     Route::get('/{subdomain}/edit_event/{hash}', [EventController::class, 'edit'])->name('event.edit');
     Route::get('/{subdomain}/event/{hash}', [EventController::class, 'view'])->name('event.view');
     Route::put('/{subdomain}/update_event/{hash}', [EventController::class, 'update'])->name('event.update');

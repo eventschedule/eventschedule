@@ -25,7 +25,7 @@ class EventController extends Controller
 
         $data = [
             'event' => $event,
-            'subdomain1' => $subdomain,
+            'subdomain' => $subdomain,
             'subdomain2' => $subdomain == $venueSubdomain ? $roleSubdomain : $venueSubdomain,
             'venue' => $event->venue,
             'talent' => $event->role->type == 'talent' ? $event->role : false,
@@ -36,16 +36,16 @@ class EventController extends Controller
         return view('event/edit', $data);
     }
 
-    public function create(Request $request, $subdomain1, $subdomain2 = '')
+    public function create(Request $request, $subdomain, $subdomain2 = '')
     {
-        $role1 = Role::subdomain($subdomain1)->firstOrFail();
+        $role1 = Role::subdomain($subdomain)->firstOrFail();
         $role2 = $subdomain2 ? Role::subdomain($subdomain2)->firstOrFail() : false;
 
         $venue = $this->getVenue($role1, $role2);
         $vendor = $this->getVendor($role1, $role2);
         $talent = $this->getTalent($role1, $role2);
         
-        if (! auth()->user()->hasRole($subdomain1)) {
+        if (! auth()->user()->hasRole($subdomain)) {
             return redirect('/');
         }
 
@@ -60,7 +60,7 @@ class EventController extends Controller
         }
 
         $data = [
-            'subdomain1' => $subdomain1,
+            'subdomain' => $subdomain,
             'subdomain2' => $subdomain2,
             'event' => $event,
             'venue' => $venue,
@@ -145,9 +145,9 @@ class EventController extends Controller
     }
     */
 
-    public function store(Request $request, $subdomain1, $subdomain2 = '')
+    public function store(Request $request, $subdomain, $subdomain2 = '')
     {
-        $role1 = Role::subdomain($subdomain1)->firstOrFail();
+        $role1 = Role::subdomain($subdomain)->firstOrFail();
         $role2 = $subdomain2 ? Role::subdomain($subdomain2)->firstOrFail() : false;
 
         $venue = $this->getVenue($role1, $role2);
@@ -210,7 +210,7 @@ class EventController extends Controller
 
         $event->save();
 
-        return redirect('/' . $subdomain1 . '/schedule')
+        return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']))
                 ->with('message', __('Successfully created event'));
     }
 

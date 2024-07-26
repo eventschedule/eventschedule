@@ -9,8 +9,8 @@
     <h3 class="mt-2 text-sm font-semibold text-gray-900">{{ __('No requests') }}</h3>
     <p class="mt-1 text-sm text-gray-500">{{ __('Share your sign up link to get more requests') }}</p>
     <div class="mt-3">
-        <a href="{{ route('event.sign_up', ['subdomain1' => $role->subdomain]) }}" target="_blank">
-            {{ \App\Utils\UrlUtils::clean(route('event.sign_up', ['subdomain1' => $role->subdomain])) }}
+        <a href="{{ route('event.sign_up', ['subdomain' => $role->subdomain]) }}" target="_blank">
+            {{ \App\Utils\UrlUtils::clean(route('event.sign_up', ['subdomain' => $role->subdomain])) }}
         </a>
     </div>
 </div>
