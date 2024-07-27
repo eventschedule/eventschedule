@@ -231,32 +231,13 @@ function removeLink(link_type, link) {
 }
 
 function initMap() {
-    geocoder = new google.maps.Geocoder();
-    map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 15,
-    });
-
-    geocodeAddress(geocoder, map);
-}
-
-// Function to geocode an address and center the map on it
-function geocodeAddress(geocoder, resultsMap) {
-    var address = "{{ $role->fullAddress() }}";
-    geocoder.geocode({
-        'address': address
-    }, function(results, status) {
-        if (status === 'OK') {
-            resultsMap.setCenter(results[0].geometry.location);
-            /*
-            var marker = new google.maps.Marker({
-                map: resultsMap,
-                position: results[0].geometry.location
-            });
-            */
-        } else {
-            console.log('Geocode was not successful for the following reason: ' + status);
-        }
+    var latitude = "{{ $role->geo_lat }}";
+    var longitude = "{{ $role->geo_lon }}";
+    
+    var latLng = new google.maps.LatLng(latitude, longitude);    
+    var map = new google.maps.Map(document.getElementById('map'), {
+        center: latLng,
+        zoom: 15
     });
 }
-
 </script>

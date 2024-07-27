@@ -40,6 +40,26 @@ class Role extends Model
 
         static::saving(function ($model) {
             $model->description_html = MarkdownUtils::convertToHtml($model->description);
+
+            $address = $model->fullAddress();
+
+            if ($address != $model->geo_address) {
+                $urlAddress = urlencode($address);
+                $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$urlAddress}&key=" . config('services.google.backend');
+                $response = file_get_contents($url);
+                $responseData = json_decode($response, true);
+
+                if ($responseData['status'] == 'OK') {
+                    $latitude = $responseData['results'][0]['geometry']['location']['lat'];
+                    $longitude = $responseData['results'][0]['geometry']['location']['lng'];
+                            
+                    $model->formatted_address = $responseData['results'][0]['formatted_address'];
+                    $model->google_place_id = $responseData['results'][0]['place_id'];
+                    $model->geo_address = $address;
+                    $model->geo_lat = $latitude;
+                    $model->geo_lon = $longitude;
+                }                
+            }
         });
     }
 
