@@ -168,6 +168,8 @@
         <div class="max-w-7xl mx-auto space-y-6">
             <div class="flex items-center gap-4">
                 <x-primary-button>{{ __('Save') }}</x-primary-button>
+
+                <x-cancel-button></x-cancel-button>
             </div>
         </div>
 
