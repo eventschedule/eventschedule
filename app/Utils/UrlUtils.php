@@ -50,4 +50,17 @@ class UrlUtils
     
         return false;
     }
+
+    public static function getBackUrl()
+    {
+        $previous = url()->previous();
+
+        if (strpos($previous, 'edit') || strpos($previous, 'add') || strpos($previous, 'update')) {
+            $parts = explode('/', $previous);
+            array_pop($parts);
+            $previous = implode('/', $parts);
+        }
+
+        return $previous;
+    }
 }
