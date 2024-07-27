@@ -96,6 +96,15 @@ class Role extends Model
         return $query->where('subdomain', $subdomain);
     }
  
+    public function bestAddress()
+    {
+        if ($this->formatted_address) {
+            return $this->formatted_address;
+        } else {
+            return $this->fullAddress();
+        }
+    }
+
     public function fullAddress()
     {
         $str = '';
