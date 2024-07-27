@@ -36,6 +36,7 @@ return [
     ],
 
     'google' => [
+        'backend' => env('BACKEND_GOOGLE_KEY'),
         'maps' => env('MAPS_API_KEY'),
         'analytics' => env('ANALYTICS_ID'),
     ],
