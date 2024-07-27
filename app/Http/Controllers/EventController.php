@@ -155,11 +155,21 @@ class EventController extends Controller
         $talent = $this->getTalent($role1, $role2);
         
         if (! $venue) {
-            $venue = Role::whereType('venue')->whereEmail($request->venue_email)->first();
+            $venue = Role::whereEmail($request->venue_email)->first();
+
+            if (! $venue->isVenue()) {
+                return redirect()
+                        ->back()
+                        ->withInput()
+                        ->withErrors(['venue_email' => __('Email is not associated with a venue')]);
+            }
         }
 
         if ($venue && ! auth()->user()->hasRole($venue->subdomain) && ! $venue->acceptRequests()) {
-            return redirect('/');
+            return redirect()
+                    ->back()
+                    ->withInput()
+                    ->withErrors(['venue_email' => __('Venue is not accepting requests')]);
         }
 
         if (! $venue) {
@@ -179,9 +189,14 @@ class EventController extends Controller
             $role = $talent;
         } else {
 
-            $role = Role::whereType($request->role_type)->whereEmail($request->role_email)->first();
+            $role = Role::whereEmail($request->role_email)->first();
 
-            if (! $role) {
+            if ($role->isVenue()) {
+                return redirect()
+                        ->back()
+                        ->withInput()
+                        ->withErrors(['venue_email' => __('Email is associated with a venue')]);
+            } elseif (! $role) {
                 $role = new Role;
                 $role->name = $request->role_name;
                 $role->subdomain = Role::generateSubdomain($request->role_name);
