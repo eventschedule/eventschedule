@@ -32,6 +32,7 @@ class Role extends Model
         'accept_talent_requests',
         'accept_vendor_requests',
         'use_24_hour_time',
+        'timezone',
     ];
 
     protected static function boot()

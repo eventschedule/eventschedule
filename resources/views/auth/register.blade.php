@@ -1,6 +1,19 @@
 <x-auth-layout>
-    <form method="POST" action="{{ route('register') }}">
+
+    <x-slot name="head">
+        <script>
+        // Example: Initialize Flatpickr on elements with the class 'datepicker'
+        document.addEventListener('DOMContentLoaded', function() {
+            var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            document.getElementById('timezone').value = timezone;
+        });
+        </script>
+    </x-slot>
+
+    <form method="POST" action="{{ route('sign_up') }}">
         @csrf
+
+        <input type="text" id="timezone" name="timezone"/>
 
         <!-- Name -->
         <div>
