@@ -76,9 +76,9 @@ class EventController extends Controller
             $event->starts_at = $request->date . $utcTime->format('H:i:s');
         }
 
-        $title = __('Add Event');
+        $title = __('messages.add_event');
         if (strpos($request->url(), '/sign_up') > 0) {
-            $title = __('Sign Up');
+            $title = __('messages.sign_up');
         }
 
         $data = [
@@ -120,7 +120,7 @@ class EventController extends Controller
         ];
 
         return redirect(route('role.view_admin', $data))
-                ->with('message', __('Successfully updated event'));
+                ->with('message', __('messages.event_updated'));
     }
 
     public function accept(Request $request, $subdomain, $hash)
@@ -135,7 +135,7 @@ class EventController extends Controller
         $event->save();
         
         return redirect('/' . $subdomain . '/requests')
-                    ->with('message', __('Request has been accepted'));
+                    ->with('message', __('messages.request_accepted'));
     }
 
     public function decline(Request $request, $subdomain, $hash)
@@ -151,13 +151,11 @@ class EventController extends Controller
         
         if ($request->redirect_to == 'schedule') {
             return redirect('/' . $subdomain . '/schedule')
-                ->with('message', __('Request has been declined'));
+                ->with('message', __('messages.request_accepted'));
         } else {
             return redirect('/' . $subdomain . '/requests')
-                ->with('message', __('Request has been declined'));
-        }
-
-        
+                ->with('message', __('messages.request_accepted'));
+        }        
     }
 
     /*
@@ -191,7 +189,7 @@ class EventController extends Controller
                 return redirect()
                         ->back()
                         ->withInput()
-                        ->withErrors(['venue_email' => __('Email is not associated with a venue')]);
+                        ->withErrors(['venue_email' => __('messages.email_not_associated_with_venue')]);
             }
         }
 
@@ -199,7 +197,7 @@ class EventController extends Controller
             return redirect()
                     ->back()
                     ->withInput()
-                    ->withErrors(['venue_email' => __('Venue is not accepting requests')]);
+                    ->withErrors(['venue_email' => __('messages.venue_not_accepting_requests')]);
         }
 
         if (! $venue) {
@@ -225,7 +223,7 @@ class EventController extends Controller
                 return redirect()
                         ->back()
                         ->withInput()
-                        ->withErrors(['venue_email' => __('Email is associated with a venue')]);
+                        ->withErrors(['venue_email' => __('messages.email_associated_with_venue')]);
             } elseif (! $role) {
                 $role = new Role;
                 $role->name = $request->role_name;
@@ -264,7 +262,7 @@ class EventController extends Controller
         ];
 
         return redirect(route('role.view_admin', $data))
-                ->with('message', __('Successfully created event'));
+                ->with('message', __('messages.event_created'));
     }
 
     private function getVenue($role1, $role2) 

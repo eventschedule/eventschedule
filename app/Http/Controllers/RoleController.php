@@ -42,7 +42,7 @@ class RoleController extends Controller
         $role->delete();
 
         return redirect(route('home'))
-                ->with('message', __('Successfully deleted ' . $type));
+                ->with('message', __('messages.deleted_' . $type));
     }
 
     public function follow(Request $request, $subdomain)
@@ -55,7 +55,7 @@ class RoleController extends Controller
         }
 
         return redirect(route($role->getTypePlural()))
-                ->with('message', str_replace(':name', $role->name, __('Successfully followed :name')));
+                ->with('message', str_replace(':name', $role->name, __('messages.followed_role')));
     }
 
     public function viewGuest(Request $request, $subdomain)
@@ -174,7 +174,7 @@ class RoleController extends Controller
 
         $data = [
             'role' => $role,
-            'title' => __('Add Member'),
+            'title' => __('messages.add_member'),
         ];
 
         return view('role/add-member', $data);
@@ -217,7 +217,7 @@ class RoleController extends Controller
         }
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))
-                    ->with('message', __('Successfully added member'));
+                    ->with('message', __('messages.member_added'));
     }
 
     public function removeMember(Request $request, $subdomain, $hash)
@@ -239,7 +239,7 @@ class RoleController extends Controller
         $roleUser->delete();
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))
-                    ->with('message', __('Successfully removed member '));
+                    ->with('message', __('messages.removed_member'));
     }
 
     public function viewVenues()
@@ -289,7 +289,7 @@ class RoleController extends Controller
 
         $data = [
             'role' => $role,
-            'title' => __('Register'),
+            'title' => __('messages.register'),
             'gradients' => $gradientOptions,
             'fonts' => $fonts,
         ];
@@ -343,7 +343,7 @@ class RoleController extends Controller
         }
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]))
-                    ->with('message', __('Successfully created ' . $role->type));
+                    ->with('message', __('messages.created_' . $role->type));
     }
 
     public function edit($subdomain)
@@ -370,7 +370,7 @@ class RoleController extends Controller
 
         $data = [
             'role' => $role,
-            'title' => __('Edit ' . ucwords($role->type)),
+            'title' => __('messages.edit_' . $role->type),
             'gradients' => $gradientOptions,
             'fonts' => $fonts,
         ];
@@ -422,7 +422,7 @@ class RoleController extends Controller
         }
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]))
-                    ->with('message', __('Successfully updated ' . $role->type));
+                    ->with('message', __('messages.updated_' . $role->type));
     }
 
     public function updateLinks(Request $request, $subdomain): RedirectResponse
@@ -482,7 +482,7 @@ class RoleController extends Controller
         $role->save();
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]))
-                    ->with('message', __('Successfully added link'));
+                    ->with('message', __('messages.added_link'));
     }
 
     public function removeLinks(Request $request, $subdomain): RedirectResponse
@@ -527,7 +527,7 @@ class RoleController extends Controller
         $role->save();
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]))
-                    ->with('message', __('Successfully removed link'));
+                    ->with('message', __('messages.removed_link'));
     }
 
     public function qrCode($subdomain)
