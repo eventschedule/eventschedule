@@ -24,7 +24,7 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         $type = $role->type;
 
-        if (! auth()->user()->id != $role->user_id) {
+        if (auth()->user()->id != $role->user_id) {
             return redirect('/');
         }
 
