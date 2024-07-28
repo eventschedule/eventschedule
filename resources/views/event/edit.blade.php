@@ -170,6 +170,10 @@
                 <x-primary-button>{{ __('Save') }}</x-primary-button>
 
                 <x-cancel-button></x-cancel-button>
+
+                @if ($event->exists)
+                    <x-delete-button></x-delete-button>
+                @endif
             </div>
         </div>
 
