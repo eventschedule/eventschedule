@@ -27,7 +27,7 @@ class EventController extends Controller
         ];
 
         return redirect(route('role.view_admin', $data))
-                ->with('message', __('Successfully deleted event'));
+                ->with('message', __('messages.event_deleted'));
     }
 
     public function view(Request $request, $subdomain, $hash)
@@ -50,7 +50,7 @@ class EventController extends Controller
             'venue' => $event->venue,
             'talent' => $event->role->type == 'talent' ? $event->role : false,
             'vendor' => $event->role->type == 'vendor' ? $event->role : false,
-            'title' => __('Edit Event'),
+            'title' => __('messages.edit_event'),
         ];
 
         return view('event/edit', $data);
