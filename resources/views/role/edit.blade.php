@@ -420,6 +420,18 @@
                         </div>
 
                         <div class="mb-6">
+                            <x-input-label for="timezone" :value="__('Timezone')" />
+                            <select name="timezone" id="timezone">
+                                @foreach(\Carbon\CarbonTimeZone::listIdentifiers() as $timezone)
+                                <option value="{{ $timezone }}" {{ $role->timezone == $timezone ? 'SELECTED' : '' }}>
+                                    {{ $timezone }}
+                                </option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('timezone')" />
+                        </div>
+
+                        <div class="mb-6">
                             <x-checkbox name="accept_talent_requests" label="{{ __('Accept talent requests') }}"
                                 checked="{{ old('accept_talent_requests', $role->accept_talent_requests) }}"
                                 data-custom-attribute="value" />
