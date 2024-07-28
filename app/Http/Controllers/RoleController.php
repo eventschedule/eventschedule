@@ -19,6 +19,21 @@ use Carbon\Carbon;
 
 class RoleController extends Controller
 {
+    public function delete(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $type = $role->type;
+
+        if (! auth()->user()->id != $role->user_id) {
+            return redirect('/');
+        }
+
+        $role->delete();
+
+        return redirect(route('home', $data))
+                ->with('message', __('Successfully deleted '  $type));
+    }
+
     public function follow(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
