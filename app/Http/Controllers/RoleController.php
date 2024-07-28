@@ -30,11 +30,13 @@ class RoleController extends Controller
         }
 
         if ($role->profile_image_url) {
-            Storage::delete($role->profile_image_url);            
+            $path = 'public/' . $role->getAttributes()['profile_image_url'];
+            Storage::delete($path);
         }
 
         if ($role->background_image_url) {
-            Storage::delete($role->background_image_url);            
+            $path = 'public/' . $role->getAttributes()['background_image_url'];
+            Storage::delete($path);
         }
 
         $role->delete();
