@@ -10,6 +10,26 @@ use Carbon\Carbon;
 
 class EventController extends Controller
 {
+    public function delete(Request $request, $subdomain, $hash)
+    {
+        $event_id = UrlUtils::decodeId($hash);
+        $event = Event::findOrFail($event_id);
+
+        if (! auth()->user()->id != $event->user_id) {
+            return redirect('/');
+        }
+
+        $event->delete();
+
+        $data = [
+            'subdomain' => $subdomain, 
+            'tab' => 'schedule',
+        ];
+
+        return redirect(route('role.view_admin', $data))
+                ->with('message', __('Successfully deleted event'));
+    }
+
     public function view(Request $request, $subdomain, $hash)
     {
         dd('here');
