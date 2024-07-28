@@ -314,6 +314,24 @@ class RoleController extends Controller
 
         $user->roles()->attach($role->id);
 
+        if ($request->hasFile('profile_image')) {
+            $file = $request->file('profile_image');
+            $filename = strtolower('profile_' . Str::random(10) . '_' . time() . '.' . $file->getClientOriginalExtension());
+            $path = $file->storeAs('images', $filename, 'public');
+
+            $role->profile_image_url = $path;
+            $role->save();
+        }
+
+        if ($request->hasFile('background_image')) {
+            $file = $request->file('background_image');
+            $filename = strtolower('background_' . Str::random(10) . '_' . time() . '.' . $file->getClientOriginalExtension());
+            $path = $file->storeAs('images', $filename, 'public');
+
+            $role->background_image_url = $path;
+            $role->save();
+        }
+
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]))
                     ->with('message', __('Successfully created ' . $role->type));
     }
