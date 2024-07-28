@@ -131,14 +131,14 @@
                     <ol class="mt-2">
                         @foreach ($events as $event)
                         @if ($event->starts_at &&
-                        Carbon\Carbon::parse($event->starts_at)->isSameDay($currentDate))
+                        Carbon\Carbon::parse($event->localStartsAt())->isSameDay($currentDate))
                         <li>
                             <a href="{{ route($showAdd ? 'event.edit' : 'event.view', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) }}"
                                 class="group flex">
                                 <p class="flex-auto truncate font-medium text-gray-900 group-hover:text-indigo-600">
                                     {{ $event->role->name }}</p>
-                                <time datetime="{{ $event->starts_at }}"
-                                    class="ml-3 hidden flex-none text-gray-500 group-hover:text-indigo-600 xl:block">{{ Carbon\Carbon::parse($event->starts_at)->format('g:i A') }}</time>
+                                <time datetime="{{ $event->localStartsAt() }}"
+                                    class="ml-3 hidden flex-none text-gray-500 group-hover:text-indigo-600 xl:block">{{ Carbon\Carbon::parse($event->localStartsAt())->format('g:i A') }}</time>
                             </a>
                         </li>
                         @endif
@@ -165,7 +165,7 @@
                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z"
                                 clip-rule="evenodd" />
                         </svg>
-                        {{ Carbon\Carbon::parse($event->starts_at)->format('g:i A') }}
+                        {{ Carbon\Carbon::parse($event->localStartsAt())->format('g:i A') }}
                     </time>
                 </div>
                 <a href="#"

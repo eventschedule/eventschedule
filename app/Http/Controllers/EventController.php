@@ -51,7 +51,9 @@ class EventController extends Controller
 
         $event = new Event;
         if ($request->date) {
-            $event->starts_at = $request->date . ' 20:00';
+            $defaultTime = Carbon::now(auth()->user()->timezone)->setTime(20, 0, 0);
+            $utcTime = $defaultTime->setTimezone('UTC');
+            $event->starts_at = $request->date . $utcTime->format('H:i:s');
         }
 
         $title = __('Add Event');
@@ -82,14 +84,14 @@ class EventController extends Controller
         $event = Event::findOrFail($event_id);
         $event->fill($request->all());
 
-        $timezone = auth()->user()->timezone;
-        $event->starts_at = Carbon::createFromFormat('Y-m-d H:i', $request->starts_at, $timezone)
+        $timezone = auth()->user()->timezone;        
+        $event->starts_at = Carbon::createFromFormat('Y-m-d H:i:s', $request->starts_at, $timezone)
             ->setTimezone('UTC')
-            ->format('Y-m-d H:i');
+            ->format('Y-m-d H:i:S');
         
         $event->save();
 
-        $date = Carbon::createFromFormat('Y-m-d H:i', $event->starts_at);
+        $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
         $data = [
             'subdomain' => $subdomain, 
             'tab' => 'schedule',
@@ -222,9 +224,9 @@ class EventController extends Controller
 
         if ($event->starts_at) {
             $timezone = auth()->user()->timezone;
-            $event->starts_at = Carbon::createFromFormat('Y-m-d H:i', $event->starts_at, $timezone)
+            $event->starts_at = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, $timezone)
                 ->setTimezone('UTC')
-                ->format('Y-m-d H:i');
+                ->format('Y-m-d H:i:s');
         }
 
         if (auth()->user()->hasRole($venue->subdomain)) {
@@ -233,7 +235,7 @@ class EventController extends Controller
 
         $event->save();
 
-        $date = Carbon::createFromFormat('Y-m-d H:i', $event->starts_at);
+        $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
         $data = [
             'subdomain' => $subdomain, 
             'tab' => 'schedule',
