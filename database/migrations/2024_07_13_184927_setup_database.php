@@ -35,8 +35,8 @@ return new class extends Migration
             $table->string('font_color')->default('#111827');
             $table->string('font_family')->nullable();
             $table->string('name');
+            $table->string('email');
             $table->string('phone')->nullable();
-            $table->string('email')->unique();
             $table->string('website')->nullable();
             $table->string('address1')->nullable();
             $table->string('address2')->nullable();
