@@ -34,16 +34,16 @@ class Event extends Model
         return $this->belongsTo(Role::class, 'venue_id');
     }
 
-    public function getStartTimeAttribute($value)
+    public function localStartsAt()
     {
-        if (! $value) {
+        if (! $this->starts_at) {
             return '';
         }
 
         $timezone = auth()->user()->timezone;
 
-        return Carbon::createFromFormat('Y-m-d H:i', $value, 'UTC')
+        return Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')
                     ->setTimezone($timezone)
-                    ->format('Y-m-d H:i');
+                    ->format('Y-m-d H:i:s');
     }
 }

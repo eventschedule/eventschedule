@@ -134,7 +134,7 @@
                         <div class="mb-6">
                             <x-input-label for="starts_at" :value="__('Date and Time')" />
                             <x-text-input type="text" id="starts_at" name="starts_at" class="datepicker"
-                                :value="old('starts_at', $event->starts_at)" />
+                                :value="old('starts_at', $event->localStartsAt())" />
                             <x-input-error class="mt-2" :messages="$errors->get('starts_at')" />
                         </div>
 
