@@ -15,7 +15,7 @@ class EventController extends Controller
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
 
-        if (! auth()->user()->id != $event->user_id) {
+        if (auth()->user()->id != $event->user_id) {            
             return redirect('/');
         }
 
