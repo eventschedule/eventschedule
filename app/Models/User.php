@@ -38,7 +38,7 @@ class User extends Authenticatable
         parent::boot();
 
         static::saving(function ($model) {
-            $model->email = strtolower($email);
+            $model->email = strtolower($model->email);
         });
     }
     
