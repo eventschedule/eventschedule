@@ -387,7 +387,7 @@
                     <div class="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
                         <div>
                             <label for="first_name" class="block text-sm font-semibold leading-6 text-white">
-                                {{ __('First name') }}
+                                {{ __('messages.first_name') }}
                             </label>
                             <div class="mt-2.5">
                                 <input type="text" name="first_name" id="first_name" autocomplete="given-name"
@@ -396,7 +396,7 @@
                         </div>
                         <div>
                             <label for="last_name" class="block text-sm font-semibold leading-6 text-white">
-                                {{ __('Last name') }}</label>
+                                {{ __('messages.last_name') }}</label>
                             <div class="mt-2.5">
                                 <input type="text" name="last_name" id="last_name" autocomplete="family-name"
                                     class="block w-full rounded-md border-0 bg-white/5 px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
@@ -404,7 +404,7 @@
                         </div>
                         <div class="sm:col-span-2">
                             <label for="email" class="block text-sm font-semibold leading-6 text-white">
-                                {{ __('Email') }}</label>
+                                {{ __('messages.email') }}</label>
                             <div class="mt-2.5">
                                 <input type="email" name="email" id="email" autocomplete="email"
                                     class="block w-full rounded-md border-0 bg-white/5 px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
@@ -412,7 +412,7 @@
                         </div>
                         <div class="sm:col-span-2">
                             <label for="phone" class="block text-sm font-semibold leading-6 text-white">
-                                {{ __('Phone number') }}</label>
+                                {{ __('messages.phone') }}</label>
                             <div class="mt-2.5">
                                 <input type="tel" name="phone" id="phone" autocomplete="tel"
                                     class="block w-full rounded-md border-0 bg-white/5 px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
@@ -420,7 +420,7 @@
                         </div>
                         <div class="sm:col-span-2">
                             <label for="message" class="block text-sm font-semibold leading-6 text-white">
-                                {{ __('Message') }}</label>
+                                {{ __('messages.message') }}</label>
                             <div class="mt-2.5">
                                 <textarea name="message" id="message" rows="4"
                                     class="block w-full rounded-md border-0 bg-white/5 px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"></textarea>
@@ -430,7 +430,7 @@
                     <div class="mt-8 flex justify-end">
                         <button type="submit"
                             class="rounded-md bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
-                            {{ __('Send message') }}</button>
+                            {{ __('messages.send_message') }}</button>
                     </div>
                 </div>
             </form>
