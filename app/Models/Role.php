@@ -40,6 +40,7 @@ class Role extends Model
         parent::boot();
 
         static::saving(function ($model) {
+            $model->email = strtolower($email);
             $model->description_html = MarkdownUtils::convertToHtml($model->description);
 
             $address = $model->fullAddress();
