@@ -31,7 +31,7 @@ class RoleController extends Controller
         $role->delete();
 
         return redirect(route('home', $data))
-                ->with('message', __('Successfully deleted '  $type));
+                ->with('message', __('Successfully deleted ' . $type));
     }
 
     public function follow(Request $request, $subdomain)
