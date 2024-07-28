@@ -103,12 +103,12 @@ class EventController extends Controller
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
         $event->fill($request->all());
-
+    
         $timezone = auth()->user()->timezone;        
         $event->starts_at = Carbon::createFromFormat('Y-m-d H:i:s', $request->starts_at, $timezone)
             ->setTimezone('UTC')
-            ->format('Y-m-d H:i:S');
-        
+            ->format('Y-m-d H:i:s');
+
         $event->save();
 
         $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);

@@ -172,7 +172,7 @@
                 <x-cancel-button></x-cancel-button>
 
                 @if ($event->exists)
-                    <x-delete-button></x-delete-button>
+                    <x-delete-button :url="route('event.delete', ['subdomain' => $subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)])"></x-delete-button>
                 @endif
             </div>
         </div>

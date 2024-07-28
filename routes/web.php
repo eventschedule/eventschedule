@@ -37,11 +37,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/{subdomain}/edit', [RoleController::class, 'edit'])->name('role.edit');
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
     Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
-    Route::post('/{subdomain}/delete', [RoleController::class, 'delete'])->name('role.delete');
+    Route::get('/{subdomain}/delete', [RoleController::class, 'delete'])->name('role.delete');
     Route::get('/{subdomain}/add_event/{subdomain2?}', [EventController::class, 'create'])->name('event.create');
     Route::post('/{subdomain}/store_event/{subdomain2?}', [EventController::class, 'store'])->name('event.store');
     Route::get('/{subdomain}/edit_event/{hash}', [EventController::class, 'edit'])->name('event.edit');
-    Route::post('/{subdomain}/delete_event/{hash}', [EventController::class, 'delete'])->name('event.delete');
+    Route::get('/{subdomain}/delete_event/{hash}', [EventController::class, 'delete'])->name('event.delete');
     Route::put('/{subdomain}/update_event/{hash}', [EventController::class, 'update'])->name('event.update');
     Route::get('/{subdomain}/requests/accept_event/{hash}', [EventController::class, 'accept'])->name('event.accept');
     Route::get('/{subdomain}/requests/decline_event/{hash}', [EventController::class, 'decline'])->name('event.decline');
