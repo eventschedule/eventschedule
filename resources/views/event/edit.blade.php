@@ -9,7 +9,7 @@
                 altInput: true,
                 time_24hr: "{{ $venue && $venue-> use_24_hour_time ? 'true' : 'false' }}",
                 altFormat: "{{ $venue && $venue->use_24_hour_time ? 'F j, Y H:i' : 'F j, Y h:i K' }}",
-                //dateFormat: "Y-m-d H:i",
+                dateFormat: "Y-m-d H:i:S",
             });
         });
         </script>
