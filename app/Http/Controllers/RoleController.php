@@ -30,7 +30,7 @@ class RoleController extends Controller
 
         $role->delete();
 
-        return redirect(route('home', $data))
+        return redirect(route('home'))
                 ->with('message', __('Successfully deleted ' . $type));
     }
 

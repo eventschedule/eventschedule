@@ -166,14 +166,20 @@
 
 
         <div class="max-w-7xl mx-auto space-y-6">
-            <div class="flex items-center gap-4">
-                <x-primary-button>{{ __('Save') }}</x-primary-button>
+            <div class="flex gap-4 items-center justify-between">
+                <div class="flex gap-4">
+                    <x-primary-button>{{ __('Save') }}</x-primary-button>
 
-                <x-cancel-button></x-cancel-button>
+                    <x-cancel-button></x-cancel-button>
+                </div>
 
-                @if ($event->exists)
-                    <x-delete-button :url="route('event.delete', ['subdomain' => $subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)])"></x-delete-button>
-                @endif
+                <div>
+                    @if ($event->exists)
+                    <x-delete-button
+                        :url="route('event.delete', ['subdomain' => $subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)])">
+                    </x-delete-button>
+                    @endif
+                </div>
             </div>
         </div>
 

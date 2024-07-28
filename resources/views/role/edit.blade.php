@@ -459,11 +459,21 @@
         </div>
 
         <div class="max-w-7xl mx-auto space-y-6 mt-3">
-            <div class="flex items-center gap-4">
-                <x-primary-button>{{ __('Save') }}</x-primary-button>
+            <div class="flex gap-4 items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <x-primary-button>{{ __('Save') }}</x-primary-button>
 
-                <x-cancel-button></x-cancel-button>
+                    <x-cancel-button></x-cancel-button>
+                </div>
+                <div>
+                    @if ($role->exists)
+                    <x-delete-button
+                        :url="route('role.delete', ['subdomain' => $role->subdomain])">
+                    </x-delete-button>
+                    @endif
+                </div>
             </div>
+
         </div>
 
     </form>
