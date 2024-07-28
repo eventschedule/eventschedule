@@ -49,6 +49,7 @@ return new class extends Migration
             $table->string('geo_address')->nullable();
             $table->string('geo_lat')->nullable();
             $table->string('geo_lon')->nullable();
+            $table->string('timezone')->nullable();
             $table->text('description')->nullable();
             $table->text('description_html')->nullable();
             $table->text('social_links')->nullable();
