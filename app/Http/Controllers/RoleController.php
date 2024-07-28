@@ -315,6 +315,11 @@ class RoleController extends Controller
         $user->roles()->attach($role->id);
 
         if ($request->hasFile('profile_image')) {
+            if ($role->profile_image_url) {
+                $path = 'public/' . $role->getAttributes()['profile_image_url'];
+                Storage::delete($path);
+            }
+
             $file = $request->file('profile_image');
             $filename = strtolower('profile_' . Str::random(10) . '_' . time() . '.' . $file->getClientOriginalExtension());
             $path = $file->storeAs('images', $filename, 'public');
@@ -324,6 +329,11 @@ class RoleController extends Controller
         }
 
         if ($request->hasFile('background_image')) {
+            if ($role->background_image_url) {
+                $path = 'public/' . $role->getAttributes()['background_image_url'];
+                Storage::delete($path);
+            }
+
             $file = $request->file('background_image');
             $filename = strtolower('background_' . Str::random(10) . '_' . time() . '.' . $file->getClientOriginalExtension());
             $path = $file->storeAs('images', $filename, 'public');
@@ -384,6 +394,11 @@ class RoleController extends Controller
         $role->save();
 
         if ($request->hasFile('profile_image')) {
+            if ($role->profile_image_url) {
+                $path = 'public/' . $role->getAttributes()['profile_image_url'];
+                Storage::delete($path);
+            }
+        
             $file = $request->file('profile_image');
             $filename = strtolower('profile_' . Str::random(10) . '_' . time() . '.' . $file->getClientOriginalExtension());
             $path = $file->storeAs('images', $filename, 'public');
@@ -393,6 +408,11 @@ class RoleController extends Controller
         }
 
         if ($request->hasFile('background_image')) {
+            if ($role->background_image_url) {
+                $path = 'public/' . $role->getAttributes()['background_image_url'];
+                Storage::delete($path);
+            }
+
             $file = $request->file('background_image');
             $filename = strtolower('background_' . Str::random(10) . '_' . time() . '.' . $file->getClientOriginalExtension());
             $path = $file->storeAs('images', $filename, 'public');
