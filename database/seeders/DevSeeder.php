@@ -52,6 +52,7 @@ class DevSeeder extends Seeder
                 'website' => 'https://google.com',
                 'city' => 'New York',
                 'postal_code' => '10022',
+                'timezone' => 'Asia/Jerusalem',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
