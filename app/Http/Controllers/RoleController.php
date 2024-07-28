@@ -7,6 +7,7 @@ use Endroid\QrCode\Writer\PngWriter;
 use App\Http\Requests\RoleCreateRequest;
 use App\Http\Requests\RoleUpdateRequest;
 use App\Http\Requests\MemberAddRequest;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,6 +27,14 @@ class RoleController extends Controller
 
         if (auth()->user()->id != $role->user_id) {
             return redirect('/');
+        }
+
+        if ($role->profile_image_url) {
+            Storage::delete($role->profile_image_url);            
+        }
+
+        if ($role->background_image_url) {
+            Storage::delete($role->background_image_url);            
         }
 
         $role->delete();
