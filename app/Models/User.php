@@ -33,6 +33,15 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($model) {
+            $model->email = strtolower($email);
+        });
+    }
+    
     /**
      * Get the attributes that should be cast.
      *
