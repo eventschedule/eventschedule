@@ -13,7 +13,7 @@
     <form method="POST" action="{{ route('sign_up') }}">
         @csrf
 
-        <input type="text" id="timezone" name="timezone"/>
+        <input type="hidden" id="timezone" name="timezone"/>
 
         <!-- Name -->
         <div>

@@ -241,6 +241,7 @@ class RoleController extends Controller
         $role->background_colors = '#7468E6, #C44B85';
         $role->background_rotation = 135;
         $role->accept_talent_requests = true;
+        $role->timezone = auth()->user()->timezone;
 
         $gradients = file_get_contents(base_path('storage/gradients.json'));
         $gradients = json_decode($gradients);
