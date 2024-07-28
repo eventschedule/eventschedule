@@ -88,8 +88,16 @@ class EventController extends Controller
             ->format('Y-m-d H:i');
         
         $event->save();
-        
-        return redirect('/' . $subdomain . '/schedule')
+
+        $date = Carbon::createFromFormat('Y-m-d H:i', $event->starts_at);
+        $data = [
+            'subdomain' => $subdomain, 
+            'tab' => 'schedule',
+            'month' => $date->month,
+            'year' => $date->year,
+        ];
+
+        return redirect(route('role.view_admin', $data))
                 ->with('message', __('Successfully updated event'));
     }
 
@@ -157,7 +165,7 @@ class EventController extends Controller
         if (! $venue) {
             $venue = Role::whereEmail($request->venue_email)->first();
 
-            if (! $venue->isVenue()) {
+            if ($venue && ! $venue->isVenue()) {
                 return redirect()
                         ->back()
                         ->withInput()
@@ -191,7 +199,7 @@ class EventController extends Controller
 
             $role = Role::whereEmail($request->role_email)->first();
 
-            if ($role->isVenue()) {
+            if ($role && $role->isVenue()) {
                 return redirect()
                         ->back()
                         ->withInput()
@@ -225,7 +233,15 @@ class EventController extends Controller
 
         $event->save();
 
-        return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']))
+        $date = Carbon::createFromFormat('Y-m-d H:i', $event->starts_at);
+        $data = [
+            'subdomain' => $subdomain, 
+            'tab' => 'schedule',
+            'month' => $date->month,
+            'year' => $date->year,
+        ];
+
+        return redirect(route('role.view_admin', $data))
                 ->with('message', __('Successfully created event'));
     }
 
