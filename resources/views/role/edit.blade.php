@@ -438,7 +438,8 @@
 
                         <div class="mb-6">
                             <x-input-label for="timezone" :value="__('messages.timezone')" />
-                            <select name="timezone" id="timezone">
+                            <select name="timezone" id="timezone" required
+                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                 @foreach(\Carbon\CarbonTimeZone::listIdentifiers() as $timezone)
                                 <option value="{{ $timezone }}" {{ $role->timezone == $timezone ? 'SELECTED' : '' }}>
                                     {{ $timezone }}
@@ -450,7 +451,8 @@
 
                         <div class="mb-6">
                             <x-input-label for="language_code" :value="__('messages.language') " />
-                            <select name="language_code" id="language_code" required>
+                            <select name="language_code" id="language_code" required
+                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                 @foreach([
                                 'ar' => 'arabic',
                                 'en' => 'english',
