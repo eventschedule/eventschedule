@@ -287,7 +287,7 @@
 
                                 <x-slot name="content">
                                     <x-dropdown-link :href="route('profile.edit')">
-                                        {{ __('Profile') }}
+                                        {{ __('messages.profile') }}
                                     </x-dropdown-link>
 
                                     <!-- Authentication -->
@@ -296,7 +296,7 @@
 
                                         <x-dropdown-link :href="route('logout')" onclick="event.preventDefault();
                                                 this.closest('form').submit();">
-                                            {{ __('Log Out') }}
+                                            {{ __('messages.log_out') }}
                                         </x-dropdown-link>
                                     </form>
                                 </x-slot>
@@ -329,7 +329,7 @@
 
                     @if ($errors->any())
                     <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
-                        <b>{{ __('There was a problem' . ':')}}</b>
+                        <b>{{ __('messages.there_was_a_problem' . ':')}}</b>
                         <ul>
                             @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
