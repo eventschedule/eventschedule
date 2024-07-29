@@ -2,7 +2,8 @@
 
     <x-slot name="head">
         @if ($tab == 'profile')
-        <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps') }}&callback=initMap" loading="async" defer></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps') }}&callback=initMap"
+            loading="async" defer></script>
         <style>
         .modal-overlay {
             z-index: 50;
@@ -151,7 +152,9 @@
                     </a>
                 </span>
 
-                <span class="sm:ml-3">
+                @if (! $role->published_at)
+                <span class="sm:ml-3"
+                    onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.publish', ['subdomain' => $role->subdomain]) }}'; }">
                     <button type="button"
                         class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -162,6 +165,7 @@
                         {{ __('messages.publish') }}
                     </button>
                 </span>
+                @endif
             </div>
         </div>
     </div>
