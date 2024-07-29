@@ -90,9 +90,11 @@
                     <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-4 ring-1 ring-white/10">
                         <a href="{{ route('landing') }}">
                             <div class="flex h-16 shrink-0 items-center">
+                                <!--
                                 <img class="h-8 w-auto"
-                                    src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
+                                    src=""
                                     alt="Your Company">
+                                -->
                             </div>
                         </a>
                         <!--

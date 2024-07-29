@@ -4,8 +4,8 @@
     <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-4">
         <a href="{{ route('landing') }}">
             <div class="flex h-16 shrink-0 items-center">
-                <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
-                    alt="Your Company">
+                <img class="h-8 w-auto" src="{{ url('resources/light-logo.png') }}"
+                    alt="Event Schedule">
             </div>
         </a>
         <nav class="flex flex-1 flex-col">
