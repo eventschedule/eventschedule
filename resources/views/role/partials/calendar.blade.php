@@ -101,9 +101,9 @@
     <div class="shadow-md ring-1 ring-black ring-opacity-5 lg:flex lg:flex-auto lg:flex-col">
         <div
             class="grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center text-xs font-semibold leading-6 text-gray-700 lg:flex-none">
-            @foreach (['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as $day)
+            @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $day)
             <div class="flex justify-center bg-white py-2">
-                {{ $day }}
+                {{ __('messages.' . $day) }}
             </div>
             @endforeach
         </div>
