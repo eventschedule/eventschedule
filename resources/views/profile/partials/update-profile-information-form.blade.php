@@ -43,7 +43,7 @@
 
                 @if (session('status') === 'verification-link-sent')
                 <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
-                    {{ __('messages.a_new_verification_link_has_been_sent_to_your_email_address') }}
+                    {{ __('messages.new_verification_link_has_been_sent') }}
                 </p>
                 @endif
             </div>
