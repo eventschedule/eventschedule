@@ -27,6 +27,7 @@ class Role extends Model
         'state',
         'postal_code',
         'country_code',
+        'language_code',
         'description',
         'visibility',
         'accept_talent_requests',

@@ -157,4 +157,6 @@ return [
     'previous_month' => 'Previous month',
     'today' => 'Today',
     'next_month' => 'Next month',
+
+    'language' => 'Language',
 ];

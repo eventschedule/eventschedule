@@ -201,6 +201,7 @@ class RoleController extends Controller
             $user->name = $data['name'];
             $user->password = bcrypt(Str::random(32));
             $user->timezone = $request->user()->timezone;
+            $user->language_code = $request->user()->language_code;
             $user->save();
         }
 
@@ -268,6 +269,7 @@ class RoleController extends Controller
         $role->background_rotation = 135;
         $role->accept_talent_requests = true;
         $role->timezone = auth()->user()->timezone;
+        $role->language_code = auth()->user()->timezone;
 
         $gradients = file_get_contents(base_path('storage/gradients.json'));
         $gradients = json_decode($gradients);

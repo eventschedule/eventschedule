@@ -431,6 +431,27 @@
                         </div>
 
                         <div class="mb-6">
+                            <x-input-label for="language_code" :value="__('messages.language') . ' *'" />
+                            <select name="language_code" id="language_code" required>
+                                @foreach([
+                                'ar' => 'arabic',
+                                'en' => 'english',
+                                'nl' => 'dutch',
+                                'fr' => 'french',
+                                'de' => 'german',
+                                'he' => 'hebrew',
+                                'it' => 'italian',
+                                'pt' => 'portuguese',
+                                'es' => 'spanish',
+                                ] as $key => $value)
+                                <option value="{{ $key }}" {{ $role->language_code == $key ? 'SELECTED' : '' }}>{{ $value }}
+                                </option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('language_code')" />
+                        </div>
+
+                        <div class="mb-6">
                             <x-checkbox name="accept_talent_requests" label="{{ __('messages.accept_talent_requests') }}"
                                 checked="{{ old('accept_talent_requests', $role->accept_talent_requests) }}"
                                 data-custom-attribute="value" />
