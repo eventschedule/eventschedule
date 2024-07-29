@@ -175,4 +175,10 @@ return [
     'thu' => 'Thu',
     'fri' => 'Fri',
     'sat' => 'Sat',
+    'venue_already_published' => 'Venue has already been published',
+    'talent_already_published' => 'Talent has already been published',
+    'vendor_already_published' => 'Vendor has already been published',
+    'published_venue' => 'Successfully published venue',
+    'published_vendor' => 'Successfully published vendor',
+    'published_talent' => 'Successfully published talent',
 ];

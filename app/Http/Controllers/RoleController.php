@@ -20,6 +20,25 @@ use Carbon\Carbon;
 
 class RoleController extends Controller
 {
+    public function publish(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if ($role->published_at) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['venue_email' => __('messages.' . $role->type . ' has already been published')]);
+        }
+
+        $role->published_at = Carbon::now()->format('Y-m-d H:i:s');
+        $role->visibility = 'public';
+        $role->save();
+
+        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]))
+                ->with('message', __('messages.published_' . $role->type));
+    }
+
     public function delete(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
