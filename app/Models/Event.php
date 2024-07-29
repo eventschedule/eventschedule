@@ -24,6 +24,11 @@ class Event extends Model
         });
     }
 
+    public function isPublic()
+    {
+        return $this->visibility == 'public';
+    }
+
     public function role()
     {
         return $this->belongsTo(Role::class);

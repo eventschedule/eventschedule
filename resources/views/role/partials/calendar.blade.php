@@ -135,10 +135,10 @@
                         <li>
                             <a href="{{ route($showAdd ? 'event.edit' : 'event.view', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) }}"
                                 class="group flex">
-                                <p class="flex-auto truncate font-medium text-gray-900 group-hover:text-indigo-600">
+                                <p class="flex-auto truncate font-medium group-hover:text-indigo-600 {{ $event->isPublic() ? 'text-gray-900 ' : 'text-gray-400 ' }}">
                                     {{ $event->role->name }}</p>
                                 <time datetime="{{ $event->localStartsAt() }}"
-                                    class="ml-3 hidden flex-none text-gray-500 group-hover:text-indigo-600 xl:block">{{ Carbon\Carbon::parse($event->localStartsAt())->format('g:i A') }}</time>
+                                    class="ml-3 hidden flex-none group-hover:text-indigo-600 xl:block {{ $event->isPublic() ? 'text-gray-500 ' : 'text-gray-400 ' }}">{{ Carbon\Carbon::parse($event->localStartsAt())->format('g:i A') }}</time>
                             </a>
                         </li>
                         @endif
