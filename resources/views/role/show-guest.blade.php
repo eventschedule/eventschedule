@@ -202,5 +202,15 @@
         </div>
     </div>
 
+    <footer class="bg-black text-white py-4 bottom-0 w-full">
+        <div class="container mx-auto text-center">
+            <p>
+                {!! str_replace(':link', '<a href="' . url('/') . '" target="_blank">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}
+                •
+                {!! str_replace(':link', '<a href="https://mudeo.app" target="_blank">mudeo | make music together</a>',  __('messages.supported_by')) !!}
+            </p>
+        </div>
+    </footer>
+
 </body>
 </html>
