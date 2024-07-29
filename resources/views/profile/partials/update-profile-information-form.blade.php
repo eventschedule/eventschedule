@@ -75,7 +75,7 @@
                 'pt' => 'portuguese',
                 'es' => 'spanish',
                 ] as $key => $value)
-                <option value="{{ $key }}" {{ $user->language_code == $key ? 'SELECTED' : '' }}>{{ $value }}
+                <option value="{{ $key }}" {{ $user->language_code == $key ? 'SELECTED' : '' }}>{{ __('messages.' . $value) }}
                 </option>
                 @endforeach
             </select>
