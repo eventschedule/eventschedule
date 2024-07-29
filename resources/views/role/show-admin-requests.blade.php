@@ -6,11 +6,11 @@
         <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M21,19V20H3V19L5,17V11C5,7.9 7.03,5.17 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V17L21,19M14,21A2,2 0 0,1 12,23A2,2 0 0,1 10,21" />
     </svg>
-    <h3 class="mt-2 text-sm font-semibold text-gray-900">{{ __('No requests') }}</h3>
-    <p class="mt-1 text-sm text-gray-500">{{ __('Share your sign up link to get more requests') }}</p>
+    <h3 class="mt-2 text-sm font-semibold text-gray-900">{{ __('messages.no_requests') }}</h3>
+    <p class="mt-1 text-sm text-gray-500">{{ __('messages.share_your_sign_up_link_to_get_more_requests') }}</p>
     <div class="mt-3">
-        <a href="{{ route('event.sign_up', ['subdomain' => $role->subdomain]) }}" target="_blank">
-            {{ \App\Utils\UrlUtils::clean(route('event.sign_up', ['subdomain' => $role->subdomain])) }}
+        <a href="{{ route('event.sign_up', ['subdomain1' => $role->subdomain]) }}" target="_blank">
+            {{ \App\Utils\UrlUtils::clean(route('event.sign_up', ['subdomain1' => $role->subdomain])) }}
         </a>
     </div>
 </div>
@@ -43,18 +43,18 @@
                                 d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
                                 clip-rule="evenodd" />
                         </svg>
-                        {{ __('Accept') }}
+                        {{ __('messages.accept') }}
                     </div>
                 </div>
                 <div class="-ml-px flex w-0 flex-1 cursor-pointer"
-                    onclick="var confirmed = confirm('{{ __('Are you sure?') }}'); if (confirmed) { location.href = '{{ route('event.decline', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id), 'redirect_to' => 'requests']) }}'; }">
+                    onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.decline', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id), 'redirect_to' => 'requests']) }}'; }">
                     <div
                         class="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900">
                         <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                             <path
                                 d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z" />
                         </svg>
-                        {{ __('Decline') }}
+                        {{ __('messages.decline') }}
                     </div>
                 </div>
             </div>

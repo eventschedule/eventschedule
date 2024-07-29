@@ -38,7 +38,7 @@
                             d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
                             clip-rule="evenodd" />
                     </svg>
-                    Back
+                    {{ __('messages.back') }}
                 </a>
             </nav>
             <!--
@@ -47,7 +47,7 @@
                     <li>
                         <div class="flex">
                             <a href="#"
-                                class="mr-4 text-sm font-medium text-gray-500 hover:text-gray-700">{{ __(ucwords($role->type)) }}</a>
+                                class="mr-4 text-sm font-medium text-gray-500 hover:text-gray-700">{{ __('messages.' . strtolower($role->type)) }}</a>
                         </div>
                     </li>
                     <li>
@@ -131,7 +131,7 @@
                                 <path
                                     d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
                             </svg>
-                            {{ __('Edit') }}
+                            {{ __('messages.edit') }}
                         </button>
                     </a>
                 </span>
@@ -146,7 +146,7 @@
                                 <path
                                     d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
                             </svg>
-                            {{ __('View') }}
+                            {{ __('messages.view') }}
                         </button>
                     </a>
                 </span>
@@ -159,7 +159,7 @@
                                 d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
                                 clip-rule="evenodd" />
                         </svg>
-                        {{ __('Publish') }}
+                        {{ __('messages.publish') }}
                     </button>
                 </span>
             </div>
@@ -169,19 +169,19 @@
     <div class="pt-5">
         <!-- Dropdown menu on small screens -->
         <div class="sm:hidden">
-            <label for="current-tab" class="sr-only">Select a tab</label>
+            <label for="current-tab" class="sr-only">{{ __('messages.select_a_tab') }}</label>
             <select id="current-tab" name="current-tab"
                 class="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600">
-                <option {{ $tab == 'schedule' ? 'selected' : '' }}>{{ __('Schedule') }}</option>
+                <option {{ $tab == 'schedule' ? 'selected' : '' }}>{{ __('messages.schedule') }}</option>
                 @if($role->acceptRequests())
                 <option {{ $tab == 'requests' ? 'selected' : '' }}>
-                    {{ __('Requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</option>
+                    {{ __('messages.requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</option>
                 @endif
-                <option {{ $tab == 'profile' ? 'selected' : '' }}>{{ __('Profile') }}</option>
+                <option {{ $tab == 'profile' ? 'selected' : '' }}>{{ __('messages.profile') }}</option>
                 <option {{ $tab == 'followers' ? 'selected' : '' }}>
-                    {{ __('Followers') }}{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</option>
+                    {{ __('messages.followers') }}{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</option>
                 <option {{ $tab == 'team' ? 'selected' : '' }}>
-                    {{ __('Team') }}{{ count($members) ? ' (' . count($members) . ')' : '' }}</option>
+                    {{ __('messages.team') }}{{ count($members) ? ' (' . count($members) . ')' : '' }}</option>
             </select>
         </div>
 
@@ -189,17 +189,17 @@
         <div class="hidden sm:block">
             <nav class="-mb-px flex space-x-8">
                 <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain]) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'schedule' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('Schedule') }}</a>
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'schedule' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.schedule') }}</a>
                 @if($role->acceptRequests())
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'requests']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'requests' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('Requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</a>
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'requests' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</a>
                 @endif
                 <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'profile']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'profile' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('Profile') }}</a>
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'profile' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.profile') }}</a>
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'followers']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'followers' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('Followers') }}{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</a>
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'followers' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.followers') }}{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</a>
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'team' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('Team') }}{{ count($members) ? ' (' . count($members) . ')' : '' }}</a>
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'team' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.team') }}{{ count($members) ? ' (' . count($members) . ')' : '' }}</a>
             </nav>
         </div>
 

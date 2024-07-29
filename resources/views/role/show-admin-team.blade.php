@@ -14,7 +14,7 @@
                     <path
                         d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
                 </svg>
-                {{ __('Add Member') }}
+                {{ __('messages.add_member') }}
             </button>
         </a>
     </div>
@@ -28,13 +28,13 @@
                         <tr>
                             <th scope="col"
                                 class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
-                                {{ __('Name') }}
+                                {{ __('messages.name') }}
                             </th>
                             <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                {{ __('Email') }}
+                                {{ __('messages.email') }}
                             </th>
                             <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                {{ __('Role') }}
+                                {{ __('messages.role') }}
                             </th>
                             <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0"></th>
                         </tr>
@@ -49,14 +49,14 @@
                                 <a href="mailto:{{ $member->email }}">{{ $member->email }}</a>
                             </td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {{ __(ucwords($member->pivot->level)) }}
+                                {{ __('messages.' . strtolower($member->pivot->level)) }}
                             </td>
                             <td
                                 class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
                                 @if ($member->pivot->level != 'owner')
                                     <a href="{{ route('role.remove_member', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($member->id)]) }}"
-                                        onclick="return confirm('{{ __('Are you sure?') }}');"
-                                        class="text-indigo-600 hover:text-indigo-900">{{ __('Remove') }}</a>
+                                        onclick="return confirm('{{ __('messages.are_you_sure') }}');"
+                                        class="text-indigo-600 hover:text-indigo-900">{{ __('messages.remove') }}</a>
                                 @endif
                             </td>
                         </tr>

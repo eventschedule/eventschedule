@@ -93,7 +93,7 @@
             var name = $('#name').val();
 
             if (!name) {
-                name = "{{ __('Preview') }}";
+                name = "{{ __('messages.preview') }}";
             }
 
             $('#preview')
@@ -137,8 +137,7 @@
         {{ $title }}
     </h2>
 
-    <form method="POST"
-        action="{{ $role->exists ? route('role.update', ['subdomain' => $role->subdomain]) : route('role.store') }}"
+    <form method="post" action="{{ $role->exists ? route('role.update', ['subdomain' => $role->subdomain]) : route('role.store') }}"
         enctype="multipart/form-data">
 
         @csrf
@@ -152,52 +151,52 @@
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('Details') }}
+                            {{ __('messages.details') }}
                         </h2>
 
                         @if(! $role->exists)
                         <fieldset>
-                            <x-input-label for="type" :value="__('Type')" />
+                            <x-input-label for="type" :value="__('messages.type')" />
                             <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0"
                                 onclick="toggleAddress()">
                                 <div class="flex items-center">
                                     <input id="venue" name="type" type="radio" value="venue" checked
                                         class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                     <label for="venue"
-                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900">Venue</label>
+                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900">{{ __('messages.venue') }}</label>
                                 </div>
                                 <div class="flex items-center">
                                     <input id="talent" name="type" type="radio" value="talent"
                                         class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                     <label for="talent"
-                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900">Talent</label>
+                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900">{{ __('messages.talent') }}</label>
                                 </div>
                                 <div class="flex items-center">
                                     <input id="vendor" name="type" type="radio" value="vendor"
                                         class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                     <label for="vendor"
-                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900">Vendor</label>
+                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900">{{ __('messages.vendor') }}</label>
                                 </div>
                             </div>
                         </fieldset>
                         @endif
 
                         <div class="mb-6">
-                            <x-input-label for="name" :value="__('Name') . ' *'" />
+                            <x-input-label for="name" :value="__('messages.name') . ' *'" />
                             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
                                 :value="old('name', $role->name)" required autofocus oninput="updatePreview()" />
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="description" :value="__('Description')" />
+                            <x-input-label for="description" :value="__('messages.description')" />
                             <textarea id="description" name="description"
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">{{ old('description', $role->description) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="profile_image" :value="__('Profile Image')" />
+                            <x-input-label for="profile_image" :value="__('messages.profile_image')" />
                             <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full"
                                 :value="old('profile_image')" />
                             <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
@@ -214,25 +213,25 @@
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('Contact Info') }}
+                            {{ __('messages.contact_info') }}
                         </h2>
 
                         <div class="mb-6">
-                            <x-input-label for="email" :value="__('Email' . ' *')" />
+                            <x-input-label for="email" :value="__('messages.email') . ' *'" />
                             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
                                 :value="old('email', $role->exists ? $role->email : auth()->user()->email)" required />
                             <x-input-error class="mt-2" :messages="$errors->get('email')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="phone" :value="__('Phone')" />
+                            <x-input-label for="phone" :value="__('messages.phone')" />
                             <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full"
                                 :value="old('phone', $role->phone)" />
                             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="website" :value="__('Website')" />
+                            <x-input-label for="website" :value="__('messages.website')" />
                             <x-text-input id="website" name="website" type="url" class="mt-1 block w-full"
                                 :value="old('website', $role->website)" />
                             <x-input-error class="mt-2" :messages="$errors->get('website')" />
@@ -246,39 +245,39 @@
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('Address') }}
+                            {{ __('messages.address') }}
                         </h2>
 
                         <div class="mb-6">
-                            <x-input-label for="address1" :value="__('Street Address')" />
+                            <x-input-label for="address1" :value="__('messages.street_address')" />
                             <x-text-input id="address1" name="address1" type="text" class="mt-1 block w-full"
                                 :value="old('address1', $role->address1)" />
                             <x-input-error class="mt-2" :messages="$errors->get('address1')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="city" :value="__('City')" />
+                            <x-input-label for="city" :value="__('messages.city')" />
                             <x-text-input id="city" name="city" type="text" class="mt-1 block w-full"
                                 :value="old('city', $role->city)" />
                             <x-input-error class="mt-2" :messages="$errors->get('city')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="state" :value="__('State / Province')" />
+                            <x-input-label for="state" :value="__('messages.state_province')" />
                             <x-text-input id="state" name="state" type="text" class="mt-1 block w-full"
                                 :value="old('state', $role->state)" />
                             <x-input-error class="mt-2" :messages="$errors->get('state')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="postal_code" :value="__('Postal Code')" />
+                            <x-input-label for="postal_code" :value="__('messages.postal_code')" />
                             <x-text-input id="postal_code" name="postal_code" type="text" class="mt-1 block w-full"
                                 :value="old('postal_code', $role->postal_code)" />
                             <x-input-error class="mt-2" :messages="$errors->get('postal_code')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="country" :value="__('Country')" />
+                            <x-input-label for="country" :value="__('messages.country')" />
                             <x-text-input id="country" name="country" type="text" class="mt-1 block w-full"
                                 :value="old('country', $role->country)" onchange="onChangeCountry()" />
                             <x-input-error class="mt-2" :messages="$errors->get('country')" />
@@ -292,11 +291,11 @@
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('Page Style') }}
+                            {{ __('messages.page_style') }}
                         </h2>
 
                         <div class="mb-6">
-                            <x-input-label for="font_family" :value="__('Font Family')" />
+                            <x-input-label for="font_family" :value="__('messages.font_family')" />
                             <select id="font_family" name="font_family" onchange="onChangeFont()"
                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                 @foreach($fonts as $font)
@@ -309,35 +308,35 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="font_color" :value="__('Font Color')" />
+                            <x-input-label for="font_color" :value="__('messages.font_color')" />
                             <x-text-input id="font_color" name="font_color" type="color" class="mt-1 block w-1/2"
                                 :value="old('font_color', $role->font_color)" oninput="updatePreview()" />
                             <x-input-error class="mt-2" :messages="$errors->get('font_color')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="accent_color" :value="__('Accent Color')" />
+                            <x-input-label for="accent_color" :value="__('messages.accent_color')" />
                             <x-text-input id="accent_color" name="accent_color" type="color" class="mt-1 block w-1/2"
                                 :value="old('accent_color', $role->accent_color)" />
                             <x-input-error class="mt-2" :messages="$errors->get('accent_color')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="background" :value="__('Background')" />
+                            <x-input-label for="background" :value="__('messages.background')" />
                             <select id="background" name="background"
                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                 oninput="onChangeBackground(); updatePreview();">
                                 @foreach(['color', 'gradient', 'image'] as $background)
                                 <option value="{{ $background }}"
                                     {{ $role->background == $background ? 'SELECTED' : '' }}>
-                                    {{ __(ucwords($background)) }}</option>
+                                    {{ __('messages.' . $background) }}</option>
                                 @endforeach
                             </select>
                             <x-input-error class="mt-2" :messages="$errors->get('background')" />
                         </div>
 
                         <div class="mb-6" id="style_background_color" style="display:none">
-                            <x-input-label for="background_color" :value="__('Background Color')" />
+                            <x-input-label for="background_color" :value="__('messages.background_color')" />
                             <x-text-input id="background_color" name="background_color" type="color"
                                 class="mt-1 block w-1/2" :value="old('background_color', $role->background_color)"
                                 oninput="updatePreview()" />
@@ -345,7 +344,7 @@
                         </div>
 
                         <div class="mb-6" id="style_background_image" style="display:none">
-                            <x-input-label for="background_image" :value="__('Image')" />
+                            <x-input-label for="background_image" :value="__('messages.image')" />
                             <input id="background_image" name="background_image" type="file" class="mt-1 block w-full"
                                 :value="old('background_image')" oninput="updatePreview()" />
                             <x-input-error class="mt-2" :messages="$errors->get('background_image')" />
@@ -357,7 +356,7 @@
 
                         <div id="style_background_gradient" style="display:none">
                             <div class="mb-6">
-                                <x-input-label for="background_colors" :value="__('Colors')" />
+                                <x-input-label for="background_colors" :value="__('messages.colors')" />
                                 <select id="background_colors" name="background_colors" oninput="updatePreview()"
                                     class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                     @foreach($gradients as $gradient => $name)
@@ -384,7 +383,7 @@
                             </div>
 
                             <div class="mb-6">
-                                <x-input-label for="background_rotation" :value="__('Rotation')" />
+                                <x-input-label for="background_rotation" :value="__('messages.rotation')" />
                                 <x-text-input id="background_rotation" name="background_rotation" type="number"
                                     class="mt-1 block w-1/2" oninput="updatePreview()"
                                     :value="old('background_rotation', $role->background_rotation)" min="0" max="360" />
@@ -393,7 +392,7 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label :value="__('Preview')" />
+                            <x-input-label :value="__('messages.preview')" />
                             <div id="preview"></div>
                         </div>
                     </div>
@@ -404,23 +403,23 @@
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('Settings') }}
+                            {{ __('messages.settings') }}
                         </h2>
 
                         <div class="mb-6">
-                            <x-input-label for="visibility" :value="__('Visibility')" />
+                            <x-input-label for="visibility" :value="__('messages.visibility')" />
                             <select id="visibility" name="visibility"
                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                 @foreach(['private', 'unlisted', 'public'] as $level)
                                 <option value="{{ $level }}" {{ $role->visibility == $level ? 'SELECTED' : '' }}>
-                                    {{ __(ucwords($level)) }}</option>
+                                    {{ __('messages.' . $level) }}</option>
                                 @endforeach
                             </select>
                             <x-input-error class="mt-2" :messages="$errors->get('visibility')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="timezone" :value="__('Timezone')" />
+                            <x-input-label for="timezone" :value="__('messages.timezone')" />
                             <select name="timezone" id="timezone">
                                 @foreach(\Carbon\CarbonTimeZone::listIdentifiers() as $timezone)
                                 <option value="{{ $timezone }}" {{ $role->timezone == $timezone ? 'SELECTED' : '' }}>
@@ -432,21 +431,21 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-checkbox name="accept_talent_requests" label="{{ __('Accept talent requests') }}"
+                            <x-checkbox name="accept_talent_requests" label="{{ __('messages.accept_talent_requests') }}"
                                 checked="{{ old('accept_talent_requests', $role->accept_talent_requests) }}"
                                 data-custom-attribute="value" />
                             <x-input-error class="mt-2" :messages="$errors->get('accept_talent_requests')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-checkbox name="accept_vendor_requests" label="{{ __('Accept vendor requests') }}"
+                            <x-checkbox name="accept_vendor_requests" label="{{ __('messages.accept_vendor_requests') }}"
                                 checked="{{ old('accept_vendor_requests', $role->accept_vendor_requests) }}"
                                 data-custom-attribute="value" />
                             <x-input-error class="mt-2" :messages="$errors->get('accept_vendor_requests')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-checkbox name="use_24_hour_time" label="{{ __('Use 24-hour time format') }}"
+                            <x-checkbox name="use_24_hour_time" label="{{ __('messages.use_24_hour_time_format') }}"
                                 checked="{{ old('use_24_hour_time', $role->use_24_hour_time) }}"
                                 data-custom-attribute="value" />
                             <x-input-error class="mt-2" :messages="$errors->get('use_24_hour_time')" />
@@ -461,7 +460,7 @@
         <div class="max-w-7xl mx-auto space-y-6 mt-3">
             <div class="flex gap-4 items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <x-primary-button>{{ __('Save') }}</x-primary-button>
+                    <x-primary-button>{{ __('messages.save') }}</x-primary-button>
 
                     <x-cancel-button></x-cancel-button>
                 </div>

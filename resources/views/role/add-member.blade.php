@@ -15,18 +15,18 @@
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('Details') }}
+                            {{ __('messages.details') }}
                         </h2>
 
                         <div class="mb-6">
-                            <x-input-label for="name" :value="__('Name' . ' *')" />
+                            <x-input-label for="name" :value="__('messages.name') . ' *'" />
                             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
                                 :value="old('name')" required autofocus autocomplete="name" />
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="email" :value="__('Email' . ' *')" />
+                            <x-input-label for="email" :value="__('messages.email') . ' *'" />
                             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
                                 :value="old('email')" required autocomplete="username" />
                             <x-input-error class="mt-2" :messages="$errors->get('email')" />
@@ -40,7 +40,7 @@
 
         <div class="max-w-7xl mx-auto space-y-6">
             <div class="flex items-center gap-4">
-                <x-primary-button>{{ __('Save') }}</x-primary-button>
+                <x-primary-button>{{ __('messages.save') }}</x-primary-button>
 
                 <x-cancel-button></x-cancel-button>
             </div>
