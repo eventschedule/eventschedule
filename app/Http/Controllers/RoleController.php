@@ -28,7 +28,7 @@ class RoleController extends Controller
             return redirect('/');
         }
 
-        if ($request->image_type = 'profile') {
+        if ($request->image_type == 'profile') {
             if ($role->profile_image_url) {
                 $path = 'public/' . $role->getAttributes()['profile_image_url'];
                 Storage::delete($path);
@@ -36,7 +36,7 @@ class RoleController extends Controller
                 $role->profile_image_url = null;
                 $role->save();
             }    
-        } else if ($request->image_type = 'background') {
+        } else if ($request->image_type == 'background') {
             if ($role->background_image_url) {
                 $path = 'public/' . $role->getAttributes()['background_image_url'];
                 Storage::delete($path);

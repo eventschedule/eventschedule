@@ -214,7 +214,7 @@
                             @if ($role->profile_image_url)
                             <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="pt-3" />
                             <a href="#"
-                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'type' => 'profile']) }}'; }">
+                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'profile']) }}'; }">
                                 {{ __('messages.delete_image') }}
                             </a>
                             @endif
@@ -366,7 +366,7 @@
                             @if ($role->background_image_url)
                             <img src="{{ $role->background_image_url }}" style="max-height:120px" class="pt-3" />
                             <a href="#"
-                                    onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'type' => 'background']) }}'; return false; }">
+                                    onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}'; return false; }">
                                 {{ __('messages.delete_image') }}
                             </a>
                             @endif
