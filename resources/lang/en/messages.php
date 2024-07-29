@@ -181,4 +181,6 @@ return [
     'published_venue' => 'Successfully published venue',
     'published_vendor' => 'Successfully published vendor',
     'published_talent' => 'Successfully published talent',
+    'color' => 'Color',
+    'gradient' => 'Gradient',
 ];

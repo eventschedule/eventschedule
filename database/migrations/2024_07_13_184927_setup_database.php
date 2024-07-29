@@ -30,7 +30,7 @@ return new class extends Migration
             $table->enum('background', ['color', 'image', 'gradient'])->default('color');
             $table->string('accent_color')->default('#007bff');
             $table->string('background_color')->default('#ffffff');
-            $table->string('background_colors')->default('#7468e6, #c44b85');
+            $table->string('background_colors')->nullable();
             $table->integer('background_rotation')->nullable();
             $table->string('font_color')->default('#111827');
             $table->string('font_family')->nullable();
