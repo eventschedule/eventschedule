@@ -12,17 +12,16 @@ Route::get('/', function () {
     return view('welcome');
 })->name('landing');
 
-Route::get('/home', function () {
-    return view('home');
-})->middleware(['auth', 'verified'])->name('home');
-
 Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
 Route::post('/message', [HomeController::class, 'message'])->name('message');
 
 Route::get('/{subdomain}/view', [RoleController::class, 'viewGuest'])->name('role.view_guest');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () 
+{
+    Route::get('/home', [HomeController::class, 'home'])->name('home');
+    
     Route::get('/register', [RoleController::class, 'create'])->name('register');
     Route::post('/store', [RoleController::class, 'store'])->name('role.store');
     
