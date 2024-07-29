@@ -52,7 +52,7 @@
 
         <div>
             <x-input-label for="timezone" :value="__('messages.timezone') . ' *'" />
-            <select name="timezone" id="timezone">
+            <select name="timezone" id="timezone" required>
                 @foreach(\Carbon\CarbonTimeZone::listIdentifiers() as $timezone)
                 <option value="{{ $timezone }}" {{ $user->timezone == $timezone ? 'SELECTED' : '' }}>{{ $timezone }}
                 </option>
@@ -62,13 +62,34 @@
         </div>
 
         <div>
+            <x-input-label for="language_code" :value="__('messages.language') . ' *'" />
+            <select name="language_code" id="language_code" required>
+                @foreach([
+                'ar' => 'arabic',
+                'en' => 'english',
+                'nl' => 'dutch',
+                'fr' => 'french',
+                'de' => 'german',
+                'he' => 'hebrew',
+                'it' => 'italian',
+                'pt' => 'portuguese',
+                'es' => 'spanish',
+                ] as $key => $value)
+                <option value="{{ $key }}" {{ $user->language_code == $key ? 'SELECTED' : '' }}>{{ $value }}
+                </option>
+                @endforeach
+            </select>
+            <x-input-error class="mt-2" :messages="$errors->get('language_code')" />
+        </div>
+
+        <div>
             <x-input-label for="profile_image" :value="__('messages.profile_image')" />
             <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full"
                 :value="old('profile_image')" />
             <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
 
             @if ($user->profile_image_url)
-                <img src="{{ $user->profile_image_url }}" style="max-height:120px" class="pt-3"/>
+            <img src="{{ $user->profile_image_url }}" style="max-height:120px" class="pt-3" />
             @endif
         </div>
 

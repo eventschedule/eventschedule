@@ -4,8 +4,12 @@
         <script>
         // Example: Initialize Flatpickr on elements with the class 'datepicker'
         document.addEventListener('DOMContentLoaded', function() {
-            var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;            
             document.getElementById('timezone').value = timezone;
+
+            var language = navigator.language || navigator.userLanguage;
+            var twoLetterLanguageCode = language.substring(0, 2);
+            document.getElementById('language_code').value = twoLetterLanguageCode;
         });
         </script>
     </x-slot>
@@ -14,6 +18,7 @@
         @csrf
 
         <input type="hidden" id="timezone" name="timezone"/>
+        <input type="hidden" id="language_code" name="language_code"/>
 
         <!-- Name -->
         <div>
