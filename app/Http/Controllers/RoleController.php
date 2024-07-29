@@ -20,6 +20,36 @@ use Carbon\Carbon;
 
 class RoleController extends Controller
 {
+    public function deleteImage(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (auth()->user()->id != $role->user_id) {
+            return redirect('/');
+        }
+
+        if ($request->image_type = 'profile') {
+            if ($role->profile_image_url) {
+                $path = 'public/' . $role->getAttributes()['profile_image_url'];
+                Storage::delete($path);
+
+                $role->profile_image_url = null;
+                $role->save();
+            }    
+        } else if ($request->image_type = 'background') {
+            if ($role->background_image_url) {
+                $path = 'public/' . $role->getAttributes()['background_image_url'];
+                Storage::delete($path);
+
+                $role->background_image_url = null;
+                $role->save();
+            }    
+        }
+
+        return redirect(route('role.view_admin', ['subdomain' => $subdomain]))
+                ->with('message', __('messages.deleted_image'));
+    }
+
     public function publish(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
