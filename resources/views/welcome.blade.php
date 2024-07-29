@@ -36,7 +36,7 @@
             <div class="mx-auto max-w-7xl">
                 <div class="px-6 pt-6 lg:max-w-2xl lg:pl-8 lg:pr-0">
                     <nav class="flex items-center justify-between lg:justify-start" aria-label="Global">
-                        <a href="#" class="-m-1.5 p-1.5">
+                        <a href="{{ url('/') }}" class="-m-1.5 p-1.5">
                             <span class="sr-only">Event Schedule</span>
                             <img alt="Event Schedule" class="h-8 w-auto" src="{{ url('resources/dark-logo.png') }}">
                         </a>
@@ -79,11 +79,10 @@
                 <div class="fixed inset-0 z-50"></div>
                 <div
                     class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between">                                            
                         <a href="#" class="-m-1.5 p-1.5">
-                            <span class="sr-only">Your Company</span>
-                            <img class="h-8 w-auto"
-                                src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600" alt="">
+                            <span class="sr-only">Event Schedule</span>
+                            <img class="h-8 w-auto" src="" alt="">
                         </a>
                         <button type="button" class="-m-2.5 rounded-md p-2.5 text-gray-700">
                             <span class="sr-only">Close menu</span>
