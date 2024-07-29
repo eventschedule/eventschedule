@@ -431,7 +431,7 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="language_code" :value="__('messages.language') . ' *'" />
+                            <x-input-label for="language_code" :value="__('messages.language') " />
                             <select name="language_code" id="language_code" required>
                                 @foreach([
                                 'ar' => 'arabic',
