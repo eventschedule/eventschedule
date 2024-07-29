@@ -46,7 +46,7 @@ class RoleController extends Controller
             }    
         }
 
-        return redirect(route('role.view_admin', ['subdomain' => $subdomain]))
+        return redirect(route('role.edit', ['subdomain' => $subdomain]))
                 ->with('message', __('messages.deleted_image'));
     }
 
