@@ -183,4 +183,5 @@ return [
     'published_talent' => 'Successfully published talent',
     'color' => 'Color',
     'gradient' => 'Gradient',
+    'subdomain' => 'Subdomain',
 ];

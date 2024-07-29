@@ -188,6 +188,15 @@
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                         </div>
 
+                        @if ($role->exists)
+                        <div class="mb-6">
+                            <x-input-label for="subdomain" :value="__('messages.subdomain') . ' *'" />
+                            <x-text-input id="subdomain" name="subdomain" type="text" class="mt-1 block w-full"
+                                :value="old('subdomain', $role->subdomain)" required />
+                            <x-input-error class="mt-2" :messages="$errors->get('subdomain')" />
+                        </div>
+                        @endif
+
                         <div class="mb-6">
                             <x-input-label for="description" :value="__('messages.description')" />
                             <textarea id="description" name="description"
