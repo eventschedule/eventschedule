@@ -6,12 +6,12 @@ class UrlUtils
 {
     public static function encodeId($value)
     {
-        return base64_encode($value + 100000);
+        return base64_encode($value + 389278);
     }
 
     public static function decodeId($value)
     {
-        return base64_decode($value) - 100000;
+        return base64_decode($value) - 389278;
     }
 
     public static function clean($url)
