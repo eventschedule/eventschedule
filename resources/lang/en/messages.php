@@ -157,6 +157,15 @@ return [
     'previous_month' => 'Previous month',
     'today' => 'Today',
     'next_month' => 'Next month',
-
+    //
     'language' => 'Language',
+    'arabic' => 'Arabic',
+    'english' => 'English',
+    'dutch' => 'Dutch',
+    'french' => 'French',
+    'german' => 'German',
+    'hebrew' => 'Hebrew',
+    'italian' => 'Italian',
+    'portuguese' => 'Portuguese',
+    'spanish' => 'Spanish',
 ];
