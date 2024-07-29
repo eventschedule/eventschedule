@@ -284,7 +284,6 @@ class RoleController extends Controller
         $role->accent_color = '#007BFF';
         $role->background = 'default';
         $role->background_color = '#FFFFFF';
-        $role->background_colors = '#7468E6, #C44B85';
         $role->background_rotation = 135;
         $role->accept_talent_requests = true;
         $role->timezone = auth()->user()->timezone;
@@ -301,9 +300,13 @@ class RoleController extends Controller
         asort($gradientOptions);
 
         $gradientOptions = [
-            '#7468e6, #c44b85' => 'Default', 
             '' => 'Custom',
         ] + $gradientOptions;
+
+
+        $random = rand(0, count($gradientOptions) - 1);
+        $keys = array_keys($gradientOptions);
+        $role->background_colors = $keys[$random];
 
         $fonts = file_get_contents(base_path('storage/fonts.json'));
         $fonts = json_decode($fonts);
