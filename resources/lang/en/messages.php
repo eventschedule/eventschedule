@@ -186,4 +186,6 @@ return [
     'subdomain' => 'Subdomain',
     'delete_image' => 'Delete Image',
     'deleted_image' => 'Successfully deleted image',
+    'try_event_schedule' => 'Create your own schedule at :link',
+    'supported_by' => 'Supported by :link',
 ];
