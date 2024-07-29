@@ -7,7 +7,7 @@
             flatpickr('.datepicker', {
                 enableTime: true,
                 altInput: true,
-                time_24hr: "{{ $venue && $venue-> use_24_hour_time ? 'true' : 'false' }}",
+                time_24hr: "{{ $venue && $venue->use_24_hour_time ? 'true' : 'false' }}",
                 altFormat: "{{ $venue && $venue->use_24_hour_time ? 'F j, Y H:i' : 'F j, Y h:i K' }}",
                 dateFormat: "Y-m-d H:i:S",
             });
@@ -35,21 +35,21 @@
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('Venue') }}
+                            {{ __('messages.venue') }}
                         </h2>
 
                         @if($venue)
                         <div>{{ $venue->name }}</div>
                         @else
                         <div class="mb-6">
-                            <x-input-label for="venue_name" :value="__('Name' . ' *')" />
+                            <x-input-label for="venue_name" :value="__('messages.name') . ' *'" />
                             <x-text-input id="venue_name" name="venue_name" type="text" class="mt-1 block w-full"
                                 :value="old('venue_name')" required autofocus />
                             <x-input-error class="mt-2" :messages="$errors->get('venue_name')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="venue_email" :value="__('Email' . ' *')" />
+                            <x-input-label for="venue_email" :value="__('messages.email') . ' *'" />
                             <x-text-input id="venue_email" name="venue_email" type="email" class="mt-1 block w-full"
                                 :value="old('venue_email')" required />
                             <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
@@ -64,11 +64,11 @@
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                             @if($venue && ! $venue->accept_talent_requests)
-                            {{ __('Vendor') }}
+                            {{ __('messages.vendor') }}
                             @elseif($venue && ! $venue->accept_vendor_requests)
-                            {{ __('Talent') }}
+                            {{ __('messages.talent') }}
                             @else
-                            {{ __('Talent/Vendor') }}
+                            {{ __('messages.talent_vendor') }}
                             @endif
                         </h2>
 
@@ -81,19 +81,19 @@
                         @if($venue)
                         @if($venue->accept_talent_requests && $venue->accept_vendor_requests)
                         <fieldset>
-                            <x-input-label for="role_type" :value="__('Type')" />
+                            <x-input-label for="role_type" :value="__('messages.type')" />
                             <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                                 <div class="flex items-center">
                                     <input id="talent" name="role_type" type="radio" value="talent" CHECKED
                                         class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                     <label for="talent"
-                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900">Talent</label>
+                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900">{{ __('messages.talent') }}</label>
                                 </div>
                                 <div class="flex items-center">
                                     <input id="vendor" name="role_type" type="radio" value="vendor"
                                         class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                     <label for="vendor"
-                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900">Vendor</label>
+                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900">{{ __('messages.vendor') }}</label>
                                 </div>
                             </div>
                         </fieldset>
@@ -105,14 +105,14 @@
                         @endif
 
                         <div class="mb-6">
-                            <x-input-label for="role_name" :value="__('Name' . ' *')" />
+                            <x-input-label for="role_name" :value="__('messages.name') . ' *'" />
                             <x-text-input id="role_name" name="role_name" type="text" class="mt-1 block w-full"
                                 :value="old('role_name')" required autofocus />
                             <x-input-error class="mt-2" :messages="$errors->get('role_name')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="role_email" :value="__('Email' . ' *')" />
+                            <x-input-label for="role_email" :value="__('messages.email') . ' *'" />
                             <x-text-input id="role_email" name="role_email" type="email" class="mt-1 block w-full"
                                 :value="old('role_email')" required />
                             <x-input-error class="mt-2" :messages="$errors->get('role_email')" />
@@ -128,30 +128,30 @@
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('Details') }}
+                            {{ __('messages.details') }}
                         </h2>
 
                         <div class="mb-6">
-                            <x-input-label for="starts_at" :value="__('Date and Time')" />
+                            <x-input-label for="starts_at" :value="__('messages.date_and_time')" />
                             <x-text-input type="text" id="starts_at" name="starts_at" class="datepicker"
                                 :value="old('starts_at', $event->localStartsAt())" />
                             <x-input-error class="mt-2" :messages="$errors->get('starts_at')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="duration" :value="__('Duration in Hours')" />
+                            <x-input-label for="duration" :value="__('messages.duration_in_hours')" />
                             <x-text-input type="number" id="duration" name="duration"
                                 :value="old('duration', $event->duration)" />
                             <x-input-error class="mt-2" :messages="$errors->get('duration')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="visibility" :value="__('Visibility')" />
+                            <x-input-label for="visibility" :value="__('messages.visibility')" />
                             <select id="visibility" name="visibility"
                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                 @foreach(['private', 'unlisted', 'public'] as $level)
                                 <option value="{{ $level }}" {{ $event->visibility == $level ? 'SELECTED' : '' }}>
-                                    {{ __(ucwords($level)) }}</option>
+                                    {{ __('messages.' . $level) }}</option>
                                 @endforeach
                             </select>
                             <x-input-error class="mt-2" :messages="$errors->get('visibility')" />
@@ -168,7 +168,7 @@
         <div class="max-w-7xl mx-auto space-y-6">
             <div class="flex gap-4 items-center justify-between">
                 <div class="flex gap-4">
-                    <x-primary-button>{{ __('Save') }}</x-primary-button>
+                    <x-primary-button>{{ __('messages.save') }}</x-primary-button>
 
                     <x-cancel-button></x-cancel-button>
                 </div>
