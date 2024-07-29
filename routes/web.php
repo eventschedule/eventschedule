@@ -39,6 +39,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/{subdomain}/publish', [RoleController::class, 'publish'])->name('role.publish');
     Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
     Route::get('/{subdomain}/delete', [RoleController::class, 'delete'])->name('role.delete');
+    Route::get('/{subdomain}/delete_image', [RoleController::class, 'deleteImage'])->name('role.delete_image');
     Route::get('/{subdomain}/add_event/{subdomain2?}', [EventController::class, 'create'])->name('event.create');
     Route::post('/{subdomain}/store_event/{subdomain2?}', [EventController::class, 'store'])->name('event.store');
     Route::get('/{subdomain}/edit_event/{hash}', [EventController::class, 'edit'])->name('event.edit');

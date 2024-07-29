@@ -184,4 +184,5 @@ return [
     'color' => 'Color',
     'gradient' => 'Gradient',
     'subdomain' => 'Subdomain',
+    'deleted_image' => 'Successfully deleted image',
 ];
