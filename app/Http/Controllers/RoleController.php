@@ -310,6 +310,7 @@ class RoleController extends Controller
     public function create()
     {
         $role = new Role;
+        $role->font_family = 'Roboto';
         $role->font_color = '#111827';
         $role->accent_color = '#007BFF';
         $role->background = 'default';
@@ -317,7 +318,7 @@ class RoleController extends Controller
         $role->background_rotation = 135;
         $role->accept_talent_requests = true;
         $role->timezone = auth()->user()->timezone;
-        $role->language_code = auth()->user()->timezone;
+        $role->language_code = auth()->user()->language_code;
 
         $gradients = file_get_contents(base_path('storage/gradients.json'));
         $gradients = json_decode($gradients);
