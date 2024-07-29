@@ -133,7 +133,7 @@
                             <div class="hidden sm:mb-10 sm:flex">
                                 <div
                                     class="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-500 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
-                                    Join the beta
+                                    100% Free!
                                 </div>
                             </div>
                             -->
