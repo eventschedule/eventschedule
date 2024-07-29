@@ -168,4 +168,11 @@ return [
     'italian' => 'Italian',
     'portuguese' => 'Portuguese',
     'spanish' => 'Spanish',
+    'sun' => 'Sun',
+    'mon' => 'Mon',
+    'tue' => 'Tue',
+    'wed' => 'Wed',
+    'thu' => 'Thu',
+    'fri' => 'Fri',
+    'sat' => 'Sat',
 ];
