@@ -410,6 +410,7 @@ class RoleController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
         $role->fill($request->all());
+        $role->subdomain = Role::cleanSubdomain($request->subdomain);
 
         if (! $request->background_colors) {
             $role->background_colors = $request->custom_color1 . ', ' . $request->custom_color2;

@@ -329,7 +329,7 @@
 
                     @if ($errors->any())
                     <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
-                        <b>{{ __('messages.there_was_a_problem' . ':')}}</b>
+                        <b>{{ __('messages.there_was_a_problem') . ':' }}</b>
                         <ul>
                             @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
