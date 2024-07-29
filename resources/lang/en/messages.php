@@ -101,7 +101,7 @@ return [
     'new_password' => 'New Password',
     'confirm_password' => 'Confirm Password',
     'save' => 'Save',
-    'saved' => 'Saved'
+    'saved' => 'Saved',
     'profile_information' => 'Profile Information',
     'update_your_accounts_profile_information_and_email_address' => 'Update your account\'s profile information and email address.',
     'name' => 'Name',
@@ -114,7 +114,7 @@ return [
     'details' => 'Details',
     'name' => 'Name',
     'email' => 'Email',
-    'save' => 'Save'
+    'save' => 'Save',
     'preview' => 'Preview',
     'details' => 'Details',
     'type' => 'Type',
@@ -183,7 +183,7 @@ return [
     'remove' => 'Remove',
     'admin' => 'Admin',
     'member' => 'Member',
-    'owner' => 'Owner'
+    'owner' => 'Owner',
     'back' => 'Back',
     'edit' => 'Edit',
     'view' => 'View',
