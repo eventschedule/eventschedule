@@ -137,7 +137,8 @@
         {{ $title }}
     </h2>
 
-    <form method="post" action="{{ $role->exists ? route('role.update', ['subdomain' => $role->subdomain]) : route('role.store') }}"
+    <form method="post"
+        action="{{ $role->exists ? route('role.update', ['subdomain' => $role->subdomain]) : route('role.store') }}"
         enctype="multipart/form-data">
 
         @csrf
@@ -212,6 +213,10 @@
 
                             @if ($role->profile_image_url)
                             <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="pt-3" />
+                            <a href="#"
+                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'type' => 'profile']) }}'; }">
+                                {{ __('messages.delete_image') }}
+                            </a>
                             @endif
                         </div>
 
@@ -360,6 +365,10 @@
 
                             @if ($role->background_image_url)
                             <img src="{{ $role->background_image_url }}" style="max-height:120px" class="pt-3" />
+                            <a href="#"
+                                    onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'type' => 'background']) }}'; return false; }">
+                                {{ __('messages.delete_image') }}
+                            </a>
                             @endif
                         </div>
 
@@ -453,7 +462,8 @@
                                 'pt' => 'portuguese',
                                 'es' => 'spanish',
                                 ] as $key => $value)
-                                <option value="{{ $key }}" {{ $role->language_code == $key ? 'SELECTED' : '' }}>{{ __('messages.' . $value) }}
+                                <option value="{{ $key }}" {{ $role->language_code == $key ? 'SELECTED' : '' }}>
+                                    {{ __('messages.' . $value) }}
                                 </option>
                                 @endforeach
                             </select>
@@ -461,14 +471,16 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-checkbox name="accept_talent_requests" label="{{ __('messages.accept_talent_requests') }}"
+                            <x-checkbox name="accept_talent_requests"
+                                label="{{ __('messages.accept_talent_requests') }}"
                                 checked="{{ old('accept_talent_requests', $role->accept_talent_requests) }}"
                                 data-custom-attribute="value" />
                             <x-input-error class="mt-2" :messages="$errors->get('accept_talent_requests')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-checkbox name="accept_vendor_requests" label="{{ __('messages.accept_vendor_requests') }}"
+                            <x-checkbox name="accept_vendor_requests"
+                                label="{{ __('messages.accept_vendor_requests') }}"
                                 checked="{{ old('accept_vendor_requests', $role->accept_vendor_requests) }}"
                                 data-custom-attribute="value" />
                             <x-input-error class="mt-2" :messages="$errors->get('accept_vendor_requests')" />
@@ -496,8 +508,7 @@
                 </div>
                 <div>
                     @if ($role->exists)
-                    <x-delete-button
-                        :url="route('role.delete', ['subdomain' => $role->subdomain])">
+                    <x-delete-button :url="route('role.delete', ['subdomain' => $role->subdomain])">
                     </x-delete-button>
                     @endif
                 </div>
