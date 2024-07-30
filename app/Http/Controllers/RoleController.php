@@ -147,7 +147,7 @@ class RoleController extends Controller
             ->where($role->isVenue() ? 'venue_id' : 'role_id', $role->id)
             ->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
             ->where('is_accepted', true)
-            ->where('visibility', 'public')
+            ->where('visibility', '!=', 'private')
             ->orderBy('starts_at')
             ->get();
 
@@ -309,7 +309,7 @@ class RoleController extends Controller
     {
         $user = auth()->user();
         $roleIds = $user->followingVenues()
-                        ->where('visibility', 'public')
+                        ->where('visibility', '!=', 'private')
                         ->pluck('roles.id');
         $roles = Role::whereIn('id', $roleIds)
                     ->orderBy('name', 'ASC')
@@ -326,7 +326,7 @@ class RoleController extends Controller
     {
         $user = auth()->user();
         $roleIds = $user->followingTalent()
-                        ->where('visibility', 'public')
+                        ->where('visibility', '!=', 'private')
                         ->pluck('roles.id');
         $roles = Role::whereIn('id', $roleIds)
                     ->orderBy('name', 'ASC')
@@ -343,7 +343,7 @@ class RoleController extends Controller
     {
         $user = auth()->user();
         $roleIds = $user->followingVendors()
-                        ->where('visibility', 'public')
+                        ->where('visibility', '!=', 'private')
                         ->pluck('roles.id');
         $roles = Role::whereIn('id', $roleIds)
                     ->orderBy('name', 'ASC')
