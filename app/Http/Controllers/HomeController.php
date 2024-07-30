@@ -26,8 +26,14 @@ class HomeController extends Controller
         $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
         $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
+        $user = $request->user();
+        $roleIds = $user->roles()->pluck('roles.id');
+        
         $events = Event::with(['role'])
-            //->whereVenueId($role->id)
+            ->where(function ($query) use ($roleIds) {
+                $query->whereIn('venue_id', $roleIds)
+                    ->orWhereIn('role_id', $roleIds);
+            })
             ->whereVisibility('public')
             ->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
             ->orderBy('starts_at')

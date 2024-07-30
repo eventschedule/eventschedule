@@ -65,7 +65,7 @@ class EventController extends Controller
         $vendor = $this->getVendor($role1, $role2);
         $talent = $this->getTalent($role1, $role2);
         
-        if (! auth()->user()->hasRole($subdomain)) {
+        if (! auth()->user()->isMember($subdomain)) {
             return redirect('/');
         }
 
@@ -96,7 +96,7 @@ class EventController extends Controller
 
     public function update(Request $request, $subdomain, $hash)
     {
-        if (! auth()->user()->hasRole($subdomain)) {
+        if (! auth()->user()->isMember($subdomain)) {
             return redirect('/');
         }
 
@@ -125,7 +125,7 @@ class EventController extends Controller
 
     public function accept(Request $request, $subdomain, $hash)
     {
-        if (! auth()->user()->hasRole($subdomain)) {
+        if (! auth()->user()->isMember($subdomain)) {
             return redirect('/');
         }
 
@@ -140,7 +140,7 @@ class EventController extends Controller
 
     public function decline(Request $request, $subdomain, $hash)
     {
-        if (! auth()->user()->hasRole($subdomain)) {
+        if (! auth()->user()->isMember($subdomain)) {
             return redirect('/');
         }
 
@@ -161,7 +161,7 @@ class EventController extends Controller
     /*
     public function delete(Request $request, $subdomain, $hash)
     {
-        if (! auth()->user()->hasRole($subdomain)) {
+        if (! auth()->user()->isMember($subdomain)) {
             return redirect('/');
         }
 
@@ -193,7 +193,7 @@ class EventController extends Controller
             }
         }
 
-        if ($venue && ! auth()->user()->hasRole($venue->subdomain) && ! $venue->acceptRequests()) {
+        if ($venue && ! auth()->user()->isMember($venue->subdomain) && ! $venue->acceptRequests()) {
             return redirect()
                     ->back()
                     ->withInput()
@@ -247,7 +247,7 @@ class EventController extends Controller
                 ->format('Y-m-d H:i:s');
         }
 
-        if (auth()->user()->hasRole($venue->subdomain)) {
+        if (auth()->user()->isMember($venue->subdomain)) {
             $event->is_accepted = true;
         }
 
