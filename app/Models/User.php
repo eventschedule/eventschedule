@@ -91,6 +91,21 @@ class User extends Authenticatable
         return $this->member()->type('vendor');
     }
 
+    public function followingVenues()
+    {
+        return $this->following()->type('venue');
+    }
+
+    public function followingTalent()
+    {
+        return $this->following()->type('talent');
+    }
+
+    public function followingVendors()
+    {
+        return $this->following()->type('vendor');
+    }
+
     public function isMember($subdomain): bool
     {
         return $this->member()->where('subdomain', $subdomain)->exists();
