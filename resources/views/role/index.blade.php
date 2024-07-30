@@ -27,7 +27,7 @@
                             @foreach ($roles as $role)
                             <tr class="bg-white">
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
-                                    {{ $role->name }}
+                                    <a href="{{ route('role.view_guest', ['subdomain' => $role->subdomain]) }}" target="_blank">{{ $role->name }}</a>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     <a href="mailto:{{ $role->email }}">{{ $role->email }}</a>
