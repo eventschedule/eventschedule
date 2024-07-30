@@ -132,8 +132,8 @@ class RoleController extends Controller
 
         $events = Event::with(['role'])
             ->where($role->isVenue() ? 'venue_id' : 'role_id', $role->id)
-            ->where('is_accepted', true)
             ->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
+            ->where('is_accepted', true)
             ->where('visibility', 'public')
             ->orderBy('starts_at')
             ->get();
