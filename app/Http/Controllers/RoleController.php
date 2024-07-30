@@ -294,17 +294,47 @@ class RoleController extends Controller
 
     public function viewVenues()
     {
-        return view('role/index');
+        $user = auth()->user();
+        $roleIds = $user->followingVenues()->pluck('roles.id');
+        $roles = Role::whereIn('id', $roleIds)
+                    ->orderBy('name', 'ASC')
+                    ->get();
+
+        $data = [
+            'roles' => $roles,
+        ];
+
+        return view('role/index', $data);
     }
 
     public function viewTalent()
     {
-        return view('role/index');
+        $user = auth()->user();
+        $roleIds = $user->followingTalent()->pluck('roles.id');
+        $roles = Role::whereIn('id', $roleIds)
+                    ->orderBy('name', 'ASC')
+                    ->get();
+
+        $data = [
+            'roles' => $roles,
+        ];
+
+        return view('role/index', $data);
     }
 
     public function viewVendors()
     {
-        return view('role/index');
+        $user = auth()->user();
+        $roleIds = $user->followingVendors()->pluck('roles.id');
+        $roles = Role::whereIn('id', $roleIds)
+                    ->orderBy('name', 'ASC')
+                    ->get();
+
+        $data = [
+            'roles' => $roles,
+        ];
+
+        return view('role/index', $data);
     }
 
     public function create()
