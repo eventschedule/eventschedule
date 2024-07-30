@@ -107,6 +107,19 @@ class RoleController extends Controller
                 ->with('message', str_replace(':name', $role->name, __('messages.followed_role')));
     }
 
+    public function unfollow(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $user = $request->user();
+
+        if ($user->isConnected($role->subdomain)) {
+            $user->roles()->detach($role->id);
+        }
+
+        return redirect(route($role->getTypePlural()))
+                ->with('message', str_replace(':name', $role->name, __('messages.unfollowed_role')));
+    }
+
     public function viewGuest(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();

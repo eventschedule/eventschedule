@@ -40,6 +40,7 @@
                                         target="_blank">{{ App\Utils\UrlUtils::clean($role->website) }}</a>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                    <a href="{{ route('role.unfollow', ['subdomain' => $role->subdomain]) }}">{{ __('messages.unfollow') }}</a>
                                 </td>
                             </tr>
                             @endforeach
