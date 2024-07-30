@@ -27,7 +27,9 @@ class HomeController extends Controller
         $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
         $user = $request->user();
-        $roleIds = $user->roles()->pluck('roles.id');
+        $roleIds = $user->roles()
+                    ->where('visibility', 'public')
+                    ->pluck('roles.id');
         
         $events = Event::with(['role'])
             ->where(function ($query) use ($roleIds) {

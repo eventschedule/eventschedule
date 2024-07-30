@@ -295,7 +295,9 @@ class RoleController extends Controller
     public function viewVenues()
     {
         $user = auth()->user();
-        $roleIds = $user->followingVenues()->pluck('roles.id');
+        $roleIds = $user->followingVenues()
+                        ->where('visibility', 'public')
+                        ->pluck('roles.id');
         $roles = Role::whereIn('id', $roleIds)
                     ->orderBy('name', 'ASC')
                     ->get();
@@ -310,7 +312,9 @@ class RoleController extends Controller
     public function viewTalent()
     {
         $user = auth()->user();
-        $roleIds = $user->followingTalent()->pluck('roles.id');
+        $roleIds = $user->followingTalent()
+                        ->where('visibility', 'public')
+                        ->pluck('roles.id');
         $roles = Role::whereIn('id', $roleIds)
                     ->orderBy('name', 'ASC')
                     ->get();
@@ -325,7 +329,9 @@ class RoleController extends Controller
     public function viewVendors()
     {
         $user = auth()->user();
-        $roleIds = $user->followingVendors()->pluck('roles.id');
+        $roleIds = $user->followingVendors()
+                        ->where('visibility', 'public')
+                        ->pluck('roles.id');
         $roles = Role::whereIn('id', $roleIds)
                     ->orderBy('name', 'ASC')
                     ->get();
