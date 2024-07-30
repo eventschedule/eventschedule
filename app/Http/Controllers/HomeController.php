@@ -28,7 +28,7 @@ class HomeController extends Controller
 
         $user = $request->user();
         $roleIds = $user->roles()
-                    ->where('visibility', 'public')
+                    ->where('visibility', '!=', 'private')
                     ->pluck('roles.id');
         
         $events = Event::with(['role'])
@@ -37,7 +37,7 @@ class HomeController extends Controller
                     ->orWhereIn('role_id', $roleIds);
             })
             ->where('is_accepted', true)
-            ->where('visibility', 'public')
+            ->where('visibility', '!=', 'private')
             ->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
             ->orderBy('starts_at')
             ->get();
