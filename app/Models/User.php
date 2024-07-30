@@ -59,6 +59,12 @@ class User extends Authenticatable
     public function roles()
     {
         return $this->belongsToMany(Role::class)
+                    ->withPivot('level');
+    }
+
+    public function member()
+    {
+        return $this->belongsToMany(Role::class)
                     ->withPivot('level')
                     ->wherePivotIn('level', ['owner', 'admin']);
     }
@@ -72,22 +78,22 @@ class User extends Authenticatable
 
     public function venues()
     {
-        return $this->roles()->type('venue');
+        return $this->member()->type('venue');
     }
 
     public function talent()
     {
-        return $this->roles()->type('talent');
+        return $this->member()->type('talent');
     }
 
     public function vendors()
     {
-        return $this->roles()->type('vendor');
+        return $this->member()->type('vendor');
     }
 
-    public function hasRole($subdomain): bool
+    public function isMember($subdomain): bool
     {
-        return $this->roles()->where('subdomain', $subdomain)->exists();
+        return $this->member()->where('subdomain', $subdomain)->exists();
     }
 
     public function isFollowing($subdomain): bool
@@ -97,7 +103,7 @@ class User extends Authenticatable
 
     public function isConnected($subdomain): bool
     {
-        return $this->hasRole($subdomain) || $this->isFollowing($subdomain);
+        return $this->roles()->where('subdomain', $subdomain)->exists();
     }
 
     public function getProfileImageUrlAttribute($value)

@@ -112,7 +112,7 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         $user = auth()->user();
 
-        if ($role->visibility == 'private' && (! $user || ! $user->hasRole($subdomain))) {
+        if ($role->visibility == 'private' && (! $user || ! $user->isMember($subdomain))) {
             return redirect('/');
         }
 
@@ -151,7 +151,7 @@ class RoleController extends Controller
 
     public function viewAdmin(Request $request, $subdomain, $tab = 'schedule')
     {
-        if (! auth()->user()->hasRole($subdomain)) {
+        if (! auth()->user()->isMember($subdomain)) {
             return redirect('/');
         }
 
@@ -215,7 +215,7 @@ class RoleController extends Controller
 
     public function createMember(Request $request, $subdomain)
     {
-        if (! auth()->user()->hasRole($subdomain)) {
+        if (! auth()->user()->isMember($subdomain)) {
             return redirect('/');
         }
 
@@ -231,7 +231,7 @@ class RoleController extends Controller
 
     public function storeMember(MemberAddRequest $request, $subdomain)
     {
-        if (! auth()->user()->hasRole($subdomain)) {
+        if (! auth()->user()->isMember($subdomain)) {
             return redirect('/');
         }
 
@@ -240,7 +240,7 @@ class RoleController extends Controller
         $data = $request->validated();
         $user = User::whereEmail($data['email'])->first();
 
-        if ($user && $user->hasRole($subdomain)) {
+        if ($user && $user->isMember($subdomain)) {
             return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']));    
         }
 
@@ -272,7 +272,7 @@ class RoleController extends Controller
 
     public function removeMember(Request $request, $subdomain, $hash)
     {
-        if (! auth()->user()->hasRole($subdomain)) {
+        if (! auth()->user()->isMember($subdomain)) {
             return redirect('/');
         }
 
@@ -435,7 +435,7 @@ class RoleController extends Controller
 
     public function update(RoleUpdateRequest $request, $subdomain): RedirectResponse
     {
-        if (! auth()->user()->hasRole($subdomain)) {
+        if (! auth()->user()->isMember($subdomain)) {
             return redirect('/');
         }        
 
@@ -483,7 +483,7 @@ class RoleController extends Controller
 
     public function updateLinks(Request $request, $subdomain): RedirectResponse
     {
-        if (! auth()->user()->hasRole($subdomain)) {
+        if (! auth()->user()->isMember($subdomain)) {
             return redirect('/');
         }
 
@@ -543,7 +543,7 @@ class RoleController extends Controller
 
     public function removeLinks(Request $request, $subdomain): RedirectResponse
     {
-        if (! auth()->user()->hasRole($subdomain)) {
+        if (! auth()->user()->isMember($subdomain)) {
             return redirect('/');
         }
 
