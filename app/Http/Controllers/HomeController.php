@@ -34,7 +34,8 @@ class HomeController extends Controller
                 $query->whereIn('venue_id', $roleIds)
                     ->orWhereIn('role_id', $roleIds);
             })
-            ->whereVisibility('public')
+            ->where('is_accepted', true)
+            ->where('visibility', 'public')
             ->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
             ->orderBy('starts_at')
             ->get();
