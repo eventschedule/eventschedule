@@ -31,7 +31,7 @@ return new class extends Migration
             $table->string('accent_color')->default('#007bff');
             $table->string('background_color')->default('#ffffff');
             $table->string('background_colors')->nullable();
-            $table->integer('background_rotation')->nullable();
+            $table->integer('background_rotation')->default(150);
             $table->string('font_color')->default('#111827');
             $table->string('font_family')->nullable();
             $table->string('name');
