@@ -7,7 +7,7 @@
     <form method="GET" action="{{ route('event.create', ['subdomain' => $subdomain]) }}">
 
         @if (request()->date)
-        <input type="hidden" name="date" value="{{ k }}"/>
+        <input type="hidden" name="date" value="{{ request()->date }}"/>
         @endif
 
         <div class="py-5">
