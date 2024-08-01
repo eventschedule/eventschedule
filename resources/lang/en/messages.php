@@ -191,4 +191,5 @@ return [
     'unfollowed_role' => 'Successfully unfollowed :name',
     'unfollow' => 'Unfollow',
     'event_requested' => 'Successfully submitted request',
+    'search' => 'Search',
 ];

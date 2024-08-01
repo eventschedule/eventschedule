@@ -61,6 +61,14 @@ class EventController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         $roles = [];
 
+        if (! $role->isVenue()) {
+            if ($request->has('venue_email')) {
+                $venue = Role::whereEmail($request->venue_email)->first();
+            } else {
+                return view('event/venue_search', ['subdomain' => $subdomain]);
+            }
+        }
+
         $venue = $role->isVenue() ? $role : null;
         $talent = $role->isTalent() ? $role : null;
         $vendor = $role->isVendor() ? $role : null;
@@ -90,7 +98,7 @@ class EventController extends Controller
                 }
 
             }
-        }        
+        }
 
         $event = new Event;
         if ($request->date) {
