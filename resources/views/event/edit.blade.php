@@ -50,9 +50,9 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="venue_email" :value="__('messages.email') . ' *'" />
+                            <x-input-label for="venue_email" :value="__('messages.email')" />
                             <x-text-input id="venue_email" name="venue_email" type="email" class="mt-1 block w-full"
-                                :value="old('venue_email')" required />
+                                :value="request()->venue_email" required readonly/>
                             <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
                         </div>
                         @endif
