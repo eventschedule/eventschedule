@@ -278,6 +278,8 @@ class EventController extends Controller
 
         if (auth()->user()->isMember($venue->subdomain)) {
             $event->is_accepted = true;
+        } else {
+            $subdomain = $role->subdomain;
         }
 
         $event->save();
