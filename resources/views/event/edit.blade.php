@@ -37,10 +37,8 @@
         @method('put')
         @endif
 
-
         <div class="py-5">
             <div class="max-w-7xl mx-auto space-y-6">
-                @if (! $role->isVenue())
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">
 
@@ -50,7 +48,7 @@
 
                         @if ($venue)
                         <div>{{ $venue->name }}</div>
-                        <input type="hidden" name="venue_email" value="{{ request()->venue_email }}"/>
+                        <input type="hidden" name="venue_email" value="{{ request()->venue_email }}" />
                         @else
                         <div class="mb-6">
                             <x-input-label for="venue_name" :value="__('messages.name') . ' *'" />
@@ -69,7 +67,6 @@
 
                     </div>
                 </div>
-                @endif
 
                 @if (! $venue)
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="address">
