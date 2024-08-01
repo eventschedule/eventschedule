@@ -113,6 +113,7 @@ class EventController extends Controller
         }
 
         $data = [
+            'role' => $role,
             'subdomain' => $subdomain,
             'event' => $event,
             'venue' => $venue,
