@@ -189,23 +189,9 @@ class EventController extends Controller
         }        
     }
 
-    /*
-    public function delete(Request $request, $subdomain, $hash)
-    {
-        if (! auth()->user()->isMember($subdomain)) {
-            return redirect('/');
-        }
-
-        $event_id = UrlUtils::decodeId($hash);
-        $event = Event::findOrFail($event_id);        
-        $event->delete();
-        
-        return redirect('/' . $subdomain . '/schedule');
-    }
-    */
-
     public function store(Request $request, $subdomain)
     {
+        $user = $request->user();
         $role = Role::subdomain($subdomain)->firstOrFail();
         $venue = $role->isVenue() ? $role : null;
         $talent = $role->isTalent() ? $role : null;
@@ -235,6 +221,8 @@ class EventController extends Controller
             $venue->subdomain = Role::generateSubdomain($request->venue_name);
             $venue->email = $request->venue_email;
             $venue->type = 'venue';
+            $venue->timezone = $user->timezone;
+            $venue->language_code = $user->language_code;
             $venue->save();
         }
 
@@ -267,6 +255,8 @@ class EventController extends Controller
                 $role->subdomain = Role::generateSubdomain($request->role_name);
                 $role->email = $request->role_email;
                 $role->type = $request->role_type;
+                $role->timezone = $user->timezone;
+                $role->language_code = $user->language_code;
                 $role->save();            
             }
         }
