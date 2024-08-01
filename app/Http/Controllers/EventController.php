@@ -74,29 +74,26 @@ class EventController extends Controller
         }
 
         if ($venue) {
-            if (! $user->isMember($subdomain)) {
-                if (! $venue->acceptRequests()) {
-                    return redirect('/');
-                }
+            if (! $user->isMember($subdomain) && ! $venue->acceptRequests()) {
+                return redirect('/');
+            }
 
-                foreach ($user->talent()->get() as $each) {
-                    $roles[] = $each;
-                }
-                
-                foreach ($user->vendors()->get() as $each) {
-                    $roles[] = $each;
-                }
+            foreach ($user->talent()->get() as $each) {
+                $roles[] = $each;
+            }
+            
+            foreach ($user->vendors()->get() as $each) {
+                $roles[] = $each;
+            }
 
-                if (count($roles) == 0) {
-                    return redirect(route('register'));
-                } elseif (count($roles) == 1) {
-                    if ($roles[0]->isVendor()) {
-                        $vendor = $roles[0];
-                    } else {
-                        $talent = $roles[0];
-                    }
+            if (count($roles) == 0) {
+                return redirect(route('register'));
+            } elseif (count($roles) == 1) {
+                if ($roles[0]->isVendor()) {
+                    $vendor = $roles[0];
+                } else {
+                    $talent = $roles[0];
                 }
-
             }
         }
 
