@@ -1,7 +1,6 @@
 <x-app-layout>
 
     @vite([
-    'resources/js/jquery-3.3.1.min.js',
     'resources/js/countrySelect.min.js',
     'resources/css/countrySelect.min.css',
     ])
