@@ -4,10 +4,7 @@
         {{ __('messages.add_event') }}
     </h2>
 
-    <form method="GET"
-        action="{{ route('event.create', ['subdomain' => $subdomain]) }}">
-
-        @csrf
+    <form method="GET" action="{{ route('event.create', ['subdomain' => $subdomain]) }}">
 
         <div class="py-5">
             <div class="max-w-7xl mx-auto space-y-6">
