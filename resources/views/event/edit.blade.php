@@ -159,6 +159,7 @@
                         @elseif($venue->accept_vendor_requests)
                         <input type="hidden" name="role_type" value="vendor" />
                         @endif
+                        @endif
 
                         @if($venue && auth()->user()->isMember($venue->subdomain))
                         <div class="mb-6">
@@ -176,22 +177,12 @@
                         </div>
                         @else
                         <div class="mb-6">
-                            <x-input-label for="role" :value="__('messages.name') . ' *'" />
                             <select name="role_id">
                                 @foreach ($roles as $role)
                                 <option value="{{ App\Utils\UrlUtils::encodeId($role->id) }}">{{ $role->name }}</option>
                                 @endforeach
                             </select>
                         </div>
-
-                        <!--
-                            <x-input-label for="role" :value="__('messages.email') . ' *'" />
-                            <x-text-input id="role_email" name="role_email" type="email" class="mt-1 block w-full"
-                                :value="old('role_email')" required />
-                            <x-input-error class="mt-2" :messages="$errors->get('role_email')" />
-                            -->
-                        @endif
-
                         @endif
 
                     </div>
