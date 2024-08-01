@@ -31,6 +31,7 @@
 
         <div class="py-5">
             <div class="max-w-7xl mx-auto space-y-6">
+                @if (! $role->isVenue())
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">
 
@@ -58,6 +59,7 @@
 
                     </div>
                 </div>
+                @endif
 
                 @if ($talent)
                 <input type="hidden" name="role_id" value="{{ App\Utils\UrlUtils::encodeId($talent->id) }}" />
