@@ -112,7 +112,7 @@
                 </div>
                 <div>
                 @if ($role->accept_talent_requests)
-                <a href="{{ route('event.sign_up', ['subdomain' => $role->subdomain, 'subdomain2' => ''])}}">
+                <a href="{{ route('event.sign_up', ['subdomain' => $role->subdomain])}}">
                     <button type="button" style="background-color: {{ $role->accent_color }}"
                         class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
@@ -126,7 +126,7 @@
                 @endif
 
                 @if ($role->accept_vendor_requests)
-                <a href="{{ route('event.sign_up', ['subdomain' => $role->subdomain, 'subdomain2' => ''])}}">
+                <a href="{{ route('event.sign_up', ['subdomain' => $role->subdomain])}}">
                     <button type="button" style="background-color: {{ $role->accent_color }}"
                         class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"

@@ -46,7 +46,6 @@ class EventController extends Controller
         $data = [
             'event' => $event,
             'subdomain' => $subdomain,
-            'subdomain2' => $subdomain == $venueSubdomain ? $roleSubdomain : $venueSubdomain,
             'venue' => $event->venue,
             'talent' => $event->role->type == 'talent' ? $event->role : false,
             'vendor' => $event->role->type == 'vendor' ? $event->role : false,
@@ -56,14 +55,12 @@ class EventController extends Controller
         return view('event/edit', $data);
     }
 
-    public function create(Request $request, $subdomain, $subdomain2 = '')
+    public function create(Request $request, $subdomain)
     {
-        $role1 = Role::subdomain($subdomain)->firstOrFail();
-        $role2 = $subdomain2 ? Role::subdomain($subdomain2)->firstOrFail() : false;
-
-        $venue = $this->getVenue($role1, $role2);
-        $vendor = $this->getVendor($role1, $role2);
-        $talent = $this->getTalent($role1, $role2);
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $venue = $role->isVenue() ? $role : null;
+        $talent = $role->isTalent() ? $role : null;
+        $vendor = $role->isVendor() ? $role : null;
         
         if ($venue && (! auth()->user()->isMember($subdomain) && ! $venue->acceptRequests())) {
             return redirect('/');
@@ -83,7 +80,6 @@ class EventController extends Controller
 
         $data = [
             'subdomain' => $subdomain,
-            'subdomain2' => $subdomain2,
             'event' => $event,
             'venue' => $venue,
             'talent' => $talent,
@@ -173,14 +169,12 @@ class EventController extends Controller
     }
     */
 
-    public function store(Request $request, $subdomain, $subdomain2 = '')
+    public function store(Request $request, $subdomain)
     {
-        $role1 = Role::subdomain($subdomain)->firstOrFail();
-        $role2 = $subdomain2 ? Role::subdomain($subdomain2)->firstOrFail() : false;
-
-        $venue = $this->getVenue($role1, $role2);
-        $vendor = $this->getVendor($role1, $role2);
-        $talent = $this->getTalent($role1, $role2);
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $venue = $role->isVenue() ? $role : null;
+        $talent = $role->isTalent() ? $role : null;
+        $vendor = $role->isVendor() ? $role : null;
         
         if (! $venue) {
             $venue = Role::whereEmail($request->venue_email)->first();
@@ -265,30 +259,4 @@ class EventController extends Controller
                 ->with('message', __('messages.event_created'));
     }
 
-    private function getVenue($role1, $role2) 
-    {
-        if ($role1->isVenue()) {
-            return $role1;
-        } else if ($role2 && $role2->isVenue()) {
-            return $role2;
-        }
-    }
-
-    private function getTalent($role1, $role2) 
-    {
-        if ($role1->isTalent()) {
-            return $role1;
-        } else if ($role2 && $role2->isTalent()) {
-            return $role2;
-        }      
-    }
-
-    private function getVendor($role1, $role2) 
-    {
-        if ($role1->isVendor()) {
-            return $role1;
-        } else if ($role2 && $role2->isVendor()) {
-            return $role2;
-        }      
-    }
 }

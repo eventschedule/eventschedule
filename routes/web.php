@@ -40,8 +40,8 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
     Route::get('/{subdomain}/delete', [RoleController::class, 'delete'])->name('role.delete');
     Route::get('/{subdomain}/delete_image', [RoleController::class, 'deleteImage'])->name('role.delete_image');
-    Route::get('/{subdomain}/add_event/{subdomain2?}', [EventController::class, 'create'])->name('event.create');
-    Route::post('/{subdomain}/store_event/{subdomain2?}', [EventController::class, 'store'])->name('event.store');
+    Route::get('/{subdomain}/add_event', [EventController::class, 'create'])->name('event.create');
+    Route::post('/{subdomain}/store_event', [EventController::class, 'store'])->name('event.store');
     Route::get('/{subdomain}/edit_event/{hash}', [EventController::class, 'edit'])->name('event.edit');
     Route::get('/{subdomain}/delete_event/{hash}', [EventController::class, 'delete'])->name('event.delete');
     Route::put('/{subdomain}/update_event/{hash}', [EventController::class, 'update'])->name('event.update');
@@ -53,7 +53,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/team/add_member', [RoleController::class, 'createMember'])->name('role.create_member');
     Route::post('/{subdomain}/team/add_member', [RoleController::class, 'storeMember'])->name('role.store_member');
     Route::get('/{subdomain}/team/remove_member/{hash}', [RoleController::class, 'removeMember'])->name('role.remove_member');
-    Route::get('/{subdomain}/sign_up/{subdomain2?}', [EventController::class, 'create'])->name('event.sign_up');
+    Route::get('/{subdomain}/sign_up', [EventController::class, 'create'])->name('event.sign_up');
     Route::get('/{subdomain}/event/{hash}', [EventController::class, 'view'])->name('event.view');
     Route::get('/{subdomain}/{tab?}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
 });
