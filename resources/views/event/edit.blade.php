@@ -59,6 +59,11 @@
                     </div>
                 </div>
 
+                @if ($talent)
+                <input type="hidden" name="role_id" value="{{ App\Utils\UrlUtils::encodeId($talent->id) }}" />
+                @elseif ($vendor)
+                <input type="hidden" name="role_id" value="{{ App\Utils\UrlUtils::encodeId($vendor->id) }}" />
+                @else
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">
 
@@ -72,13 +77,6 @@
                             @endif
                         </h2>
 
-                        @if($talent)
-                        <div>{{ $talent->name }}</div>
-                        <input type="hidden" name="role_id" value="{{ App\Utils\UrlUtils::encodeId($talent->id) }}"/>
-                        @elseif($vendor)
-                        <div>{{ $vendor->name }}</div>
-                        <input type="hidden" name="role_id" value="{{ App\Utils\UrlUtils::encodeId($vendor->id) }}"/>
-                        @else
 
                         @if($venue && auth()->user()->isMember($venue->subdomain))
                         @if($venue->accept_talent_requests && $venue->accept_vendor_requests)
@@ -104,7 +102,6 @@
                         @elseif($venue->accept_vendor_requests)
                         <input type="hidden" name="role_type" value="vendor" />
                         @endif
-                        @endif
 
                         @if($venue && auth()->user()->isMember($venue->subdomain))
                         <div class="mb-6">
@@ -125,12 +122,12 @@
                             <x-input-label for="role" :value="__('messages.name') . ' *'" />
                             <select name="role_id">
                                 @foreach ($roles as $role)
-                                    <option value="{{ App\Utils\UrlUtils::encodeId($role->id) }}">{{ $role->name }}</option>
+                                <option value="{{ App\Utils\UrlUtils::encodeId($role->id) }}">{{ $role->name }}</option>
                                 @endforeach
                             </select>
                         </div>
 
-                            <!--
+                        <!--
                             <x-input-label for="role" :value="__('messages.email') . ' *'" />
                             <x-text-input id="role_email" name="role_email" type="email" class="mt-1 block w-full"
                                 :value="old('role_email')" required />
@@ -142,7 +139,7 @@
 
                     </div>
                 </div>
-
+                @endif
 
                 @if (($venue && auth()->user()->isMember($venue->subdomain)) || ! $venue)
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
