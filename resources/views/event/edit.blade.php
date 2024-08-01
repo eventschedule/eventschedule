@@ -124,6 +124,7 @@
                 </div>
 
 
+                @if ($venue && auth()->user()->isMember($venue->subdomain))
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">
 
@@ -159,6 +160,7 @@
 
                     </div>
                 </div>
+                @endif
 
             </div>
         </div>
