@@ -57,18 +57,45 @@ class EventController extends Controller
 
     public function create(Request $request, $subdomain)
     {
+        $user = $request->user();
         $role = Role::subdomain($subdomain)->firstOrFail();
+        $roles = [];
+
         $venue = $role->isVenue() ? $role : null;
         $talent = $role->isTalent() ? $role : null;
         $vendor = $role->isVendor() ? $role : null;
         
-        if ($venue && (! auth()->user()->isMember($subdomain) && ! $venue->acceptRequests())) {
-            return redirect('/');
-        }
+        if ($venue) {
+            if (! $user->isMember($subdomain)) {
+                if (! $venue->acceptRequests()) {
+                    return redirect('/');
+                }
+
+                foreach ($user->talent()->get() as $each) {
+                    $roles[] = $each;
+                    break;
+                }
+                
+                foreach ($user->vendors()->get() as $each) {
+                    $roles[] = $each;
+                    break;
+                }
+
+                if (count($roles) == 1) {
+                    return redirect(route('register'))->with('message', __('messages.please_register_first'));
+                } elseif (count($roles) == 1) {
+                    if ($roles[0]->isVendor()) {
+                        $vendor = $roles[0];
+                    } else {
+                        $talent = $roles[0];
+                    }
+                }
+            }
+        }        
 
         $event = new Event;
         if ($request->date) {
-            $defaultTime = Carbon::now(auth()->user()->timezone)->setTime(20, 0, 0);
+            $defaultTime = Carbon::now($user()->timezone)->setTime(20, 0, 0);
             $utcTime = $defaultTime->setTimezone('UTC');
             $event->starts_at = $request->date . $utcTime->format('H:i:s');
         }
