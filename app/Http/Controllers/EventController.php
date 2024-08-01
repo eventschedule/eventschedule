@@ -99,7 +99,7 @@ class EventController extends Controller
 
         $event = new Event;
         if ($request->date) {
-            $defaultTime = Carbon::now($user()->timezone)->setTime(20, 0, 0);
+            $defaultTime = Carbon::now($user->timezone)->setTime(20, 0, 0);
             $utcTime = $defaultTime->setTimezone('UTC');
             $event->starts_at = $request->date . $utcTime->format('H:i:s');
         }
