@@ -123,8 +123,10 @@
                         @else
                         <div class="mb-6">
                             <x-input-label for="role" :value="__('messages.name') . ' *'" />
-                            <select>
-
+                            <select name="role_id">
+                                @foreach ($roles as $role)
+                                    <option value="{{ App\Utils\UrlUtils::encodeId($role->id) }}">{{ $role->name }}</option>
+                                @endforeach
                             </select>
                         </div>
 
@@ -134,7 +136,6 @@
                                 :value="old('role_email')" required />
                             <x-input-error class="mt-2" :messages="$errors->get('role_email')" />
                             -->
-                        </div>
                         @endif
 
                         @endif
