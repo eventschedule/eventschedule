@@ -2,6 +2,20 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head class="h-full bg-white">
+    <meta name="description" content="Connecting venues, talent, and vendors with their audience">
+
+    <meta property="og:title" content="Event Schedule">
+    <meta property="og:description" content="Connecting venues, talent, and vendors with their audience">
+    <meta property="og:image" content="https://eventschedule.com/images/background.jpg">
+    <meta property="og:url" content="https://eventschedule.com">
+    <meta property="og:site_name" content="Event Schedule">
+
+    <meta name="twitter:title" content="Event Schedule">
+    <meta name="twitter:description" content="Connecting venues, talent, and vendors with their audience">
+    <meta name="twitter:image" content="https://eventschedule.com/images/background.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image:alt" content="Event Schedule">
+
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.99em%22 font-size=%2275%22>🕒</text></svg>">
 
     <!-- Google tag (gtag.js) -->
