@@ -73,12 +73,10 @@ class EventController extends Controller
 
                 foreach ($user->talent()->get() as $each) {
                     $roles[] = $each;
-                    break;
                 }
                 
                 foreach ($user->vendors()->get() as $each) {
                     $roles[] = $each;
-                    break;
                 }
 
                 if (count($roles) == 0) {
@@ -90,6 +88,7 @@ class EventController extends Controller
                         $talent = $roles[0];
                     }
                 }
+
             }
         }        
 
@@ -112,6 +111,7 @@ class EventController extends Controller
             'talent' => $talent,
             'vendor' => $vendor,
             'title' => $title,
+            'roles' => $roles,
         ];
 
         return view('event/edit', $data);
