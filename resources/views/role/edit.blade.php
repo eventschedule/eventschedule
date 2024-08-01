@@ -284,7 +284,7 @@
                         <div class="mb-6">
                             <x-input-label for="country" :value="__('messages.country')" />
                             <x-text-input id="country" name="country" type="text" class="mt-1 block w-full"
-                                :value="old('country', $role->country)" onchange="onChangeCountry()" />
+                                :value="old('country')" onchange="onChangeCountry()" />
                             <x-input-error class="mt-2" :messages="$errors->get('country')" />
                             <input type="hidden" id="country_code" name="country_code" />
                         </div>
