@@ -67,7 +67,7 @@ class EventController extends Controller
 
         if (! $role->isVenue()) {
             if ($request->has('venue_email')) {
-                $venue = Role::whereEmail($request->venue_email)->first();
+                $venue = Role::whereEmail($request->venue_email)->first();                
             } else {
                 return view('event/venue_search', ['subdomain' => $subdomain]);
             }

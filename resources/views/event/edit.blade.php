@@ -50,6 +50,7 @@
 
                         @if ($venue)
                         <div>{{ $venue->name }}</div>
+                        <input type="hidden" name="venue_email" value="{{ request()->venue_email }}"/>
                         @else
                         <div class="mb-6">
                             <x-input-label for="venue_name" :value="__('messages.name') . ' *'" />
