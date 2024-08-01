@@ -271,7 +271,7 @@ class EventController extends Controller
             return $role1;
         } else if ($role2 && $role2->isVenue()) {
             return $role2;
-        }      
+        }
     }
 
     private function getTalent($role1, $role2) 
