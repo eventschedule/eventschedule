@@ -1,5 +1,10 @@
 <x-app-layout>
 
+    @vite([
+    'resources/js/countrySelect.min.js',
+    'resources/css/countrySelect.min.css',
+    ])
+
     <x-slot name="head">
         <script>
         // Example: Initialize Flatpickr on elements with the class 'datepicker'
