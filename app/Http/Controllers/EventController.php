@@ -80,7 +80,7 @@ class EventController extends Controller
                 }
 
                 if (count($roles) == 0) {
-                    return redirect(route('register'))->with('message', __('messages.please_register_first'));
+                    return redirect(route('register'));
                 } elseif (count($roles) == 1) {
                     if ($roles[0]->isVendor()) {
                         $vendor = $roles[0];
