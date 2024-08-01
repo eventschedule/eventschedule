@@ -191,7 +191,7 @@ class Role extends Model
     public static function cleanSubdomain($name)
     {
         $subdomain = preg_replace('/[^a-zA-Z0-9- ]/', '', trim($name));
-        $subdomain = str_replace([' '], ['-'], strtolower(trim($subdomain)));
+        $subdomain = str_replace([' '], [''], strtolower(trim($subdomain)));
     
         return $subdomain;
     }

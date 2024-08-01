@@ -65,7 +65,7 @@ class EventController extends Controller
         $vendor = $this->getVendor($role1, $role2);
         $talent = $this->getTalent($role1, $role2);
         
-        if (! auth()->user()->isMember($subdomain)) {
+        if ($venue && (! auth()->user()->isMember($subdomain) && ! $venue->acceptRequests())) {
             return redirect('/');
         }
 
