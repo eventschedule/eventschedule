@@ -191,4 +191,5 @@ return [
     'unfollowed_role' => 'Successfully unfollowed :name',
     'unfollow' => 'Unfollow',
     'please_register_first' => 'Please register first',
+    'event_requested' => 'Successfully submitted request',
 ];
