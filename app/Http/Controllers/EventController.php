@@ -236,6 +236,14 @@ class EventController extends Controller
             $role = $vendor;            
         } else if ($talent) {
             $role = $talent;
+        } else if ($request->role_id) {
+
+            $roleId = UrlUtils::decodeId($request->role_id);
+            $role = Role::findOrFail($roleId);
+
+            if (! auth()->user()->isMember($role->subdomain)) {
+                return redirect('/');
+            }    
         } else {
 
             $role = Role::whereEmail($request->role_email)->first();
@@ -274,7 +282,12 @@ class EventController extends Controller
 
         $event->save();
 
-        $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
+        if ($event->starts_at) {
+            $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
+        } else {
+            $date = Carbon::now();
+        }
+
         $data = [
             'subdomain' => $subdomain, 
             'tab' => 'schedule',

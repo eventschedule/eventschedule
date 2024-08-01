@@ -74,8 +74,10 @@
 
                         @if($talent)
                         <div>{{ $talent->name }}</div>
+                        <input type="hidden" name="role_id" value="{{ App\Utils\UrlUtils::encodeId($talent->id) }}"/>
                         @elseif($vendor)
                         <div>{{ $vendor->name }}</div>
+                        <input type="hidden" name="role_id" value="{{ App\Utils\UrlUtils::encodeId($vendor->id) }}"/>
                         @else
 
                         @if($venue && auth()->user()->isMember($venue->subdomain))
