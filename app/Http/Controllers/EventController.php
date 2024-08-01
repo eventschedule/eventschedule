@@ -215,9 +215,10 @@ class EventController extends Controller
 
         if (! $venue) {
             $venue = new Role;
+            $venue->fill($request->all());
             $venue->name = $request->venue_name;
-            $venue->subdomain = Role::generateSubdomain($request->venue_name);
             $venue->email = $request->venue_email;
+            $venue->subdomain = Role::generateSubdomain($request->venue_name);
             $venue->type = 'venue';
             $venue->timezone = $user->timezone;
             $venue->language_code = $user->language_code;
@@ -272,7 +273,7 @@ class EventController extends Controller
                 ->format('Y-m-d H:i:s');
         }
 
-        if (auth()->user()->isMember($venue->subdomain)) {
+        if (auth()->user()->isMember($venue->subdomain) || !$venue->user_id) {
             $event->is_accepted = true;
             $message = __('messages.event_created');
         } else {

@@ -47,7 +47,12 @@
                         </h2>
 
                         @if ($venue)
-                        <div>{{ $venue->name }}</div>
+                        <div>
+                            <a href="{{ route('role.view_guest', ['subdomain' => $venue->subdomain]) }}"
+                                target="_blank">
+                                {{ $venue->name }}
+                            </a>
+                        </div>
                         <input type="hidden" name="venue_email" value="{{ request()->venue_email }}" />
                         @else
                         <div class="mb-6">
