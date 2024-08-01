@@ -278,8 +278,10 @@ class EventController extends Controller
 
         if (auth()->user()->isMember($venue->subdomain)) {
             $event->is_accepted = true;
+            $message = __('messages.event_created');
         } else {
             $subdomain = $role->subdomain;
+            $message = __('messages.event_requested');
         }
 
         $event->save();
@@ -298,7 +300,7 @@ class EventController extends Controller
         ];
 
         return redirect(route('role.view_admin', $data))
-                ->with('message', __('messages.event_created'));
+                ->with('message', $message);
     }
 
 }
