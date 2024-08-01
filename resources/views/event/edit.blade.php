@@ -78,7 +78,7 @@
                         <div>{{ $vendor->name }}</div>
                         @else
 
-                        @if($venue)
+                        @if($venue && auth()->user()->isMember($venue->subdomain))
                         @if($venue->accept_talent_requests && $venue->accept_vendor_requests)
                         <fieldset>
                             <x-input-label for="role_type" :value="__('messages.type')" />
@@ -104,6 +104,7 @@
                         @endif
                         @endif
 
+                        @if($venue && auth()->user()->isMember($venue->subdomain))
                         <div class="mb-6">
                             <x-input-label for="role_name" :value="__('messages.name') . ' *'" />
                             <x-text-input id="role_name" name="role_name" type="text" class="mt-1 block w-full"
@@ -117,6 +118,22 @@
                                 :value="old('role_email')" required />
                             <x-input-error class="mt-2" :messages="$errors->get('role_email')" />
                         </div>
+                        @else
+                        <div class="mb-6">
+                            <x-input-label for="role" :value="__('messages.name') . ' *'" />
+                            <select>
+
+                            </select>
+                        </div>
+
+                            <!--
+                            <x-input-label for="role" :value="__('messages.email') . ' *'" />
+                            <x-text-input id="role_email" name="role_email" type="email" class="mt-1 block w-full"
+                                :value="old('role_email')" required />
+                            <x-input-error class="mt-2" :messages="$errors->get('role_email')" />
+                            -->
+                        </div>
+                        @endif
 
                         @endif
 

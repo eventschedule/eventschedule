@@ -190,4 +190,5 @@ return [
     'supported_by' => 'Supported by :link',
     'unfollowed_role' => 'Successfully unfollowed :name',
     'unfollow' => 'Unfollow',
+    'please_register_first' => 'Please register first',
 ];
