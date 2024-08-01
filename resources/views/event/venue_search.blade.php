@@ -6,6 +6,10 @@
 
     <form method="GET" action="{{ route('event.create', ['subdomain' => $subdomain]) }}">
 
+        @if (request()->date)
+        <input type="hidden" name="date" value="{{ k }}"/>
+        @endif
+
         <div class="py-5">
             <div class="max-w-7xl mx-auto space-y-6">
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
