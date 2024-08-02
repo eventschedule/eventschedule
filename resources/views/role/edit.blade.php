@@ -191,7 +191,7 @@
                         <div class="mb-6">
                             <x-input-label for="email" :value="__('messages.email') . ' *'" />
                             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
-                                :value="old('email', $role->exists ? $role->email : auth()->user()->email)" required />
+                                :value="old('email', $role->exists ? $role->email : $user->email)" required />
                             <x-input-error class="mt-2" :messages="$errors->get('email')" />
                         </div>
 
@@ -479,7 +479,7 @@
                     <x-cancel-button></x-cancel-button>
                 </div>
                 <div>
-                    @if ($role->exists)
+                    @if ($role->exists && $role->user_id == $user->id)
                     <x-delete-button :url="route('role.delete', ['subdomain' => $role->subdomain])">
                     </x-delete-button>
                     @endif

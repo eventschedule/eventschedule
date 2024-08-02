@@ -15,7 +15,7 @@ class EventController extends Controller
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
 
-        if (auth()->user()->id != $event->user_id) {            
+        if (! $request->user()->canEditEvent($event)) {
             return redirect('/');
         }
 
@@ -45,6 +45,7 @@ class EventController extends Controller
 
         $data = [
             'event' => $event,
+            'user' => $request->user(),
             'subdomain' => $subdomain,
             'venue' => $event->venue,
             'talent' => $event->role->type == 'talent' ? $event->role : false,
@@ -111,6 +112,7 @@ class EventController extends Controller
 
         $data = [
             'role' => $role,
+            'user' => $request->user(),
             'subdomain' => $subdomain,
             'event' => $event,
             'venue' => $venue,
@@ -125,12 +127,13 @@ class EventController extends Controller
 
     public function update(Request $request, $subdomain, $hash)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        $event_id = UrlUtils::decodeId($hash);
+        $event = Event::findOrFail($event_id);
+
+        if (! $request->user()->canEditEvent($event)) {
             return redirect('/');
         }
 
-        $event_id = UrlUtils::decodeId($hash);
-        $event = Event::findOrFail($event_id);
         $event->fill($request->all());
     
         if ($request->starts_at) {
