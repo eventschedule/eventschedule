@@ -94,7 +94,7 @@
                         </h2>
 
 
-                        @if($venue && auth()->user()->isMember($venue->subdomain))
+                        @if($venue && $user->isMember($venue->subdomain))
                         @if($venue->accept_talent_requests && $venue->accept_vendor_requests)
                         <fieldset>
                             <x-input-label for="role_type" :value="__('messages.type')" />
@@ -134,7 +134,7 @@
                                 {{ $vendor->name }}
                             </a>
                         </div>
-                        @elseif($venue && auth()->user()->isMember($venue->subdomain))
+                        @elseif($venue && $user->isMember($venue->subdomain))
                         <div class="mb-6">
                             <x-input-label for="role_name" :value="__('messages.name') . ' *'" />
                             <x-text-input id="role_name" name="role_name" type="text" class="mt-1 block w-full"
@@ -162,7 +162,7 @@
                     </div>
                 </div>
 
-                @if (! $venue || (! $venue->user_id || auth()->user()->isMember($venue->subdomain)))
+                @if (! $venue || (! $venue->user_id || $user->isMember($venue->subdomain)))
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">
 

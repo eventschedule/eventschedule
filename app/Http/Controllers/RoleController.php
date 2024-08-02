@@ -408,6 +408,7 @@ class RoleController extends Controller
 
         $data = [
             'role' => $role,
+            'user' => auth()->user(),
             'title' => __('messages.register'),
             'gradients' => $gradientOptions,
             'fonts' => $fonts,
@@ -488,6 +489,7 @@ class RoleController extends Controller
         $fonts = json_decode($fonts);
 
         $data = [
+            'user' => auth()->user(),
             'role' => $role,
             'title' => __('messages.edit_' . $role->type),
             'gradients' => $gradientOptions,

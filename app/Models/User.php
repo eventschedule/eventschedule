@@ -121,6 +121,11 @@ class User extends Authenticatable
         return $this->roles()->where('subdomain', $subdomain)->exists();
     }
 
+    public function canEditEvent($event)
+    {
+        return $this->isMember($event->venue->subdomain) || $this->isMember($event->role->subdomain);
+    }
+
     public function getProfileImageUrlAttribute($value)
     {
         if (! $value) {

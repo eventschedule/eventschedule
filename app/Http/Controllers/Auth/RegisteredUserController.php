@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -42,6 +43,17 @@ class RegisteredUserController extends Controller
             'timezone' => $request->timezone,
             'language_code' => $request->language_code,
         ]);
+
+        $roles = Role::whereEmail($user->email)
+                    ->whereNull('user_id')
+                    ->get();
+
+        foreach ($roles as $role) {
+            $role->user_id = $user->id;
+            $role->save();
+
+            $user->roles()->attach($role->id, ['level' => 'owner']);
+        }
 
         event(new Registered($user));
 
