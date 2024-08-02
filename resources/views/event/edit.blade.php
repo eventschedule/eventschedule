@@ -222,6 +222,7 @@
                             <x-input-error class="mt-2" :messages="$errors->get('duration')" />
                         </div>
 
+                        <!--
                         <div class="mb-6">
                             <x-input-label for="visibility" :value="__('messages.visibility')" />
                             <select id="visibility" name="visibility"
@@ -233,6 +234,7 @@
                             </select>
                             <x-input-error class="mt-2" :messages="$errors->get('visibility')" />
                         </div>
+                        -->
 
                     </div>
                 </div>

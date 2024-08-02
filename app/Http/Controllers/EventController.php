@@ -73,7 +73,7 @@ class EventController extends Controller
             }
         }
 
-        if ($venue) {
+        if ($venue && ! auth()->user()->isMember($venue->subdomain)) {
             if (! $user->isMember($subdomain) && ! $venue->acceptRequests()) {
                 return redirect('/');
             }
@@ -262,6 +262,7 @@ class EventController extends Controller
 
         $event = new Event;       
         $event->fill($request->all());
+        $event->visibility = 'public'; // TODO consider removing 
         $event->user_id = auth()->user()->id;
         $event->venue_id = $venue->id;
         $event->role_id = $role->id;
