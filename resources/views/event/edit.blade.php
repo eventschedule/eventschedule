@@ -18,13 +18,13 @@
             });
 
             $("#country").countrySelect({
-                defaultCountry: '{{ auth()->user()->country_code }}',
+                defaultCountry: '{{ $venue ? $venue->country_code : auth()->user()->country_code }}',
             });
         });
 
         function onChangeCountry() {
-            var selected = $('#country').countrySelect('getSelectedCountryData');
-            $('#country_code').val(selected.iso2);
+            var selected = $('#venue_country').countrySelect('getSelectedCountryData');
+            $('#venue_country_code').val(selected.iso2);
         }
         </script>
     </x-slot>
@@ -51,7 +51,7 @@
                             {{ __('messages.venue') }}
                         </h2>
 
-                        @if ($venue)
+                        @if ($venue && $venue->user_id)
                         <div>
                             <a href="{{ route('role.view_guest', ['subdomain' => $venue->subdomain]) }}"
                                 target="_blank">
@@ -63,14 +63,14 @@
                         <div class="mb-6">
                             <x-input-label for="venue_name" :value="__('messages.name') . ' *'" />
                             <x-text-input id="venue_name" name="venue_name" type="text" class="mt-1 block w-full"
-                                :value="old('venue_name')" required autofocus />
+                                :value="old('venue_name', $venue ? $venue->name : '')" required autofocus />
                             <x-input-error class="mt-2" :messages="$errors->get('venue_name')" />
                         </div>
 
                         <div class="mb-6">
                             <x-input-label for="venue_email" :value="__('messages.email')" />
                             <x-text-input id="venue_email" name="venue_email" type="email" class="mt-1 block w-full"
-                                :value="request()->venue_email" required readonly />
+                                :value="old('venue_email', $venue ? $venue->email : request()->venue_email)" required readonly />
                             <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
                         </div>
                         @endif
@@ -78,7 +78,7 @@
                     </div>
                 </div>
 
-                @if (! $venue)
+                @if (! $venue || ($venue && ! $venue->user_id))
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="address">
                     <div class="max-w-xl">
 
@@ -87,39 +87,39 @@
                         </h2>
 
                         <div class="mb-6">
-                            <x-input-label for="address1" :value="__('messages.street_address')" />
-                            <x-text-input id="address1" name="address1" type="text" class="mt-1 block w-full"
-                                :value="old('address1')" />
-                            <x-input-error class="mt-2" :messages="$errors->get('address1')" />
+                            <x-input-label for="venue_address1" :value="__('messages.street_address')" />
+                            <x-text-input id="venue_address1" name="venue_address1" type="text" class="mt-1 block w-full"
+                                :value="old('venue_address1', $venue->address1)" />
+                            <x-input-error class="mt-2" :messages="$errors->get('venue_address1')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="city" :value="__('messages.city')" />
-                            <x-text-input id="city" name="city" type="text" class="mt-1 block w-full"
-                                :value="old('city')" />
-                            <x-input-error class="mt-2" :messages="$errors->get('city')" />
+                            <x-input-label for="venue_city" :value="__('messages.city')" />
+                            <x-text-input id="venue_city" name="venue_city" type="text" class="mt-1 block w-full"
+                                :value="old('venue_city', $venue->city)" />
+                            <x-input-error class="mt-2" :messages="$errors->get('venue_city')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="state" :value="__('messages.state_province')" />
-                            <x-text-input id="state" name="state" type="text" class="mt-1 block w-full"
-                                :value="old('state')" />
-                            <x-input-error class="mt-2" :messages="$errors->get('state')" />
+                            <x-input-label for="venue_state" :value="__('messages.state_province')" />
+                            <x-text-input id="venue_state" name="venue_state" type="text" class="mt-1 block w-full"
+                                :value="old('venue_state', $venue->state)" />
+                            <x-input-error class="mt-2" :messages="$errors->get('venue_state')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="postal_code" :value="__('messages.postal_code')" />
-                            <x-text-input id="postal_code" name="postal_code" type="text" class="mt-1 block w-full"
-                                :value="old('postal_code')" />
-                            <x-input-error class="mt-2" :messages="$errors->get('postal_code')" />
+                            <x-input-label for="venue_postal_code" :value="__('messages.postal_code')" />
+                            <x-text-input id="venue_postal_code" name="venue_postal_code" type="text" class="mt-1 block w-full"
+                                :value="old('venue_postal_code', $venue->postal_code)" />
+                            <x-input-error class="mt-2" :messages="$errors->get('venue_postal_code')" />
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="country" :value="__('messages.country')" />
-                            <x-text-input id="country" name="country" type="text" class="mt-1 block w-full"
-                                :value="old('country')" onchange="onChangeCountry()" />
+                            <x-input-label for="venue_country" :value="__('messages.country')" />
+                            <x-text-input id="venue_country" name="venue_country" type="text" class="mt-1 block w-full"
+                                :value="old('venue_country')" onchange="onChangeCountry()" />
                             <x-input-error class="mt-2" :messages="$errors->get('country')" />
-                            <input type="hidden" id="country_code" name="country_code" />
+                            <input type="hidden" id="venue_country_code" name="venue_country_code" />
                         </div>
 
                     </div>

@@ -133,12 +133,26 @@ class EventController extends Controller
         $event = Event::findOrFail($event_id);
         $event->fill($request->all());
     
-        $timezone = auth()->user()->timezone;        
-        $event->starts_at = Carbon::createFromFormat('Y-m-d H:i:s', $request->starts_at, $timezone)
-            ->setTimezone('UTC')
-            ->format('Y-m-d H:i:s');
+        if ($request->starts_at) {
+            $timezone = auth()->user()->timezone;        
+            $event->starts_at = Carbon::createFromFormat('Y-m-d H:i:s', $request->starts_at, $timezone)
+                ->setTimezone('UTC')
+                ->format('Y-m-d H:i:s');
+        }
 
         $event->save();
+
+        $venue = $event->venue;
+        if (! $venue->user_id) {
+            $venue->name = $request->venue_name;
+            $venue->address1 = $request->venue_address1;
+            $venue->address2 = $request->venue_address2;
+            $venue->city = $request->venue_city;
+            $venue->state = $request->venue_state;
+            $venue->postal_code = $request->venue_postal_code;
+            $venue->country_code = $request->venue_country_code;
+            $venue->save();
+        }
 
         $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
         $data = [
@@ -215,13 +229,18 @@ class EventController extends Controller
 
         if (! $venue) {
             $venue = new Role;
-            $venue->fill($request->all());
             $venue->name = $request->venue_name;
             $venue->email = $request->venue_email;
             $venue->subdomain = Role::generateSubdomain($request->venue_name);
             $venue->type = 'venue';
             $venue->timezone = $user->timezone;
             $venue->language_code = $user->language_code;
+            $venue->address1 = $request->venue_address1;
+            $venue->address2 = $request->venue_address2;
+            $venue->city = $request->venue_city;
+            $venue->state = $request->venue_state;
+            $venue->postal_code = $request->venue_postal_code;
+            $venue->country_code = $request->venue_country_code;
             $venue->save();
         }
 
