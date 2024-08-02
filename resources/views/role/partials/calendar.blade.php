@@ -136,7 +136,7 @@
                             <a href="{{ $showAdd ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) : route('event.view', ['subdomain' => $event->role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) }}"
                                 class="group flex">
                                 <p class="flex-auto truncate font-medium group-hover:text-indigo-600 {{ $event->isPublic() ? 'text-gray-900 ' : 'text-gray-400 ' }}">
-                                    {{ $event->role->name }}</p>
+                                    {{ isset($subdomain) && $subdomain ==  $event->role->subdomain ? $event->venue->name : $event->role->name }}</p>
                                 <time datetime="{{ $event->localStartsAt() }}"
                                     class="ml-3 hidden flex-none group-hover:text-indigo-600 xl:block {{ $event->isPublic() ? 'text-gray-500 ' : 'text-gray-400 ' }}">{{ Carbon\Carbon::parse($event->localStartsAt())->format('g:i A') }}</time>
                             </a>
