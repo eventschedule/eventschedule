@@ -61,7 +61,7 @@
 
 <body class="antialiased dark:bg-black dark:text-white/50">
 
-    <div class="p-10 max-w-4xl mx-auto px-4">
+    <div class="p-10 max-w-5xl mx-auto px-4">
         <div class="flex items-start justify-between pb-6">
             <div>
                 @if ($role->profile_image_url)
