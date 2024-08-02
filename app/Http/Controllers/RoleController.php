@@ -152,6 +152,7 @@ class RoleController extends Controller
             ->get();
 
         return view('role/show-guest', compact(
+            'subdomain',
             'events',
             'role',
             'month', 
@@ -221,6 +222,7 @@ class RoleController extends Controller
         }
 
         return view('role/show-admin', compact(
+            'subdomain',
             'role',
             'tab',
             'events',
