@@ -172,7 +172,10 @@ class RoleController extends Controller
         $followers = $role->followers()->get();
         $members = $role->members()->get();
         $requests = Event::with(['role'])
-            ->whereVenueId($role->id)
+            ->where(function ($query) use ($role) {
+                $query->where('venue_id', $role->id)
+                    ->orWhere('role_id', $role->id);
+            })
             ->whereNull('is_accepted')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -197,14 +200,20 @@ class RoleController extends Controller
             $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
             $events = Event::with(['role'])
-                ->whereVenueId($role->id)
+                ->where(function ($query) use ($role) {
+                    $query->where('venue_id', $role->id)
+                        ->orWhere('role_id', $role->id);
+                })
                 ->whereNotNull('is_accepted')
                 ->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
                 ->orderBy('starts_at')
                 ->get();
 
             $unscheduled = Event::with(['role'])
-                ->whereVenueId($role->id)
+                ->where(function ($query) use ($role) {
+                    $query->where('venue_id', $role->id)
+                        ->orWhere('role_id', $role->id);
+                })
                 ->where('is_accepted', true)
                 ->whereNull('starts_at')
                 ->orderBy('created_at', 'desc')
