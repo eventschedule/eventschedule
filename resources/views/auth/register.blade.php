@@ -2,7 +2,6 @@
 
     <x-slot name="head">
         <script>
-        // Example: Initialize Flatpickr on elements with the class 'datepicker'
         document.addEventListener('DOMContentLoaded', function() {
             var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;            
             document.getElementById('timezone').value = timezone;

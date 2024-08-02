@@ -7,9 +7,8 @@
 
     <x-slot name="head">
         <script>
-        // Example: Initialize Flatpickr on elements with the class 'datepicker'
         document.addEventListener('DOMContentLoaded', function() {
-            flatpickr('.datepicker', {
+            var f = flatpickr('.datepicker', {
                 allowInput: true,
                 enableTime: true,
                 altInput: true,
@@ -17,6 +16,8 @@
                 altFormat: "{{ $venue && $venue->use_24_hour_time ? 'F j, Y H:i' : 'F j, Y h:i K' }}",
                 dateFormat: "Y-m-d H:i:S",
             });
+            // https://github.com/flatpickr/flatpickr/issues/892#issuecomment-604387030
+            f._input.onkeydown = () => false;
 
             $("#venue_country").countrySelect({
                 defaultCountry: '{{ $venue ? $venue->country_code : '' }}',
