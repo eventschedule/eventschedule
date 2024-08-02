@@ -17,7 +17,7 @@
                 dateFormat: "Y-m-d H:i:S",
             });
 
-            $("#country").countrySelect({
+            $("#venue_country").countrySelect({
                 defaultCountry: '{{ $venue ? $venue->country_code : auth()->user()->country_code }}',
             });
         });
