@@ -120,10 +120,11 @@ class RoleController extends Controller
                 ->with('message', str_replace(':name', $role->name, __('messages.unfollowed_role')));
     }
 
-    public function viewGuest(Request $request, $subdomain)
+    public function viewGuest(Request $request, $subdomain, $hash = '')
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
         $user = auth()->user();
+        $event = null;
 
         if ($role->visibility == 'private' && (! $user || ! $user->isMember($subdomain))) {
             return redirect('/');
@@ -132,13 +133,24 @@ class RoleController extends Controller
         $month = $request->month;
         $year = $request->year;
 
+        if ($hash) {
+            $event_id = UrlUtils::decodeId($hash);
+            $event = Event::findOrFail($event_id);
+
+            if ($event->starts_at) {
+                $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
+                $month = $date->month;
+                $year = $date->year;
+            }            
+        } 
+    
         if (! $month) {
             $month = now()->month;
         }
 
         if (! $year) {
             $year = now()->year;
-        }
+        }    
 
         $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
         $endOfMonth = $startOfMonth->copy()->endOfMonth();
@@ -160,6 +172,7 @@ class RoleController extends Controller
             'startOfMonth',
             'endOfMonth',
             'user',
+            'event',
         ));
     }
 
