@@ -328,6 +328,7 @@ class RoleController extends Controller
 
         $data = [
             'roles' => $roles,
+            'type' => 'venue',
         ];
 
         return view('role/index', $data);
@@ -345,6 +346,7 @@ class RoleController extends Controller
 
         $data = [
             'roles' => $roles,
+            'type' => 'talent',
         ];
 
         return view('role/index', $data);
@@ -362,6 +364,7 @@ class RoleController extends Controller
 
         $data = [
             'roles' => $roles,
+            'type' => 'vendor',
         ];
 
         return view('role/index', $data);
