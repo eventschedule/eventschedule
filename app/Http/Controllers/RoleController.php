@@ -367,9 +367,10 @@ class RoleController extends Controller
         return view('role/index', $data);
     }
 
-    public function create()
+    public function create($type)
     {
         $role = new Role;
+        $role->type = $type;
         $role->font_family = 'Roboto';
         $role->font_color = '#111827';
         $role->accent_color = '#007BFF';

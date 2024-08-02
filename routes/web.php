@@ -22,7 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
 {
     Route::get('/home', [HomeController::class, 'home'])->name('home');
     
-    Route::get('/register', [RoleController::class, 'create'])->name('register');
+    Route::get('/register/{type}', [RoleController::class, 'create'])->name('register');
     Route::post('/store', [RoleController::class, 'store'])->name('role.store');
     
     Route::get('/venues', [RoleController::class, 'viewVenues'])->name('venues');
