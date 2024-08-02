@@ -135,10 +135,10 @@
                         <li>
                             <a href="{{ $showAdd ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) : route('role.view_guest', ['subdomain' => $event->role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) }}"
                                 class="group flex">
-                                <p class="flex-auto truncate font-medium group-hover:text-indigo-600 {{ $event->isPublic() ? 'text-gray-900 ' : 'text-gray-400 ' }}">
+                                <p class="flex-auto line-clamp-2 font-medium group-hover:text-indigo-600 {{ $event->isPublic() ? 'text-gray-900 ' : 'text-gray-400 ' }}">
                                     {{ isset($subdomain) && $subdomain ==  $event->role->subdomain ? $event->venue->name : $event->role->name }}</p>
                                 <time datetime="{{ $event->localStartsAt() }}"
-                                    class="ml-3 hidden flex-none group-hover:text-indigo-600 xl:block {{ $event->isPublic() ? 'text-gray-500 ' : 'text-gray-400 ' }}">{{ Carbon\Carbon::parse($event->localStartsAt())->format('g:i A') }}</time>
+                                    class="ml-3 flex-none group-hover:text-indigo-600 xl:block {{ $event->isPublic() ? 'text-gray-500 ' : 'text-gray-400 ' }}">{{ Carbon\Carbon::parse($event->localStartsAt())->format('g:i A') }}</time>
                             </a>
                         </li>
                         @endif
