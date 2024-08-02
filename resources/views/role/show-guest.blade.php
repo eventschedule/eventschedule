@@ -103,6 +103,24 @@
             </div>
         </div>
 
+        @if ($event)
+
+            
+
+            @if ($role->youtube_links)
+                <div class="container mx-auto py-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        @foreach (json_decode($role->youtube_links) as $link)
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                            <iframe class="w-full h-64" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
+        @endif
+
         @include('role/partials/calendar', ['showAdd' => false, 'route' => 'guest'])
 
         <div class="py-6">
@@ -111,7 +129,7 @@
                     {!! $role->description_html !!}
                 </div>
                 <div>
-                @if ($role->accept_talent_requests)
+                @if ($role->isVenue() && $role->accept_talent_requests)
                 <a href="{{ route('event.sign_up', ['subdomain' => $role->subdomain])}}">
                     <button type="button" style="background-color: {{ $role->accent_color }}"
                         class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
@@ -125,7 +143,7 @@
                 </a>
                 @endif
 
-                @if ($role->accept_vendor_requests)
+                @if ($role->isVenue() &&$role->accept_vendor_requests)
                 <a href="{{ route('event.sign_up', ['subdomain' => $role->subdomain])}}">
                     <button type="button" style="background-color: {{ $role->accent_color }}"
                         class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
@@ -142,7 +160,7 @@
             </div>
         </div>
 
-        @if ($role->youtube_links)
+        @if ($role->youtube_links && ! $event)
             <div class="container mx-auto py-8">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     @foreach (json_decode($role->youtube_links) as $link)
