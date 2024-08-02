@@ -104,7 +104,6 @@ return [
     'state_province' => 'Bundesland / Provinz',
     'postal_code' => 'Postleitzahl',
     'country' => 'Land',
-    'page_style' => 'Seitenstil',
     'font_family' => 'Schriftfamilie',
     'font_color' => 'Schriftfarbe',
     'accent_color' => 'Akzentfarbe',

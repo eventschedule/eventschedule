@@ -104,7 +104,6 @@ return [
     'state_province' => 'מדינה / מחוז',
     'postal_code' => 'מיקוד',
     'country' => 'ארץ',
-    'page_style' => 'סגנון דף',
     'font_family' => 'משפחת גופנים',
     'font_color' => 'צבע גופן',
     'accent_color' => 'צבע מבטא',

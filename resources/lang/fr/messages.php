@@ -104,7 +104,6 @@ return [
     'state_province' => 'État / Province',
     'postal_code' => 'Code Postal',
     'country' => 'Pays',
-    'page_style' => 'Style de Page',
     'font_family' => 'Famille de Police',
     'font_color' => 'Couleur de Police',
     'accent_color' => 'Couleur d\'Accent',
