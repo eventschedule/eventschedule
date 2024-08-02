@@ -10,11 +10,6 @@ use Carbon\Carbon;
 
 class EventController extends Controller
 {
-    public function view(Request $request, $subdomain, $hash)
-    {
-        dd('here');
-    }
-
     public function delete(Request $request, $subdomain, $hash)
     {
         $event_id = UrlUtils::decodeId($hash);

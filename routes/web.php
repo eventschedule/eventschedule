@@ -16,7 +16,7 @@ Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
 Route::post('/message', [HomeController::class, 'message'])->name('message');
 
-Route::get('/{subdomain}/view', [RoleController::class, 'viewGuest'])->name('role.view_guest');
+Route::get('/{subdomain}/view/{hash?}', [RoleController::class, 'viewGuest'])->name('role.view_guest');
 
 Route::middleware(['auth', 'verified'])->group(function () 
 {
@@ -54,7 +54,6 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/team/add_member', [RoleController::class, 'createMember'])->name('role.create_member');
     Route::post('/{subdomain}/team/add_member', [RoleController::class, 'storeMember'])->name('role.store_member');
     Route::get('/{subdomain}/team/remove_member/{hash}', [RoleController::class, 'removeMember'])->name('role.remove_member');
-    Route::get('/{subdomain}/event/{hash}', [EventController::class, 'view'])->name('event.view');
     Route::get('/{subdomain}/{tab?}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
 });
 
