@@ -87,7 +87,7 @@ class EventController extends Controller
             }
 
             if (count($roles) == 0) {
-                return redirect(route('register'));
+                return redirect(route('register', ['type' => $venue->accept_talent_requests ? 'talent' : 'vendor']));
             } elseif (count($roles) == 1) {
                 if ($roles[0]->isVendor()) {
                     $vendor = $roles[0];

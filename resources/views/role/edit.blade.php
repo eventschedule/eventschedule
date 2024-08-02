@@ -38,15 +38,6 @@
             });
         });
 
-        function toggleAddress() {
-            var type = $('input[name="type"]:checked').val();
-            if (type == 'talent') {
-                $('#address').fadeOut();
-            } else {
-                $('#address').fadeIn();
-            }
-        }
-
         function onChangeCountry() {
             var selected = $('#country').countrySelect('getSelectedCountryData');
             $('#country_code').val(selected.iso2);
@@ -155,30 +146,7 @@
                         </h2>
 
                         @if(! $role->exists)
-                        <fieldset>
-                            <x-input-label for="type" :value="__('messages.type')" />
-                            <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0"
-                                onclick="toggleAddress()">
-                                <div class="flex items-center">
-                                    <input id="venue" name="type" type="radio" value="venue" checked
-                                        class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                                    <label for="venue"
-                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900">{{ __('messages.venue') }}</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input id="talent" name="type" type="radio" value="talent"
-                                        class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                                    <label for="talent"
-                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900">{{ __('messages.talent') }}</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input id="vendor" name="type" type="radio" value="vendor"
-                                        class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                                    <label for="vendor"
-                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900">{{ __('messages.vendor') }}</label>
-                                </div>
-                            </div>
-                        </fieldset>
+                        <input type="hidden" name="type" value="{{ $role->type }}"/>
                         @endif
 
                         <div class="mb-6">
@@ -244,8 +212,8 @@
                     </div>
                 </div>
 
-
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="address">
+                @if (! $role->isTalent())
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
@@ -290,6 +258,7 @@
 
                     </div>
                 </div>
+                @endif
 
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="address">
                     <div class="max-w-xl">
@@ -436,19 +405,6 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="timezone" :value="__('messages.timezone')" />
-                            <select name="timezone" id="timezone" required
-                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
-                                @foreach(\Carbon\CarbonTimeZone::listIdentifiers() as $timezone)
-                                <option value="{{ $timezone }}" {{ $role->timezone == $timezone ? 'SELECTED' : '' }}>
-                                    {{ $timezone }}
-                                </option>
-                                @endforeach
-                            </select>
-                            <x-input-error class="mt-2" :messages="$errors->get('timezone')" />
-                        </div>
-
-                        <div class="mb-6">
                             <x-input-label for="language_code" :value="__('messages.language') " />
                             <select name="language_code" id="language_code" required
                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
@@ -472,6 +428,27 @@
                         </div>
 
                         <div class="mb-6">
+                            <x-input-label for="timezone" :value="__('messages.timezone')" />
+                            <select name="timezone" id="timezone" required
+                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                @foreach(\Carbon\CarbonTimeZone::listIdentifiers() as $timezone)
+                                <option value="{{ $timezone }}" {{ $role->timezone == $timezone ? 'SELECTED' : '' }}>
+                                    {{ $timezone }}
+                                </option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('timezone')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-checkbox name="use_24_hour_time" label="{{ __('messages.use_24_hour_time_format') }}"
+                                checked="{{ old('use_24_hour_time', $role->use_24_hour_time) }}"
+                                data-custom-attribute="value" />
+                            <x-input-error class="mt-2" :messages="$errors->get('use_24_hour_time')" />
+                        </div>
+
+                        @if ($role->isVenue())
+                        <div class="mb-6">
                             <x-checkbox name="accept_talent_requests"
                                 label="{{ __('messages.accept_talent_requests') }}"
                                 checked="{{ old('accept_talent_requests', $role->accept_talent_requests) }}"
@@ -486,13 +463,7 @@
                                 data-custom-attribute="value" />
                             <x-input-error class="mt-2" :messages="$errors->get('accept_vendor_requests')" />
                         </div>
-
-                        <div class="mb-6">
-                            <x-checkbox name="use_24_hour_time" label="{{ __('messages.use_24_hour_time_format') }}"
-                                checked="{{ old('use_24_hour_time', $role->use_24_hour_time) }}"
-                                data-custom-attribute="value" />
-                            <x-input-error class="mt-2" :messages="$errors->get('use_24_hour_time')" />
-                        </div>
+                        @endif
 
                     </div>
                 </div>
