@@ -104,7 +104,6 @@ return [
     'state_province' => 'Estado / Provincia',
     'postal_code' => 'Código Postal',
     'country' => 'País',
-    'page_style' => 'Estilo de Página',
     'font_family' => 'Familia de Fuente',
     'font_color' => 'Color de Fuente',
     'accent_color' => 'Color de Acento',

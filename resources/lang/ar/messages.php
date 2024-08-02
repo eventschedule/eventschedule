@@ -104,7 +104,6 @@ return [
     'state_province' => 'الولاية / المحافظة',
     'postal_code' => 'الرمز البريدي',
     'country' => 'الدولة',
-    'page_style' => 'نمط الصفحة',
     'font_family' => 'عائلة الخطوط',
     'font_color' => 'لون الخط',
     'accent_color' => 'لون التمييز',

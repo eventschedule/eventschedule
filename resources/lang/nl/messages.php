@@ -104,7 +104,6 @@ return [
     'state_province' => 'Staat / Provincie',
     'postal_code' => 'Postcode',
     'country' => 'Land',
-    'page_style' => 'Paginastijl',
     'font_family' => 'Lettertypefamilie',
     'font_color' => 'Lettertypekleur',
     'accent_color' => 'Accentkleur',

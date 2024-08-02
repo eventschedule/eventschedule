@@ -105,7 +105,6 @@ return [
     'state_province' => 'State / Province',
     'postal_code' => 'Postal Code',
     'country' => 'Country',
-    'page_style' => 'Page Style',
     'font_family' => 'Font Family',
     'font_color' => 'Font Color',
     'accent_color' => 'Accent Color',
@@ -192,4 +191,5 @@ return [
     'unfollow' => 'Unfollow',
     'event_requested' => 'Successfully submitted request',
     'search' => 'Search',
+    'style' => 'Style',
 ];
