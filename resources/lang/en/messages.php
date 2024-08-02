@@ -192,4 +192,7 @@ return [
     'event_requested' => 'Successfully submitted request',
     'search' => 'Search',
     'style' => 'Style',
+    'register_venue' => 'Register Venue',
+    'register_talent' => 'Register Talent',
+    'register_vendor' => 'Register Vendor',
 ];
