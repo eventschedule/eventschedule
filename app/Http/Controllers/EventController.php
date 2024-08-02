@@ -154,7 +154,12 @@ class EventController extends Controller
             $venue->save();
         }
 
-        $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
+        if ($event->starts_at) {
+            $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
+        } else {
+            $date = Carbon::now();
+        }
+
         $data = [
             'subdomain' => $subdomain, 
             'tab' => 'schedule',
