@@ -122,8 +122,9 @@ class RoleController extends Controller
 
     public function viewGuest(Request $request, $subdomain, $hash = '')
     {
-        $role = Role::subdomain($subdomain)->firstOrFail();
         $user = auth()->user();
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $otherRole = null;
         $event = null;
 
         if ($role->visibility == 'private' && (! $user || ! $user->isMember($subdomain))) {
@@ -136,6 +137,7 @@ class RoleController extends Controller
         if ($hash) {
             $event_id = UrlUtils::decodeId($hash);
             $event = Event::findOrFail($event_id);
+            $otherRole = $event->venue->subdomain == $subdomain ? $event->role : $event->venue;
 
             if ($event->starts_at) {
                 $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
@@ -167,6 +169,7 @@ class RoleController extends Controller
             'subdomain',
             'events',
             'role',
+            'otherRole',
             'month', 
             'year',
             'startOfMonth',

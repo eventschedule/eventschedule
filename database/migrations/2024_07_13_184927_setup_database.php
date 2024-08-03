@@ -33,7 +33,7 @@ return new class extends Migration
             $table->string('background_colors')->nullable();
             $table->integer('background_rotation')->default(150);
             $table->string('font_color')->default('#111827');
-            $table->string('font_family')->nullable();
+            $table->string('font_family')->default('Roboto');
             $table->string('name');
             $table->string('email');
             $table->string('phone')->nullable();
