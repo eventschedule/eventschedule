@@ -229,4 +229,30 @@ class Role extends Model
 
         return $subdomain;
     }
+
+    public function getVideoColumns()
+    {
+        $links = json_decode($this->youtube_links);
+        $count = count($links);
+
+        if ($count == 1) {
+            return 1;
+        } elseif ($count == 2 || $count == 4) {
+            return 2;
+        } else {
+            return 3;
+        }
+    }
+
+    public function getVideoHeight()
+    {
+        $count = $this->getVideoColumns();
+
+        if ($count == 1) {
+            return 500;
+        } else {
+            return 300;
+        }
+
+    }
 }
