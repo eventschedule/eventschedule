@@ -197,10 +197,10 @@ class EventController extends Controller
         
         if ($request->redirect_to == 'schedule') {
             return redirect('/' . $subdomain . '/schedule')
-                ->with('message', __('messages.request_accepted'));
+                ->with('message', __('messages.request_declined'));
         } else {
             return redirect('/' . $subdomain . '/requests')
-                ->with('message', __('messages.request_accepted'));
+                ->with('message', __('messages.request_declined'));
         }        
     }
 
