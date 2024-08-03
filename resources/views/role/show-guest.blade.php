@@ -175,7 +175,19 @@
             </div>
         </div>
 
-        @if ($role->youtube_links && ! $event)
+        @if ($event)
+            @if ($otherRole->youtube_links)
+                <div class="container mx-auto py-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        @foreach (json_decode($otherRole->youtube_links) as $link)
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                            <iframe class="w-full h-64" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+        @elseif ($role->youtube_links)
             <div class="container mx-auto py-8">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     @foreach (json_decode($role->youtube_links) as $link)
