@@ -71,15 +71,15 @@
 
     <div class="p-10 max-w-5xl mx-auto px-4">
         <div class="flex items-start justify-between pb-6">
-            <a href="{{ route('role.view_guest', ['subdomain' => $role->subdomain]) }}">
+            <a href="{{ route('role.view_guest', ['subdomain' => $event ? $event->venue->subdomain : $role->subdomain]) }}">
                 <div>
-                @if ($role->profile_image_url)
-                    <img src="{{ $role->profile_image_url }}" style="max-height:100px" class="shadow-md"/>
-                    @else
+                @if ($event ? $event->venue->profile_image_url : $role->profile_image_url)
+                    <img src="{{ $event ? $event->venue->profile_image_url : $role->profile_image_url }}" style="max-height:100px" class="shadow-md"/>
+                @else
                     <div class="text-4xl font-bold">
-                        {{ $role->name }}
+                        {{ $event ? $event->venue->name : $role->name }}
                     </div>
-                    @endif
+                @endif
                 </div>
             </a>
             <div>
@@ -119,8 +119,8 @@
                 <div class="mx-auto max-w-7xl px-6 lg:px-8">
                     <div class="mx-auto max-w-2xl lg:text-center">
                         <p class="mt-2 text-6xl font-bold tracking-tight">
-                            <a href="{{ route('role.view_guest', ['subdomain' => $otherRole->subdomain]) }}">
-                                {{ $otherRole->name }}
+                            <a href="{{ route('role.view_guest', ['subdomain' => $event->role->subdomain]) }}">
+                                {{ $event->role->name }}
                             </a>
                         </p>
                         <p class="mt-6 text-2xl leading-8">{{ $event->localStartsAt(true) }}</p>
@@ -146,7 +146,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-{{ $role->getVideoColumns() }} gap-8">
                     @foreach (json_decode($role->youtube_links) as $link)
                     <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                        <iframe class="w-full" style="height:{{ $event->role->getVideoHeight() }}px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        <iframe class="w-full" style="height:{{ $role->getVideoHeight() }}px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                     </div>
                     @endforeach
                 </div>
