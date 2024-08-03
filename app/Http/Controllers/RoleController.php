@@ -588,7 +588,7 @@ class RoleController extends Controller
         
         $role->save();
 
-        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]))
+        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'profile']))
                     ->with('message', __('messages.added_link'));
     }
 
@@ -633,7 +633,7 @@ class RoleController extends Controller
 
         $role->save();
 
-        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]))
+        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'profile']))
                     ->with('message', __('messages.removed_link'));
     }
 
