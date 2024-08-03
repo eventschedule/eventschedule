@@ -59,8 +59,13 @@
     }
 
     @if ($event)
-    #event_title {
-        font-family: '{{ $otherRole->font_family }}', sans-serif !important;
+        @if ($subdomain == $event->venue->subdomain)
+        #event_title {
+        @else
+        #venue_title {
+        @endif
+            font-family: '{{ $otherRole->font_family }}', sans-serif !important;
+        }
     }
     @endif
     </style>
@@ -72,7 +77,7 @@
     <div class="p-10 max-w-5xl mx-auto px-4">
         <div class="flex items-start justify-between pb-6">
             <a href="{{ route('role.view_guest', ['subdomain' => $event ? $event->venue->subdomain : $role->subdomain]) }}">
-                <div>
+                <div id="venue_title">
                 @if ($event ? $event->venue->profile_image_url : $role->profile_image_url)
                     <img src="{{ $event ? $event->venue->profile_image_url : $role->profile_image_url }}" style="max-height:100px" class="shadow-md"/>
                 @else
