@@ -72,7 +72,6 @@ return [
     'details' => 'פרטים',
     'date_and_time' => 'תאריך ושעה',
     'duration_in_hours' => 'משך שעות',
-    'visibility' => 'נראות',
     'private' => 'פרטי',
     'unlisted' => 'לא רשום',
     'public' => 'ציבורי',

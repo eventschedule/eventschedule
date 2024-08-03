@@ -72,7 +72,6 @@ return [
     'details' => 'Detalhes',
     'date_and_time' => 'Data e Hora',
     'duration_in_hours' => 'Duração em Horas',
-    'visibility' => 'Visibilidade',
     'private' => 'Privado',
     'unlisted' => 'Não Listado',
     'public' => 'Público',

@@ -35,7 +35,6 @@ class HomeController extends Controller
                     ->orWhereIn('role_id', $roleIds);
             })
             ->where('is_accepted', true)
-            ->where('visibility', '!=', 'private')
             ->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
             ->orderBy('starts_at')
             ->get();

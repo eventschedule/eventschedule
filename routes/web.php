@@ -36,7 +36,6 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/edit', [RoleController::class, 'edit'])->name('role.edit');
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
     Route::get('/{subdomain}/unfollow', [RoleController::class, 'unfollow'])->name('role.unfollow');
-    Route::get('/{subdomain}/publish', [RoleController::class, 'publish'])->name('role.publish');
     Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
     Route::get('/{subdomain}/delete', [RoleController::class, 'delete'])->name('role.delete');
     Route::get('/{subdomain}/delete_image', [RoleController::class, 'deleteImage'])->name('role.delete_image');

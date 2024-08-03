@@ -393,18 +393,6 @@
                         @endif
 
                         <div class="mb-6">
-                            <x-input-label for="visibility" :value="__('messages.visibility')" />
-                            <select id="visibility" name="visibility"
-                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
-                                @foreach(['private', 'unlisted', 'public'] as $level)
-                                <option value="{{ $level }}" {{ $role->visibility == $level ? 'SELECTED' : '' }}>
-                                    {{ __('messages.' . $level) }}</option>
-                                @endforeach
-                            </select>
-                            <x-input-error class="mt-2" :messages="$errors->get('visibility')" />
-                        </div>
-
-                        <div class="mb-6">
                             <x-input-label for="language_code" :value="__('messages.language') " />
                             <select name="language_code" id="language_code" required
                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
