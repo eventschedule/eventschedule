@@ -133,7 +133,7 @@
                         @if ($event->starts_at &&
                         Carbon\Carbon::parse($event->localStartsAt())->isSameDay($currentDate))
                         <li>
-                            <a href="{{ $showAdd ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) : route('role.view_guest', ['subdomain' => isset($subdomain) ? $subdomain : $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) }}"
+                            <a href="{{ $showAdd ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) : route('role.view_guest', ['subdomain' => isset($subdomain) ? $subdomain : $event->role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) }}"
                                 class="group flex">
                                 <p class="flex-auto truncate font-medium group-hover:text-indigo-600 text-gray-900">
                                     {{ isset($subdomain) && $subdomain == $event->role->subdomain ? $event->venue->name : $event->role->name }}</p>
