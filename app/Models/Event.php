@@ -9,7 +9,6 @@ use Carbon\Carbon;
 class Event extends Model
 {
     protected $fillable = [
-        'visibility',
         'starts_at',
         'duration',
         'description',
@@ -22,11 +21,6 @@ class Event extends Model
         static::saving(function ($model) {
             $model->description_html = MarkdownUtils::convertToHtml($model->description);
         });
-    }
-
-    public function isPublic()
-    {
-        return $this->visibility == 'public';
     }
 
     public function role()

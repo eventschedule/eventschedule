@@ -50,25 +50,6 @@ class RoleController extends Controller
                 ->with('message', __('messages.deleted_image'));
     }
 
-    public function publish(Request $request, $subdomain)
-    {
-        $role = Role::subdomain($subdomain)->firstOrFail();
-
-        if ($role->published_at) {
-            return redirect()
-                ->back()
-                ->withInput()
-                ->withErrors(['venue_email' => __('messages.' . $role->type . ' has already been published')]);
-        }
-
-        $role->published_at = Carbon::now()->format('Y-m-d H:i:s');
-        $role->visibility = 'public';
-        $role->save();
-
-        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]))
-                ->with('message', __('messages.published_' . $role->type));
-    }
-
     public function delete(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
@@ -126,11 +107,6 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         $otherRole = null;
         $event = null;
-
-        if ($role->visibility == 'private' && (! $user || ! $user->isMember($subdomain))) {
-            return redirect('/');
-        }
-
         $month = $request->month;
         $year = $request->year;
 
@@ -161,7 +137,6 @@ class RoleController extends Controller
             ->where($role->isVenue() ? 'venue_id' : 'role_id', $role->id)
             ->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
             ->where('is_accepted', true)
-            ->where('visibility', '!=', 'private')
             ->orderBy('starts_at')
             ->get();
 
@@ -335,9 +310,7 @@ class RoleController extends Controller
     public function viewVenues()
     {
         $user = auth()->user();
-        $roleIds = $user->followingVenues()
-                        ->where('visibility', '!=', 'private')
-                        ->pluck('roles.id');
+        $roleIds = $user->followingVenues()->pluck('roles.id');
         $roles = Role::whereIn('id', $roleIds)
                     ->orderBy('name', 'ASC')
                     ->get();
@@ -353,9 +326,7 @@ class RoleController extends Controller
     public function viewTalent()
     {
         $user = auth()->user();
-        $roleIds = $user->followingTalent()
-                        ->where('visibility', '!=', 'private')
-                        ->pluck('roles.id');
+        $roleIds = $user->followingTalent()->pluck('roles.id');
         $roles = Role::whereIn('id', $roleIds)
                     ->orderBy('name', 'ASC')
                     ->get();
@@ -371,9 +342,7 @@ class RoleController extends Controller
     public function viewVendors()
     {
         $user = auth()->user();
-        $roleIds = $user->followingVendors()
-                        ->where('visibility', '!=', 'private')
-                        ->pluck('roles.id');
+        $roleIds = $user->followingVendors()->pluck('roles.id');
         $roles = Role::whereIn('id', $roleIds)
                     ->orderBy('name', 'ASC')
                     ->get();

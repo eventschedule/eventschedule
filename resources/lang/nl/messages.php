@@ -72,7 +72,6 @@ return [
     'details' => 'Details',
     'date_and_time' => 'Datum en Tijd',
     'duration_in_hours' => 'Duur in Uren',
-    'visibility' => 'Zichtbaarheid',
     'private' => 'Privé',
     'unlisted' => 'Ongelist',
     'public' => 'Openbaar',

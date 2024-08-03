@@ -72,7 +72,6 @@ return [
     'details' => 'تفاصيل',
     'date_and_time' => 'التاريخ والوقت',
     'duration_in_hours' => 'المدة بالساعات',
-    'visibility' => 'الرؤية',
     'private' => 'خاص',
     'unlisted' => 'غير مدرج',
     'public' => 'عام',
