@@ -51,6 +51,6 @@ class Event extends Model
 
         return Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')
                     ->setTimezone($timezone)
-                    ->format($pretty ? ($enable24 ? 'F j, Y H:i' : 'F j, Y h:i A') : 'Y-m-d H:i:s');
+                    ->format($pretty ? ($enable24 ? 'l, F jS • g:i' : 'l, F jS • g:i A') : 'Y-m-d H:i:s');
     }
 }
