@@ -33,8 +33,10 @@
     <title>{{ $role->name . ' | Event Schedule' }}</title>
 
     <!-- Fonts -->     
-    <link href="https://fonts.googleapis.com/css2?family={{ $role->font_family }}:wght@400;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family={{ $role->font_family }}:wght@400;700&display=swap" rel="stylesheet">
+    @if ($event)
+        <link href="https://fonts.googleapis.com/css2?family={{ $otherRole->font_family }}:wght@400;700&display=swap" rel="stylesheet">
+    @endif
 
     <!-- Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -55,6 +57,12 @@
             margin: 0;
         @endif
     }
+
+    @if ($event)
+    #event_title {
+        font-family: '{{ $otherRole->font_family }}', sans-serif !important;
+    }
+    @endif
     </style>
 
 </head>
@@ -105,7 +113,7 @@
 
         @if ($event)
 
-            <div class="py-16">
+            <div id="event_title" class="py-16">
                 <div class="mx-auto max-w-7xl px-6 lg:px-8">
                     <div class="mx-auto max-w-2xl lg:text-center">
                         <p class="mt-2 text-6xl font-bold tracking-tight">{{ $otherRole->name }}</p>
