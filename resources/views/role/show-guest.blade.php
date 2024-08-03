@@ -44,17 +44,32 @@
     <style>
     body {
         font-family: '{{ $role->font_family }}', sans-serif !important;
-        color: {{ $role->font_color }} !important;
-        background-color: {{ $role->background_color }};
-        @if ($role->background == 'gradient')
-            background-image: linear-gradient({{ $role->background_rotation }}deg, {{ $role->background_colors }});
-        @elseif ($role->background == 'image')
-            background-image: url("{{ $role->background_image_url }}");
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            height: 100%;
-            margin: 0;
+        @if ($event)
+            color: {{ $event->role->font_color }} !important;
+            background-color: {{ $event->role->background_color }};
+            @if ($event->role->background == 'gradient')
+                background-image: linear-gradient({{ $event->role->background_rotation }}deg, {{ $event->role->background_colors }});
+            @elseif ($event->role->background == 'image')
+                background-image: url("{{ $event->role->background_image_url }}");
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+                height: 100%;
+                margin: 0;
+            @endif
+        @else
+            color: {{ $role->font_color }} !important;
+            background-color: {{ $role->background_color }};
+            @if ($role->background == 'gradient')
+                background-image: linear-gradient({{ $role->background_rotation }}deg, {{ $role->background_colors }});
+            @elseif ($role->background == 'image')
+                background-image: url("{{ $role->background_image_url }}");
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+                height: 100%;
+                margin: 0;
+            @endif
         @endif
     }
 
