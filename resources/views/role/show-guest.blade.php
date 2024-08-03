@@ -92,14 +92,8 @@
     <div class="p-10 max-w-5xl mx-auto px-4">
         <div class="flex items-start justify-between pb-6">
             <a href="{{ route('role.view_guest', ['subdomain' => $event ? $event->venue->subdomain : $role->subdomain]) }}">
-                <div id="venue_title">
-                @if ($event ? $event->venue->profile_image_url : $role->profile_image_url)
-                    <img src="{{ $event ? $event->venue->profile_image_url : $role->profile_image_url }}" style="max-height:100px" class="shadow-md"/>
-                @else
-                    <div class="text-4xl font-bold">
-                        {{ $event ? $event->venue->name : $role->name }}
-                    </div>
-                @endif
+                <div id="venue_title" class="text-4xl font-bold">
+                    {{ $event ? $event->venue->name : $role->name }}
                 </div>
             </a>
             <div>
@@ -157,6 +151,10 @@
                         </div>
                         @endforeach
                     </div>
+                </div>
+            @elseif ($event->role->profile_image_url)
+                <div class="container mx-auto py-8">
+                    <img src="{{ $event->role->profile_image_url }}" class="w-full"/>
                 </div>
             @endif
         
