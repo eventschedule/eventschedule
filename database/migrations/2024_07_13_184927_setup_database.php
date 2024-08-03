@@ -19,6 +19,7 @@ return new class extends Migration
 
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
+            $table->boolean('is_unlisted')->default(false);
             $table->boolean('use_24_hour_time')->default(false);
             $table->boolean('accept_talent_requests')->default(true);
             $table->boolean('accept_vendor_requests')->default(false);

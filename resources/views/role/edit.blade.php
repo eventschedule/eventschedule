@@ -453,6 +453,13 @@
                         </div>
                         @endif
 
+                        <div class="mb-6">
+                            <x-checkbox name="is_unlisted"
+                                label="{{ __('messages.is_unlisted') }}"
+                                checked="{{ old('is_unlisted', $role->is_unlisted) }}"
+                                data-custom-attribute="value" />
+                            <x-input-error class="mt-2" :messages="$errors->get('is_unlisted')" />
+                        </div>
                     </div>
                 </div>
 

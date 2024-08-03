@@ -9,6 +9,7 @@ class Role extends Model
 {
     protected $fillable = [
         'type',
+        'is_unlisted',
         'design',
         'background',
         'background_rotation',
