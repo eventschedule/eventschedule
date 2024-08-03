@@ -105,12 +105,19 @@
 
         @if ($event)
 
-            
+            <div class="py-16">
+                <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                    <div class="mx-auto max-w-2xl lg:text-center">
+                        <p class="mt-2 text-6xl font-bold tracking-tight">{{ $subdomain == $event->venue->subdomain ? $event->role->name : $event->venue->name }}</p>
+                        <p class="mt-6 text-2xl leading-8">{{ $event->localStartsAt(true) }}</p>
+                    </div>
+                </div>
+            </div>
 
-            @if ($role->youtube_links)
+            @if ($event->role->youtube_links)
                 <div class="container mx-auto py-8">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        @foreach (json_decode($role->youtube_links) as $link)
+                        @foreach (json_decode($event->role->youtube_links) as $link)
                         <div class="bg-white rounded-lg shadow-md overflow-hidden">
                             <iframe class="w-full h-64" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                         </div>
