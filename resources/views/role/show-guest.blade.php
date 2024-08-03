@@ -108,7 +108,7 @@
             <div class="py-16">
                 <div class="mx-auto max-w-7xl px-6 lg:px-8">
                     <div class="mx-auto max-w-2xl lg:text-center">
-                        <p class="mt-2 text-6xl font-bold tracking-tight">{{ $subdomain == $event->venue->subdomain ? $event->role->name : $event->venue->name }}</p>
+                        <p class="mt-2 text-6xl font-bold tracking-tight">{{ $otherRole->name }}</p>
                         <p class="mt-6 text-2xl leading-8">{{ $event->localStartsAt(true) }}</p>
                     </div>
                 </div>
@@ -150,7 +150,7 @@
                 </a>
                 @endif
 
-                @if ($role->isVenue() &&$role->accept_vendor_requests)
+                @if ($role->isVenue() && $role->accept_vendor_requests)
                 <a href="{{ route('event.sign_up', ['subdomain' => $role->subdomain])}}">
                     <button type="button" style="background-color: {{ $role->accent_color }}"
                         class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
