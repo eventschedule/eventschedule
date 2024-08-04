@@ -660,4 +660,33 @@ class RoleController extends Controller
 
         exit;
     }
+
+    /*
+    public function verify(EmailVerificationRequest $request)
+    {
+        $customer = Customer::findOrFail($request->route('id'));
+
+        if ($customer->hasVerifiedEmail()) {
+            return redirect()->route('home')->with('status', 'Your email is already verified.');
+        }
+
+        if ($customer->markEmailAsVerified()) {
+            event(new Verified($customer));
+        }
+
+        return redirect()->route('home')->with('status', 'Your email has been verified.');
+    }
+
+    public function resendVerify(Request $request)
+    {
+        if ($request->user()->hasVerifiedEmail()) {
+            return redirect()->route('home');
+        }
+
+        $request->user()->sendEmailVerificationNotification();
+
+        return back()->with('status', 'Verification link sent!');
+    }
+    */
+
 }

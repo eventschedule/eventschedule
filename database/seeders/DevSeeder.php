@@ -18,6 +18,7 @@ class DevSeeder extends Seeder
             [
                 'name' => 'Owner',
                 'email' => 'hillelcoren+owner@gmail.com',
+                'email_verified_at' => now(),
                 'password' => Hash::make('password'),
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -26,6 +27,7 @@ class DevSeeder extends Seeder
             [
                 'name' => 'Admin',
                 'email' => 'hillelcoren+admin@gmail.com',
+                'email_verified_at' => now(),
                 'password' => Hash::make('password'),
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -34,6 +36,7 @@ class DevSeeder extends Seeder
             [
                 'name' => 'Follower',
                 'email' => 'hillelcoren+follower@gmail.com',
+                'email_verified_at' => now(),
                 'password' => Hash::make('password'),
                 'created_at' => now(),
                 'updated_at' => now(),

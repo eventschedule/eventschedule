@@ -35,6 +35,7 @@ return new class extends Migration
             $table->string('font_family')->default('Roboto');
             $table->string('name');
             $table->string('email');
+            $table->timestamp('email_verified_at')->nullable();
             $table->string('phone')->nullable();
             $table->string('website')->nullable();
             $table->string('address1')->nullable();

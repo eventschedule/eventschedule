@@ -41,7 +41,10 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/delete_image', [RoleController::class, 'deleteImage'])->name('role.delete_image');
     Route::get('/{subdomain}/add_event', [EventController::class, 'create'])->name('event.create');
     Route::get('/{subdomain}/sign_up', [EventController::class, 'create'])->name('event.sign_up');
-    Route::post('/{subdomain}/store_event', [EventController::class, 'store'])->name('event.store');
+    Route::get('/{subdomain}/verify', [RoleController::class, 'showVerify'])->name('role.verification.show');
+    Route::get('/{subdomain}/verify/{id}/{hash}', [RoleController::class, 'verify'])->name('role.verification.verify');
+    Route::post('/{subdomain}/resend', [RoleController::class, 'resendVerify'])->name('role.verification.resend');    
+    Route::post('/{subdomain}/store_event', [EventController::class, 'store'])->name('event.store');    
     Route::get('/{subdomain}/edit_event/{hash}', [EventController::class, 'edit'])->name('event.edit');
     Route::get('/{subdomain}/delete_event/{hash}', [EventController::class, 'delete'])->name('event.delete');
     Route::put('/{subdomain}/update_event/{hash}', [EventController::class, 'update'])->name('event.update');
