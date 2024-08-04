@@ -13,14 +13,16 @@ class AddedMemberNotification extends Notification
 
     protected $role;
     protected $user;
-
+    protected $admin;
+    
     /**
      * Create a new notification instance.
      */
-    public function __construct($role, $user)
+    public function __construct($role, $user, $admin)
     {
         $this->role = $role;
         $this->user = $user;
+        $this->admin = $admin;
     }
 
     /**
@@ -42,7 +44,7 @@ class AddedMemberNotification extends Notification
 
         return (new MailMessage)
                     ->subject(str_replace(':name', $this->role->name, __('messages.added_to_team')))
-                    ->line(str_replace(':name', $this->role->name, __('messages.added_to_team_detail/')))
+                    ->line(str_replace([':name', ':user'], [$this->role->name, $this->admin->name], __('messages.added_to_team_detail')))
                     ->action(
                         $newUser ? __('messages.set_new_password') : __('messages.get_started'), 
                         $newUser ? route('password.request') : route('role.view_admin', ['subdomain' => $this->role->subdomain]))
