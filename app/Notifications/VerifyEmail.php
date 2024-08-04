@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Utils\UrlUtils;
 use Illuminate\Auth\Notifications\VerifyEmail as BaseVerifyEmail;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\URL;
@@ -32,7 +33,7 @@ class VerifyEmail extends BaseVerifyEmail
         return URL::temporarySignedRoute(
             $this->type == 'user' ? 'verification.verify' : 'role.verification.verify',
             Carbon::now()->addMinutes(Config::get('auth.verification.expire', 60)),
-            ['id' => $notifiable->getKey(), 'hash' => sha1($notifiable->getEmailForVerification())]
+            ['id' => UrlUtils::encodeId($notifiable->getKey()), 'hash' => sha1($notifiable->getEmailForVerification())]
         );
     }    
 }
