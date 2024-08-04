@@ -195,4 +195,5 @@ return [
     'register_talent' => 'Register Talent',
     'register_vendor' => 'Register Vendor',
     'is_unlisted' => 'Is unlisted',
+    'confirmed_email' => 'Successfully confirmed email',
 ];
