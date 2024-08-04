@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\AddedMemberNotification;
 use App\Http\Requests\EmailVerificationRequest;
 use Illuminate\Auth\Events\Verified;
 use Endroid\QrCode\QrCode;
@@ -291,6 +293,8 @@ class RoleController extends Controller
         } else {
             $user->roles()->attach($role->id, ['level' => 'admin']);
         }
+
+        Notification::send($user, new AddedMemberNotification($role, $user));
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))
                     ->with('message', __('messages.member_added'));
