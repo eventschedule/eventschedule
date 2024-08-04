@@ -156,6 +156,19 @@
         </div>
     </div>
 
+    @if (! $role->email_verified_at)
+    <div class="pt-5 pb-2">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            {{ __('messages.verify_email_address') }} &nbsp;&nbsp;
+            <a href=""
+                    class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                    onclick="showAdd('payment_links')">
+                    {{ __('messages.resend') }}
+            </a>
+        </div>
+    </div>
+    @endif
+
     <div class="pt-5">
         <!-- Dropdown menu on small screens -->
         <div class="sm:hidden">

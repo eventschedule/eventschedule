@@ -196,4 +196,6 @@ return [
     'register_vendor' => 'Register Vendor',
     'is_unlisted' => 'Is unlisted',
     'confirmed_email' => 'Successfully confirmed email',
+    'verify_email_address' => 'Please verify the email address',
+    'resend' => 'Resend',
 ];
