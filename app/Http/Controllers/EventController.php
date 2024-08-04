@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\EventRequestNotification;
 use App\Notifications\RequestDeclinedNotification;
-use App\Notifications\RequestApprovedNotification;
+use App\Notifications\RequestAcceptedNotification;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Role;
@@ -204,7 +204,7 @@ class EventController extends Controller
         $event->save();
 
         $emails = $event->role->members()->pluck('email');
-        Notification::route('mail', $emails)->notify(new RequestApprovedNotification($event));
+        Notification::route('mail', $emails)->notify(new RequestAcceptedNotification($event));
         
         return redirect('/' . $subdomain . '/requests')
                     ->with('message', __('messages.request_accepted'));
