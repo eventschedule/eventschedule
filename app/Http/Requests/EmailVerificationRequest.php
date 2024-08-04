@@ -17,8 +17,7 @@ class EmailVerificationRequest extends FormRequest
      */
     public function authorize()
     {
-        $roleId = UrlUtils::decodeId($this->route('id'));
-        $role = Role::findOrFail($roleId);
+        $role = Role::whereSubdomain($this->route('subdomain'))->firstOrFail();
         
         if (! hash_equals(sha1($role->getEmailForVerification()), (string) $this->route('hash'))) {
             return false;
