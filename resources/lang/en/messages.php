@@ -205,4 +205,8 @@ return [
     'reset_password' => 'Reset Password',
     'new_request' => 'New request from :name',
     'view_details' => 'View Details',
+    'talent_request_accepted' => 'Congratulations! Your request to perform at :venue was accepted.',
+    'vendor_request_accepted' => 'Congratulations! Your request to vend at :venue was accepted.',
+    'talent_request_declined' => 'Unfortunately, your request to perform at :venue has been declined.',
+    'vendor_request_declined' => 'Unfortunately, your request to vend at :venue has been declined.',
 ];
