@@ -1,7 +1,7 @@
 <x-app-layout>
 
     <x-slot name="head">
-        @if ($tab == 'profile')
+        @if ($tab == 'profile' && $role->formatted_address)
         <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps') }}&callback=initMap"
             loading="async" defer></script>
         <style>

@@ -180,6 +180,11 @@ class RoleController extends Controller
         $startOfMonth = '';
         $endOfMonth = '';
 
+        // TODO remove once supported
+        if ($tab == 'requests' && ! $role->isVenue()) {
+            $tab = 'schedule';
+        }
+
         if ($tab == 'schedule') {
             if (! $month) {
                 $month = now()->month;
