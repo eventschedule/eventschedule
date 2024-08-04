@@ -126,6 +126,7 @@
                                 target="_blank">
                                 {{ $talent->name }}
                             </a>
+                            <input type="hidden" name="role_id" value="{{ App\Utils\UrlUtils::encodeId($talent->id) }}"/>
                         </div>
                         @elseif ($vendor)
                         <div class="mb-6">
@@ -133,6 +134,7 @@
                                 target="_blank">
                                 {{ $vendor->name }}
                             </a>
+                            <input type="hidden" name="role_id" value="{{ App\Utils\UrlUtils::encodeId($vendor->id) }}"/>
                         </div>
                         @elseif($venue && $user->isMember($venue->subdomain))
                         <div class="mb-6">
