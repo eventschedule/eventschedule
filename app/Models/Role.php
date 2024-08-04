@@ -82,7 +82,7 @@ class Role extends Model implements MustVerifyEmail
 
     public function sendEmailVerificationNotification()
     {
-        $this->notify(new CustomVerifyEmail('role', $this->subdomain));
+        $this->notify(new CustomVerifyEmail('role'));
     }
 
     public function members()

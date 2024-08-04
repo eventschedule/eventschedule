@@ -677,7 +677,8 @@ class RoleController extends Controller
 
     public function verify(EmailVerificationRequest $request)
     {
-        $role = Role::findOrFail($request->route('id'));
+        $roleId = UrlUtils::decodeId($request->route('id'));
+        $role = Role::findOrFail($roleId);
 
         if ($role->hasVerifiedEmail()) {
             return redirect()

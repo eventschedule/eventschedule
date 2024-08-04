@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Utils\UrlUtils;
 use App\Models\Role;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Http\FormRequest;
@@ -16,7 +17,8 @@ class EmailVerificationRequest extends FormRequest
      */
     public function authorize()
     {
-        $role = Role::findOrFail($this->route('id'));
+        $roleId = UrlUtils::decodeId($this->route('id'));
+        $role = Role::findOrFail($roleId);
         
         if (! hash_equals(sha1($role->getEmailForVerification()), (string) $this->route('hash'))) {
             return false;
