@@ -420,6 +420,10 @@ class RoleController extends Controller
         $role->subdomain = Role::generateSubdomain($request->name);
         $role->user_id = $user->id;
 
+        if ($role->email == $user->email) {
+            $role->email_verified_at = $user->email_verified_at;
+        }
+
         if (! $request->background_colors) {
             $role->background_colors = $request->custom_color1 . ', ' . $request->custom_color2;
         }
@@ -454,6 +458,10 @@ class RoleController extends Controller
 
             $role->background_image_url = $path;
             $role->save();
+        }
+
+        if (! $role->email_verified_at) {
+            $role->sendEmailVerificationNotification();
         }
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]))
