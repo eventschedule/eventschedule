@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
+use App\Notifications\VerifyEmail as CustomVerifyEmail;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -50,6 +51,11 @@ class User extends Authenticatable implements MustVerifyEmail
         });
     }
     
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new CustomVerifyEmail('user'));
+    }
+
     /**
      * Get the attributes that should be cast.
      *
