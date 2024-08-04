@@ -40,7 +40,7 @@
 {{ $salutation }}
 @else
 @lang('Regards'),<br>
-{{ config('app.name') }}
+The Event Schedule team
 @endif
 
 {{-- Subcopy --}}
