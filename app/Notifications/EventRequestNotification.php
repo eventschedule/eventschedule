@@ -17,7 +17,7 @@ class EventRequestNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct($venue, $role)
     {
         $this->role = $role;
         $this->venue = $venue;
@@ -39,9 +39,10 @@ class EventRequestNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+                    ->subject(str_replace(':name', $this->role->name, __('messages.new_request')))
+                    ->line(str_replace(':name', $this->role->name, __('messages.new_request')))
+                    ->action(__('messages.view_details'), route('role.view_admin', ['subdomain' => $this->venue->subdomain, 'tab' => 'requests']))
+                    ->line(__('messages.thank_you_for_using'));
     }
 
     /**
