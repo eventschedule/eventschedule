@@ -198,7 +198,7 @@ return [
     'resend_email' => 'Resend email',
     'sent_confirmation_email' => 'Confirmation email has been sent',
     'added_to_team' => 'You\'ve been added to :name',
-    'added_to_team_detail' => 'You\'ve been added to :name as an admin.',
+    'added_to_team_detail' => 'You\'ve been added to :name as an admin by :user.',
     'set_new_password' => 'Set new password',
     'get_started' => 'Get started',
     'thank_you_for_using' => 'Thank you for using our application!',

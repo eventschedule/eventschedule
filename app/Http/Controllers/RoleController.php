@@ -294,7 +294,7 @@ class RoleController extends Controller
             $user->roles()->attach($role->id, ['level' => 'admin']);
         }
 
-        Notification::send($user, new AddedMemberNotification($role, $user));
+        Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))
                     ->with('message', __('messages.member_added'));

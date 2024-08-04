@@ -11,12 +11,16 @@ class EventRequestNotification extends Notification
 {
     use Queueable;
 
+    protected $venue;
+    protected $role;
+    
     /**
      * Create a new notification instance.
      */
     public function __construct()
     {
-        //
+        $this->role = $role;
+        $this->venue = $venue;
     }
 
     /**
