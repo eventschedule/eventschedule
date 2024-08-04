@@ -57,6 +57,10 @@ class EventController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         $roles = [];
 
+        if (! $role->email_verified_at) {
+            return redirect('/');
+        }
+
         $venue = $role->isVenue() ? $role : null;
         $talent = $role->isTalent() ? $role : null;
         $vendor = $role->isVendor() ? $role : null;
