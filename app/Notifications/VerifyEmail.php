@@ -12,10 +12,12 @@ use Config;
 class VerifyEmail extends BaseVerifyEmail
 {
     protected $type;
+    protected $subdomain;
 
-    public function __construct($type = 'user')
-    {
+    public function __construct($type = 'user', $subdomain = '')
+    {        
         $this->type = $type;
+        $this->subdomain = $subdomain;
     }
     
     public function toMail($notifiable)
@@ -33,7 +35,9 @@ class VerifyEmail extends BaseVerifyEmail
         return URL::temporarySignedRoute(
             $this->type == 'user' ? 'verification.verify' : 'role.verification.verify',
             Carbon::now()->addMinutes(Config::get('auth.verification.expire', 60)),
-            ['id' => UrlUtils::encodeId($notifiable->getKey()), 'hash' => sha1($notifiable->getEmailForVerification())]
+            $this->type == 'user' 
+                ? ['id' => $notifiable->getKey(), 'hash' => sha1($notifiable->getEmailForVerification())]
+                : ['subdomain' => $this->subdomain, 'hash' => sha1($notifiable->getEmailForVerification())]
         );
     }    
 }
