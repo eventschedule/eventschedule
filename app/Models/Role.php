@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use App\Utils\MarkdownUtils;
+use App\Notifications\VerifyEmail as CustomVerifyEmail;
 
 class Role extends Model implements MustVerifyEmail
 {
@@ -69,6 +70,19 @@ class Role extends Model implements MustVerifyEmail
                 }                
             }
         });
+
+        static::updating(function ($model) {
+            if ($model->isDirty('email')) {
+                $model->email_verified_at = null;
+                $model->sendEmailVerificationNotification();
+            }
+        });
+
+    }
+
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new CustomVerifyEmail('role', $this->subdomain));
     }
 
     public function members()

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Auth\Events\Verified;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use App\Http\Requests\RoleCreateRequest;
@@ -673,17 +675,16 @@ class RoleController extends Controller
         exit;
     }
 
-    /*
     public function verify(EmailVerificationRequest $request)
     {
-        $customer = Customer::findOrFail($request->route('id'));
+        $role = Role::findOrFail($request->route('id'));
 
-        if ($customer->hasVerifiedEmail()) {
+        if ($role->hasVerifiedEmail()) {
             return redirect()->route('home')->with('status', 'Your email is already verified.');
         }
 
-        if ($customer->markEmailAsVerified()) {
-            event(new Verified($customer));
+        if ($role->markEmailAsVerified()) {
+            event(new Verified($role));
         }
 
         return redirect()->route('home')->with('status', 'Your email has been verified.');
@@ -699,6 +700,5 @@ class RoleController extends Controller
 
         return back()->with('status', 'Verification link sent!');
     }
-    */
-
+ 
 }
