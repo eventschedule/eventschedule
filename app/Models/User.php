@@ -42,6 +42,13 @@ class User extends Authenticatable implements MustVerifyEmail
         static::saving(function ($model) {
             $model->email = strtolower($model->email);
         });
+
+        static::updating(function ($user) {
+            if ($user->isDirty('email')) {
+                $user->email_verified_at = null;
+                $user->sendEmailVerificationNotification();
+            }
+        });
     }
     
     /**
