@@ -198,4 +198,5 @@ return [
     'confirmed_email' => 'Successfully confirmed email',
     'verify_email_address' => 'Please verify the email address',
     'resend_email' => 'Resend email',
+    'sent_confirmation_email' => 'Confirmation email has been sent',
 ];

@@ -42,7 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/add_event', [EventController::class, 'create'])->name('event.create');
     Route::get('/{subdomain}/sign_up', [EventController::class, 'create'])->name('event.sign_up');
     Route::get('/{subdomain}/verify/{hash}', [RoleController::class, 'verify'])->name('role.verification.verify');
-    Route::post('/{subdomain}/resend', [RoleController::class, 'resendVerify'])->name('role.verification.resend');    
+    Route::get('/{subdomain}/resend', [RoleController::class, 'resendVerify'])->name('role.verification.resend');    
     Route::post('/{subdomain}/store_event', [EventController::class, 'store'])->name('event.store');    
     Route::get('/{subdomain}/edit_event/{hash}', [EventController::class, 'edit'])->name('event.edit');
     Route::get('/{subdomain}/delete_event/{hash}', [EventController::class, 'delete'])->name('event.delete');

@@ -160,7 +160,7 @@
     <div class="pt-5 pb-2">
         <div class="bg-white rounded-lg shadow-md p-6">
             {{ __('messages.verify_email_address') }} &nbsp;&nbsp;
-            <a href=""
+            <a href="{{ route('role.verification.resend', ['subdomain' => $role->subdomain]) }}"
                     class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                     onclick="">
                     {{ __('messages.resend_email') }}
