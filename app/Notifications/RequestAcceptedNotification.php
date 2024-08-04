@@ -8,7 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Utils\UrlUtils;
 
-class RequestApprovedNotification extends Notification
+class RequestAcceptedNotification extends Notification
 {
     use Queueable;
 
