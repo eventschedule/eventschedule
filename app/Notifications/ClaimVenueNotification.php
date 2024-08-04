@@ -18,7 +18,7 @@ class ClaimVenueNotification extends Notification
      */
     public function __construct($event)
     {
-        $this->event;
+        $this->event = $event;
     }
 
     /**
@@ -37,10 +37,14 @@ class ClaimVenueNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $venue = $this->event->venue;
+        $role = $this->event->role;
         $user = $this->event->user;
 
         return (new MailMessage)
-                    ->subject(str_replace(':name', $venue->name, __('messages.claim_your_venue')))
+                    ->subject(str_replace(
+                        [':user', ':name'], 
+                        [$user->name, $venue->name],
+                        __('messages.claim_your_venue')))
                     ->line(str_replace(
                         [':user', ':role', ':name'], 
                         [$user->name, $role->name, $venue->name], 

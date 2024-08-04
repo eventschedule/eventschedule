@@ -72,7 +72,7 @@ class EventController extends Controller
 
         if (! $role->isVenue()) {
             if ($request->has('venue_email')) {
-                if ($request->user()->email == $request->has('venue_email')) {
+                if ($request->user()->email == $request->venue_email) {
                     return redirect()
                             ->back()
                             ->withInput()
@@ -339,7 +339,7 @@ class EventController extends Controller
         $event->save();
 
         if ($venue->wasRecentlyCreated) {
-            Notification::route('mail', $venue->email)->notify(new ClaimVenueNotification($event));    
+            Notification::route('mail', $venue->email)->notify(new ClaimVenueNotification($event));
         }
 
         if ($event->starts_at) {
