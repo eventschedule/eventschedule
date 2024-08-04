@@ -6,17 +6,20 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use App\Utils\UrlUtils;
 
 class RequestApprovedNotification extends Notification
 {
     use Queueable;
 
+    protected $event;
+
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct($event)
     {
-        //
+        $this->event = $event;
     }
 
     /**
@@ -34,10 +37,14 @@ class RequestApprovedNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $venue = $this->event->venue;
+        $role = $this->event->role;
+
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+                    ->subject(str_replace(':venue', $venue->name, __('messages.' . $role->type . '_request_accepted')))
+                    ->line(str_replace(':venue', $venue->name, __('messages.' . $role->type . '_request_accepted')))
+                    ->action(__('messages.view_event'), route('role.view_guest', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($this->event->id)]))
+                    ->line(__('messages.thank_you_for_using'));
     }
 
     /**
