@@ -126,19 +126,19 @@
                     @if ($showAdd)
                         <time datetime="{{ $currentDate->format('Y-m-d') }}" class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded bg-indigo-600 font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
                     @else
-                        <time datetime="{{ $currentDate->format('Y-m-d') }}" style="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'background-color: ' . (isset($role) ? $role->accent_color : '#5348E9') : '' }}" class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
+                        <time datetime="{{ $currentDate->format('Y-m-d') }}" style="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? ('background-color: ' . ((isset($event) && $event) ? $event->role->accent_color : (isset($role) ? $role->accent_color : '#5348E9'))) : '' }}" class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
                     @endif
                     <ol class="mt-2">
-                        @foreach ($events as $event)
-                        @if ($event->starts_at &&
-                        Carbon\Carbon::parse($event->localStartsAt())->isSameDay($currentDate))
+                        @foreach ($events as $each)
+                        @if ($each->starts_at &&
+                        Carbon\Carbon::parse($each->localStartsAt())->isSameDay($currentDate))
                         <li>
-                            <a href="{{ $showAdd ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) : route('role.view_guest', ['subdomain' => isset($subdomain) ? $subdomain : $event->role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) }}"
+                            <a href="{{ $showAdd ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) : route('role.view_guest', ['subdomain' => isset($subdomain) ? $subdomain : $each->role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}"
                                 class="group flex">
                                 <p class="flex-auto truncate font-medium group-hover:text-indigo-600 text-gray-900">
-                                    {{ isset($subdomain) && $subdomain == $event->role->subdomain ? $event->venue->name : $event->role->name }}</p>
-                                <time datetime="{{ $event->localStartsAt() }}"
-                                    class="ml-3 flex-none group-hover:text-indigo-600 xl:block text-gray-500">{{ Carbon\Carbon::parse($event->localStartsAt())->format('g:i A') }}</time>
+                                    {{ isset($subdomain) && $subdomain == $each->role->subdomain ? $each->venue->name : $each->role->name }}</p>
+                                <time datetime="{{ $each->localStartsAt() }}"
+                                    class="ml-3 flex-none group-hover:text-indigo-600 xl:block text-gray-500">{{ Carbon\Carbon::parse($each->localStartsAt())->format('g:i A') }}</time>
                             </a>
                         </li>
                         @endif
@@ -154,23 +154,23 @@
     <div class="px-4 py-10 sm:px-6 lg:hidden">
         <ol
             class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow ring-1 ring-black ring-opacity-5">
-            @foreach ($events as $event)
+            @foreach ($events as $each)
             <li class="group flex p-4 pr-6 focus-within:bg-gray-50 hover:bg-gray-50">
                 <div class="flex-auto">
-                    <p class="font-semibold text-gray-900">{{ $event->name }}</p>
-                    <time datetime="{{ $event->starts_at }}" class="mt-2 flex items-center text-gray-700">
+                    <p class="font-semibold text-gray-900">{{ $each->name }}</p>
+                    <time datetime="{{ $each->starts_at }}" class="mt-2 flex items-center text-gray-700">
                         <svg class="mr-2 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor"
                             aria-hidden="true">
                             <path fill-rule="evenodd"
                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z"
                                 clip-rule="evenodd" />
                         </svg>
-                        {{ Carbon\Carbon::parse($event->localStartsAt())->format('g:i A') }}
+                        {{ Carbon\Carbon::parse($each->localStartsAt())->format('g:i A') }}
                     </time>
                 </div>
                 <a href="#"
                     class="ml-6 flex-none self-center rounded-md bg-white px-3 py-2 font-semibold text-gray-900 opacity-0 shadow-sm ring-1 ring-inset ring-gray-300 hover:ring-gray-400 focus:opacity-100 group-hover:opacity-100">Edit<span
-                        class="sr-only">, {{ $event->name }}</span></a>
+                        class="sr-only">, {{ $each->name }}</span></a>
             </li>
             @endforeach
         </ol>
