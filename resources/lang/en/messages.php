@@ -209,4 +209,6 @@ return [
     'vendor_request_accepted' => 'Congratulations! Your request to vend at :venue was accepted.',
     'talent_request_declined' => 'Unfortunately, your request to perform at :venue has been declined.',
     'vendor_request_declined' => 'Unfortunately, your request to vend at :venue has been declined.',
+    'view_event' => 'View Event',
+    'date_to_be_announced' => 'Date to be announced',
 ];

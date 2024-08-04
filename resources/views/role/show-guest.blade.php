@@ -153,7 +153,7 @@
                                 {{ $event->role->name }}
                             </a>
                         </p>
-                        <p class="mt-6 text-2xl leading-8">{{ $event->localStartsAt(true) }}</p>
+                        <p class="mt-6 text-2xl leading-8">{{ $event->starts_at ? $event->localStartsAt(true) : __('messages.date_to_be_announced') . '...' }}</p>
                     </div>
                 </div>
             </div>
