@@ -211,6 +211,6 @@ return [
     'vendor_request_declined' => 'Unfortunately, your request to vend at :venue has been declined.',
     'view_event' => 'View Event',
     'date_to_be_announced' => 'Date to be announced',
-    'claim_your_venue' => 'Claim :name on Event Schedule',
-    'claim_your_venue_details' => ':user created a new event for :role at :name, by creating an account with an email you\'ll be set as the owner of the venue.',    
+    'claim_your_venue' => ':user scheduled an event at :venue',
+    'claim_your_venue_details' => ':user scheduled an event for :role at :name, sign up with this email address to claim ownership of the venue.',
 ];
