@@ -675,13 +675,12 @@ class RoleController extends Controller
         exit;
     }
 
-    public function verify(EmailVerificationRequest $request)
+    public function verify(EmailVerificationRequest $request, $subdomain)
     {
-        $role = Role::whereSubdomain($request->route('subdomain'))->firstOrFail();
+        $role = Role::whereSubdomain($subdomain)->firstOrFail();
 
         if ($role->hasVerifiedEmail()) {
-            return redirect()
-                    ->route('role.view_admin', ['subdomain' => $role->subdomain]);
+            return redirect()->route('role.view_admin', ['subdomain' => $role->subdomain]);
         }
 
         if ($role->markEmailAsVerified()) {
@@ -693,15 +692,19 @@ class RoleController extends Controller
                 ->with('message', __('messages.confirmed_email'));
     }
 
-    public function resendVerify(Request $request)
+    public function resendVerify(Request $request, $subdomain)
     {
-        if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->route('home');
+        $role = Role::whereSubdomain($subdomain)->firstOrFail();
+
+        if ($role->hasVerifiedEmail()) {
+            return redirect()->route('role.view_admin', ['subdomain' => $role->subdomain]);
         }
 
-        $request->user()->sendEmailVerificationNotification();
+        $role->sendEmailVerificationNotification();
 
-        return back()->with('status', 'Verification link sent!');
+        return redirect()
+            ->route('role.view_admin', ['subdomain' => $role->subdomain])
+            ->with('message', __('messages.sent_confirmation_email'));
     }
  
 }
