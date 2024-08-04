@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\EventRequestNotification;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Role;
@@ -320,6 +322,9 @@ class EventController extends Controller
         } else {
             $subdomain = $role->subdomain;
             $message = __('messages.event_requested');
+
+            $emails = $venue->members()->pluck('email');
+            Notification::route('mail', $emails)->notify(new EventRequestNotification($venue, $role));
         }
 
         $event->save();
