@@ -47,10 +47,8 @@ return [
     'confirm_your_password' => 'Please confirm your password',
     'confirm' => 'Confirm',
     'password' => 'Password',
-    'forgot_your_password_no_problem' => 'Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.',
     'email_password_reset_link' => 'Email Password Reset Link',
     'remember_me' => 'Remember me',
-    'forgot_your_password' => 'Forgot your password?',
     'log_in' => 'Log in',
     'name' => 'Name',
     'confirm_password' => 'Confirm Password',
@@ -204,4 +202,5 @@ return [
     'set_new_password' => 'Set new password',
     'get_started' => 'Get started',
     'thank_you_for_using' => 'Thank you for using our application!',
+    'reset_password' => 'Reset password',
 ];

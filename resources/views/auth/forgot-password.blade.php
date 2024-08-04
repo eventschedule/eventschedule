@@ -1,6 +1,6 @@
 <x-auth-layout>
     <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        {{ __('messages.forgot_your_password_no_problem') }}
+        {{ __('messages.reset_password') }}
     </div>
 
     <!-- Session Status -->
