@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use Illuminate\Auth\Events\Verified;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Role;
@@ -51,6 +52,10 @@ class RegisteredUserController extends Controller
         foreach ($roles as $role) {
             $role->user_id = $user->id;
             $role->save();
+
+            if ($role->markEmailAsVerified()) {
+                event(new Verified($role));
+            }    
 
             $user->roles()->attach($role->id, ['level' => 'owner']);
         }
