@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Notification;
 use App\Notifications\EventRequestNotification;
 use App\Notifications\RequestDeclinedNotification;
 use App\Notifications\RequestAcceptedNotification;
+use App\Notifications\ClaimVenueNotification;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Role;
@@ -336,6 +337,10 @@ class EventController extends Controller
         }
 
         $event->save();
+
+        if ($venue->wasRecentlyCreated) {
+            Notification::route('mail', $venue->email)->notify(new ClaimVenueNotification($event));    
+        }
 
         if ($event->starts_at) {
             $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);

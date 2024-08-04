@@ -11,12 +11,14 @@ class ClaimVenueNotification extends Notification
 {
     use Queueable;
 
+    protected $event;
+
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct($event)
     {
-        //
+        $this->event;
     }
 
     /**
@@ -34,10 +36,17 @@ class ClaimVenueNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $venue = $this->event->venue;
+        $user = $this->event->user;
+
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+                    ->subject(str_replace(':name', $venue->name, __('messages.claim_your_venue')))
+                    ->line(str_replace(
+                        [':user', ':role', ':name'], 
+                        [$user->name, $role->name, $venue->name], 
+                        __('messages.claim_your_venue_details')))
+                    ->action(__('messages.sign_up'), url('/'))
+                    ->line(__('messages.thank_you_for_using'));
     }
 
     /**
