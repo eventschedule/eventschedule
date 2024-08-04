@@ -110,6 +110,10 @@ class RoleController extends Controller
         $month = $request->month;
         $year = $request->year;
 
+        if (! $role->email_verified_at) {
+            return redirect('/');
+        }
+
         if ($hash) {
             $event_id = UrlUtils::decodeId($hash);
             $event = Event::findOrFail($event_id);
