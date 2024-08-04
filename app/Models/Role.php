@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use App\Utils\MarkdownUtils;
 
-class Role extends Model
+class Role extends Model implements MustVerifyEmail
 {
+    use Notifiable, MustVerifyEmailTrait;
+
     protected $fillable = [
         'type',
         'is_unlisted',
