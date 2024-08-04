@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Http\Requests\EmailVerificationRequest;
 use Illuminate\Auth\Events\Verified;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
@@ -680,14 +680,17 @@ class RoleController extends Controller
         $role = Role::findOrFail($request->route('id'));
 
         if ($role->hasVerifiedEmail()) {
-            return redirect()->route('home')->with('status', 'Your email is already verified.');
+            return redirect()
+                    ->route('role.view_admin', ['subdomain' => $role->subdomain]);
         }
 
         if ($role->markEmailAsVerified()) {
             event(new Verified($role));
         }
 
-        return redirect()->route('home')->with('status', 'Your email has been verified.');
+        return redirect()
+                ->route('role.view_admin', ['subdomain' => $role->subdomain])
+                ->with('message', __('messages.confirmed_email'));
     }
 
     public function resendVerify(Request $request)
