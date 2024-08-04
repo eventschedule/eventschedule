@@ -241,7 +241,7 @@
 
         <div class="flex items-center justify-between pb-6">
             <div class="mt-1 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6">
-                @if($role->email)
+                @if($role->email && $role->user_id)
                 <div class="mt-2 flex items-center text-sm">
                     <svg class="mr-1.5 h-5 w-5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"
                         aria-hidden="true">

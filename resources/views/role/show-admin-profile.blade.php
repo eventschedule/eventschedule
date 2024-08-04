@@ -6,11 +6,13 @@
 </div>
 @endif
 
-<div class="py-5">
+@if ($role->formatted_address)
+<div class="pt-5">
     <div id="map" style="height: 200px;"></div>
 </div>
+@endif
 
-<div class="container mx-auto">
+<div class="pt-5 container mx-auto">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
         <div class="bg-white rounded-lg shadow-md p-6">
