@@ -75,7 +75,7 @@
                 {{ __('messages.already_registered') }}
             </a>
 
-            <x-primary-button class="ms-4 pl-2">
+            <x-primary-button class="ml-4">
                 {{ __('messages.register') }}
             </x-primary-button>
         </div>
