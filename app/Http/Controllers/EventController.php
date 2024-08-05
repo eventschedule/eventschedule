@@ -7,6 +7,7 @@ use App\Notifications\EventRequestNotification;
 use App\Notifications\RequestDeclinedNotification;
 use App\Notifications\RequestAcceptedNotification;
 use App\Notifications\ClaimVenueNotification;
+use App\Notifications\DeletedEventNotification;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Role;
@@ -25,6 +26,15 @@ class EventController extends Controller
         }
 
         $event->delete();
+
+        $role = $event->role;
+        $venue = $event->venue;
+
+        $roleEmails = $role->members()->pluck('email')->toArray();
+        $venueEmails = $venue->members()->pluck('email')->toArray();
+        $emails = array_unique(array_merge($roleEmails, $venueEmails));
+
+        Notification::route('mail', $emails)->notify(new DeletedEventNotification($event));
 
         $data = [
             'subdomain' => $subdomain, 

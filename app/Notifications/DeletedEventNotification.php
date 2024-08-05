@@ -11,12 +11,14 @@ class DeletedEventNotification extends Notification
 {
     use Queueable;
 
+    protected $event;
+
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct($event)
     {
-        //
+        $this->event = $event;
     }
 
     /**
@@ -34,10 +36,16 @@ class DeletedEventNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $role = $this->event->role;
+        $venue = $this->event->venue;
+
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+                    ->subject(__('messages.event_has_been_deleted'))
+                    ->line(str_replace(
+                        [':name', ':venue'],
+                        [$role->name, $venue->name],
+                        __('messages.event_has_been_deleted_details'))
+                    );
     }
 
     /**
