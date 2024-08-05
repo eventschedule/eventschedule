@@ -138,7 +138,7 @@
                                 <p class="flex-auto truncate font-medium group-hover:text-indigo-600 text-gray-900">
                                     {{ isset($subdomain) && $subdomain == $each->role->subdomain ? $each->venue->name : $each->role->name }}</p>
                                 <time datetime="{{ $each->localStartsAt() }}"
-                                    class="ml-3 flex-none group-hover:text-indigo-600 xl:block text-gray-500">{{ Carbon\Carbon::parse($each->localStartsAt())->format('g:i A') }}</time>
+                                    class="ml-3 flex-none group-hover:text-indigo-600 xl:block text-gray-500">{{ Carbon\Carbon::parse($each->localStartsAt())->format($role->use_24_hour_time ? 'H:i' : 'g:i A') }}</time>
                             </a>
                         </li>
                         @endif
