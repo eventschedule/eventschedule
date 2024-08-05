@@ -217,4 +217,5 @@ return [
     'event_has_been_deleted_details' => 'The event for :name at :venue has been deleted by :user.',
     'role_has_been_deleted' => 'Your :type has been deleted',
     'role_has_been_deleted_details' => 'The :type :name has been deleted by :user.',
+    'message_sent' => 'Successfully sent message',
 ];
