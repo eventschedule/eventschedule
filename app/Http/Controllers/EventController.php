@@ -82,7 +82,34 @@ class EventController extends Controller
         $talent = $role->isTalent() ? $role : null;
         $vendor = $role->isVendor() ? $role : null;
 
-        if (! $role->isVenue()) {
+        if ($role->isVenue()) {
+            if ($request->has('role_email')) {
+                if ($request->user()->email == $request->role_email) {
+                    return redirect()
+                            ->back()
+                            ->withInput()
+                            ->withErrors(['role_email' => __('messages.email_not_associated_with_role')]);
+                }
+
+                $role = Role::whereEmail($request->role_email)->first();
+
+                if ($role->isTalent()) {
+                    $talent = $role;
+                } else {
+                    $vendor = $role;
+                }
+
+                if ($venue && ! $venue->isVenue()) {
+                    return redirect()
+                            ->back()
+                            ->withInput()
+                            ->withErrors(['role_email' => __('messages.email_not_associated_with_rolek')]);
+                }
+
+            } else {
+                return view('event/role_search', ['subdomain' => $subdomain]);
+            }
+        } else {
             if ($request->has('venue_email')) {
                 if ($request->user()->email == $request->venue_email) {
                     return redirect()
