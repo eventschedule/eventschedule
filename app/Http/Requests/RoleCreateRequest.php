@@ -6,6 +6,7 @@ use App\Models\Role;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Rules\NoEmailAlias;
+use App\Rules\SquareImage;
 
 class RoleCreateRequest extends FormRequest
 {
@@ -20,7 +21,7 @@ class RoleCreateRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(Role::class), new NoEmailAlias],
             //'subdomain' => ['required', 'string', 'max:255', Rule::unique(Role::class)],
-            'profile_image' => ['image', 'max:2500'],
+            'profile_image' => ['image', 'max:2500', new SquareImage],
             'background_image_url' => ['image', 'max:2500'],
         ];
     }
