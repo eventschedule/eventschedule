@@ -55,6 +55,8 @@ class EventController extends Controller
         $venueSubdomain = $event->venue->subdomain;
         $roleSubdomain = $event->role->subdomain;
 
+        $header = $subdomain == $event->venue->subdomain ? $event->venue->getRoleHeader() : $event->role->getRoleHeader();
+
         $data = [
             'event' => $event,
             'user' => $request->user(),
@@ -63,6 +65,7 @@ class EventController extends Controller
             'talent' => $event->role->type == 'talent' ? $event->role : false,
             'vendor' => $event->role->type == 'vendor' ? $event->role : false,
             'title' => __('messages.edit_event'),
+            'header' => $header,
         ];
 
         return view('event/edit', $data);
@@ -72,6 +75,7 @@ class EventController extends Controller
     {
         $user = $request->user();
         $role = Role::subdomain($subdomain)->firstOrFail();
+        $header = $role->getRoleHeader();
         $roles = [];
 
         if (! $role->email_verified_at) {
@@ -80,22 +84,7 @@ class EventController extends Controller
 
         $venue = $role->isVenue() ? $role : null;
         $talent = $role->isTalent() ? $role : null;
-        $vendor = $role->isVendor() ? $role : null;
-        
-        $header = __('messages.talent');
-        if ($venue) {
-            if ($venue->accept_talent_requests && $venue->accept_vendor_requests) {
-                $header = __('messages.talent') . ' / ' . __('messages.vendor');
-            } else if ($venue->accept_talent_requests) {
-                $header = __('messages.talent');
-            } else {
-                $header = __('messages.vendor');
-            }
-        } else if ($talent) {
-            $header = __('messages.talent');
-        } else if ($vendor) {
-            $header = __('messages.vendor');
-        }
+        $vendor = $role->isVendor() ? $role : null;        
 
         if ($role->isVenue()) {
             if ($request->has('role_email')) {
