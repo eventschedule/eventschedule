@@ -81,6 +81,21 @@ class EventController extends Controller
         $venue = $role->isVenue() ? $role : null;
         $talent = $role->isTalent() ? $role : null;
         $vendor = $role->isVendor() ? $role : null;
+        
+        $header = __('messages.talent');
+        if ($venue) {
+            if ($venue->accept_talent_requests && $venue->accept_vendor_requests) {
+                $header = __('messages.talent') . ' / ' . __('messages.vendor');
+            } else if ($venue->accept_talent_requests) {
+                $header = __('messages.talent');
+            } else {
+                $header = __('messages.vendor');
+            }
+        } else if ($talent) {
+            $header = __('messages.talent');
+        } else if ($vendor) {
+            $header = __('messages.vendor');
+        }
 
         if ($role->isVenue()) {
             if ($request->has('role_email')) {
@@ -107,7 +122,7 @@ class EventController extends Controller
                 }
 
             } else {
-                return view('event/role_search', ['subdomain' => $subdomain]);
+                return view('event/role_search', ['subdomain' => $subdomain, 'header' => $header]);
             }
         } else {
             if ($request->has('venue_email')) {
@@ -178,6 +193,7 @@ class EventController extends Controller
             'vendor' => $vendor,
             'title' => $title,
             'roles' => $roles,
+            'header' => $header,
         ];
 
         return view('event/edit', $data);
