@@ -7,8 +7,8 @@ use App\Notifications\EventRequestNotification;
 use App\Notifications\RequestDeclinedNotification;
 use App\Notifications\RequestAcceptedNotification;
 use App\Notifications\ClaimVenueNotification;
+use App\Notifications\ClaimRoleNotification;
 use App\Notifications\DeletedEventNotification;
-use App\Notifications\CreatedEventNotification;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Role;
@@ -393,7 +393,7 @@ class EventController extends Controller
         }
 
         if ($role->wasRecentlyCreated) {
-            Notification::route('mail', $role->email)->notify(new CreatedEventNotification($event));
+            Notification::route('mail', $role->email)->notify(new ClaimRoleNotification($event));
         }
 
         if ($event->starts_at) {
