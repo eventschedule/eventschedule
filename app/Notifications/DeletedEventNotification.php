@@ -12,13 +12,15 @@ class DeletedEventNotification extends Notification
     use Queueable;
 
     protected $event;
+    protected $user;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($event)
+    public function __construct($event, $user)
     {
         $this->event = $event;
+        $this->user = $user;
     }
 
     /**
@@ -38,12 +40,13 @@ class DeletedEventNotification extends Notification
     {
         $role = $this->event->role;
         $venue = $this->event->venue;
+        $user = $this->user;
 
         return (new MailMessage)
                     ->subject(__('messages.event_has_been_deleted'))
                     ->line(str_replace(
-                        [':name', ':venue'],
-                        [$role->name, $venue->name],
+                        [':name', ':venue', ':user'],
+                        [$role->name, $venue->name, $user->name],
                         __('messages.event_has_been_deleted_details'))
                     );
     }

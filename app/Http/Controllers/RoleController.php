@@ -57,10 +57,11 @@ class RoleController extends Controller
 
     public function delete(Request $request, $subdomain)
     {
+        $user = $request->user();
         $role = Role::subdomain($subdomain)->firstOrFail();
         $type = $role->type;
 
-        if (auth()->user()->id != $role->user_id) {
+        if ($user->id != $role->user_id) {
             return redirect('/');
         }
 
@@ -78,7 +79,7 @@ class RoleController extends Controller
 
         $role->delete();
         
-        Notification::route('mail', $emails)->notify(new DeletedRoleNotification($role));
+        Notification::route('mail', $emails)->notify(new DeletedRoleNotification($role, $user));
 
         return redirect(route('home'))
                 ->with('message', __('messages.deleted_' . $type));

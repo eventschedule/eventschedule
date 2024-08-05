@@ -214,7 +214,7 @@ return [
     'claim_your_venue' => ':user scheduled an event at :venue',
     'claim_your_venue_details' => ':user scheduled an event for :role at :name, sign up with this email address to claim ownership of the venue.',
     'event_has_been_deleted' => 'Your event has been deleted',
-    'event_has_been_deleted_details' => 'The event for :name at :venue has been deleted.',
+    'event_has_been_deleted_details' => 'The event for :name at :venue has been deleted by :user.',
     'role_has_been_deleted' => 'Your :type has been deleted',
-    'role_has_been_deleted_details' => 'The :type :name has been deleted.',
+    'role_has_been_deleted_details' => 'The :type :name has been deleted by :user.',
 ];
