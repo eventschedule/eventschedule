@@ -147,7 +147,7 @@
                         <div class="mb-6">
                             <x-input-label for="role_email" :value="__('messages.email') . ' *'" />
                             <x-text-input id="role_email" name="role_email" type="email" class="mt-1 block w-full"
-                                :value="old('role_email')" required />
+                                :value="old('role_email', $role ? $role->email : request()->role_email)" required readonly />
                             <x-input-error class="mt-2" :messages="$errors->get('role_email')" />
                         </div>
                         @else
