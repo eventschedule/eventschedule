@@ -41,6 +41,7 @@ class ClaimRoleNotification extends Notification
         $user = $this->event->user;
 
         return (new MailMessage)
+                    ->replyTo($user->email, $user->name)
                     ->subject(str_replace(
                         [':user', ':role'], 
                         [$user->name, $role->name],

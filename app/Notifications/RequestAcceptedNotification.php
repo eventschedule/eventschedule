@@ -41,6 +41,7 @@ class RequestAcceptedNotification extends Notification
         $role = $this->event->role;
 
         return (new MailMessage)
+                    ->replyTo($this->venue->user->email, $this->venue->user->name)
                     ->subject(str_replace(':venue', $venue->name, __('messages.' . $role->type . '_request_accepted')))
                     ->line(str_replace(':venue', $venue->name, __('messages.' . $role->type . '_request_accepted')))
                     ->action(__('messages.view_event'), route('role.view_guest', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($this->event->id)]))

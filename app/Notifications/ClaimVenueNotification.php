@@ -41,6 +41,7 @@ class ClaimVenueNotification extends Notification
         $user = $this->event->user;
 
         return (new MailMessage)
+                    ->replyTo($user->email, $user->name)
                     ->subject(str_replace(
                         [':user', ':venue'], 
                         [$user->name, $venue->name],
