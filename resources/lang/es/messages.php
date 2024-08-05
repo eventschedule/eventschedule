@@ -105,7 +105,6 @@ return [
     'font_color' => 'Color de Fuente',
     'accent_color' => 'Color de Acento',
     'background' => 'Fondo',
-    'background_color' => 'Color de Fondo',
     'image' => 'Imagen',
     'colors' => 'Colores',
     'rotation' => 'Rotación',

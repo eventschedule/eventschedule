@@ -105,7 +105,6 @@ return [
     'font_color' => 'Lettertypekleur',
     'accent_color' => 'Accentkleur',
     'background' => 'Achtergrond',
-    'background_color' => 'Achtergrondkleur',
     'image' => 'Afbeelding',
     'colors' => 'Kleuren',
     'rotation' => 'Rotatie',

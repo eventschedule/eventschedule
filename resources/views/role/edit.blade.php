@@ -308,14 +308,6 @@
                             <x-input-error class="mt-2" :messages="$errors->get('background')" />
                         </div>
 
-                        <div class="mb-6" id="style_background_color" style="display:none">
-                            <x-input-label for="background_color" :value="__('messages.background_color')" />
-                            <x-text-input id="background_color" name="background_color" type="color"
-                                class="mt-1 block w-1/2" :value="old('background_color', $role->background_color)"
-                                oninput="updatePreview()" />
-                            <x-input-error class="mt-2" :messages="$errors->get('background_color')" />
-                        </div>
-
                         <div class="mb-6" id="style_background_image" style="display:none">
                             <x-input-label for="background_image" :value="__('messages.image')" />
                             <input id="background_image" name="background_image" type="file" class="mt-1 block w-full"

@@ -380,7 +380,6 @@ class RoleController extends Controller
         $role->font_color = '#111827';
         $role->accent_color = '#007BFF';
         $role->background = 'default';
-        $role->background_color = '#FFFFFF';
         $role->background_rotation = 150;
         $role->accept_talent_requests = true;
         $role->timezone = auth()->user()->timezone;
