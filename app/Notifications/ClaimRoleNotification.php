@@ -42,13 +42,13 @@ class ClaimRoleNotification extends Notification
 
         return (new MailMessage)
                     ->subject(str_replace(
-                        [':name'], 
-                        [$role->name],
-                        __('messages.event_has_been_created')))
+                        [':user', ':role'], 
+                        [$user->name, $role->name],
+                        __('messages.claim_your_role')))
                     ->line(str_replace(
-                        [':user', ':role', ':name'], 
+                        [':user', ':role', ':venue'], 
                         [$user->name, $role->name, $venue->name], 
-                        __('messages.event_has_been_created_details')))
+                        __('messages.claim_your_role_details')))
                     ->action(__('messages.sign_up'), url('/'));
     }
 
