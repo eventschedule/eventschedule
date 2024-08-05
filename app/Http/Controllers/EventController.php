@@ -18,6 +18,7 @@ class EventController extends Controller
 {
     public function delete(Request $request, $subdomain, $hash)
     {
+        $user = $request->user();
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
 
@@ -34,7 +35,7 @@ class EventController extends Controller
         $venueEmails = $venue->members()->pluck('email')->toArray();
         $emails = array_unique(array_merge($roleEmails, $venueEmails));
 
-        //Notification::route('mail', $emails)->notify(new DeletedEventNotification($event));
+        Notification::route('mail', $emails)->notify(new DeletedEventNotification($event, $user));
 
         $data = [
             'subdomain' => $subdomain, 

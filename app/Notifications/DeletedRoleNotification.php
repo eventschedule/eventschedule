@@ -12,13 +12,15 @@ class DeletedRoleNotification extends Notification
     use Queueable;
 
     protected $role;
+    protected $user;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($role)
+    public function __construct($role, $user)
     {
         $this->role = $role;
+        $this->user = $user;
     }
 
     /**
@@ -37,6 +39,7 @@ class DeletedRoleNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $role = $this->role;
+        $user = $this->user;
 
         return (new MailMessage)
                 ->subject(str_replace(
@@ -45,8 +48,8 @@ class DeletedRoleNotification extends Notification
                     __('messages.role_has_been_deleted'))
                 )
                 ->line(str_replace(
-                    [':name', ':type'],
-                    [$role->name, $role->type],
+                    [':name', ':type', ':user'],
+                    [$role->name, $role->type, $user->name],
                     __('messages.role_has_been_deleted_details'))
                 );
     }
