@@ -316,6 +316,7 @@ class EventController extends Controller
 
             if ($matchingUser = User::whereEmail($venue->email)->first()) {
                 $venue->user_id = $matchingUser->id;
+                $venue->email_verified_at = $matchingUser->email_verified_at;
                 $venue->save();
                 $matchingUser->roles()->attach($venue->id, ['level' => 'owner']);
             }
@@ -356,6 +357,7 @@ class EventController extends Controller
 
                 if ($matchingUser = User::whereEmail($role->email)->first()) {
                     $role->user_id = $matchingUser->id;
+                    $role->email_verified_at = $matchingUser->email_verified_at;
                     $role->save();
                     $matchingUser->roles()->attach($role->id, ['level' => 'owner']);
                 }
@@ -388,11 +390,11 @@ class EventController extends Controller
 
         $event->save();
 
-        if ($venue->wasRecentlyCreated) {
+        if ($venue->wasRecentlyCreated && ! $vendor->user_id) {
             Notification::route('mail', $venue->email)->notify(new ClaimVenueNotification($event));
         }
 
-        if ($role->wasRecentlyCreated) {
+        if ($role->wasRecentlyCreated && ! $role->user_id) {
             Notification::route('mail', $role->email)->notify(new ClaimRoleNotification($event));
         }
 
