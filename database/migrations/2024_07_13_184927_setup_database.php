@@ -34,7 +34,7 @@ return new class extends Migration
             $table->string('font_color')->default('#111827');
             $table->string('font_family')->default('Roboto');
             $table->string('name');
-            $table->string('email');
+            $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('phone')->nullable();
             $table->string('website')->nullable();

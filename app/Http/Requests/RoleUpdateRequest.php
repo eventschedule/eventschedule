@@ -6,6 +6,7 @@ use App\Models\Role;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Utils\UrlUtils;
+use App\Rules\NoEmailAlias;
 
 class RoleUpdateRequest extends FormRequest
 {
@@ -16,9 +17,11 @@ class RoleUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
+        $role = Role::subdomain(request()->subdomain)->firstOrFail();
+
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique(Role::class)->ignore($role->id), new NoEmailAlias],
             'subdomain' => ['required', 'string', 'max:255', Rule::unique(Role::class)->ignore($this->route('subdomain'), 'subdomain')],
             'profile_image' => ['image', 'max:2500'],
             'background_image_url' => ['image', 'max:2500'],
