@@ -220,6 +220,6 @@ return [
     'message_sent' => 'Successfully sent message',
     'event_has_been_created' => 'A new event has been scheduled for :name',
     'event_has_been_created_details' => ':user created an event for :role at :name, sign up with this email address to manage it.',
-    'an_email_will_be_sent' => 'An email will be sent to inform them',
+    'an_email_will_be_sent' => 'An email notification will be sent to inform them',
     'email_not_associated_with_role' => 'Email is not associated with a talent/vendor',
 ];
