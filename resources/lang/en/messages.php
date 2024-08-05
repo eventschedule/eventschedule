@@ -221,4 +221,5 @@ return [
     'an_email_will_be_sent' => 'An email notification will be sent to inform them',
     'email_not_associated_with_role' => 'Email is not associated with a talent/vendor',
     'create_account' => 'Create Account',
+    //
 ];
