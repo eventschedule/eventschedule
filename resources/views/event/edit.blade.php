@@ -20,7 +20,8 @@
             f._input.onkeydown = () => false;
 
             $("#venue_country").countrySelect({
-                defaultCountry: '{{ $venue ? $venue->country_code : '' }}',
+                defaultCountry: '{{ $venue ? $venue->country_code : '
+                ' }}',
             });
         });
 
@@ -72,7 +73,11 @@
                         <div class="mb-6">
                             <x-input-label for="venue_email" :value="__('messages.email')" />
                             <x-text-input id="venue_email" name="venue_email" type="email" class="mt-1 block w-full"
-                                :value="old('venue_email', $venue ? $venue->email : request()->venue_email)" required readonly />
+                                :value="old('venue_email', $venue ? $venue->email : request()->venue_email)" required
+                                readonly />
+                            <p class="mt-2 text-sm text-gray-500">
+                                {{ __('messages.an_email_will_be_sent') }}
+                            </p>
                             <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
                         </div>
                         @endif
@@ -119,7 +124,8 @@
                                 target="_blank">
                                 {{ $talent->name }}
                             </a>
-                            <input type="hidden" name="role_id" value="{{ App\Utils\UrlUtils::encodeId($talent->id) }}"/>
+                            <input type="hidden" name="role_id"
+                                value="{{ App\Utils\UrlUtils::encodeId($talent->id) }}" />
                         </div>
                         @elseif ($vendor)
                         <div class="mb-6">
@@ -127,7 +133,8 @@
                                 target="_blank">
                                 {{ $vendor->name }}
                             </a>
-                            <input type="hidden" name="role_id" value="{{ App\Utils\UrlUtils::encodeId($vendor->id) }}"/>
+                            <input type="hidden" name="role_id"
+                                value="{{ App\Utils\UrlUtils::encodeId($vendor->id) }}" />
                         </div>
                         @elseif($venue && $user->isMember($venue->subdomain))
                         <div class="mb-6">
@@ -140,7 +147,11 @@
                         <div class="mb-6">
                             <x-input-label for="role_email" :value="__('messages.email') . ' *'" />
                             <x-text-input id="role_email" name="role_email" type="email" class="mt-1 block w-full"
-                                :value="old('role_email', $role ? $role->email : request()->role_email)" required readonly />
+                                :value="old('role_email', $role ? $role->email : request()->role_email)" required
+                                readonly />
+                            <p class="mt-2 text-sm text-gray-500">
+                                {{ __('messages.an_email_will_be_sent') }}
+                            </p>
                             <x-input-error class="mt-2" :messages="$errors->get('role_email')" />
                         </div>
                         @else
@@ -166,9 +177,11 @@
                         </h2>
 
                         <div class="mb-6">
-                            <x-input-label for="starts_at" :value="__('messages.date_and_time') . ($venue && $venue->user_id ? '' : ' *')" />
+                            <x-input-label for="starts_at"
+                                :value="__('messages.date_and_time') . ($venue && $venue->user_id ? '' : ' *')" />
                             <x-text-input type="text" id="starts_at" name="starts_at" class="datepicker"
-                                :value="old('starts_at', $event->localStartsAt())" :required="$venue && $venue->user_id ? '' : 'required'"/>
+                                :value="old('starts_at', $event->localStartsAt())"
+                                :required="$venue && $venue->user_id ? '' : 'required'" />
                             <x-input-error class="mt-2" :messages="$errors->get('starts_at')" />
                         </div>
 
@@ -193,7 +206,8 @@
 
                         <div class="mb-6">
                             <x-input-label for="venue_address1" :value="__('messages.street_address')" />
-                            <x-text-input id="venue_address1" name="venue_address1" type="text" class="mt-1 block w-full"
+                            <x-text-input id="venue_address1" name="venue_address1" type="text"
+                                class="mt-1 block w-full"
                                 :value="old('venue_address1', $venue ? $venue->address1 : '')" />
                             <x-input-error class="mt-2" :messages="$errors->get('venue_address1')" />
                         </div>
@@ -214,7 +228,8 @@
 
                         <div class="mb-6">
                             <x-input-label for="venue_postal_code" :value="__('messages.postal_code')" />
-                            <x-text-input id="venue_postal_code" name="venue_postal_code" type="text" class="mt-1 block w-full"
+                            <x-text-input id="venue_postal_code" name="venue_postal_code" type="text"
+                                class="mt-1 block w-full"
                                 :value="old('venue_postal_code', $venue ? $venue->postal_code : '')" />
                             <x-input-error class="mt-2" :messages="$errors->get('venue_postal_code')" />
                         </div>
