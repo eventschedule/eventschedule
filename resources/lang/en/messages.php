@@ -219,5 +219,5 @@ return [
     'role_has_been_deleted_details' => 'The :type :name has been deleted by :user.',
     'message_sent' => 'Successfully sent message',
     'event_has_been_created' => 'A new event has been scheduled for :name',
-    'event_has_been_created_details' => 'A new event has been scheduled for :name at :venue by :user',
+    'event_has_been_created_details' => ':user scheduled an event for :role at :name, sign up with this email address to manage the event.',
 ];
