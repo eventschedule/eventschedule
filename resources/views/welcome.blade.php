@@ -42,7 +42,9 @@
     <!-- Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    @if (session('message'))
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    @endif
 </head>
 
 <body class="font-sans antialiased dark:bg-black dark:text-white/50">
@@ -544,6 +546,8 @@
 
 </body>
 
+@if (session('message'))
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+@endif
 
 </html>
