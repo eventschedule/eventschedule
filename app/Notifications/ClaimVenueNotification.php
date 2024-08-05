@@ -42,11 +42,11 @@ class ClaimVenueNotification extends Notification
 
         return (new MailMessage)
                     ->subject(str_replace(
-                        [':user', ':name'], 
+                        [':user', ':venue'], 
                         [$user->name, $venue->name],
                         __('messages.claim_your_venue')))
                     ->line(str_replace(
-                        [':user', ':role', ':name'], 
+                        [':user', ':role', ':venue'], 
                         [$user->name, $role->name, $venue->name], 
                         __('messages.claim_your_venue_details')))
                     ->action(__('messages.sign_up'), url('/'))
