@@ -12,6 +12,7 @@ use App\Notifications\CreatedEventNotification;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Role;
+use App\Models\User;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 
@@ -88,13 +89,6 @@ class EventController extends Controller
 
         if ($role->isVenue()) {
             if ($request->has('role_email')) {
-                if ($request->user()->email == $request->role_email) {
-                    return redirect()
-                            ->back()
-                            ->withInput()
-                            ->withErrors(['role_email' => __('messages.email_not_associated_with_role')]);
-                }
-
                 if ($role = Role::whereEmail($request->role_email)->first()) {
                     if ($role->isTalent()) {
                         $talent = $role;
@@ -319,6 +313,12 @@ class EventController extends Controller
             $venue->postal_code = $request->venue_postal_code;
             $venue->country_code = $request->venue_country_code;
             $venue->save();
+
+            if ($matchingUser = User::whereEmail($venue->email)->first()) {
+                $venue->user_id = $matchingUser->id;
+                $venue->save();
+                $matchingUser->roles()->attach($venue->id, ['level' => 'owner']);
+            }
         }
 
         $role = false;
@@ -352,7 +352,13 @@ class EventController extends Controller
                 $role->type = $request->role_type;
                 $role->timezone = $user->timezone;
                 $role->language_code = $user->language_code;
-                $role->save();                
+                $role->save();
+
+                if ($matchingUser = User::whereEmail($role->email)->first()) {
+                    $role->user_id = $matchingUser->id;
+                    $role->save();
+                    $matchingUser->roles()->attach($role->id, ['level' => 'owner']);
+                }
             }
         }
 
