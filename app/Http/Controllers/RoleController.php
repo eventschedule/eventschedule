@@ -74,9 +74,10 @@ class RoleController extends Controller
             Storage::delete($path);
         }
 
-        $role->delete();
-
         $emails = $role->members()->pluck('email');
+
+        $role->delete();
+        
         Notification::route('mail', $emails)->notify(new DeletedRoleNotification($role));
 
         return redirect(route('home'))
