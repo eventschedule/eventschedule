@@ -7,6 +7,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Address;
+
 use Illuminate\Queue\SerializesModels;
 
 class SupportEmail extends Mailable
@@ -34,6 +36,9 @@ class SupportEmail extends Mailable
     {
         return new Envelope(
             subject: 'Support Email - ' . date('F j Y, g:i A'),
+            replyTo: [
+                new Address($this->email, $this->name),
+            ],
         );
     }
 
