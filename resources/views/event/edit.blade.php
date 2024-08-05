@@ -20,8 +20,7 @@
             f._input.onkeydown = () => false;
 
             $("#venue_country").countrySelect({
-                defaultCountry: '{{ $venue ? $venue->country_code : '
-                ' }}',
+                defaultCountry: "{{ $venue ? $venue->country_code : '' }}",
             });
         });
 
