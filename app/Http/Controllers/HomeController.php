@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use Carbon\Carbon;
+use App\Mail\SupportEmail;
+use Mail;
 
 class HomeController extends Controller
 {
@@ -60,7 +62,13 @@ class HomeController extends Controller
 
     public function message(Request $request)
     {
-        dd($request->all());
-        // TODO implement me
+        $name = trim($request->first_name . ' ' . $request->last_name);
+        $email = $request->email;
+        $message = $request->message;
+
+        $mail = new SupportEmail($name, $email, $message);
+        Mail::to(config('mail.from.address'))->send($mail);
+
+        return redirect(route('landing'));
     }
 }
