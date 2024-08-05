@@ -91,14 +91,14 @@ class EventController extends Controller
                             ->withErrors(['role_email' => __('messages.email_not_associated_with_role')]);
                 }
 
-                $role = Role::whereEmail($request->role_email)->first();
-
-                if ($role->isTalent()) {
-                    $talent = $role;
-                } else {
-                    $vendor = $role;
+                if ($role = Role::whereEmail($request->role_email)->first()) {
+                    if ($role->isTalent()) {
+                        $talent = $role;
+                    } else {
+                        $vendor = $role;
+                    }
                 }
-
+                
                 if ($venue && ! $venue->isVenue()) {
                     return redirect()
                             ->back()
