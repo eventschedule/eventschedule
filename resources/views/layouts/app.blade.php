@@ -331,7 +331,6 @@
                         Toastify({
                             text: "{{ session('message') }}",
                             duration: 3000,
-                            //newWindow: true,
                             gravity: 'bottom',
                             position: 'center',
                             stopOnFocus: true,

@@ -69,6 +69,6 @@ class HomeController extends Controller
         $mail = new SupportEmail($name, $email, $message);
         Mail::to(config('mail.from.address'))->send($mail);
 
-        return redirect(route('landing'));
+        return redirect(route('landing'))->with('message', __('messages.message_sent'));
     }
 }
