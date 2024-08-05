@@ -320,9 +320,7 @@ class EventController extends Controller
                 $role->type = $request->role_type;
                 $role->timezone = $user->timezone;
                 $role->language_code = $user->language_code;
-                $role->save();
-
-                Notification::route('mail', $role->email)->notify(new CreatedEventNotification($venue, $role));
+                $role->save();                
             }
         }
 
@@ -354,6 +352,10 @@ class EventController extends Controller
 
         if ($venue->wasRecentlyCreated) {
             Notification::route('mail', $venue->email)->notify(new ClaimVenueNotification($event));
+        }
+
+        if ($role->wasRecentlyCreated) {
+            Notification::route('mail', $role->email)->notify(new CreatedEventNotification($event));
         }
 
         if ($event->starts_at) {
