@@ -46,7 +46,6 @@
         font-family: '{{ $role->font_family }}', sans-serif !important;
         @if ($event)
             color: {{ $event->role->font_color }} !important;
-            background-color: {{ $event->role->background_color }};
             @if ($event->role->background == 'gradient')
                 background-image: linear-gradient({{ $event->role->background_rotation }}deg, {{ $event->role->background_colors }});
             @elseif ($event->role->background == 'image')
@@ -59,7 +58,6 @@
             @endif
         @else
             color: {{ $role->font_color }} !important;
-            background-color: {{ $role->background_color }};
             @if ($role->background == 'gradient')
                 background-image: linear-gradient({{ $role->background_rotation }}deg, {{ $role->background_colors }});
             @elseif ($role->background == 'image')

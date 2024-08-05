@@ -105,7 +105,6 @@ return [
     'font_color' => 'لون الخط',
     'accent_color' => 'لون التمييز',
     'background' => 'الخلفية',
-    'background_color' => 'لون الخلفية',
     'image' => 'الصورة',
     'colors' => 'الألوان',
     'rotation' => 'التدوير',

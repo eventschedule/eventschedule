@@ -105,7 +105,6 @@ return [
     'font_color' => 'Schriftfarbe',
     'accent_color' => 'Akzentfarbe',
     'background' => 'Hintergrund',
-    'background_color' => 'Hintergrundfarbe',
     'image' => 'Bild',
     'colors' => 'Farben',
     'rotation' => 'Drehung',

@@ -105,7 +105,6 @@ return [
     'font_color' => 'Couleur de Police',
     'accent_color' => 'Couleur d\'Accent',
     'background' => 'Arrière-plan',
-    'background_color' => 'Couleur de Fond',
     'image' => 'Image',
     'colors' => 'Couleurs',
     'rotation' => 'Rotation',

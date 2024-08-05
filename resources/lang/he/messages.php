@@ -105,7 +105,6 @@ return [
     'font_color' => 'צבע גופן',
     'accent_color' => 'צבע מבטא',
     'background' => 'רקע',
-    'background_color' => 'צבע רקע',
     'image' => 'תמונה',
     'colors' => 'צבעים',
     'rotation' => 'סיבוב',
