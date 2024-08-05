@@ -39,6 +39,7 @@ class EventRequestNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
+                    ->replyTo($this->role->user->email, $this->role->user->name)
                     ->subject(str_replace(':name', $this->role->name, __('messages.new_request')))
                     ->line(str_replace(':name', $this->role->name, __('messages.new_request')))
                     ->action(__('messages.view_details'), route('role.view_admin', ['subdomain' => $this->venue->subdomain, 'tab' => 'requests']))

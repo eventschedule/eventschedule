@@ -378,7 +378,7 @@ class RoleController extends Controller
         $role = new Role;
         $role->type = $type;
         $role->font_family = 'Roboto';
-        $role->font_color = '#111827';
+        $role->font_color = '#ffffff';
         $role->accent_color = '#007BFF';
         $role->background = 'gradient';
         $role->background_colors = ColorUtils::randomGradient();

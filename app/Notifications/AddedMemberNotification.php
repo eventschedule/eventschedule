@@ -43,6 +43,7 @@ class AddedMemberNotification extends Notification
         $newUser = $this->user->wasRecentlyCreated;
 
         return (new MailMessage)
+                    ->replyTo($this->user->email, $this->user->name)
                     ->subject(str_replace(':name', $this->role->name, __('messages.added_to_team')))
                     ->line(str_replace([':name', ':user'], [$this->role->name, $this->admin->name], __('messages.added_to_team_detail')))
                     ->action(
