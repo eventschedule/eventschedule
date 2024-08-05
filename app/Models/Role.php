@@ -51,7 +51,7 @@ class Role extends Model implements MustVerifyEmail
 
             $address = $model->fullAddress();
 
-            if ($address != $model->geo_address) {
+            if ($address && $address != $model->geo_address) {
                 $urlAddress = urlencode($address);
                 $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$urlAddress}&key=" . config('services.google.backend');
                 $response = file_get_contents($url);
@@ -150,7 +150,7 @@ class Role extends Model implements MustVerifyEmail
             $str .= $this->postal_code . ', ';
         }
 
-        if ($this->country_code) {
+        if ($str && $this->country_code) {
             $str .= $this->country_code;
         }
 
