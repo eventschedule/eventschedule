@@ -84,15 +84,8 @@
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            @if($venue && ! $venue->accept_talent_requests)
-                            {{ __('messages.vendor') }}
-                            @elseif($venue && ! $venue->accept_vendor_requests)
-                            {{ __('messages.talent') }}
-                            @else
-                            {{ __('messages.talent_vendor') }}
-                            @endif
+                            {{ $header }}
                         </h2>
-
 
                         @if($venue && $user->isMember($venue->subdomain))
                         @if($venue->accept_talent_requests && $venue->accept_vendor_requests)
