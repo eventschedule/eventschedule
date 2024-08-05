@@ -393,7 +393,7 @@ class EventController extends Controller
 
         $event->save();
 
-        if ($venue->wasRecentlyCreated && ! $vendor->user_id) {
+        if ($venue->wasRecentlyCreated && ! $venue->user_id) {
             Notification::route('mail', $venue->email)->notify(new ClaimVenueNotification($event));
         }
 
