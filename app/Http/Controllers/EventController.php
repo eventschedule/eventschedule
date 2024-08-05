@@ -34,7 +34,7 @@ class EventController extends Controller
         $venueEmails = $venue->members()->pluck('email')->toArray();
         $emails = array_unique(array_merge($roleEmails, $venueEmails));
 
-        Notification::route('mail', $emails)->notify(new DeletedEventNotification($event));
+        //Notification::route('mail', $emails)->notify(new DeletedEventNotification($event));
 
         $data = [
             'subdomain' => $subdomain, 
@@ -215,7 +215,7 @@ class EventController extends Controller
         $event->save();
 
         $emails = $event->role->members()->pluck('email');
-        Notification::route('mail', $emails)->notify(new RequestAcceptedNotification($event));
+        //Notification::route('mail', $emails)->notify(new RequestAcceptedNotification($event));
         
         return redirect('/' . $subdomain . '/requests')
                     ->with('message', __('messages.request_accepted'));
@@ -233,7 +233,7 @@ class EventController extends Controller
         $event->save();
 
         $emails = $event->role->members()->pluck('email');
-        Notification::route('mail', $emails)->notify(new RequestDeclinedNotification($event));
+        //Notification::route('mail', $emails)->notify(new RequestDeclinedNotification($event));
 
         if ($request->redirect_to == 'schedule') {
             return redirect('/' . $subdomain . '/schedule')
@@ -343,7 +343,7 @@ class EventController extends Controller
             $message = __('messages.event_requested');
 
             $emails = $venue->members()->pluck('email');
-            Notification::route('mail', $emails)->notify(new EventRequestNotification($venue, $role));
+            //Notification::route('mail', $emails)->notify(new EventRequestNotification($venue, $role));
         }
 
         $event->save();
