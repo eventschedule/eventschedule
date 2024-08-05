@@ -9,6 +9,7 @@ use App\Notifications\RequestAcceptedNotification;
 use App\Notifications\ClaimVenueNotification;
 use App\Notifications\ClaimRoleNotification;
 use App\Notifications\DeletedEventNotification;
+use App\Utils\ColorUtils;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Role;
@@ -312,6 +313,7 @@ class EventController extends Controller
             $venue->state = $request->venue_state;
             $venue->postal_code = $request->venue_postal_code;
             $venue->country_code = $request->venue_country_code;
+            $venue->background_colors = ColorUtils::randomGradient();
             $venue->save();
 
             if ($matchingUser = User::whereEmail($venue->email)->first()) {
@@ -353,6 +355,7 @@ class EventController extends Controller
                 $role->type = $request->role_type;
                 $role->timezone = $user->timezone;
                 $role->language_code = $user->language_code;
+                $role->background_colors = ColorUtils::randomGradient();
                 $role->save();
 
                 if ($matchingUser = User::whereEmail($role->email)->first()) {
