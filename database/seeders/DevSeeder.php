@@ -51,6 +51,7 @@ class DevSeeder extends Seeder
                 'subdomain' => 'truklin',
                 'description' => 'Music Venue',
                 'email' => 'truklin@example.com',
+                'email_verified_at' => now(),
                 'phone' => '(212) 555-1010',
                 'website' => 'https://google.com',
                 'city' => 'New York',

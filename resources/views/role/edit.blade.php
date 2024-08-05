@@ -48,14 +48,11 @@
 
             $('#style_background_image').hide();
             $('#style_background_gradient').hide();
-            $('#style_background_color').hide();
 
             if (background == 'image') {
                 $('#style_background_image').fadeIn();
             } else if (background == 'gradient') {
                 $('#style_background_gradient').fadeIn();
-            } else if (background == 'color') {
-                $('#style_background_color').fadeIn();
             }
         }
 
@@ -299,7 +296,7 @@
                             <select id="background" name="background"
                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                 oninput="onChangeBackground(); updatePreview();">
-                                @foreach(['color', 'gradient', 'image'] as $background)
+                                @foreach(['gradient', 'image'] as $background)
                                 <option value="{{ $background }}"
                                     {{ $role->background == $background ? 'SELECTED' : '' }}>
                                     {{ __('messages.' . $background) }}</option>
