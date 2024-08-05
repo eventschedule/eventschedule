@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class CreatedEventNotification extends Notification
+class ClaimRoleNotification extends Notification
 {
     use Queueable;
 

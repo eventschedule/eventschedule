@@ -181,7 +181,7 @@
                                 :value="__('messages.date_and_time') . ($venue && $venue->user_id ? '' : ' *')" />
                             <x-text-input type="text" id="starts_at" name="starts_at" class="datepicker"
                                 :value="old('starts_at', $event->localStartsAt())"
-                                :required="$venue && $venue->user_id ? '' : 'required'" />
+                                :required="! $venue || ! $venue->user_id" />
                             <x-input-error class="mt-2" :messages="$errors->get('starts_at')" />
                         </div>
 
