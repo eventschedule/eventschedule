@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\AddedMemberNotification;
 use App\Http\Requests\EmailVerificationRequest;
+use App\Notifications\DeletedRoleNotification;
 use Illuminate\Auth\Events\Verified;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
@@ -74,6 +75,9 @@ class RoleController extends Controller
         }
 
         $role->delete();
+
+        $emails = $role->members()->pluck('email');
+        Notification::route('mail', $emails)->notify(new DeletedRoleNotification($role));
 
         return redirect(route('home'))
                 ->with('message', __('messages.deleted_' . $type));
