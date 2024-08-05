@@ -21,6 +21,7 @@ use App\Models\Event;
 use App\Models\User;
 use App\Models\RoleUser;
 use App\Utils\UrlUtils;
+use App\Utils\ColorUtils;
 use Carbon\Carbon;
 
 class RoleController extends Controller
@@ -379,7 +380,8 @@ class RoleController extends Controller
         $role->font_family = 'Roboto';
         $role->font_color = '#111827';
         $role->accent_color = '#007BFF';
-        $role->background = 'default';
+        $role->background = 'gradient';
+        $role->background_colors = ColorUtils::randomGradient();
         $role->background_rotation = 150;
         $role->accept_talent_requests = true;
         $role->timezone = auth()->user()->timezone;
@@ -400,9 +402,6 @@ class RoleController extends Controller
         ] + $gradientOptions;
 
 
-        $random = rand(0, count($gradientOptions) - 1);
-        $keys = array_keys($gradientOptions);
-        $role->background_colors = $keys[$random];
 
         $fonts = file_get_contents(base_path('storage/fonts.json'));
         $fonts = json_decode($fonts);
