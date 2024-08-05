@@ -13,12 +13,18 @@ class SupportEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    protected $name;
+    protected $email;
+    protected $message;
+
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct($name, $email, $message)
     {
-        //
+        $this->name = $name;
+        $this->email = $email;
+        $this->message = $message;
     }
 
     /**
@@ -27,7 +33,7 @@ class SupportEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Support Email',
+            subject: 'Support Email - ' . date('F j Y, g:i A'),
         );
     }
 
@@ -38,6 +44,11 @@ class SupportEmail extends Mailable
     {
         return new Content(
             view: 'emails.support_email',
+            with: [
+                'name' => $this->name,
+                'email' => $this->email,
+                'note' => $this->message,
+            ]
         );
     }
 
