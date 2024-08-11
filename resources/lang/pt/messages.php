@@ -218,5 +218,4 @@ return [
     'claim_your_role_details' => ':user agendou um evento para :role em :venue, inscreva-se com este endereço de email para gerenciá-lo.',
     'an_email_will_be_sent' => 'Uma notificação por email será enviada para informá-los',
     'email_not_associated_with_role' => 'Email não associado a um talento/vendedor',
-    'create_account' => 'Criar conta',
 ];

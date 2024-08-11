@@ -14,6 +14,7 @@ Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
 Route::post('/message', [HomeController::class, 'message'])->name('message');
 
 Route::get('/{subdomain}/view/{hash?}', [RoleController::class, 'viewGuest'])->name('role.view_guest');
+Route::get('/{subdomain}/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
 
 Route::middleware(['auth', 'verified'])->group(function () 
 {
@@ -37,7 +38,6 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/delete', [RoleController::class, 'delete'])->name('role.delete');
     Route::get('/{subdomain}/delete_image', [RoleController::class, 'deleteImage'])->name('role.delete_image');
     Route::get('/{subdomain}/add_event', [EventController::class, 'create'])->name('event.create');
-    Route::get('/{subdomain}/sign_up', [EventController::class, 'create'])->name('event.sign_up');
     Route::get('/{subdomain}/verify/{hash}', [RoleController::class, 'verify'])->name('role.verification.verify');
     Route::get('/{subdomain}/resend', [RoleController::class, 'resendVerify'])->name('role.verification.resend');    
     Route::post('/{subdomain}/store_event', [EventController::class, 'store'])->name('event.store');    

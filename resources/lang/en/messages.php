@@ -220,9 +220,9 @@ return [
     'claim_your_role_details' => ':user scheduled an event for :role at :venue, sign up with this email address to manage it.',
     'an_email_will_be_sent' => 'An email notification will be sent to inform them',
     'email_not_associated_with_role' => 'Email is not associated with a talent/vendor',
-    'create_account' => 'Create Account',
     //
     'open_sidebar' => 'Open sidebar',
     'close_sidebar' => 'Close Sidebar',
     'no_scheduled_events' => 'No scheduled events',
+    'create_a_new_account' => 'Create a new account',
 ];

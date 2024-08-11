@@ -74,6 +74,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(Role::class)
                     ->withPivot('level');
     }
+    
+    public function countRoles()
+    {
+        return count($this->roles()->get());
+    }
 
     public function member()
     {

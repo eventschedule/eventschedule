@@ -218,5 +218,4 @@ return [
     'claim_your_role_details' => ':user programó un evento para :role en :venue, regístrate con esta dirección de correo electrónico para gestionarlo.',
     'an_email_will_be_sent' => 'Se enviará una notificación por correo electrónico para informarlos',
     'email_not_associated_with_role' => 'El correo electrónico no está asociado con un talento/vendedor',
-    'create_account' => 'Crear cuenta',
 ];
