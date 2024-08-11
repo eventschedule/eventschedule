@@ -106,7 +106,7 @@
                         <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl">
                             <div class="hidden sm:mb-10 sm:flex">
                                 <div
-                                    class="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-500 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
+                                    class="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-500 ring-1 ring-gray-900/10">
                                     Free Forever!
                                 </div>
                             </div>
