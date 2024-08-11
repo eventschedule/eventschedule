@@ -36,21 +36,13 @@
 
         function toggleMenu() {
             const isOpen = sidebar.getAttribute('data-state') === 'open';
-            const backdrop = sidebar.getElementsByClassName('bg-gray-900')[0]; // Selects the backdrop
-            const menu = sidebar.querySelector('.fixed.flex > div'); // Selects the menu
-
+            console.log(isOpen);
             if (isOpen) {
+                sidebar.hide();
                 sidebar.setAttribute('data-state', 'closed');
-                backdrop.classList.add('opacity-0');
-                backdrop.classList.remove('opacity-100');
-                menu.classList.add('-translate-x-full');
-                menu.classList.remove('translate-x-0');
             } else {
+                sidebar.show();
                 sidebar.setAttribute('data-state', 'open');
-                backdrop.classList.add('opacity-100');
-                backdrop.classList.remove('opacity-0');
-                menu.classList.add('translate-x-0');
-                menu.classList.remove('-translate-x-full');
             }
         }
 
