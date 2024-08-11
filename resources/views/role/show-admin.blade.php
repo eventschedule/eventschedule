@@ -73,7 +73,12 @@
             </nav>
         </div>
         -->
-        <div class="mt-2 md:flex md:items-center md:justify-between">
+        <div class="mt-2 flex items-center justify-between">
+            @if ($role->profile_image_url)
+                <div class="pr-4">
+                    <img src="{{ $role->profile_image_url }}" class="h-14 w-14 flex-none rounded-full">
+                </div>
+            @endif
             <div class="min-w-0 flex-1">
                 <h2 class="mt-2 text-xl font-bold leading-7 text-gray-900 sm:truncate sm:text-2xl sm:tracking-tight">
                     {{ $role->name }}</h2>
