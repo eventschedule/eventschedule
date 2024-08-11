@@ -9,7 +9,7 @@
                 <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month] : ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}"
                     class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50">
                     <span class="sr-only">{{ __('messages.previous_month') }}</span>
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                         <path fill-rule="evenodd"
                             d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"
                             clip-rule="evenodd" />
@@ -18,12 +18,11 @@
                 <a href="{{ $route == 'home' ? route('home') : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => now()->year, 'month' => now()->month] : ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'year' => now()->year, 'month' => now()->month]) }}"
                     class="flex items-center justify-center border-y border-gray-300 px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative md:block">
                     <div class="mt-2">{{ __('messages.today') }}</div>
-                </a>
-                <span class="relative -mx-px h-5 w-px bg-gray-300 md:hidden"></span>
+                </a>                
                 <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month] : ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) }}"
                     class="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50">
                     <span class="sr-only">{{ __('messages.next_month') }}</span>
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                         <path fill-rule="evenodd"
                             d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"
                             clip-rule="evenodd" />
@@ -35,7 +34,7 @@
                 <a href="{{ route('event.create', ['subdomain' => $role->subdomain]) }}">
                     <button type="button"
                         class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                        <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                             <path
                                 d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
                         </svg>
@@ -45,7 +44,7 @@
             @endif
         </div>
     </header>
-    <div class="shadow-md ring-1 ring-black ring-opacity-5 lg:flex lg:flex-auto lg:flex-col">
+    <div class="hidden shadow-md ring-1 ring-black ring-opacity-5 lg:flex lg:flex-auto lg:flex-col">
         <div
             class="grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center text-xs font-semibold leading-6 text-gray-700 lg:flex-none">
             @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $day)
@@ -62,7 +61,7 @@
             $totalDays = $endOfMonth->diffInDays($startOfMonth) + 1;
             $totalWeeks = ceil($totalDays / 7);
             @endphp
-            <div class="hidden w-full lg:grid lg:grid-cols-7 lg:grid-rows-{{ $totalWeeks }} lg:gap-px">
+            <div class="w-full lg:grid lg:grid-cols-7 lg:grid-rows-{{ $totalWeeks }} lg:gap-px">
                 @while ($currentDate->lte($endOfMonth))
                 @if ($showAdd)
                     <div class="cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white hover:bg-gray-100 hover:border-gray-300' : 'bg-gray-50 text-gray-500' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300"
@@ -97,14 +96,14 @@
             </div>
         </div>
     </div>
-    <!--
     <div class="px-4 py-10 sm:px-6 lg:hidden">
+        @if (count($events))
         <ol
             class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow ring-1 ring-black ring-opacity-5">
             @foreach ($events as $each)
             <li class="group flex p-4 pr-6 focus-within:bg-gray-50 hover:bg-gray-50">
                 <div class="flex-auto">
-                    <p class="font-semibold text-gray-900">{{ $each->name }}</p>
+                    <p class="font-semibold text-gray-900">{{ $each->role->name }}</p>
                     <time datetime="{{ $each->starts_at }}" class="mt-2 flex items-center text-gray-700">
                         <svg class="mr-2 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor"
                             aria-hidden="true">
@@ -121,6 +120,6 @@
             </li>
             @endforeach
         </ol>
+        @endif
     </div>
-    -->
 </div>
