@@ -29,27 +29,6 @@
     gtag('js', new Date());
     gtag('config', '{{ config('services.google.analytics') }}');
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const sidebar = document.getElementById('sidebar');
-        const openButton = document.getElementById('open-sidebar');
-        const closeButton = document.getElementById('close-sidebar');
-
-        function toggleMenu() {
-            const isOpen = sidebar.getAttribute('data-state') === 'open';
-            console.log(isOpen);
-            if (isOpen) {
-                sidebar.hide();
-                sidebar.setAttribute('data-state', 'closed');
-            } else {
-                sidebar.show();
-                sidebar.setAttribute('data-state', 'open');
-            }
-        }
-
-        openButton.addEventListener('click', toggleMenu);
-        closeButton.addEventListener('click', toggleMenu);
-    });
-
     </script>
 
     <meta charset="utf-8">
@@ -67,6 +46,30 @@
     'resources/js/app.js',
     'resources/js/jquery-3.3.1.min.js',
     ])
+
+    <script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('sidebar');
+        const openButton = document.getElementById('open-sidebar');
+        const closeButton = document.getElementById('close-sidebar');
+
+        function toggleMenu() {
+            const isOpen = sidebar.getAttribute('data-state') === 'open';
+            if (isOpen) {
+                $('#sidebar').fadeIn();
+                sidebar.setAttribute('data-state', 'closed');
+            } else {
+                $('#sidebar').fadeOut();
+                sidebar.setAttribute('data-state', 'open');
+            }
+        }
+
+        openButton.addEventListener('click', toggleMenu);
+        closeButton.addEventListener('click', toggleMenu);
+    });
+
+    </script>
 
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
@@ -200,7 +203,7 @@
 
 
                         <!-- Settings Dropdown -->
-                        <div class="hidden sm:flex sm:items-center sm:ms-6">
+                        <div class="sm:flex sm:items-center sm:ms-6">
                             <x-dropdown align="right" width="48">
                                 <x-slot name="trigger">
                                     <button
