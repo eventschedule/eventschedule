@@ -17,6 +17,12 @@
         </style>
         @endif
 
+        <script>
+            function onTabChange() {
+                var tab = $('#current-tab').find(':selected').val();
+                location.href = "{{ url('/') }}" + '/{{ $subdomain }}/' + tab;
+            }             
+        </script>
     </x-slot>
 
     <form method="POST" action="{{ route('role.remove_links', ['subdomain' => $role->subdomain]) }}"
@@ -173,17 +179,17 @@
         <!-- Dropdown menu on small screens -->
         <div class="sm:hidden">
             <label for="current-tab" class="sr-only">{{ __('messages.select_a_tab') }}</label>
-            <select id="current-tab" name="current-tab"
+            <select id="current-tab" name="current-tab" onchange="onTabChange()"
                 class="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600">
-                <option {{ $tab == 'schedule' ? 'selected' : '' }}>{{ __('messages.schedule') }}</option>
+                <option value="schedule" {{ $tab == 'schedule' ? 'selected' : '' }}>{{ __('messages.schedule') }}</option>
                 @if ($role->isVenue() && $role->acceptRequests())
-                <option {{ $tab == 'requests' ? 'selected' : '' }}>
+                <option value="requests" {{ $tab == 'requests' ? 'selected' : '' }}>
                     {{ __('messages.requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</option>
                 @endif
-                <option {{ $tab == 'profile' ? 'selected' : '' }}>{{ __('messages.profile') }}</option>
-                <option {{ $tab == 'followers' ? 'selected' : '' }}>
+                <option value="profile" {{ $tab == 'profile' ? 'selected' : '' }}>{{ __('messages.profile') }}</option>
+                <option value="followers" {{ $tab == 'followers' ? 'selected' : '' }}>
                     {{ __('messages.followers') }}{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</option>
-                <option {{ $tab == 'team' ? 'selected' : '' }}>
+                <option value="team" {{ $tab == 'team' ? 'selected' : '' }}>
                     {{ __('messages.team') }}{{ count($members) ? ' (' . count($members) . ')' : '' }}</option>
             </select>
         </div>
