@@ -105,7 +105,7 @@
                 class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow ring-1 ring-black ring-opacity-5">
                 @foreach ($events as $each)
                 <a href="{{ $each->getGuestUrl() }}">
-                    <li class="relative flex items-center space-x-6 py-6 xl:static">
+                    <li class="relative flex items-center space-x-6 py-6 px-4 xl:static">
                         @if ($each->role->profile_image_url)
                         <img src="{{ $each->role->profile_image_url }}" class="h-14 w-14 flex-none rounded-full">
                         @else
