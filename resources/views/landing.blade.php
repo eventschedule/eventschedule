@@ -230,6 +230,7 @@
         </div>
     </div>
 
+    <!--
     <section class="bg-white px-6 py-24 sm:py-32 lg:px-8">
         <figure class="mx-auto max-w-2xl">
             <p class="sr-only">5 out of 5 stars</p>
@@ -277,6 +278,36 @@
             </figcaption>
         </figure>
     </section>
+    -->
+
+    <div class="bg-white">
+        <div class="px-6 py-24 sm:px-6 sm:py-32 lg:px-8">
+            <div class="mx-auto max-w-2xl text-center">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                    Sign up today and experience a new level of efficiency and collaboration.
+                </h2>
+                <p class="mx-auto mt-6 max-w-xl text-lg leading-8 text-gray-600">
+                    Stay Connected: Use QR codes at events to engage with your audience and keep them informed about
+                    upcoming shows.
+                </p>
+                <div class="mt-10 flex items-center justify-center gap-x-6">
+                    @auth
+                    <a href="{{ route('home') }}"
+                        class="group inline-flex items-center justify-center rounded-full py-2 px-4 text-sm font-semibold focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 bg-blue-600 text-white hover:text-slate-100 hover:bg-blue-500 active:bg-blue-800 active:text-blue-100 focus-visible:outline-blue-600">Get
+                        Started</a>
+                    @else
+                    <a href="{{ route('sign_up') }}"
+                        class="group inline-flex items-center justify-center rounded-full py-2 px-4 text-sm font-semibold focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 bg-blue-600 text-white hover:text-slate-100 hover:bg-blue-500 active:bg-blue-800 active:text-blue-100 focus-visible:outline-blue-600">Get
+                        started</a>
+                    @endauth
+                    <!--
+                    <a href="#" class="text-sm font-semibold leading-6 text-gray-900">Learn more <span
+                            aria-hidden="true">→</span></a>
+                    -->
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="relative isolate bg-gray-900">
         <div class="mx-auto grid max-w-7xl grid-cols-1 lg:grid-cols-2">
@@ -399,35 +430,6 @@
                     </div>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <div class="bg-white">
-        <div class="px-6 py-24 sm:px-6 sm:py-32 lg:px-8">
-            <div class="mx-auto max-w-2xl text-center">
-                <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                    Sign up today and experience a new level of efficiency and collaboration.
-                </h2>
-                <p class="mx-auto mt-6 max-w-xl text-lg leading-8 text-gray-600">
-                    Stay Connected: Use QR codes at events to engage with your audience and keep them informed about
-                    upcoming shows.
-                </p>
-                <div class="mt-10 flex items-center justify-center gap-x-6">
-                    @auth
-                    <a href="{{ route('home') }}"
-                        class="group inline-flex items-center justify-center rounded-full py-2 px-4 text-sm font-semibold focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 bg-blue-600 text-white hover:text-slate-100 hover:bg-blue-500 active:bg-blue-800 active:text-blue-100 focus-visible:outline-blue-600">Get
-                        Started</a>
-                    @else
-                    <a href="{{ route('sign_up') }}"
-                        class="group inline-flex items-center justify-center rounded-full py-2 px-4 text-sm font-semibold focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 bg-blue-600 text-white hover:text-slate-100 hover:bg-blue-500 active:bg-blue-800 active:text-blue-100 focus-visible:outline-blue-600">Get
-                        started</a>
-                    @endauth
-                    <!--
-                    <a href="#" class="text-sm font-semibold leading-6 text-gray-900">Learn more <span
-                            aria-hidden="true">→</span></a>
-                    -->
-                </div>
-            </div>
         </div>
     </div>
 
