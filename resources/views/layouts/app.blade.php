@@ -111,7 +111,6 @@
                                 -->
                             </div>
                         </a>
-                        <!--
                         <nav class="flex flex-1 flex-col">
                             <ul role="list" class="flex flex-1 flex-col gap-y-7">
                                 <li>
@@ -232,7 +231,6 @@
                                 </li>
                             </ul>
                         </nav>
-                        -->
                     </div>
                 </div>
             </div>
