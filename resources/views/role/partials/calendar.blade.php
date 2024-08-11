@@ -30,7 +30,7 @@
                     </svg>
                 </a>
             </div>
-            <div class="hidden md:flex md:items-center">
+            <div class="md:flex md:items-center">
                 <!--
                 <div class="relative">
                 <button type="button" class="flex items-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="false" aria-haspopup="true">

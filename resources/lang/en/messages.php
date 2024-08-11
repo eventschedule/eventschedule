@@ -222,4 +222,6 @@ return [
     'email_not_associated_with_role' => 'Email is not associated with a talent/vendor',
     'create_account' => 'Create Account',
     //
+    'open_sidebar' => 'Open sidebar',
+    'close_sidebar' => 'Close Sidebar',
 ];
