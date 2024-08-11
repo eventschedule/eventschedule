@@ -473,12 +473,11 @@ class RoleController extends Controller
         $message = __('messages.created_' . $role->type);
 
         if ($subdomain = session('pending_venue') && $user->countRoles() == 1) {
-            $role = Role::whereSubdomain($subdomain)->firstOrFail();
             $data = [
                 'subdomain' => $subdomain,
-                'venue_email' => $role->email,
+                'role_email' => $role->email,
             ];
-            return redirect(route('event.sign_up', $data))->with('message', $message);
+            return redirect(route('event.create', $data))->with('message', $message);
         } else {    
             return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]))->with('message', $message);
         }
