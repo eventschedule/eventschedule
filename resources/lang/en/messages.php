@@ -224,4 +224,5 @@ return [
     //
     'open_sidebar' => 'Open sidebar',
     'close_sidebar' => 'Close Sidebar',
+    'no_scheduled_events' => 'No scheduled events',
 ];

@@ -151,6 +151,14 @@
                 </a>
                 @endforeach
             </ol>
+            @else
+            <div class="p-10 max-w-5xl mx-auto px-4">
+                <div class="flex justify-center items-center pb-6 w-full">
+                    <div class="text-2xl text-center">
+                        {{ __('messages.no_scheduled_events') }}
+                    </div>
+                </div>
+            </div>
             @endif
         </div>
     </div>

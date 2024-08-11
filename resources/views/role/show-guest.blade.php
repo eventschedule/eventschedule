@@ -44,6 +44,8 @@
     <style>
     body {
         font-family: '{{ $role->font_family }}', sans-serif !important;
+        min-height: 100%;
+        background-attachment: fixed;
         @if ($event)
             color: {{ $event->role->font_color }} !important;
             @if ($event->role->background == 'gradient')
@@ -299,7 +301,7 @@
         </div>
     </div>
 
-    <footer class="bg-black text-white py-4 bottom-0 w-full">
+    <footer class="fixed bottom-0 left-0 right-0 bg-black text-white py-4 w-full">
         <div class="container mx-auto text-center">
             <p>
                 {!! str_replace(':link', '<a href="' . url('/') . '" target="_blank">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}
