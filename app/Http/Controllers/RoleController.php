@@ -470,8 +470,18 @@ class RoleController extends Controller
             $role->sendEmailVerificationNotification();
         }
 
-        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]))
-                    ->with('message', __('messages.created_' . $role->type));
+        $message = __('messages.created_' . $role->type);
+
+        if ($subdomain = session('pending_venue') && $user->countRoles() == 1) {
+            $role = Role::whereSubdomain($subdomain)->firstOrFail();
+            $data = [
+                'subdomain' => $subdomain,
+                'venue_email' => $role->email,
+            ];
+            return redirect(route('event.sign_up', $data))->with('message', $message);
+        } else {    
+            return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]))->with('message', $message);
+        }
     }
 
     public function edit($subdomain)
@@ -710,5 +720,11 @@ class RoleController extends Controller
             ->route('role.view_admin', ['subdomain' => $role->subdomain])
             ->with('message', __('messages.sent_confirmation_email'));
     }
- 
+
+    public function signUp(Request $request, $subdomain)
+    {
+        session(['pending_venue' => $subdomain]);
+
+        return redirect()->route('event.create', ['subdomain' => $subdomain]);
+    }
 }

@@ -218,5 +218,4 @@ return [
     'claim_your_role_details' => ':user hat eine Veranstaltung für :role bei :venue geplant, melde dich mit dieser E-Mail-Adresse an, um es zu verwalten.',
     'an_email_will_be_sent' => 'Eine E-Mail-Benachrichtigung wird gesendet, um sie zu informieren',
     'email_not_associated_with_role' => 'E-Mail ist nicht mit einem Talent/Anbieter verbunden',
-    'create_account' => 'Konto erstellen',
 ];

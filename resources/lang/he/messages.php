@@ -218,5 +218,4 @@ return [
     'claim_your_role_details' => ':user תכנן אירוע עבור :role ב:venue, הירשם עם כתובת האימייל הזו כדי לנהל אותו.',
     'an_email_will_be_sent' => 'יישלח דוא"ל כדי ליידע אותם',
     'email_not_associated_with_role' => 'האימייל לא משויך לכישרון/מוכר',
-    'create_account' => 'צור חשבון',
 ];

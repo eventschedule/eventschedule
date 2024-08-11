@@ -218,5 +218,4 @@ return [
     'claim_your_role_details' => ':user heeft een evenement gepland voor :role bij :venue, meld je aan met dit e-mailadres om het te beheren.',
     'an_email_will_be_sent' => 'Er wordt een e-mailmelding verzonden om hen te informeren',
     'email_not_associated_with_role' => 'E-mail is niet geassocieerd met een talent/verkoper',
-    'create_account' => 'Maak een account aan',
 ];

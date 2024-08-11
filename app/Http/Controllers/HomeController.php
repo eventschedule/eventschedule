@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Event;
+use App\Models\Role;
 use Carbon\Carbon;
 use App\Mail\SupportEmail;
 use Mail;
@@ -17,6 +18,15 @@ class HomeController extends Controller
 
     public function home(Request $request)
     {
+        if (session('pending_venue') && auth()->user()->countRoles() == 0) {
+            $role = Role::whereSubdomain(session('pending_venue'))->firstOrFail();
+            if ($role->accept_talent_requests) {
+                return redirect()->route('register', ['type' => 'talent']);
+            } else if ($role->accept_vendor_requests) {
+                return redirect()->route('register', ['type' => 'vendor']);
+            }
+        }
+
         $events = [];
         $month = $request->month;
         $year = $request->year;

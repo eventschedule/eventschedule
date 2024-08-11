@@ -218,5 +218,4 @@ return [
     'claim_your_role_details' => ':user قام بجدولة حدث لـ :role في :venue، سجل بهذه العنوان الإلكتروني لإدارته.',
     'an_email_will_be_sent' => 'سيتم إرسال إشعار بالبريد الإلكتروني لإبلاغهم',
     'email_not_associated_with_role' => 'البريد الإلكتروني غير مرتبط بموهبة/بائع',
-    'create_account' => 'إنشاء حساب',
 ];
