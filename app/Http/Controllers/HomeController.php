@@ -10,6 +10,11 @@ use Mail;
 
 class HomeController extends Controller
 {
+    public function landing()
+    {
+        return view('landing');
+    }
+
     public function home(Request $request)
     {
         $events = [];
