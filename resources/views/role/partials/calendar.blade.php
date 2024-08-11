@@ -76,7 +76,7 @@
                             style="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? ('background-color: ' . ((isset($event) && $event) ? $event->role->accent_color : (isset($role) ? $role->accent_color : '#5348E9'))) : '' }}"
                             class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
                         @endif
-                        <ol class="mt-2">
+                        <ol class="mt-4 divide-y divide-gray-100 text-sm leading-6 lg:col-span-7 xl:col-span-8">
                             @foreach ($events as $each)
                             @if ($each->starts_at &&
                             Carbon\Carbon::parse($each->localStartsAt())->isSameDay($currentDate))
@@ -104,12 +104,12 @@
             <ol
                 class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow ring-1 ring-black ring-opacity-5">
                 @foreach ($events as $each)
-                <li class="relative flex items-center space-x-6 py-6 xl:static">
-                    <a href="{{ $each->getGuestUrl() }}">
+                <a href="{{ $each->getGuestUrl() }}">
+                    <li class="relative flex items-center space-x-6 py-6 xl:static">
                         @if ($each->role->profile_image_url)
-                            <img src="{{ $each->role->profile_image_url }}" class="h-14 w-14 flex-none rounded-full">
+                        <img src="{{ $each->role->profile_image_url }}" class="h-14 w-14 flex-none rounded-full">
                         @else
-                            <div class="h-14 w-14"></div>
+                        <div class="h-14 w-14"></div>
                         @endif
                         <div class="flex-auto">
                             <h3 class="pr-10 font-semibold text-gray-900 xl:pr-0">
@@ -127,8 +127,8 @@
                                         </svg>
                                     </dt>
                                     <dd><time datetime="{{ $each->starts_at }}">
-                                        {{ Carbon\Carbon::parse($each->localStartsAt())->format($each->role->use_24_hour_time ? 'F j, Y H:i' : 'F j, Y h:i A') }}
-                                    </time></dd>
+                                            {{ Carbon\Carbon::parse($each->localStartsAt())->format($each->role->use_24_hour_time ? 'F j, Y H:i' : 'F j, Y g:i A') }}
+                                        </time></dd>
                                 </div>
                                 <div
                                     class="mt-2 flex items-start space-x-3 xl:ml-3.5 xl:mt-0 xl:border-l xl:border-gray-400 xl:border-opacity-50 xl:pl-3.5">
@@ -147,8 +147,8 @@
                                 </div>
                             </dl>
                         </div>
-                    </a>
-                </li>
+                    </li>
+                </a>
                 @endforeach
             </ol>
             @endif

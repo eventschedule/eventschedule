@@ -64,7 +64,7 @@
                                 <a href="mailto:{{ $follower->email }}">{{ $follower->email }}</a>
                             </td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {{ $follower->pivot->created_at->format($role->use_24_hour_time ? 'F j, Y H:i' : 'F j, Y h:i A') }}
+                                {{ $follower->pivot->created_at->format($role->use_24_hour_time ? 'F j, Y g:i' : 'F j, Y h:i A') }}
                             </td>
                         </tr>
                         @endforeach
