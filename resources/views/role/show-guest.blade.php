@@ -168,13 +168,9 @@
                         @endforeach
                     </div>
                 </div>
-            @elseif ($event->role->profile_image_url)
-                <div class="container mx-auto py-8">
-                    <img src="{{ $event->role->profile_image_url }}" class="w-full"/>
-                </div>
             @endif
         
-        @elseif (! $role->isVenue() && ($role->youtube_links || $role->profile_image_url))
+        @elseif (! $role->isVenue() && $role->youtube_links)
 
             @if ($role->youtube_links)
             <div class="container mx-auto py-8">
@@ -186,10 +182,6 @@
                     @endforeach
                 </div>
             </div>
-            @else
-                <div class="container mx-auto py-8">
-                    <img src="{{ $event->role->profile_image_url }}" class="w-full"/>
-                </div>
             @endif
 
         @endif
