@@ -174,8 +174,9 @@
                 </div>
             @endif
         
-        @elseif (! $role->isVenue() && $role->youtube_links && ! $event)
+        @elseif (! $role->isVenue() && ($role->youtube_links || $role->profile_image_url))
 
+            @if ($role->youtube_links)
             <div class="container mx-auto py-8">
                 <div class="grid grid-cols-1 md:grid-cols-{{ $role->getVideoColumns() }} gap-8">
                     @foreach (json_decode($role->youtube_links) as $link)
@@ -185,6 +186,11 @@
                     @endforeach
                 </div>
             </div>
+            @else
+                <div class="container mx-auto py-8">
+                    <img src="{{ $event->role->profile_image_url }}" class="w-full"/>
+                </div>
+            @endif
 
         @endif
 
@@ -239,7 +245,7 @@
             </div>
         @endif
 
-        <div class="flex items-center justify-between pb-6">
+        <div class="flex items-center justify-between pb-10">
             <div class="mt-1 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6">
                 @if($role->email && $role->user_id)
                 <div class="mt-2 flex items-center text-sm">
