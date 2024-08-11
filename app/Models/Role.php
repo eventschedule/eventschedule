@@ -292,4 +292,9 @@ class Role extends Model implements MustVerifyEmail
         }
 
     }
+
+    public function getGuestUrl()
+    {
+        return route('role.view_guest', ['subdomain' => $this->subdomain]);
+    }
 }

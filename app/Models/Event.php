@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Utils\MarkdownUtils;
+use App\Utils\UrlUtils;
 use Carbon\Carbon;
 
 class Event extends Model
@@ -57,5 +58,10 @@ class Event extends Model
         return Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')
                     ->setTimezone($timezone)
                     ->format($pretty ? ($enable24 ? 'l, F jS • g:i' : 'l, F jS • g:i A') : 'Y-m-d H:i:s');
+    }
+
+    public function getGuestUrl()
+    {
+        return route('role.view_guest', ['subdomain' => $this->role->subdomain, 'hash' => UrlUtils::encodeId($this->id)]);
     }
 }

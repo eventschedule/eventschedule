@@ -55,7 +55,7 @@
 
                         @if ($venue && $venue->user_id)
                         <div>
-                            <a href="{{ route('role.view_guest', ['subdomain' => $venue->subdomain]) }}"
+                            <a href="{{ $venue->getGuestUrl() }}"
                                 target="_blank">
                                 {{ $venue->name }}
                             </a>
@@ -119,7 +119,7 @@
 
                         @if ($talent)
                         <div class="mb-6">
-                            <a href="{{ route('role.view_guest', ['subdomain' => $talent->subdomain]) }}"
+                            <a href="{{ $talent->getGuestUrl() }}"
                                 target="_blank">
                                 {{ $talent->name }}
                             </a>
@@ -128,7 +128,7 @@
                         </div>
                         @elseif ($vendor)
                         <div class="mb-6">
-                            <a href="{{ route('role.view_guest', ['subdomain' => $vendor->subdomain]) }}"
+                            <a href="{{ $vendor->getGuestUrl() }}"
                                 target="_blank">
                                 {{ $vendor->name }}
                             </a>
