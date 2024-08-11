@@ -304,7 +304,7 @@
         </div>
     </div>
 
-    <footer class="fixed bottom-0 left-0 right-0 bg-black text-white py-4 w-full">
+    <footer class="bottom-0 left-0 right-0 bg-black text-white py-4 w-full">
         <div class="container mx-auto text-center">
             <p>
                 {!! str_replace(':link', '<a href="' . url('/') . '" target="_blank">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}
