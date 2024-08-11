@@ -18,6 +18,11 @@
 
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.99em%22 font-size=%2275%22>📅</text></svg>">
 
+    <meta http-equiv="Content-Security-Policy" content="
+        img-src 'self' data:;
+        frame-src 'self';
+    ">
+
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics') }}"></script>
     <script>
@@ -73,7 +78,7 @@
                     <nav class="flex items-center justify-between lg:justify-start" aria-label="Global">
                         <a href="{{ url('/') }}" class="-m-1.5 p-1.5">
                             <span class="sr-only">Event Schedule</span>
-                            <img alt="Event Schedule" class="h-8 w-auto" src="{{ url('resources/dark-logo.png') }}">
+                            <img alt="Event Schedule" class="h-8 w-auto" src="{{ url('images/dark-logo.png') }}">
                         </a>
                         <div class="lg:ml-12 lg:flex lg:gap-x-14">
                             @auth
@@ -135,16 +140,10 @@
             </div>
             <div class="bg-gray-50 lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
                 <img class="aspect-[3/2] object-cover lg:aspect-auto lg:h-full lg:w-full"
-                    src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1587&q=80"
-                    alt="">
+                    src="{{ url('images/landing.jpg') }}" alt="">
             </div>
         </div>
     </div>
-
-
-
-
-
 
     <div class="bg-gray-900 py-24 sm:py-32">
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
