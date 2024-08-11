@@ -20,7 +20,7 @@
 <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 pt-5">
     @foreach($requests as $event)
     <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow">
-        <a href="{{ route('role.view_guest', ['subdomain' => $event->role->subdomain]) }}" target="_blank">
+        <a href="{{ $event->role->getGuestUrl() }}" target="_blank">
             <div class="flex flex-1 flex-col p-8">
                 @if ($event->role->profile_image_url)
                 <img class="mx-auto h-32 w-32 flex-shrink-0 rounded-full object-cover" src="{{ $event->role->profile_image_url }}"

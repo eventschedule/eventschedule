@@ -11,7 +11,7 @@
         @foreach($unscheduled as $event)
         @if(! $event->starts_at)
         <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow">
-            <a href="{{ route('role.view_guest', ['subdomain' => $role->subdomain]) }}" target="_blank">
+            <a href="{{ $role->getGuestUrl() }}" target="_blank">
                 <div class="flex flex-1 flex-col p-8">
                     @if ($event->role->profile_image_url)
                     <img class="mx-auto h-32 w-32 flex-shrink-0 rounded-full object-cover"

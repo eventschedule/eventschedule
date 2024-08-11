@@ -89,7 +89,7 @@
 
     <div class="p-10 max-w-5xl mx-auto px-4">
         <div class="flex items-start justify-between pb-6">
-            <a href="{{ route('role.view_guest', ['subdomain' => $event ? $event->venue->subdomain : $role->subdomain]) }}">
+            <a href="{{ $event ? $event->venue->getGuestUrl() : $role->getGuestUrl() }}">
                 <div id="venue_title" class="text-4xl font-bold">
                     {{ $event ? $event->venue->name : $role->name }}
                 </div>
@@ -147,7 +147,7 @@
                 <div class="mx-auto max-w-7xl px-6 lg:px-8">
                     <div class="mx-auto max-w-2xl lg:text-center">
                         <p class="mt-2 text-6xl font-bold tracking-tight">
-                            <a href="{{ route('role.view_guest', ['subdomain' => $event->role->subdomain]) }}">
+                            <a href="{{ $event->role->getGuestUrl() }}">
                                 {{ $event->role->name }}
                             </a>
                         </p>
