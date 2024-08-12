@@ -461,10 +461,9 @@ class RoleController extends Controller
 
             $file = $request->file('profile_image');
             $filename = strtolower('profile_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            //$path = $file->storeAs('images', $filename, 'public');
-            Storage::put($filename, $file);
+            $path = $file->storeAs('/', $filename);
 
-            $role->profile_image_url = $filename;
+            $role->profile_image_url = $path;
             $role->save();
         }
 
@@ -479,10 +478,9 @@ class RoleController extends Controller
 
             $file = $request->file('background_image');
             $filename = strtolower('background_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            //$path = $file->storeAs('images', $filename, 'public');
-            $path = Storage::put($filename, $file);
+            $path = $file->storeAs('/', $filename);
 
-            $role->background_image_url = $filename;
+            $role->background_image_url = $path;
             $role->save();
         }
 
@@ -580,8 +578,7 @@ class RoleController extends Controller
 
             $file = $request->file('background_image');
             $filename = strtolower('background_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            //$path = $file->storeAs('images', $filename, 'public');
-            $path = Storage::put($filename, $file, 'public');
+            $path = $file->storeAs('/', $filename);
 
             $role->background_image_url = $path;
             $role->save();
