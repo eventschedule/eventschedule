@@ -149,7 +149,7 @@
                 </span>
 
                 <span class="ml-3 hidden sm:block">
-                    <a href="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'year' => $year, 'month' => $month]) }}"
+                    <a href="{{ route('role.view_guest', (now()->year == $year && now()->month == $month) ? ['subdomain' => $role->subdomain] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'month' => $month] : ['subdomain' => $role->subdomain, 'year' => $year, 'month' => $month])) }}"
                         target="_blank">
                         <button type="button" {{ ! $role->email_verified_at ? 'disabled' : '' }}
                             class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 {{ ! $role->email_verified_at ? 'disabled:cursor-not-allowed' : '' }}">
