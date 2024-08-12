@@ -46,10 +46,11 @@
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+
     @vite([
     'resources/css/app.css',
     'resources/js/app.js',
-    'resources/js/jquery-3.3.1.min.js',
     ])
 
     <script>
