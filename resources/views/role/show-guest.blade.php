@@ -52,11 +52,11 @@
         min-height: 100%;
         background-attachment: fixed;
         @if ($event)
-            color: {{ $event->role->font_color }} !important;
-            @if ($event->role->background == 'gradient')
-                background-image: linear-gradient({{ $event->role->background_rotation }}deg, {{ $event->role->background_colors }});
-            @elseif ($event->role->background == 'image')
-                background-image: url("{{ $event->role->background_image_url }}");
+            color: {{ $otherRole->font_color }} !important;
+            @if ($otherRole->background == 'gradient')
+                background-image: linear-gradient({{ $otherRole->background_rotation }}deg, {{ $otherRole->background_colors }});
+            @elseif ($otherRole->background == 'image')
+                background-image: url("{{ $otherRole->background_image_url }}");
                 background-size: cover;
                 background-position: center;
                 background-repeat: no-repeat;
@@ -133,7 +133,7 @@
                 @endif
 
                 @if ($event || $role->isVenue())
-                <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event ? $event->venue->bestAddress() : $role->bestAddress()) }}" target="_blank">
+                <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event ? $event->venue->bestAddress() : $role->bestAddress()) }}" target="_blank" class="pl-1">
                     <button type="button" style="background-color: {{ $event ? $event->role->accent_color : $role->accent_color }}"
                         class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
