@@ -213,7 +213,13 @@ class Role extends Model implements MustVerifyEmail
             return '';
         }
 
-        return config('filesystems.default') == 'local' ? url('/storage/' . $value) : $value;
+        if (config('filesystems.default') == 'do_spaces') {
+            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $value;
+        } else if (config('filesystems.default') == 'local') {
+            return url('/storage/' . $value);
+        } else {
+            return $value;
+        }
     }
 
     public function getBackgroundImageUrlAttribute($value)
@@ -222,7 +228,13 @@ class Role extends Model implements MustVerifyEmail
             return '';
         }
 
-        return config('filesystems.default') == 'local' ? url('/storage/' . $value) : $value;
+        if (config('filesystems.default') == 'do_spaces') {
+            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $value;
+        } else if (config('filesystems.default') == 'local') {
+            return url('/storage/' . $value);
+        } else {
+            return $value;
+        }
     }
     
     public static function cleanSubdomain($name)
@@ -303,4 +315,5 @@ class Role extends Model implements MustVerifyEmail
     {
         return route('role.view_guest', ['subdomain' => $this->subdomain]);
     }
+
 }
