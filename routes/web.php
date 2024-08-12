@@ -52,7 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/team/add_member', [RoleController::class, 'createMember'])->name('role.create_member');
     Route::post('/{subdomain}/team/add_member', [RoleController::class, 'storeMember'])->name('role.store_member');
     Route::get('/{subdomain}/team/remove_member/{hash}', [RoleController::class, 'removeMember'])->name('role.remove_member');
-    Route::get('/{subdomain}/{tab?}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
+    //Route::get('/{subdomain}/{tab?}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
 });
 
 /*
