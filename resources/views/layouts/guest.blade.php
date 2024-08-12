@@ -20,7 +20,7 @@
 
     <meta http-equiv="Content-Security-Policy" content="
         img-src 'self' data:;
-        frame-src 'self' https://www.youtube.com;
+        frame-src 'self';
     ">
 
     <!-- Google tag (gtag.js) -->
