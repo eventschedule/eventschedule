@@ -37,9 +37,6 @@ class RoleController extends Controller
         if ($request->image_type == 'profile') {
             if ($role->profile_image_url) {
                 $path = $role->getAttributes()['profile_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
-                }
                 Storage::delete($path);
 
                 $role->profile_image_url = null;
@@ -48,9 +45,6 @@ class RoleController extends Controller
         } else if ($request->image_type == 'background') {
             if ($role->background_image_url) {
                 $path = $role->getAttributes()['background_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
-                }
                 Storage::delete($path);
 
                 $role->background_image_url = null;
@@ -453,34 +447,28 @@ class RoleController extends Controller
         if ($request->hasFile('profile_image')) {
             if ($role->profile_image_url) {
                 $path = $role->getAttributes()['profile_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
-                }
                 Storage::delete($path);
             }
 
             $file = $request->file('profile_image');
             $filename = strtolower('profile_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            $path = $file->storeAs('/', $filename);
+            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
-            $role->profile_image_url = $path;
+            $role->profile_image_url = $filename;
             $role->save();
         }
 
         if ($request->hasFile('background_image')) {
             if ($role->background_image_url) {
                 $path = $role->getAttributes()['background_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
-                }
                 Storage::delete($path);
             }
 
             $file = $request->file('background_image');
             $filename = strtolower('background_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            $path = $file->storeAs('/', $filename);
+            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
-            $role->background_image_url = $path;
+            $role->background_image_url = $filename;
             $role->save();
         }
 
@@ -553,34 +541,28 @@ class RoleController extends Controller
         if ($request->hasFile('profile_image')) {
             if ($role->profile_image_url) {
                 $path = $role->getAttributes()['profile_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
-                }
                 Storage::delete($path);
             }
         
             $file = $request->file('profile_image');
             $filename = strtolower('profile_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            $path = $file->storeAs('/', $filename);
+            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
-            $role->profile_image_url = $path;
+            $role->profile_image_url = $filename;
             $role->save();
         }
 
         if ($request->hasFile('background_image')) {
             if ($role->background_image_url) {
                 $path = $role->getAttributes()['background_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
-                }
                 Storage::delete($path);
             }
 
             $file = $request->file('background_image');
             $filename = strtolower('background_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            $path = $file->storeAs('/', $filename);
+            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
-            $role->background_image_url = $path;
+            $role->background_image_url = $filename;
             $role->save();
         }
 
