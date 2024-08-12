@@ -37,6 +37,9 @@ class RoleController extends Controller
         if ($request->image_type == 'profile') {
             if ($role->profile_image_url) {
                 $path = $role->getAttributes()['profile_image_url'];
+                if (config('filesystems.default') == 'local') {
+                    $path = 'public/' . $path;
+                }
                 Storage::delete($path);
 
                 $role->profile_image_url = null;
@@ -45,6 +48,9 @@ class RoleController extends Controller
         } else if ($request->image_type == 'background') {
             if ($role->background_image_url) {
                 $path = $role->getAttributes()['background_image_url'];
+                if (config('filesystems.default') == 'local') {
+                    $path = 'public/' . $path;
+                }
                 Storage::delete($path);
 
                 $role->background_image_url = null;
@@ -447,6 +453,9 @@ class RoleController extends Controller
         if ($request->hasFile('profile_image')) {
             if ($role->profile_image_url) {
                 $path = $role->getAttributes()['profile_image_url'];
+                if (config('filesystems.default') == 'local') {
+                    $path = 'public/' . $path;
+                }
                 Storage::delete($path);
             }
 
@@ -461,6 +470,9 @@ class RoleController extends Controller
         if ($request->hasFile('background_image')) {
             if ($role->background_image_url) {
                 $path = $role->getAttributes()['background_image_url'];
+                if (config('filesystems.default') == 'local') {
+                    $path = 'public/' . $path;
+                }
                 Storage::delete($path);
             }
 
@@ -541,6 +553,9 @@ class RoleController extends Controller
         if ($request->hasFile('profile_image')) {
             if ($role->profile_image_url) {
                 $path = $role->getAttributes()['profile_image_url'];
+                if (config('filesystems.default') == 'local') {
+                    $path = 'public/' . $path;
+                }
                 Storage::delete($path);
             }
         
@@ -555,6 +570,9 @@ class RoleController extends Controller
         if ($request->hasFile('background_image')) {
             if ($role->background_image_url) {
                 $path = $role->getAttributes()['background_image_url'];
+                if (config('filesystems.default') == 'local') {
+                    $path = 'public/' . $path;
+                }
                 Storage::delete($path);
             }
 

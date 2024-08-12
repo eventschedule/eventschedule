@@ -37,11 +37,20 @@ class ProfileController extends Controller
         $request->user()->save();
 
         if ($request->hasFile('profile_image')) {
+            $user = $request->user();
+            
+            if ($user->profile_image_url) {
+                $path = $user->getAttributes()['profile_image_url'];
+                if (config('filesystems.default') == 'local') {
+                    $path = 'public/' . $path;
+                }
+                Storage::delete($path);
+            }
+
             $file = $request->file('profile_image');
             $filename = strtolower('profile_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
             
-            $user = $request->user();
             $user->profile_image_url = $filename;
             $user->save();
         }
