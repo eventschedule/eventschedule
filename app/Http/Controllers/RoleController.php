@@ -536,8 +536,8 @@ class RoleController extends Controller
 
         if ($request->hasFile('profile_image')) {
             if ($role->profile_image_url) {
-                $path = 'public/' . $role->getAttributes()['profile_image_url'];
-                Storage::delete($path);
+                //$path = 'public/' . $role->getAttributes()['profile_image_url'];
+                //Storage::delete($path);
             }
         
             $file = $request->file('profile_image');
