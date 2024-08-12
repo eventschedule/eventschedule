@@ -257,6 +257,12 @@ class Role extends Model implements MustVerifyEmail
             'app',
             'www',
             'dev',
+            'contact',
+            'info',
+            'blog',
+            'docs',
+            'api',
+            'faq',
         ];
 
         while (self::where('subdomain', $subdomain)->exists() || in_array($subdomain, $reserved)) {
