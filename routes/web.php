@@ -13,9 +13,6 @@ Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
 Route::post('/message', [HomeController::class, 'message'])->name('message');
 
-Route::get('/{subdomain}/view/{hash?}', [RoleController::class, 'viewGuest'])->name('role.view_guest');
-Route::get('/{subdomain}/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
-
 Route::middleware(['auth', 'verified'])->group(function () 
 {
     Route::get('/home', [HomeController::class, 'home'])->name('home');
@@ -52,15 +49,17 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/team/add_member', [RoleController::class, 'createMember'])->name('role.create_member');
     Route::post('/{subdomain}/team/add_member', [RoleController::class, 'storeMember'])->name('role.store_member');
     Route::get('/{subdomain}/team/remove_member/{hash}', [RoleController::class, 'removeMember'])->name('role.remove_member');
-    Route::get('/{subdomain}/{tab?}', [RoleController::class, 'viewAdmin'])->name('role.view_admin');
+    Route::get('/{subdomain}/{tab?}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|requests|profile|followers|team');
 });
 
-/*
-Route::group(['domain' => 'dev.eventschedule.com'], function() {
-    //
-});
-
-Route::group(['domain' => '{subdomain}.eventschedule.com'], function() {
-    //
-});
-*/
+if (config('app.env') == 'local') {
+    Route::domain('dev.eventschedule.com')->group(function () {
+        Route::get('/{subdomain}/view/{hash?}', [RoleController::class, 'viewGuest'])->name('role.view_guest');
+        Route::get('/{subdomain}/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
+    });    
+} else {
+    Route::domain('{subdomain}.eventschedule.com')->group(function () {
+        Route::get('/{hash?}', [RoleController::class, 'viewGuest'])->name('role.view_guest');
+        Route::get('/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
+    });
+}
