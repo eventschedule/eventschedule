@@ -16,6 +16,8 @@ use App\Models\Role;
 use App\Models\User;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use App\Rules\NoEmailAlias;
+use App\Rules\NoFakeEmail;
 
 class EventController extends Controller
 {
@@ -75,6 +77,11 @@ class EventController extends Controller
 
     public function create(Request $request, $subdomain)
     {
+        $request->validate([
+            'venue_email' => ['sometimes', new NoEmailAlias, new NoFakeEmail],
+            'role_email' => ['sometimes', new NoEmailAlias, new NoFakeEmail],
+        ]);
+
         $user = $request->user();
         $role = Role::subdomain($subdomain)->firstOrFail();
         $header = $role->getRoleHeader();
