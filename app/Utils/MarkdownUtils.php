@@ -10,6 +10,10 @@ class MarkdownUtils
 {
     public static function convertToHtml($markdown)
     {
+        if (! $markdown) {
+            return $markdown;
+        }
+
         $markdown = strip_tags($markdown);
 
         $converter = new CommonMarkConverter();
