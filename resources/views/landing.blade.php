@@ -109,13 +109,15 @@
 
                     <div class="relative px-6 py-32 sm:py-40 lg:px-8 lg:py-56 lg:pr-0">
                         <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl">
+                            <!--
                             <div class="hidden sm:mb-10 sm:flex">
                                 <div
-                                    class="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-500 ring-1 ring-gray-900/10">
+                                    class="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-500 ring-1">
                                     Free Forever!
                                 </div>
                             </div>
-                            <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl"><span
+                            -->
+                            <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-1xl hidden md:block"><span
                                     class="text-gray-600">your</span>.eventschedule.com</h1>
                             <p class="mt-6 text-lg leading-8 text-gray-600">Connecting venues, talent, and vendors with
                                 their audience</p>
