@@ -7,6 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -38,7 +39,8 @@ class ProfileController extends Controller
         if ($request->hasFile('profile_image')) {
             $file = $request->file('profile_image');
             $filename = strtolower('profile_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            $path = $file->storeAs('images', $filename, 'public');
+            //$path = $file->storeAs('images', $filename, 'public');
+            $path = Storage::put($filename, $image, 'public');
             
             $user = $request->user();
             $user->profile_image_url = $path;
