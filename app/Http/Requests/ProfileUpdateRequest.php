@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Rules\NoEmailAlias;
+use App\Rules\NoFakeEmail;
 
 class ProfileUpdateRequest extends FormRequest
 {
@@ -18,7 +19,7 @@ class ProfileUpdateRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($this->user()->id), new NoEmailAlias],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($this->user()->id), new NoEmailAlias, new NoFakeEmail],
             'timezone' => ['required', 'string', 'max:255'],
             'language_code' => ['required', 'string', 'max:255'],
             'profile_image' => ['image', 'max:2500'],
