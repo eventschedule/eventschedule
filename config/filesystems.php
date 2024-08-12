@@ -63,10 +63,6 @@ return [
             'bucket' => env('DO_SPACES_BUCKET'),
             'endpoint' => env('DO_SPACES_ENDPOINT'),
             'visibility' => 'public',
-            //'folder' => env('DO_SPACES_FOLDER'),
-            //'cdn_endpoint' => env('DO_SPACES_CDN_ENDPOINT'),
-            //'url' => env('DO_SPACES_URL'),
-            //'use_path_style_endpoint' => env('DO_SPACES_USE_PATH_STYLE_ENDPOINT', false),                
         ],
     ],
 

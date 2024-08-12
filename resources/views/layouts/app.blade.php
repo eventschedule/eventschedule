@@ -19,7 +19,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.99em%22 font-size=%2275%22>📅</text></svg>">
 
     <meta http-equiv="Content-Security-Policy" content="
-        img-src 'self' data: https://maps.gstatic.com https://maps.googleapis.com;
+        img-src 'self' data: https://maps.gstatic.com https://maps.googleapis.com https://eventschedule.nyc3.cdn.digitaloceanspaces.com;
         frame-src 'self';
     ">
 

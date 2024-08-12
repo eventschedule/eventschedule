@@ -150,6 +150,12 @@ class User extends Authenticatable implements MustVerifyEmail
             return '';
         }
 
-        return config('filesystems.default') == 'local' ? url('/storage/' . $value) : $value;
+        if (config('filesystems.default') == 'do_spaces') {
+            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $value;
+        } else if (config('filesystems.default') == 'local') {
+            return url('/storage/' . $value);
+        } else {
+            return $value;
+        }
     }
 }
