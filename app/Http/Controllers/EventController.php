@@ -322,6 +322,7 @@ class EventController extends Controller
             $venue->postal_code = $request->venue_postal_code;
             $venue->country_code = $request->venue_country_code;
             $venue->background_colors = ColorUtils::randomGradient();
+            $venue->font_color = '#ffffff';
             $venue->save();
 
             if ($matchingUser = User::whereEmail($venue->email)->first()) {
@@ -364,6 +365,7 @@ class EventController extends Controller
                 $role->timezone = $user->timezone;
                 $role->language_code = $user->language_code;
                 $role->background_colors = ColorUtils::randomGradient();
+                $role->font_color = '#ffffff';
                 $role->save();
 
                 if ($matchingUser = User::whereEmail($role->email)->first()) {
