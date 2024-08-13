@@ -56,7 +56,7 @@
                         @if ($venue && $venue->user_id)
                         <div class="text-gray-900 dark:text-gray-100">
                             <a href="{{ $venue->getGuestUrl() }}"
-                                target="_blank">
+                                target="_blank" class="hover:underline">
                                 {{ $venue->name }}
                             </a>
                         </div>
@@ -120,7 +120,7 @@
                         @if ($talent)
                         <div class="mb-6 text-gray-900 dark:text-gray-100">
                             <a href="{{ $talent->getGuestUrl() }}"
-                                target="_blank">
+                                target="_blank" class="hover:underline">
                                 {{ $talent->name }}
                             </a>
                             <input type="hidden" name="role_id"
@@ -129,7 +129,7 @@
                         @elseif ($vendor)
                         <div class="mb-6 text-gray-900 dark:text-gray-100">
                             <a href="{{ $vendor->getGuestUrl() }}"
-                                target="_blank">
+                                target="_blank" class="hover:underline">
                                 {{ $vendor->name }}
                             </a>
                             <input type="hidden" name="role_id"

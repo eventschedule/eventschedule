@@ -45,7 +45,7 @@
                             <tr class="bg-white">
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
                                     <a href="{{ $role->getGuestUrl() }}"
-                                        target="_blank">{{ $role->name }}</a>
+                                        target="_blank" class="hover:underline">{{ $role->name }}</a>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     <a href="mailto:{{ $role->email }}">{{ $role->email }}</a>
@@ -55,7 +55,7 @@
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     <a href="{{ $role->website }}"
-                                        target="_blank">{{ App\Utils\UrlUtils::clean($role->website) }}</a>
+                                        target="_blank" class="hover:underline">{{ App\Utils\UrlUtils::clean($role->website) }}</a>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     <button type="button"

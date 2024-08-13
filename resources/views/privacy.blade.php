@@ -65,7 +65,7 @@
         </li>
         <li>
             <p><strong>Website</strong> refers to Event Schedule, accessible from <a href="https://eventschedule.com"
-                    rel="external nofollow noopener" target="_blank">https://eventschedule.com</a></p>
+                    rel="external nofollow noopener" target="_blank" class="hover:underline">https://eventschedule.com</a></p>
         </li>
         <li>
             <p><strong>You</strong> means the individual accessing or using the Service, or the company, or other legal
@@ -133,7 +133,7 @@
     <p>Cookies can be &quot;Persistent&quot; or &quot;Session&quot; Cookies. Persistent Cookies remain on Your personal
         computer or mobile device when You go offline, while Session Cookies are deleted as soon as You close Your web
         browser. You can learn more about cookies on <a href="https://www.termsfeed.com/blog/cookies/#What_Are_Cookies"
-            target="_blank">TermsFeed website</a> article.</p>
+            target="_blank" class="hover:underline">TermsFeed website</a> article.</p>
     <p>We use both Session and Persistent Cookies for the purposes set out below:</p>
     <ul>
         <li>

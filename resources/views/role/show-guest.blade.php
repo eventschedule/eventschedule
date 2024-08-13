@@ -385,9 +385,9 @@
     <footer class="bottom-0 left-0 right-0 bg-black text-white py-4 w-full">
         <div class="container mx-auto text-center">
             <p>
-                {!! str_replace(':link', '<a href="' . url('/') . '" target="_blank">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}
+                {!! str_replace(':link', '<a href="' . url('/') . '" target="_blank" class="hover:underline">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}
                 •
-                {!! str_replace(':link', '<a href="https://mudeo.app" target="_blank">mudeo | make music together</a>',  __('messages.supported_by')) !!}
+                {!! str_replace(':link', '<a href="https://mudeo.app" target="_blank" class="hover:underline">mudeo | make music together</a>',  __('messages.supported_by')) !!}
             </p>
         </div>
     </footer>

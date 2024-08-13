@@ -9,7 +9,7 @@
     <h3 class="mt-2 text-sm font-semibold text-gray-900">{{ __('messages.no_requests') }}</h3>
     <p class="mt-1 text-sm text-gray-500">{{ __('messages.share_your_sign_up_link_to_get_more_requests') }}</p>
     <div class="mt-3">
-        <a href="{{ route('event.sign_up', ['subdomain' => $role->subdomain]) }}" target="_blank">
+        <a href="{{ route('event.sign_up', ['subdomain' => $role->subdomain]) }}" target="_blank" class="hover:underline">
             {{ \App\Utils\UrlUtils::clean(route('event.sign_up', ['subdomain' => $role->subdomain])) }}
         </a>
     </div>
@@ -20,7 +20,7 @@
 <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 pt-5">
     @foreach($requests as $event)
     <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow">
-        <a href="{{ $event->role->getGuestUrl() }}" target="_blank">
+        <a href="{{ $event->role->getGuestUrl() }}" target="_blank" class="hover:underline">
             <div class="flex flex-1 flex-col p-8">
                 @if ($event->role->profile_image_url)
                 <img class="mx-auto h-32 w-32 flex-shrink-0 rounded-full object-cover" src="{{ $event->role->profile_image_url }}"
