@@ -25,6 +25,8 @@ class HomeController extends Controller
             } else if ($role->accept_vendor_requests) {
                 return redirect()->route('register', ['type' => 'vendor']);
             }
+        } else if ($subdomain = session('pending_follow')) {
+            return redirect()->route('role.follow', ['subdomain' => $subdomain]);
         }
 
         $events = [];
