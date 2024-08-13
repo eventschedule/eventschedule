@@ -50,7 +50,7 @@
     body {
         font-family: '{{ $role->font_family }}', sans-serif !important;
         min-height: 100%;
-        background-attachment: fixed;
+        background-attachment: scroll;
         @if ($event)
             color: {{ $otherRole->font_color }} !important;
             @if ($otherRole->background == 'gradient')
