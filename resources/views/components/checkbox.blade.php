@@ -5,6 +5,6 @@
             class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
     </div>
     <div class="ml-3 text-sm leading-6">
-        <label for="{{ $name }}" class="font-medium text-gray-900">{{ $label }}</label>
+        <label for="{{ $name }}" class="font-medium text-gray-900 dark:text-gray-300">{{ $label }}</label>
     </div>
 </div>
