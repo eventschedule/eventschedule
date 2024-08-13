@@ -226,4 +226,5 @@ return [
     'no_scheduled_events' => 'No scheduled events',
     'create_a_new_account' => 'Create a new account',
     'questions_or_suggestions' => 'If you have any questions or suggestions please email us at :email',
+    'add_to_calendar' => 'Add to calendar',
 ];

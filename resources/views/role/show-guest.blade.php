@@ -159,6 +159,9 @@
                             </a>
                         </p>
                         <p class="mt-6 text-2xl leading-8">{{ $event->starts_at ? $event->localStartsAt(true) : __('messages.date_to_be_announced') . '...' }}</p>
+                        <p style="font-family: sans-serif; letter-spacing: .35em" class="mt-8 tracking-widest text-gray-500 inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 cursor-pointer">
+                            {{ strtoupper(__('messages.add_to_calendar')) }}
+                        </p>
                     </div>
                 </div>
             </div>
