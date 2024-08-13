@@ -64,4 +64,72 @@ class Event extends Model
     {
         return route('role.view_guest', ['subdomain' => $this->role->subdomain, 'hash' => UrlUtils::encodeId($this->id)]);
     }
+
+    public function getTitle()
+    {
+        $title = __('messages.event_title');
+
+        return str_replace([':role', ':venue'], [$this->role->name, $this->venue->name], $title);
+    }
+
+    public function getGoogleCalendarUrl()
+    {
+        $title = $this->getTitle();
+        $description = strip_tags($this->description_html);
+        $location = $this->venue->bestAddress();
+        $duration = $this->duration > 0 ? $this->duration : 2;
+        $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
+        $startDate = $startAt->format('Ymd\THis\Z');
+        $endDate = $startAt->addSeconds($duration * 3600)->format('Ymd\THis\Z');
+
+        $url = "https://calendar.google.com/calendar/r/eventedit?";
+        $url .= "text=" . urlencode($title);
+        $url .= "&dates=" . $startDate . "/" . $endDate;
+        $url .= "&details=" . urlencode($description);
+        $url .= "&location=" . urlencode($location);
+
+        return $url;
+    }
+
+    public function getAppleCalendarUrl()
+    {
+        $title = $this->getTitle();
+        $description = strip_tags($this->description_html);
+        $location = $this->venue->bestAddress();
+        $duration = $this->duration > 0 ? $this->duration : 2;
+        $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
+        $startDate = $startAt->format('Ymd\THis\Z');
+        $endDate = $startAt->addSeconds($duration * 3600)->format('Ymd\THis\Z');
+
+        $url = "BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\n";
+        $url .= "SUMMARY:" . $title . "\n";
+        $url .= "DESCRIPTION:" . $description . "\n";
+        $url .= "DTSTART:" . $startDate . "\n";
+        $url .= "DTEND:" . $endDate . "\n";
+        $url .= "LOCATION:" . $location . "\n";
+        $url .= "END:VEVENT\nEND:VCALENDAR";
+
+        return "data:text/calendar;charset=utf8," . urlencode($url);
+    }
+
+    public function getMicrosoftCalendarUrl()
+    {
+        $title = $this->getTitle();
+        $description = strip_tags($this->description_html);
+        $location = $this->venue->bestAddress();
+        $duration = $this->duration > 0 ? $this->duration : 2;
+        $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
+        $startDate = $startAt->format('Y-m-d\TH:i:s\Z');
+        $endDate = $startAt->addSeconds($duration * 3600)->format('Y-m-d\TH:i:s\Z');
+
+        $url = "https://outlook.live.com/calendar/0/deeplink/compose?";
+        $url .= "subject=" . urlencode($title);
+        $url .= "&body=" . urlencode($description);
+        $url .= "&startdt=" . $startDate;
+        $url .= "&enddt=" . $endDate;
+        $url .= "&location=" . urlencode($location);
+        $url .= "&allday=false";
+
+        return $url;
+    }
 }
