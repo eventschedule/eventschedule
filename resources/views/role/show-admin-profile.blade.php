@@ -15,6 +15,48 @@
 <div class="pt-5 container mx-auto">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
+    <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="font-bold mb-2 flex justify-between items-center">
+                {{ __('messages.youtube_videos') }}
+                <button type="button"
+                    class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                    onclick="showAdd('youtube_links')">
+                    {{ __('messages.add') }}
+                </button>
+            </h2>
+
+            @if ($role->youtube_links)
+            <p class="text-gray-700">
+
+            <ul role="list" class="divide-y divide-gray-200">
+                @foreach(json_decode($role->youtube_links) as $link)
+                <li class="py-4">
+                    <div class="flex">
+                        <div class="mr-4 flex-shrink-0 text-gray-500">
+                            <x-url-icon>
+                                {{ \App\Utils\UrlUtils::clean($link->url) }}
+                            </x-url-icon>
+                        </div>
+                        <div>
+                            <a href="{{ $link->url }}" target="_blank">
+                                <h4 class="text-lg font-bold break-words line-clamp-2">{{ $link->name }}</h4>
+                                <img src="{{ $link->thumbnail_url }}"/>
+                            </a>
+                            <button type="button"
+                                class="mt-3 inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                                onclick="removeLink('youtube_links', '{{ $link->url }}')">
+                                {{ __('messages.remove') }}
+                            </button>
+                        </div>
+                    </div>
+                </li>
+                @endforeach
+            </ul>
+
+            </p>
+            @endif
+        </div>
+
         <div class="bg-white rounded-lg shadow-md p-6">
 
             <h2 class="font-bold mb-2 flex justify-between items-center">
@@ -95,48 +137,6 @@
                 </li>
                 @endforeach
             </ul>
-            </p>
-            @endif
-        </div>
-
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="font-bold mb-2 flex justify-between items-center">
-                {{ __('messages.youtube_videos') }}
-                <button type="button"
-                    class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                    onclick="showAdd('youtube_links')">
-                    {{ __('messages.add') }}
-                </button>
-            </h2>
-
-            @if ($role->youtube_links)
-            <p class="text-gray-700">
-
-            <ul role="list" class="divide-y divide-gray-200">
-                @foreach(json_decode($role->youtube_links) as $link)
-                <li class="py-4">
-                    <div class="flex">
-                        <div class="mr-4 flex-shrink-0 text-gray-500">
-                            <x-url-icon>
-                                {{ \App\Utils\UrlUtils::clean($link->url) }}
-                            </x-url-icon>
-                        </div>
-                        <div>
-                            <a href="{{ $link->url }}" target="_blank">
-                                <h4 class="text-lg font-bold break-words line-clamp-2">{{ $link->name }}</h4>
-                                <img src="{{ $link->thumbnail_url }}"/>
-                            </a>
-                            <button type="button"
-                                class="mt-3 inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                                onclick="removeLink('youtube_links', '{{ $link->url }}')">
-                                {{ __('messages.remove') }}
-                            </button>
-                        </div>
-                    </div>
-                </li>
-                @endforeach
-            </ul>
-
             </p>
             @endif
         </div>
