@@ -247,7 +247,7 @@
             </main>
 
             <div class="mt-auto pb-8 px-8 text-sm text-gray-500">
-                {!! str_replace(':email', '<a href="mailto:contact@eventschedule.com?subject=Feedback">contact@eventschedule.com</a>', __('messages.questions_or_suggestions')) !!}
+                {!! str_replace(':email', '<a href="mailto:contact@eventschedule.com?subject=Feedback" class="hover:underline">contact@eventschedule.com</a>', __('messages.questions_or_suggestions')) !!}
             </div>
 
         </div>
