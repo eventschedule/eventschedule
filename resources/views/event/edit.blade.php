@@ -31,7 +31,7 @@
         </script>
     </x-slot>
 
-    <h2 class="pt-2 mt-4 text-xl font-bold leading-7 text-gray-900 sm:truncate sm:text-2xl sm:tracking-tight">
+    <h2 class="pt-2 mt-4 text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
         {{ $title }}
     </h2>
 
@@ -54,7 +54,7 @@
                         </h2>
 
                         @if ($venue && $venue->user_id)
-                        <div>
+                        <div class="text-gray-900 dark:text-gray-100">
                             <a href="{{ $venue->getGuestUrl() }}"
                                 target="_blank">
                                 {{ $venue->name }}
@@ -100,13 +100,13 @@
                                     <input id="talent" name="role_type" type="radio" value="talent" CHECKED
                                         class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                     <label for="talent"
-                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900">{{ __('messages.talent') }}</label>
+                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.talent') }}</label>
                                 </div>
                                 <div class="flex items-center">
                                     <input id="vendor" name="role_type" type="radio" value="vendor"
                                         class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                     <label for="vendor"
-                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900">{{ __('messages.vendor') }}</label>
+                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.vendor') }}</label>
                                 </div>
                             </div>
                         </fieldset>
@@ -118,7 +118,7 @@
                         @endif
 
                         @if ($talent)
-                        <div class="mb-6">
+                        <div class="mb-6 text-gray-900 dark:text-gray-100">
                             <a href="{{ $talent->getGuestUrl() }}"
                                 target="_blank">
                                 {{ $talent->name }}
@@ -127,7 +127,7 @@
                                 value="{{ App\Utils\UrlUtils::encodeId($talent->id) }}" />
                         </div>
                         @elseif ($vendor)
-                        <div class="mb-6">
+                        <div class="mb-6 text-gray-900 dark:text-gray-100">
                             <a href="{{ $vendor->getGuestUrl() }}"
                                 target="_blank">
                                 {{ $vendor->name }}
