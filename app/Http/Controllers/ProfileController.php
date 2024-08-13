@@ -72,6 +72,14 @@ class ProfileController extends Controller
 
         Auth::logout();
 
+        if ($user->profile_image_url) {
+            $path = $user->getAttributes()['profile_image_url'];
+            if (config('filesystems.default') == 'local') {
+                $path = 'public/' . $path;
+            }
+            Storage::delete($path);
+        }
+
         $roles = $user->owner()->get();
 
         foreach ($roles as $role) {
