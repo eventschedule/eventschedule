@@ -128,9 +128,23 @@
                 </div>
             </a>
             <div>
+                @if (($event && $event->venue->bestAddress()) || ($role->isVenue() && $role->bestAddress()))
+                <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event ? $event->venue->bestAddress() : $role->bestAddress()) }}" target="_blank" class="pl-2">
+                    <button type="button" style="background-color: {{ $event ? $event->role->accent_color : $role->accent_color }}"
+                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                        <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
+                                aria-hidden="true">
+                                <path
+                                    d="M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z" />
+                            </svg>
+                        {{ __('messages.map') }}
+                    </button>
+                </a>
+                @endif
+
                 @if ($event)
                 @if (! $user || ! $user->isConnected($event->role->subdomain))
-                <a href="{{ route('role.follow', ['subdomain' => $event->role->subdomain]) }}" class="pl-1">
+                <a href="{{ route('role.follow', ['subdomain' => $event->role->subdomain]) }}" class="pl-2">
                     <button type="button" style="background-color: {{ $event->role->accent_color }}"
                         class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
@@ -144,7 +158,7 @@
                 @endif
                 @else
                 @if (! $user || ! $user->isConnected($role->subdomain))
-                <a href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}" class="pl-1">
+                <a href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}" class="pl-2">
                     <button type="button" style="background-color: {{ $role->accent_color }}"
                         class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
@@ -156,20 +170,6 @@
                     </button>
                 </a>
                 @endif
-                @endif
-
-                @if (($event && $event->venue->bestAddress()) || ($role->isVenue() && $role->bestAddress()))
-                <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event ? $event->venue->bestAddress() : $role->bestAddress()) }}" target="_blank" class="pl-1">
-                    <button type="button" style="background-color: {{ $event ? $event->role->accent_color : $role->accent_color }}"
-                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
-                        <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
-                                aria-hidden="true">
-                                <path
-                                    d="M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z" />
-                            </svg>
-                        {{ __('messages.map') }}
-                    </button>
-                </a>
                 @endif
             </div>
         </div>
@@ -186,7 +186,7 @@
                         </p>
                         <p class="mt-6 text-2xl leading-8">{{ $event->starts_at ? $event->localStartsAt(true) : __('messages.date_to_be_announced') . '...' }}</p>
                         <!--
-                        <p style="font-family: sans-serif; letter-spacing: .35em" class="mt-8 tracking-widest text-gray-500 inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 cursor-pointer">
+                        <p style="font-family: sans-serif; letter-spacing: .25em" class="mt-8 tracking-widest text-gray-500 inline-flex items-center rounded-md bg-white px-5 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 cursor-pointer">
                             {{ strtoupper(__('messages.add_to_calendar')) }}
                         </p>
                         -->
