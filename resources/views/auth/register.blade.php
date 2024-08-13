@@ -62,7 +62,7 @@
                         class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
                 </div>
                 <div class="ml-3 text-sm leading-6">
-                    <label for="terms" class="font-medium text-gray-900">
+                    <label for="terms" class="font-medium text-gray-900 dark:text-gray-300">
                         {!! str_replace([':terms', ':privacy'], ['<a href="' . route('terms') . '" target="_blank"> ' . __('messages.terms_of_service') . '</a>', '<a href="' . route('privacy') . '" target="_blank">' . __('messages.privacy_policy') . '</a>'], __('messages.i_accept_the_terms_and_privacy')) !!}
                     </label>
                 </div>
