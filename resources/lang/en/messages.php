@@ -224,7 +224,7 @@ return [
     'open_sidebar' => 'Open sidebar',
     'close_sidebar' => 'Close Sidebar',
     'no_scheduled_events' => 'No scheduled events',
-    'create_a_new_account' => 'Create a new account',
+    'create_new_account' => 'Create new account',
     'questions_or_suggestions' => 'If you have any questions or suggestions please email us at :email',
     'add_to_calendar' => 'Add to calendar',
     'event_title' => ':role at :venue',
