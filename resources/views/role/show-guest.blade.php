@@ -387,7 +387,7 @@
             <p>
                 {!! str_replace(':link', '<a href="' . url('/') . '" target="_blank" class="hover:underline">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}
                 •
-                {!! str_replace(':link', '<a href="https://mudeo.app" target="_blank" class="hover:underline">mudeo | make music together</a>',  __('messages.supported_by')) !!}
+                {!! str_replace(':link', '<a href="https://mudeo.app" target="_blank" class="hover:underline">mudeo</a>',  __('messages.supported_by')) !!} | make music together
             </p>
         </div>
     </footer>
