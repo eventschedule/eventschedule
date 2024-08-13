@@ -63,14 +63,14 @@
                 </div>
                 <div class="ml-3 text-sm leading-6">
                     <label for="terms" class="font-medium text-gray-900 dark:text-gray-300">
-                        {!! str_replace([':terms', ':privacy'], ['<a href="' . route('terms') . '" target="_blank"> ' . __('messages.terms_of_service') . '</a>', '<a href="' . route('privacy') . '" target="_blank">' . __('messages.privacy_policy') . '</a>'], __('messages.i_accept_the_terms_and_privacy')) !!}
+                        {!! str_replace([':terms', ':privacy'], ['<a href="' . route('terms') . '" target="_blank" class="hover:underline"> ' . __('messages.terms_of_service') . '</a>', '<a href="' . route('privacy') . '" target="_blank" class="hover:underline">' . __('messages.privacy_policy') . '</a>'], __('messages.i_accept_the_terms_and_privacy')) !!}
                     </label>
                 </div>
             </div>
         </div>
 
         <div class="flex items-center justify-between mt-4">
-            <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
+            <a class="hover:underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
                 href="{{ route('login') }}">
                 {{ __('messages.already_registered') }}
             </a>

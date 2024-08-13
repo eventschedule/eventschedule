@@ -169,7 +169,8 @@
                             @if ($role->profile_image_url)
                             <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="pt-3" />
                             <a href="#"
-                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'profile']) }}'; }">
+                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'profile']) }}'; }"
+                                class="hover:underline">
                                 {{ __('messages.delete_image') }}
                             </a>
                             @endif
@@ -314,7 +315,8 @@
                             @if ($role->background_image_url)
                             <img src="{{ $role->background_image_url }}" style="max-height:120px" class="pt-3" />
                             <a href="#"
-                                    onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}'; return false; }">
+                                    onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}'; return false; }"
+                                    class="hover:underline">
                                 {{ __('messages.delete_image') }}
                             </a>
                             @endif
@@ -332,7 +334,7 @@
                                     @endforeach
                                 </select>
                                 <div class="text-xs">
-                                    <a href="https://uigradients.com" target="_blank">Gradients from uiGradients</a>
+                                    <a href="https://uigradients.com" target="_blank" class="hover:underline">Gradients from uiGradients</a>
                                 </div>
                                 <x-input-error class="mt-2" :messages="$errors->get('background_colors')" />
 
