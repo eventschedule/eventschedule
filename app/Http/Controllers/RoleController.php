@@ -100,12 +100,19 @@ class RoleController extends Controller
 
     public function follow(Request $request, $subdomain)
     {
+        if (! auth()->user()) {
+            session(['pending_follow' => $subdomain]);
+            return redirect()->route('sign_up');
+        }
+
         $role = Role::subdomain($subdomain)->firstOrFail();
         $user = $request->user();
 
         if (! $user->isConnected($role->subdomain)) {
             $user->roles()->attach($role->id, ['level' => 'follower']);
         }
+
+        session()->forget('pending_follow');
 
         return redirect(route($role->getTypePlural()))
                 ->with('message', str_replace(':name', $role->name, __('messages.followed_role')));

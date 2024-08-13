@@ -28,7 +28,6 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/{subdomain}/edit', [RoleController::class, 'edit'])->name('role.edit');
-    Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
     Route::get('/{subdomain}/unfollow', [RoleController::class, 'unfollow'])->name('role.unfollow');
     Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
     Route::get('/{subdomain}/delete', [RoleController::class, 'delete'])->name('role.delete');
@@ -55,11 +54,13 @@ if (config('app.env') == 'local') {
     Route::domain('dev.eventschedule.com')->group(function () {
         Route::get('/{subdomain}/view/{hash?}', [RoleController::class, 'viewGuest'])->name('role.view_guest');
         Route::get('/{subdomain}/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
+        Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
     });    
 } else {
     Route::domain('{subdomain}.eventschedule.com')->group(function () {
         Route::get('/{hash?}', [RoleController::class, 'viewGuest'])->name('role.view_guest');
         Route::get('/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
+        Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
     });
 }
 

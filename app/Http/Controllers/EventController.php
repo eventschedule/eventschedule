@@ -411,6 +411,8 @@ class EventController extends Controller
             Notification::route('mail', $role->email)->notify(new ClaimRoleNotification($event));
         }
 
+        session()->forget('pending_venue');
+
         if ($event->starts_at) {
             $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
         } else {
