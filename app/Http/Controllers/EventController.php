@@ -171,7 +171,7 @@ class EventController extends Controller
         }
 
         $title = __('messages.add_event');
-        if (strpos($request->url(), '/sign_up') > 0 || ! auth()->user()->isMember($venue->subdomain)) {
+        if (strpos($request->url(), '/sign_up') > 0 || ($venue && ! auth()->user()->isMember($venue->subdomain))) {
             $title = __('messages.sign_up');
         }
 

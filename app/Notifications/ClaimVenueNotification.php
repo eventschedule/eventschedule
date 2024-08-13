@@ -50,8 +50,7 @@ class ClaimVenueNotification extends Notification
                         [':user', ':role', ':venue'], 
                         [$user->name, $role->name, $venue->name], 
                         __('messages.claim_your_venue_details')))
-                    ->action(__('messages.sign_up'), url('/'))
-                    ->line(__('messages.thank_you_for_using'));
+                    ->action(__('messages.sign_up'), route('sign_up', ['email' => $venue->email]));
     }
 
     /**

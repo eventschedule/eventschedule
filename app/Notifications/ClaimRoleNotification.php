@@ -50,7 +50,7 @@ class ClaimRoleNotification extends Notification
                         [':user', ':role', ':venue'], 
                         [$user->name, $role->name, $venue->name], 
                         __('messages.claim_your_role_details')))
-                    ->action(__('messages.sign_up'), url('/'));
+                    ->action(__('messages.sign_up'), route('sign_up', ['email' => $role->email]));
     }
 
     /**
