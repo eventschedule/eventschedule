@@ -10,7 +10,7 @@ require __DIR__.'/auth.php';
 
 Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
-Route::post('/message', [HomeController::class, 'message'])->name('message');
+Route::post('/message', [HomeController::class, 'message'])->name('message')->middleware('throttle:1,1');
 
 Route::middleware(['auth', 'verified'])->group(function () 
 {
