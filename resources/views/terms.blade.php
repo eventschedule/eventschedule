@@ -48,7 +48,7 @@
     </li>
     <li>
         <p><strong>Website</strong> refers to Event Schedule, accessible from <a href="https://eventschedule.com"
-                rel="external nofollow noopener" target="_blank">https://eventschedule.com</a></p>
+                rel="external nofollow noopener" target="_blank" class="hover:underline">https://eventschedule.com</a></p>
     </li>
     <li>
         <p><strong>You</strong> means the individual accessing or using the Service, or the company, or other legal
