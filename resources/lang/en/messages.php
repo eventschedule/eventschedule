@@ -225,7 +225,8 @@ return [
     'close_sidebar' => 'Close Sidebar',
     'no_scheduled_events' => 'No scheduled events',
     'create_new_account' => 'Create new account',
-    'questions_or_suggestions' => 'If you have any questions or suggestions please email us at :email',
+    'questions_or_suggestions' => 'If you have any questions or suggestions email us at :email',
     'add_to_calendar' => 'Add to calendar',
     'event_title' => ':role at :venue',
+    'full_name' => 'Full Name',
 ];
