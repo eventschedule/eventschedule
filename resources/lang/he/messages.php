@@ -218,4 +218,12 @@ return [
     'claim_your_role_details' => ':user תכנן אירוע עבור :role ב:venue, הירשם עם כתובת האימייל הזו כדי לנהל אותו.',
     'an_email_will_be_sent' => 'יישלח דוא"ל כדי ליידע אותם',
     'email_not_associated_with_role' => 'האימייל לא משויך לכישרון/מוכר',
+    'open_sidebar' => 'פתח את הסרגל הצדדי',
+    'close_sidebar' => 'סגור את הסרגל הצדדי',
+    'no_scheduled_events' => 'אין אירועים מתוכננים',
+    'create_new_account' => 'צור חשבון חדש',
+    'questions_or_suggestions' => 'אם יש לך שאלות או הצעות, שלח לנו דוא"ל לכתובת :email',
+    'add_to_calendar' => 'הוסף ליומן',
+    'event_title' => ':role ב- :venue',
+    'full_name' => 'שם מלא',
 ];
