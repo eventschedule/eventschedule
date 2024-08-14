@@ -57,10 +57,10 @@
         }
 
         function onChangeFont() {
-            var font_family = $('#font_family').find(':selected').val();
+            var font_family = $('#font_family').find(':selected').text();
             var link = document.createElement('link');
 
-            link.href = 'https://fonts.googleapis.com/css2?family=' + font_family + ':wght@400;700&display=swap';
+            link.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(font_family.trim()) + ':wght@400;700&display=swap';
             link.rel = 'stylesheet';
 
             document.head.appendChild(link);
