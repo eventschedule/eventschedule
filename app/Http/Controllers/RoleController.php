@@ -401,7 +401,7 @@ class RoleController extends Controller
         $role->accent_color = '#007BFF';
         $role->background = 'gradient';
         $role->background_colors = ColorUtils::randomGradient();
-        $role->background_rotation = 150;
+        $role->background_rotation = rand(0, 359);
         $role->accept_talent_requests = true;
         $role->timezone = auth()->user()->timezone;
         $role->language_code = auth()->user()->language_code;
