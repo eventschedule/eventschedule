@@ -2,7 +2,14 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
+    @if ($event && $event->role->description_html)
+    <meta name="description" content="{{ strip_tags($event->role->description_html) }}">
+    @elseif ($role->description_html)
+    <meta name="description" content="{{ strip_tags($role->description_html) }}">
+    @else
     <meta name="description" content="Connecting venues, talent, and vendors with their audience">
+    @endif
+    <meta http-equiv="X-Frame-Options" content="DENY">
 
     <meta property="og:title" content="Event Schedule">
     <meta property="og:description" content="Connecting venues, talent, and vendors with their audience">
