@@ -322,6 +322,7 @@ class EventController extends Controller
             $venue->postal_code = $request->venue_postal_code;
             $venue->country_code = $request->venue_country_code;
             $venue->background_colors = ColorUtils::randomGradient();
+            $venue->background_rotation = rand(0, 359);
             $venue->font_color = '#ffffff';
             $venue->save();
 
@@ -365,6 +366,7 @@ class EventController extends Controller
                 $role->timezone = $user->timezone;
                 $role->language_code = $user->language_code;
                 $role->background_colors = ColorUtils::randomGradient();
+                $role->background_rotation = rand(0, 359);
                 $role->font_color = '#ffffff';
                 $role->save();
 
