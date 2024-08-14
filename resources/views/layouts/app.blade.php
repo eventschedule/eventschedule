@@ -3,6 +3,7 @@
 
 <head class="h-full bg-white">
     <meta name="description" content="Connecting venues, talent, and vendors with their audience">
+    <meta http-equiv="X-Frame-Options" content="DENY">
 
     <meta property="og:title" content="Event Schedule">
     <meta property="og:description" content="Connecting venues, talent, and vendors with their audience">
