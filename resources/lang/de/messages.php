@@ -218,4 +218,12 @@ return [
     'claim_your_role_details' => ':user hat eine Veranstaltung für :role bei :venue geplant, melde dich mit dieser E-Mail-Adresse an, um es zu verwalten.',
     'an_email_will_be_sent' => 'Eine E-Mail-Benachrichtigung wird gesendet, um sie zu informieren',
     'email_not_associated_with_role' => 'E-Mail ist nicht mit einem Talent/Anbieter verbunden',
+    'open_sidebar' => 'Seitenleiste öffnen',
+    'close_sidebar' => 'Seitenleiste schließen',
+    'no_scheduled_events' => 'Keine geplanten Veranstaltungen',
+    'create_new_account' => 'Neues Konto erstellen',
+    'questions_or_suggestions' => 'Wenn Sie Fragen oder Vorschläge haben, schreiben Sie uns an :email',
+    'add_to_calendar' => 'Zum Kalender hinzufügen',
+    'event_title' => ':role bei :venue',
+    'full_name' => 'Vollständiger Name',
 ];

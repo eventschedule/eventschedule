@@ -218,4 +218,12 @@ return [
     'claim_your_role_details' => ':user heeft een evenement gepland voor :role bij :venue, meld je aan met dit e-mailadres om het te beheren.',
     'an_email_will_be_sent' => 'Er wordt een e-mailmelding verzonden om hen te informeren',
     'email_not_associated_with_role' => 'E-mail is niet geassocieerd met een talent/verkoper',
+    'open_sidebar' => 'Zijbalk openen',
+    'close_sidebar' => 'Zijbalk sluiten',
+    'no_scheduled_events' => 'Geen geplande evenementen',
+    'create_new_account' => 'Maak een nieuw account aan',
+    'questions_or_suggestions' => 'Als je vragen of suggesties hebt, stuur ons een e-mail op :email',
+    'add_to_calendar' => 'Toevoegen aan agenda',
+    'event_title' => ':role bij :venue',
+    'full_name' => 'Volledige naam',
 ];

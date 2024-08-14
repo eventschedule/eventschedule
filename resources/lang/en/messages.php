@@ -220,7 +220,6 @@ return [
     'claim_your_role_details' => ':user scheduled an event for :role at :venue, sign up with this email address to manage it.',
     'an_email_will_be_sent' => 'An email notification will be sent to inform them',
     'email_not_associated_with_role' => 'Email is not associated with a talent/vendor',
-    //
     'open_sidebar' => 'Open sidebar',
     'close_sidebar' => 'Close Sidebar',
     'no_scheduled_events' => 'No scheduled events',
@@ -229,4 +228,5 @@ return [
     'add_to_calendar' => 'Add to calendar',
     'event_title' => ':role at :venue',
     'full_name' => 'Full Name',
+    //
 ];

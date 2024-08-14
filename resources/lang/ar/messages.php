@@ -218,4 +218,12 @@ return [
     'claim_your_role_details' => ':user قام بجدولة حدث لـ :role في :venue، سجل بهذه العنوان الإلكتروني لإدارته.',
     'an_email_will_be_sent' => 'سيتم إرسال إشعار بالبريد الإلكتروني لإبلاغهم',
     'email_not_associated_with_role' => 'البريد الإلكتروني غير مرتبط بموهبة/بائع',
+    'open_sidebar' => 'افتح الشريط الجانبي',
+    'close_sidebar' => 'أغلق الشريط الجانبي',
+    'no_scheduled_events' => 'لا توجد أحداث مجدولة',
+    'create_new_account' => 'إنشاء حساب جديد',
+    'questions_or_suggestions' => 'إذا كانت لديك أي أسئلة أو اقتراحات، راسلنا عبر البريد الإلكتروني على :email',
+    'add_to_calendar' => 'أضف إلى التقويم',
+    'event_title' => ':role في :venue',
+    'full_name' => 'الاسم الكامل',
 ];
