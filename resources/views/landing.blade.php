@@ -288,8 +288,7 @@
                     Sign up today and experience a new level of efficiency and collaboration.
                 </h2>
                 <p class="mx-auto mt-6 max-w-xl text-lg leading-8 text-gray-600">
-                    Stay Connected: Use QR codes at events to engage with your audience and keep them informed about
-                    upcoming shows.
+                    Connect directly with your audience with our easy to use platform.
                 </p>
                 <div class="mt-10 flex items-center justify-center gap-x-6">
                     @auth
