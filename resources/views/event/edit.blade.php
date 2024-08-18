@@ -32,9 +32,9 @@
         function onChangeDateType() {
             var value = $('input[name="schedule_type"]:checked').val();
             if (value == 'one_time') {
-                $('#schedule_div').hide();
+                $('#days_of_week_div').hide();
             } else {
-                $('#schedule_div').show();
+                $('#days_of_week_div').show();
             }
         }
 
@@ -202,11 +202,11 @@
                             </div>
                         </div>
 
-                        <div id="schedule_div" class="mb-6 {{ ! $event || ! $event->schedule ? 'hidden' : '' }}">
+                        <div id="days_of_week_div" class="mb-6 {{ ! $event || ! $event->days_of_week ? 'hidden' : '' }}">
                             @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $index => $day)
-                            <label for="schedule_{{ $index }}" class="mr-3 text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">
-                                <input type="checkbox" id="schedule_{{ $index }}" name="schedule_{{ $index }}" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                                    {{ $event && $event->schedule && $event->schedule[$index] == '1' ? 'checked' : '' }}/> &nbsp;
+                            <label for="days_of_week_{{ $index }}" class="mr-3 text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">
+                                <input type="checkbox" id="days_of_week_{{ $index }}" name="days_of_week_{{ $index }}" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                                    {{ $event && $event->days_of_week && $event->days_of_week[$index] == '1' ? 'checked' : '' }}/> &nbsp;
                                 {{ __('messages.' . $day) }}
                             </label>
                             @endforeach
