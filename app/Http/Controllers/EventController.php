@@ -136,7 +136,7 @@ class EventController extends Controller
                     }
                 }
             } else {
-                return view('event/role_search', ['subdomain' => $subdomain, 'header' => $header]);
+                return view('event/role_search', ['subdomain' => $subdomain, 'header' => $header, 'roles' => $user->talentOrVendors()->get()]);
             }
         } else if (! $role->isVenue()) {
             if ($request->venue_email) {
@@ -144,7 +144,7 @@ class EventController extends Controller
             } else if ($request->venue_id) {
                 $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
             } else {
-                return view('event/venue_search', ['subdomain' => $subdomain]);
+                return view('event/venue_search', ['subdomain' => $subdomain, 'venues' => $user->venues()->get()]);
             }
         }
 

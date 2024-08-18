@@ -226,4 +226,6 @@ return [
     'claim_your_venue' => ':role scheduled an event at :venue',
     'claim_your_role' => ':venue scheduled an event for :role',
     'claim_email_line2' => 'Sign up with this email address to customize the event page or feel free to ignore this email, no future emails will be sent.',
+    'other' => 'Other',
+    'next' => 'Next',
 ];
