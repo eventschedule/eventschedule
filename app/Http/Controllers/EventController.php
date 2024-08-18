@@ -276,7 +276,7 @@ class EventController extends Controller
         $vendor = $role->isVendor() ? $role : null;
 
         if (! $venue) {
-            $venue = Role::findOrFail($request->venue_id);
+            $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
         }
 
         if ($venue && ! auth()->user()->isMember($venue->subdomain) && ! $venue->acceptRequests()) {
@@ -330,7 +330,8 @@ class EventController extends Controller
             }    
         } else {
 
-            $role = Role::findOrFail($request->role_id);
+            $roleId = UrlUtils::decodeId($request->role_id);
+            $role = Role::findOrFail($roleId);
 
             if ($role && $role->isVenue()) {
                 return redirect()
