@@ -213,7 +213,6 @@ return [
     'role_has_been_deleted_details' => ':type :name נמחק על ידי :user.',
     'message_sent' => 'ההודעה נשלחה בהצלחה',
     'an_email_will_be_sent' => 'יישלח דוא"ל כדי ליידע אותם',
-    'email_not_associated_with_role' => 'האימייל לא משויך לכישרון/מוכר',
     'open_sidebar' => 'פתח את הסרגל הצדדי',
     'close_sidebar' => 'סגור את הסרגל הצדדי',
     'no_scheduled_events' => 'אין אירועים מתוכננים',

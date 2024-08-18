@@ -16,7 +16,6 @@ use App\Models\Role;
 use App\Models\User;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
-use App\Rules\NoEmailAlias;
 use App\Rules\NoFakeEmail;
 
 class EventController extends Controller
@@ -78,8 +77,8 @@ class EventController extends Controller
     public function create(Request $request, $subdomain)
     {
         $request->validate([
-            'venue_email' => ['sometimes', new NoEmailAlias, new NoFakeEmail],
-            'role_email' => ['sometimes', new NoEmailAlias, new NoFakeEmail],
+            'venue_email' => ['sometimes', new NoFakeEmail],
+            'role_email' => ['sometimes', new NoFakeEmail],
         ]);
 
         $user = $request->user();
@@ -121,21 +120,13 @@ class EventController extends Controller
 
         if ($role->isVenue() && ! count($roles)) {
             if ($request->has('role_email')) {
-                if ($role = Role::whereEmail($request->role_email)->first()) {
+                if ($role = Role::whereEmail($request->role_email)->where('type', '!=', 'venue')->first()) {
                     if ($role->isTalent()) {
                         $talent = $role;
                     } else {
                         $vendor = $role;
                     }
                 }
-                
-                if ($venue && ! $venue->isVenue()) {
-                    return redirect()
-                            ->back()
-                            ->withInput()
-                            ->withErrors(['role_email' => __('messages.email_not_associated_with_rolek')]);
-                }
-
             } else {
                 return view('event/role_search', ['subdomain' => $subdomain, 'header' => $header]);
             }
@@ -148,15 +139,7 @@ class EventController extends Controller
                             ->withErrors(['venue_email' => __('messages.email_not_associated_with_venue')]);
                 }
 
-                $venue = Role::whereEmail($request->venue_email)->first();
-
-                if ($venue && ! $venue->isVenue()) {
-                    return redirect()
-                            ->back()
-                            ->withInput()
-                            ->withErrors(['venue_email' => __('messages.email_not_associated_with_venue')]);
-                }
-
+                $venue = Role::whereEmail($request->venue_email)->where('type', '=', 'venue')->first();
             } else {
                 return view('event/venue_search', ['subdomain' => $subdomain]);
             }

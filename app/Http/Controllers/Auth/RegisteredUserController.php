@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
-use App\Rules\NoEmailAlias;
 use App\Rules\NoFakeEmail;
 
 class RegisteredUserController extends Controller
@@ -35,7 +34,7 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class, new NoEmailAlias, new NoFakeEmail],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class, new NoFakeEmail],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
