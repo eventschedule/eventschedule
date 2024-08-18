@@ -61,6 +61,21 @@ class Event extends Model
                     ->format($pretty ? ($enable24 ? 'l, F jS • g:i' : 'l, F jS • g:i A') : 'Y-m-d H:i:s');
     }
 
+    public function matchesDate($date)
+    {
+        if (! $this->starts_at) {
+            return false;
+        }
+
+        if ($this->days_of_week) {            
+            $afterStartDate = Carbon::parse($this->localStartsAt())->isSameDay($date) || Carbon::parse($this->localStartsAt())->lessThanOrEqualTo($date);
+            $dayOfWeek = $date->dayOfWeek;
+            return $afterStartDate && $this->days_of_week[$dayOfWeek];
+        } else {
+            return Carbon::parse($this->localStartsAt())->isSameDay($date);
+        }
+    }
+
     public function getGuestUrl()
     {
         return route('role.view_guest', ['subdomain' => $this->role->subdomain, 'hash' => UrlUtils::encodeId($this->id)]);

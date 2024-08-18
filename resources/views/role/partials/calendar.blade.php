@@ -78,8 +78,7 @@
                         @endif
                         <ol class="mt-4 divide-y divide-gray-100 text-sm leading-6 lg:col-span-7 xl:col-span-8">
                             @foreach ($events as $each)
-                            @if ($each->starts_at &&
-                            Carbon\Carbon::parse($each->localStartsAt())->isSameDay($currentDate))
+                            @if ($each->matchesDate($currentDate))
                             <li>
                                 <a href="{{ $showAdd ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) : route('role.view_guest', ['subdomain' => isset($subdomain) ? $subdomain : $each->role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}"
                                     class="group flex">

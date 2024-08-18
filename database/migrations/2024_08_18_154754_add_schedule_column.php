@@ -16,7 +16,7 @@ return new class extends Migration
         });
 
         Schema::table('events', function (Blueprint $table) {
-            $table->string('schedule')->nullable();
+            $table->string('days_of_week')->nullable();
             $table->string('event_url')->nullable();
             $table->foreignId('venue_id')->nullable()->change();
             $table->foreignId('role_id')->nullable()->change();
@@ -33,7 +33,7 @@ return new class extends Migration
         });
 
         Schema::table('events', function (Blueprint $table) {
-            $table->dropColumn('schedule');
+            $table->dropColumn('days_of_week');
             $table->dropColumn('event_url');
         });
     }

@@ -188,12 +188,12 @@ class EventController extends Controller
 
         $event->fill($request->all());
     
-        $schedule = '';
+        $days_of_week = '';
         $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
         foreach ($days as $index => $day) {
-            $schedule .= request()->has('schedule_' . $index) ? '1' : '0';
+            $days_of_week .= request()->has('days_of_week_' . $index) ? '1' : '0';
         }
-        $event->schedule = $schedule ? $schedule : null;        
+        $event->days_of_week = $days_of_week ? $days_of_week : null;        
 
         if ($request->starts_at) {
             $timezone = auth()->user()->timezone;        
@@ -373,12 +373,12 @@ class EventController extends Controller
         $event->venue_id = $venue->id;
         $event->role_id = $role->id;
 
-        $schedule = '';
+        $days_of_week = '';
         $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
         foreach ($days as $index => $day) {
-            $schedule .= request()->has('schedule_' . $index) ? '1' : '0';
+            $days_of_week .= request()->has('days_of_week_' . $index) ? '1' : '0';
         }
-        $event->schedule = $schedule ? $schedule : null;        
+        $event->days_of_week = $days_of_week ? $days_of_week : null;        
 
         if ($event->starts_at) {
             $timezone = auth()->user()->timezone;
