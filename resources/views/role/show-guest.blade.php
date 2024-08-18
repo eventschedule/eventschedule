@@ -86,7 +86,7 @@
         background-attachment: scroll;
         @if ($event)
             color: {{ $otherRole->font_color }} !important;
-            background-color: {{ explode(', ', $otherRole->background_colors)[0] }} !important;
+            background-color: #888 !important;
             @if ($otherRole->background == 'gradient')
                 background-image: linear-gradient({{ $otherRole->background_rotation }}deg, {{ $otherRole->background_colors }});
             @elseif ($otherRole->background == 'image')
@@ -99,7 +99,7 @@
             @endif
         @else
             color: {{ $role->font_color }} !important;
-            background-color: {{ explode(', ', $role->background_colors)[0] }} !important;
+            background-color: #888 !important;
             @if ($role->background == 'gradient')
                 background-image: linear-gradient({{ $role->background_rotation }}deg, {{ $role->background_colors }});
             @elseif ($role->background == 'image')
