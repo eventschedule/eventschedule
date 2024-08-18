@@ -133,6 +133,10 @@ class RoleController extends Controller
 
     public function viewGuest(Request $request, $subdomain, $hash = '')
     {
+        if ($subdomain == 'www') {
+            return redirect()->route('landing');
+        }
+
         $user = auth()->user();
         $role = Role::subdomain($subdomain)->firstOrFail();
         $otherRole = null;
