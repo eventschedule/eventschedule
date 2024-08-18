@@ -60,7 +60,7 @@
                                 {{ $venue->name }}
                             </a>
                         </div>
-                        <input type="hidden" name="venue_email" value="{{ request()->venue_email }}" />
+                        <input type="hidden" name="venue_id" value="{{ App\Utils\UrlUtils::encodeId($venue->id) }}"/>
                         @else
                         <div class="mb-6">
                             <x-input-label for="venue_name" :value="__('messages.name') . ' *'" />
@@ -74,7 +74,7 @@
                             <x-text-input id="venue_email" name="venue_email" type="email" class="mt-1 block w-full"
                                 :value="old('venue_email', $venue ? $venue->email : request()->venue_email)" required
                                 readonly />
-                            <input type="hidden" name="venue_id" value="{{ $venue ? UrlUtils::encodeId($venue->id) : '' }}"/>
+                            <input type="hidden" name="venue_id" value="{{ $venue ? App\Utils\UrlUtils::encodeId($venue->id) : '' }}"/>
                             <p class="mt-2 text-sm text-gray-500">
                                 {{ __('messages.an_email_will_be_sent') }}
                             </p>
@@ -149,7 +149,7 @@
                             <x-text-input id="role_email" name="role_email" type="email" class="mt-1 block w-full"
                                 :value="old('role_email', $role ? $role->email : request()->role_email)" required
                                 readonly />
-                            <input type="hidden" name="role_id" value="{{ $role ? UrlUtils::encodeId($role->id) : '' }}"/>
+                            <input type="hidden" name="role_id" value="{{ $role ? App\Utils\UrlUtils::encodeId($role->id) : '' }}"/>
                             <p class="mt-2 text-sm text-gray-500">
                                 {{ __('messages.an_email_will_be_sent') }}
                             </p>
@@ -169,13 +169,32 @@
                     </div>
                 </div>
 
-                @if (! $venue || (! $venue->user_id || $user->isMember($venue->subdomain)))
+                @if (! $venue || ! $venue->user_id || $user->isMember($venue->subdomain))
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                             {{ __('messages.details') }}
                         </h2>
+
+                        <div class="mb-6">
+                            <fieldset>
+                                <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
+                                    <div class="flex items-center">
+                                        <input id="one_time" name="role_type" type="radio" value="one_time" CHECKED
+                                            class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                        <label for="one_time"
+                                            class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.one_time') }}</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input id="recurring" name="role_type" type="radio" value="recurring"
+                                            class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                        <label for="recurring"
+                                            class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.recurring') }}</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
 
                         <div class="mb-6">
                             <x-input-label for="starts_at"
