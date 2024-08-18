@@ -7,12 +7,12 @@
     @elseif ($role->description_html)
     <meta name="description" content="{{ strip_tags($role->description_html) }}">
     @else
-    <meta name="description" content="Connecting venues, talent, and vendors with their audience">
+    <meta name="description" content="The simple and free way to share your event schedule">
     @endif
     <meta http-equiv="X-Frame-Options" content="DENY">
 
     <meta property="og:title" content="Event Schedule">
-    <meta property="og:description" content="Connecting venues, talent, and vendors with their audience">
+    <meta property="og:description" content="The simple and free way to share your event schedule">
     <meta property="og:url" content="https://eventschedule.com">
     <meta property="og:site_name" content="Event Schedule">
 
@@ -25,7 +25,7 @@
     @endif
 
     <meta name="twitter:title" content="Event Schedule">
-    <meta name="twitter:description" content="Connecting venues, talent, and vendors with their audience">
+    <meta name="twitter:description" content="The simple and free way to share your event schedule">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image:alt" content="Event Schedule">
 
