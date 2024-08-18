@@ -13,6 +13,7 @@ class Event extends Model
         'starts_at',
         'duration',
         'description',
+        'event_url',
     ];
 
     protected static function boot()
