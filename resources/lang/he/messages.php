@@ -15,7 +15,6 @@ return [
     'event_updated' => 'האירוע עודכן בהצלחה',
     'request_accepted' => 'הבקשה התקבלה',
     'request_declined' => 'הבקשה נדחתה',
-    'email_not_associated_with_venue' => 'האימייל לא משויך למקום',
     'venue_not_accepting_requests' => 'המקום לא מקבל בקשות',
     'email_associated_with_venue' => 'האימייל משויך למקום',
     'event_created' => 'האירוע נוצר בהצלחה',
