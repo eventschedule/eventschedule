@@ -202,10 +202,11 @@
                             </div>
                         </div>
 
-                        <div id="schedule_div" class="mb-6 hiddenX">
+                        <div id="schedule_div" class="mb-6 {{ ! $event || ! $event->schedule ? 'hidden' : '' }}">
                             @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $index => $day)
                             <label for="schedule_{{ $index }}" class="mr-3 text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">
-                                <input type="checkbox" id="schedule_{{ $index }}" name="schedule_{{ $index }}" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"/> &nbsp;
+                                <input type="checkbox" id="schedule_{{ $index }}" name="schedule_{{ $index }}" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                                    {{ $event && $event->schedule && $event->schedule[$index] == '1' ? 'checked' : '' }}/> &nbsp;
                                 {{ __('messages.' . $day) }}
                             </label>
                             @endforeach

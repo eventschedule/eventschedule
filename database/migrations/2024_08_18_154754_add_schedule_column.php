@@ -16,7 +16,7 @@ return new class extends Migration
         });
 
         Schema::table('events', function (Blueprint $table) {
-            $table->text('schedule')->nullable();
+            $table->string('schedule')->nullable();
             $table->string('event_url')->nullable();
             $table->foreignId('venue_id')->nullable()->change();
             $table->foreignId('role_id')->nullable()->change();
