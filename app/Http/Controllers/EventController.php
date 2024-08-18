@@ -118,9 +118,17 @@ class EventController extends Controller
             }
         }
 
-        if ($role->isVenue() && ! count($roles)) {
-            if ($request->has('role_email')) {
+        if ($role->isVenue()) {
+            if ($request->role_email) {
                 if ($role = Role::whereEmail($request->role_email)->where('type', '!=', 'venue')->first()) {
+                    if ($role->isTalent()) {
+                        $talent = $role;
+                    } else {
+                        $vendor = $role;
+                    }
+                }
+            } else if ($request->role_id) {
+                if ($role = Role::findOrFail(UrlUtils::decodeId($request->role_id))) {
                     if ($role->isTalent()) {
                         $talent = $role;
                     } else {
@@ -131,15 +139,10 @@ class EventController extends Controller
                 return view('event/role_search', ['subdomain' => $subdomain, 'header' => $header]);
             }
         } else if (! $role->isVenue()) {
-            if ($request->has('venue_email')) {
-                if ($request->user()->email == $request->venue_email) {
-                    return redirect()
-                            ->back()
-                            ->withInput()
-                            ->withErrors(['venue_email' => __('messages.email_not_associated_with_venue')]);
-                }
-
+            if ($request->venue_email) {
                 $venue = Role::whereEmail($request->venue_email)->where('type', '=', 'venue')->first();
+            } else if ($request->venue_id) {
+                $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
             } else {
                 return view('event/venue_search', ['subdomain' => $subdomain]);
             }
@@ -273,14 +276,7 @@ class EventController extends Controller
         $vendor = $role->isVendor() ? $role : null;
         
         if (! $venue) {
-            $venue = Role::whereEmail($request->venue_email)->first();
-
-            if ($venue && ! $venue->isVenue()) {
-                return redirect()
-                        ->back()
-                        ->withInput()
-                        ->withErrors(['venue_email' => __('messages.email_not_associated_with_venue')]);
-            }
+            $venue = Role::findOrFail($request->venue_id);
         }
 
         if ($venue && ! auth()->user()->isMember($venue->subdomain) && ! $venue->acceptRequests()) {
@@ -334,7 +330,7 @@ class EventController extends Controller
             }    
         } else {
 
-            $role = Role::whereEmail($request->role_email)->first();
+            $role = Role::findOrFail($request->role_id);
 
             if ($role && $role->isVenue()) {
                 return redirect()

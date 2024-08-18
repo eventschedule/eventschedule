@@ -15,7 +15,6 @@ return [
     'event_updated' => 'Veranstaltung erfolgreich aktualisiert',
     'request_accepted' => 'Anfrage angenommen',
     'request_declined' => 'Anfrage abgelehnt',
-    'email_not_associated_with_venue' => 'E-Mail ist nicht mit einem Veranstaltungsort verknüpft',
     'venue_not_accepting_requests' => 'Veranstaltungsort akzeptiert keine Anfragen',
     'email_associated_with_venue' => 'E-Mail ist mit einem Veranstaltungsort verknüpft',
     'event_created' => 'Veranstaltung erfolgreich erstellt',

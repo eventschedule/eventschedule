@@ -15,7 +15,6 @@ return [
     'event_updated' => 'Successfully updated event',
     'request_accepted' => 'Request has been accepted',
     'request_declined' => 'Request has been declined',
-    'email_not_associated_with_venue' => 'Email is not associated with a venue',
     'venue_not_accepting_requests' => 'Venue is not accepting requests',
     'email_associated_with_venue' => 'Email is associated with a venue',
     'event_created' => 'Successfully created event',

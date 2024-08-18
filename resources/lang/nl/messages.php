@@ -15,7 +15,6 @@ return [
     'event_updated' => 'Evenement succesvol bijgewerkt',
     'request_accepted' => 'Verzoek geaccepteerd',
     'request_declined' => 'Verzoek afgewezen',
-    'email_not_associated_with_venue' => 'E-mail is niet gekoppeld aan een locatie',
     'venue_not_accepting_requests' => 'Locatie accepteert geen verzoeken',
     'email_associated_with_venue' => 'E-mail is gekoppeld aan een locatie',
     'event_created' => 'Evenement succesvol aangemaakt',

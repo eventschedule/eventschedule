@@ -15,7 +15,6 @@ return [
     'event_updated' => 'تم تحديث الحدث بنجاح',
     'request_accepted' => 'تم قبول الطلب',
     'request_declined' => 'تم رفض الطلب',
-    'email_not_associated_with_venue' => 'البريد الإلكتروني غير مرتبط بمكان',
     'venue_not_accepting_requests' => 'المكان لا يقبل الطلبات',
     'email_associated_with_venue' => 'البريد الإلكتروني مرتبط بمكان',
     'event_created' => 'تم إنشاء الحدث بنجاح',

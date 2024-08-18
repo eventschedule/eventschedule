@@ -74,6 +74,7 @@
                             <x-text-input id="venue_email" name="venue_email" type="email" class="mt-1 block w-full"
                                 :value="old('venue_email', $venue ? $venue->email : request()->venue_email)" required
                                 readonly />
+                            <input type="hidden" name="venue_id" value="{{ $venue ? UrlUtils::encodeId($venue->id) : '' }}"/>
                             <p class="mt-2 text-sm text-gray-500">
                                 {{ __('messages.an_email_will_be_sent') }}
                             </p>
@@ -148,6 +149,7 @@
                             <x-text-input id="role_email" name="role_email" type="email" class="mt-1 block w-full"
                                 :value="old('role_email', $role ? $role->email : request()->role_email)" required
                                 readonly />
+                            <input type="hidden" name="role_id" value="{{ $role ? UrlUtils::encodeId($role->id) : '' }}"/>
                             <p class="mt-2 text-sm text-gray-500">
                                 {{ __('messages.an_email_will_be_sent') }}
                             </p>

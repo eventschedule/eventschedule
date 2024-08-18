@@ -15,7 +15,6 @@ return [
     'event_updated' => 'Evento aggiornato con successo',
     'request_accepted' => 'Richiesta accettata',
     'request_declined' => 'Richiesta rifiutata',
-    'email_not_associated_with_venue' => 'L\'email non è associata a un luogo',
     'venue_not_accepting_requests' => 'Il luogo non accetta richieste',
     'email_associated_with_venue' => 'L\'email è associata a un luogo',
     'event_created' => 'Evento creato con successo',
