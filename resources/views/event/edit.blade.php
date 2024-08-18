@@ -28,6 +28,16 @@
             var selected = $('#venue_country').countrySelect('getSelectedCountryData');
             $('#venue_country_code').val(selected.iso2);
         }
+
+        function onChangeDateType() {
+            var value = $('input[name="schedule_type"]:checked').val();
+            if (value == 'one_time') {
+                $('#schedule_div').hide();
+            } else {
+                $('#schedule_div').show();
+            }
+        }
+
         </script>
     </x-slot>
 
@@ -177,23 +187,28 @@
                             {{ __('messages.details') }}
                         </h2>
 
-                        <div class="mb-6">
-                            <fieldset>
-                                <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
-                                    <div class="flex items-center">
-                                        <input id="one_time" name="role_type" type="radio" value="one_time" CHECKED
-                                            class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                                        <label for="one_time"
-                                            class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.one_time') }}</label>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <input id="recurring" name="role_type" type="radio" value="recurring"
-                                            class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                                        <label for="recurring"
-                                            class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.recurring') }}</label>
-                                    </div>
-                                </div>
-                            </fieldset>
+                        <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
+                            <div class="flex items-center">
+                                <input id="one_time" name="schedule_type" type="radio" value="one_time" onchange="onChangeDateType()" CHECKED
+                                    class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                <label for="one_time"
+                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.one_time') }}</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="recurring" name="schedule_type" type="radio" value="recurring" onchange="onChangeDateType()" 
+                                    class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                <label for="recurring"
+                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.recurring') }}</label>
+                            </div>
+                        </div>
+
+                        <div id="schedule_div" class="mb-6 hiddenX">
+                            @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $index => $day)
+                            <label for="schedule_{{ $index }}" class="mr-3 text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">
+                                <input type="checkbox" id="schedule_{{ $index }}" name="schedule_{{ $index }}" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"/> &nbsp;
+                                {{ __('messages.' . $day) }}
+                            </label>
+                            @endforeach
                         </div>
 
                         <div class="mb-6">
