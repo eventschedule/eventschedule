@@ -213,7 +213,6 @@ return [
     'role_has_been_deleted_details' => ':type :name è stato eliminato da :user.',
     'message_sent' => 'Messaggio inviato con successo',
     'an_email_will_be_sent' => 'Una notifica email verrà inviata per informarli',
-    'email_not_associated_with_role' => 'Email non associata a un talento/venditore',
     'open_sidebar' => 'Apri la barra laterale',
     'close_sidebar' => 'Chiudi la barra laterale',
     'no_scheduled_events' => 'Nessun evento programmato',

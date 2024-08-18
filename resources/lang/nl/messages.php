@@ -213,7 +213,6 @@ return [
     'role_has_been_deleted_details' => ':type :name is verwijderd door :user.',
     'message_sent' => 'Bericht succesvol verzonden',
     'an_email_will_be_sent' => 'Er wordt een e-mailmelding verzonden om hen te informeren',
-    'email_not_associated_with_role' => 'E-mail is niet geassocieerd met een talent/verkoper',
     'open_sidebar' => 'Zijbalk openen',
     'close_sidebar' => 'Zijbalk sluiten',
     'no_scheduled_events' => 'Geen geplande evenementen',

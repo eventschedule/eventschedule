@@ -213,7 +213,6 @@ return [
     'role_has_been_deleted_details' => 'تم حذف :type :name بواسطة :user.',
     'message_sent' => 'تم إرسال الرسالة بنجاح',
     'an_email_will_be_sent' => 'سيتم إرسال إشعار بالبريد الإلكتروني لإبلاغهم',
-    'email_not_associated_with_role' => 'البريد الإلكتروني غير مرتبط بموهبة/بائع',
     'open_sidebar' => 'افتح الشريط الجانبي',
     'close_sidebar' => 'أغلق الشريط الجانبي',
     'no_scheduled_events' => 'لا توجد أحداث مجدولة',

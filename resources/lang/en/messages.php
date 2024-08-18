@@ -215,7 +215,6 @@ return [
     'role_has_been_deleted_details' => 'The :type :name has been deleted by :user.',
     'message_sent' => 'Successfully sent message',
     'an_email_will_be_sent' => 'An email notification will be sent to inform them',
-    'email_not_associated_with_role' => 'Email is not associated with a talent/vendor',
     'open_sidebar' => 'Open sidebar',
     'close_sidebar' => 'Close Sidebar',
     'no_scheduled_events' => 'No scheduled events',
