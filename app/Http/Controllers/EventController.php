@@ -274,7 +274,7 @@ class EventController extends Controller
         $venue = $role->isVenue() ? $role : null;
         $talent = $role->isTalent() ? $role : null;
         $vendor = $role->isVendor() ? $role : null;
-        
+
         if (! $venue) {
             $venue = Role::findOrFail($request->venue_id);
         }
