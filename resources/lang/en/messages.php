@@ -226,9 +226,6 @@ return [
     'full_name' => 'Full Name',
     //
     'claim_your_venue' => ':role scheduled an event at :venue',
-    'claim_your_venue_details' => ':role added an event at :venue to their schedule',
     'claim_your_role' => ':venue scheduled an event for :role',
-    'claim_your_role_details' => ':venue added an event for :role to their schedule',
     'claim_email_line2' => 'Sign up with this email address to customize the event page or feel free to ignore this email, no future emails will be sent.',
-    'claim_email_line3' => 'p.s. if you\'re looking for a solution for your own event schedule we have a site to recommend ;)',
 ];

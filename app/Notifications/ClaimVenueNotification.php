@@ -6,7 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Utils\UrlUtils;
+use App\Utils\UrlUtils;
 
 class ClaimVenueNotification extends Notification
 {
@@ -42,16 +42,18 @@ class ClaimVenueNotification extends Notification
         $user = $this->event->user;
 
         return (new MailMessage)
+                    ->cc($user->email)
                     ->replyTo($user->email, $user->name)
                     ->subject(str_replace(
                         [':role', ':venue'], 
                         [$role->name, $venue->name],
                         __('messages.claim_your_venue')))
-                    ->line(__('messages.claim_your_venue_details'))
-                    ->action(__('messages.view_event'), route('role.view_guest', ['hash' => UrlUtils::encodeId($this->event->id)]))
-                    ->line(__('messages.claim_email_line2'))
-                    ->action(__('messages.sign_up'), route('sign_up', ['email' => $venue->email]))
-                    ->line(__('messages.claim_email_line3'));
+                    ->line(str_replace(
+                        [':venue', ':role'], 
+                        [$venue->name, $role->name],
+                        __('messages.claim_your_venue')))
+                    ->action(__('messages.view_event'), route('role.view_guest', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($this->event->id)]))
+                    ->line(__('messages.claim_email_line2'));
     }
 
     /**
