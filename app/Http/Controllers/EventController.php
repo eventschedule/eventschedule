@@ -188,6 +188,13 @@ class EventController extends Controller
 
         $event->fill($request->all());
     
+        $schedule = '';
+        $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+        foreach ($days as $index => $day) {
+            $schedule .= request()->has('schedule_' . $index) ? '1' : '0';
+        }
+        $event->schedule = $schedule ? $schedule : null;        
+
         if ($request->starts_at) {
             $timezone = auth()->user()->timezone;        
             $event->starts_at = Carbon::createFromFormat('Y-m-d H:i:s', $request->starts_at, $timezone)
@@ -365,6 +372,13 @@ class EventController extends Controller
         $event->user_id = auth()->user()->id;
         $event->venue_id = $venue->id;
         $event->role_id = $role->id;
+
+        $schedule = '';
+        $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+        foreach ($days as $index => $day) {
+            $schedule .= request()->has('schedule_' . $index) ? '1' : '0';
+        }
+        $event->schedule = $schedule ? $schedule : null;        
 
         if ($event->starts_at) {
             $timezone = auth()->user()->timezone;
