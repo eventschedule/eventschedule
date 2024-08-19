@@ -34,7 +34,7 @@ class VerifyEmail extends BaseVerifyEmail
     {
         return URL::temporarySignedRoute(
             $this->type == 'user' ? 'verification.verify' : 'role.verification.verify',
-            Carbon::now()->addMinutes(Config::get('auth.verification.expire', 6000000)),
+            Carbon::now()->addMinutes(Config::get('auth.verification.expire', 60)),
             $this->type == 'user' 
                 ? ['id' => $notifiable->getKey(), 'hash' => sha1($notifiable->getEmailForVerification())]
                 : ['subdomain' => $this->subdomain, 'hash' => sha1($notifiable->getEmailForVerification())]
