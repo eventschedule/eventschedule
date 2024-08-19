@@ -6,11 +6,19 @@ class UrlUtils
 {
     public static function encodeId($value)
     {
+        if (! $value) {
+            return null;
+        }
+
         return base64_encode($value + 389278);
     }
 
     public static function decodeId($value)
     {
+        if (! $value) {
+            return null;
+        }
+
         return base64_decode($value) - 389278;
     }
 
