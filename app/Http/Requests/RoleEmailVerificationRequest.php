@@ -8,7 +8,7 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
-class EmailVerificationRequest extends FormRequest
+class RoleEmailVerificationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
