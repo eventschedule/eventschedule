@@ -54,7 +54,10 @@ class HomeController extends Controller
                     ->orWhereIn('role_id', $roleIds);
             })
             ->where('is_accepted', true)
-            ->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
+            ->where(function ($query) use ($startOfMonth, $endOfMonth) {
+                $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
+                    ->orWhereNotNull('days_of_week');
+            })
             ->orderBy('starts_at')
             ->get();
 
