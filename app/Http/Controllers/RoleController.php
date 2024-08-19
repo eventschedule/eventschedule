@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\AddedMemberNotification;
-use App\Http\Requests\EmailVerificationRequest;
+use App\Http\Requests\RoleEmailVerificationRequest;
 use App\Notifications\DeletedRoleNotification;
 use Illuminate\Auth\Events\Verified;
 use Endroid\QrCode\QrCode;
@@ -731,7 +731,7 @@ class RoleController extends Controller
         exit;
     }
 
-    public function verify(EmailVerificationRequest $request, $subdomain)
+    public function verify(RoleEmailVerificationRequest $request, $subdomain)
     {
         $role = Role::whereSubdomain($subdomain)->firstOrFail();
 
