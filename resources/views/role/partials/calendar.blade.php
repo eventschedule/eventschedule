@@ -99,10 +99,28 @@
             </div>
         </div>
         <div class="px-4 py-10 sm:px-6 lg:hidden">
+            @php
+            $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth();
+            $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth();
+            $currentDate = $startOfMonth->copy();
+            @endphp
+
             @if (count($events))
             <ol
                 class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow ring-1 ring-black ring-opacity-5">
+                @while ($currentDate->lte($endOfMonth))
+                @php
+                $currentDayOfWeek = $currentDate->dayOfWeek; // Get the day of the week (0 for Sunday, 6 for Saturday)
+                @endphp
+
                 @foreach ($events as $each)
+                @php
+                // Check if the event occurs on the current day of the week or matches the specific date
+                $isRecurringToday = isset($each->day_of_week) && $each->day_of_week[$currentDayOfWeek] == '1';
+                $isEventOnDate = $each->matchesDate($currentDate);
+                @endphp
+
+                @if ($isRecurringToday || $isEventOnDate)
                 <a href="{{ $each->getGuestUrl() }}">
                     <li class="relative flex items-center space-x-6 py-6 px-4 xl:static">
                         @if ($each->role->profile_image_url)
@@ -125,9 +143,11 @@
                                                 clip-rule="evenodd" />
                                         </svg>
                                     </dt>
-                                    <dd><time datetime="{{ $each->starts_at }}">
-                                            {{ Carbon\Carbon::parse($each->localStartsAt())->format($each->role->use_24_hour_time ? 'F j, Y H:i' : 'F j, Y g:i A') }}
-                                        </time></dd>
+                                    <dd>
+                                        <time datetime="{{ $currentDate->format('Y-m-d') }}">
+                                            {{ $currentDate->format($each->role->use_24_hour_time ? 'F j, Y H:i' : 'F j, Y g:i A') }}
+                                        </time>
+                                    </dd>
                                 </div>
                                 <div
                                     class="mt-2 flex items-start space-x-3 xl:ml-3.5 xl:mt-0 xl:border-l xl:border-gray-400 xl:border-opacity-50 xl:pl-3.5">
@@ -148,7 +168,13 @@
                         </div>
                     </li>
                 </a>
+                @endif
                 @endforeach
+
+                @php
+                $currentDate->addDay(); // Move to the next day
+                @endphp
+                @endwhile
             </ol>
             @else
             <div class="p-10 max-w-5xl mx-auto px-4">

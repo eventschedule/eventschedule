@@ -9,7 +9,6 @@
     @else
     <meta name="description" content="The simple and free way to share your event schedule">
     @endif
-    <meta http-equiv="X-Frame-Options" content="DENY">
 
     <meta property="og:title" content="Event Schedule">
     <meta property="og:description" content="The simple and free way to share your event schedule">
