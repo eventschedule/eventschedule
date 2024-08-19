@@ -193,7 +193,7 @@ class EventController extends Controller
         foreach ($days as $index => $day) {
             $days_of_week .= request()->has('days_of_week_' . $index) ? '1' : '0';
         }
-        $event->days_of_week = $days_of_week ? $days_of_week : null;        
+        $event->days_of_week = request()->schedule_type == 'recurring' ? $days_of_week : null;
 
         if ($request->starts_at) {
             $timezone = auth()->user()->timezone;        
@@ -378,7 +378,7 @@ class EventController extends Controller
         foreach ($days as $index => $day) {
             $days_of_week .= request()->has('days_of_week_' . $index) ? '1' : '0';
         }
-        $event->days_of_week = $days_of_week ? $days_of_week : null;        
+        $event->days_of_week = request()->schedule_type == 'recurring' ? $days_of_week : null;
 
         if ($event->starts_at) {
             $timezone = auth()->user()->timezone;
