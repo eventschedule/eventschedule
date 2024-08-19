@@ -220,4 +220,12 @@ return [
     'add_to_calendar' => 'Ajouter au calendrier',
     'event_title' => ':role à :venue',
     'full_name' => 'Nom complet',
+    "claim_your_venue": ":role a planifié un événement à :venue",
+    "claim_your_role": ":venue a planifié un événement pour :role",
+    "claim_email_line2": "Inscrivez-vous avec cette adresse e-mail pour personnaliser la page de l'événement ou n'hésitez pas à ignorer cet e-mail, aucun e-mail futur ne sera envoyé.",
+    "other": "Autre",
+    "next": "Suivant",
+    "one_time": "Une fois",
+    "recurring": "Récurrent",
+    "days_of_week": "Jours de la semaine",
 ];

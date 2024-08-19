@@ -222,7 +222,6 @@ return [
     'add_to_calendar' => 'Add to calendar',
     'event_title' => ':role at :venue',
     'full_name' => 'Full Name',
-    //
     'claim_your_venue' => ':role scheduled an event at :venue',
     'claim_your_role' => ':venue scheduled an event for :role',
     'claim_email_line2' => 'Sign up with this email address to customize the event page or feel free to ignore this email, no future emails will be sent.',
@@ -231,4 +230,5 @@ return [
     'one_time' => 'One-time',
     'recurring' => 'Recurring',
     'days_of_week' => 'Days of the Week',
+    //
 ];
