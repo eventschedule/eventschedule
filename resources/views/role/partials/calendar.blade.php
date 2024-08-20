@@ -80,7 +80,7 @@
                             @foreach ($events as $each)
                             @if ($each->matchesDate($currentDate))
                             <li>
-                                <a href="{{ $showAdd ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) : route('event.view_guest', ['subdomain' => isset($subdomain) ? $subdomain : $each->role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}"
+                                <a href="{{ $showAdd ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) : route('role.view_guest', ['subdomain' => isset($subdomain) ? $subdomain : $each->role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}"
                                     class="group flex">
                                     <p class="flex-auto truncate font-medium group-hover:text-indigo-600 text-gray-900">
                                         {{ isset($subdomain) && $subdomain == $each->role->subdomain ? $each->venue->name : $each->role->name }}

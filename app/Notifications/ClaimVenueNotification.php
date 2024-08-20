@@ -52,7 +52,7 @@ class ClaimVenueNotification extends Notification
                         [':venue', ':role'], 
                         [$venue->name, $role->name],
                         __('messages.claim_your_venue')))
-                    ->action(__('messages.view_event'), route('event.view_guest', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($this->event->id)]))
+                    ->action(__('messages.view_event'), route('role.view_guest', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($this->event->id)]))
                     ->line(__('messages.claim_email_line2'));
     }
 
