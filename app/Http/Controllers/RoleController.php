@@ -771,7 +771,7 @@ class RoleController extends Controller
         session(['pending_venue' => $subdomain]);
 
         $mainDomain = config('app.url');
-        $redirectUrl = $mainDomain . route('event.create', ['subdomain' => $subdomain]);
+        $redirectUrl = $mainDomain . route('event.create', ['subdomain' => $subdomain], false);
 
         return redirect($redirectUrl);
     }
