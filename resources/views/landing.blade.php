@@ -268,7 +268,7 @@
                     officia exercitation. Eu non aute velit id velit Lorem elit anim pariatur.”</p>
             </blockquote>
             <figcaption class="mt-10 flex items-center gap-x-6">
-                <img class="h-12 w-12 rounded-full bg-gray-50"
+                <img class="h-12 w-12 bg-gray-50"
                     src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=1024&h=1024&q=80"
                     alt="">
                 <div class="text-sm leading-6">
