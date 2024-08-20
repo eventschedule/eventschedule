@@ -131,9 +131,8 @@ class RoleController extends Controller
                 ->with('message', str_replace(':name', $role->name, __('messages.unfollowed_role')));
     }
 
-    public function viewGuest(Request $request, $subdomain, $hash = '', $param = '')
+    public function viewGuest(Request $request, $subdomain)
     {
-        \Log::info($subdomain . ' - ' . $hash . ' - ' . $request->hash);
         if ($subdomain == 'www') {
             return redirect()->route('landing');
         }
@@ -145,8 +144,8 @@ class RoleController extends Controller
         $month = $request->month;
         $year = $request->year;
 
-        if ($hash) {
-            $event_id = UrlUtils::decodeId($hash);
+        if ($request->hash) {
+            $event_id = UrlUtils::decodeId($request->hash);
             $event = Event::findOrFail($event_id);
             $otherRole = $event->venue->subdomain == $subdomain ? $event->role : $event->venue;
 
