@@ -6,8 +6,6 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
-require __DIR__.'/auth.php';
-
 if (config('app.env') != 'local') {
     Route::domain('{subdomain}.eventschedule.com')->group(function () {
         Route::get('/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
@@ -15,6 +13,8 @@ if (config('app.env') != 'local') {
         Route::get('/{hash}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
     });
 }
+
+require __DIR__.'/auth.php';
 
 Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
