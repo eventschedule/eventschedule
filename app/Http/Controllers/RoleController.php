@@ -114,7 +114,7 @@ class RoleController extends Controller
 
         session()->forget('pending_follow');
 
-        return redirect(route($role->getTypePlural()))
+        return redirect(url(route($role->getTypePlural())))
                 ->with('message', str_replace(':name', $role->name, __('messages.followed_role')));
     }
 
@@ -767,6 +767,6 @@ class RoleController extends Controller
     {
         session(['pending_venue' => $subdomain]);
 
-        return redirect()->route('event.create', ['subdomain' => $subdomain]);
+        return url(redirect()->route('event.create', ['subdomain' => $subdomain]));
     }
 }
