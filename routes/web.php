@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/auth.php';
 
+Route::domain('{subdomain}.eventschedule.com')->group(function () {
+    Route::get('/{hash}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
+}
+
 Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
 Route::post('/message', [HomeController::class, 'message'])->name('message')->middleware('throttle:1,1');
@@ -61,7 +65,6 @@ if (config('app.env') == 'local') {
     Route::domain('{subdomain}.eventschedule.com')->group(function () {
         Route::get('/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
-        Route::get('/{hash}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
         Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');
     });
 }
