@@ -392,7 +392,7 @@
             <p>
                 {!! str_replace(':link', '<a href="' . url('/') . '" target="_blank" class="hover:underline">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}
                 •
-                @if ($role->country_code == 'il' || ($event && $event->venue && $event->venue->country_code == 'il'))
+                @if (($role->country_code == 'il' && $role->id != 6) || ($event && $event->venue && $event->venue->country_code == 'il' && $event->venue->id != 6))
                 {!! str_replace(':link', '<a href="https://myjewishsoulmate.com" target="_blank" class="hover:underline">My Jewish Soulmate</a>',  __('messages.supported_by')) !!}
                 @else
                 {!! str_replace(':link', '<a href="https://mudeo.app" target="_blank" class="hover:underline">mudeo</a>',  __('messages.supported_by')) !!} | make music together
