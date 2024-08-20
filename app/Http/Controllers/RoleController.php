@@ -773,8 +773,6 @@ class RoleController extends Controller
         $mainDomain = config('app.url');
         $redirectUrl = $mainDomain . route('event.create', ['subdomain' => $subdomain], false);
 
-        dd($redirectUrl);
-
         return redirect($redirectUrl);
     }
 }
