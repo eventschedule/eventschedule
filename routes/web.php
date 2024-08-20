@@ -10,6 +10,8 @@ require __DIR__.'/auth.php';
 
 if (config('app.env') != 'local') {
     Route::domain('{subdomain}.eventschedule.com')->group(function () {
+        Route::get('/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
+        Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
         Route::get('/{hash}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
     });
 }
@@ -65,8 +67,6 @@ if (config('app.env') == 'local') {
     });    
 } else {
     Route::domain('{subdomain}.eventschedule.com')->group(function () {
-        Route::get('/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
-        Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
         Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');
     });
 }

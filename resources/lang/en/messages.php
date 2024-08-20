@@ -230,4 +230,5 @@ return [
     'one_time' => 'One-time',
     'recurring' => 'Recurring',
     'days_of_week' => 'Days of the Week',
+    //
 ];
