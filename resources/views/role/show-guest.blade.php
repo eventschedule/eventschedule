@@ -325,7 +325,7 @@
             </div>
         @endif
 
-        <div class="flex items-center justify-between pb-10">
+        <div class="flex items-center justify-between pb-16">
             <div class="mt-1 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6">
                 @if($role->email && $role->user_id)
                 <div class="mt-2 flex items-center text-sm">
