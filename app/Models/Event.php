@@ -49,7 +49,7 @@ class Event extends Model
         $timezone = 'UTC';
         $enable24 = false;
 
-        if ($user =auth()->user()) {
+        if ($user = auth()->user()) {
             $timezone = $user->timezone;
         } else {
             $timezone = $this->venue->timezone;
@@ -86,6 +86,11 @@ class Event extends Model
         $title = __('messages.event_title');
 
         return str_replace([':role', ':venue'], [$this->role->name, $this->venue->name], $title);
+    }
+
+    public function getMetaDescription()
+    {
+        return $this->venue->name . ' | ' . $this->localStartsAt(true);
     }
 
     public function getGoogleCalendarUrl()
