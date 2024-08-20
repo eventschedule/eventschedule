@@ -44,7 +44,7 @@ class RequestAcceptedNotification extends Notification
                     ->replyTo($this->venue->user->email, $this->venue->user->name)
                     ->subject(str_replace(':venue', $venue->name, __('messages.' . $role->type . '_request_accepted')))
                     ->line(str_replace(':venue', $venue->name, __('messages.' . $role->type . '_request_accepted')))
-                    ->action(__('messages.view_event'), route('role.view_guest', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($this->event->id)]))
+                    ->action(__('messages.view_event'), route('event.view_guest', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($this->event->id)]))
                     ->line(__('messages.thank_you_for_using'));
     }
 

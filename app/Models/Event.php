@@ -78,7 +78,7 @@ class Event extends Model
 
     public function getGuestUrl()
     {
-        return route('role.view_guest', ['subdomain' => $this->role->subdomain, 'hash' => UrlUtils::encodeId($this->id)]);
+        return route('event.view_guest', ['subdomain' => $this->role->subdomain, 'hash' => UrlUtils::encodeId($this->id)]);
     }
 
     public function getTitle()
