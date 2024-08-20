@@ -131,9 +131,9 @@ class RoleController extends Controller
                 ->with('message', str_replace(':name', $role->name, __('messages.unfollowed_role')));
     }
 
-    public function viewGuest(Request $request, $subdomain, $hash = '')
+    public function viewGuest(Request $request, $subdomain, $hash = '', $param = '')
     {
-        \Log::info($subdomain . ' - ' . $hash);
+        \Log::info($subdomain . ' - ' . $hash . ' - ' . $param);
         if ($subdomain == 'www') {
             return redirect()->route('landing');
         }
