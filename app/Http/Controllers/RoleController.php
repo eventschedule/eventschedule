@@ -133,6 +133,7 @@ class RoleController extends Controller
 
     public function viewGuest(Request $request, $subdomain, $hash = '')
     {
+        \Log::info($subdomain . ' - ' . $hash);
         if ($subdomain == 'www') {
             return redirect()->route('landing');
         }
