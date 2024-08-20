@@ -224,8 +224,8 @@ return [
     "claim_your_role" => ":venue programó un evento para :role",
     "claim_email_line2" => "Regístrate con esta dirección de correo electrónico para personalizar la página del evento o siéntete libre de ignorar este correo electrónico, no se enviarán futuros correos electrónicos.",
     "other" => "Otro",
-    "next": "Siguiente",
-    "one_time": "Una vez",
-    "recurring": "Recurrente",
-    "days_of_week": "Días de la semana",
+    "next" => "Siguiente",
+    "one_time" => "Una vez",
+    "recurring" => "Recurrente",
+    "days_of_week" => "Días de la semana",
 ];
