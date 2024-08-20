@@ -6,34 +6,31 @@
     <meta name="description" content="{{ strip_tags($event->role->description_html) }}">
     @elseif ($role->description_html)
     <meta name="description" content="{{ strip_tags($role->description_html) }}">
-    @else
-    <meta name="description" content="The simple and free way to share your event schedule">
     @endif
 
-    <meta property="og:title" content="Event Schedule">
-    <meta property="og:description" content="The simple and free way to share your event schedule">
+    @if ($event)
+    <meta property="og:title" content="{{ $event->role->name }}">
+    <meta property="og:description" content="{{ $event->getTitle() }}">
+    <meta name="twitter:title" content="{{ $event->role->name }}">
+    <meta name="twitter:description" content="{{ $event->getTitle() }}">
+    @else
+    <meta property="og:title" content="{{ $role->name }}">
+    <meta property="og:description" content="{{ strip_tags($role->description_html) }}">
+    <meta name="twitter:title" content="{{ $role->name }}">
+    <meta name="twitter:description" content="{{ strip_tags($role->description_html) }}">
+    @endif
+
     <meta property="og:url" content="https://eventschedule.com">
     <meta property="og:site_name" content="Event Schedule">
-
-    @if ($event && $event->role->profile_image_url)
-    <meta property="og:image" content="{{ $event->role->profile_image_url }}">
-    @elseif ($role->profile_image_url)
-    <meta property="og:image" content="{{ $role->profile_image_url }}">
-    @else
-    <meta property="og:image" content="https://eventschedule.com/images/background.jpg">
-    @endif
-
-    <meta name="twitter:title" content="Event Schedule">
-    <meta name="twitter:description" content="The simple and free way to share your event schedule">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image:alt" content="Event Schedule">
 
     @if ($event && $event->role->profile_image_url)
+    <meta property="og:image" content="{{ $event->role->profile_image_url }}">
     <meta name="twitter:image" content="{{ $event->role->profile_image_url }}">
     @elseif ($role->profile_image_url)
+    <meta property="og:image" content="{{ $role->profile_image_url }}">
     <meta name="twitter:image" content="{{ $role->profile_image_url }}">
-    @else
-    <meta name="twitter:image" content="https://eventschedule.com/images/background.jpg">
     @endif
 
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.99em%22 font-size=%2275%22>📅</text></svg>">
