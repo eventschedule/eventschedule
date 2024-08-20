@@ -8,9 +8,11 @@ use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/auth.php';
 
-Route::domain('{subdomain}.eventschedule.com')->group(function () {
-    Route::get('/{hash}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
-});
+if (config('app.env') != 'local') {
+    Route::domain('{subdomain}.eventschedule.com')->group(function () {
+        Route::get('/{hash}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
+    });
+}
 
 Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
