@@ -3,9 +3,9 @@
 
 <head>
     @if ($event && $event->role->description_html)
-    <meta name="description" content="{{ strip_tags($event->role->description_html) }}">
+    <meta name="description" content="{{ trim(strip_tags($event->role->description_html)) }}">
     @elseif ($role->description_html)
-    <meta name="description" content="{{ strip_tags($role->description_html) }}">
+    <meta name="description" content="{{ trim(strip_tags($role->description_html)) }}">
     @endif
 
     @if ($event)
@@ -15,9 +15,9 @@
     <meta name="twitter:description" content="{{ $event->getTitle() }}">
     @else
     <meta property="og:title" content="{{ $role->name }}">
-    <meta property="og:description" content="{{ strip_tags($role->description_html) }}">
+    <meta property="og:description" content="{{ trim(strip_tags($role->description_html)) }}">
     <meta name="twitter:title" content="{{ $role->name }}">
-    <meta name="twitter:description" content="{{ strip_tags($role->description_html) }}">
+    <meta name="twitter:description" content="{{ trim(strip_tags($role->description_html)) }}">
     @endif
 
     <meta property="og:url" content="https://eventschedule.com">
