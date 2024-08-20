@@ -124,7 +124,7 @@
                 <a href="{{ $each->getGuestUrl() }}">
                     <li class="relative flex items-center space-x-6 py-6 px-4 xl:static">
                         @if ($each->role->profile_image_url)
-                        <img src="{{ $each->role->profile_image_url }}" class="h-14 w-14 flex-none rounded-full">
+                        <img src="{{ $each->role->profile_image_url }}" class="h-14 w-14 flex-none">
                         @else
                         <div class="h-14 w-14"></div>
                         @endif

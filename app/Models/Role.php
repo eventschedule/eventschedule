@@ -239,8 +239,12 @@ class Role extends Model implements MustVerifyEmail
     
     public static function cleanSubdomain($name)
     {
-        $subdomain = preg_replace('/[^a-zA-Z0-9- ]/', '', trim($name));
-        $subdomain = str_replace([' '], [''], strtolower(trim($subdomain)));
+        $subdomain = preg_replace('/[^a-zA-Z0-9]/', '', trim($name));
+        $subdomain = strtolower(trim($subdomain));
+
+        if (strlen($subdomain) < 5) {
+            return \Str::random(8);
+        }
     
         return $subdomain;
     }

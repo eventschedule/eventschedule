@@ -23,7 +23,7 @@
         <a href="{{ $event->role->getGuestUrl() }}" target="_blank" class="hover:underline">
             <div class="flex flex-1 flex-col p-8">
                 @if ($event->role->profile_image_url)
-                <img class="mx-auto h-32 w-32 flex-shrink-0 rounded-full object-cover" src="{{ $event->role->profile_image_url }}"
+                <img class="mx-auto h-32 w-32 flex-shrink-0 object-cover" src="{{ $event->role->profile_image_url }}"
                     alt="Profile Image">
                 @endif
                 <h3 class="mt-6 text-sm font-medium text-gray-900">{{ $event->role->name }}</h3>
