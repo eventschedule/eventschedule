@@ -775,4 +775,9 @@ class RoleController extends Controller
 
         return redirect($redirectUrl);
     }
+
+    public function validateAddress(Request $request)
+    {
+        return 'test 1234';
+    }
 }

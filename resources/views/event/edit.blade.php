@@ -38,6 +38,27 @@
             }
         }
 
+        function onValidateClick() {
+            var country = $('#venue_country').countrySelect('getSelectedCountryData');
+            
+            $.get({
+                url: '{{ route('validate_address') }}',
+                data: {
+                    address1: $('#venue_address1').val(),
+                    city: $('#venue_city').val(),
+                    state: $('#venue_state').val(),
+                    postal_code: $('#venue_postal_code').val(),                    
+                    country: country ? country.name : '',
+                },
+                success: function(response) {
+                    console.log(response);
+                },
+                error: function(xhr, status, error) {
+                    console.error(error);
+                }
+            });
+        }
+
         </script>
     </x-slot>
 
@@ -291,7 +312,12 @@
         <div class="max-w-7xl mx-auto space-y-6">
             <div class="flex gap-4 items-center justify-between">
                 <div class="flex gap-4">
-                    <x-primary-button>{{ __('messages.save') }}</x-primary-button>
+                    @if (! $venue)
+                        <x-secondary-button onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
+                        <x-primary-button id="save_button" class="hidden">{{ __('messages.save') }}</x-primary-button>
+                    @else
+                        <x-primary-button>{{ __('messages.save') }}</x-primary-button>
+                    @endif                    
 
                     <x-cancel-button></x-cancel-button>
                 </div>
