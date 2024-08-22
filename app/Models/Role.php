@@ -39,6 +39,11 @@ class Role extends Model implements MustVerifyEmail
         'accept_vendor_requests',
         'use_24_hour_time',
         'timezone',
+        'formatted_address',
+        'google_place_id',
+        'geo_address',
+        'geo_lat',
+        'geo_lon',
     ];
 
     protected static function boot()
@@ -49,6 +54,7 @@ class Role extends Model implements MustVerifyEmail
             $model->email = strtolower($model->email);
             $model->description_html = MarkdownUtils::convertToHtml($model->description);
 
+            /*
             $address = $model->fullAddress();
 
             if ($address && $address != $model->geo_address) {
@@ -68,6 +74,7 @@ class Role extends Model implements MustVerifyEmail
                     $model->geo_lon = $longitude;
                 }                
             }
+            */
         });
 
         static::updating(function ($model) {

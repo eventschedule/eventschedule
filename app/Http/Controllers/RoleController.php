@@ -814,7 +814,6 @@ class RoleController extends Controller
             'geo_lon' => 'lon',
         ]);
 
-
         if ($responseData['status'] == 'OK') {
             return response()->json([
                 'geo_address' => $address,

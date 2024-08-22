@@ -52,11 +52,19 @@
                     country: country ? country.name : '',
                 },
                 success: function(response) {
-                    console.log(response);
+                    $('#formatted_address').val(response['formatted_address']);
+                    $('#google_place_id').val(response['google_place_id']);
+                    $('#geo_address').val(response['geo_address']);
+                    $('#geo_lat').val(response['geo_lat']);
+                    $('#geo_lon').val(response['geo_lon']);
+
                     var address = response['formatted_address'];
                     var url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address);
                     var html = address + " - <a href=\"" + url + "\" target=\"_blank\" class=\"hover:underline\">{{ __('messages.view_map') }}</a>";
+                    
                     $('#address_response').html(html);
+                    $('#validate_button').hide();
+                    $('#save_button').show();                    
                 },
                 error: function(xhr, status, error) {
                     $('#address_response').text("{{ __('messages.an_error_occurred') }}");
@@ -305,8 +313,12 @@
                             <input type="hidden" id="venue_country_code" name="venue_country_code" />
                         </div>
 
-                        <div id="address_response" class="mb-6 hidden">
-                        </div>
+                        <div id="address_response" class="mb-6 hidden"></div>
+                        <input type="hidden" name="formatted_address" id="formatted_address"/>
+                        <input type="hidden" name="google_place_id" id="google_place_id"/>
+                        <input type="hidden" name="geo_address" id="geo_address"/>
+                        <input type="hidden" name="geo_lat" id="geo_lat"/>
+                        <input type="hidden" name="geo_lon" id="geo_lon"/>
 
                     </div>
                 </div>
@@ -321,7 +333,7 @@
             <div class="flex gap-4 items-center justify-between">
                 <div class="flex gap-4">
                     @if (! $venue)
-                        <x-secondary-button onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
+                        <x-secondary-button id="validate_button" onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
                         <x-primary-button id="save_button" class="hidden">{{ __('messages.save') }}</x-primary-button>
                     @else
                         <x-primary-button>{{ __('messages.save') }}</x-primary-button>
