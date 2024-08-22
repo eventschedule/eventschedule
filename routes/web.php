@@ -18,14 +18,14 @@ require __DIR__.'/auth.php';
 
 Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
-Route::post('/message', [HomeController::class, 'message'])->name('message')->middleware('throttle:1,1');
+Route::post('/message', [HomeController::class, 'message'])->name('message')->middleware('throttle:2,2');
 
 Route::middleware(['auth', 'verified'])->group(function () 
 {
     Route::get('/home', [HomeController::class, 'home'])->name('home');
     
     Route::get('/register/{type}', [RoleController::class, 'create'])->name('register');
-    Route::get('/validate_address', [RoleController::class, 'validateAddress'])->name('validate_address');
+    Route::get('/validate_address', [RoleController::class, 'validateAddress'])->name('validate_address')->middleware('throttle:20,60');
     Route::post('/store', [RoleController::class, 'store'])->name('role.store');
     
     Route::get('/venues', [RoleController::class, 'viewVenues'])->name('venues');
