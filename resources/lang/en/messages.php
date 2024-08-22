@@ -233,4 +233,6 @@ return [
     //
     'validate_address' => 'Validate Address',
     'an_error_occurred' => 'An error occurred',
+    'view_map' => 'View Map',
+    'searching' => 'Searching',
 ];
