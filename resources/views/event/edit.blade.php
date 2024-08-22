@@ -39,6 +39,7 @@
         }
 
         function onValidateClick() {
+            $('#address_response').text("{{ __('messages.searching') }}...").show();
             var country = $('#venue_country').countrySelect('getSelectedCountryData');
             
             $.get({
@@ -52,11 +53,13 @@
                 },
                 success: function(response) {
                     console.log(response);
-                    $('#address_response').text(response['formatted_address']).show();
+                    var address = response['formatted_address'];
+                    var url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address);
+                    var html = address + " - <a href=\"" + url + "\" target=\"_blank\">{{ __('messages.view_map') }}</a>";
+                    $('#address_response').html(html);
                 },
                 error: function(xhr, status, error) {
-                    console.error(error);
-                    $('#address_response').text("{{ __('messages.an_error_occurred') }}").show();
+                    $('#address_response').text("{{ __('messages.an_error_occurred') }}");
                 }
             });
         }
