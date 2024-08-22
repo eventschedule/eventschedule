@@ -55,7 +55,7 @@
                     console.log(response);
                     var address = response['formatted_address'];
                     var url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address);
-                    var html = address + " - <a href=\"" + url + "\" target=\"_blank\">{{ __('messages.view_map') }}</a>";
+                    var html = address + " - <a href=\"" + url + "\" target=\"_blank\" class=\"hover:underline\">{{ __('messages.view_map') }}</a>";
                     $('#address_response').html(html);
                 },
                 error: function(xhr, status, error) {
