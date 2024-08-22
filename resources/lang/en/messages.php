@@ -232,4 +232,5 @@ return [
     'days_of_week' => 'Days of the Week',
     //
     'validate_address' => 'Validate Address',
+    'an_error_occurred' => 'An error occurred',
 ];

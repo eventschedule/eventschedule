@@ -778,6 +778,53 @@ class RoleController extends Controller
 
     public function validateAddress(Request $request)
     {
-        return 'test 1234';
+        $parts = [];
+
+        if ($address1 = $request->address1) {
+            $parts[] = $address1;                
+        }
+
+        if ($city = $request->city) {
+            $parts[] = $city;
+        }
+
+        if ($state = $request->state) {
+            $parts[] = $state;
+        }
+
+        if ($postal_code = $request->postal_code) {
+            $parts[] = $postal_code;
+        }
+
+        if ($country = $request->country) {
+            $parts[] = $country;
+        }
+        
+        $address = implode(', ', $parts);
+        $urlAddress = urlencode($address);
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$urlAddress}&key=" . config('services.google.backend');
+        $response = file_get_contents($url);
+        $responseData = json_decode($response, true);
+
+        return response()->json([
+            'geo_address' => $address,
+            'formatted_address' => 'Formatted address',
+            'google_place_id' => 'Place id',
+            'geo_lat' => 'lat',
+            'geo_lon' => 'lon',
+        ]);
+
+
+        if ($responseData['status'] == 'OK') {
+            return response()->json([
+                'geo_address' => $address,
+                'formatted_address' => $responseData['results'][0]['formatted_address'],
+                'google_place_id' => $responseData['results'][0]['place_id'],
+                'geo_lat' => $responseData['results'][0]['geometry']['location']['lat'],
+                'geo_lon' => $responseData['results'][0]['geometry']['location']['lng'],
+            ]);
+        } else {
+            return '';
+        }        
     }
 }

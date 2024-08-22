@@ -52,9 +52,11 @@
                 },
                 success: function(response) {
                     console.log(response);
+                    $('#address_response').text(response['formatted_address']).show();
                 },
                 error: function(xhr, status, error) {
                     console.error(error);
+                    $('#address_response').text("{{ __('messages.an_error_occurred') }}").show();
                 }
             });
         }
@@ -298,6 +300,9 @@
                                 :value="old('venue_country')" onchange="onChangeCountry()" />
                             <x-input-error class="mt-2" :messages="$errors->get('country')" />
                             <input type="hidden" id="venue_country_code" name="venue_country_code" />
+                        </div>
+
+                        <div id="address_response" class="mb-6 hidden">
                         </div>
 
                     </div>
