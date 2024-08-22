@@ -231,4 +231,5 @@ return [
     'recurring' => 'Recurring',
     'days_of_week' => 'Days of the Week',
     //
+    'validate_address' => 'Validate Address',
 ];
