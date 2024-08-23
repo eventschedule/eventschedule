@@ -236,4 +236,5 @@ return [
     'view_map' => 'View Map',
     'searching' => 'Searching',
     'pending' => 'Pending',
+    'availability' => 'Availability',
 ];

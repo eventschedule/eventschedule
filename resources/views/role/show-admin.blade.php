@@ -204,6 +204,8 @@
             <nav class="-mb-px flex space-x-8">
                 <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain]) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'schedule' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.schedule') }}</a>
+                <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'availability']) }}"
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'availability' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.availability') }}</a>
                 @if ($role->isVenue() && $role->acceptRequests())
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'requests']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'requests' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</a>
@@ -221,6 +223,8 @@
 
     @if ($tab == 'schedule' || ! $tab)
     @include('role.show-admin-schedule')
+    @elseif ($tab == 'availability')
+    @include('role.show-admin-availability')
     @elseif ($tab == 'requests')
     @include('role.show-admin-requests')
     @elseif ($tab == 'profile')
