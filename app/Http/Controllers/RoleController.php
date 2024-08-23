@@ -225,7 +225,7 @@ class RoleController extends Controller
             $tab = 'schedule';
         }
 
-        if ($tab == 'schedule') {
+        if ($tab == 'schedule' || $tab == 'availability') {
             if (! $month) {
                 $month = now()->month;
             }
@@ -236,28 +236,30 @@ class RoleController extends Controller
             $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
             $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
-            $events = Event::with(['role'])
-                ->where(function ($query) use ($role) {
-                    $query->where('venue_id', $role->id)
-                        ->orWhere('role_id', $role->id);
-                })
-                ->whereNotNull('is_accepted')
-                ->where(function ($query) use ($startOfMonth, $endOfMonth) {
-                    $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
-                        ->orWhereNotNull('days_of_week');
-                })
-                ->orderBy('starts_at')
-                ->get();
+            if ($tab == 'schedule') {
+                $events = Event::with(['role'])
+                    ->where(function ($query) use ($role) {
+                        $query->where('venue_id', $role->id)
+                            ->orWhere('role_id', $role->id);
+                    })
+                    ->whereNotNull('is_accepted')
+                    ->where(function ($query) use ($startOfMonth, $endOfMonth) {
+                        $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
+                            ->orWhereNotNull('days_of_week');
+                    })
+                    ->orderBy('starts_at')
+                    ->get();
 
-            $unscheduled = Event::with(['role'])
-                ->where(function ($query) use ($role) {
-                    $query->where('venue_id', $role->id)
-                        ->orWhere('role_id', $role->id);
-                })
-                ->where('is_accepted', true)
-                ->whereNull('starts_at')
-                ->orderBy('created_at', 'desc')
-                ->get();
+                $unscheduled = Event::with(['role'])
+                    ->where(function ($query) use ($role) {
+                        $query->where('venue_id', $role->id)
+                            ->orWhere('role_id', $role->id);
+                    })
+                    ->where('is_accepted', true)
+                    ->whereNull('starts_at')
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+            }
         }
 
         return view('role/show-admin', compact(
