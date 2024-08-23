@@ -49,7 +49,7 @@
                     city: $('#venue_city').val(),
                     state: $('#venue_state').val(),
                     postal_code: $('#venue_postal_code').val(),                    
-                    country: country ? country.name : '',
+                    country_code: country ? country.iso2 : '',
                 },
                 success: function(response) {
                     $('#formatted_address').val(response['formatted_address']);
@@ -314,7 +314,7 @@
                         <div class="mb-6">
                             <x-secondary-button id="validate_button" onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
                         </div>
-                        
+
                         <div id="address_response" class="mb-6 hidden"></div>
                         <input type="hidden" name="formatted_address" id="formatted_address"/>
                         <input type="hidden" name="google_place_id" id="google_place_id"/>

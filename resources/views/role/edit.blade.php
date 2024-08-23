@@ -120,7 +120,6 @@
         function onValidateClick() {
             $('#address_response').text("{{ __('messages.searching') }}...").show();
             var country = $('#venue_country').countrySelect('getSelectedCountryData');
-            
             $.get({
                 url: '{{ route('validate_address') }}',
                 data: {
@@ -128,7 +127,7 @@
                     city: $('#venue_city').val(),
                     state: $('#venue_state').val(),
                     postal_code: $('#venue_postal_code').val(),                    
-                    country: country ? country.name : '',
+                    country_code: country ? country.iso2 : '',
                 },
                 success: function(response) {
                     $('#formatted_address').val(response['formatted_address']);
