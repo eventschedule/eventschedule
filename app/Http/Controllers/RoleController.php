@@ -801,4 +801,10 @@ class RoleController extends Controller
             return '';
         }        
     }
+
+    public function availability(Request $request, $subdomain)
+    {
+        return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'availability']))
+            ->with('message', __('messages.updated_availability'));
+    }
 }

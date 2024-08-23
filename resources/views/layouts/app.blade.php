@@ -3,6 +3,7 @@
 
 <head class="h-full bg-white">
     <meta name="description" content="The simple and free way to share your event schedule">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <meta property="og:title" content="Event Schedule">
     <meta property="og:description" content="The simple and free way to share your event schedule">
