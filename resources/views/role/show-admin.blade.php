@@ -13,8 +13,8 @@
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: linear-gradient(45deg, transparent 45%, #e3342f 45%, #e3342f 55%, transparent 55%),
-                            linear-gradient(-45deg, transparent 45%, #e3342f 45%, #e3342f 55%, transparent 55%);
+                background: linear-gradient(45deg, transparent 45%, #888 45%, #888 55%, transparent 55%),
+                            linear-gradient(-45deg, transparent 45%, #888 45%, #888 55%, transparent 55%);
                 opacity: 0.6;
                 pointer-events: none;
             }
@@ -25,9 +25,13 @@
             const $saveButton = $('#saveButton');
             const $dayElements = $('.day-element');
 
-            $dayElements.on('click', function () {                
+            $dayElements.on('click', function () {
                 const $this = $(this);
                 const day = $this.data('date');
+
+                console.log('## CLICK ' + day);
+                console.log(selectedDays);;
+
 
                 if (selectedDays.has(day)) {
                     selectedDays.delete(day);
