@@ -1,7 +1,70 @@
 <x-app-layout>
 
     <x-slot name="head">
-        @if ($tab == 'profile' && $role->formatted_address)
+        @if ($tab == 'availability')
+        <style>
+            .day-selected {
+                position: relative;
+            }
+
+            .day-x {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(45deg, transparent 45%, #e3342f 45%, #e3342f 55%, transparent 55%),
+                            linear-gradient(-45deg, transparent 45%, #e3342f 45%, #e3342f 55%, transparent 55%);
+                opacity: 0.6;
+                pointer-events: none;
+            }
+        </style>
+        <script>
+        $(document).ready(function () {
+            const selectedDays = new Set();
+            const $saveButton = $('#saveButton');
+            const $dayElements = $('.day-element');
+
+            $dayElements.on('click', function () {
+                const $this = $(this);
+                const day = $this.data('date');
+
+                if (selectedDays.has(day)) {
+                    selectedDays.delete(day);
+                    $this.removeClass('day-selected');
+                    $this.find('.day-x').remove();
+                } else {
+                    selectedDays.add(day);
+                    $this.addClass('day-selected');
+                    $this.append('<div class="day-x"></div>');
+                }
+
+                $saveButton.prop('disabled', selectedDays.size === 0);
+            });
+
+            $saveButton.on('click', function () {
+                console.log('## save click');
+                $.ajax({
+                    url: '/',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        selectedDays: Array.from(selectedDays)
+                    }),
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function (data) {
+                        console.log('Success:', data);
+                    },
+                    error: function (error) {
+                        console.error('Error:', error);
+                    }
+                });
+            });
+        });
+        </script>
+        @elseif ($tab == 'profile' && $role->formatted_address)
         <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps') }}&callback=initMap"
             loading="async" defer></script>
         <style>
