@@ -337,7 +337,7 @@
                         <x-primary-button id="save_button" class="hidden">{{ __('messages.save') }}</x-primary-button>
                     @else
                         <x-primary-button>{{ __('messages.save') }}</x-primary-button>
-                    @endif                    
+                    @endif
 
                     <x-cancel-button></x-cancel-button>
                 </div>
