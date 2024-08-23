@@ -1,1 +1,1 @@
-@include('role/partials/calendar', ['showAdd' => false, 'route' => 'admin', 'tab' => 'availability'])
+@include('role/partials/calendar', ['route' => 'admin', 'tab' => 'availability'])

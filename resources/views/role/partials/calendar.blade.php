@@ -27,8 +27,9 @@
                     </svg>
                 </a>
             </div>
-            @if ($showAdd)
+            @if ($route == 'admin' && $role->email_verified_at)
             <div class="ml-3 h-6 w-px bg-gray-300"></div>
+            @if ($tab == 'schedule')
             <a href="{{ route('event.create', ['subdomain' => $role->subdomain]) }}">
                 <button type="button"
                     class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
@@ -39,6 +40,18 @@
                     {{ __('messages.add_event') }}
                 </button>
             </a>
+            @elseif ($tab == 'availability')
+            <a href="#">
+                <button type="button"
+                    class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                    <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                    </svg>
+                    {{ __('messages.save') }}
+                </button>
+            </a>
+            @endif
             @endif
         </div>
     </header>
@@ -61,14 +74,14 @@
             @endphp
             <div class="w-full lg:grid lg:grid-cols-7 lg:grid-rows-{{ $totalWeeks }} lg:gap-px">
                 @while ($currentDate->lte($endOfMonth))
-                @if ($showAdd)
+                @if ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at)
                 <div class="cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white hover:bg-gray-100 hover:border-gray-300' : 'bg-gray-50 text-gray-500' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300"
                     onclick="window.location = '{{ route('event.create', ['subdomain' => $role->subdomain, 'date' => $currentDate->format('Y-m-d')]) }}';">
                     @else
                     <div
                         class="relative {{ $currentDate->month == $month ? 'bg-white' : 'bg-gray-50 text-gray-500' }} px-3 py-2 min-h-[100px] border-1 border-transparent">
                         @endif
-                        @if ($showAdd)
+                        @if ($route == 'admin')
                         <time datetime="{{ $currentDate->format('Y-m-d') }}"
                             class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded bg-indigo-600 font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
                         @else
@@ -80,7 +93,7 @@
                             @foreach ($events as $each)
                             @if ($each->matchesDate($currentDate))
                             <li>
-                                <a href="{{ $showAdd ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) : route('event.view_guest', ['subdomain' => isset($subdomain) ? $subdomain : $each->role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}"
+                                <a href="{{ ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at) ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) : route('event.view_guest', ['subdomain' => isset($subdomain) ? $subdomain : $each->role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}"
                                     class="group flex">
                                     <p class="flex-auto truncate font-medium group-hover:text-indigo-600 text-gray-900">
                                         {{ isset($subdomain) && $subdomain == $each->role->subdomain ? $each->venue->name : $each->role->name }}
