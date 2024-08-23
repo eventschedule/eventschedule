@@ -25,7 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/home', [HomeController::class, 'home'])->name('home');
     
     Route::get('/register/{type}', [RoleController::class, 'create'])->name('register');
-    Route::get('/validate_address', [RoleController::class, 'validateAddress'])->name('validate_address')->middleware('throttle:20,60');
+    Route::get('/validate_address', [RoleController::class, 'validateAddress'])->name('validate_address')->middleware('throttle:30,1440');
     Route::post('/store', [RoleController::class, 'store'])->name('role.store');
     
     Route::get('/venues', [RoleController::class, 'viewVenues'])->name('venues');
