@@ -787,14 +787,6 @@ class RoleController extends Controller
         $response = file_get_contents($url);
         $responseData = json_decode($response, true);
 
-        return response()->json([
-            'geo_address' => $address,
-            'formatted_address' => 'Formatted address',
-            'google_place_id' => 'Place id',
-            'geo_lat' => 'lat',
-            'geo_lon' => 'lon',
-        ]);
-
         if ($responseData['status'] == 'OK') {
             return response()->json([
                 'geo_address' => $address,
