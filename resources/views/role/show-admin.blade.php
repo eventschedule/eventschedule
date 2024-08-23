@@ -29,10 +29,6 @@
                 const $this = $(this);
                 const day = $this.data('date');
 
-                console.log('## CLICK ' + day);
-                console.log(selectedDays);;
-
-
                 if (selectedDays.has(day)) {
                     selectedDays.delete(day);
                     $this.removeClass('day-selected');
@@ -47,7 +43,6 @@
             });
 
             $saveButton.on('click', function () {
-                console.log('## save click');
                 $.ajax({
                     url: '/',
                     type: 'POST',
