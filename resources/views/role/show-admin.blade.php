@@ -25,7 +25,7 @@
             const $saveButton = $('#saveButton');
             const $dayElements = $('.day-element');
 
-            $dayElements.on('click', function () {
+            $dayElements.on('click', function () {                
                 const $this = $(this);
                 const day = $this.data('date');
 
