@@ -142,8 +142,6 @@
                     var html = address + " - <a href=\"" + url + "\" target=\"_blank\" class=\"hover:underline\">{{ __('messages.view_map') }}</a>";
                     
                     $('#address_response').html(html);
-                    $('#validate_button').hide();
-                    $('#save_button').show();                    
                 },
                 error: function(xhr, status, error) {
                     $('#address_response').text("{{ __('messages.an_error_occurred') }}");
@@ -213,6 +211,65 @@
 
                     </div>
                 </div>
+
+                @if (! $role->isTalent())
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                    <div class="max-w-xl">
+
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                            {{ __('messages.address') }}
+                        </h2>
+
+                        <div class="mb-6">
+                            <x-input-label for="address1" :value="__('messages.street_address')" />
+                            <x-text-input id="address1" name="address1" type="text" class="mt-1 block w-full"
+                                :value="old('address1', $role->address1)" />
+                            <x-input-error class="mt-2" :messages="$errors->get('address1')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="city" :value="__('messages.city')" />
+                            <x-text-input id="city" name="city" type="text" class="mt-1 block w-full"
+                                :value="old('city', $role->city)" />
+                            <x-input-error class="mt-2" :messages="$errors->get('city')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="state" :value="__('messages.state_province')" />
+                            <x-text-input id="state" name="state" type="text" class="mt-1 block w-full"
+                                :value="old('state', $role->state)" />
+                            <x-input-error class="mt-2" :messages="$errors->get('state')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="postal_code" :value="__('messages.postal_code')" />
+                            <x-text-input id="postal_code" name="postal_code" type="text" class="mt-1 block w-full"
+                                :value="old('postal_code', $role->postal_code)" />
+                            <x-input-error class="mt-2" :messages="$errors->get('postal_code')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="country" :value="__('messages.country')" />
+                            <x-text-input id="country" name="country" type="text" class="mt-1 block w-full"
+                                :value="old('country')" onchange="onChangeCountry()" />
+                            <x-input-error class="mt-2" :messages="$errors->get('country')" />
+                            <input type="hidden" id="country_code" name="country_code" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-secondary-button id="validate_button" onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
+                        </div>
+
+                        <div id="address_response" class="mb-6 hidden"></div>
+                        <input type="hidden" name="formatted_address" id="formatted_address"/>
+                        <input type="hidden" name="google_place_id" id="google_place_id"/>
+                        <input type="hidden" name="geo_address" id="geo_address"/>
+                        <input type="hidden" name="geo_lat" id="geo_lat"/>
+                        <input type="hidden" name="geo_lon" id="geo_lon"/>
+
+                    </div>
+                </div>
+                @endif
 
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">
@@ -444,61 +501,6 @@
                     </div>
                 </div>
 
-                @if (! $role->isTalent())
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
-                    <div class="max-w-xl">
-
-                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('messages.address') }}
-                        </h2>
-
-                        <div class="mb-6">
-                            <x-input-label for="address1" :value="__('messages.street_address')" />
-                            <x-text-input id="address1" name="address1" type="text" class="mt-1 block w-full"
-                                :value="old('address1', $role->address1)" />
-                            <x-input-error class="mt-2" :messages="$errors->get('address1')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="city" :value="__('messages.city')" />
-                            <x-text-input id="city" name="city" type="text" class="mt-1 block w-full"
-                                :value="old('city', $role->city)" />
-                            <x-input-error class="mt-2" :messages="$errors->get('city')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="state" :value="__('messages.state_province')" />
-                            <x-text-input id="state" name="state" type="text" class="mt-1 block w-full"
-                                :value="old('state', $role->state)" />
-                            <x-input-error class="mt-2" :messages="$errors->get('state')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="postal_code" :value="__('messages.postal_code')" />
-                            <x-text-input id="postal_code" name="postal_code" type="text" class="mt-1 block w-full"
-                                :value="old('postal_code', $role->postal_code)" />
-                            <x-input-error class="mt-2" :messages="$errors->get('postal_code')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="country" :value="__('messages.country')" />
-                            <x-text-input id="country" name="country" type="text" class="mt-1 block w-full"
-                                :value="old('country')" onchange="onChangeCountry()" />
-                            <x-input-error class="mt-2" :messages="$errors->get('country')" />
-                            <input type="hidden" id="country_code" name="country_code" />
-                        </div>
-
-                        <div id="address_response" class="mb-6 hidden"></div>
-                        <input type="hidden" name="formatted_address" id="formatted_address"/>
-                        <input type="hidden" name="google_place_id" id="google_place_id"/>
-                        <input type="hidden" name="geo_address" id="geo_address"/>
-                        <input type="hidden" name="geo_lat" id="geo_lat"/>
-                        <input type="hidden" name="geo_lon" id="geo_lon"/>
-
-                    </div>
-                </div>
-                @endif
-
 
             </div>
         </div>
@@ -506,13 +508,7 @@
         <div class="max-w-7xl mx-auto space-y-6 mt-3">
             <div class="flex gap-4 items-center justify-between">
                 <div class="flex items-center gap-4">
-                    @if (! $role->exists && $role->isVenue())
-                        <x-secondary-button id="validate_button" onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
-                        <x-primary-button id="save_button" class="hidden">{{ __('messages.save') }}</x-primary-button>
-                    @else
-                        <x-primary-button>{{ __('messages.save') }}</x-primary-button>
-                    @endif
-
+                    <x-primary-button>{{ __('messages.save') }}</x-primary-button>
                     <x-cancel-button></x-cancel-button>
                 </div>
                 <div>

@@ -63,8 +63,6 @@
                     var html = address + " - <a href=\"" + url + "\" target=\"_blank\" class=\"hover:underline\">{{ __('messages.view_map') }}</a>";
                     
                     $('#address_response').html(html);
-                    $('#validate_button').hide();
-                    $('#save_button').show();                    
                 },
                 error: function(xhr, status, error) {
                     $('#address_response').text("{{ __('messages.an_error_occurred') }}");
@@ -313,6 +311,10 @@
                             <input type="hidden" id="venue_country_code" name="venue_country_code" />
                         </div>
 
+                        <div class="mb-6">
+                            <x-secondary-button id="validate_button" onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
+                        </div>
+                        
                         <div id="address_response" class="mb-6 hidden"></div>
                         <input type="hidden" name="formatted_address" id="formatted_address"/>
                         <input type="hidden" name="google_place_id" id="google_place_id"/>
@@ -327,18 +329,10 @@
             </div>
         </div>
 
-
-
         <div class="max-w-7xl mx-auto space-y-6">
             <div class="flex gap-4 items-center justify-between">
                 <div class="flex gap-4">
-                    @if (! $venue)
-                        <x-secondary-button id="validate_button" onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
-                        <x-primary-button id="save_button" class="hidden">{{ __('messages.save') }}</x-primary-button>
-                    @else
-                        <x-primary-button>{{ __('messages.save') }}</x-primary-button>
-                    @endif
-
+                    <x-primary-button>{{ __('messages.save') }}</x-primary-button>                    
                     <x-cancel-button></x-cancel-button>
                 </div>
 
