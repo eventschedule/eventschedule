@@ -778,27 +778,8 @@ class RoleController extends Controller
 
     public function validateAddress(Request $request)
     {
-        $parts = [];
-
-        if ($address1 = $request->address1) {
-            $parts[] = $address1;                
-        }
-
-        if ($city = $request->city) {
-            $parts[] = $city;
-        }
-
-        if ($state = $request->state) {
-            $parts[] = $state;
-        }
-
-        if ($postal_code = $request->postal_code) {
-            $parts[] = $postal_code;
-        }
-
-        if ($country = $request->country) {
-            $parts[] = $country;
-        }
+        $role = new Role;
+        $role->fill($request->all());
         
         $address = implode(', ', $parts);
         $urlAddress = urlencode($address);
