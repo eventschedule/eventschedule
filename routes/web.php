@@ -36,6 +36,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    Route::post('/{subdomain}/availability', [RoleController::class, 'availability'])->name('role.availability');
     Route::get('/{subdomain}/edit', [RoleController::class, 'edit'])->name('role.edit');
     Route::get('/{subdomain}/unfollow', [RoleController::class, 'unfollow'])->name('role.unfollow');
     Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');

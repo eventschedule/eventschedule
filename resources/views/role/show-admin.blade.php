@@ -21,7 +21,8 @@
         </style>
         <script>
         $(document).ready(function () {
-            const selectedDays = new Set();
+            const availableDays = new Set();
+            const unavailableDays = new Set();
             const $saveButton = $('#saveButton');
             const $dayElements = $('.day-element');
 
@@ -29,37 +30,27 @@
                 const $this = $(this);
                 const day = $this.data('date');
 
-                if (selectedDays.has(day)) {
-                    selectedDays.delete(day);
+                if (unavailableDays.has(day)) {
+                    unavailableDays.delete(day);
+                    availableDays.add(day);
                     $this.removeClass('day-selected');
                     $this.find('.day-x').remove();
                 } else {
-                    selectedDays.add(day);
+                    unavailableDays.add(day);
+                    if (availableDays.has(day)) {
+                        availableDays.delete(day);
+                    }
                     $this.addClass('day-selected');
                     $this.append('<div class="day-x"></div>');
                 }
 
-                $saveButton.prop('disabled', selectedDays.size === 0);
+                $saveButton.prop('disabled', false);
             });
 
-            $saveButton.on('click', function () {
-                $.ajax({
-                    url: '/',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        selectedDays: Array.from(selectedDays)
-                    }),
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function (data) {
-                        console.log('Success:', data);
-                    },
-                    error: function (error) {
-                        console.error('Error:', error);
-                    }
-                });
+            $saveButton.on('click', function () {                
+                $('#unavailable_days').val(JSON.stringify(Array.from(unavailableDays)));
+                $('#available_days').val(JSON.stringify(Array.from(availableDays)));
+                $('#availability_form').submit();
             });
         });
         </script>

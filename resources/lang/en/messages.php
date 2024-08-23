@@ -237,4 +237,5 @@ return [
     'searching' => 'Searching',
     'pending' => 'Pending',
     'availability' => 'Availability',
+    'updated_availability' => 'Successfully updated availability',
 ];
