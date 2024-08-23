@@ -235,4 +235,5 @@ return [
     'an_error_occurred' => 'An error occurred',
     'view_map' => 'View Map',
     'searching' => 'Searching',
+    'pending' => 'Pending',
 ];
