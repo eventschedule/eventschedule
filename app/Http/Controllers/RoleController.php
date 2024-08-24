@@ -822,15 +822,21 @@ class RoleController extends Controller
         $available = json_decode($request->available_days);
         $unavailable = json_decode($request->unavailable_days);
 
-        $dates = array_diff($dates, $available);
+        if ($dates) {
+            $dates = array_diff($dates, $available);
+        } else {
+            $dates = [];
+        }
 
         foreach ($unavailable as $date) {
             $dates[] = $date;
         }
         
+        $dates = array_unique($dates);
         asort($dates);
+        $dates = array_values($dates);
 
-        $roleUser->dates_unavailable = json_encode(array_values($dates));
+        $roleUser->dates_unavailable = json_encode($dates);
         $roleUser->save();
 
         return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'availability']))
