@@ -230,7 +230,6 @@ return [
     'one_time' => 'One-time',
     'recurring' => 'Recurring',
     'days_of_week' => 'Days of the Week',
-    //
     'validate_address' => 'Validate Address',
     'an_error_occurred' => 'An error occurred',
     'view_map' => 'View Map',
@@ -239,4 +238,6 @@ return [
     'availability' => 'Availability',
     'updated_availability' => 'Successfully updated availability',
     'unavailable' => 'Unavailable',
+    'unsaved_changes' => 'You have unsaved changes',
+    //
 ];
