@@ -15,12 +15,9 @@
         </style>
         <script>
             $(document).ready(function() {
-                console.log('## READY');
                 $('.has-tooltip').hover(function(e) {
-                    console.log('## HOVER');
                     var tooltipText = $(this).attr('data-tooltip');
-                    console.log(tooltipText);
-                    $('#tooltip').text(tooltipText)
+                    $('#tooltip').html(tooltipText)
                                 .css({
                                     top: e.pageY + 10 + 'px',
                                     left: e.pageX + 10 + 'px'
