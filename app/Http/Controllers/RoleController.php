@@ -203,6 +203,7 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         $followers = $role->followers()->get();
         $members = $role->members()->get();
+
         $requests = Event::with(['role'])
             ->where(function ($query) use ($role) {
                 $query->where('venue_id', $role->id)
