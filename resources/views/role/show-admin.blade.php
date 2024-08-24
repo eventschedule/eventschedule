@@ -3,10 +3,6 @@
     <x-slot name="head">
         @if ($tab == 'availability')
         <style>
-            .day-selected {
-                position: relative;
-            }
-
             .day-x {
                 position: absolute;
                 top: 0;
@@ -22,7 +18,7 @@
         <script>
         $(document).ready(function () {
             const availableDays = new Set();
-            const unavailableDays = new Set();
+            const unavailableDays = new Set({!! json_encode($datesUnavailable) !!});
             const $saveButton = $('#saveButton');
             const $dayElements = $('.day-element');
 
@@ -33,14 +29,12 @@
                 if (unavailableDays.has(day)) {
                     unavailableDays.delete(day);
                     availableDays.add(day);
-                    $this.removeClass('day-selected');
                     $this.find('.day-x').remove();
                 } else {
                     unavailableDays.add(day);
                     if (availableDays.has(day)) {
                         availableDays.delete(day);
                     }
-                    $this.addClass('day-selected');
                     $this.append('<div class="day-x"></div>');
                 }
 

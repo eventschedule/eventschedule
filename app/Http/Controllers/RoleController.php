@@ -259,6 +259,12 @@ class RoleController extends Controller
                     ->whereNull('starts_at')
                     ->orderBy('created_at', 'desc')
                     ->get();
+            } else if ($tab == 'availability') {                                       
+                $user = $request->user();
+                $roleUser = RoleUser::where('user_id', $user->id)
+                                ->where('role_id', $role->id)
+                                ->first();
+                $datesUnavailable = json_decode($roleUser->dates_unavailable);
             }
         }
 
@@ -275,6 +281,7 @@ class RoleController extends Controller
             'startOfMonth',
             'endOfMonth',
             'unscheduled',
+            'datesUnavailable',
         ));
     }
 
