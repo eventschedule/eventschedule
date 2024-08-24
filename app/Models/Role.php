@@ -93,7 +93,7 @@ class Role extends Model implements MustVerifyEmail
     {
         return $this->belongsToMany(User::class)                    
                     ->withTimestamps()
-                    ->withPivot('level')
+                    ->withPivot('level', 'dates_unavailable')
                     ->where('level', '!=', 'follower')
                     ->orderBy('name');
     }    
