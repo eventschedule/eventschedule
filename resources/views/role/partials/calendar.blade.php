@@ -54,13 +54,15 @@
         </div>
     </header>
     <div class="{{ $tab == 'availability' ? '' : 'hidden' }} shadow-md ring-1 ring-black ring-opacity-5 lg:flex lg:flex-auto lg:flex-col">
-        <div
-            class="{{ $tab == 'availability' ? 'hidden' : '' }} grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center text-xs font-semibold leading-6 text-gray-700 lg:flex-none">
-            @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $day)
-            <div class="flex justify-center bg-white py-2">
-                {{ __('messages.' . $day) }}
+        <div class="{{ $tab == 'availability' ? 'hidden lg:block' : '' }}"> 
+            <div
+                class="grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center text-xs font-semibold leading-6 text-gray-700 lg:flex-none">
+                @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $day)
+                <div class="flex justify-center bg-white py-2">
+                    {{ __('messages.' . $day) }}
+                </div>
+                @endforeach
             </div>
-            @endforeach
         </div>
         <div class="flex bg-gray-200 text-xs leading-6 text-gray-700 lg:flex-auto">
             @php
