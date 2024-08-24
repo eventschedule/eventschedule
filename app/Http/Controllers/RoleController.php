@@ -844,7 +844,14 @@ class RoleController extends Controller
         $roleUser->dates_unavailable = json_encode($dates);
         $roleUser->save();
 
-        return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'availability']))
+        $data = [
+            'subdomain' => $subdomain, 
+            'tab' => 'availability',
+            'month' => $request->month,
+            'year' => $request->year,
+        ];
+
+        return redirect(route('role.view_admin', $data))
             ->with('message', __('messages.updated_availability'));
     }
 }
