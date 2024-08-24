@@ -228,4 +228,13 @@ return [
     "one_time" => "Une fois",
     "recurring" => "Récurrent",
     "days_of_week" => "Jours de la semaine",
+    'validate_address' => 'Valider l\'adresse',
+    'an_error_occurred' => 'Une erreur s\'est produite',
+    'view_map' => 'Voir la carte',
+    'searching' => 'Recherche en cours',
+    'pending' => 'En attente',
+    'availability' => 'Disponibilité',
+    'updated_availability' => 'Disponibilité mise à jour avec succès',
+    'unavailable' => 'Indisponible',
+    'unsaved_changes' => 'Vous avez des modifications non enregistrées',
 ];

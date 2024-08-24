@@ -228,4 +228,13 @@ return [
     "one_time" => "חד פעמי",
     "recurring" => "מחזורי",
     "days_of_week" => "ימי השבוע",
+    'validate_address' => 'אמת כתובת',
+    'an_error_occurred' => 'אירעה שגיאה',
+    'view_map' => 'הצג מפה',
+    'searching' => 'מחפש',
+    'pending' => 'ממתין',
+    'availability' => 'זמינות',
+    'updated_availability' => 'הזמינות עודכנה בהצלחה',
+    'unavailable' => 'לא זמין',
+    'unsaved_changes' => 'יש לך שינויים שלא נשמרו',
 ];
