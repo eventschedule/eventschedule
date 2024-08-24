@@ -274,7 +274,7 @@
 
         @endif
 
-        @include('role/partials/calendar', ['route' => 'guest'])
+        @include('role/partials/calendar', ['route' => 'guest', 'tab' => ''])
 
         <div class="py-6">
             <div class="flex items-start justify-between pb-6">
