@@ -211,8 +211,7 @@ class RoleController extends Controller
             })
             ->whereNull('is_accepted')
             ->orderBy('created_at', 'desc')
-            ->get();
-        
+            ->get();        
         
         $events = [];
         $unscheduled = [];
@@ -261,6 +260,10 @@ class RoleController extends Controller
                     ->whereNull('starts_at')
                     ->orderBy('created_at', 'desc')
                     ->get();
+
+                foreach ($members as $member) {
+                    $datesUnavailable[$member->name] = json_decode($member->pivot->dates_unavailable);
+                }
             } else if ($tab == 'availability') {                                       
                 $user = $request->user();
                 $roleUser = RoleUser::where('user_id', $user->id)

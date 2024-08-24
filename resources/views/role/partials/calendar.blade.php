@@ -69,11 +69,20 @@
             $currentDate = $startOfMonth->copy();
             $totalDays = $endOfMonth->diffInDays($startOfMonth) + 1;
             $totalWeeks = ceil($totalDays / 7);
+            $unavailable = [];                
             @endphp
             <div class="w-full lg:grid lg:grid-cols-7 lg:grid-rows-{{ $totalWeeks }} lg:gap-px">
                 @while ($currentDate->lte($endOfMonth))
                 @if ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at)
-                <div class="cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white hover:bg-gray-100 hover:border-gray-300' : 'bg-gray-50 text-gray-500' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300"
+                @php
+                $unavailable = [];
+                foreach ($datesUnavailable as $user => $dates) {
+                    if (in_array($currentDate->format('Y-m-d'), $dates)) {
+                        $unavailable[] = $user;
+                    }
+                }
+                @endphp
+                <div class="cursor-pointer relative {{ count($unavailable) ? 'bg-orange-50' : ($currentDate->month == $month ? 'bg-white hover:bg-gray-100 hover:border-gray-300' : 'bg-gray-50 text-gray-500') }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300"
                     onclick="window.location = '{{ route('event.create', ['subdomain' => $role->subdomain, 'date' => $currentDate->format('Y-m-d')]) }}';">
                     @elseif ($route == 'admin' && $tab == 'availability' && $role->email_verified_at)
                     <div class="cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white hover:bg-gray-100 hover:border-gray-300' : 'bg-gray-50 text-gray-500' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 day-element" data-date="{{ $currentDate->format('Y-m-d') }}">
@@ -84,6 +93,7 @@
                     <div
                         class="relative {{ $currentDate->month == $month ? 'bg-white' : 'bg-gray-50 text-gray-500' }} px-3 py-2 min-h-[100px] border-1 border-transparent">
                         @endif
+                        <div class="flex justify-between">
                         @if ($route == 'admin')
                         <time datetime="{{ $currentDate->format('Y-m-d') }}"
                             class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded bg-indigo-600 font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
@@ -92,6 +102,15 @@
                             style="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? ('background-color: ' . ((isset($event) && $event) ? $event->role->accent_color : (isset($role) ? $role->accent_color : '#5348E9'))) : '' }}"
                             class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
                         @endif
+                        @if (count($unavailable))
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#888">
+                                <title>
+                                    {{ __('messages.unavailable') . ":\n" . implode("\n", $unavailable) }}
+                                </title>
+                                <path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z" />
+                            </svg>
+                        @endif
+                        </div>
                         <ol class="mt-4 divide-y divide-gray-100 text-sm leading-6 lg:col-span-7 xl:col-span-8">
                             @foreach ($events as $each)
                             @if ($each->matchesDate($currentDate))
