@@ -804,6 +804,31 @@ class RoleController extends Controller
 
     public function availability(Request $request, $subdomain)
     {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $user = $request->user();       
+
+        $roleUser = RoleUser::where('user_id', $user->id)
+                        ->where('role_id', $role->id)
+                        ->first();
+    
+        $dates = json_decode($roleUser->dates_unavailable);
+
+        $available = json_decode($request->available_days);
+        $unavailable = json_decode($request->unavailable_days);
+
+        foreach ($available as $date) {
+            unset($dates[$date]);
+        }
+
+        foreach ($unavailable as $date) {
+            $dates[] = $date;
+        }
+
+        asort($dates);
+
+        $roleUser->dates_unavailable = json_encode($dates);
+        $roleUser->save();
+
         return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'availability']))
             ->with('message', __('messages.updated_availability'));
     }
