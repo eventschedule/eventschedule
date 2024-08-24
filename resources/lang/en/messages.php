@@ -238,4 +238,5 @@ return [
     'pending' => 'Pending',
     'availability' => 'Availability',
     'updated_availability' => 'Successfully updated availability',
+    'unavailable' => 'Unavailable',
 ];
