@@ -1,7 +1,44 @@
 <x-app-layout>
 
     <x-slot name="head">
-        @if ($tab == 'availability')
+        @if ($tab == 'schedule')
+        <style>
+            .tooltip {
+                position: absolute;
+                padding: 5px 10px;
+                background: #333;
+                color: #fff;
+                border-radius: 4px;
+                display: none;
+                font-size: 12px;
+            }
+        </style>
+        <script>
+            $(document).ready(function() {
+                console.log('## READY');
+                $('.has-tooltip').hover(function(e) {
+                    console.log('## HOVER');
+                    var tooltipText = $(this).attr('data-tooltip');
+                    console.log(tooltipText);
+                    $('#tooltip').text(tooltipText)
+                                .css({
+                                    top: e.pageY + 10 + 'px',
+                                    left: e.pageX + 10 + 'px'
+                                })
+                                .fadeIn(0);
+                }, function() {
+                    $('#tooltip').fadeOut(0);
+                });
+
+                $('.has-tooltip').mousemove(function(e) {
+                    $('#tooltip').css({
+                        top: e.pageY + 10 + 'px',
+                        left: e.pageX + 10 + 'px'
+                    });
+                });
+            });
+        </script>            
+        @elseif ($tab == 'availability')
         <style>
             .day-x {
                 position: absolute;
