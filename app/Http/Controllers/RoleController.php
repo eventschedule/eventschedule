@@ -219,6 +219,7 @@ class RoleController extends Controller
         $year = $request->year;
         $startOfMonth = '';
         $endOfMonth = '';
+        $datesUnavailable = [];
 
         // TODO remove once supported
         if ($tab == 'requests' && ! $role->isVenue()) {
