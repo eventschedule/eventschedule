@@ -262,7 +262,7 @@ class RoleController extends Controller
                     ->get();
 
                 foreach ($members as $member) {
-                    $datesUnavailable[$member->name] = json_decode($member->pivot->dates_unavailable);
+                    $datesUnavailable[e($member->name)] = json_decode($member->pivot->dates_unavailable);
                 }
             } else if ($tab == 'availability') {                                       
                 $user = $request->user();
