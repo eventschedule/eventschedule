@@ -240,4 +240,5 @@ return [
     'unavailable' => 'Unavailable',
     'unsaved_changes' => 'You have unsaved changes',
     //
+    'show_email_address' => 'Show email address',
 ];

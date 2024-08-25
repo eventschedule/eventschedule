@@ -277,11 +277,18 @@
                             {{ __('messages.contact_info') }}
                         </h2>
 
-                        <div class="mb-6">
+                        <div class="mb-3">
                             <x-input-label for="email" :value="__('messages.email') . ' *'" />
                             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
                                 :value="old('email', $role->exists ? $role->email : $user->email)" required />
                             <x-input-error class="mt-2" :messages="$errors->get('email')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-checkbox name="show_email" label="{{ __('messages.show_email_address') }}"
+                                checked="{{ old('show_email', $role->show_email) }}"
+                                data-custom-attribute="value" />
+                            <x-input-error class="mt-2" :messages="$errors->get('show_email')" />
                         </div>
 
                         <div class="mb-6">

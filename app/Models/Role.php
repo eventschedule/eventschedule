@@ -44,6 +44,7 @@ class Role extends Model implements MustVerifyEmail
         'geo_address',
         'geo_lat',
         'geo_lon',
+        'show_email',
     ];
 
     protected static function boot()
