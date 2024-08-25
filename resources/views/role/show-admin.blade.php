@@ -14,26 +14,48 @@
             }
         </style>
         <script>
-            $(document).ready(function() {
-                $('.has-tooltip').hover(function(e) {
-                    var tooltipText = $(this).attr('data-tooltip');
-                    $('#tooltip').html(tooltipText)
-                                .css({
-                                    top: e.pageY + 10 + 'px',
-                                    left: e.pageX + 10 + 'px'
-                                })
-                                .fadeIn(0);
-                }, function() {
-                    $('#tooltip').fadeOut(0);
-                });
+        $(document).ready(function() {
+            $('.has-tooltip').hover(function(e) {
+                var tooltipText = $(this).attr('data-tooltip');
+                var tooltip = $('#tooltip');
+                tooltip.html(tooltipText).css({
+                    top: e.pageY + 10 + 'px',
+                    left: e.pageX + 10 + 'px'
+                }).fadeIn(0);
 
-                $('.has-tooltip').mousemove(function(e) {
-                    $('#tooltip').css({
+                // Calculate if the tooltip will go off the right edge of the screen
+                var tooltipWidth = tooltip.outerWidth();
+                var screenWidth = $(window).width();
+                var tooltipRightEdge = e.pageX + 10 + tooltipWidth;
+
+                if (tooltipRightEdge > screenWidth) {
+                    tooltip.css({
+                        left: e.pageX - tooltipWidth - 10 + 'px'
+                    });
+                }
+            }, function() {
+                $('#tooltip').fadeOut(0);
+            });
+
+            $('.has-tooltip').mousemove(function(e) {
+                var tooltip = $('#tooltip');
+                var tooltipWidth = tooltip.outerWidth();
+                var screenWidth = $(window).width();
+                var tooltipRightEdge = e.pageX + 10 + tooltipWidth;
+
+                if (tooltipRightEdge > screenWidth) {
+                    tooltip.css({
+                        top: e.pageY + 10 + 'px',
+                        left: e.pageX - tooltipWidth - 10 + 'px'
+                    });
+                } else {
+                    tooltip.css({
                         top: e.pageY + 10 + 'px',
                         left: e.pageX + 10 + 'px'
                     });
-                });
+                }
             });
+        });
         </script>            
         @elseif ($tab == 'availability')
         <style>
