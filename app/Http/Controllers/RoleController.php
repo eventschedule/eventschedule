@@ -141,7 +141,12 @@ class RoleController extends Controller
         }
 
         $user = auth()->user();
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        $role = Role::subdomain($subdomain)->first();
+
+        if (! $role) {
+            return redirect()->route('landing');
+        }
+
         $otherRole = null;
         $event = null;
         $month = $request->month;
