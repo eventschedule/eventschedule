@@ -803,7 +803,7 @@ class RoleController extends Controller
         $address = $role->fullAddress();
         $urlAddress = urlencode($address);
         
-        $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$urlAddress}&key=" . config('services.google.backend');
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?key=" . config('services.google.backend') . '&address={$urlAddress}';
         $response = file_get_contents($url);
         $responseData = json_decode($response, true);
 
