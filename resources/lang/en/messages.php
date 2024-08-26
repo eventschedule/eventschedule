@@ -241,4 +241,5 @@ return [
     'unsaved_changes' => 'You have unsaved changes',
     //
     'show_email_address' => 'Show email address',
+    'address_not_found' => 'Address not found',
 ];
