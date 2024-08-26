@@ -256,9 +256,11 @@
                             <input type="hidden" id="country_code" name="country_code" />
                         </div>
 
+                        <!--
                         <div class="mb-6">
                             <x-secondary-button id="validate_button" onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
                         </div>
+                        -->
 
                         <div id="address_response" class="mb-6 hidden"></div>
                         <input type="hidden" name="formatted_address" id="formatted_address"/>
