@@ -798,10 +798,11 @@ class RoleController extends Controller
     public function validateAddress(Request $request)
     {
         $role = new Role;
-        $role->fill($request->all());
+        $role->fill($request->all());        
         
-        $address = implode(', ', $parts);
+        $address = $role->fullAddress();
         $urlAddress = urlencode($address);
+        
         $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$urlAddress}&key=" . config('services.google.backend');
         $response = file_get_contents($url);
         $responseData = json_decode($response, true);
