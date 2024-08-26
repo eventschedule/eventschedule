@@ -120,9 +120,10 @@
         function onValidateClick() {
             $('#address_response').text("{{ __('messages.searching') }}...").show();
             var country = $('#venue_country').countrySelect('getSelectedCountryData');
-            $.get({
+            $.post({
                 url: '{{ route('validate_address') }}',
                 data: {
+                    _token: '{{ csrf_token() }}',
                     address1: $('#venue_address1').val(),
                     city: $('#venue_city').val(),
                     state: $('#venue_state').val(),
