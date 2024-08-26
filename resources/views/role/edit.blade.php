@@ -124,10 +124,10 @@
                 url: '{{ route('validate_address') }}',
                 data: {
                     _token: '{{ csrf_token() }}',
-                    address1: $('#venue_address1').val(),
-                    city: $('#venue_city').val(),
-                    state: $('#venue_state').val(),
-                    postal_code: $('#venue_postal_code').val(),                    
+                    address1: $('#address1').val(),
+                    city: $('#city').val(),
+                    state: $('#state').val(),
+                    postal_code: $('#postal_code').val(),                    
                     country_code: country ? country.iso2 : '',
                 },
                 success: function(response) {
