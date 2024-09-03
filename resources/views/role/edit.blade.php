@@ -131,17 +131,19 @@
                     country_code: country ? country.iso2 : '',
                 },
                 success: function(response) {
-                    $('#formatted_address').val(response['formatted_address']);
-                    $('#google_place_id').val(response['google_place_id']);
-                    $('#geo_address').val(response['geo_address']);
-                    $('#geo_lat').val(response['geo_lat']);
-                    $('#geo_lon').val(response['geo_lon']);
+                    if (response) {
+                        $('#formatted_address').val(response['formatted_address']);
+                        $('#google_place_id').val(response['google_place_id']);
+                        $('#geo_address').val(response['geo_address']);
+                        $('#geo_lat').val(response['geo_lat']);
+                        $('#geo_lon').val(response['geo_lon']);
 
-                    var address = response['formatted_address'];
-                    var url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address);
-                    var html = address + " - <a href=\"" + url + "\" target=\"_blank\" class=\"hover:underline\">{{ __('messages.view_map') }}</a>";
-                    
-                    $('#address_response').html(html);
+                        var address = response['formatted_address'];
+                        var url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address);
+                        var html = address + " - <a href=\"" + url + "\" target=\"_blank\" class=\"hover:underline\">{{ __('messages.view_map') }}</a>";
+                        
+                        $('#address_response').html(html);
+                    }
                 },
                 error: function(xhr, status, error) {
                     $('#address_response').text("{{ __('messages.an_error_occurred') }}");
