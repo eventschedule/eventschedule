@@ -181,7 +181,7 @@
                                     </dt>
                                     <dd>
                                         <time datetime="{{ $currentDate->format('Y-m-d') }}">
-                                            {{ $currentDate->format($each->role->use_24_hour_time ? 'F j, Y H:i' : 'F j, Y g:i A') }}
+                                            {{ $currentDate->format($each->role->use_24_hour_time ? 'M jS, Y • H:i' : 'M jS, Y • g:i A') }}
                                         </time>
                                     </dd>
                                 </div>
