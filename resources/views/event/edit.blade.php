@@ -13,7 +13,7 @@
                 enableTime: true,
                 altInput: true,
                 time_24hr: "{{ $venue && $venue->use_24_hour_time ? 'true' : 'false' }}",
-                altFormat: "{{ $venue && $venue->use_24_hour_time ? 'F j, Y H:i' : 'F j, Y h:i K' }}",
+                altFormat: "{{ $venue && $venue->use_24_hour_time ? 'M j, Y • H:i' : 'M j, Y • h:i K' }}",
                 dateFormat: "Y-m-d H:i:S",
             });
             // https://github.com/flatpickr/flatpickr/issues/892#issuecomment-604387030
