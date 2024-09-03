@@ -146,7 +146,7 @@
                     }
                 },
                 error: function(xhr, status, error) {
-                    $('#address_response').text("{{ __('messages.an_error_occurred') }}");
+                    $('#address_response').text("{{ __('messages.an_error_occurred') }}" + ': ' + error);
                 }
             });
         }
