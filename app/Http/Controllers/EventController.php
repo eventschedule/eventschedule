@@ -322,7 +322,7 @@ class EventController extends Controller
                 $venue->user_id = $matchingUser->id;
                 $venue->email_verified_at = $matchingUser->email_verified_at;
                 $venue->save();
-                $matchingUser->roles()->attach($venue->id, ['level' => 'owner']);
+                $matchingUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
             }
         }
 
@@ -366,7 +366,7 @@ class EventController extends Controller
                     $role->user_id = $matchingUser->id;
                     $role->email_verified_at = $matchingUser->email_verified_at;
                     $role->save();
-                    $matchingUser->roles()->attach($role->id, ['level' => 'owner']);
+                    $matchingUser->roles()->attach($role->id, ['level' => 'owner', 'created_at' => now()]);
                 }
             }
         }

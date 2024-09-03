@@ -98,7 +98,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsToMany(Role::class)
                     ->withPivot('level')
-                    ->wherePivot('level', 'follower');
+                    ->wherePivot('level', 'follower', 'created_at');
     }
 
     public function venues()

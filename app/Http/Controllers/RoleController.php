@@ -109,7 +109,7 @@ class RoleController extends Controller
         $user = $request->user();
 
         if (! $user->isConnected($role->subdomain)) {
-            $user->roles()->attach($role->id, ['level' => 'follower']);
+            $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
         }
 
         session()->forget('pending_follow');
@@ -345,7 +345,7 @@ class RoleController extends Controller
             $roleUser->save();
 
         } else {
-            $user->roles()->attach($role->id, ['level' => 'admin']);
+            $user->roles()->attach($role->id, ['level' => 'admin', 'created_at' => now()]);
         }
 
         Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
@@ -487,7 +487,7 @@ class RoleController extends Controller
 
         $role->save();
 
-        $user->roles()->attach($role->id);
+        $user->roles()->attach($role->id, ['created_at' => now()]);
 
         if ($request->hasFile('profile_image')) {
             if ($role->profile_image_url) {
