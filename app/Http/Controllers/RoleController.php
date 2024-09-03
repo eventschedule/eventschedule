@@ -800,24 +800,27 @@ class RoleController extends Controller
         $role = new Role;
         $role->fill($request->all());        
         
-        $address = $role->fullAddress();
-        $urlAddress = urlencode($address);
-        
-        $url = "https://maps.googleapis.com/maps/api/geocode/json?key=" . config('services.google.backend') . '&address={$urlAddress}';
-        $response = file_get_contents($url);
-        $responseData = json_decode($response, true);
+        if ($address = $role->fullAddress()) {
+            $urlAddress = urlencode($address);
+            
+            $url = "https://maps.googleapis.com/maps/api/geocode/json?key=" . config('services.google.backend') . "&address={$urlAddress}";
+            $response = file_get_contents($url);
+            $responseData = json_decode($response, true);
 
-        if ($responseData['status'] == 'OK') {
-            return response()->json([
-                'geo_address' => $address,
-                'formatted_address' => $responseData['results'][0]['formatted_address'],
-                'google_place_id' => $responseData['results'][0]['place_id'],
-                'geo_lat' => $responseData['results'][0]['geometry']['location']['lat'],
-                'geo_lon' => $responseData['results'][0]['geometry']['location']['lng'],
-            ]);
-        } else {
-            return '';
-        }        
+            if ($responseData['status'] == 'OK') {
+                return response()->json([
+                    'geo_address' => $address,
+                    'formatted_address' => $responseData['results'][0]['formatted_address'],
+                    'google_place_id' => $responseData['results'][0]['place_id'],
+                    'geo_lat' => $responseData['results'][0]['geometry']['location']['lat'],
+                    'geo_lon' => $responseData['results'][0]['geometry']['location']['lng'],
+                ]);
+            } else {
+                \Log::error('Google Maps Error: ' . $response);
+            }
+        }
+
+        return '';
     }
 
     public function availability(Request $request, $subdomain)
