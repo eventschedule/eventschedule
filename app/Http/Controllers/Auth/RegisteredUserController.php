@@ -58,7 +58,7 @@ class RegisteredUserController extends Controller
                 event(new Verified($role));
             }    
 
-            $user->roles()->attach($role->id, ['level' => 'owner']);
+            $user->roles()->attach($role->id, ['level' => 'owner', 'created_at' => now()]);
         }
 
         event(new Registered($user));
