@@ -434,7 +434,7 @@ class RoleController extends Controller
 
         $data = [
             'roles' => $roles,
-            'type' => 'vendor',
+            'type' => 'curator',
         ];
 
         return view('role/index', $data);

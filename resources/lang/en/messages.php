@@ -245,4 +245,5 @@ return [
     'your_curators' => 'Your Curators',
     'curators' => 'Curators',
     'curator' => 'Curator',
+    'register_curator' => 'Register Curator',
 ];
