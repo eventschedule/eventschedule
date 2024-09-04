@@ -31,6 +31,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/venues', [RoleController::class, 'viewVenues'])->name('venues');
     Route::get('/talent', [RoleController::class, 'viewTalent'])->name('talent');
     Route::get('/vendors', [RoleController::class, 'viewVendors'])->name('vendors');
+    Route::get('/curators', [RoleController::class, 'viewCurators'])->name('curators');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
