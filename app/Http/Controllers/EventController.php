@@ -354,7 +354,7 @@ class EventController extends Controller
                 $role->name = $request->role_name;
                 $role->subdomain = Role::generateSubdomain($request->role_name);
                 $role->email = $request->role_email;
-                $role->type = $request->role_type;
+                $role->type = $request->role_type ? $request->role_type : 'talent';
                 $role->timezone = $user->timezone;
                 $role->language_code = $user->language_code;
                 $role->background_colors = ColorUtils::randomGradient();
