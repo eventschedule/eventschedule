@@ -318,6 +318,8 @@ class EventController extends Controller
             $venue->font_color = '#ffffff';
             $venue->save();
 
+            $user->roles()->attach($venue->id, ['level' => 'follower', 'created_at' => now()]);
+
             if ($matchingUser = User::whereEmail($venue->email)->first()) {
                 $venue->user_id = $matchingUser->id;
                 $venue->email_verified_at = $matchingUser->email_verified_at;
@@ -361,6 +363,8 @@ class EventController extends Controller
                 $role->background_rotation = rand(0, 359);
                 $role->font_color = '#ffffff';
                 $role->save();
+
+                $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
 
                 if ($matchingUser = User::whereEmail($role->email)->first()) {
                     $role->user_id = $matchingUser->id;
