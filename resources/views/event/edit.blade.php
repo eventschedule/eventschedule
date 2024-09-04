@@ -98,7 +98,7 @@
                             {{ __('messages.venue') }}
                         </h2>
 
-                        @if ($venue && $venue->user_id)
+                        @if ($venue)
                         <div class="text-gray-900 dark:text-gray-100">
                             <a href="{{ $venue->getGuestUrl() }}"
                                 target="_blank" class="hover:underline">
