@@ -338,10 +338,7 @@ class EventController extends Controller
 
             $roleId = UrlUtils::decodeId($request->role_id);
             $role = Role::findOrFail($roleId);
-
-            if (! auth()->user()->isMember($role->subdomain)) {
-                return redirect('/');
-            }    
+            
         } else {
 
             $role = Role::find($request->role_email);
