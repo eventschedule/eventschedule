@@ -143,6 +143,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->following()->type('vendor');
     }
 
+    public function followingCurators()
+    {
+        return $this->following()->type('curator');
+    }
+
     public function isMember($subdomain): bool
     {
         return $this->member()->where('subdomain', $subdomain)->exists();
