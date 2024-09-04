@@ -468,8 +468,6 @@ class RoleController extends Controller
             '' => 'Custom',
         ] + $gradientOptions;
 
-
-
         $fonts = file_get_contents(base_path('storage/fonts.json'));
         $fonts = json_decode($fonts);
 
