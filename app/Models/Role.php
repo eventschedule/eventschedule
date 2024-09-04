@@ -178,6 +178,16 @@ class Role extends Model implements MustVerifyEmail
         return $this->type == 'talent';
     }
 
+    public function isCurator()
+    {
+        return $this->type == 'talent';
+    }
+
+    public function canHaveAddress()
+    {
+        return $this->isVenue() || $this->isVendor();
+    }
+
     public function acceptRequests()
     {
         return $this->accept_talent_requests || $this->accept_vendor_requests;
