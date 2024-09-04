@@ -246,4 +246,7 @@ return [
     'curators' => 'Curators',
     'curator' => 'Curator',
     'register_curator' => 'Register Curator',
+    'created_curator' => 'Successfully created curator',
+    'updated_curator' => 'Successfully updated curator',
+    'deleted_curator' => 'Successfully deleted curator',
 ];
