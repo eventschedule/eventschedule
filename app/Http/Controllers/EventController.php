@@ -118,7 +118,7 @@ class EventController extends Controller
             }
         }
 
-        if ($role->isVenue()) {
+        if (! $talent && ! $vendor) {
             if ($request->role_email) {
                 if ($role = Role::whereEmail($request->role_email)->where('type', '!=', 'venue')->first()) {
                     if ($role->isTalent()) {
@@ -138,7 +138,9 @@ class EventController extends Controller
             } else {
                 return view('event/role_search', ['subdomain' => $subdomain, 'header' => $header, 'roles' => $user->connectedTalentOrVendors()->get()]);
             }
-        } else if (! $role->isVenue()) {
+        } 
+        
+        if (! $venue) {
             if ($request->venue_email) {
                 $venue = Role::whereEmail($request->venue_email)->where('type', '=', 'venue')->first();
             } else if ($request->venue_id) {

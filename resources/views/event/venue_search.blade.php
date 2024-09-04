@@ -24,6 +24,12 @@
 
     <form method="GET" action="{{ route('event.create', ['subdomain' => $subdomain]) }}">
 
+        @if (request()->role_id)
+        <input type="hidden" name="role_id" value="{{ request()->role_id }}" />
+        @elseif (request()->role_email)
+        <input type="hidden" name="role_email" value="{{ request()->role_email }}" />
+        @endif
+
         @if (request()->date)
         <input type="hidden" name="date" value="{{ request()->date }}" />
         @endif
