@@ -181,7 +181,16 @@
                             <input type="hidden" name="role_id"
                                 value="{{ App\Utils\UrlUtils::encodeId($vendor->id) }}" />
                         </div>
-                        @elseif($venue && $user->isMember($venue->subdomain))
+                        @elseif (count($roles))
+                        <div class="mb-6">
+                            <select name="role_id"
+                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">>
+                                @foreach ($roles as $role)
+                                <option value="{{ App\Utils\UrlUtils::encodeId($role->id) }}">{{ $role->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        @else
                         <div class="mb-6">
                             <x-input-label for="role_name" :value="__('messages.name') . ' *'" />
                             <x-text-input id="role_name" name="role_name" type="text" class="mt-1 block w-full"
@@ -199,15 +208,6 @@
                                 {{ __('messages.an_email_will_be_sent') }}
                             </p>
                             <x-input-error class="mt-2" :messages="$errors->get('role_email')" />
-                        </div>
-                        @else
-                        <div class="mb-6">
-                            <select name="role_id"
-                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">>
-                                @foreach ($roles as $role)
-                                <option value="{{ App\Utils\UrlUtils::encodeId($role->id) }}">{{ $role->name }}</option>
-                                @endforeach
-                            </select>
                         </div>
                         @endif
 
