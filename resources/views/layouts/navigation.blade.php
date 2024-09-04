@@ -51,6 +51,17 @@
                         {{ __('messages.vendors') }}
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('curators') }}"
+                        class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('curators') ? 'bg-gray-800 text-white' : '' }}">
+                        <svg class="h-6 w-6 shrink-0" viewBox="0 0 24 24"
+                            fill="{{ request()->is('curators') ? '#ccc' : '#666' }}" aria-hidden="true">
+                            <path
+                                d="M12,19.2C9.5,19.2 7.29,17.92 6,16C6.03,14 10,12.9 12,12.9C14,12.9 17.97,14 18,16C16.71,17.92 14.5,19.2 12,19.2M12,5A3,3 0 0,1 15,8A3,3 0 0,1 12,11A3,3 0 0,1 9,8A3,3 0 0,1 12,5M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12C22,6.47 17.5,2 12,2Z" />
+                        </svg>
+                        {{ __('messages.curators') }}
+                    </a>
+                </li>
             </ul>
         </li>
 
@@ -59,6 +70,7 @@
             $venues = $user->venues()->get();
             $talent = $user->talent()->get();
             $vendors = $user->vendors()->get();
+            $curators = $user->curators()->get();
         ?>
 
         @if (count($venues) > 0)
@@ -117,6 +129,27 @@
                         <span
                             class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($vendor->subdomain) || request()->is($vendor->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($vendor->name, 0, 1)) }}</span>
                         <span class="truncate">{{ $vendor->name }}</span>
+                    </a>
+                </li>
+                @endforeach
+
+            </ul>
+        </li>
+        @endif
+
+        @if (count($curators) > 0)
+        <li>
+            <div class="text-xs font-semibold leading-6 text-gray-400">{{ __('messages.your_curators') }}</div>
+
+            <ul role="list" class="-mx-2 mt-2 space-y-1">
+
+                @foreach ($curators as $curator)
+                <li>
+                    <a href="{{ route('role.view_admin', ['subdomain' => $curator->subdomain, 'tab' => $curator->subdomain == request()->subdomain ? '' : request()->tab]) }}"
+                        class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is($curator->subdomain) || request()->is($curator->subdomain . '/*') ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
+                        <span
+                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($curator->subdomain) || request()->is($curator->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($curator->name, 0, 1)) }}</span>
+                        <span class="truncate">{{ $curator->name }}</span>
                     </a>
                 </li>
                 @endforeach

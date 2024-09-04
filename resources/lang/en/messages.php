@@ -242,4 +242,7 @@ return [
     //
     'show_email_address' => 'Show email address',
     'address_not_found' => 'Address not found',
+    'your_curators' => 'Your Curators',
+    'curators' => 'Curators',
+    'curator' => 'Curator',
 ];
