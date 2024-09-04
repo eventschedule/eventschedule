@@ -424,6 +424,22 @@ class RoleController extends Controller
         return view('role/index', $data);
     }
 
+    public function viewCurators()
+    {
+        $user = auth()->user();
+        $roleIds = $user->followingCurators()->pluck('roles.id');
+        $roles = Role::whereIn('id', $roleIds)
+                    ->orderBy('name', 'ASC')
+                    ->get();
+
+        $data = [
+            'roles' => $roles,
+            'type' => 'vendor',
+        ];
+
+        return view('role/index', $data);
+    }
+
     public function create($type)
     {
         $role = new Role;
