@@ -12,6 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         DB::statement("ALTER TABLE `roles` MODIFY `type` ENUM('venue', 'talent', 'vendor', 'curator') NOT NULL");
+
+        Schema::create('event_role', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('event_id')->constrained()->onDelete('cascade');
+            $table->foreignId('role_id')->constrained()->onDelete('cascade');
+            $table->unique(['role_id', 'event_id']);
+        });
     }
 
     /**
@@ -19,6 +26,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        DB::statement("UPDATE `roles` SET type = 'talent' WHERE type = 'curator';");
         DB::statement("ALTER TABLE `roles` MODIFY `type` ENUM('venue', 'talent', 'vendor') NOT NULL");
+
+        Schema::dropIfExists('event_role');
     }
 };
