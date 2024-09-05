@@ -284,7 +284,7 @@ class EventController extends Controller
     public function store(Request $request, $subdomain)
     {
         $user = $request->user();
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        $subdomainRole = $role = Role::subdomain($subdomain)->firstOrFail();
         $venue = $role->isVenue() ? $role : null;
         $talent = $role->isTalent() ? $role : null;
         $vendor = $role->isVendor() ? $role : null;
@@ -414,8 +414,8 @@ class EventController extends Controller
             Notification::route('mail', $role->email)->notify(new ClaimRoleNotification($event));
         }
         
-        if ($role->isCurator()) {
-            $role->events()->attach($event->id);
+        if ($subdomainRole->isCurator()) {
+            $subdomainRole->events()->attach($event->id);
         }
 
         session()->forget('pending_venue');

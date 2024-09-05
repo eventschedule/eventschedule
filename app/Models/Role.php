@@ -92,7 +92,7 @@ class Role extends Model implements MustVerifyEmail
 
     public function events()
     {
-        return $this->belongsToMany(Role::class);
+        return $this->belongsToMany(Event::class);
     }
     
     public function members()
