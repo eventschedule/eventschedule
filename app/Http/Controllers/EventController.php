@@ -413,6 +413,10 @@ class EventController extends Controller
         if ($role->wasRecentlyCreated && ! $role->user_id) {
             Notification::route('mail', $role->email)->notify(new ClaimRoleNotification($event));
         }
+        
+        if ($role->isCurator()) {
+            $role->events()->attach($event->id);
+        }
 
         session()->forget('pending_venue');
 

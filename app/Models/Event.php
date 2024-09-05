@@ -40,6 +40,13 @@ class Event extends Model
         return $this->belongsTo(Role::class, 'venue_id');
     }
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class)                    
+                    ->withTimestamps();
+    }    
+
+
     public function localStartsAt($pretty = false)
     {
         if (! $this->starts_at) {
