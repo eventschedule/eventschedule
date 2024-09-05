@@ -90,6 +90,11 @@ class Role extends Model implements MustVerifyEmail
         $this->notify(new CustomVerifyEmail('role', $this->subdomain));
     }
 
+    public function events()
+    {
+        return $this->belongsToMany(Role::class);
+    }
+    
     public function members()
     {
         return $this->belongsToMany(User::class)                    
@@ -180,7 +185,7 @@ class Role extends Model implements MustVerifyEmail
 
     public function isCurator()
     {
-        return $this->type == 'talent';
+        return $this->type == 'curator';
     }
 
     public function canHaveAddress()
