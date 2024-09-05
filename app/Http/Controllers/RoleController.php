@@ -20,6 +20,7 @@ use App\Models\Role;
 use App\Models\Event;
 use App\Models\User;
 use App\Models\RoleUser;
+use App\Models\EventRole;
 use App\Utils\UrlUtils;
 use App\Utils\ColorUtils;
 use Carbon\Carbon;
@@ -209,17 +210,9 @@ class RoleController extends Controller
         $followers = $role->followers()->get();
         $members = $role->members()->get();
 
-        $requests = Event::with(['role'])
-            ->where(function ($query) use ($role) {
-                $query->where('venue_id', $role->id)
-                    ->orWhere('role_id', $role->id);
-            })
-            ->whereNull('is_accepted')
-            ->orderBy('created_at', 'desc')
-            ->get();        
-        
         $events = [];
         $unscheduled = [];
+        $requests = [];
         $month = $request->month;
         $year = $request->year;
         $startOfMonth = '';
@@ -243,31 +236,44 @@ class RoleController extends Controller
             $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
             if ($tab == 'schedule') {
-                $events = Event::with(['role'])
-                    ->where(function ($query) use ($role) {
-                        $query->where('venue_id', $role->id)
-                            ->orWhere('role_id', $role->id);
-                    })
-                    ->whereNotNull('is_accepted')
-                    ->where(function ($query) use ($startOfMonth, $endOfMonth) {
-                        $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
-                            ->orWhereNotNull('days_of_week');
-                    })
-                    ->orderBy('starts_at')
-                    ->get();
+                if ($role->isCurator()) {
+                    $eventIds = EventRole::whereRoleId($role->id)->pluck('event_id');
 
-                $unscheduled = Event::with(['role'])
-                    ->where(function ($query) use ($role) {
-                        $query->where('venue_id', $role->id)
-                            ->orWhere('role_id', $role->id);
-                    })
-                    ->where('is_accepted', true)
-                    ->whereNull('starts_at')
-                    ->orderBy('created_at', 'desc')
-                    ->get();
+                    $events = Event::with(['role'])
+                        ->where(function ($query) use ($startOfMonth, $endOfMonth) {
+                            $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
+                                ->orWhereNotNull('days_of_week');
+                        })        
+                        ->whereIn('id', $eventIds)
+                        ->orderBy('starts_at')    
+                        ->get();
+                } else {
+                    $events = Event::with(['role'])
+                        ->where(function ($query) use ($role) {
+                            $query->where('venue_id', $role->id)
+                                ->orWhere('role_id', $role->id);
+                        })
+                        ->whereNotNull('is_accepted')
+                        ->where(function ($query) use ($startOfMonth, $endOfMonth) {
+                            $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
+                                ->orWhereNotNull('days_of_week');
+                        })
+                        ->orderBy('starts_at')
+                        ->get();
 
-                foreach ($members as $member) {
-                    $datesUnavailable[e($member->name)] = json_decode($member->pivot->dates_unavailable);
+                    $unscheduled = Event::with(['role'])
+                        ->where(function ($query) use ($role) {
+                            $query->where('venue_id', $role->id)
+                                ->orWhere('role_id', $role->id);
+                        })
+                        ->where('is_accepted', true)
+                        ->whereNull('starts_at')
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+
+                    foreach ($members as $member) {
+                        $datesUnavailable[e($member->name)] = json_decode($member->pivot->dates_unavailable);
+                    }
                 }
             } else if ($tab == 'availability') {                                       
                 $user = $request->user();
@@ -276,6 +282,15 @@ class RoleController extends Controller
                                 ->first();
                 $datesUnavailable = json_decode($roleUser->dates_unavailable);
             }
+        } else if ($tab == 'requests') {
+            $requests = Event::with(['role'])
+                            ->where(function ($query) use ($role) {
+                                $query->where('venue_id', $role->id)
+                                    ->orWhere('role_id', $role->id);
+                            })
+                            ->whereNull('is_accepted')
+                            ->orderBy('created_at', 'desc')
+                            ->get();
         }
 
         return view('role/show-admin', compact(
