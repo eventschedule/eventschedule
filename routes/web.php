@@ -50,7 +50,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/edit_event/{hash}', [EventController::class, 'edit'])->name('event.edit');
     Route::get('/{subdomain}/delete_event/{hash}', [EventController::class, 'delete'])->name('event.delete');
     Route::put('/{subdomain}/update_event/{hash}', [EventController::class, 'update'])->name('event.update');
-    Route::get('/{subdomain}/delete_event_image', [EventController::class, 'deleteImage'])->name('role.delete_event_image');
+    Route::get('/{subdomain}/delete_event_image', [EventController::class, 'deleteImage'])->name('event.delete_image');
     Route::get('/{subdomain}/requests/accept_event/{hash}', [EventController::class, 'accept'])->name('event.accept');
     Route::get('/{subdomain}/requests/decline_event/{hash}', [EventController::class, 'decline'])->name('event.decline');
     Route::post('/{subdomain}/profile/update_links', [RoleController::class, 'updateLinks'])->name('role.update_links');
