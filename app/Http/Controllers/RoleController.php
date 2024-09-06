@@ -176,7 +176,6 @@ class RoleController extends Controller
         $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
         $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
-
         if ($role->isCurator()) {
             $events = Event::with(['role'])
                 ->where(function ($query) use ($startOfMonth, $endOfMonth) {
