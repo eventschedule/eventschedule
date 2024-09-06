@@ -271,10 +271,10 @@
                                 :value="old('flyer_image')" />
                             <x-input-error class="mt-2" :messages="$errors->get('flyer_image')" />
 
-                            @if ($event->flyer_image)
-                            <img src="{{ $event->flyer_image }}" style="max-height:120px" class="pt-3" />
+                            @if ($event->flyer_image_url)
+                            <img src="{{ $event->flyer_image_url }}" style="max-height:120px" class="pt-3" />
                             <a href="#"
-                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'flyer']) }}'; }"
+                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.delete_image', ['hash' => App\Utils\UrlUtils::encodeId($event->id), 'image_type' => 'flyer']) }}'; }"
                                 class="hover:underline">
                                 {{ __('messages.delete_image') }}
                             </a>
