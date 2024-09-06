@@ -81,7 +81,8 @@
     </h2>
 
     <form method="POST"
-        action="{{ $event->exists ? route('event.update', ['subdomain' => $subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) : route('event.store', ['subdomain' => $subdomain]) }}">
+        action="{{ $event->exists ? route('event.update', ['subdomain' => $subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) : route('event.store', ['subdomain' => $subdomain]) }}"
+        enctype="multipart/form-data">
 
         @csrf
 
@@ -264,6 +265,22 @@
                             @endforeach
                         </div>
 
+                        <div class="mb-6">
+                            <x-input-label for="flyer_image" :value="__('messages.flyer_image')" />
+                            <input id="flyer_image" name="flyer_image" type="file" class="mt-1 block w-full"
+                                :value="old('flyer_image')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('flyer_image')" />
+
+                            @if ($event->flyer_image)
+                            <img src="{{ $event->flyer_image }}" style="max-height:120px" class="pt-3" />
+                            <a href="#"
+                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'flyer']) }}'; }"
+                                class="hover:underline">
+                                {{ __('messages.delete_image') }}
+                            </a>
+                            @endif
+                        </div>
+                        
                     </div>
                 </div>
                 @endif
