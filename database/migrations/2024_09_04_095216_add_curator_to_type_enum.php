@@ -19,6 +19,10 @@ return new class extends Migration
             $table->foreignId('role_id')->constrained()->onDelete('cascade');
             $table->unique(['role_id', 'event_id']);
         });
+
+        Schema::table('events', function (Blueprint $table) {
+            $table->string('flyer_image_url')->nullable();
+        });
     }
 
     /**
@@ -30,5 +34,9 @@ return new class extends Migration
         DB::statement("ALTER TABLE `roles` MODIFY `type` ENUM('venue', 'talent', 'vendor') NOT NULL");
 
         Schema::dropIfExists('event_role');
+
+        Schema::table('events', function (Blueprint $table) {
+            $table->dropColumn('flyer_image_url');        
+        });        
     }
 };
