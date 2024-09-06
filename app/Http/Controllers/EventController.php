@@ -226,18 +226,23 @@ class EventController extends Controller
 
         $venue = $event->venue;
         if (! $venue->user_id) {
-            $venue->name = $request->venue_name;
+            if ($request->venue_name) {
+                $venue->name = $request->venue_name;
+            }
+
             $venue->address1 = $request->venue_address1;
             $venue->address2 = $request->venue_address2;
             $venue->city = $request->venue_city;
             $venue->state = $request->venue_state;
             $venue->postal_code = $request->venue_postal_code;
             $venue->country_code = $request->venue_country_code;
+            
             $venue->formatted_address = $request->formatted_address;
             $venue->google_place_id = $request->google_place_id;
             $venue->geo_address = $request->geo_address;
             $venue->geo_lat = $request->geo_lat;
             $venue->geo_lon = $request->geo_lon;
+            
             $venue->save();
         }
 
