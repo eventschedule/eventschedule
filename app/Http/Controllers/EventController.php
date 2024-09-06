@@ -22,7 +22,7 @@ use App\Rules\NoFakeEmail;
 
 class EventController extends Controller
 {
-    public function deleteImage(Request $request)
+    public function deleteImage(Request $request, $subdomain)
     {
         $event_id = UrlUtils::decodeId($request->hash);
         $event = Event::findOrFail($event_id);
@@ -33,7 +33,7 @@ class EventController extends Controller
 
         if ($request->image_type == 'flyer') {
             if ($event->flyer_image_url) {
-                $path = $role->getAttributes()['flyer_image_url'];
+                $path = $event->getAttributes()['flyer_image_url'];
                 if (config('filesystems.default') == 'local') {
                     $path = 'public/' . $path;
                 }
@@ -44,7 +44,7 @@ class EventController extends Controller
             }    
         }
 
-        return redirect(route('event.edit', ['hash' => $request->hash]))
+        return redirect(route('event.edit', ['subdomain' => $subdomain, 'hash' => $request->hash]))
                 ->with('message', __('messages.deleted_image'));
     }
 
