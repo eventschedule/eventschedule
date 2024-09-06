@@ -176,15 +176,31 @@ class RoleController extends Controller
         $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
         $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
-        $events = Event::with(['role'])
-            ->where($role->isVenue() ? 'venue_id' : 'role_id', $role->id)
-            ->where('is_accepted', true)
-            ->where(function ($query) use ($startOfMonth, $endOfMonth) {
-                $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
-                    ->orWhereNotNull('days_of_week');
-            })
-            ->orderBy('starts_at')
-            ->get();
+
+        if ($role->isCurator()) {
+            $events = Event::with(['role'])
+                ->where(function ($query) use ($startOfMonth, $endOfMonth) {
+                    $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
+                        ->orWhereNotNull('days_of_week');
+                })
+                ->whereIn('id', function ($query) use ($role) {
+                    $query->select('event_id')
+                        ->from('event_role')
+                        ->where('role_id', $role->id);
+                })
+                ->orderBy('starts_at')
+                ->get();
+        } else {
+            $events = Event::with(['role'])
+                ->where(function ($query) use ($startOfMonth, $endOfMonth) {
+                    $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
+                        ->orWhereNotNull('days_of_week');
+                })
+                ->where($role->isVenue() ? 'venue_id' : 'role_id', $role->id)
+                ->where('is_accepted', true)
+                ->orderBy('starts_at')
+                ->get();
+        }
 
         return view('role/show-guest', compact(
             'subdomain',
@@ -237,16 +253,18 @@ class RoleController extends Controller
 
             if ($tab == 'schedule') {
                 if ($role->isCurator()) {
-                    $eventIds = EventRole::whereRoleId($role->id)->pluck('event_id');
-
                     $events = Event::with(['role'])
                         ->where(function ($query) use ($startOfMonth, $endOfMonth) {
                             $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
                                 ->orWhereNotNull('days_of_week');
-                        })        
-                        ->whereIn('id', $eventIds)
-                        ->orderBy('starts_at')    
-                        ->get();
+                        })
+                        ->whereIn('id', function ($query) use ($role) {
+                            $query->select('event_id')
+                                ->from('event_role')
+                                ->where('role_id', $role->id);
+                        })
+                        ->orderBy('starts_at')
+                        ->get();    
                 } else {
                     $events = Event::with(['role'])
                         ->where(function ($query) use ($role) {
