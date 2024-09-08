@@ -198,7 +198,7 @@
                         <div class="mb-6">
                             <x-input-label for="profile_image" :value="__('messages.profile_image')" />
                             <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full"
-                                :value="old('profile_image')" />
+                                :value="old('profile_image')" accept="image/png, image/jpeg" />
                             <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
 
                             @if ($role->profile_image_url)
@@ -362,7 +362,7 @@
                         <div class="mb-6" id="style_background_image" style="display:none">
                             <x-input-label for="background_image" :value="__('messages.image')" />
                             <input id="background_image" name="background_image" type="file" class="mt-1 block w-full"
-                                :value="old('background_image')" oninput="updatePreview()" />
+                                :value="old('background_image')" oninput="updatePreview()" accept="image/png, image/jpeg" />
                             <x-input-error class="mt-2" :messages="$errors->get('background_image')" />
 
                             @if ($role->background_image_url)
