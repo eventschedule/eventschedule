@@ -253,4 +253,5 @@ return [
     'youtube_videos' => 'YouTube Videos',
     'video_url' => 'Video URL',
     'event_added' => 'Successfully added event',
+    'please_select' => 'Please select',
 ];

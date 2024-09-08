@@ -47,7 +47,8 @@
                         <div class="mb-6">
                             <select id="venue_id" name="venue_id"
                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                onchange="onSelectChange()">
+                                onchange="onSelectChange()" required>
+                                <option value="" disabled selected>{{ __('messages.please_select') }}</option>
                                 @foreach ($venues as $venue)
                                 <option value="{{ App\Utils\UrlUtils::encodeId($venue->id) }}">{{ $venue->name }}</option>
                                 @endforeach
