@@ -268,7 +268,7 @@
                         <div class="mb-6">
                             <x-input-label for="flyer_image" :value="__('messages.flyer_image')" />
                             <input id="flyer_image" name="flyer_image" type="file" class="mt-1 block w-full"
-                                :value="old('flyer_image')" />
+                                :value="old('flyer_image')" accept="image/png, image/jpeg" />
                             <x-input-error class="mt-2" :messages="$errors->get('flyer_image')" />
 
                             @if ($event->flyer_image_url)
