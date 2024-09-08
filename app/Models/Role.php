@@ -264,7 +264,7 @@ class Role extends Model implements MustVerifyEmail
         $subdomain = strtolower(trim($subdomain));
 
         if (strlen($subdomain) < 5) {
-            return \Str::random(8);
+            return strtolower(\Str::random(8));
         }
     
         return $subdomain;
