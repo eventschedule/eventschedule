@@ -450,65 +450,79 @@ class EventController extends Controller
             }
         }
 
-        $event = new Event;       
-        $event->fill($request->all());
-        $event->user_id = auth()->user()->id;
-        $event->venue_id = $venue->id;
-        $event->role_id = $role->id;
+        $event = false;
 
-        $days_of_week = '';
-        $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-        foreach ($days as $index => $day) {
-            $days_of_week .= request()->has('days_of_week_' . $index) ? '1' : '0';
-        }
-        $event->days_of_week = request()->schedule_type == 'recurring' ? $days_of_week : null;
-
-        if ($event->starts_at) {
-            $timezone = auth()->user()->timezone;
-            $event->starts_at = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, $timezone)
-                ->setTimezone('UTC')
-                ->format('Y-m-d H:i:s');
+        if ($subdomainRole->isCurator()) {
+            $date = explode(' ', $request->starts_at)[0];
+            $event = Event::where('role_id', $role->id)
+                        ->where('venue_id', $venue->id)                        
+                        ->where('starts_at', 'like', $date . '%')
+                        ->first();                                                                        
         }
 
-        if (auth()->user()->isMember($venue->subdomain) || !$venue->user_id) {
-            $event->is_accepted = true;
-            $message = __('messages.event_created');
+        if ($event) {
+            $message = __('messages.event_added');
         } else {
-            $subdomain = $role->subdomain;
-            $message = __('messages.event_requested');
+            $event = new Event;       
+            $event->fill($request->all());
+            $event->user_id = auth()->user()->id;
+            $event->venue_id = $venue->id;
+            $event->role_id = $role->id;
 
-            $emails = $venue->members()->pluck('email');
-            //Notification::route('mail', $emails)->notify(new EventRequestNotification($venue, $role));
-        }
+            $days_of_week = '';
+            $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+            foreach ($days as $index => $day) {
+                $days_of_week .= request()->has('days_of_week_' . $index) ? '1' : '0';
+            }
+            $event->days_of_week = request()->schedule_type == 'recurring' ? $days_of_week : null;
 
-        $event->save();
-
-        if ($request->hasFile('flyer_image_url')) {
-            if ($event->flyer_image_url) {
-                $path = $event->getAttributes()['flyer_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
-                }
-                Storage::delete($path);
+            if ($event->starts_at) {
+                $timezone = auth()->user()->timezone;
+                $event->starts_at = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, $timezone)
+                    ->setTimezone('UTC')
+                    ->format('Y-m-d H:i:s');
             }
 
-            $file = $request->file('flyer_image_url');
-            $filename = strtolower('flyer_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+            if (auth()->user()->isMember($venue->subdomain) || !$venue->user_id) {
+                $event->is_accepted = true;
+                $message = __('messages.event_created');
+            } else {
+                $subdomain = $role->subdomain;
+                $message = __('messages.event_requested');
 
-            $event->flyer_image_url = $filename;
+                $emails = $venue->members()->pluck('email');
+                //Notification::route('mail', $emails)->notify(new EventRequestNotification($venue, $role));
+            }
+
             $event->save();
+
+            if ($request->hasFile('flyer_image_url')) {
+                if ($event->flyer_image_url) {
+                    $path = $event->getAttributes()['flyer_image_url'];
+                    if (config('filesystems.default') == 'local') {
+                        $path = 'public/' . $path;
+                    }
+                    Storage::delete($path);
+                }
+
+                $file = $request->file('flyer_image_url');
+                $filename = strtolower('flyer_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+                $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+
+                $event->flyer_image_url = $filename;
+                $event->save();
+            }
+
+            if ($venue->wasRecentlyCreated && ! $venue->user_id) {
+                Notification::route('mail', $venue->email)->notify(new ClaimVenueNotification($event));
+            }
+
+            if ($role->wasRecentlyCreated && ! $role->user_id) {
+                Notification::route('mail', $role->email)->notify(new ClaimRoleNotification($event));
+            }
         }
 
-        if ($venue->wasRecentlyCreated && ! $venue->user_id) {
-            Notification::route('mail', $venue->email)->notify(new ClaimVenueNotification($event));
-        }
-
-        if ($role->wasRecentlyCreated && ! $role->user_id) {
-            Notification::route('mail', $role->email)->notify(new ClaimRoleNotification($event));
-        }
-        
-        if ($subdomainRole->isCurator()) {
+        if ($subdomainRole->isCurator() && ! $subdomainRole->events()->where('event_id', $event->id)->exists()) {
             $subdomainRole->events()->attach($event->id);
         }
 

@@ -2,7 +2,7 @@
 
 return [
     'home' => 'Home',
-    'venues' => 'Venues',
+    'venuek' => 'Venues',
     'talent' => 'Talent',
     'vendors' => 'Vendors',
     'your_venues' => 'Your Venues',
@@ -252,4 +252,5 @@ return [
     'flyer_image' => 'Flyer Image',
     'youtube_videos' => 'YouTube Videos',
     'video_url' => 'Video URL',
+    'event_added' => 'Successfully added event',
 ];
