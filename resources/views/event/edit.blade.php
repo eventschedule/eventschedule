@@ -186,8 +186,8 @@
                         <div class="mb-6">
                             <select name="role_id"
                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">>
-                                @foreach ($roles as $role)
-                                <option value="{{ App\Utils\UrlUtils::encodeId($role->id) }}">{{ $role->name }}</option>
+                                @foreach ($roles as $each)
+                                <option value="{{ App\Utils\UrlUtils::encodeId($each->id) }}">{{ $each->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -281,6 +281,33 @@
                             @endif
                         </div>
                         
+                    </div>
+                </div>
+                @endif
+
+                @if (! $talent || ($talent && ! $talent->user_id))
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="address">
+                    <div class="max-w-xl">
+
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                            {{ __('messages.youtube_videos') }}
+                        </h2>
+
+                        <div class="mb-6">
+                            <x-input-label for="first_video_url" :value="__('messages.video_url')" />
+                            <x-text-input id="first_video_url" name="first_video_url" type="url"
+                                class="mt-1 block w-full"
+                                :value="old('first_video_url', $talent ? $talent->getFirstVideoUrl() : '')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('first_video_url')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="second_video_url" :value="__('messages.video_url')" />
+                            <x-text-input id="second_video_url" name="second_video_url" type="url"
+                                class="mt-1 block w-full"
+                                :value="old('second_video_url', $talent ? $talent->getSecondVideoUrl() : '')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('second_video_url')" />
+                        </div>
                     </div>
                 </div>
                 @endif

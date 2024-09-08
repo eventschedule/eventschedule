@@ -310,8 +310,42 @@ class Role extends Model implements MustVerifyEmail
         return $subdomain;
     }
 
+    public function getFirstVideoUrl()
+    {
+        if (! $this->youtube_links) {
+            return '';
+        }
+
+        $links = json_decode($this->youtube_links);
+
+        if (count($links) >= 1) {
+            return $links[0]->url;
+        }
+
+        return '';
+    }
+
+    public function getSecondVideoUrl()
+    {
+        if (! $this->youtube_links) {
+            return '';
+        }
+
+        $links = json_decode($this->youtube_links);
+
+        if (count($links) >= 2) {
+            return $links[1]->url;
+        }
+
+        return '';
+    }
+
     public function getVideoColumns()
     {
+        if (! $this->youtube_links) {
+            return 0;
+        }
+
         $links = json_decode($this->youtube_links);
         $count = count($links);
 
@@ -326,6 +360,10 @@ class Role extends Model implements MustVerifyEmail
 
     public function getVideoHeight()
     {
+        if (! $this->youtube_links) {
+            return 0;
+        }
+
         $count = $this->getVideoColumns();
 
         if ($count == 1) {
