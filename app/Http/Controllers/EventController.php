@@ -93,6 +93,7 @@ class EventController extends Controller
             'user' => $request->user(),
             'subdomain' => $subdomain,
             'venue' => $event->venue,
+            'role' => $event->role,
             'talent' => $event->role->type == 'talent' ? $event->role : false,
             'vendor' => $event->role->type == 'vendor' ? $event->role : false,
             'title' => __('messages.edit_event'),
@@ -252,6 +253,8 @@ class EventController extends Controller
         }
 
         $venue = $event->venue;
+        $role = $event->role;
+
         if (! $venue->user_id) {
             if ($request->venue_name) {
                 $venue->name = $request->venue_name;
@@ -271,6 +274,18 @@ class EventController extends Controller
             $venue->geo_lon = $request->geo_lon;
             
             $venue->save();
+        }
+
+        if (! $role->user_id) {
+            $links = [];
+            if ($request->first_video_url) {
+                $links[] = UrlUtils::getUrlDetails($request->first_video_url);
+            }
+            if ($request->second_video_url) {
+                $links[] = UrlUtils::getUrlDetails($request->second_video_url);
+            }
+            $role->youtube_links = json_encode($links);
+            $role->save();
         }
 
         if ($event->starts_at) {
@@ -410,6 +425,16 @@ class EventController extends Controller
                 $role->background_colors = ColorUtils::randomGradient();
                 $role->background_rotation = rand(0, 359);
                 $role->font_color = '#ffffff';
+
+                $links = [];
+                if ($request->first_video_url) {
+                    $links[] = UrlUtils::getUrlDetails($request->first_video_url);
+                }
+                if ($request->second_video_url) {
+                    $links[] = UrlUtils::getUrlDetails($request->second_video_url);
+                }
+                $role->youtube_links = json_encode($links);
+
                 $role->save();
 
                 $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);

@@ -71,4 +71,30 @@ class UrlUtils
 
         return $previous;
     }
+
+    public static function getUrlDetails($url)
+    {
+        $title = '';
+        $thumbnail_url = '';
+        $url = 'https://noembed.com/embed?dataType=json&url=' . urlencode($link);
+
+        if ($response = @file_get_contents($url)) {
+            $json = json_decode($response);
+
+            if (property_exists($json, 'title')) {
+                $title = $json->title;
+            }
+
+            if (property_exists($json, 'thumbnail_url')) {
+                $thumbnail_url = $json->thumbnail_url;
+            }
+        }
+                    
+        $obj = new \stdClass;
+        $obj->name = $title;
+        $obj->url = rtrim($link, '/');
+        $obj->thumbnail_url = $thumbnail_url;
+
+        return $obj;
+    }    
 }

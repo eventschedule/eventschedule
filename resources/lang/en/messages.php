@@ -250,4 +250,6 @@ return [
     'updated_curator' => 'Successfully updated curator',
     'deleted_curator' => 'Successfully deleted curator',
     'flyer_image' => 'Flyer Image',
+    'youtube_videos' => 'YouTube Videos',
+    'video_url' => 'Video URL',
 ];
