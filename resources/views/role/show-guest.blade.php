@@ -25,7 +25,10 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image:alt" content="Event Schedule">
 
-    @if ($event && $event->role->profile_image_url)
+    @if ($event && $event->flyer_image_url)
+    <meta property="og:image" content="{{ $event->flyer_image_url }}">
+    <meta name="twitter:image" content="{{ $event->flyer_image_url }}">
+    @elseif ($event && $event->role->profile_image_url)
     <meta property="og:image" content="{{ $event->role->profile_image_url }}">
     <meta name="twitter:image" content="{{ $event->role->profile_image_url }}">
     @elseif ($role->profile_image_url)
