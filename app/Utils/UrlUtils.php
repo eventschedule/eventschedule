@@ -76,9 +76,9 @@ class UrlUtils
     {
         $title = '';
         $thumbnail_url = '';
-        $url = 'https://noembed.com/embed?dataType=json&url=' . urlencode($link);
+        $lookup_url = 'https://noembed.com/embed?dataType=json&url=' . urlencode($url);
 
-        if ($response = @file_get_contents($url)) {
+        if ($response = @file_get_contents($lookup_url)) {
             $json = json_decode($response);
 
             if (property_exists($json, 'title')) {
@@ -92,7 +92,7 @@ class UrlUtils
                     
         $obj = new \stdClass;
         $obj->name = $title;
-        $obj->url = rtrim($link, '/');
+        $obj->url = rtrim($url, '/');
         $obj->thumbnail_url = $thumbnail_url;
 
         return $obj;
