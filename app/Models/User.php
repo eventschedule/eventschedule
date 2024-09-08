@@ -166,6 +166,10 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function canEditEvent($event)
     {
+        if ($this->id == $event->user_id) {
+            return true;
+        }
+
         return $this->isMember($event->venue->subdomain) || $this->isMember($event->role->subdomain);
     }
 
