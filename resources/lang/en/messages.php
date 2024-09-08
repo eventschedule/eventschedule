@@ -239,7 +239,6 @@ return [
     'updated_availability' => 'Successfully updated availability',
     'unavailable' => 'Unavailable',
     'unsaved_changes' => 'You have unsaved changes',
-    //
     'show_email_address' => 'Show email address',
     'address_not_found' => 'Address not found',
     'your_curators' => 'Your Curators',
@@ -254,4 +253,5 @@ return [
     'video_url' => 'Video URL',
     'event_added' => 'Successfully added event',
     'please_select' => 'Please select',
+    //
 ];
