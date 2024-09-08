@@ -223,6 +223,7 @@
                             {{ __('messages.details') }}
                         </h2>
 
+                        @if (! $subdomainRole->isCurator())
                         <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                             <div class="flex items-center">
                                 <input id="one_time" name="schedule_type" type="radio" value="one_time" onchange="onChangeDateType()" {{ $event->days_of_week ? '' : 'CHECKED' }}
@@ -237,6 +238,7 @@
                                     class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.recurring') }}</label>
                             </div>
                         </div>
+                        @endif
 
                         <div class="mb-6">
                             <x-input-label for="starts_at"

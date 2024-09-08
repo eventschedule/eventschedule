@@ -111,17 +111,17 @@ class EventController extends Controller
         ]);
 
         $user = $request->user();
-        $role = Role::subdomain($subdomain)->firstOrFail();
-        $header = $role->getRoleHeader();
+        $subdomainRole = Role::subdomain($subdomain)->firstOrFail();
+        $header = $subdomainRole->getRoleHeader();
         $roles = [];
 
-        if (! $role->email_verified_at) {
+        if (! $subdomainRole->email_verified_at) {
             return redirect('/');
         }
 
-        $venue = $role->isVenue() ? $role : null;
-        $talent = $role->isTalent() ? $role : null;
-        $vendor = $role->isVendor() ? $role : null;        
+        $venue = $subdomainRole->isVenue() ? $subdomainRole : null;
+        $talent = $subdomainRole->isTalent() ? $subdomainRole : null;
+        $vendor = $subdomainRole->isVendor() ? $subdomainRole : null;        
 
         if ($venue && ! auth()->user()->isMember($venue->subdomain)) {
             if (! $user->isMember($subdomain) && ! $venue->acceptRequests()) {
@@ -193,6 +193,7 @@ class EventController extends Controller
         }
 
         $data = [
+            'subdomainRole' => $subdomainRole,
             'role' => $role,
             'user' => $request->user(),
             'subdomain' => $subdomain,
