@@ -41,7 +41,8 @@
                         <div class="mb-6">
                             <select id="role_id" name="role_id"
                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                onchange="onSelectChange()">
+                                onchange="onSelectChange()" required>
+                                <option value="" disabled selected>{{ __('messages.please_select') }}</option>
                                 @foreach ($roles as $role)
                                 <option value="{{ App\Utils\UrlUtils::encodeId($role->id) }}">{{ $role->name }}</option>
                                 @endforeach
