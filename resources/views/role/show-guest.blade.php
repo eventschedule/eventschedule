@@ -183,7 +183,7 @@
 
             <div id="event_title" class="py-16">
                 <div class="mx-auto max-w-7xl px-6 lg:px-8">
-                    <div class="mx-auto max-w-2xl lg:text-center">
+                    <div class="mx-auto max-w-2xl text-center">
                         <p class="mt-2 text-6xl font-bold tracking-tight">
                             <a href="{{ $event->role->getGuestUrl() }}">
                                 {{ $event->role->name }}
@@ -247,7 +247,7 @@
             </div>
 
             @if ($event->role->youtube_links)
-                <div class="container mx-auto py-8">
+                <div class="container mx-auto pb-8">
                     <div class="grid grid-cols-1 md:grid-cols-{{ $event->role->getVideoColumns() }} gap-8">
                         @foreach (json_decode($event->role->youtube_links) as $link)
                         <div class="bg-white rounded-lg shadow-md overflow-hidden">
@@ -255,6 +255,12 @@
                         </div>
                         @endforeach
                     </div>
+                </div>
+            @endif
+
+            @if ($event->flyer_image_url)
+                <div class="container mx-auto pb-8 flex justify-center">
+                    <img src="{{ $event->flyer_image_url }}" class="block"/>
                 </div>
             @endif
         
