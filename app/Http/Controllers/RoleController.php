@@ -143,6 +143,7 @@ class RoleController extends Controller
 
         $user = auth()->user();
         $role = Role::subdomain($subdomain)->first();
+        $embed = request()->embed && $role->isPro();
 
         if (! $role) {
             return redirect()->route('landing');
@@ -213,6 +214,7 @@ class RoleController extends Controller
             'endOfMonth',
             'user',
             'event',
+            'embed',
         ));
 
 
