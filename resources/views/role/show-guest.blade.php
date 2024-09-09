@@ -2,6 +2,7 @@
 
 @section('title', $role->name)
 
+@section('content')
 <body class="antialiased dark:bg-black dark:text-white/50">
 
     <div class="p-10 max-w-5xl mx-auto px-4">
@@ -287,3 +288,4 @@
     </footer>
 
 </body>
+@endsection
