@@ -25,6 +25,7 @@
             margin: auto;
             font-size: 3rem;
         }
+
         </style>
 
         <script>
@@ -312,111 +313,115 @@
                 </div>
 
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="address">
-                    <div class="max-w-xl">
+                    <div>
 
-                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('messages.style') }}
-                        </h2>
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                        {{ __('messages.style') }}
+                    </h2>
 
-                        <div class="mb-6">
-                            <x-input-label for="font_family" :value="__('messages.font_family')" />
-                            <select id="font_family" name="font_family" onchange="onChangeFont()"
-                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
-                                @foreach($fonts as $font)
-                                <option value="{{ $font->value }}"
-                                    {{ $role->font_family == $font->value ? 'SELECTED' : '' }}>
-                                    {{ $font->label }}</option>
-                                @endforeach
-                            </select>
-                            <x-input-error class="mt-2" :messages="$errors->get('font_family')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="font_color" :value="__('messages.font_color')" />
-                            <x-text-input id="font_color" name="font_color" type="color" class="mt-1 block w-1/2"
-                                :value="old('font_color', $role->font_color)" oninput="updatePreview()" />
-                            <x-input-error class="mt-2" :messages="$errors->get('font_color')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="accent_color" :value="__('messages.accent_color')" />
-                            <x-text-input id="accent_color" name="accent_color" type="color" class="mt-1 block w-1/2"
-                                :value="old('accent_color', $role->accent_color)" />
-                            <x-input-error class="mt-2" :messages="$errors->get('accent_color')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="background" :value="__('messages.background')" />
-                            <select id="background" name="background"
-                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                oninput="onChangeBackground(); updatePreview();">
-                                @foreach(['gradient', 'image'] as $background)
-                                <option value="{{ $background }}"
-                                    {{ $role->background == $background ? 'SELECTED' : '' }}>
-                                    {{ __('messages.' . $background) }}</option>
-                                @endforeach
-                            </select>
-                            <x-input-error class="mt-2" :messages="$errors->get('background')" />
-                        </div>
-
-                        <div class="mb-6" id="style_background_image" style="display:none">
-                            <x-input-label for="background_image" :value="__('messages.image')" />
-                            <input id="background_image" name="background_image" type="file" class="mt-1 block w-full"
-                                :value="old('background_image')" oninput="updatePreview()" accept="image/png, image/jpeg" />
-                            <x-input-error class="mt-2" :messages="$errors->get('background_image')" />
-
-                            @if ($role->background_image_url)
-                            <img src="{{ $role->background_image_url }}" style="max-height:120px" class="pt-3" />
-                            <a href="#"
-                                    onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}'; return false; }"
-                                    class="hover:underline">
-                                {{ __('messages.delete_image') }}
-                            </a>
-                            @endif
-                        </div>
-
-                        <div id="style_background_gradient" style="display:none">
+                    <div class="flex flex-col lg:flex-row gap-6">
+                        <div class="w-full lg:w-1/2">
                             <div class="mb-6">
-                                <x-input-label for="background_colors" :value="__('messages.colors')" />
-                                <select id="background_colors" name="background_colors" oninput="updatePreview()"
+                                <x-input-label for="font_family" :value="__('messages.font_family')" />
+                                <select id="font_family" name="font_family" onchange="onChangeFont()"
                                     class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
-                                    @foreach($gradients as $gradient => $name)
-                                    <option value="{{ $gradient }}"
-                                        {{ $role->background_colors == $gradient || (! array_key_exists($role->background_colors, $gradients) && ! $gradient) ? 'SELECTED' : '' }}>
-                                        {{ $name }}</option>
+                                    @foreach($fonts as $font)
+                                    <option value="{{ $font->value }}"
+                                        {{ $role->font_family == $font->value ? 'SELECTED' : '' }}>
+                                        {{ $font->label }}</option>
                                     @endforeach
                                 </select>
-                                <div class="text-xs">
-                                    <a href="https://uigradients.com" target="_blank" class="hover:underline">Gradients from uiGradients</a>
-                                </div>
-                                <x-input-error class="mt-2" :messages="$errors->get('background_colors')" />
-
-                                <div id="custom_colors" style="display:none">
-                                    <x-text-input id="custom_color1" name="custom_color1" type="color"
-                                        class="mt-1 block w-1/2"
-                                        :value="old('custom_color1', $role->background_colors ? explode(', ', $role->background_colors)[0] : '')"
-                                        oninput="updatePreview()" />
-                                    <x-text-input id="custom_color2" name="custom_color2" type="color"
-                                        class="mt-1 block w-1/2"
-                                        :value="old('custom_color2', $role->background_colors ? explode(', ', $role->background_colors)[1] : '')"
-                                        oninput="updatePreview()" />
-                                </div>
+                                <x-input-error class="mt-2" :messages="$errors->get('font_family')" />
                             </div>
 
                             <div class="mb-6">
-                                <x-input-label for="background_rotation" :value="__('messages.rotation')" />
-                                <x-text-input id="background_rotation" name="background_rotation" type="number"
-                                    class="mt-1 block w-1/2" oninput="updatePreview()"
-                                    :value="old('background_rotation', $role->background_rotation)" min="0" max="360" />
-                                <x-input-error class="mt-2" :messages="$errors->get('background_rotation')" />
+                                <x-input-label for="font_color" :value="__('messages.font_color')" />
+                                <x-text-input id="font_color" name="font_color" type="color" class="mt-1 block w-1/2"
+                                    :value="old('font_color', $role->font_color)" oninput="updatePreview()" />
+                                <x-input-error class="mt-2" :messages="$errors->get('font_color')" />
+                            </div>
+
+                            <div class="mb-6">
+                                <x-input-label for="accent_color" :value="__('messages.accent_color')" />
+                                <x-text-input id="accent_color" name="accent_color" type="color" class="mt-1 block w-1/2"
+                                    :value="old('accent_color', $role->accent_color)" />
+                                <x-input-error class="mt-2" :messages="$errors->get('accent_color')" />
+                            </div>
+
+                            <div class="mb-6">
+                                <x-input-label for="background" :value="__('messages.background')" />
+                                <select id="background" name="background"
+                                    class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                    oninput="onChangeBackground(); updatePreview();">
+                                    @foreach(['gradient', 'image'] as $background)
+                                    <option value="{{ $background }}"
+                                        {{ $role->background == $background ? 'SELECTED' : '' }}>
+                                        {{ __('messages.' . $background) }}</option>
+                                    @endforeach
+                                </select>
+                                <x-input-error class="mt-2" :messages="$errors->get('background')" />
+                            </div>
+
+                            <div class="mb-6" id="style_background_image" style="display:none">
+                                <x-input-label for="background_image" :value="__('messages.image')" />
+                                <input id="background_image" name="background_image" type="file" class="mt-1 block w-full"
+                                    :value="old('background_image')" oninput="updatePreview()" accept="image/png, image/jpeg" />
+                                <x-input-error class="mt-2" :messages="$errors->get('background_image')" />
+
+                                @if ($role->background_image_url)
+                                <img src="{{ $role->background_image_url }}" style="max-height:120px" class="pt-3" />
+                                <a href="#"
+                                    onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}'; return false; }"
+                                    class="hover:underline">
+                                    {{ __('messages.delete_image') }}
+                                </a>
+                                @endif
+                            </div>
+
+                            <div id="style_background_gradient" style="display:none">
+                                <div class="mb-6">
+                                    <x-input-label for="background_colors" :value="__('messages.colors')" />
+                                    <select id="background_colors" name="background_colors" oninput="updatePreview()"
+                                        class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                        @foreach($gradients as $gradient => $name)
+                                        <option value="{{ $gradient }}"
+                                            {{ $role->background_colors == $gradient || (! array_key_exists($role->background_colors, $gradients) && ! $gradient) ? 'SELECTED' : '' }}>
+                                            {{ $name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="text-xs">
+                                        <a href="https://uigradients.com" target="_blank" class="hover:underline">Gradients from uiGradients</a>
+                                    </div>
+                                    <x-input-error class="mt-2" :messages="$errors->get('background_colors')" />
+
+                                    <div id="custom_colors" style="display:none">
+                                        <x-text-input id="custom_color1" name="custom_color1" type="color"
+                                            class="mt-1 block w-1/2"
+                                            :value="old('custom_color1', $role->background_colors ? explode(', ', $role->background_colors)[0] : '')"
+                                            oninput="updatePreview()" />
+                                        <x-text-input id="custom_color2" name="custom_color2" type="color"
+                                            class="mt-1 block w-1/2"
+                                            :value="old('custom_color2', $role->background_colors ? explode(', ', $role->background_colors)[1] : '')"
+                                            oninput="updatePreview()" />
+                                    </div>
+                                </div>
+
+                                <div class="mb-6">
+                                    <x-input-label for="background_rotation" :value="__('messages.rotation')" />
+                                    <x-text-input id="background_rotation" name="background_rotation" type="number"
+                                        class="mt-1 block w-1/2" oninput="updatePreview()"
+                                        :value="old('background_rotation', $role->background_rotation)" min="0" max="360" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('background_rotation')" />
+                                </div>
                             </div>
                         </div>
 
-                        <div class="mb-6">
+                        <div class="w-full flex-grow">
                             <x-input-label :value="__('messages.preview')" />
-                            <div id="preview"></div>
+                            <div id="preview" class="h-full w-full flex-grow"></div>
                         </div>
                     </div>
+                </div>
 
                 </div>
 
