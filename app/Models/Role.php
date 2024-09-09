@@ -379,4 +379,8 @@ class Role extends Model implements MustVerifyEmail
         return route('role.view_guest', ['subdomain' => $this->subdomain]);
     }
 
+    public function isPro()
+    {
+        return $this->plan_expires >= now()->format('Y-m-d');
+    }
 }

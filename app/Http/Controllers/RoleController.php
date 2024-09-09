@@ -201,7 +201,8 @@ class RoleController extends Controller
                 ->get();
         }
 
-        return view('role/show-guest', compact(
+        $response = response()
+            ->view('role/show-guest', compact(
             'subdomain',
             'events',
             'role',
@@ -213,6 +214,13 @@ class RoleController extends Controller
             'user',
             'event',
         ));
+
+
+        if (! $role->isPro()) {
+            $response->header('X-Frame-Options', 'DENY');
+        }
+
+        return $response;
     }
 
     public function viewAdmin(Request $request, $subdomain, $tab = 'schedule')
