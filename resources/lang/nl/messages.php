@@ -222,7 +222,6 @@ return [
     'full_name' => 'Volledige naam',
     'claim_your_venue' => ':role heeft een evenement gepland bij :venue',
     'claim_your_role' => ':venue heeft een evenement gepland voor :role',
-    'claim_email_line2' => 'Meld je aan met dit e-mailadres om de evenementpagina aan te passen of negeer deze e-mail, er zullen geen toekomstige e-mails worden verzonden.',
     'other' => 'Anders',
     'next' => 'Volgende',
     'one_time' => 'Eenmalig',

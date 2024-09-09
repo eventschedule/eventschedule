@@ -222,7 +222,6 @@ return [
     'full_name' => 'Nome completo',
     'claim_your_venue' => ':role agendou um evento em :venue',
     'claim_your_role' => ':venue agendou um evento para :role',
-    'claim_email_line2' => 'Inscreva-se com este endereço de e-mail para personalizar a página do evento ou sinta-se à vontade para ignorar este e-mail, nenhum e-mail futuro será enviado.',
     'other' => 'Outro',
     'next' => 'Próximo',
     'one_time' => 'Única vez',
