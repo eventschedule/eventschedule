@@ -514,11 +514,11 @@ class EventController extends Controller
                 $event->save();
             }
 
-            if ($venue->wasRecentlyCreated && ! $venue->user_id) {
+            if (! $venue->user_id) {
                 Notification::route('mail', $venue->email)->notify(new ClaimVenueNotification($event));
             }
 
-            if ($role->wasRecentlyCreated && ! $role->user_id) {
+            if (! $role->user_id) {
                 Notification::route('mail', $role->email)->notify(new ClaimRoleNotification($event));
             }
         }
