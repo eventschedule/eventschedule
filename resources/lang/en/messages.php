@@ -2,7 +2,7 @@
 
 return [
     'home' => 'Home',
-    'venuek' => 'Venues',
+    'venues' => 'Venues',
     'talent' => 'Talent',
     'vendors' => 'Vendors',
     'your_venues' => 'Your Venues',
