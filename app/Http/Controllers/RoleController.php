@@ -143,7 +143,6 @@ class RoleController extends Controller
 
         $user = auth()->user();
         $role = Role::subdomain($subdomain)->first();
-        $embed = request()->embed && $role->isPro();
 
         if (! $role) {
             return redirect()->route('landing');
@@ -202,8 +201,9 @@ class RoleController extends Controller
                 ->get();
         }
 
+        $embed = request()->embed && $role->isPro();
         $response = response()
-            ->view('role/show-guest', compact(
+            ->view($embed ? 'role/show-guest-embed' : 'role/show-guest', compact(
             'subdomain',
             'events',
             'role',
