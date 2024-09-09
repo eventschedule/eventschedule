@@ -117,7 +117,8 @@
                             @if ($each->matchesDate($currentDate))
                             <li>
                                 <a href="{{ ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at) ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) : route('event.view_guest', ['subdomain' => isset($subdomain) ? $subdomain : $each->role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}"
-                                    class="group flex has-tooltip" data-tooltip="{{ $each->role->name }}<br/>{{ $each->venue->name }}<br/>{{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}">
+                                    class="group flex has-tooltip" data-tooltip="{{ $each->role->name }}<br/>{{ $each->venue->name }}<br/>{{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
+                                    {{ isset($embed) && $embed ? 'target="blank"' : '' }}>
                                     <p class="flex-auto truncate font-medium group-hover:text-indigo-600 text-gray-900">
                                         {{ isset($subdomain) && $subdomain == $each->role->subdomain ? $each->venue->name : $each->role->name }}
                                     </p>
@@ -159,7 +160,7 @@
                 @endphp
 
                 @if ($isRecurringToday || $isEventOnDate)
-                <a href="{{ $each->getGuestUrl() }}">
+                <a href="{{ $each->getGuestUrl() }}" {{ isset($embed) && $embed ? 'target="blank"' : '' }}>
                     <li class="relative flex items-center space-x-6 py-6 px-4 xl:static">
                         @if ($each->role->profile_image_url)
                         <img src="{{ $each->role->profile_image_url }}" class="h-14 w-14 flex-none">
