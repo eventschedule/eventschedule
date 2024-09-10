@@ -45,8 +45,19 @@ class ClaimRole extends Mailable
      */
     public function content(): Content
     {
+        $event = $this->event;
+        $role = $event->role;
+        $venue = $event->venue;
+        $user = $event->user;
+
         return new Content(
             markdown: 'mail.role.claim',
+            with: [
+                'event' => $event,
+                'role' => $role,
+                'venue' => $venue,
+                'user' => $user,
+            ]
         );
     }
 
