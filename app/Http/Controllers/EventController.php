@@ -6,9 +6,10 @@ use Illuminate\Support\Facades\Notification;
 use App\Notifications\EventRequestNotification;
 use App\Notifications\RequestDeclinedNotification;
 use App\Notifications\RequestAcceptedNotification;
-use App\Notifications\ClaimVenueNotification;
-use App\Notifications\ClaimRoleNotification;
 use App\Notifications\DeletedEventNotification;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ClaimRole;
+use App\Mail\ClaimVenue;
 use Illuminate\Support\Facades\Storage;
 use App\Utils\ColorUtils;
 use Illuminate\Http\Request;
@@ -386,6 +387,7 @@ class EventController extends Controller
             $venue->background_rotation = rand(0, 359);
             $venue->font_color = '#ffffff';
             $venue->save();
+            $venue->refesh();
 
             $user->roles()->attach($venue->id, ['level' => 'follower', 'created_at' => now()]);
 
@@ -439,6 +441,7 @@ class EventController extends Controller
                 $role->youtube_links = json_encode($links);
 
                 $role->save();
+                $role->refresh();
 
                 $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
 
@@ -515,11 +518,11 @@ class EventController extends Controller
             }
 
             if (! $venue->user_id && $venue->is_subscribed) {
-                Notification::route('mail', $venue->email)->notify(new ClaimVenueNotification($event));
+                Mail::to($venue->email)->send(new ClaimVenue($event));
             }
 
             if (! $role->user_id && $role->is_subscribed) {
-                Notification::route('mail', $role->email)->notify(new ClaimRoleNotification($event));
+                Mail::to($role->email)->send(new ClaimRole($event));
             }
         }
 
