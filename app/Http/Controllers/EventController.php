@@ -82,6 +82,7 @@ class EventController extends Controller
     public function edit(Request $request, $subdomain, $hash)
     {
         $user = $request->user();
+        $subdomainRole = Role::subdomain($subdomain)->firstOrFail();
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
 
@@ -95,6 +96,7 @@ class EventController extends Controller
         $header = $subdomain == $event->venue->subdomain ? $event->venue->getRoleHeader() : $event->role->getRoleHeader();
 
         $data = [
+            'subdomainRole' => $subdomainRole,
             'event' => $event,
             'user' => $user,
             'subdomain' => $subdomain,
