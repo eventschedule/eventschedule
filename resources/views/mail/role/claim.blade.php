@@ -7,8 +7,9 @@
 {{ __('messages.view_event') }}
 </x-mail::button>
 
-{{ __('messages.claim_email_line2') }}
+{!! str_replace(':click_here', '<a href="' . $unsubscribe_url . '">' . __('messages.click_here') . '</a>', __('messages.claim_email_line2')) !!}
 
 Thanks,<br>
 {{ config('app.name') }}
+
 </x-mail::message>

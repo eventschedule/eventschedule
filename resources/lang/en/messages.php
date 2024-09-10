@@ -253,8 +253,11 @@ return [
     'event_added' => 'Successfully added event',
     'please_select' => 'Please select',
     //
-    'claim_email_line2' => 'Sign up to customize the event page or feel free to ignore this email.',
+    'claim_email_line2' => 'Sign up to customize the event page or feel free to ignore this email. To stop receiving these emails :click_here.',
+    'click_here' => 'click here',
     'unsubscribed' => 'Successfully unsubscribed from emails',
     'subscribed' => 'Successfully subscribed to emails',
     'hello' => 'Hello',
+    'subscribe' => 'Subscribe',
+    'unsubscribe' => 'Unsubscribe',    
 ];
