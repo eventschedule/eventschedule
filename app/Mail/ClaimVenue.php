@@ -84,6 +84,7 @@ class ClaimVenue extends Mailable
         return new Headers(
             text: [
                 'List-Unsubscribe' => '<' . route('role.unsubscribe', ['subdomain' => $role->subdomain]) . '>',
+                'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
             ],
         );
     }
