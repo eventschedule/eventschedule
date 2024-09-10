@@ -899,4 +899,27 @@ class RoleController extends Controller
         return redirect(route('role.view_admin', $data))
             ->with('message', __('messages.updated_availability'));
     }
+ 
+    public function unsubscribe(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $role->is_subscribed = false;
+        $role->save();
+
+        echo __('messages.unsubscribed');
+        exit;
+    }
+
+    public function subscribe(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $role->is_subscribed = true;
+        $role->save();
+
+        return redirect()
+            ->back()
+            ->with('message', __('messages.subscribed'));
+    }
 }

@@ -254,4 +254,6 @@ return [
     'please_select' => 'Please select',
     //
     'claim_email_line2' => 'Sign up to customize the event page or feel free to ignore this email.',
+    'unsubscribed' => 'Successfully unsubscribed from emails',
+    'subscribed' => 'Successfully subscribed to emails',
 ];
