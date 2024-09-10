@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 if (config('app.env') != 'local') {
     Route::domain('{subdomain}.eventschedule.com')->group(function () {
         Route::get('/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
-        Route::get('/unsubscribe', [RoleController::class, 'unsubscribe'])->name('role.unsubscribe')->middleware('throttle:2,2');
+        Route::post('/unsubscribe', [RoleController::class, 'unsubscribe'])->name('role.unsubscribe')->middleware('throttle:2,2');
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
         Route::get('/{hash}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
     });
@@ -69,7 +69,7 @@ if (config('app.env') == 'local') {
         Route::get('/{subdomain}/view/{hash}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
         Route::get('/{subdomain}/view', [RoleController::class, 'viewGuest'])->name('role.view_guest');
         Route::get('/{subdomain}/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
-        Route::get('/{subdomain}/unsubscribe', [RoleController::class, 'unsubscribe'])->name('role.unsubscribe')->middleware('throttle:2,2');
+        Route::post('/{subdomain}/unsubscribe', [RoleController::class, 'unsubscribe'])->name('role.unsubscribe')->middleware('throttle:2,2');
         Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
     });    
 } else {
