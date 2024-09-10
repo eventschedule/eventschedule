@@ -395,7 +395,7 @@ class EventController extends Controller
             $venue->background_rotation = rand(0, 359);
             $venue->font_color = '#ffffff';
             $venue->save();
-            $venue->refesh();
+            $venue->refresh();
 
             $user->roles()->attach($venue->id, ['level' => 'follower', 'created_at' => now()]);
 
