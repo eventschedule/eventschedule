@@ -121,6 +121,7 @@ class EventController extends Controller
         $user = $request->user();
         $subdomainRole = Role::subdomain($subdomain)->firstOrFail();
         $header = $subdomainRole->getRoleHeader();
+        $role = null;
         $roles = [];
 
         if (! $subdomainRole->email_verified_at) {
@@ -128,8 +129,8 @@ class EventController extends Controller
         }
 
         $venue = $subdomainRole->isVenue() ? $subdomainRole : null;
-        $talent = $subdomainRole->isTalent() ? $subdomainRole : null;
-        $vendor = $subdomainRole->isVendor() ? $subdomainRole : null;        
+        $role = $talent = $subdomainRole->isTalent() ? $subdomainRole : null;
+        $role = $vendor = $subdomainRole->isVendor() ? $subdomainRole : null;        
 
         if ($venue && ! auth()->user()->isMember($venue->subdomain)) {
             if (! $user->isMember($subdomain) && ! $venue->acceptRequests()) {
