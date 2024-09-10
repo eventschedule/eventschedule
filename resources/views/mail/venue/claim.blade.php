@@ -13,7 +13,7 @@
 {{ __('messages.sign_up') }}
 </x-mail::button>
 
-{!! str_replace(':click_here', '<a href="' . $unsubscribe_url . '">' . __('messages.click_here') . '</a>', __('messages.claim_email_line3')) !!}
+{!! str_replace(':click_here', '<a href="' . $unsubscribe_url . '">' . __('messages.click_here') . '</a>', __('messages.claim_email_line2')) !!}
 
 Thanks,<br>
 {{ config('app.name') }}
