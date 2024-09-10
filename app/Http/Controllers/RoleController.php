@@ -141,8 +141,7 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->first();
 
         if (! $role) {
-            $redirectUrl = config('app.url') . route('landing');    
-            return redirect($redirectUrl);
+            return config('app.url');
         }
 
         $otherRole = null;
