@@ -37,6 +37,9 @@ class ClaimVenue extends Mailable
                         [':role', ':venue'], 
                         [$role->name, $venue->name],
                         __('messages.claim_your_venue')),
+            replyTo: [
+                new Address($user->email, $user->name),
+            ],                        
         );
     }
 
@@ -45,8 +48,20 @@ class ClaimVenue extends Mailable
      */
     public function content(): Content
     {
+        $event = $this->event;
+        $role = $event->role;
+        $venue = $event->venue;
+        $user = $event->user;
+
         return new Content(
             markdown: 'mail.venue.claim',
+            with: [
+                'event' => $event,
+                'role' => $role,
+                'venue' => $venue,
+                'user' => $user,
+                'unsubscribe_url' => route('role.unsubscribe', ['subdomain' => $venue->subdomain]),
+            ]
         );
     }
 
@@ -58,5 +73,16 @@ class ClaimVenue extends Mailable
     public function attachments(): array
     {
         return [];
+    }
+
+    public function headers(): Headers
+    {
+        $role = $this->event->role;
+
+        return new Headers(
+            text: [
+                'List-Unsubscribe' => '<' . route('role.unsubscribe', ['subdomain' => $role->subdomain]) . '>',
+            ],
+        );
     }
 }
