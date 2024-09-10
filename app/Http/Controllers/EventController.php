@@ -81,8 +81,13 @@ class EventController extends Controller
 
     public function edit(Request $request, $subdomain, $hash)
     {
+        $user = $request->user();
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
+
+        if (! $user->canEditEvent($event)) {
+            return redirect('');
+        }
 
         $venueSubdomain = $event->venue->subdomain;
         $roleSubdomain = $event->role->subdomain;
@@ -91,7 +96,7 @@ class EventController extends Controller
 
         $data = [
             'event' => $event,
-            'user' => $request->user(),
+            'user' => $user,
             'subdomain' => $subdomain,
             'venue' => $event->venue,
             'role' => $event->role,
@@ -215,8 +220,8 @@ class EventController extends Controller
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
 
-        if (! $request->user()->canEditEvent($event)) {
-            return redirect('/');
+        if (true  || ! $request->user()->canEditEvent($event)) {
+            return redirect($event->getGuestUrl());
         }
 
         $event->fill($request->all());
