@@ -8,6 +8,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Mail\Mailables\Headers;
 
 class ClaimRole extends Mailable
 {
@@ -37,6 +38,9 @@ class ClaimRole extends Mailable
                         [':venue', ':role'], 
                         [$venue->name, $role->name],
                         __('messages.claim_your_role')),
+            replyTo: [
+                new Address($user->email, $user->name),
+            ],                        
         );
     }
 
@@ -57,6 +61,7 @@ class ClaimRole extends Mailable
                 'role' => $role,
                 'venue' => $venue,
                 'user' => $user,
+                'unsubscribe_url' => route('role.unsubscribe', ['subdomain' => $role->subdomain]),
             ]
         );
     }
@@ -69,5 +74,16 @@ class ClaimRole extends Mailable
     public function attachments(): array
     {
         return [];
+    }
+
+    public function headers(): Headers
+    {
+        $role = $this->event->role;
+
+        return new Headers(
+            text: [
+                'List-Unsubscribe' => '<' . route('role.unsubscribe', ['subdomain' => $role->subdomain]) . '>',
+            ],
+        );
     }
 }
