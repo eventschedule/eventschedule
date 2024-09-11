@@ -32,11 +32,15 @@
         document.addEventListener('DOMContentLoaded', () => {
             updatePreview();
             onChangeBackground();
-            onChangeFont();
 
             $("#country").countrySelect({
-                defaultCountry: '{{ $role->country_code }}',
+                defaultCountry: '{{ old('country_code', $role->country_code) }}',
             });
+            onChangeCountry(); // Update the hidden country_code field
+
+            var fontFamily = '{{ old('font_family', $role->font_family) }}';
+            $('#font_family').val(fontFamily);            
+            onChangeFont();
         });
 
         function onChangeCountry() {
