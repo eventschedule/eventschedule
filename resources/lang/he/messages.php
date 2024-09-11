@@ -88,7 +88,6 @@ return [
     'your_email_address_is_unverified' => 'כתובת האימייל שלך לא אומתה.',
     'click_here_to_re_send_the_verification_email' => 'לחץ כאן כדי לשלוח מחדש את האימייל לאימות.',
     'timezone' => 'אזור זמן',
-    'profile_image' => 'תמונת פרופיל',
     'preview' => 'תצוגה מקדימה',
     'description' => 'תיאור',
     'contact_info' => 'מידע ליצירת קשר',

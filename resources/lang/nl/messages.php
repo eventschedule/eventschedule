@@ -88,7 +88,6 @@ return [
     'your_email_address_is_unverified' => 'Uw e-mailadres is niet geverifieerd.',
     'click_here_to_re_send_the_verification_email' => 'Klik hier om de verificatiemail opnieuw te verzenden.',
     'timezone' => 'Tijdzone',
-    'profile_image' => 'Profielfoto',
     'preview' => 'Voorbeeld',
     'description' => 'Beschrijving',
     'contact_info' => 'Contactinformatie',
