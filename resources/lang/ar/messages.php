@@ -88,7 +88,6 @@ return [
     'your_email_address_is_unverified' => 'عنوان بريدك الإلكتروني غير مؤكد.',
     'click_here_to_re_send_the_verification_email' => 'انقر هنا لإعادة إرسال البريد الإلكتروني للتحقق.',
     'timezone' => 'المنطقة الزمنية',
-    'profile_image' => 'صورة الملف الشخصي',
     'preview' => 'معاينة',
     'description' => 'وصف',
     'contact_info' => 'معلومات الاتصال',

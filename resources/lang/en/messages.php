@@ -88,10 +88,8 @@ return [
     'your_email_address_is_unverified' => 'Your email address is unverified.',
     'click_here_to_re_send_the_verification_email' => 'Click here to re-send the verification email.',
     'timezone' => 'Timezone',
-    'profile_image' => 'Profile Image',
     'preview' => 'Preview',
     'description' => 'Description',
-    'profile_image' => 'Profile Image',
     'contact_info' => 'Contact Info',
     'phone' => 'Phone',
     'website' => 'Website',
@@ -261,4 +259,5 @@ return [
     'hello' => 'Hello',
     'subscribe' => 'Subscribe',
     'unsubscribe' => 'Unsubscribe',    
+    'square_profile_image' => 'Square Profile Image',
 ];

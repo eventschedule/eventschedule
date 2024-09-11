@@ -88,7 +88,6 @@ return [
     'your_email_address_is_unverified' => 'Votre adresse email n\'est pas vérifiée.',
     'click_here_to_re_send_the_verification_email' => 'Cliquez ici pour renvoyer l\'email de vérification.',
     'timezone' => 'Fuseau Horaire',
-    'profile_image' => 'Image de Profil',
     'preview' => 'Aperçu',
     'description' => 'Description',
     'contact_info' => 'Informations de Contact',
