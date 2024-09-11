@@ -68,6 +68,7 @@
 
     <style>
         .tooltip {
+            font-family: sans-serif !important;
             position: absolute;
             padding: 5px 10px;
             background: #333;
