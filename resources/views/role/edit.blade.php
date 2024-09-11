@@ -30,16 +30,18 @@
 
         <script>
         document.addEventListener('DOMContentLoaded', () => {
-            updatePreview();
-            onChangeBackground();
-
             $("#country").countrySelect({
                 defaultCountry: '{{ old('country_code', $role->country_code) }}',
             });
-            onChangeCountry(); // Update the hidden country_code field
-
-            var fontFamily = '{{ old('font_family', $role->font_family) }}';
-            $('#font_family').val(fontFamily);            
+            $('#background').val('{{ old('background', $role->background) }}');
+            $('#background_colors').val('{{ old('background_colors', $role->background_colors) }}');
+            $('#font_family').val('{{ old('font_family', $role->font_family) }}');
+            $('#language_code').val('{{ old('language_code', $role->language_code) }}');
+            $('#timezone').val('{{ old('timezone', $role->timezone) }}');
+            
+            updatePreview();
+            onChangeBackground();
+            onChangeCountry();
             onChangeFont();
         });
 
