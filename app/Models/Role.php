@@ -55,6 +55,7 @@ class Role extends Model implements MustVerifyEmail
             $model->email = strtolower($model->email);
             $model->description_html = MarkdownUtils::convertToHtml($model->description);
 
+            /*
             $address = $model->fullAddress();
 
             if ($address && $address != $model->geo_address) {
@@ -74,6 +75,7 @@ class Role extends Model implements MustVerifyEmail
                     $model->geo_lon = $longitude;
                 }                
             }
+            */
         });
 
         static::updating(function ($model) {

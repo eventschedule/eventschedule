@@ -43,6 +43,33 @@
             onChangeBackground();
             onChangeCountry();
             onChangeFont();
+
+            function previewImage(input, previewId) {
+                const preview = document.getElementById(previewId);
+                const file = input.files[0];
+                const reader = new FileReader();
+
+                reader.onloadend = function () {
+                    preview.src = reader.result;
+                    preview.style.display = 'block';
+                }
+
+                if (file) {
+                    reader.readAsDataURL(file);
+                } else {
+                    preview.src = '';
+                    preview.style.display = 'none';
+                }
+            }
+
+            $('#profile_image').on('change', function() {
+                previewImage(this, 'profile_image_preview');
+            });
+
+            $('#background_image').on('change', function() {
+                previewImage(this, 'background_image_preview');
+                updatePreview();
+            });
         });
 
         function onChangeCountry() {
@@ -207,6 +234,8 @@
                             <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full"
                                 :value="old('profile_image')" accept="image/png, image/jpeg" />
                             <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
+
+                            <img id="profile_image_preview" src="#" alt="Profile Image Preview" style="max-height:120px; display:none;" class="pt-3" />
 
                             @if ($role->profile_image_url)
                             <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="pt-3" />
@@ -373,6 +402,8 @@
                                 <input id="background_image" name="background_image" type="file" class="mt-1 block w-full"
                                     :value="old('background_image')" oninput="updatePreview()" accept="image/png, image/jpeg" />
                                 <x-input-error class="mt-2" :messages="$errors->get('background_image')" />
+
+                                <img id="background_image_preview" src="#" alt="Background Image Preview" style="max-height:120px; display:none;" class="pt-3" />
 
                                 @if ($role->background_image_url)
                                 <img src="{{ $role->background_image_url }}" style="max-height:120px" class="pt-3" />
