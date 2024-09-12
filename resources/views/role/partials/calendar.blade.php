@@ -162,12 +162,8 @@
                 @if ($isRecurringToday || $isEventOnDate)
                 <a href="{{ $each->getGuestUrl() }}" {{ isset($embed) && $embed ? 'target="blank"' : '' }}>
                     <li class="relative flex items-center space-x-6 py-6 px-4 xl:static">
-                        @if ($each->role->profile_image_url)
-                        <img src="{{ $each->role->profile_image_url }}" class="h-14 w-14 flex-none">
-                        @elseif ($each->venue->profile_image_url)
-                        <img src="{{ $each->venue->profile_image_url }}" class="h-14 w-14 flex-none">
-                        @else
-                        <div class="h-14 w-14"></div>
+                        @if ($each->getImageUrl())
+                        <img src="{{ $each->getImageUrl() }}" class="h-14 w-14 flex-none">
                         @endif
                         <div class="flex-auto">
                             <h3 class="pr-10 font-semibold text-gray-900 xl:pr-0">
