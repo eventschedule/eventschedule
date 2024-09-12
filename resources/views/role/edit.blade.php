@@ -153,6 +153,7 @@
 
         function onValidateClick() {
             $('#address_response').text("{{ __('messages.searching') }}...").show();
+            $('#accept_button').addClass('hidden');
             var country = $('#country').countrySelect('getSelectedCountryData');
             $.post({
                 url: '{{ route('validate_address') }}',
@@ -177,12 +178,38 @@
                         var html = address + " - <a href=\"" + url + "\" target=\"_blank\" class=\"hover:underline\">{{ __('messages.view_map') }}</a>";
                         
                         $('#address_response').html(html);
+                        $('#accept_button').removeClass('hidden');
+
+                        // Store the response data for later use
+                        $('#address_response').data('validated_address', response);
                     }
                 },
                 error: function(xhr, status, error) {
                     $('#address_response').text("{{ __('messages.an_error_occurred') }}" + ': ' + error);
                 }
             });
+        }
+
+        function acceptAddress(event) {
+            event.preventDefault();
+            var validatedAddress = $('#address_response').data('validated_address');
+            if (validatedAddress) {
+                $('#address1').val(validatedAddress['address1']);
+                $('#city').val(validatedAddress['city']);
+                $('#state').val(validatedAddress['state']);
+                $('#postal_code').val(validatedAddress['postal_code']);
+                $("#country").countrySelect("selectCountry", validatedAddress['country_code']);
+                
+                // Update hidden fields
+                $('#formatted_address').val(validatedAddress['formatted_address']);
+                $('#google_place_id').val(validatedAddress['google_place_id']);
+                $('#geo_address').val(validatedAddress['geo_address']);
+                $('#geo_lat').val(validatedAddress['geo_lat']);
+                $('#geo_lon').val(validatedAddress['geo_lon']);
+                
+                // Hide the address response after accepting
+                $('#address_response').hide();
+            }
         }
 
         </script>
@@ -295,7 +322,10 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-secondary-button id="validate_button" onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
+                            <div class="flex items-center space-x-4">
+                                <x-secondary-button id="validate_button" onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
+                                <x-secondary-button id="accept_button" onclick="acceptAddress(event)" class="hidden">{{ __('messages.accept') }}</x-secondary-button>
+                            </div>
                         </div>
 
                         <div id="address_response" class="mb-6 hidden"></div>
