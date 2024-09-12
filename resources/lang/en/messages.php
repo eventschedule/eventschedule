@@ -263,4 +263,5 @@ return [
     'subdomain_taken' => 'Subdomain is already taken',
     'resend_invite' => 'Resend Invite',
     'invite_resent' => 'Successfully sent invite',
+    'new_schedule' => 'New Schedule',
 ];
