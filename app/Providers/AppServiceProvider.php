@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton('userRoles', function () {
             if ($user = auth()->user()) {
-                return $user->member()->get();
+                return $user->roles()->get();
             }
             return collect();
         });
@@ -35,10 +35,14 @@ class AppServiceProvider extends ServiceProvider
         View::composer('layouts.navigation', function ($view) {
             $allRoles = app('userRoles');
             $view->with([
-                'venues' => $allRoles->where('type', 'venue'),
-                'talent' => $allRoles->where('type', 'talent'),
-                'vendors' => $allRoles->where('type', 'vendor'),
-                'curators' => $allRoles->where('type', 'curator'),
+                'isFollowingVenues' => $allRoles->where('type', 'venue')->where('pivot.level', 'follower')->count(),    
+                'isFollowingTalent' => $allRoles->where('type', 'talent')->where('pivot.level', 'follower')->count(),
+                'isFollowingVendors' => $allRoles->where('type', 'vendor')->where('pivot.level', 'follower')->count(),
+                'isFollowingCurators' => $allRoles->where('type', 'curator')->where('pivot.level', 'follower')->count(),
+                'venues' => $allRoles->where('type', 'venue')->whereIn('pivot.level', ['owner', 'admin']),    
+                'talent' => $allRoles->where('type', 'talent')->whereIn('pivot.level', ['owner', 'admin']),
+                'vendors' => $allRoles->where('type', 'vendor')->whereIn('pivot.level', ['owner', 'admin']),
+                'curators' => $allRoles->where('type', 'curator')->whereIn('pivot.level', ['owner', 'admin']),
             ]);
         });
         
