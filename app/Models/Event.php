@@ -81,6 +81,19 @@ class Event extends Model
         }
     }
 
+    public function getImageUrl()
+    {
+        if ($this->flyer_image_url) {
+            return $this->flyer_image_url;
+        } elseif ($this->role->profile_image_url) {
+            return $this->role->profile_image_url;
+        } elseif ($this->venue->profile_image_url) {
+            return $this->venue->profile_image_url;
+        }
+        
+        return null;
+    }
+
     public function getGuestUrl()
     {
         return route('event.view_guest', ['subdomain' => $this->role->subdomain, 'hash' => UrlUtils::encodeId($this->id)]);
