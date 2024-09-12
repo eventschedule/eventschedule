@@ -512,7 +512,7 @@ class RoleController extends Controller
         $data = [
             'role' => $role,
             'user' => auth()->user(),
-            'title' => __('messages.register'),
+            'title' => __('messages.new_' . $role->type),
             'gradients' => $gradientOptions,
             'fonts' => $fonts,
         ];

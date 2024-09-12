@@ -21,9 +21,9 @@ class HomeController extends Controller
         if (session('pending_venue') && auth()->user()->countRoles() == 0) {
             $role = Role::whereSubdomain(session('pending_venue'))->firstOrFail();
             if ($role->accept_talent_requests) {
-                return redirect()->route('register', ['type' => 'talent']);
+                return redirect()->route('new', ['type' => 'talent']);
             } else if ($role->accept_vendor_requests) {
-                return redirect()->route('register', ['type' => 'vendor']);
+                return redirect()->route('new', ['type' => 'vendor']);
             }
         } else if ($subdomain = session('pending_follow')) {
             return redirect()->route('role.follow', ['subdomain' => $subdomain]);
