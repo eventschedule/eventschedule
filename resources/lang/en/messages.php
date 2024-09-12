@@ -261,4 +261,6 @@ return [
     'unsubscribe' => 'Unsubscribe',    
     'square_profile_image' => 'Square Profile Image',
     'subdomain_taken' => 'Subdomain is already taken',
+    'resend_invite' => 'Resend Invite',
+    'invite_resent' => 'Successfully sent invite',
 ];
