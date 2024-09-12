@@ -59,6 +59,8 @@
                         $('#address_response').text(address);
                         $('#accept_button').show();
                         $('#address_response').data('validated_address', response);
+                    } else {
+                        $('#address_response').text("{{ __('messages.address_not_found') }}");    
                     }
                 },
                 error: function(xhr, status, error) {
