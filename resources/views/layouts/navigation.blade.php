@@ -8,6 +8,7 @@
     <ul role="list" class="flex flex-1 flex-col gap-y-7">
         <li>
             <ul role="list" class="-mx-2 space-y-1">
+
                 <li>
                     <a href="{{ route('home') }}"
                         class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('home') ? 'bg-gray-800 text-white' : '' }}">
@@ -18,6 +19,8 @@
                         {{ __('messages.home') }}
                     </a>
                 </li>
+
+                @if ($isFollowingVenues)
                 <li>
                     <a href="{{ route('venues') }}"
                         class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('venues') ? 'bg-gray-800 text-white' : '' }}">
@@ -29,6 +32,9 @@
                         {{ __('messages.venues') }}
                     </a>
                 </li>
+                @endif
+
+                @if ($isFollowingTalent)
                 <li>
                     <a href="{{ route('talent') }}"
                         class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('talent') ? 'bg-gray-800 text-white' : '' }}">
@@ -40,6 +46,9 @@
                         {{ __('messages.talent') }}
                     </a>
                 </li>
+                @endif
+
+                @if ($isFollowingVendors)
                 <li>
                     <a href="{{ route('vendors') }}"
                         class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('vendors') ? 'bg-gray-800 text-white' : '' }}">
@@ -51,6 +60,9 @@
                         {{ __('messages.vendors') }}
                     </a>
                 </li>
+                @endif
+
+                @if ($isFollowingCurators)
                 <li>
                     <a href="{{ route('curators') }}"
                         class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('curators') ? 'bg-gray-800 text-white' : '' }}">
@@ -62,6 +74,8 @@
                         {{ __('messages.curators') }}
                     </a>
                 </li>
+                @endif
+
             </ul>
         </li>
 
