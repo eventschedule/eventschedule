@@ -40,7 +40,7 @@
 
         function onValidateClick() {
             $('#address_response').text("{{ __('messages.searching') }}...").show();
-            $('#accept_button').addClass('hidden');
+            $('#accept_button').hide();
             var country = $('#venue_country').countrySelect('getSelectedCountryData');
             
             $.post({
@@ -60,7 +60,7 @@
                         var html = address + " - <a href=\"" + url + "\" target=\"_blank\" class=\"hover:underline\">{{ __('messages.view_map') }}</a>";
                         
                         $('#address_response').html(html);
-                        $('#accept_button').removeClass('hidden');
+                        $('#accept_button').show();
 
                         // Store the response data for later use
                         $('#address_response').data('validated_address', response);
@@ -89,8 +89,9 @@
                 $('#geo_lat').val(validatedAddress['geo_lat']);
                 $('#geo_lon').val(validatedAddress['geo_lon']);
                 
-                // Hide the address response after accepting
+                // Hide the address response and accept button after accepting
                 $('#address_response').hide();
+                $('#accept_button').hide();
             }
         }
 
