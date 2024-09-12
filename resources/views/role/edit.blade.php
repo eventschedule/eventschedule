@@ -297,35 +297,35 @@
                         <div class="mb-6">
                             <x-input-label for="address1" :value="__('messages.street_address')" />
                             <x-text-input id="address1" name="address1" type="text" class="mt-1 block w-full"
-                                :value="old('address1', $role->address1)" />
+                                :value="old('address1', $role->address1)" autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('address1')" />
                         </div>
 
                         <div class="mb-6">
                             <x-input-label for="city" :value="__('messages.city')" />
                             <x-text-input id="city" name="city" type="text" class="mt-1 block w-full"
-                                :value="old('city', $role->city)" />
+                                :value="old('city', $role->city)" autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('city')" />
                         </div>
 
                         <div class="mb-6">
                             <x-input-label for="state" :value="__('messages.state_province')" />
                             <x-text-input id="state" name="state" type="text" class="mt-1 block w-full"
-                                :value="old('state', $role->state)" />
+                                :value="old('state', $role->state)" autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('state')" />
                         </div>
 
                         <div class="mb-6">
                             <x-input-label for="postal_code" :value="__('messages.postal_code')" />
                             <x-text-input id="postal_code" name="postal_code" type="text" class="mt-1 block w-full"
-                                :value="old('postal_code', $role->postal_code)" />
+                                :value="old('postal_code', $role->postal_code)" autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('postal_code')" />
                         </div>
 
                         <div class="mb-6">
                             <x-input-label for="country" :value="__('messages.country')" />
                             <x-text-input id="country" name="country" type="text" class="mt-1 block w-full"
-                                :value="old('country')" onchange="onChangeCountry()" />
+                                :value="old('country')" onchange="onChangeCountry()" autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('country')" />
                             <input type="hidden" id="country_code" name="country_code" />
                         </div>
