@@ -961,4 +961,19 @@ class RoleController extends Controller
             ->back()
             ->with('message', __('messages.subscribed'));
     }
+
+    public function resendInvite(Request $request, $subdomain, $hash)
+    {
+        if (! auth()->user()->isMember($subdomain)) {
+            return redirect('/');
+        }
+    
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $userId = UrlUtils::decodeId($hash);
+        $user = User::findOrFail($userId);
+    
+        Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
+    
+        return redirect()->back()->with('message', __('messages.invite_resent'));
+    }    
 }

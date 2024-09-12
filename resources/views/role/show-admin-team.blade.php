@@ -51,8 +51,12 @@
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                 @if ($member->email_verified_at)
                                     {{ __('messages.' . strtolower($member->pivot->level)) }}
-                                @else
-                                    {{ __('messages.pending') }}
+                                @else      
+                                    <button type="button"
+                                        onclick="{{ route('role.resend_invite', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($member->id)]) }}"
+                                        class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                                        {{ __('messages.resend_invite') }}
+                                    </button>
                                 @endif
                             </td>
                             <td
