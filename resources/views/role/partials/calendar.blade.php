@@ -1,4 +1,4 @@
-<div class="lg:flex lg:h-full lg:flex-col pt-1">
+<div class="flex h-full flex-col pt-1">
     <header class="flex items-center justify-between lg:pl-6 py-4 lg:flex-none">
         <h1 class="text-lg font-semibold leading-6">
             <time
@@ -224,5 +224,6 @@
             @endif
         </div>
     </div>
+</div>
 
 <div id="tooltip" class="tooltip"></div>
