@@ -53,14 +53,25 @@
         gtag('js', new Date());
         gtag('config', '{{ config('services.google.analytics') }}');
 
-        function onPopUpClick() {
+        function onPopUpClick(event) {
+            event.stopPropagation();
             var menu = $('#pop-up-menu');
             if (menu.is(':hidden')) {
                 menu.show();
+                $(document).on('click', hidePopUp);
             } else {
-                menu.hide();
-            }            
+                hidePopUp();
+            }
         }
+
+        function hidePopUp() {
+            $('#pop-up-menu').hide();
+            $(document).off('click', hidePopUp);
+        }
+
+        $(document).on('click', '#pop-up-menu', function(event) {
+            event.stopPropagation();
+        });
     </script>
 
     <style>
