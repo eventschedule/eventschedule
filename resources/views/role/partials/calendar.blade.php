@@ -1,5 +1,5 @@
 <div class="flex h-full flex-col pt-1">
-    <header class="flex items-center justify-between lg:pl-6 py-4 lg:flex-none">
+    <header class="flex items-center justify-between md:pl-6 py-4 md:flex-none">
         <h1 class="text-lg font-semibold leading-6">
             <time
                 datetime="{{ sprintf('%04d-%02d', $year, $month) }}">{{ Carbon\Carbon::create($year, $month, 1)->format('F Y') }}</time>
@@ -53,10 +53,10 @@
             @endif
         </div>
     </header>
-    <div class="{{ $tab == 'availability' ? '' : 'hidden' }} shadow-md ring-1 ring-black ring-opacity-5 lg:flex lg:flex-auto lg:flex-col">
-        <div class="{{ $tab == 'availability' ? 'hidden lg:block' : '' }}"> 
+    <div class="{{ $tab == 'availability' ? '' : 'hidden' }} shadow-md ring-1 ring-black ring-opacity-5 md:flex md:flex-auto md:flex-col">
+        <div class="{{ $tab == 'availability' ? 'hidden md:block' : '' }}"> 
             <div
-                class="grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center text-xs font-semibold leading-6 text-gray-700 lg:flex-none">
+                class="grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center text-xs font-semibold leading-6 text-gray-700 md:flex-none">
                 @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $day)
                 <div class="flex justify-center bg-white py-2">
                     {{ __('messages.' . $day) }}
@@ -64,7 +64,7 @@
                 @endforeach
             </div>
         </div>
-        <div class="flex bg-gray-200 text-xs leading-6 text-gray-700 lg:flex-auto">
+        <div class="flex bg-gray-200 text-xs leading-6 text-gray-700 md:flex-auto">
             @php
             $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth()->startOfWeek(Carbon\Carbon::SUNDAY);
             $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth()->endOfWeek(Carbon\Carbon::SATURDAY);
@@ -73,7 +73,7 @@
             $totalWeeks = ceil($totalDays / 7);
             $unavailable = [];                
             @endphp
-            <div class="w-full lg:grid lg:grid-cols-7 lg:grid-rows-{{ $totalWeeks }} lg:gap-px">
+            <div class="w-full md:grid md:grid-cols-7 md:grid-rows-{{ $totalWeeks }} md:gap-px">
                 @while ($currentDate->lte($endOfMonth))
                 @if ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at)
                 @php
@@ -87,7 +87,7 @@
                 <div class="cursor-pointer relative {{ count($unavailable) ? ($currentDate->month == $month ? 'bg-orange-50 hover:bg-gray-100 hover:border-gray-300' : 'bg-orange-50 hover:bg-gray-100 hover:border-gray-300 text-gray-500') : ($currentDate->month == $month ? 'bg-white hover:bg-gray-100 hover:border-gray-300' : 'bg-gray-50 text-gray-500 hover:bg-gray-100 hover:border-gray-300') }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300"
                     onclick="window.location = '{{ route('event.create', ['subdomain' => $role->subdomain, 'date' => $currentDate->format('Y-m-d')]) }}';">
                     @elseif ($route == 'admin' && $tab == 'availability' && $role->email_verified_at)
-                        <div class="{{ $tab == 'availability' && $currentDate->month != $month ? 'hidden lg:block' : '' }} cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white hover:bg-gray-100 hover:border-gray-300' : 'bg-gray-50 text-gray-500' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 day-element" data-date="{{ $currentDate->format('Y-m-d') }}">
+                        <div class="{{ $tab == 'availability' && $currentDate->month != $month ? 'hidden md:block' : '' }} cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white hover:bg-gray-100 hover:border-gray-300' : 'bg-gray-50 text-gray-500' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 day-element" data-date="{{ $currentDate->format('Y-m-d') }}">
                         @if (is_array($datesUnavailable) && in_array($currentDate->format('Y-m-d'), $datesUnavailable))
                             <div class="day-x"></div>
                         @endif
@@ -112,7 +112,7 @@
                             </div>
                         @endif
                         </div>
-                        <ol class="mt-4 divide-y divide-gray-100 text-sm leading-6 lg:col-span-7 xl:col-span-8">
+                        <ol class="mt-4 divide-y divide-gray-100 text-sm leading-6 md:col-span-7 xl:col-span-8">
                             @foreach ($events as $each)
                             @if ($each->matchesDate($currentDate))
                             <li>
@@ -137,7 +137,7 @@
                 </div>
             </div>
         </div>
-        <div class="px-4 py-10 sm:px-6 lg:hidden">
+        <div class="px-4 py-10 sm:px-6 md:hidden">
             @php
             $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth();
             $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth();
