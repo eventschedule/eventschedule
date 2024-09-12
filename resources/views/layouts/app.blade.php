@@ -188,7 +188,7 @@
                     <!-- Sidebar component, swap this element with another sidebar if you like -->
                     <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-4 ring-1 ring-white/10">
 
-                        @include('layouts.navigation')
+                        @include('layouts.navigation')                        
 
                     </div>
                 </div>
