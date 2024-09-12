@@ -224,6 +224,5 @@
             @endif
         </div>
     </div>
-</div>
 
 <div id="tooltip" class="tooltip"></div>
