@@ -260,4 +260,5 @@ return [
     'subscribe' => 'Subscribe',
     'unsubscribe' => 'Unsubscribe',    
     'square_profile_image' => 'Square Profile Image',
+    'subdomain_taken' => 'Subdomain is already taken',
 ];

@@ -509,12 +509,12 @@
                             {{ __('messages.settings') }}
                         </h2>
                         
-                        @if (false && $role->exists)
+                        @if ($role->exists)
                         <div class="mb-6">
-                            <x-input-label for="subdomain" :value="__('messages.subdomain')" />
-                            <x-text-input id="subdomain" name="subdomain" type="text" class="mt-1 block w-full"
-                                :value="old('subdomain', $role->subdomain)" required />
-                            <x-input-error class="mt-2" :messages="$errors->get('subdomain')" />
+                            <x-input-label for="new_subdomain" :value="__('messages.subdomain')" />
+                            <x-text-input id="new_subdomain" name="new_subdomain" type="text" class="mt-1 block w-full"
+                                :value="old('new_subdomain', $role->subdomain)" required />
+                            <x-input-error class="mt-2" :messages="$errors->get('new_subdomain')" />
                         </div>
                         @endif
 
