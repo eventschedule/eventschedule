@@ -840,12 +840,48 @@ class RoleController extends Controller
             $responseData = json_decode($response, true);
 
             if ($responseData['status'] == 'OK') {
+                $result = $responseData['results'][0];
+                $addressComponents = $result['address_components'];
+
+                $street_number = '';
+                $route = '';
+                $city = '';
+                $state = '';
+                $postal_code = '';
+                $country = '';
+
+                foreach ($addressComponents as $component) {
+                    if (in_array('street_number', $component['types'])) {
+                        $street_number = $component['long_name'];
+                    }
+                    if (in_array('route', $component['types'])) {
+                        $route = $component['long_name'];
+                    }
+                    if (in_array('locality', $component['types'])) {
+                        $city = $component['long_name'];
+                    }
+                    if (in_array('administrative_area_level_1', $component['types'])) {
+                        $state = $component['short_name'];
+                    }
+                    if (in_array('postal_code', $component['types'])) {
+                        $postal_code = $component['long_name'];
+                    }
+                    if (in_array('country', $component['types'])) {
+                        $country = $component['short_name'];
+                    }
+                }
+
                 return response()->json([
+                    'address1' => $street_number . ' ' . $route,
+                    'city' => $city,
+                    'state' => $state,
+                    'postal_code' => $postal_code,
+                    'country_code' => $country,
                     'geo_address' => $address,
-                    'formatted_address' => $responseData['results'][0]['formatted_address'],
-                    'google_place_id' => $responseData['results'][0]['place_id'],
-                    'geo_lat' => $responseData['results'][0]['geometry']['location']['lat'],
-                    'geo_lon' => $responseData['results'][0]['geometry']['location']['lng'],
+                    'formatted_address' => $result['formatted_address'],
+                    'google_place_id' => $result['place_id'],
+                    'geo_lat' => $result['geometry']['location']['lat'],
+                    'geo_lon' => $result['geometry']['location']['lng'],
                 ]);
             } else {
                 \Log::error('Google Maps Error: ' . $response);
