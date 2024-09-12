@@ -13,7 +13,7 @@
                 </div>
             </a>
             <div>
-                @if (($event && $event->venue->bestAddress()) || ($role->isVenue() && $role->bestAddress()))
+                @if (($event && $event->venue->bestAddress()) || $role->bestAddress())
                 <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event ? $event->venue->bestAddress() : $role->bestAddress()) }}" target="_blank" class="pl-2">
                     <button type="button" style="background-color: {{ $event ? $otherRole->accent_color : $role->accent_color }}"
                         class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
