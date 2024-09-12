@@ -56,13 +56,8 @@
                 success: function(response) {
                     if (response) {
                         var address = response['formatted_address'];
-                        var url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address);
-                        var html = address + " - <a href=\"" + url + "\" target=\"_blank\" class=\"hover:underline\">{{ __('messages.view_map') }}</a>";
-                        
-                        $('#address_response').html(html);
+                        $('#address_response').text(address);
                         $('#accept_button').show();
-
-                        // Store the response data for later use
                         $('#address_response').data('validated_address', response);
                     }
                 },
@@ -70,6 +65,23 @@
                     $('#address_response').text("{{ __('messages.an_error_occurred') }}" + ': ' + error);
                 }
             });
+        }
+
+        function viewMap() {
+            var address = [
+                $('#venue_address1').val(),
+                $('#venue_city').val(),
+                $('#venue_state').val(),
+                $('#venue_postal_code').val(),
+                $('#venue_country').countrySelect('getSelectedCountryData').name
+            ].filter(Boolean).join(', ');
+
+            if (address) {
+                var url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address);
+                window.open(url, '_blank');
+            } else {
+                alert("{{ __('messages.please_enter_address') }}");
+            }
         }
 
         function acceptAddress(event) {
@@ -92,6 +104,7 @@
                 // Hide the address response and accept button after accepting
                 $('#address_response').hide();
                 $('#accept_button').hide();
+                $('#view_map_button').hide();
             }
         }
 
@@ -407,6 +420,7 @@
 
                         <div class="mb-6">
                             <div class="flex items-center space-x-4">
+                                <x-secondary-button id="view_map_button" onclick="viewMap()">{{ __('messages.view_map') }}</x-secondary-button>
                                 <x-secondary-button id="validate_button" onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
                                 <x-secondary-button id="accept_button" onclick="acceptAddress(event)" class="hidden">{{ __('messages.accept') }}</x-secondary-button>
                             </div>
