@@ -114,7 +114,7 @@ class Event extends Model
     public function getGoogleCalendarUrl()
     {
         $title = $this->getTitle();
-        $description = strip_tags($this->role->description_html);
+        $description = $this->description_html ? strip_tags($this->description_html) : strip_tags($this->role->description_html);
         $location = $this->venue->bestAddress();
         $duration = $this->duration > 0 ? $this->duration : 2;
         $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
@@ -133,7 +133,7 @@ class Event extends Model
     public function getAppleCalendarUrl()
     {
         $title = $this->getTitle();
-        $description = strip_tags($this->role->description_html);
+        $description = $this->description_html ? strip_tags($this->description_html) : strip_tags($this->role->description_html);
         $location = $this->venue->bestAddress();
         $duration = $this->duration > 0 ? $this->duration : 2;
         $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
@@ -154,7 +154,7 @@ class Event extends Model
     public function getMicrosoftCalendarUrl()
     {
         $title = $this->getTitle();
-        $description = strip_tags($this->role->description_html);
+        $description = $this->description_html ? strip_tags($this->description_html) : strip_tags($this->role->description_html);
         $location = $this->venue->bestAddress();
         $duration = $this->duration > 0 ? $this->duration : 2;
         $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
