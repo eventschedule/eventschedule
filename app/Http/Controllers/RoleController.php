@@ -173,7 +173,7 @@ class RoleController extends Controller
         $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
         if ($role->isCurator()) {
-            $events = Event::with(['role'])
+            $events = Event::with(['role', 'venue'])
                 ->where(function ($query) use ($startOfMonth, $endOfMonth) {
                     $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
                         ->orWhereNotNull('days_of_week');
@@ -186,7 +186,7 @@ class RoleController extends Controller
                 ->orderBy('starts_at')
                 ->get();
         } else {
-            $events = Event::with(['role'])
+            $events = Event::with(['role', 'venue'])
                 ->where(function ($query) use ($startOfMonth, $endOfMonth) {
                     $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
                         ->orWhereNotNull('days_of_week');
@@ -258,7 +258,7 @@ class RoleController extends Controller
 
             if ($tab == 'schedule') {
                 if ($role->isCurator()) {
-                    $events = Event::with(['role'])
+                    $events = Event::with(['role', 'venue'])
                         ->where(function ($query) use ($startOfMonth, $endOfMonth) {
                             $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
                                 ->orWhereNotNull('days_of_week');
@@ -271,7 +271,7 @@ class RoleController extends Controller
                         ->orderBy('starts_at')
                         ->get();    
                 } else {
-                    $events = Event::with(['role'])
+                    $events = Event::with(['role', 'venue'])
                         ->where(function ($query) use ($role) {
                             $query->where('venue_id', $role->id)
                                 ->orWhere('role_id', $role->id);
@@ -284,7 +284,7 @@ class RoleController extends Controller
                         ->orderBy('starts_at')
                         ->get();
 
-                    $unscheduled = Event::with(['role'])
+                    $unscheduled = Event::with(['role', 'venue'])
                         ->where(function ($query) use ($role) {
                             $query->where('venue_id', $role->id)
                                 ->orWhere('role_id', $role->id);
@@ -306,7 +306,7 @@ class RoleController extends Controller
                 $datesUnavailable = json_decode($roleUser->dates_unavailable);
             }
         } else if ($tab == 'requests') {
-            $requests = Event::with(['role'])
+            $requests = Event::with(['role', 'venue'])
                             ->where(function ($query) use ($role) {
                                 $query->where('venue_id', $role->id)
                                     ->orWhere('role_id', $role->id);
