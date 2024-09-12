@@ -53,8 +53,8 @@
         gtag('js', new Date());
         gtag('config', '{{ config('services.google.analytics') }}');
 
-        function onCalendarClick() {
-            var menu = $('#calendar-menu');
+        function onPopUpClick() {
+            var menu = $('#pop-up-menu');
             if (menu.is(':hidden')) {
                 menu.show();
             } else {

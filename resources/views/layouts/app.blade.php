@@ -35,6 +35,14 @@
     gtag('js', new Date());
     gtag('config', '{{ config('services.google.analytics') }}');
 
+    function onPopUpClick() {
+        var menu = $('#pop-up-menu');
+        if (menu.is(':hidden')) {
+            menu.show();
+        } else {
+            menu.hide();
+        }            
+    }
     </script>
 
     <meta charset="utf-8">
