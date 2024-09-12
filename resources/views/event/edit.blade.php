@@ -104,7 +104,6 @@
                 // Hide the address response and accept button after accepting
                 $('#address_response').hide();
                 $('#accept_button').hide();
-                $('#view_map_button').hide();
             }
         }
 
