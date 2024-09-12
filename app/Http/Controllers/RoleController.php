@@ -633,7 +633,14 @@ class RoleController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
         $role->fill($request->all());
-        $role->subdomain = Role::cleanSubdomain($request->subdomain);
+
+        $newSubdomain = Role::cleanSubdomain($request->new_subdomain);
+        if ($newSubdomain != $subdomain) {
+            if (Role::subdomain($newSubdomain)->first()) {
+                return redirect()->back()->withErrors(['new_subdomain' => __('messages.subdomain_taken')]);
+            }
+            $role->subdomain = $newSubdomain;
+        }
 
         if (! $request->background_colors) {
             $role->background_colors = $request->custom_color1 . ', ' . $request->custom_color2;
