@@ -223,7 +223,7 @@ class EventController extends Controller
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
 
-        if (true  || ! $request->user()->canEditEvent($event)) {
+        if (! $request->user()->canEditEvent($event)) {
             return redirect($event->getGuestUrl());
         }
 
