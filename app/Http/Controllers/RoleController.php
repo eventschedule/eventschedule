@@ -160,7 +160,7 @@ class RoleController extends Controller
                     $eventRoleId = $role->isVenue() ? $eventRole->id : $role->id;
                     $event = Event::where('role_id', $eventRoleId)
                         ->where('venue_id', $eventVenueId)
-                        ->where('starts_at', '>=', now())
+                        ->where('starts_at', '>=', now()->subDay())
                         ->orderBy('starts_at')
                         ->first();
 
