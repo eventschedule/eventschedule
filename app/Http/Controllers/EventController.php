@@ -87,7 +87,7 @@ class EventController extends Controller
         $event = Event::findOrFail($event_id);
 
         if (! $user->canEditEvent($event)) {
-            return redirect($event->getGuestUrl());
+            return redirect()->back();
         }
 
         $venueSubdomain = $event->venue->subdomain;
@@ -224,7 +224,7 @@ class EventController extends Controller
         $event = Event::findOrFail($event_id);
 
         if (! $request->user()->canEditEvent($event)) {
-            return redirect($event->getGuestUrl());
+            return redirect()->back();
         }
 
         $event->fill($request->all());
