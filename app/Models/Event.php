@@ -94,7 +94,7 @@ class Event extends Model
         return null;
     }
 
-    public function getGuestUrl($subdomain)
+    public function getGuestUrl($subdomain, $date = null)
     {        
         if ($subdomain == $this->role->subdomain) {
             $subdomain = $this->role->subdomain;
@@ -107,7 +107,7 @@ class Event extends Model
         $data = [
             'subdomain' => $subdomain, 
             'other_subdomain' => $other_subdomain, 
-            'date' => Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC'),
+            'date' => $date ? $date->format('Y-m-d') : Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d'),
         ];
 
         return route('event.view_guest', $data);
