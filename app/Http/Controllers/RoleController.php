@@ -165,8 +165,8 @@ class RoleController extends Controller
                             ->where('venue_id', $eventVenueId)
                             ->where(function ($query) use ($eventDate) {
                                 $query->whereDate('starts_at', $eventDate)
-                                    ->orWhere(function ($q) use ($eventDate) {
-                                        $q->whereNotNull('days_of_week')
+                                    ->orWhere(function ($query) use ($eventDate) {
+                                        $query->whereNotNull('days_of_week')
                                             ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1])
                                             ->where('starts_at', '<=', $eventDate);
                                     });
