@@ -128,6 +128,12 @@
                 </div>
             @endif
 
+            @if ($event->description_html)
+                <div class="container mx-auto pb-8 max-w-xl text-lg">
+                    {!! nl2br($event->description_html) !!}
+                </div>
+            @endif
+
             @if ($event->flyer_image_url)
                 <div class="container mx-auto pb-8 flex justify-center">
                     <img src="{{ $event->flyer_image_url }}" class="block"/>
