@@ -19,15 +19,13 @@ class UrlUtils
             return null;
         }
 
-        $id = 0;
+        $id = base64_decode($value);
 
-        try {
-            $id = base64_decode($value) - 389278;
-        } catch (\Exception $e) {
+        if (is_numeric($id)) {
+            return $id - 389278;
+        } else {
             return null;
         }
-
-        return $id;
     }
 
     public static function clean($url)
