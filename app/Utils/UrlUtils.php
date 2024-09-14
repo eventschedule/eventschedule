@@ -19,7 +19,15 @@ class UrlUtils
             return null;
         }
 
-        return base64_decode($value) - 389278;
+        $id = 0;
+
+        try {
+            $id = base64_decode($value) - 389278;
+        } catch (\Exception $e) {
+            return null;
+        }
+
+        return $id;
     }
 
     public static function clean($url)
