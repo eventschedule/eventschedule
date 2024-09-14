@@ -150,22 +150,44 @@ class RoleController extends Controller
         $year = $request->year;
 
         if ($hash) {
-            $event_id = UrlUtils::decodeId($hash);
-            $event = Event::find($event_id);
+            $eventId = UrlUtils::decodeId($hash);
 
-            if ($event) {
-                $otherRole = $event->venue->subdomain == $subdomain ? $event->role : $event->venue;
-
-                if ($event->starts_at) {
-                    $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
-                    $month = $date->month;
-                    $year = $date->year;
-                }            
+            if ($eventId) {
+                $event = Event::find($eventId);
+                if (! $event) {
+                    return redirect($role->getGuestUrl());
+                }
             } else {
-                return redirect($role->getGuestUrl());
+                if ($eventRole = Role::subdomain($hash)->first()) {
+                    $eventVenueId = $role->isVenue() ? $role->id : $eventRole->id;
+                    $eventRoleId = $role->isVenue() ? $eventRole->id : $role->id;
+                    $event = Event::where('role_id', $eventRoleId)
+                        ->where('venue_id', $eventVenueId)
+                        ->where('starts_at', '>=', now())
+                        ->orderBy('starts_at')
+                        ->first();
+
+                    if (!$event) {
+                        $event = Event::where('role_id', $eventRoleId)
+                            ->where('venue_id', $eventVenueId)
+                            ->where('starts_at', '<', now())
+                            ->orderBy('starts_at', 'desc')
+                            ->first();
+                    }
+                }
             }
         } 
-    
+
+        if ($event) {
+            $otherRole = $event->venue->subdomain == $subdomain ? $event->role : $event->venue;
+
+            if ($event->starts_at) {
+                $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
+                $month = $date->month;
+                $year = $date->year;
+            }            
+        }
+
         if (! $month) {
             $month = now()->month;
         }
