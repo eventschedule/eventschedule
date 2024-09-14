@@ -154,9 +154,6 @@ class RoleController extends Controller
 
             if ($eventId) {
                 $event = Event::find($eventId);
-                if (! $event) {
-                    return redirect($role->getGuestUrl());
-                }
             } else {
                 if ($eventRole = Role::subdomain($hash)->first()) {
                     $eventVenueId = $role->isVenue() ? $role->id : $eventRole->id;
@@ -175,6 +172,10 @@ class RoleController extends Controller
                             ->first();
                     }
                 }
+            }
+
+            if (! $event) {
+                return redirect($role->getGuestUrl());
             }
         } 
 
