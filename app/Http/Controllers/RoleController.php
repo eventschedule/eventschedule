@@ -158,18 +158,35 @@ class RoleController extends Controller
                 if ($eventRole = Role::subdomain($hash)->first()) {
                     $eventVenueId = $role->isVenue() ? $role->id : $eventRole->id;
                     $eventRoleId = $role->isVenue() ? $eventRole->id : $role->id;
-                    $event = Event::where('role_id', $eventRoleId)
-                        ->where('venue_id', $eventVenueId)
-                        ->where('starts_at', '>=', now()->subDay())
-                        ->orderBy('starts_at')
-                        ->first();
 
-                    if (!$event) {
+                    if ($request->date) {
+                        $eventDate = Carbon::parse($request->date);
                         $event = Event::where('role_id', $eventRoleId)
                             ->where('venue_id', $eventVenueId)
-                            ->where('starts_at', '<', now())
-                            ->orderBy('starts_at', 'desc')
+                            ->where(function ($query) use ($eventDate) {
+                                $query->whereDate('starts_at', $eventDate)
+                                    ->orWhere(function ($q) use ($eventDate) {
+                                        $q->whereNotNull('days_of_week')
+                                            ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1])
+                                            ->where('starts_at', '<=', $eventDate);
+                                    });
+                            })
+                            ->orderBy('starts_at')
+                            ->first();                                                    
+                    } else {
+                        $event = Event::where('role_id', $eventRoleId)
+                            ->where('venue_id', $eventVenueId)
+                            ->where('starts_at', '>=', now()->subDay())
+                            ->orderBy('starts_at')
                             ->first();
+
+                        if (!$event) {
+                            $event = Event::where('role_id', $eventRoleId)
+                                ->where('venue_id', $eventVenueId)
+                                ->where('starts_at', '<', now())
+                                ->orderBy('starts_at', 'desc')
+                                ->first();
+                        }
                     }
                 }
             }
