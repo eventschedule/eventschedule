@@ -94,9 +94,23 @@ class Event extends Model
         return null;
     }
 
-    public function getGuestUrl()
-    {
-        return route('event.view_guest', ['subdomain' => $this->role->subdomain, 'hash' => UrlUtils::encodeId($this->id)]);
+    public function getGuestUrl($subdomain)
+    {        
+        if ($subdomain == $this->role->subdomain) {
+            $subdomain = $this->role->subdomain;
+            $other_subdomain = $this->venue->subdomain;
+        } else {
+            $subdomain = $this->venue->subdomain;
+            $other_subdomain = $this->role->subdomain;
+        }
+
+        $data = [
+            'subdomain' => $subdomain, 
+            'other_subdomain' => $other_subdomain, 
+            'date' => Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC'),
+        ];
+
+        return route('event.view_guest', $data);
     }
 
     public function getTitle()

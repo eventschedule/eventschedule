@@ -135,7 +135,7 @@ class RoleController extends Controller
                 ->with('message', str_replace(':name', $role->name, __('messages.unfollowed_role')));
     }
 
-    public function viewGuest(Request $request, $subdomain, $hash = '')
+    public function viewGuest(Request $request, $subdomain, $otherSubdomain = '')
     {
         $user = auth()->user();
         $role = Role::subdomain($subdomain)->first();
@@ -149,44 +149,38 @@ class RoleController extends Controller
         $month = $request->month;
         $year = $request->year;
 
-        if ($hash) {
-            $eventId = UrlUtils::decodeId($hash);
+        if ($otherSubdomain) {
+            if ($eventRole = Role::subdomain($otherSubdomain)->first()) {
+                $eventVenueId = $role->isVenue() ? $role->id : $eventRole->id;
+                $eventRoleId = $role->isVenue() ? $eventRole->id : $role->id;
 
-            if ($eventId) {
-                $event = Event::find($eventId);
-            } else {
-                if ($eventRole = Role::subdomain($hash)->first()) {
-                    $eventVenueId = $role->isVenue() ? $role->id : $eventRole->id;
-                    $eventRoleId = $role->isVenue() ? $eventRole->id : $role->id;
+                if ($request->date) {
+                    $eventDate = Carbon::parse($request->date);
+                    $event = Event::where('role_id', $eventRoleId)
+                        ->where('venue_id', $eventVenueId)
+                        ->where(function ($query) use ($eventDate) {
+                            $query->whereDate('starts_at', $eventDate)
+                                ->orWhere(function ($query) use ($eventDate) {
+                                    $query->whereNotNull('days_of_week')
+                                        ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1])
+                                        ->where('starts_at', '<=', $eventDate);
+                                });
+                        })
+                        ->orderBy('starts_at')
+                        ->first();
+                } else {
+                    $event = Event::where('role_id', $eventRoleId)
+                        ->where('venue_id', $eventVenueId)
+                        ->where('starts_at', '>=', now()->subDay())
+                        ->orderBy('starts_at')
+                        ->first();
 
-                    if ($request->date) {
-                        $eventDate = Carbon::parse($request->date);
+                    if (!$event) {
                         $event = Event::where('role_id', $eventRoleId)
                             ->where('venue_id', $eventVenueId)
-                            ->where(function ($query) use ($eventDate) {
-                                $query->whereDate('starts_at', $eventDate)
-                                    ->orWhere(function ($query) use ($eventDate) {
-                                        $query->whereNotNull('days_of_week')
-                                            ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1])
-                                            ->where('starts_at', '<=', $eventDate);
-                                    });
-                            })
-                            ->orderBy('starts_at')
-                            ->first();                                                    
-                    } else {
-                        $event = Event::where('role_id', $eventRoleId)
-                            ->where('venue_id', $eventVenueId)
-                            ->where('starts_at', '>=', now()->subDay())
-                            ->orderBy('starts_at')
+                            ->where('starts_at', '<', now())
+                            ->orderBy('starts_at', 'desc')
                             ->first();
-
-                        if (!$event) {
-                            $event = Event::where('role_id', $eventRoleId)
-                                ->where('venue_id', $eventVenueId)
-                                ->where('starts_at', '<', now())
-                                ->orderBy('starts_at', 'desc')
-                                ->first();
-                        }
                     }
                 }
             }

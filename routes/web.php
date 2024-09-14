@@ -11,7 +11,7 @@ if (config('app.env') != 'local') {
         Route::get('/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
         Route::post('/unsubscribe', [RoleController::class, 'unsubscribe'])->name('role.unsubscribe')->middleware('throttle:2,2');
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
-        Route::get('/{hash}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
+        Route::get('/{other_subdomain}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
     });
 }
 
@@ -67,7 +67,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
 
 if (config('app.env') == 'local') {
     Route::domain('dev.eventschedule.com')->group(function () {
-        Route::get('/{subdomain}/view/{hash}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
+        Route::get('/{subdomain}/view/{other_subdomain}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
         Route::get('/{subdomain}/view', [RoleController::class, 'viewGuest'])->name('role.view_guest');
         Route::get('/{subdomain}/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
         Route::post('/{subdomain}/unsubscribe', [RoleController::class, 'unsubscribe'])->name('role.unsubscribe')->middleware('throttle:2,2');
