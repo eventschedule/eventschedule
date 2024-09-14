@@ -151,14 +151,19 @@ class RoleController extends Controller
 
         if ($hash) {
             $event_id = UrlUtils::decodeId($hash);
-            $event = Event::findOrFail($event_id);
-            $otherRole = $event->venue->subdomain == $subdomain ? $event->role : $event->venue;
+            $event = Event::find($event_id);
 
-            if ($event->starts_at) {
-                $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
-                $month = $date->month;
-                $year = $date->year;
-            }            
+            if ($event) {
+                $otherRole = $event->venue->subdomain == $subdomain ? $event->role : $event->venue;
+
+                if ($event->starts_at) {
+                    $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
+                    $month = $date->month;
+                    $year = $date->year;
+                }            
+            } else {
+                return redirect($role->getGuestUrl());
+            }
         } 
     
         if (! $month) {
