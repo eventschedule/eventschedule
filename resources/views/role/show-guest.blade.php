@@ -57,7 +57,7 @@
                 @endif
                 @endif
 
-                @if(auth()->check() && $curatorRoles->count() > 0)
+                @if($event && auth()->check() && $curatorRoles->count() > 0)
                     @php
                         $eventInRole = false;
                         foreach ($curatorRoles as $role) {
