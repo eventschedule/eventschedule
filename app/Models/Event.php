@@ -45,7 +45,7 @@ class Event extends Model
         return $this->belongsToMany(Role::class);
     }
 
-    public function localStartsAt($pretty = false)
+    public function localStartsAt($pretty = false, $date = null)
     {
         if (! $this->starts_at) {
             return '';
@@ -61,9 +61,10 @@ class Event extends Model
             $enable24 = $this->venue->use_24_hour_time;
         }
 
-        return Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')
-                    ->setTimezone($timezone)
-                    ->format($pretty ? ($enable24 ? 'l, F jS • g:i' : 'l, F jS • g:i A') : 'Y-m-d H:i:s');
+        $startAt = $this->getStartDateTime($date);
+
+        return $startAt->setTimezone($timezone)
+                    ->format($pretty ? ($enable24 ? 'l, F jS • H:i' : 'l, F jS • g:i A') : 'Y-m-d H:i:s');
     }
 
     public function matchesDate($date)
@@ -125,13 +126,13 @@ class Event extends Model
         return $this->venue->name . ' | ' . $this->localStartsAt(true);
     }
 
-    public function getGoogleCalendarUrl()
+    public function getGoogleCalendarUrl($date = null)
     {
         $title = $this->getTitle();
         $description = $this->description_html ? strip_tags($this->description_html) : strip_tags($this->role->description_html);
         $location = $this->venue->bestAddress();
         $duration = $this->duration > 0 ? $this->duration : 2;
-        $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
+        $startAt = $this->getStartDateTime($date);
         $startDate = $startAt->format('Ymd\THis\Z');
         $endDate = $startAt->addSeconds($duration * 3600)->format('Ymd\THis\Z');
 
@@ -144,13 +145,13 @@ class Event extends Model
         return $url;
     }
 
-    public function getAppleCalendarUrl()
+    public function getAppleCalendarUrl($date = null)
     {
         $title = $this->getTitle();
         $description = $this->description_html ? strip_tags($this->description_html) : strip_tags($this->role->description_html);
         $location = $this->venue->bestAddress();
         $duration = $this->duration > 0 ? $this->duration : 2;
-        $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
+        $startAt = $this->getStartDateTime($date);
         $startDate = $startAt->format('Ymd\THis\Z');
         $endDate = $startAt->addSeconds($duration * 3600)->format('Ymd\THis\Z');
 
@@ -165,13 +166,13 @@ class Event extends Model
         return "data:text/calendar;charset=utf8," . urlencode($url);
     }
 
-    public function getMicrosoftCalendarUrl()
+    public function getMicrosoftCalendarUrl($date = null)
     {
         $title = $this->getTitle();
         $description = $this->description_html ? strip_tags($this->description_html) : strip_tags($this->role->description_html);
         $location = $this->venue->bestAddress();
         $duration = $this->duration > 0 ? $this->duration : 2;
-        $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
+        $startAt = $this->getStartDateTime($date);
         $startDate = $startAt->format('Y-m-d\TH:i:s\Z');
         $endDate = $startAt->addSeconds($duration * 3600)->format('Y-m-d\TH:i:s\Z');
 
@@ -184,6 +185,18 @@ class Event extends Model
         $url .= "&allday=false";
 
         return $url;
+    }
+
+    private function getStartDateTime($date = null)
+    {
+        $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
+        
+        if ($date) {
+            $customDate = Carbon::createFromFormat('Y-m-d', $date);
+            $startAt->setDate($customDate->year, $customDate->month, $customDate->day);
+        }
+        
+        return $startAt;
     }
 
     public function getFlyerImageUrlAttribute($value)
