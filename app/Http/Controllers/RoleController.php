@@ -148,6 +148,7 @@ class RoleController extends Controller
         $event = null;
         $month = $request->month;
         $year = $request->year;
+        $date = $request->date;
 
         if ($otherSubdomain) {
             if ($eventRole = Role::subdomain($otherSubdomain)->first()) {
@@ -185,7 +186,19 @@ class RoleController extends Controller
                 }
             }
 
-            if (! $event) {
+            if ($event) {
+                if (! $date && $event->days_of_week) {
+                    $nextDate = now();
+                    $daysOfWeek = str_split($event->days_of_week);
+                    while (true) {
+                        if ($daysOfWeek[$nextDate->dayOfWeek] == '1' && $nextDate >= now()->format('Y-m-d')) {
+                            break;
+                        }
+                        $nextDate->addDay();
+                    }
+                    $date = $nextDate->format('Y-m-d');
+                }
+            } else {
                 return redirect($role->getGuestUrl());
             }
         } 
@@ -194,9 +207,9 @@ class RoleController extends Controller
             $otherRole = $event->venue->subdomain == $subdomain ? $event->role : $event->venue;
 
             if ($event->starts_at) {
-                $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
-                $month = $date->month;
-                $year = $date->year;
+                $startAtDate = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
+                $month = $startAtDate->month;
+                $year = $startAtDate->year;
             }            
         }
 
@@ -250,6 +263,7 @@ class RoleController extends Controller
             'user',
             'event',
             'embed',
+            'date',
         ));
 
 
