@@ -56,6 +56,46 @@
                 </a>
                 @endif
                 @endif
+
+                @if(auth()->check() && $curatorRoles->count() > 0)
+                    <div class="absolute top-4 right-4">
+                        @php
+                            $eventInRole = $curatorRoles->flatMap->events->contains($event);
+                        @endphp
+
+                        @if($eventInRole)
+                            <form action="{{ route('event.uncurate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger">Remove</button>
+                            </form>
+                        @else
+                            @if($curatorRoles->count() == 1)
+                                <form action="{{ route('event.curate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn btn-primary">Curate</button>
+                                </form>
+                            @else
+                                <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle" type="button" id="curateDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Curate
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="curateDropdown">
+                                        @foreach($curatorRoles as $role)
+                                            <li>
+                                                <form action="{{ route('event.curate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="POST">
+                                                    @csrf
+                                                    <button type="submit" class="dropdown-item">{{ $role->name }}</button>
+                                                </form>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+                        @endif
+                    </div>
+                @endif
+                
             </div>
         </div>
 

@@ -269,4 +269,6 @@ return [
     'new_curator' => 'New Curator',
     'supported_by_both' => 'Supported by :link1 and :link2',
     //
+    'curate_event' => 'Successfully curated event',
+    'uncurate_event' => 'Successfully uncurated event',
 ];
