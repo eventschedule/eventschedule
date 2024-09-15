@@ -250,7 +250,6 @@ return [
     'video_url' => 'Video URL',
     'event_added' => 'Successfully added event',
     'please_select' => 'Please select',
-    //
     'claim_email_line1' => 'Sign up to customize the event page or feel free to ignore this email',
     'claim_email_line2' => 'To unsubscribe from future events :click_here',
     'click_here' => 'click here',
@@ -269,4 +268,5 @@ return [
     'new_venue' => 'New Venue',
     'new_curator' => 'New Curator',
     'supported_by_both' => 'Supported by :link1 and :link2',
+    //
 ];
