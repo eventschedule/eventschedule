@@ -13,9 +13,9 @@
 
     @if ($event)
     <meta property="og:title" content="{{ $event->role->name }}">
-    <meta property="og:description" content="{{ $event->getMetaDescription() }}">
+    <meta property="og:description" content="{{ $event->getMetaDescription($date) }}">
     <meta name="twitter:title" content="{{ $event->role->name }}">
-    <meta name="twitter:description" content="{{ $event->getMetaDescription() }}">
+    <meta name="twitter:description" content="{{ $event->getMetaDescription($date) }}">
     @else
     <meta property="og:title" content="{{ $role->name }}">
     <meta property="og:description" content="{{ trim(strip_tags($role->description_html)) }}">
