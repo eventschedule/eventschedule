@@ -45,6 +45,11 @@ class Event extends Model
         return $this->belongsToMany(Role::class);
     }
 
+    public function hashedId()
+    {
+        return UrlUtils::encodeId($this->id);
+    }
+
     public function localStartsAt($pretty = false, $date = null)
     {
         if (! $this->starts_at) {

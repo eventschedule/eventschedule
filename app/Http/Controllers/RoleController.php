@@ -138,6 +138,8 @@ class RoleController extends Controller
     public function viewGuest(Request $request, $subdomain, $otherSubdomain = '')
     {
         $user = auth()->user();
+        $curatorRoles = $user->curators()->get();
+
         $role = Role::subdomain($subdomain)->first();
 
         if (! $role) {
@@ -264,6 +266,7 @@ class RoleController extends Controller
             'event',
             'embed',
             'date',
+            'curatorRoles',
         ));
 
 

@@ -557,4 +557,25 @@ class EventController extends Controller
                 ->with('message', $message);
     }
 
+    public function curate(Request $request, $subdomain, $hash)
+    {
+        $event_id = UrlUtils::decodeId($hash);
+        $event = Event::findOrFail($event_id);
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $role->events()->attach($event->id);
+    
+        return back()->with('message', __('messages.curate_event'));
+    }
+
+    public function uncurate(Request $request, $subdomain, $hash)
+    {
+        $event_id = UrlUtils::decodeId($hash);
+        $event = Event::findOrFail($event_id);
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $role->events()->detach($event->id);
+
+        return back()->with('message', __('messages.uncurate_event'));
+    }
 }
