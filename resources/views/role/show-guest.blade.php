@@ -58,44 +58,56 @@
                 @endif
 
                 @if(auth()->check() && $curatorRoles->count() > 0)
-                    <div class="absolute top-4 right-4">
-                        @php
-                            $eventInRole = $curatorRoles->flatMap->events->contains($event);
-                        @endphp
+                    @php
+                        $eventInRole = false;
+                        foreach ($curatorRoles as $role) {
+                            if ($role->events()->where('event_role.event_id', $event->id)->exists()) {
+                                $eventInRole = true;
+                                break;
+                            }
+                        }
+                    @endphp
 
-                        @if($eventInRole)
-                            <form action="{{ route('event.uncurate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="POST">
+                    @if($eventInRole)
+                        <form action="{{ route('event.uncurate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" style="background-color: {{ $role->accent_color }}"
+                            class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                                {{ __('messages.uncurate') }}
+                            </button>
+                        </form>
+                    @else
+                        @if($curatorRoles->count() == 1)
+                            <form action="{{ route('event.curate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="POST">
                                 @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger">Remove</button>
+                                <button type="submit" style="background-color: {{ $role->accent_color }}"
+                                    class="btn btn-primary inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                                    {{ __('messages.curate') }}
+                                </button>
                             </form>
                         @else
-                            @if($curatorRoles->count() == 1)
-                                <form action="{{ route('event.curate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn btn-primary">Curate</button>
-                                </form>
-                            @else
-                                <div class="dropdown">
-                                    <button class="btn btn-primary dropdown-toggle" type="button" id="curateDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Curate
-                                    </button>
-                                    <ul class="dropdown-menu" aria-labelledby="curateDropdown">
-                                        @foreach($curatorRoles as $role)
-                                            <li>
-                                                <form action="{{ route('event.curate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="POST">
-                                                    @csrf
-                                                    <button type="submit" class="dropdown-item">{{ $role->name }}</button>
-                                                </form>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            @endif
+                            <div class="dropdown" style="background-color: {{ $role->accent_color }}">
+                                <button class="dropdown-toggle inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2" 
+                                    type="button" id="curateDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    {{ __('messages.curate') }}
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="curateDropdown">
+                                    @foreach($curatorRoles as $role)
+                                        <li>
+                                            <form action="{{ route('event.curate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="dropdown-item inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                                                    {{ $role->name }}
+                                                </button>
+                                            </form>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
                         @endif
-                    </div>
-                @endif
-                
+                    @endif
+                @endif                
             </div>
         </div>
 
