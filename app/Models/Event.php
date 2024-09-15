@@ -121,9 +121,9 @@ class Event extends Model
         return str_replace([':role', ':venue'], [$this->role->name, $this->venue->name], $title);
     }
 
-    public function getMetaDescription()
+    public function getMetaDescription($date = null)
     {
-        return $this->venue->name . ' | ' . $this->localStartsAt(true);
+        return $this->venue->name . ' | ' . $this->localStartsAt(true, $date);
     }
 
     public function getGoogleCalendarUrl($date = null)
