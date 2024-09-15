@@ -271,4 +271,6 @@ return [
     //
     'curate_event' => 'Successfully curated event',
     'uncurate_event' => 'Successfully uncurated event',
+    'curate' => 'Curate',
+    'uncurate' => 'Uncurate',
 ];
