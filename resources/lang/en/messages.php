@@ -268,4 +268,5 @@ return [
     'new_vendor' => 'New Vendor',
     'new_venue' => 'New Venue',
     'new_curator' => 'New Curator',
+    'supported_by_both' => 'Supported by :link1 and :link2',
 ];
