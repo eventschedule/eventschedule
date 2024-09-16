@@ -139,7 +139,7 @@
         @if ($event)
 
             <div id="event_title" class="py-16">
-                <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                <div class="mx-auto max-w-6xl px-6 lg:px-8">
                     <div class="mx-auto max-w-2xl text-center">
                         <p class="mt-2 text-6xl font-bold tracking-tight">
                             <a href="{{ $event->role->getGuestUrl() }}" class="hover:underline">
@@ -147,7 +147,7 @@
                             </a>
                         </p>
                         <p class="mt-6 text-2xl leading-8">
-                            {{ $event->starts_at ? $event->localStartsAt(true, $date) : __('messages.date_to_be_announced') . '...' }}
+                            {{ $event->starts_at ? $event->localStartsAt(true, $date, true) : __('messages.date_to_be_announced') . '...' }}
                         </p>
 
                         <div style="font-family: sans-serif" class="mt-8 relative inline-block text-left">

@@ -273,4 +273,5 @@ return [
     'deleted_curator' => 'Successfully deleted curator',    
     'private_space_no_email' => 'Private space/no email address',
     'search_create' => 'Search/create',
+    'to' => 'to',
 ];
