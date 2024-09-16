@@ -123,80 +123,78 @@
 
     <script>
         $(document).ready(function() {
-        $('.has-tooltip').hover(function(e) {
-            var tooltipText = $(this).attr('data-tooltip');
-            var tooltip = $('#tooltip');
-            tooltip.html(tooltipText).css({
-                top: e.pageY + 10 + 'px',
-                left: e.pageX + 10 + 'px'
-            }).fadeIn(0);
-
-            // Calculate if the tooltip will go off the right edge of the screen
-            var tooltipWidth = tooltip.outerWidth();
-            var screenWidth = $(window).width();
-            var tooltipRightEdge = e.pageX + 10 + tooltipWidth;
-
-            if (tooltipRightEdge > screenWidth) {
-                tooltip.css({
-                    left: e.pageX - tooltipWidth - 10 + 'px'
-                });
-            }
-        }, function() {
-            $('#tooltip').fadeOut(0);
-        });
-
-        $('.has-tooltip').mousemove(function(e) {
-            var tooltip = $('#tooltip');
-            var tooltipWidth = tooltip.outerWidth();
-            var screenWidth = $(window).width();
-            var tooltipRightEdge = e.pageX + 10 + tooltipWidth;
-
-            if (tooltipRightEdge > screenWidth) {
-                tooltip.css({
-                    top: e.pageY + 10 + 'px',
-                    left: e.pageX - tooltipWidth - 10 + 'px'
-                });
-            } else {
-                tooltip.css({
+            $('.has-tooltip').hover(function(e) {
+                var tooltipText = $(this).attr('data-tooltip');
+                var tooltip = $('#tooltip');
+                tooltip.html(tooltipText).css({
                     top: e.pageY + 10 + 'px',
                     left: e.pageX + 10 + 'px'
-                });
+                }).fadeIn(0);
+
+                // Calculate if the tooltip will go off the right edge of the screen
+                var tooltipWidth = tooltip.outerWidth();
+                var screenWidth = $(window).width();
+                var tooltipRightEdge = e.pageX + 10 + tooltipWidth;
+
+                if (tooltipRightEdge > screenWidth) {
+                    tooltip.css({
+                        left: e.pageX - tooltipWidth - 10 + 'px'
+                    });
+                }
+            }, function() {
+                $('#tooltip').fadeOut(0);
+            });
+
+            $('.has-tooltip').mousemove(function(e) {
+                var tooltip = $('#tooltip');
+                var tooltipWidth = tooltip.outerWidth();
+                var screenWidth = $(window).width();
+                var tooltipRightEdge = e.pageX + 10 + tooltipWidth;
+
+                if (tooltipRightEdge > screenWidth) {
+                    tooltip.css({
+                        top: e.pageY + 10 + 'px',
+                        left: e.pageX - tooltipWidth - 10 + 'px'
+                    });
+                } else {
+                    tooltip.css({
+                        top: e.pageY + 10 + 'px',
+                        left: e.pageX + 10 + 'px'
+                    });
+                }
+            });
+
+            const sidebar = document.getElementById('sidebar');
+            const openButton = document.getElementById('open-sidebar');
+            const closeButton = document.getElementById('close-sidebar');
+
+            function toggleMenu() {
+                const isOpen = sidebar.getAttribute('data-state') === 'open';
+                if (isOpen) {
+                    $('#sidebar').show();
+                    sidebar.setAttribute('data-state', 'closed');
+                } else {
+                    $('#sidebar').hide();
+                    sidebar.setAttribute('data-state', 'open');
+                }
             }
+
+            openButton.addEventListener('click', toggleMenu);
+            closeButton.addEventListener('click', toggleMenu);
+
+            @if (session('message'))
+            Toastify({
+                text: "{{ session('message') }}",
+                duration: 3000,
+                gravity: 'bottom',
+                position: 'center',
+                stopOnFocus: true,
+                style: {
+                    background: '#4BB543',
+                }
+            }).showToast();
+            @endif
         });
-    });
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const sidebar = document.getElementById('sidebar');
-        const openButton = document.getElementById('open-sidebar');
-        const closeButton = document.getElementById('close-sidebar');
-
-        function toggleMenu() {
-            const isOpen = sidebar.getAttribute('data-state') === 'open';
-            if (isOpen) {
-                $('#sidebar').show();
-                sidebar.setAttribute('data-state', 'closed');
-            } else {
-                $('#sidebar').hide();
-                sidebar.setAttribute('data-state', 'open');
-            }
-        }
-
-        openButton.addEventListener('click', toggleMenu);
-        closeButton.addEventListener('click', toggleMenu);
-
-        @if (session('message'))
-        Toastify({
-            text: "{{ session('message') }}",
-            duration: 3000,
-            gravity: 'bottom',
-            position: 'center',
-            stopOnFocus: true,
-            style: {
-                background: '#4BB543',
-            }
-        }).showToast();
-        @endif
-    });
 
     </script>
 
