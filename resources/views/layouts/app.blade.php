@@ -8,7 +8,10 @@
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.99em%22 font-size=%2275%22>📅</text></svg>">
 
-    {{ isset($meta) ? $meta : '<meta name="description" content="The simple and free way to share your event schedule">
+    @if (isset($meta))
+        {{ $meta }}
+    @else
+        <meta name="description" content="The simple and free way to share your event schedule">
         <meta property="og:title" content="Event Schedule">
         <meta property="og:description" content="The simple and free way to share your event schedule">
         <meta property="og:image" content="https://eventschedule.com/images/background.jpg">
@@ -18,7 +21,8 @@
         <meta name="twitter:description" content="The simple and free way to share your event schedule">
         <meta name="twitter:image" content="https://eventschedule.com/images/background.jpg">
         <meta name="twitter:image:alt" content="Event Schedule">
-        <meta name="twitter:card" content="summary_large_image">' }}
+        <meta name="twitter:card" content="summary_large_image">
+    @endif    
 
     <meta http-equiv="Content-Security-Policy" content="
         img-src 'self' data: https://maps.gstatic.com https://maps.googleapis.com https://eventschedule.nyc3.cdn.digitaloceanspaces.com https://*.ytimg.com;
