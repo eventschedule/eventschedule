@@ -273,4 +273,6 @@ return [
     'uncurate_event' => 'Successfully uncurated event',
     'curate' => 'Curate',
     'uncurate' => 'Uncurate',
+    'we_recommend' => 'We recommend :name',
+    'gradients_from' => 'Gradients from :name',
 ];

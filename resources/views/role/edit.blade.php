@@ -441,6 +441,9 @@
                                 <x-input-label for="background_image" :value="__('messages.image')" />
                                 <input id="background_image" name="background_image" type="file" class="mt-1 block w-full"
                                     :value="old('background_image')" oninput="updatePreview()" accept="image/png, image/jpeg" />
+                                <div class="text-xs">
+                                    <a href="https://www.pexels.com" target="_blank" class="hover:underline">{{ __('messages.we_recommend', ['name' => 'pexels.com']) }}</a>
+                                </div>
                                 <x-input-error class="mt-2" :messages="$errors->get('background_image')" />
 
                                 <img id="background_image_preview" src="#" alt="Background Image Preview" style="max-height:120px; display:none;" class="pt-3" />
@@ -467,7 +470,7 @@
                                         @endforeach
                                     </select>
                                     <div class="text-xs">
-                                        <a href="https://uigradients.com" target="_blank" class="hover:underline">Gradients from uiGradients</a>
+                                        <a href="https://uigradients.com" target="_blank" class="hover:underline">{{ __('messages.gradients_from', ['name' => 'uiGradients']) }}</a>
                                     </div>
                                     <x-input-error class="mt-2" :messages="$errors->get('background_colors')" />
 
