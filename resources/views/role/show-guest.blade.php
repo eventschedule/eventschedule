@@ -79,7 +79,7 @@
                         </form>
                     @else
                         @if($curatorRoles->count() == 1)
-                            <form action="{{ route('event.curate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="POST">
+                            <form action="{{ route('event.curate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="GET">
                                 @csrf
                                 <button type="submit" style="background-color: {{ $role->accent_color }}"
                                     class="btn btn-primary inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
@@ -92,29 +92,30 @@
                                 </button>
                             </form>
                         @else
-                            <div class="dropdown" style="background-color: {{ $role->accent_color }}">
-                                <button class="dropdown-toggle inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2" 
-                                    type="button" id="curateDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="ml-3 shadow-md relative inline-block text-left">
+                                <button type="button" style="background-color: {{ $role->accent_color }}"
+                                    onclick="onPopUpClick('curator-pop-up-menu', event)"
+                                    class="btn btn-primary inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2" 
+                                    id="menu-button" aria-expanded="true" aria-haspopup="true">
                                     <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
                                         aria-hidden="true">
-                                        <path
-                                            d="M5.8 21L7.4 14L2 9.2L9.2 8.6L12 2L14.8 8.6L22 9.2L18.8 12H18C14.9 12 12.4 14.3 12 17.3L5.8 21M17 14V17H14V19H17V22H19V19H22V17H19V14H17Z"/>
+                                        <path fill-rule="evenodd" d="M5.8 21L7.4 14L2 9.2L9.2 8.6L12 2L14.8 8.6L22 9.2L18.8 12H18C14.9 12 12.4 14.3 12 17.3L5.8 21M17 14V17H14V19H17V22H19V19H22V17H19V14H17Z" clip-rule="evenodd" />
                                     </svg>
                                     {{ __('messages.curate') }}
                                 </button>
-                                <ul class="dropdown-menu" aria-labelledby="curateDropdown">
-                                    @foreach($curatorRoles as $curatorRole)
-                                        <li>
-                                            <form action="{{ route('event.curate', ['subdomain' => $curatorRole->subdomain, 'hash' => $event->hashedId()]) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="dropdown-item inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
-                                                    {{ $curatorRole->name }}
-                                                </button>
-                                            </form>
-                                        </li>
-                                    @endforeach
-                                </ul>
+
+                                <div id="curator-pop-up-menu" class="pop-up-menu hidden absolute right-0 z-10 mt-2 w-40 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" 
+                                    style="font-family: sans-serif" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                                    <div class="py-1" role="none" onclick="onPopUpClick('curator-pop-up-menu', event)">
+                                        @foreach($curatorRoles as $curatorRole)
+                                        <a href="{{ route('event.curate', ['subdomain' => $curatorRole->subdomain, 'hash' => $event->hashedId()]) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-0">
+                                            {{ $curatorRole->name }}
+                                        </a>
+                                        @endforeach
+                                    </div>
+                                </div>
                             </div>
+
                         @endif
                     @endif
                 @endif                
