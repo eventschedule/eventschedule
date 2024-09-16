@@ -218,4 +218,12 @@ class Event extends Model
             return $value;
         }
     }
+
+    public function getOtherRole($subdomain) {
+        if ($subdomain == $this->role->subdomain) {
+            return $this->venue;
+        } else {
+            return $this->role;
+        }
+    }
 }
