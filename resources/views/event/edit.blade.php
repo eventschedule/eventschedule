@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-admin-layout>
 
     @vite([
     'resources/js/countrySelect.min.js',
@@ -466,4 +466,4 @@
 
     </form>
 
-</x-app-layout>
+</x-app-admin-layout>

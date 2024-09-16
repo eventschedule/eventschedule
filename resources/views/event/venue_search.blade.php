@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-admin-layout>
 
     <x-slot name="head">
         <script>
@@ -81,4 +81,4 @@
 
     </form>
 
-</x-app-layout>
+</x-app-admin-layout>
