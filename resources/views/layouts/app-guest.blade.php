@@ -82,13 +82,13 @@
 
         @if ($event)
             @if ($subdomain == $event->venue->subdomain)
-            #event_title {
+            #event_title
             @else
-            #venue_title {
+            #venue_title
             @endif
+            {
                 font-family: '{{ $otherRole->font_family }}', sans-serif !important;
             }
-        }
         @endif
 
         h1 {
