@@ -147,7 +147,7 @@
                             </a>
                         </p>
                         <p class="mt-6 text-2xl leading-8">
-                            {{ $event->starts_at ? $event->localStartsAt(true, $date, true) : __('messages.date_to_be_announced') . '...' }}
+                            {!! $event->starts_at ? $event->localStartsAt(true, $date, true) : __('messages.date_to_be_announced') . '...' !!}
                         </p>
 
                         <div style="font-family: sans-serif" class="mt-8 relative inline-block text-left">

@@ -75,13 +75,11 @@ class Event extends Model
             $startDate = $startAt->format('Y-m-d');
             $startAt->addHours($this->duration);
             $endDate = $startAt->format('Y-m-d');
-
-            $value .= ' ' . __('messages.to') . ' ';
-
+            
             if ($startDate == $endDate) {
-                $value .= $startAt->format($enable24 ? 'H:i' : 'g:i A');
+                $value .= ' ' . __('messages.to') . ' ' . $startAt->format($enable24 ? 'H:i' : 'g:i A');
             } else {
-                $value .= $startAt->format($format);
+                $value = $value . '<br/>' . __('messages.to') . '<br/>' . $startAt->format($format);
             }
         }
 
