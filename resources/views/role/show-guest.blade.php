@@ -60,8 +60,8 @@
                 @if($event && $curatorRoles->count() > 0)
                     @php
                         $eventInRole = false;
-                        foreach ($curatorRoles as $role) {
-                            if ($role->events()->where('event_role.event_id', $event->id)->exists()) {
+                        foreach ($curatorRoles as $curatorRole) {
+                            if ($curatorRole->events()->where('event_role.event_id', $event->id)->exists()) {
                                 $eventInRole = true;
                                 break;
                             }
@@ -93,12 +93,12 @@
                                     {{ __('messages.curate') }}
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="curateDropdown">
-                                    @foreach($curatorRoles as $role)
+                                    @foreach($curatorRoles as $curatorRole)
                                         <li>
-                                            <form action="{{ route('event.curate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="POST">
+                                            <form action="{{ route('event.curate', ['subdomain' => $curatorRole->subdomain, 'hash' => $event->hashedId()]) }}" method="POST">
                                                 @csrf
                                                 <button type="submit" class="dropdown-item inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
-                                                    {{ $role->name }}
+                                                    {{ $curatorRole->name }}
                                                 </button>
                                             </form>
                                         </li>
