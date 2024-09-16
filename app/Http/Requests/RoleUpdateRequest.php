@@ -24,7 +24,7 @@ class RoleUpdateRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             //'email' => ['required', 'string', 'email', 'max:255', Rule::unique(Role::class)->ignore($role->id), new NoFakeEmail],
             'email' => ['required', 'string', 'email', 'max:255', new NoFakeEmail],
-            'new_subdomain' => ['required', 'string', 'max:255', 'min:5'],
+            'new_subdomain' => ['required', 'string', 'max:255', 'min:4', 'max:50'],
             'profile_image' => ['image', 'max:2500', new SquareImage],
             'background_image_url' => ['image', 'max:2500'],
         ];
