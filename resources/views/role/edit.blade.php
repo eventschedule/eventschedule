@@ -338,7 +338,7 @@
                             </div>
                         </div>
 
-                        <div id="address_response" class="mb-6 hidden"></div>
+                        <div id="address_response" class="mb-6 hidden text-gray-900 dark:text-gray-100"></div>
                         <input type="hidden" name="formatted_address" id="formatted_address"/>
                         <input type="hidden" name="google_place_id" id="google_place_id"/>
                         <input type="hidden" name="geo_address" id="geo_address"/>
