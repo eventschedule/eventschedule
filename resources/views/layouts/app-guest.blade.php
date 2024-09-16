@@ -90,6 +90,37 @@
             }
         }
         @endif
+
+        h1 {
+        font-size: 2.25rem; /* Same as text-4xl in Tailwind */
+        font-weight: 700; /* Same as font-bold */
+        }
+
+        h2 {
+        font-size: 1.875rem; /* Same as text-3xl */
+        font-weight: 600; /* Same as font-semibold */
+        }
+
+        h3 {
+        font-size: 1.5rem; /* Same as text-2xl */
+        font-weight: 600; /* Same as font-semibold */
+        }
+
+        h4 {
+        font-size: 1.25rem; /* Same as text-xl */
+        font-weight: 500; /* Same as font-medium */
+        }
+
+        h5 {
+        font-size: 1.125rem; /* Same as text-lg */
+        font-weight: 500; /* Same as font-medium */
+        }
+
+        h6 {
+        font-size: 1rem; /* Same as text-base */
+        font-weight: 400; /* Same as font-normal */
+        }
+
         </style>
 
     </x-slot>
