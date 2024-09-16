@@ -6,6 +6,21 @@
 
         <script>
             $(document).ready(function() {
+                const sidebar = document.getElementById('sidebar');
+                const openButton = document.getElementById('open-sidebar');
+                const closeButton = document.getElementById('close-sidebar');
+
+                function toggleMenu() {
+                    const isOpen = sidebar.getAttribute('data-state') === 'open';
+                    if (isOpen) {
+                        $('#sidebar').show();
+                        sidebar.setAttribute('data-state', 'closed');
+                    } else {
+                        $('#sidebar').hide();
+                        sidebar.setAttribute('data-state', 'open');
+                    }
+                }
+
                 openButton.addEventListener('click', toggleMenu);
                 closeButton.addEventListener('click', toggleMenu);
             });
