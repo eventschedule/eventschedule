@@ -199,7 +199,8 @@
                     <a href="{{ route('role.view_guest', (now()->year == $year && now()->month == $month) ? ['subdomain' => $role->subdomain] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'month' => $month] : ['subdomain' => $role->subdomain, 'year' => $year, 'month' => $month])) }}"
                         target="_blank">
                         <button type="button" {{ ! $role->email_verified_at ? 'disabled' : '' }}
-                            class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 {{ ! $role->email_verified_at ? 'disabled:cursor-not-allowed' : '' }}">
+                            class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm 
+                             ring-1 ring-inset ring-gray-300 hover:bg-gray-50 {{ ! $role->email_verified_at ? 'disabled:cursor-not-allowed' : '' }}">
                             <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor"
                                 aria-hidden="true">
                                 <path
@@ -216,7 +217,7 @@
 
     @if (! $role->email_verified_at)
     <div class="pt-5 pb-2">
-        <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="bg-white rounded-lg shadow-sm p-6">
             {{ __('messages.verify_email_address') }} &nbsp;&nbsp;
             <a href="{{ route('role.verification.resend', ['subdomain' => $role->subdomain]) }}"
                     class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"

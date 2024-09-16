@@ -11,7 +11,7 @@
                 @if (auth()->check() && auth()->user()->isMember($role->subdomain))
                 <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain]) }}" class="pl-2">
                     <button type="button" style="background-color: {{ $event ? $otherRole->accent_color : $role->accent_color }}"
-                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
                                 aria-hidden="true">
                                 <path
@@ -25,7 +25,7 @@
                 @if (($event && $event->venue->bestAddress()) || $role->bestAddress())
                 <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event ? $event->venue->bestAddress() : $role->bestAddress()) }}" target="_blank" class="pl-2">
                     <button type="button" style="background-color: {{ $event ? $otherRole->accent_color : $role->accent_color }}"
-                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
                                 aria-hidden="true">
                                 <path
@@ -40,7 +40,7 @@
                 @if (! $user || ! $user->isConnected($event->role->subdomain))
                 <a href="{{ route('role.follow', ['subdomain' => $event->role->subdomain]) }}" class="pl-2">
                     <button type="button" style="background-color: {{ $otherRole->accent_color }}"
-                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
                                 aria-hidden="true">
                                 <path
@@ -54,7 +54,7 @@
                 @if (! $user || ! $user->isConnected($role->subdomain))
                 <a href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}" class="pl-2">
                     <button type="button" style="background-color: {{ $role->accent_color }}"
-                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
                             aria-hidden="true">
                             <path
@@ -82,7 +82,7 @@
                             @csrf
                             @method('DELETE')
                             <button type="submit" style="background-color: {{ $role->accent_color }}"
-                            class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                            class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                                 <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
                                     aria-hidden="true">
                                     <path
@@ -96,7 +96,7 @@
                             <form action="{{ route('event.curate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="GET" style="display: inline-block;">
                                 @csrf
                                 <button type="submit" style="background-color: {{ $role->accent_color }}"
-                                    class="btn btn-primary inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                                    class="btn btn-primary inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                                     <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
                                         aria-hidden="true">
                                         <path
@@ -106,10 +106,10 @@
                                 </button>
                             </form>
                         @else
-                            <div class="ml-3 shadow-md relative inline-block text-left">
+                            <div class="ml-3 shadow-sm relative inline-block text-left">
                                 <button type="button" style="background-color: {{ $role->accent_color }}"
                                     onclick="onPopUpClick('curator-pop-up-menu', event)"
-                                    class="btn btn-primary inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2" 
+                                    class="btn btn-primary inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2" 
                                     id="menu-button" aria-expanded="true" aria-haspopup="true">
                                     <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
                                         aria-hidden="true">
@@ -194,7 +194,7 @@
                 <div class="container mx-auto py-8">
                     <div class="grid grid-cols-1 md:grid-cols-{{ $event->role->getVideoColumns() }} gap-8">
                         @foreach (json_decode($event->role->youtube_links) as $link)
-                        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
                             <iframe class="w-full" style="height:{{ $event->role->getVideoHeight() }}px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                         </div>
                         @endforeach
@@ -220,7 +220,7 @@
             <div class="container mx-auto py-8">
                 <div class="grid grid-cols-1 md:grid-cols-{{ $role->getVideoColumns() }} gap-8">
                     @foreach (json_decode($role->youtube_links) as $link)
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
                         <iframe class="w-full" style="height:{{ $role->getVideoHeight() }}px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                     </div>
                     @endforeach
@@ -241,7 +241,7 @@
                 @if ($role->isVenue() && $role->accept_talent_requests && $role->user_id)
                 <a href="{{ route('event.sign_up', ['subdomain' => $role->subdomain])}}">
                     <button type="button" style="background-color: {{ $event ? $event->role->accent_color : $role->accent_color }}"
-                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                        class="inline-flex items-center rounded-md shadow-sm px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
                                 aria-hidden="true">
                                 <path
@@ -255,7 +255,7 @@
                 @if ($role->isVenue() && $role->accept_vendor_requests && $role->user_id)
                 <a href="{{ route('event.sign_up', ['subdomain' => $role->subdomain])}}">
                     <button type="button" style="background-color: {{ $event ? $event->role->accent_color : $role->accent_color }}"
-                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                        class="inline-flex items-center rounded-md shadow-sm px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
                                 aria-hidden="true">
                                 <path
@@ -273,7 +273,7 @@
             <div class="container mx-auto py-8">
                 <div class="grid grid-cols-1 md:grid-cols-{{ $role->getVideoColumns() }} gap-8">
                     @foreach (json_decode($role->youtube_links) as $link)
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
                         <iframe class="w-full" style="height:{{ $role->getVideoHeight() }}px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                     </div>
                     @endforeach
