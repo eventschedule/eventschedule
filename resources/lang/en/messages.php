@@ -216,7 +216,6 @@ return [
     'full_name' => 'Full Name',
     'claim_your_venue' => ':role scheduled an event at :venue',
     'claim_your_role' => ':venue scheduled an event for :role',
-    'other' => 'Other',
     'next' => 'Next',
     'one_time' => 'One-time',
     'recurring' => 'Recurring',
@@ -273,4 +272,5 @@ return [
     'updated_curator' => 'Successfully updated curator',
     'deleted_curator' => 'Successfully deleted curator',    
     'private_space_no_email' => 'Private space/no email address',
+    'search_or_create' => 'Search or create',
 ];

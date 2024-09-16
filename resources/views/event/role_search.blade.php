@@ -46,7 +46,7 @@
                                 @foreach ($roles as $role)
                                 <option value="{{ App\Utils\UrlUtils::encodeId($role->id) }}">{{ $role->name }}</option>
                                 @endforeach
-                                <option value="">{{ __('messages.other') }}</option>
+                                <option value="">{{ __('messages.search_or_create') }}</option>
                             </select>
                         </div>
                         @endif

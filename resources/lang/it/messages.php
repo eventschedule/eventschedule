@@ -215,7 +215,6 @@ return [
     'full_name' => 'Nome completo',
     'claim_your_venue' => ':role ha programmato un evento a :venue',
     'claim_your_role' => ':venue ha programmato un evento per :role',
-    'other' => 'Altro',
     'next' => 'Avanti',
     'one_time' => 'Una volta',
     'recurring' => 'Ricorrente',

@@ -65,7 +65,7 @@
                                 @foreach ($venues as $venue)
                                 <option value="{{ App\Utils\UrlUtils::encodeId($venue->id) }}">{{ $venue->name }}</option>
                                 @endforeach
-                                <option value="">{{ __('messages.other') }}</option>
+                                <option value="">{{ __('messages.search_or_create') }}</option>
                             </select>
                         </div>
                         @endif

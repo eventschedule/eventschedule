@@ -215,7 +215,6 @@ return [
     'full_name' => 'Volledige naam',
     'claim_your_venue' => ':role heeft een evenement gepland bij :venue',
     'claim_your_role' => ':venue heeft een evenement gepland voor :role',
-    'other' => 'Anders',
     'next' => 'Volgende',
     'one_time' => 'Eenmalig',
     'recurring' => 'Terugkerend',
