@@ -138,7 +138,7 @@ class RoleController extends Controller
     public function viewGuest(Request $request, $subdomain, $otherSubdomain = '')
     {
         $user = auth()->user();
-        $curatorRoles = $user->curators()->get();
+        $curatorRoles = $user ? $user->curators()->get() : collect();
 
         $role = Role::subdomain($subdomain)->first();
 

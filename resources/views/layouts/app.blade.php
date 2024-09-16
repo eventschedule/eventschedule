@@ -67,6 +67,9 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
 
     @vite([
     'resources/css/app.css',
@@ -128,10 +131,6 @@
             }
         });
     });
-    </script>            
-
-
-    <script>
 
     document.addEventListener('DOMContentLoaded', function () {
         const sidebar = document.getElementById('sidebar');
@@ -151,11 +150,22 @@
 
         openButton.addEventListener('click', toggleMenu);
         closeButton.addEventListener('click', toggleMenu);
+
+        @if (session('message'))
+        Toastify({
+            text: "{{ session('message') }}",
+            duration: 3000,
+            gravity: 'bottom',
+            position: 'center',
+            stopOnFocus: true,
+            style: {
+                background: '#4BB543',
+            }
+        }).showToast();
+        @endif
     });
 
     </script>
-
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
     <style>
         .editor-toolbar {
@@ -291,23 +301,6 @@
             <main class="pb-10">
                 <div class="px-4 sm:px-6 lg:px-8">
 
-                    @if (session('message'))
-                    <script>
-                    document.addEventListener('DOMContentLoaded', () => {
-                        Toastify({
-                            text: "{{ session('message') }}",
-                            duration: 3000,
-                            gravity: 'bottom',
-                            position: 'center',
-                            stopOnFocus: true,
-                            style: {
-                                background: '#4BB543',
-                            }
-                        }).showToast();
-                    });
-                    </script>
-                    @endif
-
                     @if ($errors->any())
                     <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                         <b>{{ __('messages.there_was_a_problem') . ':' }}</b>
@@ -332,7 +325,5 @@
     </div>
 
 </body>
-
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
 </html>
