@@ -2,19 +2,31 @@
 
     <x-slot name="head">
         <script>
-            function onSelectChange() {
+            function onChange() {
                 var value = $('#venue_id').find(':selected').val();
+                var no_email = $('#private_space_no_email').is(':checked');
+                console.log('onChange', value, no_email);
+
+
                 if (value) {
                     $('#email_div').hide();
                     $('#primary_button').text("{{ __('messages.next') }}");
                     $('#venue_email').removeAttr('required');
                 } else {
                     $('#email_div').show();
-                    $('#primary_button').text("{{ __('messages.search') }}");
-                    $('#venue_email').attr('required', 'required');
+                    if (no_email) {
+                        $('#primary_button').text("{{ __('messages.next') }}");                    
+                        $('#venue_email').removeAttr('required');
+                    } else {
+                        $('#primary_button').text("{{ __('messages.search') }}");                    
+                        $('#venue_email').attr('required', 'required');
+                    }
                 }
             }
-            onSelectChange();
+
+            $(document).ready(function() {
+                onChange();
+            });
         </script>
     </x-slot>
 
@@ -47,7 +59,7 @@
                         <div class="mb-6">
                             <select id="venue_id" name="venue_id"
                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                onchange="onSelectChange()" required>
+                                onchange="onChange()" required>
                                 <option value="" disabled selected>{{ __('messages.please_select') }}</option>
                                 @foreach ($venues as $venue)
                                 <option value="{{ App\Utils\UrlUtils::encodeId($venue->id) }}">{{ $venue->name }}</option>
@@ -57,11 +69,20 @@
                         </div>
                         @endif
 
-                        <div id="email_div" class="mb-6 {{ count($venues) ? 'hidden' : '' }}">
-                            <x-input-label for="venue_email" :value="__('messages.email') . ' *'" />
-                            <x-text-input id="venue_email" name="venue_email" type="email" class="mt-1 block w-full"
-                                :value="old('venue_email')" autofocus/>
-                            <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
+                        <div id="email_div" class="{{ count($venues) ? 'hidden' : '' }}">
+                            <div class="mb-6">
+                                <x-input-label for="venue_email" :value="__('messages.email') . ' *'" />
+                                <x-text-input id="venue_email" name="venue_email" type="email" class="mt-1 block w-full"
+                                    :value="old('venue_email')" autofocus/>
+                                <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
+                            </div>
+
+                            <div class="mb-6">
+                                <x-checkbox name="private_space_no_email" label="{{ __('messages.private_space_no_email') }}"
+                                    checked="{{ old('private_space_no_email', false) }}"
+                                    data-custom-attribute="value" onclick="onChange()" />
+                                <x-input-error class="mt-2" :messages="$errors->get('private_space_no_email')" />
+                            </div>
                         </div>
 
                     </div>
