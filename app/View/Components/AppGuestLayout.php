@@ -7,10 +7,10 @@ use Illuminate\View\View;
 use App\Models\Role;
 use App\Models\Event;
 
-class AppLayout extends Component
+class AppGuestLayout extends Component
 {
     public function __construct(
-        public ?Role $role = null,
+        public Role $role,
         public ?Event $event = null,
     ) {}
 
@@ -19,6 +19,6 @@ class AppLayout extends Component
      */
     public function render(): View
     {
-        return view('layouts.app');
+        return view('layouts.app-guest');
     }
 }

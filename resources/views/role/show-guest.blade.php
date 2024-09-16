@@ -1,9 +1,4 @@
-@extends('master')
-
-@section('title', $role->name)
-
-@section('content')
-<body class="antialiased dark:bg-black dark:text-white/50">
+<x-app-guest-layout :role="$role" :event="$event">
 
     <div class="p-10 max-w-5xl mx-auto px-4">
         <div class="flex items-start justify-between pb-6">
@@ -347,5 +342,4 @@
         </div>
     </footer>
 
-</body>
-@endsection
+</x-app-guest-layout>
