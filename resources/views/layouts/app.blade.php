@@ -145,9 +145,6 @@
                 }
             }
 
-            openButton.addEventListener('click', toggleMenu);
-            closeButton.addEventListener('click', toggleMenu);
-
             @if (session('message'))
             Toastify({
                 text: "{{ session('message') }}",

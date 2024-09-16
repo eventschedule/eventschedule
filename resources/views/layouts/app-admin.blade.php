@@ -3,6 +3,14 @@
     <x-slot name="head">
         <link rel="preconnect" href="https://rsms.me/">
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css">        
+
+        <script>
+            $(document).ready(function() {
+                openButton.addEventListener('click', toggleMenu);
+                closeButton.addEventListener('click', toggleMenu);
+            });
+        </script>
+
         {{ isset($head) ? $head : '' }}
     </x-slot>
 
