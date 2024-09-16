@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-admin-layout>
 
     <x-slot name="head">
         @if ($tab == 'availability')
@@ -287,4 +287,4 @@
     @include('role.show-admin-team')
     @endif
 
-</x-app-layout>
+</x-app-admin-layout>

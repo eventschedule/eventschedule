@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-admin-layout>
     <div class="py-12">
         <div class="max-w-7xl mx-auto space-y-6">
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
@@ -20,4 +20,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-app-admin-layout>

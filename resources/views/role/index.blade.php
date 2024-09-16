@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-admin-layout>
 
     <div class="mt-8 flow-root">
         <div class="overflow-x-auto px-4 sm:px-6 lg:px-8 bg-white">
@@ -56,4 +56,4 @@
         </div>
     </div>
 
-</x-app-layout>
+</x-app-admin-layout>
