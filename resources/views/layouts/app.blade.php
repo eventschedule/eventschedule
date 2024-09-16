@@ -155,7 +155,7 @@
         <meta property="og:title" content="Event Schedule">
         <meta property="og:description" content="The simple and free way to share your event schedule">
         <meta property="og:image" content="https://eventschedule.com/images/background.jpg">
-        <meta property="og:url" content="{{ request()->url() }}">
+        <meta property="og:url" content="' . request()->url() . '">
         <meta property="og:site_name" content="Event Schedule">
         <meta name="twitter:title" content="Event Schedule">
         <meta name="twitter:description" content="The simple and free way to share your event schedule">
