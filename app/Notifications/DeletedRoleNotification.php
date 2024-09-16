@@ -45,7 +45,7 @@ class DeletedRoleNotification extends Notification
                 ->replyTo($user->email, $user->name)
                 ->subject(str_replace(
                     ':type', 
-                    strtolower(__('messages.' . $role->type)), 
+                    __('messages.' . $role->type), 
                     __('messages.role_has_been_deleted'))
                 )
                 ->line(str_replace(
