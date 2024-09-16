@@ -10,8 +10,7 @@ use App\Models\Event;
 class AppLayout extends Component
 {
     public function __construct(
-        public ?Role $role = null,
-        public ?Event $event = null,
+        public ?string $title,
     ) {}
 
     /**
