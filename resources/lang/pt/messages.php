@@ -215,7 +215,6 @@ return [
     'full_name' => 'Nome completo',
     'claim_your_venue' => ':role agendou um evento em :venue',
     'claim_your_role' => ':venue agendou um evento para :role',
-    'other' => 'Outro',
     'next' => 'Próximo',
     'one_time' => 'Única vez',
     'recurring' => 'Recorrente',

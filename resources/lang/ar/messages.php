@@ -215,7 +215,6 @@ return [
     'full_name' => 'الاسم الكامل',
     'claim_your_venue' => ':role قام بجدولة حدث في :venue',
     'claim_your_role' => ':venue قام بجدولة حدث لـ :role',
-    'other' => 'آخر',
     'next' => 'التالي',
     'one_time' => 'مرة واحدة',
     'recurring' => 'متكرر',
