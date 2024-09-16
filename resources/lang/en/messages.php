@@ -272,5 +272,5 @@ return [
     'updated_curator' => 'Successfully updated curator',
     'deleted_curator' => 'Successfully deleted curator',    
     'private_space_no_email' => 'Private space/no email address',
-    'search_or_create' => 'Search or create',
+    'search_create' => 'Search/create',
 ];
