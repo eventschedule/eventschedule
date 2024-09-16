@@ -62,7 +62,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/team/add_member', [RoleController::class, 'createMember'])->name('role.create_member');
     Route::post('/{subdomain}/team/add_member', [RoleController::class, 'storeMember'])->name('role.store_member');
     Route::get('/{subdomain}/team/remove_member/{hash}', [RoleController::class, 'removeMember'])->name('role.remove_member');
-    Route::post('/{subdomain}/curate_event/{hash}', [EventController::class, 'curate'])->name('event.curate');
+    Route::get('/{subdomain}/curate_event/{hash}', [EventController::class, 'curate'])->name('event.curate');
     Route::delete('/{subdomain}/uncurate_event/{hash}', [EventController::class, 'uncurate'])->name('event.uncurate');
     Route::get('/{subdomain}/{tab?}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|availability|requests|profile|followers|team');
 });
