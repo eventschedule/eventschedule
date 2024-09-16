@@ -50,7 +50,7 @@ class Event extends Model
         return UrlUtils::encodeId($this->id);
     }
 
-    public function localStartsAt($pretty = false, $date = null)
+    public function localStartsAt($pretty = false, $date = null, $endTime = false)
     {
         if (! $this->starts_at) {
             return '';
@@ -67,9 +67,25 @@ class Event extends Model
         }
 
         $startAt = $this->getStartDateTime($date);
+        $format = $pretty ? ($enable24 ? 'l, F jS • H:i' : 'l, F jS • g:i A') : 'Y-m-d H:i:s';
 
-        return $startAt->setTimezone($timezone)
-                    ->format($pretty ? ($enable24 ? 'l, F jS • H:i' : 'l, F jS • g:i A') : 'Y-m-d H:i:s');
+        $value = $startAt->setTimezone($timezone)->format($format);
+        
+        if ($endTime && $this->duration > 0) {
+            $startDate = $startAt->format('Y-m-d');
+            $startAt->addHours($this->duration);
+            $endDate = $startAt->format('Y-m-d');
+
+            $value .= ' ' . __('messages.to') . ' ';
+
+            if ($startDate == $endDate) {
+                $value .= $startAt->format($enable24 ? 'H:i' : 'g:i A');
+            } else {
+                $value .= $startAt->format($format);
+            }
+        }
+
+        return $value;
     }
 
     public function matchesDate($date)
