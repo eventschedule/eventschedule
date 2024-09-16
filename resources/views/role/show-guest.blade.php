@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role" :event="$event">
+<x-app-guest-layout :role="$role" :event="$event" :date="$date">
 
     <div class="p-10 max-w-5xl mx-auto px-4">
         <div class="flex items-start justify-between pb-6">

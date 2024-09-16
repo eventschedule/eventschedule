@@ -12,6 +12,7 @@ class AppGuestLayout extends Component
     public function __construct(
         public Role $role,
         public ?Event $event = null,
+        public ?string $date = null,
     ) {}
 
     /**
