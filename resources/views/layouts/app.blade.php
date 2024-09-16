@@ -6,42 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    @if ($event && $event->exists) 
-        @if ($event->description_html)
-        <meta name="description" content="{{ trim(strip_tags($event->description_html)) }}">
-        @else ($event->role->description_html)
-        <meta name="description" content="{{ trim(strip_tags($event->role->description_html)) }}">
-        @endif
-        <meta property="og:title" content="{{ $event->role->name }}">
-        <meta property="og:description" content="{{ $event->getMetaDescription($date) }}">
-        <meta property="og:image" content="{{ $event->getImageUrl() }}">
-        <meta name="twitter:title" content="{{ $event->role->name }}">
-        <meta name="twitter:description" content="{{ $event->getMetaDescription($date) }}">
-        <meta name="twitter:image" content="{{ $event->getImageUrl() }}">
-        <meta name="twitter:image:alt" content="{{ $event->role->name }}">
-    @elseif ($role->exists)
-        <meta name="description" content="{{ trim(strip_tags($role->description_html)) }}">
-        <meta property="og:title" content="{{ $role->name }}">
-        <meta property="og:description" content="{{ trim(strip_tags($role->description_html)) }}">
-        <meta property="og:image" content="{{ $role->profile_image_url }}">
-        <meta name="twitter:title" content="{{ $role->name }}">
-        <meta name="twitter:description" content="{{ trim(strip_tags($role->description_html)) }}">
-        <meta name="twitter:image" content="{{ $role->profile_image_url }}">
-        <meta name="twitter:image:alt" content="{{ $role->name }}">
-    @else
-        <meta name="description" content="The simple and free way to share your event schedule">
-        <meta property="og:title" content="Event Schedule">
-        <meta property="og:description" content="The simple and free way to share your event schedule">
-        <meta property="og:image" content="https://eventschedule.com/images/background.jpg">
-        <meta name="twitter:title" content="Event Schedule">
-        <meta name="twitter:description" content="The simple and free way to share your event schedule">
-        <meta name="twitter:image" content="https://eventschedule.com/images/background.jpg">
-        <meta name="twitter:image:alt" content="Event Schedule">
-    @endif
-
-    <meta property="og:url" content="https://eventschedule.com">
-    <meta property="og:site_name" content="Event Schedule">
-    <meta name="twitter:card" content="summary_large_image">
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.99em%22 font-size=%2275%22>📅</text></svg>">
 
@@ -81,17 +45,6 @@
         event.stopPropagation();
     });
     </script>
-
-    <!-- Fonts -->
-    @if ($role->exists)
-        <link href="https://fonts.googleapis.com/css2?family={{ $role->font_family }}:wght@400;700&display=swap" rel="stylesheet">
-        @if ($event)
-            <link href="https://fonts.googleapis.com/css2?family={{ $event->getOtherRole($role->subdomain)->font_family }}:wght@400;700&display=swap" rel="stylesheet">
-        @endif
-    @else
-        <link rel="preconnect" href="https://rsms.me/">
-        <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-    @endif
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
@@ -198,8 +151,20 @@
 
     </script>
 
-    {{ isset($head) ? $head : '' }}
-</head>
+    {{ isset($head) ? $head : '<meta name="description" content="The simple and free way to share your event schedule">
+        <meta property="og:title" content="Event Schedule">
+        <meta property="og:description" content="The simple and free way to share your event schedule">
+        <meta property="og:image" content="https://eventschedule.com/images/background.jpg">
+        <meta property="og:url" content="{{ request()->url() }}">
+        <meta property="og:site_name" content="Event Schedule">
+        <meta name="twitter:title" content="Event Schedule">
+        <meta name="twitter:description" content="The simple and free way to share your event schedule">
+        <meta name="twitter:image" content="https://eventschedule.com/images/background.jpg">
+        <meta name="twitter:image:alt" content="Event Schedule">
+        <meta name="twitter:card" content="summary_large_image">' }}
+
+
+</head> 
 <body class="font-sans antialiased h-full bg-gray-50">
 
     {{ $slot }}

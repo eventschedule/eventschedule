@@ -1,5 +1,10 @@
 <x-app-layout>
 
+    <x-slot name="head">
+        <link rel="preconnect" href="https://rsms.me/">
+        <link rel="stylesheet" href="https://rsms.me/inter/inter.css">        
+    </x-slot>
+
     <div>
         <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
         <div data-state="closed" id="sidebar" class="relative z-50 hidden" role="dialog" aria-modal="true">
