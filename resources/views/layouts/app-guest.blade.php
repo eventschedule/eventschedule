@@ -7,8 +7,7 @@
         }
     @endphp
 
-    <x-slot name="head">
-
+    <x-slot name="meta">
         @if ($event && $event->exists) 
             @if ($event->description_html)
             <meta name="description" content="{{ trim(strip_tags($event->description_html)) }}">
@@ -38,6 +37,9 @@
             <meta name="twitter:image:alt" content="{{ $role->name }}">
             <meta name="twitter:card" content="summary_large_image">
         @endif
+    </x-slot>
+
+    <x-slot name="head">
 
         <link href="https://fonts.googleapis.com/css2?family={{ $role->font_family }}:wght@400;700&display=swap" rel="stylesheet">
         @if ($event)
