@@ -2,7 +2,7 @@
 
     <div class="p-10 max-w-5xl mx-auto px-4">
         <div class="flex items-start justify-between pb-6">
-            <a href="{{ $event ? $event->venue->getGuestUrl() : $role->getGuestUrl() }}">
+            <a href="{{ $event ? $event->venue->getGuestUrl() : $role->getGuestUrl() }}" class="hover:underline">
                 <div id="venue_title" class="text-4xl font-bold">
                     {{ $event ? $event->venue->name : $role->name }}
                 </div>
@@ -128,7 +128,7 @@
                 <div class="mx-auto max-w-7xl px-6 lg:px-8">
                     <div class="mx-auto max-w-2xl text-center">
                         <p class="mt-2 text-6xl font-bold tracking-tight">
-                            <a href="{{ $event->role->getGuestUrl() }}">
+                            <a href="{{ $event->role->getGuestUrl() }}" class="hover:underline">
                                 {{ $event->role->name }}
                             </a>
                         </p>
