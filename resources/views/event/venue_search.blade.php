@@ -25,7 +25,8 @@
             }
 
             $(document).ready(function() {
-                onChange();
+                onChange();                
+                $('#private_space_no_email').on('change', onChange);
             });
         </script>
     </x-slot>
@@ -78,9 +79,9 @@
                             </div>
 
                             <div class="mb-6">
-                                <x-checkbox name="private_space_no_email" label="{{ __('messages.private_space_no_email') }}"
+                                <x-checkbox id="private_space_no_email" name="private_space_no_email" label="{{ __('messages.private_space_no_email') }}"
                                     checked="{{ old('private_space_no_email', false) }}"
-                                    data-custom-attribute="value" onclick="onChange()" />
+                                    data-custom-attribute="value"/>
                                 <x-input-error class="mt-2" :messages="$errors->get('private_space_no_email')" />
                             </div>
                         </div>
