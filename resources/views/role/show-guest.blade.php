@@ -8,6 +8,20 @@
                 </div>
             </a>
             <div>
+                @if (auth()->check() && auth()->user()->isMember($role->subdomain))
+                <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain]) }}" class="pl-2">
+                    <button type="button" style="background-color: {{ $event ? $otherRole->accent_color : $role->accent_color }}"
+                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                        <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
+                                aria-hidden="true">
+                                <path
+                                    d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
+                            </svg>
+                        {{ __('messages.edit') }}
+                    </button>
+                </a>                
+                @endif
+
                 @if (($event && $event->venue->bestAddress()) || $role->bestAddress())
                 <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event ? $event->venue->bestAddress() : $role->bestAddress()) }}" target="_blank" class="pl-2">
                     <button type="button" style="background-color: {{ $event ? $otherRole->accent_color : $role->accent_color }}"
@@ -64,7 +78,7 @@
                     @endphp
 
                     @if($eventInRole)
-                        <form action="{{ route('event.uncurate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="POST">
+                        <form action="{{ route('event.uncurate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="POST" style="display: inline-block;" >
                             @csrf
                             @method('DELETE')
                             <button type="submit" style="background-color: {{ $role->accent_color }}"
@@ -79,7 +93,7 @@
                         </form>
                     @else
                         @if($curatorRoles->count() == 1)
-                            <form action="{{ route('event.curate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="GET">
+                            <form action="{{ route('event.curate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="GET" style="display: inline-block;">
                                 @csrf
                                 <button type="submit" style="background-color: {{ $role->accent_color }}"
                                     class="btn btn-primary inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
