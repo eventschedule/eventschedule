@@ -7,7 +7,7 @@
                     {{ $event ? $event->venue->name : $role->name }}
                 </div>
             </a>
-            <div class="flex items-center justify-end">
+            <div>
                 @if (auth()->check() && auth()->user()->isMember($role->subdomain))
                 <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain]) }}" class="pl-2">
                     <button type="button" style="background-color: {{ $event ? $otherRole->accent_color : $role->accent_color }}"
