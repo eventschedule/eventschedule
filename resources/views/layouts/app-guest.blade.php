@@ -1,4 +1,4 @@
-<x-app-layout :role="$role" :event="$event" :date="$date">
+<x-app-layout :title="$role->name . ' | Event Schedule'">
 
     @php
         $subdomain = $role->subdomain;
