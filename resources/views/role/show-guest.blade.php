@@ -78,10 +78,10 @@
                     @endphp
 
                     @if($eventInRole)
-                        <form action="{{ route('event.uncurate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="POST" style="display: inline-block;" >
+                        <form action="{{ route('event.uncurate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="POST" style="display: inline-block;" class="ml-2">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" style="background-color: {{ $role->accent_color }}"
+                            <button type="submit" style="background-color: {{ $event ? $otherRole->accent_color : $role->accent_color }}"
                             class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                                 <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
                                     aria-hidden="true">
@@ -93,9 +93,9 @@
                         </form>
                     @else
                         @if($curatorRoles->count() == 1)
-                            <form action="{{ route('event.curate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="GET" style="display: inline-block;">
+                            <form action="{{ route('event.curate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="GET" style="display: inline-block;" class="ml-2">
                                 @csrf
-                                <button type="submit" style="background-color: {{ $role->accent_color }}"
+                                <button type="submit" style="background-color: {{ $event ? $otherRole->accent_color : $role->accent_color }}"
                                     class="btn btn-primary inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                                     <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
                                         aria-hidden="true">
@@ -106,8 +106,8 @@
                                 </button>
                             </form>
                         @else
-                            <div class="ml-3 shadow-sm relative inline-block text-left">
-                                <button type="button" style="background-color: {{ $role->accent_color }}"
+                            <div class="ml-2 shadow-sm relative inline-block text-left">
+                                <button type="button" style="background-color: {{ $event ? $otherRole->accent_color : $role->accent_color }}"
                                     onclick="onPopUpClick('curator-pop-up-menu', event)"
                                     class="btn btn-primary inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2" 
                                     id="menu-button" aria-expanded="true" aria-haspopup="true">
