@@ -4,7 +4,8 @@
         <script>
             function onChange() {
                 var value = $('#venue_id').find(':selected').val();
-                var no_email = $('#private_space_no_email').is(':checked');
+                //var no_email = $('#private_space_no_email').is(':checked');
+                var no_email = false;
                 console.log('onChange', value, no_email);
 
 
@@ -78,12 +79,14 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
                             </div>
 
+                            <!--
                             <div class="mb-6">
                                 <x-checkbox id="private_space_no_email" name="private_space_no_email" label="{{ __('messages.private_space_no_email') }}"
                                     checked="{{ old('private_space_no_email', false) }}"
                                     data-custom-attribute="value"/>
                                 <x-input-error class="mt-2" :messages="$errors->get('private_space_no_email')" />
                             </div>
+                            -->
                         </div>
 
                     </div>
