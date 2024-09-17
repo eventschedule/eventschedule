@@ -134,6 +134,17 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->roles()->whereIn('type', ['curator']);
     }
 
+    public function editableCurators()
+    {
+        return $this->connectedCurators()
+                    ->get()
+                    ->filter(function ($role) {
+                        return $role->is_open 
+                            || $role->pivot->level == 'admin' 
+                            || $role->pivot->level == 'owner';
+                    });
+    }
+
     public function followingVenues()
     {
         return $this->following()->type('venue');
