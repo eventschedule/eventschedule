@@ -518,7 +518,8 @@
                         <div class="mb-6">
                             <x-input-label for="new_subdomain" :value="__('messages.subdomain')" />
                             <x-text-input id="new_subdomain" name="new_subdomain" type="text" class="mt-1 block w-full"
-                                :value="old('new_subdomain', $role->subdomain)" required minlength="4" maxlength="50" />
+                                :value="old('new_subdomain', $role->subdomain)" required minlength="4" maxlength="50"
+                                pattern="[a-z0-9-]+" oninput="this.value = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '')" />
                             <x-input-error class="mt-2" :messages="$errors->get('new_subdomain')" />
                         </div>
                         @endif
