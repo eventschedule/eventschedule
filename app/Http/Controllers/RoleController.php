@@ -138,7 +138,17 @@ class RoleController extends Controller
     public function viewGuest(Request $request, $subdomain, $otherSubdomain = '')
     {
         $user = auth()->user();
-        $curatorRoles = $user ? $user->curators()->get() : collect();
+        $curatorRoles = collect();
+        if ($user) {
+            $curatorRoles = $user
+                ->connectedCurators()
+                ->get()
+                ->filter(function ($role) {
+                    return $role->is_open 
+                        || $role->pivot->level == 'admin' 
+                        || $role->pivot->level == 'owner';
+                });
+        }
 
         $role = Role::subdomain($subdomain)->first();
 

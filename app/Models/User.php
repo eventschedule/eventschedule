@@ -129,6 +129,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->roles()->whereIn('type', ['venue']);
     }
 
+    public function connectedCurators()
+    {
+        return $this->roles()->whereIn('type', ['curator']);
+    }
+
     public function followingVenues()
     {
         return $this->following()->type('venue');
