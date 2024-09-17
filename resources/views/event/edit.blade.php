@@ -358,7 +358,7 @@
                             $curators = $user->editableCurators();
                         @endphp
                         
-                        @if($curators->count() > 0)
+                        @if($curators->count() > 0 && $subdomainRole->isTalent())
                         <div class="mb-6">
                             <x-input-label for="curators" :value="__('messages.add_to_schedules')" />
                             @foreach($curators as $curator)
