@@ -274,4 +274,5 @@ return [
     'private_space_no_email' => 'Private space/no email address',
     'search_create' => 'Search/create',
     'to' => 'to',
+    'allow_everyone_to_add_events' => 'Allow everyone to add events',
 ];
