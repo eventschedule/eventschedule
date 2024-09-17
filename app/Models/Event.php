@@ -23,6 +23,12 @@ class Event extends Model
         static::saving(function ($model) {
             $model->description_html = MarkdownUtils::convertToHtml($model->description);
         });
+
+        static::deleting(function ($event) {
+            if (! $event->venue->email) {
+                $event->venue->delete();
+            }
+        });
     }
 
     public function role()
