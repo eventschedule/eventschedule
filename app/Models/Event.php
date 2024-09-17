@@ -137,12 +137,12 @@ class Event extends Model
     {
         $title = __('messages.event_title');
 
-        return str_replace([':role', ':venue'], [$this->role->name, $this->venue->name], $title);
+        return str_replace([':role', ':venue'], [$this->role->name, $this->venue->getDisplayName()], $title);
     }
 
     public function getMetaDescription($date = null)
     {
-        return $this->venue->name . ' | ' . $this->localStartsAt(true, $date);
+        return $this->venue->getDisplayName() . ' | ' . $this->localStartsAt(true, $date);
     }
 
     public function getGoogleCalendarUrl($date = null)
