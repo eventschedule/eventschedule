@@ -256,6 +256,10 @@ class EventController extends Controller
 
         $event->save();
 
+        // Handle curator selections
+        $selectedCurators = $request->input('curators', []);
+        $event->curators()->sync($selectedCurators);
+
         if ($request->hasFile('flyer_image')) {
             if ($event->flyer_image_url) {
                 $path = $event->getAttributes()['flyer_image_url'];
@@ -518,6 +522,10 @@ class EventController extends Controller
             }
 
             $event->save();
+
+            // Handle curator selections
+            $selectedCurators = $request->input('curators', []);
+            $event->curators()->sync($selectedCurators);
 
             if ($request->hasFile('flyer_image_url')) {
                 if ($event->flyer_image_url) {

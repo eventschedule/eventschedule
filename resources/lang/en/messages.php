@@ -275,4 +275,5 @@ return [
     'search_create' => 'Search/create',
     'to' => 'to',
     'allow_everyone_to_add_events' => 'Allow everyone to add events',
+    'add_to_schedules' => 'Add to schedules',
 ];
