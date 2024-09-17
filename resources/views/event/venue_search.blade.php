@@ -4,10 +4,7 @@
         <script>
             function onChange() {
                 var value = $('#venue_id').find(':selected').val();
-                //var no_email = $('#private_space_no_email').is(':checked');
-                var no_email = false;
-                console.log('onChange', value, no_email);
-
+                var no_email = $('#no_email').is(':checked');        
 
                 if (value) {
                     $('#email_div').hide();
@@ -26,8 +23,7 @@
             }
 
             $(document).ready(function() {
-                //onChange();                
-                $('#private_space_no_email').on('change', onChange);
+                $('#no_email').on('change', onChange);
             });
         </script>
     </x-slot>
