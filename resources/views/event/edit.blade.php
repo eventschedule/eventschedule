@@ -389,9 +389,9 @@
                         </h2>
 
                         <div class="mb-6">
-                            <x-input-label for="venue_address1" :value="__('messages.street_address')" />
+                            <x-input-label for="venue_address1" :value="__('messages.street_address') . (request()->no_email ? ' *' : '')" />
                             <x-text-input id="venue_address1" name="venue_address1" type="text"
-                                class="mt-1 block w-full"
+                                class="mt-1 block w-full" :required="request()->no_email"
                                 :value="old('venue_address1', $venue ? $venue->address1 : '')" autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('venue_address1')" />
                         </div>
