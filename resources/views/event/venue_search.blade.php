@@ -79,14 +79,12 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
                             </div>
 
-                            <!--
                             <div class="mb-6">
-                                <x-checkbox id="private_space_no_email" name="private_space_no_email" label="{{ __('messages.private_space_no_email') }}"
-                                    checked="{{ old('private_space_no_email', false) }}"
+                                <x-checkbox id="no_email" name="no_email" label="{{ __('messages.private_space_no_email') }}"
+                                    checked="{{ old('no_email', false) }}"
                                     data-custom-attribute="value"/>
-                                <x-input-error class="mt-2" :messages="$errors->get('private_space_no_email')" />
+                                <x-input-error class="mt-2" :messages="$errors->get('no_email')" />
                             </div>
-                            -->
                         </div>
 
                     </div>

@@ -173,8 +173,14 @@ class EventController extends Controller
                         $vendor = $role;
                     }
                 }
+            } else if ($request->no_email) {
+                // do nothing
             } else {
-                return view('event/role_search', ['subdomain' => $subdomain, 'header' => $header, 'roles' => $user->connectedTalentOrVendors()->get()]);
+                return view('event/role_search', [
+                    'subdomain' => $subdomain, 
+                    'header' => $header, 
+                    'roles' => $user->connectedTalentOrVendors()->get(),
+                ]);
             }
         } 
         
