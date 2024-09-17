@@ -582,6 +582,17 @@
                                 data-custom-attribute="value" />
                             <x-input-error class="mt-2" :messages="$errors->get('accept_vendor_requests')" />
                         </div>
+
+                        @elseif ($role->isCurator())
+
+                        <div class="mb-6">
+                            <x-checkbox name="is_open"
+                                label="{{ __('messages.allow_everyone_to_add_events') }}"
+                                checked="{{ old('is_open', $role->is_open) }}"
+                                data-custom-attribute="value" />
+                            <x-input-error class="mt-2" :messages="$errors->get('is_open')" />
+                        </div>
+
                         @endif
 
                         <!--
