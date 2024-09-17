@@ -52,7 +52,10 @@ class Role extends Model implements MustVerifyEmail
         parent::boot();
 
         static::saving(function ($model) {
-            $model->email = strtolower($model->email);
+            if ($model->email) {
+                $model->email = strtolower($model->email);
+            }
+
             $model->description_html = MarkdownUtils::convertToHtml($model->description);
 
             /*

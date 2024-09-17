@@ -147,6 +147,10 @@
 
         <div class="py-5">
             <div class="max-w-7xl mx-auto space-y-6">
+                @if ($venue)
+                <input type="hidden" name="venue_id" value="{{ App\Utils\UrlUtils::encodeId($venue->id) }}"/>
+                @endif
+
                 @if((! $venue && ! request()->no_email) || ($venue && $venue->name))
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">                                                
@@ -161,7 +165,6 @@
                                 {{ $venue->name }}
                             </a>
                         </div>
-                        <input type="hidden" name="venue_id" value="{{ App\Utils\UrlUtils::encodeId($venue->id) }}"/>
                         @else
                         <div class="mb-6">
                             <x-input-label for="venue_name" :value="__('messages.name') . ' *'" />

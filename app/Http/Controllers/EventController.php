@@ -375,7 +375,7 @@ class EventController extends Controller
         if (! $venue && $request->venue_id) {
             $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
         }
-        
+
         if ($venue && ! auth()->user()->isMember($venue->subdomain) && ! $venue->acceptRequests()) {
             return redirect()
                     ->back()
@@ -405,7 +405,7 @@ class EventController extends Controller
 
             $user->roles()->attach($venue->id, ['level' => 'follower', 'created_at' => now()]);
 
-            if ($matchingUser = User::whereEmail($venue->email)->first()) {
+            if ($venue->email && $matchingUser = User::whereEmail($venue->email)->first()) {
                 $venue->user_id = $matchingUser->id;
                 $venue->email_verified_at = $matchingUser->email_verified_at;
                 $venue->save();
