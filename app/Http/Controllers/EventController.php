@@ -190,7 +190,12 @@ class EventController extends Controller
             } else if ($request->no_email) {
                 // do nothing
             } else {
-                return view('event/venue_search', ['subdomain' => $subdomain, 'venues' => $user->connectedVenues()->get()]);
+                return view('event/venue_search', [
+                    'subdomain' => $subdomain, 
+                    'venues' => $user->connectedVenues()
+                                    ->whereNotNull('email')
+                                    ->get(),
+                ]);
             }
         }
 
