@@ -531,11 +531,11 @@ class EventController extends Controller
                 $event->save();
             }
 
-            if (! $venue->user_id && $venue->is_subscribed) {
+            if (! $venue->user_id && $venue->is_subscribed && $venue->email) {
                 Mail::to($venue->email)->cc($user->email)->send(new ClaimVenue($event));
             }
 
-            if (! $role->user_id && $role->is_subscribed) {
+            if (! $role->user_id && $role->is_subscribed && $role->email) {
                 Mail::to($role->email)->cc($user->email)->send(new ClaimRole($event));
             }
         }
