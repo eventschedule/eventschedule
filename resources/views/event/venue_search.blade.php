@@ -26,7 +26,7 @@
             }
 
             $(document).ready(function() {
-                onChange();                
+                //onChange();                
                 $('#private_space_no_email').on('change', onChange);
             });
         </script>
