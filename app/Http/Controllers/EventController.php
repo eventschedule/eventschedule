@@ -173,8 +173,6 @@ class EventController extends Controller
                         $vendor = $role;
                     }
                 }
-            } else if ($request->no_email) {
-                // do nothing
             } else {
                 return view('event/role_search', [
                     'subdomain' => $subdomain, 
@@ -189,6 +187,8 @@ class EventController extends Controller
                 $venue = Role::whereEmail($request->venue_email)->where('type', '=', 'venue')->first();
             } else if ($request->venue_id) {
                 $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
+            } else if ($request->no_email) {
+                // do nothing
             } else {
                 return view('event/venue_search', ['subdomain' => $subdomain, 'venues' => $user->connectedVenues()->get()]);
             }

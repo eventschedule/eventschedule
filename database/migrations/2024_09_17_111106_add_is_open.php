@@ -17,7 +17,7 @@ return new class extends Migration
         });        
 
         Schema::table('roles', function (Blueprint $table) {
-            $table->string('subdomain')->nullable()->change();
+            $table->string('name')->nullable()->change();
             $table->string('email')->nullable()->change();
             $table->boolean('is_open')->default(false);            
         });
@@ -29,8 +29,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('roles', function (Blueprint $table) {
-            $table->string('subdomain')->nullable(false)->change();
             $table->string('email')->nullable(false)->change();
+            $table->string('name')->nullable(false)->change();
             $table->dropColumn('is_open');
         });
 
