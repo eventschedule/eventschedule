@@ -385,8 +385,8 @@ class EventController extends Controller
 
         if (! $venue) {
             $venue = new Role;
-            $venue->name = $request->venue_name;
-            $venue->email = $request->venue_email;
+            $venue->name = $request->venue_name ?? null;
+            $venue->email = $request->venue_email ?? null;
             $venue->subdomain = Role::generateSubdomain($request->venue_name);
             $venue->type = 'venue';
             $venue->timezone = $user->timezone;
