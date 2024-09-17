@@ -51,6 +51,11 @@ class Event extends Model
         return $this->belongsToMany(Role::class);
     }
 
+    public function curators()
+    {
+        return $this->belongsToMany(Role::class, 'event_role', 'event_id', 'role_id');
+    }
+
     public function hashedId()
     {
         return UrlUtils::encodeId($this->id);

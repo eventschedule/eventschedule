@@ -352,10 +352,35 @@
                             </a>
                             @endif
                         </div>
+
+                        
+                        @php
+                            $curators = $user->editableCurators();
+                        @endphp
+                        
+                        @if($curators->count() > 0)
+                        <div class="mb-6">
+                            <x-input-label for="curators" :value="__('messages.add_to_schedules')" />
+                            @foreach($curators as $curator)
+                            <div class="flex items-center mb-4 mt-1">
+                                <input type="checkbox" 
+                                       id="curator_{{ $curator->id }}" 
+                                       name="curators[]" 
+                                       value="{{ $curator->id }}"
+                                       {{ $event->curators->contains($curator->id) ? 'checked' : '' }}
+                                       class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                <label for="curator_{{ $curator->id }}" class="ml-2 block text-sm text-gray-900 dark:text-gray-100">
+                                    {{ $curator->name }}
+                                </label>
+                            </div>
+                            @endforeach
+                        </div>
+                        @endif
+
+
                     </div>
                 </div>
                 @endif
-
                 @if (! $talent || ($talent && ! $talent->user_id))
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="address">
                     <div class="max-w-xl">
