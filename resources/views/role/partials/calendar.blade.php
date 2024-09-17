@@ -157,10 +157,10 @@
                             @if ($each->matchesDate($currentDate))
                             <li>
                                 <a href="{{ ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at) ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) : $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate) }}"
-                                    class="group flex has-tooltip" data-tooltip="<b>{{ $each->role->name }}</b><br/>{{ $each->venue->name }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
+                                    class="group flex has-tooltip" data-tooltip="<b>{{ $each->role->name }}</b><br/>{{ $each->venue->getDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
                                     {{ isset($embed) && $embed ? 'target="blank"' : '' }}>
                                     <p class="flex-auto truncate font-medium group-hover:text-indigo-600 text-gray-900">
-                                        {{ isset($subdomain) && $subdomain == $each->role->subdomain ? $each->venue->name : $each->role->name }}
+                                        {{ isset($subdomain) && $subdomain == $each->role->subdomain ? $each->venue->getDisplayName() : $each->role->name }}
                                     </p>
                                     <!--
                                     <time datetime="{{ $each->localStartsAt() }}"
@@ -238,7 +238,7 @@
                                         </svg>
                                     </dt>
                                     <dd>
-                                        {{ $each->venue->name }}
+                                        {{ $each->venue->getDisplayName() }}
                                     </dd>
                                 </div>
                             </dl>

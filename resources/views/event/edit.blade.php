@@ -147,7 +147,7 @@
 
         <div class="py-5">
             <div class="max-w-7xl mx-auto space-y-6">
-                @if(! request()->no_email)
+                @if((! $venue && ! request()->no_email) || ($venue && $venue->name))
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">

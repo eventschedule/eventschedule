@@ -60,7 +60,7 @@
                                 onchange="onChange()" required>
                                 <option value="" disabled selected>{{ __('messages.please_select') }}</option>
                                 @foreach ($venues as $venue)
-                                <option value="{{ App\Utils\UrlUtils::encodeId($venue->id) }}">{{ $venue->name }}</option>
+                                <option value="{{ App\Utils\UrlUtils::encodeId($venue->id) }}">{{ $venue->getDisplayName() }}</option>
                                 @endforeach
                                 <option value="">{{ __('messages.search_create') }}</option>
                             </select>
