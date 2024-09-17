@@ -269,7 +269,7 @@ class Role extends Model implements MustVerifyEmail
         $subdomain = preg_replace('/[^a-zA-Z0-9]/', '', trim($name));
         $subdomain = strtolower(trim($subdomain));
 
-        if (strlen($subdomain) < 5) {
+        if (strlen($subdomain) < 4) {
             return strtolower(\Str::random(8));
         }
     
