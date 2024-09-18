@@ -1,6 +1,6 @@
 <x-app-guest-layout :role="$role" :event="$event" :date="$date">
 
-    <div class="p-10 max-w-5xl mx-auto px-4">
+    <div class="p-10 pb-0 max-w-5xl mx-auto px-4">
         <div class="flex items-start justify-between pb-6">
             <a href="{{ $event ? $event->venue->getGuestUrl() : $role->getGuestUrl() }}" class="hover:underline">
                 <div id="venue_title" class="text-4xl font-bold">
