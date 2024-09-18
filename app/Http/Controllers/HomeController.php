@@ -26,6 +26,12 @@ class HomeController extends Controller
                 return redirect()->route('new', ['type' => 'vendor']);
             }
         } else if ($subdomain = session('pending_follow')) {
+            $role = Role::whereSubdomain(session('pending_follow'))->firstOrFail();
+            
+            $user = auth()->user();
+            $user->language_code = $role->language_code;
+            $user->save();
+
             return redirect()->route('role.follow', ['subdomain' => $subdomain]);
         }
 
