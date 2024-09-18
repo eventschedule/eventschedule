@@ -411,14 +411,19 @@ class EventController extends Controller
             $venue->font_color = '#ffffff';
             $venue->save();
             $venue->refresh();
-
-            $user->roles()->attach($venue->id, ['level' => 'follower', 'created_at' => now()]);
-
+            
+            $matchingUser = false;
+            
             if ($venue->email && $matchingUser = User::whereEmail($venue->email)->first()) {
                 $venue->user_id = $matchingUser->id;
                 $venue->email_verified_at = $matchingUser->email_verified_at;
                 $venue->save();
+                
                 $matchingUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
+            }
+
+            if (! $matchingUser || $matchingUser->id != $user->id) { 
+                $user->roles()->attach($venue->id, ['level' => 'follower', 'created_at' => now()]);
             }
         }
 
