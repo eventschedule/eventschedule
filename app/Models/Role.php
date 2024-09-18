@@ -225,12 +225,14 @@ class Role extends Model implements MustVerifyEmail
 
     public function getTypePlural()
     {
-        if ($this->type == 'venue') {
+        if ($this->isVenue()) {
             return 'venues';
-        } else if ($this->type = 'talent') {
+        } else if ($this->isTalent()) {
             return 'talent';
-        } else {
+        } else if ($this->isVendor()) {
             return 'vendors';
+        } else if ($this->isCurator()) {
+            return 'curators';
         }
     }
 
