@@ -327,13 +327,6 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="description" :value="__('messages.description')" />
-                            <textarea id="description" name="description"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">{{ old('description', $event->description) }}</textarea>
-                            <x-input-error class="mt-2" :messages="$errors->get('description')" />
-                        </div>
-
-                        <div class="mb-6">
                             <x-input-label for="flyer_image" :value="__('messages.flyer_image')" />
                             <input id="flyer_image" name="flyer_image" type="file" class="mt-1 block w-full"
                                 :value="old('flyer_image')" accept="image/png, image/jpeg" onchange="previewImage(this);" />
@@ -377,6 +370,12 @@
                         </div>
                         @endif
 
+                        <div class="mb-6">
+                            <x-input-label for="description" :value="__('messages.description')" />
+                            <textarea id="description" name="description"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">{{ old('description', $event->description) }}</textarea>
+                            <x-input-error class="mt-2" :messages="$errors->get('description')" />
+                        </div>
 
                     </div>
                 </div>
