@@ -325,27 +325,6 @@
                             </label>
                             @endforeach
                         </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="flyer_image" :value="__('messages.flyer_image')" />
-                            <input id="flyer_image" name="flyer_image" type="file" class="mt-1 block w-full"
-                                :value="old('flyer_image')" accept="image/png, image/jpeg" onchange="previewImage(this);" />
-                            <x-input-error class="mt-2" :messages="$errors->get('flyer_image')" />
-
-                            <div id="image_preview" class="mt-3" style="display: none;">
-                                <img id="preview_img" src="#" alt="Preview" style="max-height:120px" />
-                            </div>
-
-                            @if ($event->flyer_image_url)
-                            <img src="{{ $event->flyer_image_url }}" style="max-height:120px" class="pt-3" />
-                            <a href="#"
-                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.delete_image', ['subdomain' => $subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id), 'image_type' => 'flyer']) }}'; }"
-                                class="hover:underline">
-                                {{ __('messages.delete_image') }}
-                            </a>
-                            @endif
-                        </div>
-
                         
                         @php
                             $curators = $user->editableCurators();
@@ -369,6 +348,26 @@
                             @endforeach
                         </div>
                         @endif
+
+                        <div class="mb-6">
+                            <x-input-label for="flyer_image" :value="__('messages.flyer_image')" />
+                            <input id="flyer_image" name="flyer_image" type="file" class="mt-1 block w-full"
+                                :value="old('flyer_image')" accept="image/png, image/jpeg" onchange="previewImage(this);" />
+                            <x-input-error class="mt-2" :messages="$errors->get('flyer_image')" />
+
+                            <div id="image_preview" class="mt-3" style="display: none;">
+                                <img id="preview_img" src="#" alt="Preview" style="max-height:120px" />
+                            </div>
+
+                            @if ($event->flyer_image_url)
+                            <img src="{{ $event->flyer_image_url }}" style="max-height:120px" class="pt-3" />
+                            <a href="#"
+                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.delete_image', ['subdomain' => $subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id), 'image_type' => 'flyer']) }}'; }"
+                                class="hover:underline">
+                                {{ __('messages.delete_image') }}
+                            </a>
+                            @endif
+                        </div>
 
                         <div class="mb-6">
                             <x-input-label for="description" :value="__('messages.description')" />
