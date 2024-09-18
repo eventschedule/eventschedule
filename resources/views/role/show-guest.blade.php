@@ -214,7 +214,7 @@
                 </div>
             @endif
         
-        @elseif (! $role->isVenue() && $role->youtube_links)
+        @elseif (! $role->isVenue() && ! $role->isCurator() && $role->youtube_links)
 
             @if ($role->youtube_links)
             <div class="container mx-auto py-8">
@@ -269,7 +269,7 @@
             </div>
         </div>
         
-        @if ($role->isVenue() && $role->youtube_links && ! $event)
+        @if (($role->isVenue() || $role->isCurator()) && $role->youtube_links && ! $event)
             <div class="container mx-auto py-8">
                 <div class="grid grid-cols-1 md:grid-cols-{{ $role->getVideoColumns() }} gap-8">
                     @foreach (json_decode($role->youtube_links) as $link)
