@@ -615,7 +615,7 @@ class RoleController extends Controller
             $role->save();
         }
 
-        if ($request->hasFile('background_image')) {
+        if ($role->background == 'image' && $request->hasFile('background_image')) {
             if ($role->background_image_url) {
                 $path = $role->getAttributes()['background_image_url'];
                 if (config('filesystems.default') == 'local') {
@@ -722,7 +722,7 @@ class RoleController extends Controller
             $role->save();
         }
 
-        if ($request->hasFile('background_image')) {
+        if ($role->background == 'image' && $request->hasFile('background_image')) {
             if ($role->background_image_url) {
                 $path = $role->getAttributes()['background_image_url'];
                 if (config('filesystems.default') == 'local') {

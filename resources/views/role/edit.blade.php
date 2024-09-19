@@ -52,6 +52,7 @@
                 reader.onloadend = function () {
                     preview.src = reader.result;
                     preview.style.display = 'block';
+                    updatePreview();
                 }
 
                 if (file) {
@@ -59,6 +60,7 @@
                 } else {
                     preview.src = '';
                     preview.style.display = 'none';
+                    updatePreview();
                 }
             }
 
@@ -142,9 +144,10 @@
                     .css('background-color', '')
                     .css('background-image', gradient);
             } else if (background == 'image') {
+                var backgroundImageUrl = $('#background_image_preview').attr('src') || "{{ $role->background_image_url }}";
                 $('#preview')
                     .css('background-color', '')
-                    .css('background-image', 'url("{{ $role->background_image_url }}")');
+                    .css('background-image', 'url("' + backgroundImageUrl + '")');
             } else {
                 $('#preview').css('background-image', '')
                     .css('background-color', backgroundColor);
@@ -448,7 +451,7 @@
                                 </div>
                                 <x-input-error class="mt-2" :messages="$errors->get('background_image')" />
 
-                                <img id="background_image_preview" src="#" alt="Background Image Preview" style="max-height:120px; display:none;" class="pt-3" />
+                                <img id="background_image_preview" src="" alt="Background Image Preview" style="max-height:120px; display:none;" class="pt-3" />
 
                                 @if ($role->background_image_url)
                                 <img src="{{ $role->background_image_url }}" style="max-height:120px" class="pt-3" />
