@@ -232,6 +232,7 @@
 
         @include('role/partials/calendar', ['route' => 'guest', 'tab' => ''])
 
+        @if(! $event)
         <div class="py-6">
             <div class="flex items-start justify-between pb-6">
                 <div>
@@ -268,7 +269,8 @@
                 </div>
             </div>
         </div>
-        
+        @endif
+
         @if (($role->isVenue() || $role->isCurator()) && $role->youtube_links && ! $event)
             <div class="container mx-auto py-8">
                 <div class="grid grid-cols-1 md:grid-cols-{{ $role->getVideoColumns() }} gap-8">
