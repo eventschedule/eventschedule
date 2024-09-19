@@ -53,6 +53,11 @@
                     preview.src = reader.result;
                     preview.style.display = 'block';
                     updatePreview();
+                    
+                    if (previewId === 'background_image_preview') {
+                        $('#style_background_image img:not(#background_image_preview)').hide();
+                        $('#style_background_image a').hide();
+                    }
                 }
 
                 if (file) {
