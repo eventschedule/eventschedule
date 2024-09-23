@@ -51,7 +51,7 @@
             font-family: '{{ $role->font_family }}', sans-serif !important;
             min-height: 100%;
             background-attachment: scroll;
-            @if ($event && $otherRole->user_id)
+            @if ($event && $otherRole->isClaimed())
                 color: {{ $otherRole->font_color }} !important;
                 background-color: #888 !important;
                 @if ($otherRole->background == 'gradient')

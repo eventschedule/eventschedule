@@ -194,6 +194,11 @@ class Role extends Model implements MustVerifyEmail
         return $this->type == 'curator';
     }
 
+    public function isClaimed()
+    {
+        return $this->email_verified_at != null && $this->user_id != null;
+    }
+
     public function canHaveAddress()
     {
         return $this->isVenue() || $this->isVendor();
