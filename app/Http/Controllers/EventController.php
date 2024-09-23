@@ -527,7 +527,7 @@ class EventController extends Controller
             }
 
             if ($subdomainRole->isCurator()) {
-                $event->curator_subdomain = $subdomainRole->subdomain;
+                $event->curator_id = $subdomainRole->id;
             }
 
             $event->save();

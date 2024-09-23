@@ -46,6 +46,11 @@ class Event extends Model
         return $this->belongsTo(Role::class, 'venue_id');
     }
 
+    public function curator()
+    {
+        return $this->belongsTo(Role::class, 'curator_id');
+    }
+
     public function roles()
     {
         return $this->belongsToMany(Role::class);
@@ -135,8 +140,8 @@ class Event extends Model
         $role = $this->role;
         $venue = $this->venue;
 
-        if (! $subdomain && $this->curator_subdomain) {
-            $subdomain = $this->curator_subdomain;
+        if (! $subdomain && $this->curator_id) {
+            $subdomain = $this->curator->subdomain;
         } else {
             $subdomain = $role->subdomain;
         }
