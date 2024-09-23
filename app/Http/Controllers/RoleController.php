@@ -186,6 +186,8 @@ class RoleController extends Controller
                             ->first();
                     }
                 }
+            } else if ($eventId = UrlUtils::decodeId($otherSubdomain)) {
+                $event = Event::find($eventId);
             }
 
             if ($event) {
