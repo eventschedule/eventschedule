@@ -3,7 +3,7 @@
 
 {{ $subject }}
 
-<x-mail::button :url="route('event.view_guest', ['subdomain' => $venue->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)])">
+<x-mail::button :url="$event->getGuestUrl()">
 {{ __('messages.view_event') }}
 </x-mail::button>
 
