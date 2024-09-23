@@ -1003,12 +1003,14 @@ class RoleController extends Controller
         return view('role/unsubscribe');
     }
 
-    public function unsubscribe(Request $request, $subdomain)
+    public function unsubscribe(Request $request)
     {
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        $roles = Role::where('email', $request->email)->get();
 
-        $role->is_subscribed = false;
-        $role->save();
+        foreach ($roles as $role) {
+            $role->is_subscribed = false;
+            $role->save();
+        }
 
         echo __('messages.unsubscribed');
         exit;
