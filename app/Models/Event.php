@@ -127,17 +127,34 @@ class Event extends Model
 
     public function getGuestUrl($subdomain, $date = null)
     {        
-        if ($subdomain == $this->role->subdomain) {
-            $subdomain = $this->role->subdomain;
-            $other_subdomain = $this->venue->subdomain;
+        $role = $this->role;
+        $venue = $this->venue;
+
+        if ($subdomain == $role->subdomain) {
+            $subdomain = $role->subdomain;
+            $otherSubdomain = $venue->subdomain;
+        } else if ($subdomain == $venue->subdomain) {
+            $subdomain = $venue->subdomain;
+            $otherSubdomain = $role->subdomain;
         } else {
-            $subdomain = $this->venue->subdomain;
-            $other_subdomain = $this->role->subdomain;
+            if ($role->isClaimed()) {
+                $subdomain = $role->subdomain;
+                if ($venue->isClaimed()) {
+                    $otherSubdomain = $venue->subdomain;
+                } else {
+                    $otherSubdomain = UrlUtils::encodeId($this->id);
+                }
+            } else if ($venue->isClaimed()) {
+                $subdomain = $venue->subdomain;
+                $otherSubdomain = UrlUtils::encodeId($this->id);
+            } else {
+                $otherSubdomain = UrlUtils::encodeId($this->id);
+            }
         }
 
         $data = [
             'subdomain' => $subdomain, 
-            'other_subdomain' => $other_subdomain, 
+            'other_subdomain' => $otherSubdomain, 
             'date' => $date ? $date->format('Y-m-d') : Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d'),
         ];
 
