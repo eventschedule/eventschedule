@@ -130,11 +130,17 @@ class Event extends Model
         return $this->role->name;
     }
 
-    public function getGuestUrl($subdomain, $date = null)
+    public function getGuestUrl($subdomain = false, $date = null)
     {        
         $role = $this->role;
         $venue = $this->venue;
 
+        if (! $subdomain && $this->curator_subdomain) {
+            $subdomain = $this->curator_subdomain;
+        } else {
+            $subdomain = $role->subdomain;
+        }
+    
         if ($subdomain == $role->subdomain) {
             $subdomain = $role->subdomain;
             $otherSubdomain = $venue->subdomain;

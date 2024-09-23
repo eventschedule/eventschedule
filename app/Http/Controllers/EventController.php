@@ -526,7 +526,10 @@ class EventController extends Controller
                 //Notification::route('mail', $emails)->notify(new EventRequestNotification($venue, $role));
             }
 
-            $event->is_curated = $subdomainRole->isCurator();
+            if ($subdomainRole->isCurator()) {
+                $event->curator_subdomain = $subdomainRole->subdomain;
+            }
+
             $event->save();
 
             // Handle curator selections
