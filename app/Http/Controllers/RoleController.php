@@ -998,6 +998,11 @@ class RoleController extends Controller
             ->with('message', __('messages.updated_availability'));
     }
  
+    public function showUnsubscribe(Request $request)
+    {        
+        return view('role/unsubscribe');
+    }
+
     public function unsubscribe(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
