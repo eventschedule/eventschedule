@@ -125,6 +125,11 @@ class Event extends Model
         return null;
     }
 
+    public function getDisplayName()
+    {
+        return $this->role->name;
+    }
+
     public function getGuestUrl($subdomain, $date = null)
     {        
         $role = $this->role;
