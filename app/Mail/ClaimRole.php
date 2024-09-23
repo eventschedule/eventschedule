@@ -30,14 +30,21 @@ class ClaimRole extends Mailable
      */
     public function envelope(): Envelope
     {
-        $role = $this->event->role;
-        $venue = $this->event->venue;
-        $user = $this->event->user;
+        $event = $this->event;  
+        $role = $event->role;
+        $venue = $event->venue;
+        $user = $event->user;
+
+        if ($event->is_curated) {
+            $subject = __('messages.claim_your_role_curated');
+        } else {
+            $subject = __('messages.claim_your_role');
+        }        
 
         return new Envelope(
             subject: str_replace(
-                        [':venue', ':role'], 
-                        [$venue->name, $role->name],
+                        [':venue', ':role', ':event'], 
+                        [$venue->name, $role->name, $event->getDisplayName()],
                         __('messages.claim_your_role')),
             replyTo: [
                 new Address($user->email, $user->name),
@@ -55,6 +62,12 @@ class ClaimRole extends Mailable
         $venue = $event->venue;
         $user = $event->user;
 
+        if ($event->is_curated) {
+            $subject = __('messages.claim_your_role_curated');
+        } else {
+            $subject = __('messages.claim_your_role');
+        }        
+
         return new Content(
             markdown: 'mail.role.claim',
             with: [
@@ -62,6 +75,7 @@ class ClaimRole extends Mailable
                 'role' => $role,
                 'venue' => $venue,
                 'user' => $user,
+                'subject' => $subject,
                 'unsubscribe_url' => route('role.unsubscribe', ['subdomain' => $role->subdomain]),
             ]
         );

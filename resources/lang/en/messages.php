@@ -276,4 +276,5 @@ return [
     'allow_everyone_to_add_events' => 'Allow everyone to add events',
     'add_to_schedules' => 'Add to schedules',
     //
-];
+    'claim_your_role_curated' => ':event at :venue was added to the :curator schedule',
+    ];

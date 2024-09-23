@@ -1,7 +1,7 @@
 <x-mail::message>
 # {{ __('messages.hello') }}!
 
-{{ str_replace([':venue', ':role'], [$venue->name, $role->name], __('messages.claim_your_role'))}}
+{{ $subject }}
 
 <x-mail::button :url="route('event.view_guest', ['subdomain' => $venue->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)])">
 {{ __('messages.view_event') }}
