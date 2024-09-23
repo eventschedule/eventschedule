@@ -239,7 +239,7 @@
                     {!! $role->description_html !!}
                 </div>
                 <div>
-                @if ($role->isVenue() && $role->accept_talent_requests && $role->user_id)
+                @if ($role->isVenue() && $role->accept_talent_requests && $role->isClaimed())
                 <a href="{{ route('event.sign_up', ['subdomain' => $role->subdomain])}}">
                     <button type="button" style="background-color: {{ $event ? $event->role->accent_color : $role->accent_color }}"
                         class="inline-flex items-center rounded-md shadow-sm px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
@@ -253,7 +253,7 @@
                 </a>
                 @endif
 
-                @if ($role->isVenue() && $role->accept_vendor_requests && $role->user_id)
+                @if ($role->isVenue() && $role->accept_vendor_requests && $role->isClaimed())
                 <a href="{{ route('event.sign_up', ['subdomain' => $role->subdomain])}}">
                     <button type="button" style="background-color: {{ $event ? $event->role->accent_color : $role->accent_color }}"
                         class="inline-flex items-center rounded-md shadow-sm px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
