@@ -12,11 +12,11 @@
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        <div class="flex items-center justify-between mt-4">
-
-            <x-primary-button class="ml-4">
+        <div class="mt-4">
+            <x-primary-button class="w-full">
                 {{ __('messages.unsubscribe') }}
             </x-primary-button>
         </div>
+
     </form>
 </x-auth-layout>
