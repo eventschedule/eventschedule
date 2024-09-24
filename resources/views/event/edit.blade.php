@@ -21,7 +21,33 @@
 
         <div class="py-5">
             <div class="max-w-7xl mx-auto space-y-6">
-                @{{ event }}
+                
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                    <div class="max-w-xl">                                                
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                            {{ __('messages.venue') }}
+                        </h2>
+
+                        <fieldset>
+                            <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
+                                <div class="flex items-center">
+                                    <input id="use_existing" name="vendor_type" type="radio" value="use_existing" CHECKED
+                                        class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                    <label for="use_existing"
+                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="search_create" name="vendor_type" type="radio" value="search_create"
+                                        class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                    <label for="search_create"
+                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.search_create') }}</label>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                    </div>
+                </div>
+
             </div>
         </div>
     </form>
