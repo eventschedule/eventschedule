@@ -183,7 +183,7 @@ class Event extends Model
     {
         $title = __('messages.event_title');
 
-        return str_replace([':role', ':venue'], [$this->role->name, $this->venue->getDisplayName()], $title);
+        return str_replace([':role', ':venue'], [$this->role()->name, $this->venue->getDisplayName()], $title);
     }
 
     public function getMetaDescription($date = null)
@@ -194,7 +194,7 @@ class Event extends Model
     public function getGoogleCalendarUrl($date = null)
     {
         $title = $this->getTitle();
-        $description = $this->description_html ? strip_tags($this->description_html) : strip_tags($this->role->description_html);
+        $description = $this->description_html ? strip_tags($this->description_html) : strip_tags($this->role()->description_html);
         $location = $this->venue->bestAddress();
         $duration = $this->duration > 0 ? $this->duration : 2;
         $startAt = $this->getStartDateTime($date);
@@ -213,7 +213,7 @@ class Event extends Model
     public function getAppleCalendarUrl($date = null)
     {
         $title = $this->getTitle();
-        $description = $this->description_html ? strip_tags($this->description_html) : strip_tags($this->role->description_html);
+        $description = $this->description_html ? strip_tags($this->description_html) : strip_tags($this->role()->description_html);
         $location = $this->venue->bestAddress();
         $duration = $this->duration > 0 ? $this->duration : 2;
         $startAt = $this->getStartDateTime($date);
@@ -234,7 +234,7 @@ class Event extends Model
     public function getMicrosoftCalendarUrl($date = null)
     {
         $title = $this->getTitle();
-        $description = $this->description_html ? strip_tags($this->description_html) : strip_tags($this->role->description_html);
+        $description = $this->description_html ? strip_tags($this->description_html) : strip_tags($this->role()->description_html);
         $location = $this->venue->bestAddress();
         $duration = $this->duration > 0 ? $this->duration : 2;
         $startAt = $this->getStartDateTime($date);
@@ -280,7 +280,7 @@ class Event extends Model
     }
 
     public function getOtherRole($subdomain) {
-        if ($subdomain == $this->role->subdomain) {
+        if ($subdomain == $this->role()->subdomain) {
             return $this->venue;
         } else {
             return $this->role;

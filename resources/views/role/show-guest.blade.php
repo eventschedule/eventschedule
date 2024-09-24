@@ -37,7 +37,7 @@
                 @endif
 
                 @if ($event)
-                @if (! $user || ! $user->isConnected($event->role->subdomain))
+                @if (! $user || ! $user->isConnected($event->role()->subdomain))
                 <a href="{{ route('role.follow', ['subdomain' => $event->role->subdomain]) }}" class="pl-2">
                     <button type="button" style="background-color: {{ $otherRole->accent_color }}"
                         class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
@@ -142,8 +142,8 @@
                 <div class="mx-auto max-w-6xl px-6 lg:px-8">
                     <div class="mx-auto max-w-2xl text-center">
                         <p class="mt-2 text-6xl font-bold tracking-tight">
-                            <a href="{{ $event->role->getGuestUrl() }}" class="hover:underline">
-                                {{ $event->role->name }}
+                            <a href="{{ $event->role()->getGuestUrl() }}" class="hover:underline">
+                                {{ $event->role()->name }}
                             </a>
                         </p>
                         <p class="mt-6 text-2xl leading-8">
@@ -190,7 +190,7 @@
                 </div>
             </div>
 
-            @if ($event->role->youtube_links)
+            @if ($event->role()->youtube_links)
                 <div class="container mx-auto py-8">
                     <div class="grid grid-cols-1 md:grid-cols-{{ $event->role->getVideoColumns() }} gap-8">
                         @foreach (json_decode($event->role->youtube_links) as $link)

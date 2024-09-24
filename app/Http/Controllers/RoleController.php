@@ -255,7 +255,15 @@ class RoleController extends Controller
                     $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
                         ->orWhereNotNull('days_of_week');
                 })
-                ->where($role->isVenue() ? 'venue_id' : 'role_id', $role->id)
+                ->where(function ($query) use ($role) {
+                    if ($role->isVenue()) {
+                        $query->where('venue_id', $role->id);
+                    } else {
+                        $query->whereHas('roles', function ($query) use ($role) {
+                            $query->where('role_id', $role->id);
+                        });
+                    }
+                })
                 ->where('is_accepted', true)
                 ->orderBy('starts_at')
                 ->get();
