@@ -1,11 +1,8 @@
 import './bootstrap';
 
 import Alpine from 'alpinejs';
-import { createApp, ref } from 'vue'
-
 window.Alpine = Alpine;
 Alpine.start();
-
 
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.css';
