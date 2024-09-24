@@ -29,20 +29,27 @@
                         </h2>
 
                         @if (!$venue)
-                        @if (count($venues))
                         <fieldset>
                             <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
+                                @if (count($venues))
                                 <div class="flex items-center">
                                     <input id="use_existing" name="vendor_type" type="radio" value="use_existing" v-model="vendorType"
                                         class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                     <label for="use_existing"
                                         class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
                                 </div>
+                                @endif
                                 <div class="flex items-center">
                                     <input id="search_create" name="vendor_type" type="radio" value="search_create" v-model="vendorType"
                                         class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                     <label for="search_create"
                                         class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.search_create') }}</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="no_email" name="vendor_type" type="radio" value="no_email" v-model="vendorType"
+                                        class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                    <label for="no_email"
+                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.private_space') }}</label>
                                 </div>
                             </div>
                         </fieldset>
@@ -58,7 +65,6 @@
                                 </select>
                             </div>
                         </div>
-                        @endif
 
                         <div v-if="vendorType === 'search_create'">
                             <div class="mb-6">
