@@ -159,7 +159,9 @@ class RoleController extends Controller
 
                 if ($request->date) {
                     $eventDate = Carbon::parse($request->date);
-                    $event = Event::where('role_id', $eventRoleId)
+                    $event = Event::whereHas('roles', function ($query) use ($eventRoleId) {
+                            $query->where('role_id', $eventRoleId);
+                        })
                         ->where('venue_id', $eventVenueId)
                         ->where(function ($query) use ($eventDate) {
                             $query->whereDate('starts_at', $eventDate)
@@ -172,14 +174,18 @@ class RoleController extends Controller
                         ->orderBy('starts_at')
                         ->first();
                 } else {
-                    $event = Event::where('role_id', $eventRoleId)
+                    $event = Event::whereHas('roles', function ($query) use ($eventRoleId) {
+                                $query->where('role_id', $eventRoleId);
+                        })
                         ->where('venue_id', $eventVenueId)
                         ->where('starts_at', '>=', now()->subDay())
                         ->orderBy('starts_at')
                         ->first();
 
                     if (!$event) {
-                        $event = Event::where('role_id', $eventRoleId)
+                        $event = Event::whereHas('roles', function ($query) use ($eventRoleId) {
+                                $query->where('role_id', $eventRoleId);
+                            })    
                             ->where('venue_id', $eventVenueId)
                             ->where('starts_at', '<', now())
                             ->orderBy('starts_at', 'desc')
@@ -237,7 +243,9 @@ class RoleController extends Controller
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
-                        ->where('role_id', $role->id);
+                        ->whereHas('roles', function ($query) use ($role) {
+                            $query->where('role_id', $role->id);
+                        });
                 })
                 ->orderBy('starts_at')
                 ->get();
@@ -324,7 +332,9 @@ class RoleController extends Controller
                         ->whereIn('id', function ($query) use ($role) {
                             $query->select('event_id')
                                 ->from('event_role')
-                                ->where('role_id', $role->id);
+                                ->whereHas('roles', function ($query) use ($role) {
+                                    $query->where('role_id', $role->id);
+                                });
                         })
                         ->orderBy('starts_at')
                         ->get();    
@@ -332,7 +342,9 @@ class RoleController extends Controller
                     $events = Event::with(['roles', 'venue'])
                         ->where(function ($query) use ($role) {
                             $query->where('venue_id', $role->id)
-                                ->orWhere('role_id', $role->id);
+                                ->orWhereHas('roles', function ($query) use ($role) {
+                                    $query->where('role_id', $role->id);
+                                });
                         })
                         ->whereNotNull('is_accepted')
                         ->where(function ($query) use ($startOfMonth, $endOfMonth) {
@@ -345,7 +357,9 @@ class RoleController extends Controller
                     $unscheduled = Event::with(['roles', 'venue'])
                         ->where(function ($query) use ($role) {
                             $query->where('venue_id', $role->id)
-                                ->orWhere('role_id', $role->id);
+                                ->orWhereHas('roles', function ($query) use ($role) {
+                                    $query->where('role_id', $role->id);
+                                });
                         })
                         ->where('is_accepted', true)
                         ->whereNull('starts_at')
@@ -367,7 +381,9 @@ class RoleController extends Controller
             $requests = Event::with(['roles', 'venue'])
                             ->where(function ($query) use ($role) {
                                 $query->where('venue_id', $role->id)
-                                    ->orWhere('role_id', $role->id);
+                                    ->orWhereHas('roles', function ($query) use ($role) {
+                                        $query->where('role_id', $role->id);
+                                    });
                             })
                             ->whereNull('is_accepted')
                             ->orderBy('created_at', 'desc')
