@@ -53,7 +53,7 @@ class Event extends Model
 
     public function role()
     {
-        return $this->belongsToMany(Role::class)->first();
+        return $this->roles[0];
     }
 
     public function curators()
