@@ -34,7 +34,7 @@
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ $header }}
+                            
                         </h2>
 
                         @if (count($roles))
