@@ -136,7 +136,7 @@ class EventController extends Controller
         
         $roles = $user->roles()->get();
         $venues = $roles->filter(function($item) {
-            return $item->isVenue();
+            return $item->isVenue() && $item->name;
         });
 
         return view('event/edit', [
