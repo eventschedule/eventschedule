@@ -277,4 +277,5 @@ return [
     'add_to_schedules' => 'Add to schedules',
     //
     'claim_your_role_curated' => ':event at :venue was added to the :curator schedule',
+    'use_existing' => 'Use existing',
     ];
