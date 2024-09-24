@@ -15,6 +15,7 @@ use App\Utils\ColorUtils;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Role;
+use App\Models\EventRole;
 use App\Models\User;
 use App\Utils\UrlUtils;
 use Illuminate\Support\Str;
@@ -93,7 +94,7 @@ class EventController extends Controller
         }
 
         $venueSubdomain = $event->venue->subdomain;
-        $roleSubdomain = $event->role->subdomain;
+        $roleSubdomain = $event->role()->subdomain;
  
         $data = [
             'subdomainRole' => $subdomainRole,
@@ -496,7 +497,6 @@ class EventController extends Controller
             $event->fill($request->all());
             $event->user_id = auth()->user()->id;
             $event->venue_id = $venue->id;
-            $event->roles()->attach($role->id);
 
             $days_of_week = '';
             $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
@@ -528,6 +528,11 @@ class EventController extends Controller
             }
 
             $event->save();
+
+            $er = EventRole::create([
+                'event_id' => $event->id,
+                'role_id' => $role->id,
+            ]);
 
             // Handle curator selections
             $selectedCurators = $request->input('curators', []);
