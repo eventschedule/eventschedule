@@ -141,7 +141,7 @@
                             class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded bg-indigo-600 font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
                         @else
                         <time datetime="{{ $currentDate->format('Y-m-d') }}"
-                            style="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? ('background-color: ' . ((isset($event) && $event) ? $event->role->accent_color : (isset($role) ? $role->accent_color : '#5348E9'))) : '' }}"
+                            style="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? ('background-color: ' . ((isset($event) && $event) ? $event->role()->accent_color : (isset($role) ? $role->accent_color : '#5348E9'))) : '' }}"
                             class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
                         @endif
                         @if (count($unavailable))
