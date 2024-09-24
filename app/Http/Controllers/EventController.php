@@ -133,9 +133,14 @@ class EventController extends Controller
         if (strpos($request->url(), '/sign_up') > 0) {
             $title = __('messages.sign_up');
         }
+        
+        $roles = $user->roles()->get();
+        $venues = $roles->filter(function($item) {
+            return $item->isVenue();
+        });
 
         return view('event/edit', [
-            'roles' => $user->roles()->get(),
+            'roles' => $roles,
             'event' => $event,
             'subdomain' => $subdomain,
             'title' => $title,
