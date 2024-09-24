@@ -113,16 +113,38 @@ class EventController extends Controller
 
     public function create(Request $request, $subdomain)
     {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        
+        $event = new Event;
+
+        if ($request->date) {
+            $defaultTime = Carbon::now($user->timezone)->setTime(20, 0, 0);
+            $utcTime = $defaultTime->setTimezone('UTC');
+            $event->starts_at = $request->date . $utcTime->format('H:i:s');
+        }
+
+        $title = __('messages.add_event');
+        if (strpos($request->url(), '/sign_up') > 0) {
+            $title = __('messages.sign_up');
+        }
+
         return view('event/edit', [
+            'event' => $event,
             'subdomain' => $subdomain,
+            'title' => $title,
         ]);
     }
 
     public function edit(Request $request, $subdomain, $hash)
     {
+        $event_id = UrlUtils::decodeId($hash);
+        $event = Event::findOrFail($event_id);
+
         return view('event/edit', [
+            'event' => $event,
             'subdomain' => $subdomain,
             'hash' => $hash,
+            'title' => __('messages.edit_event'),
         ]);
     }
 
