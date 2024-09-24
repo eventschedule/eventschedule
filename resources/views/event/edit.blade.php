@@ -194,7 +194,7 @@
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ $header }}
+                            {{ __('messages.members') }}
                         </h2>
 
                         @if($venue && $user->isMember($venue->subdomain))

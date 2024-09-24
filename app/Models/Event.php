@@ -51,6 +51,11 @@ class Event extends Model
         return $this->belongsToMany(Role::class);
     }
 
+    public function role()
+    {
+        return $this->roles->first();
+    }
+
     public function curators()
     {
         return $this->belongsToMany(Role::class, 'event_role', 'event_id', 'role_id');
@@ -127,7 +132,11 @@ class Event extends Model
 
     public function getDisplayName()
     {
-        return $this->roles->first()->name;
+        if ($this->name) {
+            return $this->name;
+        }
+
+        return $this->roles->where('type', 'talent')->first()->name;
     }
 
     public function getGuestUrl($subdomain = false, $date = null)
