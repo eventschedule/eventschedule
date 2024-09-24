@@ -209,25 +209,6 @@ class Role extends Model implements MustVerifyEmail
         return $this->accept_talent_requests || $this->accept_vendor_requests;
     }
 
-    public function getRoleHeader()
-    {
-        if ($this->isVenue()) {
-            if ($this->accept_talent_requests && $this->accept_vendor_requests) {
-                return __('messages.talent') . ' / ' . __('messages.vendor');
-            } else if ($this->accept_talent_requests) {
-                return __('messages.talent');
-            } else {
-                return __('messages.vendor');
-            }
-        } else if ($this->isTalent()) {
-            return __('messages.talent');
-        } else if ($this->isVendor()) {
-            return __('messages.vendor');
-        }
-
-        return __('messages.talent');
-    }
-
     public function getTypePlural()
     {
         if ($this->isVenue()) {

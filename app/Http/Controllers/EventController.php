@@ -61,6 +61,7 @@ class EventController extends Controller
 
         $event->delete();
 
+        /*
         $role = $event->role;
         $venue = $event->venue;
 
@@ -68,7 +69,8 @@ class EventController extends Controller
         $venueEmails = $venue->members()->pluck('email')->toArray();
         $emails = array_unique(array_merge($roleEmails, $venueEmails));
 
-        //Notification::route('mail', $emails)->notify(new DeletedEventNotification($event, $user));
+        Notification::route('mail', $emails)->notify(new DeletedEventNotification($event, $user));
+        */
 
         $data = [
             'subdomain' => $subdomain, 
@@ -92,9 +94,7 @@ class EventController extends Controller
 
         $venueSubdomain = $event->venue->subdomain;
         $roleSubdomain = $event->role->subdomain;
-
-        $header = $subdomain == $event->venue->subdomain ? $event->venue->getRoleHeader() : $event->role->getRoleHeader();
-
+ 
         $data = [
             'subdomainRole' => $subdomainRole,
             'event' => $event,
@@ -105,7 +105,6 @@ class EventController extends Controller
             'talent' => $event->role->type == 'talent' ? $event->role : false,
             'vendor' => $event->role->type == 'vendor' ? $event->role : false,
             'title' => __('messages.edit_event'),
-            'header' => $header,
         ];
 
         return view('event/edit', $data);
@@ -120,7 +119,6 @@ class EventController extends Controller
 
         $user = $request->user();
         $subdomainRole = Role::subdomain($subdomain)->firstOrFail();
-        $header = $subdomainRole->getRoleHeader();
         $role = null;
         $roles = [];
 
@@ -223,7 +221,6 @@ class EventController extends Controller
             'vendor' => $vendor,
             'title' => $title,
             'roles' => $roles,
-            'header' => $header,
         ];
 
         return view('event/edit', $data);
