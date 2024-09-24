@@ -29,6 +29,7 @@
                         </h2>
 
                         @if (!$venue)
+                        @if (count($venues))
                         <fieldset>
                             <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                                 <div class="flex items-center">
@@ -47,7 +48,6 @@
                         </fieldset>
 
                         <div v-if="vendorType === 'use_existing'">
-                            @if (count($venues))
                             <div class="mb-6">
                                 <select name="role_id"
                                     class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
@@ -57,8 +57,8 @@
                                     @endforeach
                                 </select>
                             </div>
-                            @endif
                         </div>
+                        @endif
 
                         <div v-if="vendorType === 'search_create'">
                             <div class="mb-6">
@@ -96,7 +96,7 @@
     data() {
       return {
         event: @json($event),
-        vendorType: 'use_existing'
+        vendorType: "{{ count($venues) ? 'use_existing' : 'search_create' }}",
       }
     },
     setup() {
