@@ -113,9 +113,15 @@ class EventController extends Controller
 
     public function create(Request $request, $subdomain)
     {
+        $user = $request->user();
         $role = Role::subdomain($subdomain)->firstOrFail();
-        
+        $venue = $role->isVenue() ? $role : null;
+
         $event = new Event;
+
+        if ($venue) {
+            $event->venue_id = $venue->id;
+        }
 
         if ($request->date) {
             $defaultTime = Carbon::now($user->timezone)->setTime(20, 0, 0);
@@ -129,9 +135,11 @@ class EventController extends Controller
         }
 
         return view('event/edit', [
+            'roles' => $user->roles()->get(),
             'event' => $event,
             'subdomain' => $subdomain,
             'title' => $title,
+            'venue' => $venue,
         ]);
     }
 
