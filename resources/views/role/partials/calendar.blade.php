@@ -157,10 +157,10 @@
                             @if ($each->matchesDate($currentDate))
                             <li>
                                 <a href="{{ ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at) ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) : $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate) }}"
-                                    class="group flex has-tooltip" data-tooltip="<b>{{ $each->role->name }}</b><br/>{{ $each->venue->getDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
+                                    class="group flex has-tooltip" data-tooltip="<b>{{ $each->role()->name }}</b><br/>{{ $each->venue->getDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
                                     {{ isset($embed) && $embed ? 'target="blank"' : '' }}>
                                     <p class="flex-auto truncate font-medium group-hover:text-indigo-600 text-gray-900">
-                                        {{ isset($subdomain) && $subdomain == $each->role->subdomain ? $each->venue->getDisplayName() : $each->role->name }}
+                                        {{ isset($subdomain) && $subdomain == $each->role()->subdomain ? $each->venue->getDisplayName() : $each->role()->name }}
                                     </p>
                                     <!--
                                     <time datetime="{{ $each->localStartsAt() }}"
@@ -207,7 +207,7 @@
                         @endif
                         <div class="flex-auto">
                             <h3 class="pr-10 font-semibold text-gray-900 xl:pr-0">
-                                {{ $each->role->name }}
+                                {{ $each->role()->name }}
                             </h3>
                             <dl class="mt-2 flex flex-col text-gray-500 xl:flex-row">
                                 <div class="flex items-start space-x-3">
@@ -222,7 +222,7 @@
                                     </dt>
                                     <dd>
                                         <time datetime="{{ $currentDate->format('Y-m-d') }}">
-                                            {{ $currentDate->format($each->role->use_24_hour_time ? 'M jS, Y • H:i' : 'M jS, Y • g:i A') }}
+                                            {{ $currentDate->format($each->role()->use_24_hour_time ? 'M jS, Y • H:i' : 'M jS, Y • g:i A') }}
                                         </time>
                                     </dd>
                                 </div>

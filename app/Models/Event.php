@@ -53,7 +53,7 @@ class Event extends Model
 
     public function role()
     {
-        return $this->roles->first();
+        return $this->belongsToMany(Role::class)->first();
     }
 
     public function curators()
@@ -121,8 +121,8 @@ class Event extends Model
     {
         if ($this->flyer_image_url) {
             return $this->flyer_image_url;
-        } elseif ($this->role->profile_image_url) {
-            return $this->role->profile_image_url;
+        } elseif ($this->role()->profile_image_url) {
+            return $this->role()->profile_image_url;
         } elseif ($this->venue->profile_image_url) {
             return $this->venue->profile_image_url;
         }
@@ -141,7 +141,7 @@ class Event extends Model
 
     public function getGuestUrl($subdomain = false, $date = null)
     {        
-        $role = $this->role;
+        $role = $this->role();
         $venue = $this->venue;
 
         if (! $subdomain) {
