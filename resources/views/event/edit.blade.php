@@ -28,24 +28,17 @@
                             {{ __('messages.venue') }}
                         </h2>
 
-                        @if ($venue)
-                        <div class="text-gray-900 dark:text-gray-100">
-                            <a href="{{ $venue->getGuestUrl() }}"
-                                target="_blank" class="hover:underline">
-                                {{ $venue->name }}
-                            </a>
-                        </div>
-                        @else
+                        @if (!$venue)
                         <fieldset>
                             <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                                 <div class="flex items-center">
-                                    <input id="use_existing" name="vendor_type" type="radio" value="use_existing" CHECKED
+                                    <input id="use_existing" name="vendor_type" type="radio" value="use_existing" v-model="vendorType"
                                         class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                     <label for="use_existing"
                                         class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
                                 </div>
                                 <div class="flex items-center">
-                                    <input id="search_create" name="vendor_type" type="radio" value="search_create"
+                                    <input id="search_create" name="vendor_type" type="radio" value="search_create" v-model="vendorType"
                                         class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                     <label for="search_create"
                                         class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.search_create') }}</label>
@@ -53,36 +46,38 @@
                             </div>
                         </fieldset>
 
-                        @if (count($roles))
-                        <div class="mb-6">
-                            <select name="role_id"
-                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
-                                <option value="" disabled selected>{{ __('messages.please_select') }}</option>                                
-                                @foreach ($roles as $each)
-                                <option value="{{ App\Utils\UrlUtils::encodeId($each->id) }}">{{ $each->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        @endif
-
-
-                        <div class="mb-6">
-                            <x-input-label for="venue_name" :value="__('messages.name') . ' *'" />
-                            <x-text-input id="venue_name" name="venue_name" type="text" class="mt-1 block w-full"
-                                :value="old('venue_name', $venue ? $venue->name : '')" required autofocus />
-                            <x-input-error class="mt-2" :messages="$errors->get('venue_name')" />
+                        <div v-if="vendorType === 'use_existing'">
+                            @if (count($roles))
+                            <div class="mb-6">
+                                <select name="role_id"
+                                    class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                    <option value="" disabled selected>{{ __('messages.please_select') }}</option>                                
+                                    @foreach ($roles as $each)
+                                    <option value="{{ App\Utils\UrlUtils::encodeId($each->id) }}">{{ $each->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            @endif
                         </div>
 
-                        <div class="mb-6">
-                            <x-input-label for="venue_email" :value="__('messages.email')" />
-                            <x-text-input id="venue_email" name="venue_email" type="email" class="mt-1 block w-full"
-                                :value="old('venue_email', $venue ? $venue->email : request()->venue_email)" required
-                                readonly />
-                            <input type="hidden" name="venue_id" value="{{ $venue ? App\Utils\UrlUtils::encodeId($venue->id) : '' }}"/>
-                            <p class="mt-2 text-sm text-gray-500">
-                                {{ __('messages.an_email_will_be_sent') }}
-                            </p>
-                            <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
+                        <div v-if="vendorType === 'search_create'">
+                            <div class="mb-6">
+                                <x-input-label for="venue_name" :value="__('messages.name') . ' *'" />
+                                <x-text-input id="venue_name" name="venue_name" type="text" class="mt-1 block w-full"
+                                    :value="old('venue_name', $venue ? $venue->name : '')" required autofocus />
+                                <x-input-error class="mt-2" :messages="$errors->get('venue_name')" />
+                            </div>
+
+                            <div class="mb-6">
+                                <x-input-label for="venue_email" :value="__('messages.email')" />
+                                <x-text-input id="venue_email" name="venue_email" type="email" class="mt-1 block w-full"
+                                    :value="old('venue_email', $venue ? $venue->email : request()->venue_email)" required />
+                                <input type="hidden" name="venue_id" value="{{ $venue ? App\Utils\UrlUtils::encodeId($venue->id) : '' }}"/>
+                                <p class="mt-2 text-sm text-gray-500">
+                                    {{ __('messages.an_email_will_be_sent') }}
+                                </p>
+                                <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
+                            </div>
                         </div>
                         @endif
 
@@ -101,6 +96,7 @@
     data() {
       return {
         event: @json($event),
+        vendorType: 'use_existing'
       }
     },
     setup() {
