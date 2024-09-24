@@ -46,10 +46,10 @@
                                         class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.search_create') }}</label>
                                 </div>
                                 <div class="flex items-center">
-                                    <input id="no_email" name="vendor_type" type="radio" value="no_email" v-model="vendorType"
+                                    <input id="private_address" name="vendor_type" type="radio" value="private_address" v-model="vendorType"
                                         class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                                    <label for="no_email"
-                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.private_space') }}</label>
+                                    <label for="private_address"
+                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.private_address') }}</label>
                                 </div>
                             </div>
                         </fieldset>
