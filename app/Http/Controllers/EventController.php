@@ -145,6 +145,7 @@ class EventController extends Controller
             'subdomain' => $subdomain,
             'title' => $title,
             'venue' => $venue,
+            'venues' => $venues,
         ]);
     }
 
