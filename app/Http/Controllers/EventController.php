@@ -82,7 +82,7 @@ class EventController extends Controller
                 ->with('message', __('messages.event_deleted'));
     }
 
-    public function edit(Request $request, $subdomain, $hash)
+    public function editOld(Request $request, $subdomain, $hash)
     {
         $user = $request->user();
         $subdomainRole = Role::subdomain($subdomain)->firstOrFail();
@@ -108,10 +108,25 @@ class EventController extends Controller
             'title' => __('messages.edit_event'),
         ];
 
-        return view('event/edit', $data);
+        return view('event/edit_old', $data);
     }
 
     public function create(Request $request, $subdomain)
+    {
+        return view('event/edit', [
+            'subdomain' => $subdomain,
+        ]);
+    }
+
+    public function edit(Request $request, $subdomain, $hash)
+    {
+        return view('event/edit', [
+            'subdomain' => $subdomain,
+            'hash' => $hash,
+        ]);
+    }
+
+    public function createOld(Request $request, $subdomain)
     {
         $request->validate([
             'venue_email' => ['sometimes', new NoFakeEmail],
@@ -223,7 +238,7 @@ class EventController extends Controller
             'roles' => $roles,
         ];
 
-        return view('event/edit', $data);
+        return view('event/edit_old', $data);
     }
 
     public function update(Request $request, $subdomain, $hash)
