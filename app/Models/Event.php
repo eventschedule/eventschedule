@@ -31,11 +31,6 @@ class Event extends Model
         });
     }
 
-    public function role()
-    {
-        return $this->belongsTo(Role::class);
-    }
-    
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -132,7 +127,7 @@ class Event extends Model
 
     public function getDisplayName()
     {
-        return $this->role->name;
+        return $this->roles->first()->name;
     }
 
     public function getGuestUrl($subdomain = false, $date = null)
