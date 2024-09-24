@@ -25,6 +25,7 @@ return new class extends Migration
         Schema::table('events', function (Blueprint $table) {
             $table->dropForeign(['role_id']);
             $table->dropColumn('role_id');
+            $table->string('name')->nullable();
         });
     }
 
@@ -35,6 +36,7 @@ return new class extends Migration
     {
         Schema::table('events', function (Blueprint $table) {
             $table->foreignId('role_id')->constrained()->onDelete('cascade');
+            $table->dropColumn('name');
         });
     }
 };

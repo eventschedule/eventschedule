@@ -499,7 +499,7 @@ class EventController extends Controller
             $event->fill($request->all());
             $event->user_id = auth()->user()->id;
             $event->venue_id = $venue->id;
-            $event->role_id = $role->id;
+            $event->roles()->attach($role->id);
 
             $days_of_week = '';
             $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
