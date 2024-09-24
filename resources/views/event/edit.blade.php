@@ -31,19 +31,19 @@
                             <fieldset>
                                 <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                                     <div v-if="venues.length" class="flex items-center">
-                                        <input id="use_existing" name="vendor_type" type="radio" value="use_existing" v-model="vendorType"
+                                        <input id="use_existing" name="venue_type" type="radio" value="use_existing" v-model="venueType"
                                             class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                         <label for="use_existing"
                                             class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
                                     </div>
                                     <div class="flex items-center">
-                                        <input id="search_create" name="vendor_type" type="radio" value="search_create" v-model="vendorType"
+                                        <input id="search_create" name="venue_type" type="radio" value="search_create" v-model="venueType"
                                             class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                         <label for="search_create"
                                             class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.search_create') }}</label>
                                     </div>
                                     <div class="flex items-center">
-                                        <input id="private_address" name="vendor_type" type="radio" value="private_address" v-model="vendorType"
+                                        <input id="private_address" name="venue_type" type="radio" value="private_address" v-model="venueType"
                                             class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                         <label for="private_address"
                                             class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.private_address') }}</label>
@@ -51,19 +51,39 @@
                                 </div>
                             </fieldset>
 
-                            <div v-if="vendorType === 'use_existing'">
+                            <div v-if="venueType === 'use_existing'">
                                 <div class="mb-6">
-                                    <select name="venue_id"
-                                        class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                        v-model="selectedVenueId"
-                                        @change="updateSelectedVenue">
-                                        <option value="" disabled selected>{{ __('messages.please_select') }}</option>                                
-                                        <option v-for="venue in venues" :key="venue.id" :value="venue.id">@{{ venue.name }}</option>
-                                    </select>
+                                    <x-input-label for="venue_search_email" :value="__('messages.search_by_email')" />
+                                    <div class="flex mt-1">
+                                        <x-text-input id="venue_search_email" v-model="venueSearchEmail" type="email" class="block w-full mr-2"
+                                            :placeholder="__('messages.enter_venue_email')" />
+                                        <x-primary-button @click="searchVenues" type="button">
+                                            {{ __('messages.search') }}
+                                        </x-primary-button>
+                                    </div>
+                                </div>
+                                <div v-if="searchResults.length" class="mb-6">
+                                    <x-input-label :value="__('messages.search_results')" />
+                                    <div class="mt-2 space-y-2">
+                                        <div v-for="venue in searchResults" :key="venue.id" class="flex items-center">
+                                            <input :id="'venue_' + venue.id" type="radio" :value="venue.id" v-model="selectedVenueId"
+                                                class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                            <label :for="'venue_' + venue.id" class="ml-3 block text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                @{{ venue.name }} (@{{ venue.email }})
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div v-if="selectedVenueId" class="mb-6">
+                                    <x-input-label :value="__('messages.selected_venue')" />
+                                    <p class="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                                        @{{ selectedVenue.name }} (@{{ selectedVenue.email }})
+                                    </p>
+                                    <input type="hidden" name="venue_id" :value="selectedVenueId" />
                                 </div>
                             </div>
 
-                            <div v-if="vendorType === 'search_create'">
+                            <div v-if="venueType === 'search_create'">
                                 <div class="mb-6">
                                     <x-input-label for="venue_name" :value="__('messages.name') . ' *'" />
                                     <x-text-input id="venue_name" name="venue_name" type="text" class="mt-1 block w-full"
@@ -107,11 +127,13 @@
       return {
         event: @json($event),
         venues: @json($venues),
-        vendorType: "{{ count($venues) ? 'use_existing' : 'search_create' }}",
+        venueType: "{{ count($venues) ? 'use_existing' : 'search_create' }}",
         selectedVenueId: "",
         selectedVenue: null,
         venueName: "{{ old('venue_name', $venue ? $venue->name : '') }}",
         venueEmail: "{{ old('venue_email', $venue ? $venue->email : request()->venue_email) }}",
+        venueSearchEmail: "",
+        searchResults: [],
       }
     },
     methods: {
@@ -121,6 +143,29 @@
       clearSelectedVenue() {
         this.selectedVenue = null;
         this.selectedVenueId = "";
+      },
+      searchVenues() {
+        if (!this.venueSearchEmail) return;
+
+        fetch(`/role_search?email=${encodeURIComponent(this.venueSearchEmail)}`, {
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          this.searchResults = data;
+          this.selectedVenueId = "";
+        })
+        .catch(error => {
+          console.error('Error searching venues:', error);
+        });
+      },
+    },
+    computed: {
+      selectedVenue() {
+        return this.searchResults.find(v => v.id === this.selectedVenueId) || null;
       }
     },
     mounted() {
