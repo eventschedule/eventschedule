@@ -598,7 +598,7 @@ class RoleController extends Controller
 
         $role->save();
 
-        $user->roles()->attach($role->id, ['created_at' => now()]);
+        $user->roles()->attach($role->id, ['created_at' => now(), 'level' => 'owner']);
 
         if ($request->hasFile('profile_image')) {
             if ($role->profile_image_url) {
