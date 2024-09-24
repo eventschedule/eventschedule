@@ -3,6 +3,7 @@ import laravel from 'laravel-vite-plugin';
 
 export default defineConfig({
     server: {
+        /*
         hmr: {
             host: "192.168.10.10",
         },
@@ -10,6 +11,7 @@ export default defineConfig({
             origin: '*',
         },
         host: "192.168.10.10",
+        */
         watch: {
             usePolling: true,
         },
