@@ -52,11 +52,23 @@
                             </fieldset>
 
                             <div v-if="venueType === 'use_existing'">
-                                <div class="mb-6">
-                                    <x-input-label for="venue_search_email" :value="__('messages.search_by_email')" />
+                                <select name="venue_id"
+                                        class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                        v-model="selectedVenueId"
+                                        @change="updateSelectedVenue">
+                                        <option value="" disabled selected>{{ __('messages.please_select') }}</option>                                
+                                        <option v-for="venue in venues" :key="venue.id" :value="venue.id">@{{ venue.name }}</option>
+                                </select>
+
+
+                            </div>
+
+                            <div v-if="venueType === 'search_create'">
+
+                            <div class="mb-6">
                                     <div class="flex mt-1">
                                         <x-text-input id="venue_search_email" v-model="venueSearchEmail" type="email" class="block w-full mr-2"
-                                            :placeholder="__('messages.enter_venue_email')" />
+                                            :placeholder="__('messages.enter_email')" />
                                         <x-primary-button @click="searchVenues" type="button">
                                             {{ __('messages.search') }}
                                         </x-primary-button>
@@ -81,9 +93,7 @@
                                     </p>
                                     <input type="hidden" name="venue_id" :value="selectedVenueId" />
                                 </div>
-                            </div>
 
-                            <div v-if="venueType === 'search_create'">
                                 <div class="mb-6">
                                     <x-input-label for="venue_name" :value="__('messages.name') . ' *'" />
                                     <x-text-input id="venue_name" name="venue_name" type="text" class="mt-1 block w-full"
