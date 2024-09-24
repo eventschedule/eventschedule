@@ -175,7 +175,6 @@ class EventController extends Controller
             } else {
                 return view('event/role_search', [
                     'subdomain' => $subdomain, 
-                    'header' => $header, 
                     'roles' => $user->connectedTalentOrVendors()->get(),
                 ]);
             }
