@@ -1065,5 +1065,21 @@ class RoleController extends Controller
         Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
     
         return redirect()->back()->with('message', __('messages.invite_resent'));
-    }    
+    }
+
+    public function search(Request $request)
+    {
+        $type = $request->type;
+        $query = $request->query;
+
+        $roles = Role::where('type', $type)
+            ->where(function($q) use ($query) {
+                $q->where('email', 'like', "%{$query}%")
+                  ->orWhere('phone', 'like', "%{$query}%")
+                  ->orWhere('name', 'like', "%{$query}%");
+            })
+            ->get(['id', 'name', 'address1', 'address2', 'city', 'state', 'zip']);
+
+        return response()->json($roles);
+    }
 }
