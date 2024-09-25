@@ -65,7 +65,7 @@
                                 <div v-if="!venueEmail" class="mb-6">
                                     <div class="flex mt-1">
                                         <x-text-input id="venue_search_email" v-model="venueSearchEmail" type="email" class="block w-full mr-2"
-                                            :placeholder="__('messages.enter_email')" autofocus />
+                                            :placeholder="__('messages.enter_email')" required autofocus />
                                         <x-primary-button @click="searchVenues" type="button">
                                             {{ __('messages.search') }}
                                         </x-primary-button>
@@ -178,7 +178,8 @@
     watch: {
       venueType() {
         this.event.venue_id = "";
-        this.venueSearchResults = [];
+        this.venueEmail = "";
+        this.venueSearchResults = [];        
       }
     },
     mounted() {
