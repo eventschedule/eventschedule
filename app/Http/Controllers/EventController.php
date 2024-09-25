@@ -118,10 +118,7 @@ class EventController extends Controller
         $venue = $role->isVenue() ? $role : null;
 
         $event = new Event;
-
-        if ($venue) {
-            $event->venue_id = $venue->id;
-        }
+        $event->venue_id = $venue ? $venue->id : "";
 
         if ($request->date) {
             $defaultTime = Carbon::now($user->timezone)->setTime(20, 0, 0);

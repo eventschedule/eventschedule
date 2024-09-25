@@ -280,4 +280,5 @@ return [
     'use_existing' => 'Use existing',
     'private_address' => 'Private address',
     'enter_email' => 'Enter email',
-    ];
+    'search_results' => 'Search results',
+];
