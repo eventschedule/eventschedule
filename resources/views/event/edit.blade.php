@@ -167,6 +167,12 @@
         return this.venues[this.event.venue_id];
       }
     },
+    watch: {
+      venueType() {
+        this.event.venue_id = "";
+        this.searchResults = [];
+      }
+    },
     mounted() {
         //
     }
