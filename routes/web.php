@@ -29,6 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/new/{type}', [RoleController::class, 'create'])->name('new');
     Route::post('/validate_address', [RoleController::class, 'validateAddress'])->name('validate_address')->middleware('throttle:25,1440');
     Route::post('/store', [RoleController::class, 'store'])->name('role.store');
+    Route::get('/search_roles', [RoleController::class, 'search'])->name('role.search');
     
     Route::get('/venues', [RoleController::class, 'viewVenues'])->name('venues');
     Route::get('/talent', [RoleController::class, 'viewTalent'])->name('talent');
@@ -67,7 +68,6 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/team/remove_member/{hash}', [RoleController::class, 'removeMember'])->name('role.remove_member');
     Route::get('/{subdomain}/curate_event/{hash}', [EventController::class, 'curate'])->name('event.curate');
     Route::delete('/{subdomain}/uncurate_event/{hash}', [EventController::class, 'uncurate'])->name('event.uncurate');
-    Route::get('/{subdomain}/search_roles', [RoleController::class, 'search'])->name('role.search');
     Route::get('/{subdomain}/{tab?}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|availability|requests|profile|followers|team');
 });
 
