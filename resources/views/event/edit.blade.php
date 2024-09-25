@@ -62,7 +62,7 @@
 
                             <div v-if="venueType === 'search_create'">
 
-                            <div class="mb-6">
+                                <div v-if="!venueEmail" class="mb-6">
                                     <div class="flex mt-1">
                                         <x-text-input id="venue_search_email" v-model="venueSearchEmail" type="email" class="block w-full mr-2"
                                             :placeholder="__('messages.enter_email')" autofocus />
@@ -71,6 +71,7 @@
                                         </x-primary-button>
                                     </div>
                                 </div>
+
                                 <div v-if="venueSearchResults.length" class="mb-6">
                                     <x-input-label :value="__('messages.search_results')" />
                                     <div class="mt-2 space-y-2">
@@ -90,22 +91,22 @@
                                     </p>
                                 </div>
 
-                                <div v-if="venueEmail">
+                                <div v-if="venueEmail && !event.id">
+                                    <div class="mb-6">
+                                        <x-input-label for="venue_email" :value="__('messages.email')" />
+                                        <x-text-input id="venue_email" name="venue_email" type="email" class="mt-1 block w-full"
+                                            v-model="venueEmail" required disabled />
+                                        <p class="mt-2 text-sm text-gray-500">
+                                            {{ __('messages.an_email_will_be_sent') }}
+                                        </p>
+                                        <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
+                                    </div>
+
                                     <div class="mb-6">
                                         <x-input-label for="venue_name" :value="__('messages.name') . ' *'" />
                                         <x-text-input id="venue_name" name="venue_name" type="text" class="mt-1 block w-full"
                                             v-model="venueName" required autofocus />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_name')" />
-                                    </div>
-
-                                    <div class="mb-6">
-                                        <x-input-label for="venue_email" :value="__('messages.email')" />
-                                        <x-text-input id="venue_email" name="venue_email" type="email" class="mt-1 block w-full"
-                                            v-model="venueEmail" required />
-                                        <p class="mt-2 text-sm text-gray-500">
-                                            {{ __('messages.an_email_will_be_sent') }}
-                                        </p>
-                                        <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
                                     </div>
                                 </div>
 
