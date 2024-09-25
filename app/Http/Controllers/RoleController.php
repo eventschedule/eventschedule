@@ -1078,7 +1078,13 @@ class RoleController extends Controller
                   //->orWhere('phone', '=', $search)
                   //->orWhere('name', 'like', "%{$search}%");
             })
-            ->get(['id', 'name', 'address1', 'address2', 'city', 'state', 'zip']);
+            ->get(['id', 'name', 'address1', 'address2', 'city', 'state', 'zip', 'user_id']);
+
+        $roles = $roles->map(function ($role) {
+            $role->id = UrlUtils::encodeId($role->id);
+            $role->user_id = UrlUtils::encodeId($role->user_id);
+            return $role;
+        });
 
         return response()->json($roles);
     }

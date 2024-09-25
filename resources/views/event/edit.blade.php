@@ -266,7 +266,9 @@
         });
       },
       showAddressFields() {
-        return this.venueType === 'private_address' || (this.venueType === 'search_create' && this.venueEmail);
+        return (this.venueType === 'use_existing' && this.selectedVenue && !this.selectedVenue.user_id) 
+            || this.venueType === 'private_address' 
+            || (this.venueType === 'search_create' && this.venueEmail);
       },
     },
     computed: {
