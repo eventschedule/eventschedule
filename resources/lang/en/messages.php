@@ -281,4 +281,5 @@ return [
     'private_address' => 'Private address',
     'search_results' => 'Search results',
     'clear' => 'Clear',
+    'members' => 'Members',
 ];

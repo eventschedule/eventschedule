@@ -1,7 +1,136 @@
 <x-app-admin-layout>
 
+@vite([
+    'resources/js/countrySelect.min.js',
+    'resources/css/countrySelect.min.css',
+])
+
 <x-slot name="head">
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var f = flatpickr('.datepicker', {
+            allowInput: true,
+            enableTime: true,
+            altInput: true,
+            time_24hr: "{{ $venue && $venue->use_24_hour_time ? 'true' : 'false' }}",
+            altFormat: "{{ $venue && $venue->use_24_hour_time ? 'M j, Y • H:i' : 'M j, Y • h:i K' }}",
+            dateFormat: "Y-m-d H:i:S",
+        });
+        // https://github.com/flatpickr/flatpickr/issues/892#issuecomment-604387030
+        f._input.onkeydown = () => false;
+
+        $("#venue_country").countrySelect({
+            defaultCountry: "{{ $venue ? $venue->country_code : '' }}",
+        });
+    });
+
+    function onChangeCountry() {
+        var selected = $('#venue_country').countrySelect('getSelectedCountryData');
+        $('#venue_country_code').val(selected.iso2);
+    }
+
+    function onChangeDateType() {
+        var value = $('input[name="schedule_type"]:checked').val();
+        if (value == 'one_time') {
+            $('#days_of_week_div').hide();
+        } else {
+            $('#days_of_week_div').show();
+        }
+    }
+
+    function onValidateClick() {
+        $('#address_response').text("{{ __('messages.searching') }}...").show();
+        $('#accept_button').hide();
+        var country = $('#venue_country').countrySelect('getSelectedCountryData');
+        
+        $.post({
+            url: '{{ route('validate_address') }}',
+            data: {
+                _token: '{{ csrf_token() }}',
+                address1: $('#venue_address1').val(),
+                city: $('#venue_city').val(),
+                state: $('#venue_state').val(),
+                postal_code: $('#venue_postal_code').val(),                    
+                country_code: country ? country.iso2 : '',
+            },
+            success: function(response) {
+                if (response) {
+                    var address = response['formatted_address'];
+                    $('#address_response').text(address);
+                    $('#accept_button').show();
+                    $('#address_response').data('validated_address', response);
+                } else {
+                    $('#address_response').text("{{ __('messages.address_not_found') }}");    
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#address_response').text("{{ __('messages.an_error_occurred') }}" + ': ' + error);
+            }
+        });
+    }
+
+    function viewMap() {
+        var address = [
+            $('#venue_address1').val(),
+            $('#venue_city').val(),
+            $('#venue_state').val(),
+            $('#venue_postal_code').val(),
+            $('#venue_country').countrySelect('getSelectedCountryData').name
+        ].filter(Boolean).join(', ');
+
+        if (address) {
+            var url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address);
+            window.open(url, '_blank');
+        } else {
+            alert("{{ __('messages.please_enter_address') }}");
+        }
+    }
+
+    function acceptAddress(event) {
+        event.preventDefault();
+        var validatedAddress = $('#address_response').data('validated_address');
+        if (validatedAddress) {
+            $('#venue_address1').val(validatedAddress['address1']);
+            $('#venue_city').val(validatedAddress['city']);
+            $('#venue_state').val(validatedAddress['state']);
+            $('#venue_postal_code').val(validatedAddress['postal_code']);
+            $("#venue_country").countrySelect("selectCountry", validatedAddress['country_code']);
+            
+            // Update hidden fields
+            $('#formatted_address').val(validatedAddress['formatted_address']);
+            $('#google_place_id').val(validatedAddress['google_place_id']);
+            $('#geo_address').val(validatedAddress['geo_address']);
+            $('#geo_lat').val(validatedAddress['geo_lat']);
+            $('#geo_lon').val(validatedAddress['geo_lon']);
+            
+            // Hide the address response and accept button after accepting
+            $('#address_response').hide();
+            $('#accept_button').hide();
+        }
+    }
+
+    function previewImage(input) {
+        var preview = document.getElementById('preview_img');
+        var previewDiv = document.getElementById('image_preview');
+        
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                previewDiv.style.display = 'block';
+            }
+            
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.src = '#';
+            previewDiv.style.display = 'none';
+        }
+    }
+
+    </script>
+
 </x-slot>
 
 <div id="app">
@@ -179,6 +308,122 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                    <div class="max-w-xl">                                                
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                            {{ __('messages.members') }}
+                        </h2>
+
+                    </div>
+                </div>
+
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                    <div class="max-w-xl">                                                
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                            {{ __('messages.details') }}
+                        </h2>
+
+                        @if (! $role->isCurator())
+                        <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
+                            <div class="flex items-center">
+                                <input id="one_time" name="schedule_type" type="radio" value="one_time" onchange="onChangeDateType()" {{ $event->days_of_week ? '' : 'CHECKED' }}
+                                    class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                <label for="one_time"
+                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.one_time') }}</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="recurring" name="schedule_type" type="radio" value="recurring" onchange="onChangeDateType()"  {{ $event->days_of_week ? 'CHECKED' : '' }}
+                                    class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                <label for="recurring"
+                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.recurring') }}</label>
+                            </div>
+                        </div>
+
+                        <div id="days_of_week_div" class="mb-6 {{ ! $event || ! $event->days_of_week ? 'hidden' : '' }}">
+                            <x-input-label for="duration" :value="__('messages.days_of_week')" />
+                            @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $index => $day)
+                            <label for="days_of_week_{{ $index }}" class="mr-3 text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">
+                                <input type="checkbox" id="days_of_week_{{ $index }}" name="days_of_week_{{ $index }}" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                                    {{ $event && $event->days_of_week && $event->days_of_week[$index] == '1' ? 'checked' : '' }}/> &nbsp;
+                                {{ __('messages.' . $day) }}
+                            </label>
+                            @endforeach
+                        </div>
+                        @endif
+
+                        <div class="mb-6">
+                            <x-input-label for="starts_at"
+                                :value="__('messages.date_and_time') . ($venue && $venue->user_id ? '' : ' *')" />
+                            <x-text-input type="text" id="starts_at" name="starts_at" class="datepicker"
+                                :value="old('starts_at', $event->localStartsAt())"
+                                :required="! $venue || ! $venue->user_id" />
+                            <x-input-error class="mt-2" :messages="$errors->get('starts_at')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="duration" :value="__('messages.duration_in_hours')" />
+                            <x-text-input type="number" id="duration" name="duration"
+                                :value="old('duration', $event->duration)" />
+                            <x-input-error class="mt-2" :messages="$errors->get('duration')" />
+                        </div>
+                        
+                        @php
+                            $curators = $user->editableCurators();
+                        @endphp
+                        
+                        @if($curators->count() > 0 && $role->isTalent())
+                        <div class="mb-6">
+                            <x-input-label for="curators" :value="__('messages.add_to_schedules')" />
+                            @foreach($curators as $curator)
+                            <div class="flex items-center mb-4 mt-1">
+                                <input type="checkbox" 
+                                       id="curator_{{ $curator->id }}" 
+                                       name="curators[]" 
+                                       value="{{ $curator->id }}"
+                                       {{ $event->curators->contains($curator->id) ? 'checked' : '' }}
+                                       class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                <label for="curator_{{ $curator->id }}" class="ml-2 block text-sm text-gray-900 dark:text-gray-100">
+                                    {{ $curator->name }}
+                                </label>
+                            </div>
+                            @endforeach
+                        </div>
+                        @endif
+
+                        <!--
+                        <div class="mb-6">
+                            <x-input-label for="flyer_image" :value="__('messages.flyer_image')" />
+                            <input id="flyer_image" name="flyer_image" type="file" class="mt-1 block w-full"
+                                :value="old('flyer_image')" accept="image/png, image/jpeg" onchange="previewImage(this);" />
+                            <x-input-error class="mt-2" :messages="$errors->get('flyer_image')" />
+
+                            <div id="image_preview" class="mt-3" style="display: none;">
+                                <img id="preview_img" src="#" alt="Preview" style="max-height:120px" />
+                            </div>
+
+                            @if ($event->flyer_image_url)
+                            <img src="{{ $event->flyer_image_url }}" style="max-height:120px" class="pt-3" />
+                            <a href="#"
+                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.delete_image', ['subdomain' => $subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id), 'image_type' => 'flyer']) }}'; }"
+                                class="hover:underline">
+                                {{ __('messages.delete_image') }}
+                            </a>
+                            @endif
+                        </div>
+                            -->
+
+                        <div class="mb-6">
+                            <x-input-label for="description" :value="__('messages.description')" />
+                            <textarea id="description" name="description"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">{{ old('description', $event->description) }}</textarea>
+                            <x-input-error class="mt-2" :messages="$errors->get('description')" />
+                        </div>
+
+                    </div>
+                </div>
+
+                
             </div>
         </div>
     </form>
