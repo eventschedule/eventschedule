@@ -174,6 +174,12 @@
 
           if (data.length === 0) {
             this.venueEmail = this.venueSearchEmail;
+            this.$nextTick(() => {
+              const venueNameInput = document.getElementById('venue_name');
+              if (venueNameInput) {
+                venueNameInput.focus();
+              }
+            });
           }
         })
         .catch(error => {
@@ -185,6 +191,13 @@
         this.venueName = "";
         this.venueSearchEmail = "";
         this.venueSearchResults = [];
+        
+        this.$nextTick(() => {
+          const emailInput = document.getElementById('venue_search_email');
+          if (emailInput) {
+            emailInput.focus();
+          }
+        });
       },
     },
     computed: {
