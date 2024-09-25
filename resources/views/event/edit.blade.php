@@ -157,7 +157,7 @@
       searchVenues() {
         if (!this.venueSearchEmail) return;
 
-        fetch(`/search_roles?email=${encodeURIComponent(this.venueSearchEmail)}`, {
+        fetch(`/search_roles?search=${encodeURIComponent(this.venueSearchEmail)}`, {
           headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json',
@@ -165,6 +165,7 @@
         })
         .then(response => response.json())
         .then(data => {
+          console.log(data);
           this.searchResults = data;
           this.selectedVenueId = "";
         })
