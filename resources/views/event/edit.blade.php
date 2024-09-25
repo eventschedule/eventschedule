@@ -63,9 +63,10 @@
                             <div v-if="venueType === 'search_create'">
 
                                 <div v-if="!venueEmail" class="mb-6">
+                                    <x-input-label for="venue_search_email" :value="__('messages.email')" />
                                     <div class="flex mt-1">
                                         <x-text-input id="venue_search_email" v-model="venueSearchEmail" type="email" class="block w-full mr-2"
-                                            :placeholder="__('messages.enter_email')" required autofocus @keyup.enter="searchVenues" />
+                                            :placeholder="''" required autofocus @keyup.enter="searchVenues" />
                                         <x-primary-button @click="searchVenues" type="button">
                                             {{ __('messages.search') }}
                                         </x-primary-button>
