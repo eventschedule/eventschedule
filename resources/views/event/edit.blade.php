@@ -115,57 +115,56 @@
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_name')" />
                                     </div>
                                 </div>
+                            </div>
 
-                                <div v-if="venueType === 'private_address' || (venueType === 'search_create' && venueEmail)">
-                                    <div class="mb-6">
-                                        <x-input-label for="venue_address1" :value="__('messages.street_address') . (request()->no_email ? ' *' : '')" />
-                                        <x-text-input id="venue_address1" name="venue_address1" type="text"
-                                            class="mt-1 block w-full" :required="request()->no_email"
-                                            :value="old('venue_address1', $venue ? $venue->address1 : '')" autocomplete="off" />
-                                        <x-input-error class="mt-2" :messages="$errors->get('venue_address1')" />
-                                    </div>
-
-                                    <div class="mb-6">
-                                        <x-input-label for="venue_city" :value="__('messages.city')" />
-                                        <x-text-input id="venue_city" name="venue_city" type="text" class="mt-1 block w-full"
-                                            :value="old('venue_city', $venue ? $venue->city : '')" autocomplete="off" />
-                                        <x-input-error class="mt-2" :messages="$errors->get('venue_city')" />
-                                    </div>
-
-                                    <div class="mb-6">
-                                        <x-input-label for="venue_state" :value="__('messages.state_province')" />
-                                        <x-text-input id="venue_state" name="venue_state" type="text" class="mt-1 block w-full"
-                                            :value="old('venue_state', $venue ? $venue->state : '')" autocomplete="off" />
-                                        <x-input-error class="mt-2" :messages="$errors->get('venue_state')" />
-                                    </div>
-
-                                    <div class="mb-6">
-                                        <x-input-label for="venue_postal_code" :value="__('messages.postal_code')" />
-                                        <x-text-input id="venue_postal_code" name="venue_postal_code" type="text"
-                                            class="mt-1 block w-full"
-                                            :value="old('venue_postal_code', $venue ? $venue->postal_code : '')" autocomplete="off" />
-                                        <x-input-error class="mt-2" :messages="$errors->get('venue_postal_code')" />
-                                    </div>
-
-                                    <div class="mb-6">
-                                        <x-input-label for="venue_country" :value="__('messages.country')" />
-                                        <x-text-input id="venue_country" name="venue_country" type="text" class="mt-1 block w-full"
-                                            :value="old('venue_country')" onchange="onChangeCountry()" autocomplete="off" />
-                                        <x-input-error class="mt-2" :messages="$errors->get('country')" />
-                                        <input type="hidden" id="venue_country_code" name="venue_country_code" />
-                                    </div>
-
-                                    <div class="mb-6">
-                                        <div class="flex items-center space-x-4">
-                                            <x-secondary-button id="view_map_button" onclick="viewMap()">{{ __('messages.view_map') }}</x-secondary-button>
-                                            <x-secondary-button id="validate_button" onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
-                                            <x-secondary-button id="accept_button" onclick="acceptAddress(event)" class="hidden">{{ __('messages.accept') }}</x-secondary-button>
-                                        </div>
-                                    </div>
-
-                                    <div id="address_response" class="mb-6 hidden text-gray-900 dark:text-gray-100"></div>
-
+                            <div v-if="showAddressFields()">
+                                <div class="mb-6">
+                                    <x-input-label for="venue_address1" :value="__('messages.street_address') . (request()->no_email ? ' *' : '')" />
+                                    <x-text-input id="venue_address1" name="venue_address1" type="text"
+                                        class="mt-1 block w-full" :required="request()->no_email"
+                                        :value="old('venue_address1', $venue ? $venue->address1 : '')" autocomplete="off" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('venue_address1')" />
                                 </div>
+
+                                <div class="mb-6">
+                                    <x-input-label for="venue_city" :value="__('messages.city')" />
+                                    <x-text-input id="venue_city" name="venue_city" type="text" class="mt-1 block w-full"
+                                        :value="old('venue_city', $venue ? $venue->city : '')" autocomplete="off" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('venue_city')" />
+                                </div>
+
+                                <div class="mb-6">
+                                    <x-input-label for="venue_state" :value="__('messages.state_province')" />
+                                    <x-text-input id="venue_state" name="venue_state" type="text" class="mt-1 block w-full"
+                                        :value="old('venue_state', $venue ? $venue->state : '')" autocomplete="off" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('venue_state')" />
+                                </div>
+
+                                <div class="mb-6">
+                                    <x-input-label for="venue_postal_code" :value="__('messages.postal_code')" />
+                                    <x-text-input id="venue_postal_code" name="venue_postal_code" type="text"
+                                        class="mt-1 block w-full"
+                                        :value="old('venue_postal_code', $venue ? $venue->postal_code : '')" autocomplete="off" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('venue_postal_code')" />
+                                </div>
+
+                                <div class="mb-6">
+                                    <x-input-label for="venue_country" :value="__('messages.country')" />
+                                    <x-text-input id="venue_country" name="venue_country" type="text" class="mt-1 block w-full"
+                                        :value="old('venue_country')" onchange="onChangeCountry()" autocomplete="off" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('country')" />
+                                    <input type="hidden" id="venue_country_code" name="venue_country_code" />
+                                </div>
+
+                                <div class="mb-6">
+                                    <div class="flex items-center space-x-4">
+                                        <x-secondary-button id="view_map_button" onclick="viewMap()">{{ __('messages.view_map') }}</x-secondary-button>
+                                        <x-secondary-button id="validate_button" onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
+                                        <x-secondary-button id="accept_button" onclick="acceptAddress(event)" class="hidden">{{ __('messages.accept') }}</x-secondary-button>
+                                    </div>
+                                </div>
+
+                                <div id="address_response" class="mb-6 hidden text-gray-900 dark:text-gray-100"></div>
 
                             </div>
                         </div>
@@ -193,7 +192,8 @@
       return {
         event: @json($event),
         venues: @json($venues),
-        venueType: "{{ count($venues) ? 'use_existing' : 'search_create' }}",
+        //venueType: "{{ count($venues) ? 'use_existing' : 'search_create' }}",
+        venueType: "private_address",
         venueName: "{{ old('venue_name', $venue ? $venue->name : '') }}",
         venueEmail: "{{ old('venue_email', $venue ? $venue->email : request()->venue_email) }}",
         venueSearchEmail: "",
@@ -264,6 +264,9 @@
             }
           }
         });
+      },
+      showAddressFields() {
+        return this.venueType === 'private_address' || (this.venueType === 'search_create' && this.venueEmail);
       },
     },
     computed: {
