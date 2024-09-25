@@ -154,7 +154,12 @@
         this.event.venue_id = "";
       },
       searchVenues() {
-        if (!this.venueSearchEmail) return;
+        const emailInput = document.getElementById('venue_search_email');
+        
+        if (!emailInput.checkValidity()) {
+          emailInput.reportValidity();
+          return;
+        }
 
         fetch(`/search_roles?type=venue&search=${encodeURIComponent(this.venueSearchEmail)}`, {
           headers: {
