@@ -94,7 +94,7 @@
 
                                 <div v-if="venueEmail && !event.id">
                                     <div class="mb-6">
-                                        <x-input-label for="venue_email" :value="__('messages.email')" />
+                                        <x-input-label for="venue_email" :value="__('messages.email') . ' *'" />
                                         <div class="flex mt-1">
                                             <x-text-input id="venue_email" name="venue_email" type="email" class="mr-2 block w-full"
                                                 v-model="venueEmail" required disabled />
