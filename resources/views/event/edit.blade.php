@@ -157,7 +157,7 @@
       searchVenues() {
         if (!this.venueSearchEmail) return;
 
-        fetch(`/role_search?email=${encodeURIComponent(this.venueSearchEmail)}`, {
+        fetch(`/search_roles?email=${encodeURIComponent(this.venueSearchEmail)}`, {
           headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json',
