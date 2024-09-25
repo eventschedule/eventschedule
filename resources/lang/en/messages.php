@@ -279,7 +279,6 @@ return [
     'claim_your_role_curated' => ':event at :venue was added to the :curator schedule',
     'use_existing' => 'Use existing',
     'private_address' => 'Private address',
-    'enter_email' => 'Enter email',
     'search_results' => 'Search results',
     'clear' => 'Clear',
 ];
