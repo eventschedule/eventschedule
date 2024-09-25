@@ -75,7 +75,7 @@
                                     <x-input-label :value="__('messages.search_results')" />
                                     <div class="mt-2 space-y-2">
                                         <div v-for="venue in searchResults" :key="venue.id" class="flex items-center">
-                                            <input :id="'venue_' + venue.id" type="radio" :value="venue.id" v-model="selectedVenueId"
+                                            <input :id="'venue_' + venue.id" type="radio" :value="venue.id" v-model="event.venue_id"
                                                 class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                             <label :for="'venue_' + venue.id" class="ml-3 block text-sm font-medium text-gray-900 dark:text-gray-100">
                                                 @{{ venue.name }} (@{{ venue.email }})
@@ -83,12 +83,11 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div v-if="selectedVenueId" class="mb-6">
+                                <div v-if="selectedVenue" class="mb-6">
                                     <x-input-label :value="__('messages.selected_venue')" />
                                     <p class="mt-1 text-sm text-gray-900 dark:text-gray-100">
                                         @{{ selectedVenue.name }} (@{{ selectedVenue.email }})
                                     </p>
-                                    <input type="hidden" name="venue_id" :value="selectedVenueId" />
                                 </div>
 
                                 <div class="mb-6">
@@ -102,7 +101,6 @@
                                     <x-input-label for="venue_email" :value="__('messages.email')" />
                                     <x-text-input id="venue_email" name="venue_email" type="email" class="mt-1 block w-full"
                                         v-model="venueEmail" required />
-                                    <input type="hidden" name="venue_id" :value="selectedVenueId"/>
                                     <p class="mt-2 text-sm text-gray-500">
                                         {{ __('messages.an_email_will_be_sent') }}
                                     </p>
@@ -143,8 +141,7 @@
     },
     methods: {
       clearSelectedVenue() {
-        this.selectedVenue = null;
-        this.selectedVenueId = "";
+        this.event.venue_id = "";
       },
       searchVenues() {
         if (!this.venueSearchEmail) return;
@@ -167,7 +164,7 @@
     },
     computed: {
       selectedVenue() {
-        return this.venues[this.selectedVenueId];
+        return this.venues[this.event.venue_id];
       }
     },
     mounted() {
