@@ -248,9 +248,9 @@
 
                             <div v-if="showAddressFields()">
                                 <div class="mb-6">
-                                    <x-input-label for="venue_address1" :value="__('messages.street_address') . (request()->no_email ? ' *' : '')" />
+                                    <x-input-label for="venue_address1" :value="__('messages.street_address') . ' *'" />
                                     <x-text-input id="venue_address1" name="venue_address1" type="text"
-                                        class="mt-1 block w-full" :required="request()->no_email"
+                                        class="mt-1 block w-full" required
                                         :value="old('venue_address1', $venue ? $venue->address1 : '')" autocomplete="off" />
                                     <x-input-error class="mt-2" :messages="$errors->get('venue_address1')" />
                                 </div>
@@ -426,6 +426,24 @@
                 
             </div>
         </div>
+
+        <div class="max-w-7xl mx-auto space-y-6">
+            <div class="flex gap-4 items-center justify-between">
+                <div class="flex gap-4">
+                    <x-primary-button>{{ __('messages.save') }}</x-primary-button>                    
+                    <x-cancel-button></x-cancel-button>
+                </div>
+
+                <div>
+                    @if ($event->exists)
+                    <x-delete-button
+                        :url="route('event.delete', ['subdomain' => $subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)])">
+                    </x-delete-button>
+                    @endif
+                </div>
+            </div>
+        </div>
+
     </form>
 </div>
 
