@@ -27,7 +27,7 @@
 
     <meta http-equiv="Content-Security-Policy" content="
         img-src 'self' data: https://maps.gstatic.com https://maps.googleapis.com https://eventschedule.nyc3.cdn.digitaloceanspaces.com https://*.ytimg.com;
-        frame-src 'self' https://www.youtube.com;
+        frame-src 'self' https://www.youtube.com https://www.googletagmanager.com;
     ">
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
