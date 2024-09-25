@@ -94,8 +94,13 @@
                                 <div v-if="venueEmail && !event.id">
                                     <div class="mb-6">
                                         <x-input-label for="venue_email" :value="__('messages.email')" />
-                                        <x-text-input id="venue_email" name="venue_email" type="email" class="mt-1 block w-full"
-                                            v-model="venueEmail" required disabled />
+                                        <div class="flex">
+                                            <x-text-input id="venue_email" name="venue_email" type="email" class="mt-1 mr-2 block w-full"
+                                                v-model="venueEmail" required disabled />
+                                            <x-primary-button @click="searchVenues" type="button">
+                                                {{ __('messages.clear') }}
+                                            </x-primary-button>
+                                        </div>
                                         <p class="mt-2 text-sm text-gray-500">
                                             {{ __('messages.an_email_will_be_sent') }}
                                         </p>
