@@ -199,6 +199,21 @@
           }
         });
       },
+      setFocusBasedOnVenueType() {
+        this.$nextTick(() => {
+          if (this.venueType === 'use_existing') {
+            const venueSelect = document.querySelector('select[name="venue_id"]');
+            if (venueSelect) {
+              venueSelect.focus();
+            }
+          } else if (this.venueType === 'search_create') {
+            const searchInput = document.getElementById('venue_search_email');
+            if (searchInput) {
+              searchInput.focus();
+            }
+          }
+        });
+      },
     },
     computed: {
       selectedVenue() {
@@ -210,11 +225,12 @@
         this.event.venue_id = "";
         this.venueEmail = "";
         this.venueSearchEmail = "";
-        this.venueSearchResults = [];        
+        this.venueSearchResults = [];
+        this.setFocusBasedOnVenueType();
       }
     },
     mounted() {
-        //
+        this.setFocusBasedOnVenueType();
     }
   }).mount('#app')
 </script>
