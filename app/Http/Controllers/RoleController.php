@@ -1071,12 +1071,11 @@ class RoleController extends Controller
     {
         $type = $request->type;
         $search = $request->search;
-
         $roles = Role::where('type', $type)
             ->where(function($query) use ($search) {
-                $query->where('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('name', 'like', "%{$search}%");
+                $query->where('email', '=', $search);
+                  //->orWhere('phone', '=', $search)
+                  //->orWhere('name', 'like', "%{$search}%");
             })
             ->get(['id', 'name', 'address1', 'address2', 'city', 'state', 'zip']);
 
