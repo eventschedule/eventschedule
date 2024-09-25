@@ -65,16 +65,16 @@
                             <div class="mb-6">
                                     <div class="flex mt-1">
                                         <x-text-input id="venue_search_email" v-model="venueSearchEmail" type="email" class="block w-full mr-2"
-                                            :placeholder="__('messages.enter_email')" />
+                                            :placeholder="__('messages.enter_email')" autofocus />
                                         <x-primary-button @click="searchVenues" type="button">
                                             {{ __('messages.search') }}
                                         </x-primary-button>
                                     </div>
                                 </div>
-                                <div v-if="searchResults.length" class="mb-6">
+                                <div v-if="venueSearchResults.length" class="mb-6">
                                     <x-input-label :value="__('messages.search_results')" />
                                     <div class="mt-2 space-y-2">
-                                        <div v-for="venue in searchResults" :key="venue.id" class="flex items-center">
+                                        <div v-for="venue in venueSearchResults" :key="venue.id" class="flex items-center">
                                             <input :id="'venue_' + venue.id" type="radio" :value="venue.id" v-model="event.venue_id"
                                                 class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                             <label :for="'venue_' + venue.id" class="ml-3 block text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -90,22 +90,25 @@
                                     </p>
                                 </div>
 
-                                <div class="mb-6">
-                                    <x-input-label for="venue_name" :value="__('messages.name') . ' *'" />
-                                    <x-text-input id="venue_name" name="venue_name" type="text" class="mt-1 block w-full"
-                                        v-model="venueName" required autofocus />
-                                    <x-input-error class="mt-2" :messages="$errors->get('venue_name')" />
+                                <div v-if="venueEmail">
+                                    <div class="mb-6">
+                                        <x-input-label for="venue_name" :value="__('messages.name') . ' *'" />
+                                        <x-text-input id="venue_name" name="venue_name" type="text" class="mt-1 block w-full"
+                                            v-model="venueName" required autofocus />
+                                        <x-input-error class="mt-2" :messages="$errors->get('venue_name')" />
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <x-input-label for="venue_email" :value="__('messages.email')" />
+                                        <x-text-input id="venue_email" name="venue_email" type="email" class="mt-1 block w-full"
+                                            v-model="venueEmail" required />
+                                        <p class="mt-2 text-sm text-gray-500">
+                                            {{ __('messages.an_email_will_be_sent') }}
+                                        </p>
+                                        <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
+                                    </div>
                                 </div>
 
-                                <div class="mb-6">
-                                    <x-input-label for="venue_email" :value="__('messages.email')" />
-                                    <x-text-input id="venue_email" name="venue_email" type="email" class="mt-1 block w-full"
-                                        v-model="venueEmail" required />
-                                    <p class="mt-2 text-sm text-gray-500">
-                                        {{ __('messages.an_email_will_be_sent') }}
-                                    </p>
-                                    <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
-                                </div>
                             </div>
                         </div>
 
@@ -136,7 +139,7 @@
         venueName: "{{ old('venue_name', $venue ? $venue->name : '') }}",
         venueEmail: "{{ old('venue_email', $venue ? $venue->email : request()->venue_email) }}",
         venueSearchEmail: "",
-        searchResults: [],
+        venueSearchResults: [],
       }
     },
     methods: {
@@ -155,7 +158,11 @@
         .then(response => response.json())
         .then(data => {
           console.log(data);
-          this.searchResults = data;
+          this.venueSearchResults = data;
+
+          if (data.length === 0) {
+            this.venueEmail = this.venueSearchEmail;
+          }
         })
         .catch(error => {
           console.error('Error searching venues:', error);
@@ -170,7 +177,7 @@
     watch: {
       venueType() {
         this.event.venue_id = "";
-        this.searchResults = [];
+        this.venueSearchResults = [];
       }
     },
     mounted() {
