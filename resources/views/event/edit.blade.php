@@ -98,7 +98,7 @@
                                         <div class="flex">
                                             <x-text-input id="venue_email" name="venue_email" type="email" class="mt-1 mr-2 block w-full"
                                                 v-model="venueEmail" required disabled />
-                                            <x-primary-button @click="searchVenues" type="button">
+                                            <x-primary-button @click="clearVenueSearch" type="button">
                                                 {{ __('messages.clear') }}
                                             </x-primary-button>
                                         </div>
@@ -174,6 +174,12 @@
         .catch(error => {
           console.error('Error searching venues:', error);
         });
+      },
+      clearVenueSearch() {
+        this.venueEmail = "";
+        this.venueName = "";
+        this.venueSearchEmail = "";
+        this.venueSearchResults = [];
       },
     },
     computed: {
