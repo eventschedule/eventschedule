@@ -26,7 +26,7 @@
     @endif    
 
     <meta http-equiv="Content-Security-Policy" content="
-        img-src 'self' data: https://maps.gstatic.com https://maps.googleapis.com https://eventschedule.nyc3.cdn.digitaloceanspaces.com https://*.ytimg.com;
+        img-src 'self' data: https://maps.gstatic.com https://maps.googleapis.com https://eventschedule.nyc3.cdn.digitaloceanspaces.com https://*.ytimg.com https://eventschedule.test:5173;
         frame-src 'self' https://www.youtube.com https://www.googletagmanager.com;
     ">
 
