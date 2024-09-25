@@ -137,6 +137,8 @@ class EventController extends Controller
         });
         
         return view('event/edit', [
+            'role' => $role,
+            'user' => $user,
             'roles' => $roles,
             'event' => $event,
             'subdomain' => $subdomain,
