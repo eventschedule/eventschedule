@@ -28,9 +28,9 @@
                         </h2>
 
                         <div v-if="!selectedVenue">
-                            <fieldset>
+                            <fieldset>                                
                                 <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
-                                    <div v-if="venues.length" class="flex items-center">
+                                    <div v-if="Object.keys(venues).length > 0" class="flex items-center">
                                         <input id="use_existing" name="venue_type" type="radio" value="use_existing" v-model="venueType"
                                             class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                         <label for="use_existing"
@@ -54,13 +54,10 @@
                             <div v-if="venueType === 'use_existing'">
                                 <select name="venue_id"
                                         class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                        v-model="selectedVenueId"
-                                        @change="updateSelectedVenue">
+                                        v-model="event.venue_id">
                                         <option value="" disabled selected>{{ __('messages.please_select') }}</option>                                
                                         <option v-for="venue in venues" :key="venue.id" :value="venue.id">@{{ venue.name }}</option>
                                 </select>
-
-
                             </div>
 
                             <div v-if="venueType === 'search_create'">
@@ -138,8 +135,6 @@
         event: @json($event),
         venues: @json($venues),
         venueType: "{{ count($venues) ? 'use_existing' : 'search_create' }}",
-        selectedVenueId: "",
-        selectedVenue: null,
         venueName: "{{ old('venue_name', $venue ? $venue->name : '') }}",
         venueEmail: "{{ old('venue_email', $venue ? $venue->email : request()->venue_email) }}",
         venueSearchEmail: "",
@@ -147,9 +142,6 @@
       }
     },
     methods: {
-      updateSelectedVenue() {
-        this.selectedVenue = this.venues.find(v => v.id === this.selectedVenueId);
-      },
       clearSelectedVenue() {
         this.selectedVenue = null;
         this.selectedVenueId = "";
@@ -167,7 +159,6 @@
         .then(data => {
           console.log(data);
           this.searchResults = data;
-          this.selectedVenueId = "";
         })
         .catch(error => {
           console.error('Error searching venues:', error);
@@ -176,14 +167,11 @@
     },
     computed: {
       selectedVenue() {
-        return this.searchResults.find(v => v.id === this.selectedVenueId) || null;
+        return this.venues[this.selectedVenueId];
       }
     },
     mounted() {
-      if (this.event.venue_id) {
-        this.selectedVenueId = this.event.venue_id;
-        this.updateSelectedVenue();
-      }
+        //
     }
   }).mount('#app')
 </script>

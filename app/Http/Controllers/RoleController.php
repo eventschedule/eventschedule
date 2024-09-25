@@ -1071,6 +1071,7 @@ class RoleController extends Controller
     {
         $type = $request->type;
         $search = $request->search;
+
         $roles = Role::where('type', $type)
             ->where(function($query) use ($search) {
                 $query->where('email', '=', $search);

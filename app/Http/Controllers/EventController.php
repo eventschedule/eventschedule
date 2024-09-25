@@ -138,7 +138,7 @@ class EventController extends Controller
         $venues = $roles->filter(function($item) {
             return $item->isVenue() && $item->name;
         });
-
+        
         return view('event/edit', [
             'roles' => $roles,
             'event' => $event,
