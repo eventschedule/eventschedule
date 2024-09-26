@@ -282,4 +282,5 @@ return [
     'search_results' => 'Search results',
     'clear' => 'Clear',
     'members' => 'Members',
+    'no_contact_info' => 'No contact info',
 ];

@@ -358,10 +358,10 @@
 
                             <div v-if="memberType === 'search_create'">
                                 <div class="mb-6">
-                                    <x-input-label for="member_search_email" :value="__('messages.search_members')" />
+                                    <x-input-label for="member_search_email" :value="__('messages.email') . ' *'" />
                                     <div class="flex mt-1">
                                         <x-text-input id="member_search_email" v-model="memberSearchEmail" type="email" class="block w-full mr-2"
-                                            :placeholder="__('messages.enter_email')" @keydown.enter.prevent="searchMembers" />
+                                            :placeholder="''" @keydown.enter.prevent="searchMembers" />
                                         <x-primary-button @click="searchMembers" type="button">
                                             {{ __('messages.search') }}
                                         </x-primary-button>
@@ -381,7 +381,6 @@
                                 </div>
 
                                 <div v-if="showNewMemberForm" class="mb-6">
-                                    <h3 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-2">{{ __('messages.add_new_member') }}</h3>
                                     <div class="mb-4">
                                         <x-input-label for="new_member_email" :value="__('messages.email') . ' *'" />
                                         <x-text-input id="new_member_email" v-model="newMemberEmail" type="email" class="mt-1 block w-full" required />
