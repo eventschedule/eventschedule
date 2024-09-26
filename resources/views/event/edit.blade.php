@@ -160,21 +160,21 @@
                             <fieldset>                                
                                 <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                                     <div v-if="Object.keys(venues).length > 0" class="flex items-center">
-                                        <input id="use_existing" name="venue_type" type="radio" value="use_existing" v-model="venueType"
+                                        <input id="use_existing_venue" name="venue_type" type="radio" value="use_existing" v-model="venueType"
                                             class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                                        <label for="use_existing"
+                                        <label for="use_existing_venue"
                                             class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
                                     </div>
                                     <div class="flex items-center">
-                                        <input id="search_create" name="venue_type" type="radio" value="search_create" v-model="venueType"
+                                        <input id="search_create_venue" name="venue_type" type="radio" value="search_create" v-model="venueType"
                                             class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                                        <label for="search_create"
+                                        <label for="search_create_venue"
                                             class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.search_create') }}</label>
                                     </div>
                                     <div class="flex items-center">
-                                        <input id="private_address" name="venue_type" type="radio" value="private_address" v-model="venueType"
+                                        <input id="private_address_venue" name="venue_type" type="radio" value="private_address" v-model="venueType"
                                             class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                                        <label for="private_address"
+                                        <label for="private_address_venue"
                                             class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.private_address') }}</label>
                                     </div>
                                 </div>
@@ -329,21 +329,21 @@
                             <fieldset>                                
                                 <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                                     <div v-if="Object.keys(members).length > 0" class="flex items-center">
-                                        <input id="use_existing" name="member_type" type="radio" value="use_existing" v-model="memberType"
+                                        <input id="use_existing_members" name="member_type" type="radio" value="use_existing" v-model="memberType"
                                             class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                                        <label for="use_existing"
+                                        <label for="use_existing_members"
                                             class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
                                     </div>
                                     <div class="flex items-center">
-                                        <input id="search_create" name="member_type" type="radio" value="search_create" v-model="memberType"
+                                        <input id="search_create_members" name="member_type" type="radio" value="search_create" v-model="memberType"
                                             class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                                        <label for="search_create"
+                                        <label for="search_create_members"
                                             class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.search_create') }}</label>
                                     </div>
                                     <div class="flex items-center">
-                                        <input id="no_contact_info" name="member_type" type="radio" value="no_contact_info" v-model="memberType"
+                                        <input id="no_contact_info_members" name="member_type" type="radio" value="no_contact_info" v-model="memberType"
                                             class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                                        <label for="no_contact_info"
+                                        <label for="no_contact_info_members"
                                             class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.no_contact_info') }}</label>
                                     </div>
                                 </div>
