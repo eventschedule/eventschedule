@@ -403,7 +403,7 @@
                                     <x-input-label for="member_name" :value="__('messages.name') . ' *'" />
                                     <div class="flex mt-1">
                                         <x-text-input id="member_name" name="member_name" type="text" class="mr-2 block w-full"
-                                            v-model="memberName" required autofocus />
+                                            v-model="memberName" required autofocus @keydown.enter.prevent="addNewMember" />
                                         <x-primary-button @click="addNewMember" type="button" class="fixed-width-button">
                                             {{ __('messages.add') }}
                                         </x-primary-button>
@@ -711,7 +711,17 @@
         this.selectedMembers = this.selectedMembers.filter(m => m.id !== member.id);
       },
       addNewMember() {
-        if (!this.memberEmail || !this.memberName) return;
+        if (!this.memberEmail || !this.memberName) {
+          // Show validation error
+          const nameInput = document.getElementById('member_name');
+          if (!this.memberName) {
+            nameInput.setCustomValidity('{{ __("messages.name_is_required") }}');
+          } else {
+            nameInput.setCustomValidity('');
+          }
+          nameInput.reportValidity();
+          return;
+        }
 
         const newMember = {
           id: `new_${Date.now()}`,
@@ -722,6 +732,10 @@
         this.memberEmail = "";
         this.memberName = "";
         this.memberSearchEmail = "";
+
+        // Reset custom validity
+        const nameInput = document.getElementById('member_name');
+        nameInput.setCustomValidity('');
       },
       addExistingMember() {
         if (this.selectedExistingMember && !this.selectedMembers.some(m => m.id === this.selectedExistingMember.id)) {
