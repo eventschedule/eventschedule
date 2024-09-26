@@ -6,12 +6,12 @@
 ])
 
 <x-slot name="head">
-  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
   <style>
     .fixed-width-button {
-      min-width: 100px; /* Adjust this value as needed */
+      min-width: 100px;
     }
   </style>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
         var f = flatpickr('.datepicker', {
