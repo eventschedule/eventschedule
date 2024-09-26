@@ -315,6 +315,57 @@
                             {{ __('messages.members') }}
                         </h2>
 
+                        <div>
+                            <div v-if="selectedMembers && selectedMembers.length > 0" class="mb-6">
+                                <h3 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-2">{{ __('messages.selected_members') }}</h3>
+                                <div v-for="member in selectedMembers" :key="member.id" class="flex items-center justify-between mb-2">
+                                    <span class="text-sm text-gray-900 dark:text-gray-100">@{{ member.name }} (@{{ member.email }})</span>
+                                    <x-secondary-button @click="removeMember(member)" type="button">
+                                        {{ __('messages.remove') }}
+                                    </x-secondary-button>
+                                </div>
+                            </div>
+
+                            <div class="mb-6">
+                                <x-input-label for="member_search_email" :value="__('messages.search_members')" />
+                                <div class="flex mt-1">
+                                    <x-text-input id="member_search_email" v-model="memberSearchEmail" type="email" class="block w-full mr-2"
+                                        :placeholder="__('messages.enter_email')" @keydown.enter.prevent="searchMembers" />
+                                    <x-primary-button @click="searchMembers" type="button">
+                                        {{ __('messages.search') }}
+                                    </x-primary-button>
+                                </div>
+                            </div>
+
+                            <div v-if="memberSearchResults.length" class="mb-6">
+                                <x-input-label :value="__('messages.search_results')" />
+                                <div class="mt-2 space-y-2">
+                                    <div v-for="member in memberSearchResults" :key="member.id" class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-900 dark:text-gray-100">@{{ member.name }} (@{{ member.email }})</span>
+                                        <x-secondary-button @click="addMember(member)" type="button">
+                                            {{ __('messages.add') }}
+                                        </x-secondary-button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div v-if="showNewMemberForm" class="mb-6">
+                                <h3 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-2">{{ __('messages.add_new_member') }}</h3>
+                                <div class="mb-4">
+                                    <x-input-label for="new_member_email" :value="__('messages.email') . ' *'" />
+                                    <x-text-input id="new_member_email" v-model="newMemberEmail" type="email" class="mt-1 block w-full" required />
+                                </div>
+                                <div class="mb-4">
+                                    <x-input-label for="new_member_name" :value="__('messages.name') . ' *'" />
+                                    <x-text-input id="new_member_name" v-model="newMemberName" type="text" class="mt-1 block w-full" required />
+                                </div>
+                                <div class="flex justify-end">
+                                    <x-primary-button @click="addNewMember" type="button">
+                                        {{ __('messages.add_member') }}
+                                    </x-primary-button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -442,6 +493,10 @@
             </div>
         </div>
 
+        <template v-for="member in selectedMembers">
+            <input type="hidden" name="members[]" :value="member.id">
+        </template>
+
     </form>
 </div>
 
@@ -453,12 +508,19 @@
       return {
         event: @json($event),
         venues: @json($venues),
-        //venueType: "{{ count($venues) ? 'use_existing' : 'search_create' }}",
+        members: @json($members),
         venueType: "private_address",
+        memberType: "{{ count($members) ? 'use_existing' : 'search_create' }}",
         venueName: "{{ old('venue_name', $venue ? $venue->name : '') }}",
         venueEmail: "{{ old('venue_email', $venue ? $venue->email : request()->venue_email) }}",
         venueSearchEmail: "",
         venueSearchResults: [],
+        selectedMembers: @json($event->members ?? []),
+        memberSearchEmail: "",
+        memberSearchResults: [],
+        showNewMemberForm: false,
+        newMemberEmail: "",
+        newMemberName: "",
       }
     },
     methods: {
@@ -530,6 +592,52 @@
         return (this.venueType === 'use_existing' && this.selectedVenue && !this.selectedVenue.user_id) 
             || this.venueType === 'private_address' 
             || (this.venueType === 'search_create' && this.venueEmail);
+      },
+      searchMembers() {
+        if (!this.memberSearchEmail) return;
+
+        fetch(`/search_roles?type=member&search=${encodeURIComponent(this.memberSearchEmail)}`, {
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          this.memberSearchResults = data;
+          if (data.length === 0) {
+            this.showNewMemberForm = true;
+            this.newMemberEmail = this.memberSearchEmail;
+          } else {
+            this.showNewMemberForm = false;
+          }
+        })
+        .catch(error => {
+          console.error('Error searching members:', error);
+        });
+      },
+      addMember(member) {
+        if (!this.selectedMembers.some(m => m.id === member.id)) {
+          this.selectedMembers.push(member);
+        }
+        this.memberSearchResults = this.memberSearchResults.filter(m => m.id !== member.id);
+      },
+      removeMember(member) {
+        this.selectedMembers = this.selectedMembers.filter(m => m.id !== member.id);
+      },
+      addNewMember() {
+        if (!this.newMemberEmail || !this.newMemberName) return;
+
+        const newMember = {
+          id: `new_${Date.now()}`,
+          name: this.newMemberName,
+          email: this.newMemberEmail
+        };
+        this.selectedMembers.push(newMember);
+        this.showNewMemberForm = false;
+        this.newMemberEmail = "";
+        this.newMemberName = "";
+        this.memberSearchEmail = "";
       },
     },
     computed: {

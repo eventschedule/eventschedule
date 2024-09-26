@@ -141,6 +141,10 @@ class EventController extends Controller
         $venues = $roles->filter(function($item) {
             return $item->isVenue() && $item->name;
         });
+        $members = $roles->filter(function($item) {
+            return ($item->isTalent() || $item->isVendor()) && $item->name;
+        });
+    
         
         return view('event/edit', [
             'role' => $role,
@@ -151,6 +155,7 @@ class EventController extends Controller
             'title' => $title,
             'venue' => $venue,
             'venues' => $venues,
+            'members' => $members,
         ]);
     }
 
