@@ -317,7 +317,6 @@
 
                         <div>
                             <div v-if="selectedMembers && selectedMembers.length > 0" class="mb-6">
-                                <h3 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-2">{{ __('messages.selected_members') }}</h3>
                                 <div v-for="member in selectedMembers" :key="member.id" class="flex items-center justify-between mb-2">
                                     <span class="text-sm text-gray-900 dark:text-gray-100">@{{ member.name }} (@{{ member.email || __('messages.no_contact_info') }})</span>
                                     <x-secondary-button @click="removeMember(member)" type="button">
