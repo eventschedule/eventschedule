@@ -391,20 +391,18 @@
                                     </div>
                                     <div class="flex justify-end">
                                         <x-primary-button @click="addNewMember" type="button">
-                                            {{ __('messages.add_member') }}
+                                            {{ __('messages.add') }}
                                         </x-primary-button>
                                     </div>
                                 </div>
                             </div>
 
-                            <div v-if="memberType === 'no_contact_info'">
-                                <div class="mb-4">
-                                    <x-input-label for="no_contact_member_name" :value="__('messages.name') . ' *'" />
-                                    <x-text-input id="no_contact_member_name" v-model="noContactMemberName" type="text" class="mt-1 block w-full" required />
-                                </div>
-                                <div class="flex justify-end">
+                            <div v-if="memberType === 'no_contact_info'" class="mb-6">
+                                <x-input-label for="no_contact_member_name" :value="__('messages.name') . ' *'" />
+                                <div class="flex mt-1">
+                                    <x-text-input id="no_contact_member_name" v-model="noContactMemberName" type="text" class="mr-2 block w-full" required />
                                     <x-primary-button @click="addNoContactMember" type="button">
-                                        {{ __('messages.add_member') }}
+                                        {{ __('messages.add') }}
                                     </x-primary-button>
                                 </div>
                             </div>
