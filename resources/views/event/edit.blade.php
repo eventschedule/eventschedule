@@ -7,6 +7,11 @@
 
 <x-slot name="head">
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    .fixed-width-button {
+      min-width: 100px; /* Adjust this value as needed */
+    }
+  </style>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
         var f = flatpickr('.datepicker', {
@@ -196,7 +201,7 @@
                                     <div class="flex mt-1">
                                         <x-text-input id="venue_search_email" v-model="venueSearchEmail" type="email" class="block w-full mr-2"
                                             :placeholder="''" required autofocus @keydown.enter.prevent="searchVenues" />
-                                        <x-primary-button @click="searchVenues" type="button">
+                                        <x-primary-button @click="searchVenues" type="button" class="fixed-width-button">
                                             {{ __('messages.search') }}
                                         </x-primary-button>
                                     </div>
@@ -227,7 +232,7 @@
                                         <div class="flex mt-1">
                                             <x-text-input id="venue_email" name="venue_email" type="email" class="mr-2 block w-full"
                                                 v-model="venueEmail" required disabled />
-                                            <x-primary-button @click="clearVenueSearch" type="button">
+                                            <x-primary-button @click="clearVenueSearch" type="button" class="fixed-width-button">
                                                 {{ __('messages.clear') }}
                                             </x-primary-button>
                                         </div>
@@ -361,7 +366,7 @@
                                     <div class="flex mt-1">
                                         <x-text-input id="member_search_email" v-model="memberSearchEmail" type="email" class="block w-full mr-2"
                                             :placeholder="''" required autofocus @keydown.enter.prevent="searchMembers" />
-                                        <x-primary-button @click="searchMembers" type="button">
+                                        <x-primary-button @click="searchMembers" type="button" class="fixed-width-button">
                                             {{ __('messages.search') }}
                                         </x-primary-button>
                                     </div>
@@ -384,7 +389,7 @@
                                     <div class="flex mt-1">
                                         <x-text-input id="member_email" name="member_email" type="email" class="mr-2 block w-full"
                                             v-model="memberEmail" required disabled />
-                                        <x-primary-button @click="clearMemberSearch" type="button">
+                                        <x-primary-button @click="clearMemberSearch" type="button" class="fixed-width-button">
                                             {{ __('messages.clear') }}
                                         </x-primary-button>
                                     </div>
@@ -399,7 +404,7 @@
                                     <div class="flex mt-1">
                                         <x-text-input id="member_name" name="member_name" type="text" class="mr-2 block w-full"
                                             v-model="memberName" required autofocus />
-                                        <x-primary-button @click="addNewMember" type="button">
+                                        <x-primary-button @click="addNewMember" type="button" class="fixed-width-button">
                                             {{ __('messages.add') }}
                                         </x-primary-button>
                                     </div>
@@ -411,7 +416,7 @@
                                 <x-input-label for="no_contact_member_name" :value="__('messages.name') . ' *'" />
                                 <div class="flex mt-1">
                                     <x-text-input id="no_contact_member_name" v-model="noContactMemberName" type="text" class="mr-2 block w-full" required />
-                                    <x-primary-button @click="addNoContactMember" type="button">
+                                    <x-primary-button @click="addNoContactMember" type="button" class="fixed-width-button">
                                         {{ __('messages.add') }}
                                     </x-primary-button>
                                 </div>
@@ -530,14 +535,15 @@
         <div class="max-w-7xl mx-auto space-y-6">
             <div class="flex gap-4 items-center justify-between">
                 <div class="flex gap-4">
-                    <x-primary-button>{{ __('messages.save') }}</x-primary-button>                    
-                    <x-cancel-button></x-cancel-button>
+                    <x-primary-button class="fixed-width-button">{{ __('messages.save') }}</x-primary-button>                    
+                    <x-cancel-button class="fixed-width-button"></x-cancel-button>
                 </div>
 
                 <div>
                     @if ($event->exists)
                     <x-delete-button
-                        :url="route('event.delete', ['subdomain' => $subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)])">
+                        :url="route('event.delete', ['subdomain' => $subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)])"
+                        class="fixed-width-button">
                     </x-delete-button>
                     @endif
                 </div>
