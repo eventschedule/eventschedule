@@ -350,13 +350,10 @@
                             </fieldset>
 
                             <div v-if="memberType === 'use_existing'">
-                                <select v-model="selectedExistingMember" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                <select v-model="selectedExistingMember" @change="addExistingMember" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                                     <option value="" disabled selected>{{ __('messages.select_member') }}</option>
                                     <option v-for="member in members" :key="member.id" :value="member">@{{ member.name }}</option>
                                 </select>
-                                <x-primary-button @click="addExistingMember" class="mt-2" type="button">
-                                    {{ __('messages.add_member') }}
-                                </x-primary-button>
                             </div>
 
                             <div v-if="memberType === 'search_create'">
@@ -691,7 +688,9 @@
       addExistingMember() {
         if (this.selectedExistingMember && !this.selectedMembers.some(m => m.id === this.selectedExistingMember.id)) {
           this.selectedMembers.push(this.selectedExistingMember);
-          this.selectedExistingMember = null;
+          this.$nextTick(() => {
+            this.selectedExistingMember = null;
+          });
         }
       },
       addNoContactMember() {
