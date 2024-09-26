@@ -391,11 +391,10 @@
                         </div>
                         @endif
 
-                        <!--
                         <div class="mb-6">
-                            <x-input-label for="flyer_image" :value="__('messages.flyer_image')" />
-                            <input id="flyer_image" name="flyer_image" type="file" class="mt-1 block w-full"
-                                :value="old('flyer_image')" accept="image/png, image/jpeg" onchange="previewImage(this);" />
+                        <x-input-label for="flyer_image" :value="__('messages.flyer_image')" />
+                        <input id="flyer_image" name="flyer_image" type="file" class="mt-1 block w-full" 
+                                accept="image/png, image/jpeg" onchange="previewImage(this);" />
                             <x-input-error class="mt-2" :messages="$errors->get('flyer_image')" />
 
                             <div id="image_preview" class="mt-3" style="display: none;">
@@ -411,7 +410,6 @@
                             </a>
                             @endif
                         </div>
-                            -->
 
                         <div class="mb-6">
                             <x-input-label for="description" :value="__('messages.description')" />
