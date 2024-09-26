@@ -359,7 +359,7 @@
                                 <select v-model="selectedExistingMember" @change="addExistingMember" 
                                     class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                     <option value="" disabled selected>{{ __('messages.please_select') }}</option>
-                                    <option v-for="member in members" :key="member.id" :value="member">@{{ member.name }}</option>
+                                    <option v-for="member in filteredMembers" :key="member.id" :value="member">@{{ member.name }}</option>
                                 </select>
                             </div>
 
@@ -732,7 +732,7 @@
         if (this.selectedExistingMember && !this.selectedMembers.some(m => m.id === this.selectedExistingMember.id)) {
           this.selectedMembers.push(this.selectedExistingMember);
           this.$nextTick(() => {
-            this.selectedExistingMember = null;
+            this.selectedExistingMember = "";
           });
         }
       },
@@ -755,6 +755,9 @@
     computed: {
       selectedVenue() {
         return this.venues[this.event.venue_id];
+      },
+      filteredMembers() {
+        return this.members.filter(member => !this.selectedMembers.some(selected => selected.id === member.id));
       }
     },
     watch: {
