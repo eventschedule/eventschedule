@@ -82,6 +82,7 @@ class EventController extends Controller
                 ->with('message', __('messages.event_deleted'));
     }
 
+    /*
     public function editOld(Request $request, $subdomain, $hash)
     {
         $user = $request->user();
@@ -110,12 +111,17 @@ class EventController extends Controller
 
         return view('event/edit_old', $data);
     }
+    */
 
     public function create(Request $request, $subdomain)
     {
         $user = $request->user();
         $role = Role::subdomain($subdomain)->firstOrFail();
         $venue = $role->isVenue() ? $role : null;
+
+        if (! $role->email_verified_at) {
+            return redirect('/');
+        }
 
         $event = new Event;
         $event->venue_id = $venue ? $venue->id : "";
@@ -161,6 +167,7 @@ class EventController extends Controller
         ]);
     }
 
+    /*
     public function createOld(Request $request, $subdomain)
     {
         $request->validate([
@@ -275,6 +282,7 @@ class EventController extends Controller
 
         return view('event/edit_old', $data);
     }
+    */
 
     public function update(Request $request, $subdomain, $hash)
     {
