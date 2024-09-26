@@ -396,8 +396,13 @@
 
                                 <div v-if="memberEmail" class="mb-6">
                                     <x-input-label for="member_name" :value="__('messages.name') . ' *'" />
-                                    <x-text-input id="member_name" name="member_name" type="text" class="mt-1 block w-full"
-                                        v-model="memberName" required autofocus />
+                                    <div class="flex mt-1">
+                                        <x-text-input id="member_name" name="member_name" type="text" class="mr-2 block w-full"
+                                            v-model="memberName" required autofocus />
+                                        <x-primary-button @click="addNewMember" type="button">
+                                            {{ __('messages.add') }}
+                                        </x-primary-button>
+                                    </div>
                                     <x-input-error class="mt-2" :messages="$errors->get('member_name')" />
                                 </div>
                             </div>
@@ -664,6 +669,7 @@
 
           if (data.length === 0) {
             this.memberEmail = this.memberSearchEmail;
+            this.memberName = '';
             this.$nextTick(() => {
               const memberNameInput = document.getElementById('member_name');
               if (memberNameInput) {
@@ -699,17 +705,16 @@
         this.selectedMembers = this.selectedMembers.filter(m => m.id !== member.id);
       },
       addNewMember() {
-        if (!this.newMemberEmail || !this.newMemberName) return;
+        if (!this.memberEmail || !this.memberName) return;
 
         const newMember = {
           id: `new_${Date.now()}`,
-          name: this.newMemberName,
-          email: this.newMemberEmail
+          name: this.memberName,
+          email: this.memberEmail
         };
         this.selectedMembers.push(newMember);
-        this.showNewMemberForm = false;
-        this.newMemberEmail = "";
-        this.newMemberName = "";
+        this.memberEmail = "";
+        this.memberName = "";
         this.memberSearchEmail = "";
       },
       addExistingMember() {
