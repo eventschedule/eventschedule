@@ -418,7 +418,7 @@
                             <div v-if="memberType === 'no_contact_info'" class="mb-6">
                                 <x-input-label for="no_contact_member_name" :value="__('messages.name') . ' *'" />
                                 <div class="flex mt-1">
-                                    <x-text-input id="no_contact_member_name" @keyup.enter.prevent="addNoContactMember"
+                                    <x-text-input id="no_contact_member_name" @keydown.enter.prevent="addNoContactMember"
                                         v-model="memberName" type="text" class="mr-2 block w-full" required />
                                     <x-primary-button @click="addNoContactMember" type="button" class="fixed-width-button">
                                         {{ __('messages.add') }}
