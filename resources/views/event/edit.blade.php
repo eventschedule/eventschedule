@@ -711,14 +711,9 @@
         this.selectedMembers = this.selectedMembers.filter(m => m.id !== member.id);
       },
       addNewMember() {
-        if (!this.memberEmail || !this.memberName) {
-          // Show validation error
-          const nameInput = document.getElementById('member_name');
-          if (!this.memberName) {
-            nameInput.setCustomValidity('{{ __("messages.name_is_required") }}');
-          } else {
-            nameInput.setCustomValidity('');
-          }
+        const nameInput = document.getElementById('member_name');
+          
+        if (!nameInput.checkValidity()) {
           nameInput.reportValidity();
           return;
         }
@@ -728,14 +723,11 @@
           name: this.memberName,
           email: this.memberEmail
         };
+
         this.selectedMembers.push(newMember);
         this.memberEmail = "";
         this.memberName = "";
         this.memberSearchEmail = "";
-
-        // Reset custom validity
-        const nameInput = document.getElementById('member_name');
-        nameInput.setCustomValidity('');
       },
       addExistingMember() {
         if (this.selectedExistingMember && !this.selectedMembers.some(m => m.id === this.selectedExistingMember.id)) {
