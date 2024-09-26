@@ -197,7 +197,7 @@
                             <div v-if="venueType === 'search_create'">
 
                                 <div v-if="!venueEmail" class="mb-6">
-                                    <x-input-label for="venue_search_email" :value="__('messages.email')" />
+                                    <x-input-label for="venue_search_email" :value="__('messages.email') . ' *'" />
                                     <div class="flex mt-1">
                                         <x-text-input id="venue_search_email" v-model="venueSearchEmail" type="email" class="block w-full mr-2"
                                             :placeholder="''" required autofocus @keydown.enter.prevent="searchVenues" />
@@ -323,7 +323,9 @@
                         <div>
                             <div v-if="selectedMembers && selectedMembers.length > 0" class="mb-6">
                                 <div v-for="member in selectedMembers" :key="member.id" class="flex items-center justify-between mb-2">
-                                    <span class="text-sm text-gray-900 dark:text-gray-100">@{{ member.name }} (@{{ member.email || __('messages.no_contact_info') }})</span>
+                                    <span class="text-sm text-gray-900 dark:text-gray-100">
+                                        @{{ member.name }}@{{ member.email ? ` (${member.email})` : '' }}
+                                    </span>
                                     <x-secondary-button @click="removeMember(member)" type="button" class="fixed-width-button">
                                         {{ __('messages.remove') }}
                                     </x-secondary-button>
@@ -355,7 +357,7 @@
 
                             <div v-if="memberType === 'use_existing'">
                                 <select v-model="selectedExistingMember" @change="addExistingMember" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                                    <option value="" disabled selected>{{ __('messages.select_member') }}</option>
+                                    <option value="" disabled selected>{{ __('messages.please_select') }}</option>
                                     <option v-for="member in members" :key="member.id" :value="member">@{{ member.name }}</option>
                                 </select>
                             </div>
