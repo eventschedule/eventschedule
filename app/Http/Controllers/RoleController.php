@@ -817,8 +817,7 @@ class RoleController extends Controller
             return redirect('/');
         }
 
-        $role = Role::subdomain($subdomain)->firstOrFail();
-        
+        $role = Role::subdomain($subdomain)->firstOrFail();        
         if ($request->remove_link_type == 'social_links') {
             $links = $role->social_links;
         } else if ($request->remove_link_type == 'payment_links') {
@@ -933,36 +932,34 @@ class RoleController extends Controller
                 $result = $responseData['results'][0];
                 $addressComponents = $result['address_components'];
 
-                $street_number = '';
-                $route = '';
-                $city = '';
-                $state = '';
-                $postal_code = '';
-                $country = '';
+                $addressParts = [
+                    'street_number' => '',
+                    'route' => '',
+                    'sublocality_level_1' => '',
+                    'locality' => '',
+                    'administrative_area_level_1' => '',
+                    'postal_code' => '',
+                    'country' => '',
+                ];
 
                 foreach ($addressComponents as $component) {
-                    if (in_array('street_number', $component['types'])) {
-                        $street_number = $component['long_name'];
-                    }
-                    if (in_array('route', $component['types'])) {
-                        $route = $component['long_name'];
-                    }
-                    if (in_array('locality', $component['types'])) {
-                        $city = $component['long_name'];
-                    }
-                    if (in_array('administrative_area_level_1', $component['types'])) {
-                        $state = $component['short_name'];
-                    }
-                    if (in_array('postal_code', $component['types'])) {
-                        $postal_code = $component['long_name'];
-                    }
-                    if (in_array('country', $component['types'])) {
-                        $country = $component['short_name'];
+                    foreach ($component['types'] as $type) {
+                        if (array_key_exists($type, $addressParts)) {
+                            $addressParts[$type] = $type == 'country' ? $component['short_name'] : $component['long_name'];
+                        }
                     }
                 }
 
+                $address1 = trim($addressParts['street_number'] . ' ' . $addressParts['route']);
+                $address2 = $addressParts['sublocality_level_1'];
+                $city = $addressParts['locality'] ?: $addressParts['sublocality_level_1'];
+                $state = $addressParts['administrative_area_level_1'];
+                $postal_code = $addressParts['postal_code'];
+                $country = $addressParts['country'];
+
                 return response()->json([
-                    'address1' => $street_number . ' ' . $route,
+                    'address1' => $address1,
+                    'address2' => $address2,
                     'city' => $city,
                     'state' => $state,
                     'postal_code' => $postal_code,
@@ -974,7 +971,8 @@ class RoleController extends Controller
                     'geo_lon' => $result['geometry']['location']['lng'],
                 ]);
             } else {
-                \Log::error('Google Maps Error: ' . $response);
+                \Log::error('Google Maps Error: ' . json_encode($responseData));
+                return response()->json(['error' => 'Unable to validate address'], 400);
             }
         }
 
