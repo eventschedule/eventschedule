@@ -768,6 +768,8 @@
       memberType() {
         this.memberSearchEmail = "";
         this.memberSearchResults = [];
+        this.memberEmail = "";
+        this.memberName = "";
       },
     },
     mounted() {
