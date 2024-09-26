@@ -356,11 +356,11 @@
                             </div>
 
                             <div v-if="memberType === 'search_create'">
-                                <div class="mb-6">
+                                <div v-if="!memberEmail" class="mb-6">
                                     <x-input-label for="member_search_email" :value="__('messages.email') . ' *'" />
                                     <div class="flex mt-1">
                                         <x-text-input id="member_search_email" v-model="memberSearchEmail" type="email" class="block w-full mr-2"
-                                            :placeholder="''" @keydown.enter.prevent="searchMembers" />
+                                            :placeholder="''" required autofocus @keydown.enter.prevent="searchMembers" />
                                         <x-primary-button @click="searchMembers" type="button">
                                             {{ __('messages.search') }}
                                         </x-primary-button>
@@ -379,20 +379,26 @@
                                     </div>
                                 </div>
 
-                                <div v-if="showNewMemberForm" class="mb-6">
-                                    <div class="mb-4">
-                                        <x-input-label for="new_member_email" :value="__('messages.email') . ' *'" />
-                                        <x-text-input id="new_member_email" v-model="newMemberEmail" type="email" class="mt-1 block w-full" required />
-                                    </div>
-                                    <div class="mb-4">
-                                        <x-input-label for="new_member_name" :value="__('messages.name') . ' *'" />
-                                        <x-text-input id="new_member_name" v-model="newMemberName" type="text" class="mt-1 block w-full" required />
-                                    </div>
-                                    <div class="flex justify-end">
-                                        <x-primary-button @click="addNewMember" type="button">
-                                            {{ __('messages.add') }}
+                                <div v-if="memberEmail" class="mb-6">
+                                    <x-input-label for="member_email" :value="__('messages.email') . ' *'" />
+                                    <div class="flex mt-1">
+                                        <x-text-input id="member_email" name="member_email" type="email" class="mr-2 block w-full"
+                                            v-model="memberEmail" required disabled />
+                                        <x-primary-button @click="clearMemberSearch" type="button">
+                                            {{ __('messages.clear') }}
                                         </x-primary-button>
                                     </div>
+                                    <p class="mt-2 text-sm text-gray-500">
+                                        {{ __('messages.an_email_will_be_sent') }}
+                                    </p>
+                                    <x-input-error class="mt-2" :messages="$errors->get('member_email')" />
+                                </div>
+
+                                <div v-if="memberEmail" class="mb-6">
+                                    <x-input-label for="member_name" :value="__('messages.name') . ' *'" />
+                                    <x-text-input id="member_name" name="member_name" type="text" class="mt-1 block w-full"
+                                        v-model="memberName" required autofocus />
+                                    <x-input-error class="mt-2" :messages="$errors->get('member_name')" />
                                 </div>
                             </div>
 
@@ -563,6 +569,8 @@
         newMemberName: "",
         selectedExistingMember: null,
         noContactMemberName: "",
+        memberEmail: "",
+        memberName: "",
       }
     },
     methods: {
@@ -636,7 +644,12 @@
             || (this.venueType === 'search_create' && this.venueEmail);
       },
       searchMembers() {
-        if (!this.memberSearchEmail) return;
+        const emailInput = document.getElementById('member_search_email');
+        
+        if (!emailInput.checkValidity()) {
+          emailInput.reportValidity();
+          return;
+        }
 
         fetch(`/search_roles?type=member&search=${encodeURIComponent(this.memberSearchEmail)}`, {
           headers: {
@@ -646,16 +659,34 @@
         })
         .then(response => response.json())
         .then(data => {
+          console.log(data);
           this.memberSearchResults = data;
+
           if (data.length === 0) {
-            this.showNewMemberForm = true;
-            this.newMemberEmail = this.memberSearchEmail;
-          } else {
-            this.showNewMemberForm = false;
+            this.memberEmail = this.memberSearchEmail;
+            this.$nextTick(() => {
+              const memberNameInput = document.getElementById('member_name');
+              if (memberNameInput) {
+                memberNameInput.focus();
+              }
+            });
           }
         })
         .catch(error => {
           console.error('Error searching members:', error);
+        });
+      },
+      clearMemberSearch() {
+        this.memberEmail = "";
+        this.memberName = "";
+        this.memberSearchEmail = "";
+        this.memberSearchResults = [];
+        
+        this.$nextTick(() => {
+          const emailInput = document.getElementById('member_search_email');
+          if (emailInput) {
+            emailInput.focus();
+          }
         });
       },
       addMember(member) {
