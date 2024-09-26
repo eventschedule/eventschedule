@@ -415,7 +415,8 @@
                             <div v-if="memberType === 'no_contact_info'" class="mb-6">
                                 <x-input-label for="no_contact_member_name" :value="__('messages.name') . ' *'" />
                                 <div class="flex mt-1">
-                                    <x-text-input id="no_contact_member_name" v-model="noContactMemberName" type="text" class="mr-2 block w-full" required />
+                                    <x-text-input id="no_contact_member_name" @keyup.enter.prevent="addNoContactMember"
+                                        v-model="noContactMemberName" type="text" class="mr-2 block w-full" required />
                                     <x-primary-button @click="addNoContactMember" type="button" class="fixed-width-button">
                                         {{ __('messages.add') }}
                                     </x-primary-button>
@@ -711,8 +712,7 @@
         this.selectedMembers = this.selectedMembers.filter(m => m.id !== member.id);
       },
       addNewMember() {
-        const nameInput = document.getElementById('member_name');
-          
+        const nameInput = document.getElementById('member_name');    
         if (!nameInput.checkValidity()) {
           nameInput.reportValidity();
           return;
@@ -738,7 +738,11 @@
         }
       },
       addNoContactMember() {
-        if (!this.noContactMemberName) return;
+        const nameInput = document.getElementById('no_contact_member_name');    
+        if (!nameInput.checkValidity()) {
+          nameInput.reportValidity();
+          return;
+        }
 
         const newMember = {
           id: `no_contact_${Date.now()}`,
