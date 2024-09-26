@@ -356,7 +356,8 @@
                             </fieldset>
 
                             <div v-if="memberType === 'use_existing'">
-                                <select v-model="selectedExistingMember" @change="addExistingMember" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                <select v-model="selectedExistingMember" @change="addExistingMember" 
+                                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                                     <option value="" disabled selected>{{ __('messages.please_select') }}</option>
                                     <option v-for="member in members" :key="member.id" :value="member">@{{ member.name }}</option>
                                 </select>
@@ -418,7 +419,7 @@
                                 <x-input-label for="no_contact_member_name" :value="__('messages.name') . ' *'" />
                                 <div class="flex mt-1">
                                     <x-text-input id="no_contact_member_name" @keyup.enter.prevent="addNoContactMember"
-                                        v-model="noContactMemberName" type="text" class="mr-2 block w-full" required />
+                                        v-model="memberName" type="text" class="mr-2 block w-full" required />
                                     <x-primary-button @click="addNoContactMember" type="button" class="fixed-width-button">
                                         {{ __('messages.add') }}
                                     </x-primary-button>
@@ -578,11 +579,7 @@
         selectedMembers: @json($event->members ?? []),
         memberSearchEmail: "",
         memberSearchResults: [],
-        showNewMemberForm: false,
-        newMemberEmail: "",
-        newMemberName: "",
         selectedExistingMember: null,
-        noContactMemberName: "",
         memberEmail: "",
         memberName: "",
       }
@@ -748,11 +745,11 @@
 
         const newMember = {
           id: `no_contact_${Date.now()}`,
-          name: this.noContactMemberName,
+          name: this.memberName,
           email: null
         };
         this.selectedMembers.push(newMember);
-        this.noContactMemberName = "";
+        this.memberName = "";
       },
     },
     computed: {
@@ -767,7 +764,11 @@
         this.venueSearchEmail = "";
         this.venueSearchResults = [];
         this.setFocusBasedOnVenueType();
-      }
+      },
+      memberType() {
+        this.memberSearchEmail = "";
+        this.memberSearchResults = [];
+      },
     },
     mounted() {
         this.setFocusBasedOnVenueType();
