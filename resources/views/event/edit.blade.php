@@ -723,6 +723,7 @@
         const newMember = {
           id: 'new_' + Date.now(),
           name: this.memberName,
+          email: this.memberEmail,
         };
 
         this.selectedMembers.push(newMember);
@@ -748,6 +749,7 @@
         const newMember = {
           id: 'new_' + Date.now(),
           name: this.memberName,
+          email: null,
         };
         this.selectedMembers.push(newMember);
         this.memberName = "";
