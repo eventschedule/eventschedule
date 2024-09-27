@@ -200,7 +200,7 @@
                                     <x-input-label for="venue_search_email" :value="__('messages.email') . ' *'" />
                                     <div class="flex mt-1">
                                         <x-text-input id="venue_search_email" v-model="venueSearchEmail" type="email" class="block w-full mr-2"
-                                            :placeholder="''" required autofocus @keydown.enter.prevent="searchVenues" />
+                                            :placeholder="''" required autofocus @keydown.enter.prevent="searchVenues" autocomplete="off" />
                                         <x-primary-button @click="searchVenues" type="button" class="fixed-width-button">
                                             {{ __('messages.search') }}
                                         </x-primary-button>
@@ -231,7 +231,7 @@
                                         <x-input-label for="venue_email" :value="__('messages.email') . ' *'" />
                                         <div class="flex mt-1">
                                             <x-text-input id="venue_email" name="venue_email" type="email" class="mr-2 block w-full"
-                                                v-model="venueEmail" required disabled />
+                                                v-model="venueEmail" required disabled autocomplete="off" />
                                             <x-primary-button @click="clearVenueSearch" type="button" class="fixed-width-button">
                                                 {{ __('messages.clear') }}
                                             </x-primary-button>
@@ -245,7 +245,7 @@
                                     <div class="mb-6">
                                         <x-input-label for="venue_name" :value="__('messages.name') . ' *'" />
                                         <x-text-input id="venue_name" name="venue_name" type="text" class="mt-1 block w-full"
-                                            v-model="venueName" required autofocus />
+                                            v-model="venueName" required autofocus autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_name')" />
                                     </div>
                                 </div>
@@ -368,7 +368,7 @@
                                     <x-input-label for="member_search_email" :value="__('messages.email') . ' *'" />
                                     <div class="flex mt-1">
                                         <x-text-input id="member_search_email" v-model="memberSearchEmail" type="email" class="block w-full mr-2"
-                                            :placeholder="''" required autofocus @keydown.enter.prevent="searchMembers" />
+                                            :placeholder="''" required autofocus @keydown.enter.prevent="searchMembers" autocomplete="off" />
                                         <x-primary-button @click="searchMembers" type="button" class="fixed-width-button">
                                             {{ __('messages.search') }}
                                         </x-primary-button>
@@ -391,7 +391,7 @@
                                     <x-input-label for="member_email" :value="__('messages.email') . ' *'" />
                                     <div class="flex mt-1">
                                         <x-text-input id="member_email" name="member_email" type="email" class="mr-2 block w-full"
-                                            v-model="memberEmail" required disabled />
+                                            v-model="memberEmail" required disabled autocomplete="off" />
                                         <x-primary-button @click="clearMemberSearch" type="button" class="fixed-width-button">
                                             {{ __('messages.clear') }}
                                         </x-primary-button>
@@ -406,7 +406,7 @@
                                     <x-input-label for="member_name" :value="__('messages.name') . ' *'" />
                                     <div class="flex mt-1">
                                         <x-text-input id="member_name" name="member_name" type="text" class="mr-2 block w-full"
-                                            v-model="memberName" required autofocus @keydown.enter.prevent="addNewMember" />
+                                            v-model="memberName" required autofocus @keydown.enter.prevent="addNewMember" autocomplete="off" />
                                         <x-primary-button @click="addNewMember" type="button" class="fixed-width-button">
                                             {{ __('messages.add') }}
                                         </x-primary-button>
@@ -419,7 +419,7 @@
                                 <x-input-label for="no_contact_member_name" :value="__('messages.name') . ' *'" />
                                 <div class="flex mt-1">
                                     <x-text-input id="no_contact_member_name" @keydown.enter.prevent="addNoContactMember"
-                                        v-model="memberName" type="text" class="mr-2 block w-full" required />
+                                        v-model="memberName" type="text" class="mr-2 block w-full" required autocomplete="off" />
                                     <x-primary-button @click="addNoContactMember" type="button" class="fixed-width-button">
                                         {{ __('messages.add') }}
                                     </x-primary-button>
@@ -468,14 +468,14 @@
                                 :value="__('messages.date_and_time') . ($venue && $venue->user_id ? '' : ' *')" />
                             <x-text-input type="text" id="starts_at" name="starts_at" class="datepicker"
                                 :value="old('starts_at', $event->localStartsAt())"
-                                :required="! $venue || ! $venue->user_id" />
+                                :required="! $venue || ! $venue->user_id" autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('starts_at')" />
                         </div>
 
                         <div class="mb-6">
                             <x-input-label for="duration" :value="__('messages.duration_in_hours')" />
                             <x-text-input type="number" id="duration" name="duration"
-                                :value="old('duration', $event->duration)" />
+                                :value="old('duration', $event->duration)" autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('duration')" />
                         </div>
                         
@@ -525,7 +525,8 @@
                         <div class="mb-6">
                             <x-input-label for="description" :value="__('messages.description')" />
                             <textarea id="description" name="description"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">{{ old('description', $event->description) }}</textarea>
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                autocomplete="off">{{ old('description', $event->description) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
 
