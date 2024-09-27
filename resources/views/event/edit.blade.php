@@ -613,7 +613,6 @@
         })
         .then(response => response.json())
         .then(data => {
-          console.log(data);
           this.venueSearchResults = data;
 
           if (data.length === 0) {
@@ -679,7 +678,6 @@
         })
         .then(response => response.json())
         .then(data => {
-          console.log(data);
           this.memberSearchResults = data;
 
           if (data.length === 0) {
