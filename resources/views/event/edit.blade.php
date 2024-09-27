@@ -212,7 +212,7 @@
                                     <x-input-label :value="__('messages.search_results')" />
                                     <div class="mt-2 space-y-2">
                                         <div v-for="venue in venueSearchResults" :key="venue.id" class="flex items-center">
-                                            <input :id="'venue_' + venue.id" type="radio" :value="venue.id" v-model="event.venue_id"
+                                            <input :id="'venue_' + venue.id" type="radio" :value="venue" v-model="selectedVenue"
                                                 class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                             <label :for="'venue_' + venue.id" class="ml-3 block text-sm font-medium text-gray-900 dark:text-gray-100">
                                                 @{{ venue.name }}
