@@ -380,10 +380,10 @@
                                     <x-input-label :value="__('messages.search_results')" />
                                     <div class="mt-2 space-y-2">
                                         <div v-for="member in memberSearchResults" :key="member.id" class="flex items-center justify-between">
-                                            <span class="text-sm text-gray-900 dark:text-gray-100">@{{ member.name }} (@{{ member.email }})</span>
-                                            <x-secondary-button @click="addMember(member)" type="button">
+                                            <span class="text-sm text-gray-900 dark:text-gray-100">@{{ member.name }}</span>
+                                            <x-primary-button @click="addMember(member)" type="button" class="fixed-width-button">
                                                 {{ __('messages.add') }}
-                                            </x-secondary-button>
+                                            </x-primary-button>
                                         </div>
                                     </div>
                                 </div>
