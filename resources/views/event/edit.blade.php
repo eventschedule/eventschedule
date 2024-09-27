@@ -187,7 +187,7 @@
                             </fieldset>
 
                             <div v-if="venueType === 'use_existing'">
-                                <select name="venue_id"
+                                <select name="venue_id" required
                                         class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                         v-model="event.venue_id">
                                         <option value="" disabled selected>{{ __('messages.please_select') }}</option>                                
@@ -358,7 +358,7 @@
                             </fieldset>
 
                             <div v-if="memberType === 'use_existing'">
-                                <select v-model="selectedExistingMember" @change="addExistingMember" 
+                                <select v-model="selectedExistingMember" @change="addExistingMember" :required="selectedMembers.length === 0"
                                     class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                     <option value="" disabled selected>{{ __('messages.please_select') }}</option>
                                     <option v-for="member in filteredMembers" :key="member.id" :value="member">@{{ member.name }}</option>
