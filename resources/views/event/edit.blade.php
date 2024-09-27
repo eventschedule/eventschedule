@@ -426,10 +426,10 @@
                                 </div>
                             </div>
 
-                            <div v-if="!showMemberTypeRadio" class="mt-4">
-                                <x-primary-button @click="showAddMemberForm" type="button" class="fixed-size-button">
+                            <div v-if="!showMemberTypeRadio" class="mt-4 flex justify-end">
+                                <x-secondary-button @click="showAddMemberForm" type="button" class="fixed-size-button">
                                     {{ __('messages.add') }}
-                                </x-primary-button>
+                                </x-secondary-button>
                             </div>
                         </div>
                     </div>
