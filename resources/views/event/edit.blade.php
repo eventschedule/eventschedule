@@ -232,9 +232,9 @@
                                         <div class="flex mt-1">
                                             <x-text-input id="venue_email" name="venue_email" type="email" class="mr-2 block w-full"
                                                 v-model="venueEmail" required disabled autocomplete="off" />
-                                            <x-primary-button @click="clearVenueSearch" type="button" class="fixed-width-button">
+                                            <x-secondary-button @click="clearVenueSearch" type="button" class="fixed-width-button">
                                                 {{ __('messages.clear') }}
-                                            </x-primary-button>
+                                            </x-secondary-button>
                                         </div>
                                         <p class="mt-2 text-sm text-gray-500">
                                             {{ __('messages.an_email_will_be_sent') }}
@@ -392,9 +392,9 @@
                                     <div class="flex mt-1">
                                         <x-text-input id="member_email" name="member_email" type="email" class="mr-2 block w-full"
                                             v-model="memberEmail" required disabled autocomplete="off" />
-                                        <x-primary-button @click="clearMemberSearch" type="button" class="fixed-width-button">
+                                        <x-secondary-button @click="clearMemberSearch" type="button" class="fixed-width-button">
                                             {{ __('messages.clear') }}
-                                        </x-primary-button>
+                                        </x-secondary-button>
                                     </div>
                                     <p class="mt-2 text-sm text-gray-500">
                                         {{ __('messages.an_email_will_be_sent') }}
