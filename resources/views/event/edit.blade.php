@@ -330,98 +330,106 @@
                                 </div>
                             </div>
 
-                            <fieldset>                                
-                                <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
-                                    <div v-if="Object.keys(members).length > 0" class="flex items-center">
-                                        <input id="use_existing_members" name="member_type" type="radio" value="use_existing" v-model="memberType"
-                                            class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                                        <label for="use_existing_members"
-                                            class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
+                            <div v-if="showMemberTypeRadio">
+                                <fieldset>                                
+                                    <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
+                                        <div v-if="Object.keys(members).length > 0" class="flex items-center">
+                                            <input id="use_existing_members" name="member_type" type="radio" value="use_existing" v-model="memberType"
+                                                class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                            <label for="use_existing_members"
+                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input id="search_create_members" name="member_type" type="radio" value="search_create" v-model="memberType"
+                                                class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                            <label for="search_create_members"
+                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.search_create') }}</label>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input id="no_contact_info_members" name="member_type" type="radio" value="no_contact_info" v-model="memberType"
+                                                class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                            <label for="no_contact_info_members"
+                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.no_contact_info') }}</label>
+                                        </div>
                                     </div>
-                                    <div class="flex items-center">
-                                        <input id="search_create_members" name="member_type" type="radio" value="search_create" v-model="memberType"
-                                            class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                                        <label for="search_create_members"
-                                            class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.search_create') }}</label>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <input id="no_contact_info_members" name="member_type" type="radio" value="no_contact_info" v-model="memberType"
-                                            class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                                        <label for="no_contact_info_members"
-                                            class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.no_contact_info') }}</label>
-                                    </div>
-                                </div>
-                            </fieldset>
+                                </fieldset>
 
-                            <div v-if="memberType === 'use_existing'">
-                                <select v-model="selectedMember" @change="addExistingMember" :required="selectedMembers.length === 0"
-                                    class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
-                                    <option value="" disabled selected>{{ __('messages.please_select') }}</option>
-                                    <option v-for="member in filteredMembers" :key="member.id" :value="member">@{{ member.name }}</option>
-                                </select>
-                            </div>
-
-                            <div v-if="memberType === 'search_create'">
-                                <div v-if="!memberEmail" class="mb-6">
-                                    <x-input-label for="member_search_email" :value="__('messages.email') . ' *'" />
-                                    <div class="flex mt-1">
-                                        <x-text-input id="member_search_email" v-model="memberSearchEmail" type="email" class="block w-full mr-2"
-                                            :placeholder="''" required autofocus @keydown.enter.prevent="searchMembers" autocomplete="off" />
-                                        <x-primary-button @click="searchMembers" type="button" class="fixed-size-button">
-                                            {{ __('messages.search') }}
-                                        </x-primary-button>
-                                    </div>
+                                <div v-if="memberType === 'use_existing'">
+                                    <select v-model="selectedMember" @change="addExistingMember" :required="selectedMembers.length === 0"
+                                        class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                        <option value="" disabled selected>{{ __('messages.please_select') }}</option>
+                                        <option v-for="member in filteredMembers" :key="member.id" :value="member">@{{ member.name }}</option>
+                                    </select>
                                 </div>
 
-                                <div v-if="memberSearchResults.length" class="mb-6">
-                                    <x-input-label :value="__('messages.search_results')" />
-                                    <div class="mt-2 space-y-2">
-                                        <div v-for="member in memberSearchResults" :key="member.id" class="flex items-center justify-between">
-                                            <span class="text-sm text-gray-900 dark:text-gray-100">@{{ member.name }}</span>
-                                            <x-primary-button @click="addMember(member)" type="button" class="fixed-size-button">
-                                                {{ __('messages.add') }}
+                                <div v-if="memberType === 'search_create'">
+                                    <div v-if="!memberEmail" class="mb-6">
+                                        <x-input-label for="member_search_email" :value="__('messages.email') . ' *'" />
+                                        <div class="flex mt-1">
+                                            <x-text-input id="member_search_email" v-model="memberSearchEmail" type="email" class="block w-full mr-2"
+                                                :placeholder="''" required autofocus @keydown.enter.prevent="searchMembers" autocomplete="off" />
+                                            <x-primary-button @click="searchMembers" type="button" class="fixed-size-button">
+                                                {{ __('messages.search') }}
                                             </x-primary-button>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div v-if="memberEmail" class="mb-6">
-                                    <x-input-label for="member_email" :value="__('messages.email') . ' *'" />
-                                    <div class="flex mt-1">
-                                        <x-text-input id="member_email" name="member_email" type="email" class="mr-2 block w-full"
-                                            v-model="memberEmail" required disabled autocomplete="off" />
-                                        <x-secondary-button @click="clearMemberSearch" type="button" class="fixed-size-button">
-                                            {{ __('messages.clear') }}
-                                        </x-secondary-button>
+                                    <div v-if="memberSearchResults.length" class="mb-6">
+                                        <x-input-label :value="__('messages.search_results')" />
+                                        <div class="mt-2 space-y-2">
+                                            <div v-for="member in memberSearchResults" :key="member.id" class="flex items-center justify-between">
+                                                <span class="text-sm text-gray-900 dark:text-gray-100">@{{ member.name }}</span>
+                                                <x-primary-button @click="addMember(member)" type="button" class="fixed-size-button">
+                                                    {{ __('messages.add') }}
+                                                </x-primary-button>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <p class="mt-2 text-sm text-gray-500">
-                                        {{ __('messages.an_email_will_be_sent') }}
-                                    </p>
-                                    <x-input-error class="mt-2" :messages="$errors->get('member_email')" />
+
+                                    <div v-if="memberEmail" class="mb-6">
+                                        <x-input-label for="member_email" :value="__('messages.email') . ' *'" />
+                                        <div class="flex mt-1">
+                                            <x-text-input id="member_email" name="member_email" type="email" class="mr-2 block w-full"
+                                                v-model="memberEmail" required disabled autocomplete="off" />
+                                            <x-secondary-button @click="clearMemberSearch" type="button" class="fixed-size-button">
+                                                {{ __('messages.clear') }}
+                                            </x-secondary-button>
+                                        </div>
+                                        <p class="mt-2 text-sm text-gray-500">
+                                            {{ __('messages.an_email_will_be_sent') }}
+                                        </p>
+                                        <x-input-error class="mt-2" :messages="$errors->get('member_email')" />
+                                    </div>
+
+                                    <div v-if="memberEmail" class="mb-6">
+                                        <x-input-label for="member_name" :value="__('messages.name') . ' *'" />
+                                        <div class="flex mt-1">
+                                            <x-text-input id="member_name" name="member_name" type="text" class="mr-2 block w-full"
+                                                v-model="memberName" required autofocus @keydown.enter.prevent="addNewMember" autocomplete="off" />
+                                            <x-primary-button @click="addNewMember" type="button" class="fixed-size-button">
+                                                {{ __('messages.add') }}
+                                            </x-primary-button>
+                                        </div>
+                                        <x-input-error class="mt-2" :messages="$errors->get('member_name')" />
+                                    </div>
                                 </div>
 
-                                <div v-if="memberEmail" class="mb-6">
-                                    <x-input-label for="member_name" :value="__('messages.name') . ' *'" />
+                                <div v-if="memberType === 'no_contact_info'" class="mb-6">
+                                    <x-input-label for="no_contact_member_name" :value="__('messages.name') . ' *'" />
                                     <div class="flex mt-1">
-                                        <x-text-input id="member_name" name="member_name" type="text" class="mr-2 block w-full"
-                                            v-model="memberName" required autofocus @keydown.enter.prevent="addNewMember" autocomplete="off" />
-                                        <x-primary-button @click="addNewMember" type="button" class="fixed-size-button">
+                                        <x-text-input id="no_contact_member_name" @keydown.enter.prevent="addNoContactMember"
+                                            v-model="memberName" type="text" class="mr-2 block w-full" required autocomplete="off" />
+                                        <x-primary-button @click="addNoContactMember" type="button" class="fixed-size-button">
                                             {{ __('messages.add') }}
                                         </x-primary-button>
                                     </div>
-                                    <x-input-error class="mt-2" :messages="$errors->get('member_name')" />
                                 </div>
                             </div>
 
-                            <div v-if="memberType === 'no_contact_info'" class="mb-6">
-                                <x-input-label for="no_contact_member_name" :value="__('messages.name') . ' *'" />
-                                <div class="flex mt-1">
-                                    <x-text-input id="no_contact_member_name" @keydown.enter.prevent="addNoContactMember"
-                                        v-model="memberName" type="text" class="mr-2 block w-full" required autocomplete="off" />
-                                    <x-primary-button @click="addNoContactMember" type="button" class="fixed-size-button">
-                                        {{ __('messages.add') }}
-                                    </x-primary-button>
-                                </div>
+                            <div v-if="!showMemberTypeRadio" class="mt-4">
+                                <x-primary-button @click="showAddMemberForm" type="button" class="fixed-size-button">
+                                    {{ __('messages.add') }}
+                                </x-primary-button>
                             </div>
                         </div>
                     </div>
@@ -582,6 +590,7 @@
         selectedMember: "",
         memberEmail: "",
         memberName: "",
+        showMemberTypeRadio: true,
       }
     },
     methods: {
@@ -706,9 +715,13 @@
           this.selectedMembers.push(member);
         }
         this.memberSearchResults = this.memberSearchResults.filter(m => m.id !== member.id);
+        this.showMemberTypeRadio = false;
       },
       removeMember(member) {
         this.selectedMembers = this.selectedMembers.filter(m => m.id !== member.id);
+        if (this.selectedMembers.length === 0) {
+          this.showMemberTypeRadio = true;
+        }
       },
       addNewMember() {
         const nameInput = document.getElementById('member_name');    
@@ -727,6 +740,7 @@
         this.memberEmail = "";
         this.memberName = "";
         this.memberSearchEmail = "";
+        this.showMemberTypeRadio = false;
       },
       addExistingMember() {
         if (this.selectedMember && !this.selectedMembers.some(m => m.id === this.selectedMember.id)) {
@@ -734,6 +748,7 @@
           this.$nextTick(() => {
             this.selectedMember = "";
           });
+          this.showMemberTypeRadio = false;
         }
       },
       addNoContactMember() {
@@ -750,6 +765,7 @@
         };
         this.selectedMembers.push(newMember);
         this.memberName = "";
+        this.showMemberTypeRadio = false;
       },
       setFocusBasedOnMemberType() {
         this.$nextTick(() => {
@@ -765,6 +781,10 @@
             }
           }
         });
+      },
+      showAddMemberForm() {
+        this.showMemberTypeRadio = true;
+        this.setFocusBasedOnMemberType();
       },
     },
     computed: {
@@ -794,6 +814,7 @@
     mounted() {
       this.setFocusBasedOnVenueType();
       this.setFocusBasedOnMemberType();
+      this.showMemberTypeRadio = this.selectedMembers.length === 0;
     }
   }).mount('#app')
 </script>
