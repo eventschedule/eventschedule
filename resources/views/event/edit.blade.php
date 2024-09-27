@@ -189,9 +189,9 @@
                             <div v-if="venueType === 'use_existing'">
                                 <select name="venue_id" required
                                         class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                        v-model="selectedVenueId">
+                                        v-model="selectedVenue">
                                         <option value="" disabled selected>{{ __('messages.please_select') }}</option>                                
-                                        <option v-for="venue in venues" :key="venue.id" :value="venue.id">@{{ venue.name }}</option>
+                                        <option v-for="venue in venues" :key="venue.id" :value="venue">@{{ venue.name }}</option>
                                 </select>
                             </div>
 
@@ -583,7 +583,7 @@
         venueEmail: "",
         venueSearchEmail: "",
         venueSearchResults: [],
-        selectedVenueId: "",
+        selectedVenue: "",
         selectedMembers: @json($event->members ?? []),
         memberSearchEmail: "",
         memberSearchResults: [],
@@ -595,7 +595,7 @@
     },
     methods: {
       clearSelectedVenue() {
-        this.selectedVenueId = "";
+        this.selectedVenue = "";
       },
       searchVenues() {
         const emailInput = document.getElementById('venue_search_email');
@@ -790,9 +790,6 @@
       },
     },
     computed: {
-      selectedVenue() {
-        return this.venues[this.selectedVenueId];
-      },
       filteredMembers() {
         return this.members.filter(member => !this.selectedMembers.some(selected => selected.id === member.id));
       }
