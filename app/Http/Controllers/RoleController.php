@@ -1078,6 +1078,7 @@ class RoleController extends Controller
             })
             ->get([
                 'id', 
+                'subdomain',
                 'name', 
                 'address1', 
                 'address2', 
@@ -1092,6 +1093,7 @@ class RoleController extends Controller
         $roles = $roles->map(function ($role) {
             $role->id = UrlUtils::encodeId($role->id);
             $role->user_id = UrlUtils::encodeId($role->user_id);
+            $role->url = $role->getGuestUrl();
             return $role;
         });
 
