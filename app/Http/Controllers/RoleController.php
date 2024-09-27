@@ -1070,13 +1070,24 @@ class RoleController extends Controller
         $type = $request->type;
         $search = $request->search;
 
-        $roles = Role::where('type', $type)
+        $roles = Role::whereIn('type', $type == 'venue' ? ['venue'] : ['talent', 'vendor'])
             ->where(function($query) use ($search) {
                 $query->where('email', '=', $search);
                   //->orWhere('phone', '=', $search)
                   //->orWhere('name', 'like', "%{$search}%");
             })
-            ->get(['id', 'name', 'address1', 'address2', 'city', 'state', 'zip', 'user_id']);
+            ->get([
+                'id', 
+                'name', 
+                'address1', 
+                'address2', 
+                'city', 
+                'state', 
+                'zip', 
+                'user_id',
+                'profile_image_url',
+                'country_code',
+            ]);
 
         $roles = $roles->map(function ($role) {
             $role->id = UrlUtils::encodeId($role->id);
