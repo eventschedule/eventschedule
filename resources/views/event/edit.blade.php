@@ -636,15 +636,15 @@
       },
       setFocusBasedOnVenueType() {
         this.$nextTick(() => {
-          if (this.venueType === 'use_existing') {
-            const venueSelect = document.querySelector('select[name="venue_id"]');
-            if (venueSelect) {
-              venueSelect.focus();
-            }
-          } else if (this.venueType === 'search_create') {
+          if (this.venueType === 'search_create') {
             const searchInput = document.getElementById('venue_search_email');
             if (searchInput) {
               searchInput.focus();
+            }
+          } if (this.venueType === 'private_address') {
+            const venueSelect = document.querySelector('input[name="venue_address1"]');
+            if (venueSelect) {
+              venueSelect.focus();
             }
           }
         });
@@ -751,6 +751,21 @@
         this.selectedMembers.push(newMember);
         this.memberName = "";
       },
+      setFocusBasedOnMemberType() {
+        this.$nextTick(() => {
+          if (this.memberType === 'search_create') {
+            const searchInput = document.getElementById('member_search_email');
+            if (searchInput) {
+              searchInput.focus();
+            }
+          } else if (this.memberType === 'no_contact_info') {
+            const nameInput = document.getElementById('no_contact_member_name');
+            if (nameInput) {
+              nameInput.focus();
+            }
+          }
+        });
+      },
     },
     computed: {
       selectedVenue() {
@@ -773,10 +788,12 @@
         this.memberSearchResults = [];
         this.memberEmail = "";
         this.memberName = "";
+        this.setFocusBasedOnMemberType();
       },
     },
     mounted() {
-        this.setFocusBasedOnVenueType();
+      this.setFocusBasedOnVenueType();
+      this.setFocusBasedOnMemberType();
     }
   }).mount('#app')
 </script>
