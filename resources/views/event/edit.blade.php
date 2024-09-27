@@ -318,6 +318,7 @@
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                             {{ __('messages.members') }}
+                            <span v-if="selectedMembers.length > 1">(@{{ selectedMembers.length }})</span>
                         </h2>
 
                         <div>
@@ -719,7 +720,7 @@
         }
 
         const newMember = {
-          id: -1,
+          id: 'new_' + Date.now(),
           name: this.memberName,
         };
 
@@ -744,7 +745,7 @@
         }
 
         const newMember = {
-          id: -1,
+          id: 'new_' + Date.now(),
           name: this.memberName,
         };
         this.selectedMembers.push(newMember);
