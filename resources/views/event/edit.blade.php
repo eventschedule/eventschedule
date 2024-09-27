@@ -189,7 +189,7 @@
                             <div v-if="venueType === 'use_existing'">
                                 <select name="venue_id" required
                                         class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                        v-model="event.venue_id">
+                                        v-model="selectedVenueId">
                                         <option value="" disabled selected>{{ __('messages.please_select') }}</option>                                
                                         <option v-for="venue in venues" :key="venue.id" :value="venue.id">@{{ venue.name }}</option>
                                 </select>
@@ -219,12 +219,6 @@
                                             </label>
                                         </div>
                                     </div>
-                                </div>
-                                <div v-if="selectedVenue" class="mb-6">
-                                    <x-input-label :value="__('messages.selected_venue')" />
-                                    <p class="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                                        @{{ selectedVenue.name }}
-                                    </p>
                                 </div>
 
                                 <div v-if="venueEmail && !event.id">
@@ -304,14 +298,16 @@
                             </div>
                         </div>
 
-                        <div v-else>
-                            <p class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                                {{ __('messages.selected_venue') }}: @{{ selectedVenue.name }}
-                            </p>
-                            <button @click="clearSelectedVenue" class="mt-2 text-sm text-indigo-600 hover:text-indigo-500">
-                                {{ __('messages.change_venue') }}
-                            </button>
-                        </div>
+                        <div v-else class="mb-6">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-900 dark:text-gray-100">
+                                    @{{ selectedVenue.name }}
+                                </span>
+                                <x-secondary-button @click="clearSelectedVenue" type="button" class="fixed-size-button">
+                                    {{ __('messages.remove') }}
+                                </x-secondary-button>
+                            </div>
+                        </div>                        
                     </div>
                 </div>
 
@@ -358,7 +354,7 @@
                             </fieldset>
 
                             <div v-if="memberType === 'use_existing'">
-                                <select v-model="selectedExistingMember" @change="addExistingMember" :required="selectedMembers.length === 0"
+                                <select v-model="selectedMember" @change="addExistingMember" :required="selectedMembers.length === 0"
                                     class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                     <option value="" disabled selected>{{ __('messages.please_select') }}</option>
                                     <option v-for="member in filteredMembers" :key="member.id" :value="member">@{{ member.name }}</option>
@@ -575,21 +571,22 @@
         members: @json($members ?? []),
         venueType: "use_existing",
         memberType: "use_existing",
-        venueName: "{{ old('venue_name', $venue ? $venue->name : '') }}",
-        venueEmail: "{{ old('venue_email', $venue ? $venue->email : request()->venue_email) }}",
+        venueName: "",
+        venueEmail: "",
         venueSearchEmail: "",
         venueSearchResults: [],
+        selectedVenueId: "",
         selectedMembers: @json($event->members ?? []),
         memberSearchEmail: "",
         memberSearchResults: [],
-        selectedExistingMember: "",
+        selectedMember: "",
         memberEmail: "",
         memberName: "",
       }
     },
     methods: {
       clearSelectedVenue() {
-        this.event.venue_id = "";
+        this.selectedVenueId = "";
       },
       searchVenues() {
         const emailInput = document.getElementById('venue_search_email');
@@ -732,10 +729,10 @@
         this.memberSearchEmail = "";
       },
       addExistingMember() {
-        if (this.selectedExistingMember && !this.selectedMembers.some(m => m.id === this.selectedExistingMember.id)) {
-          this.selectedMembers.push(this.selectedExistingMember);
+        if (this.selectedMember && !this.selectedMembers.some(m => m.id === this.selectedMember.id)) {
+          this.selectedMembers.push(this.selectedMember);
           this.$nextTick(() => {
-            this.selectedExistingMember = "";
+            this.selectedMember = "";
           });
         }
       },
@@ -772,7 +769,7 @@
     },
     computed: {
       selectedVenue() {
-        return this.venues[this.event.venue_id];
+        return this.venues[this.selectedVenueId];
       },
       filteredMembers() {
         return this.members.filter(member => !this.selectedMembers.some(selected => selected.id === member.id));

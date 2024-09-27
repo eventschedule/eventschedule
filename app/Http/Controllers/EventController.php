@@ -138,14 +138,23 @@ class EventController extends Controller
         }
         
         $roles = $user->roles()->get();
+    
         $venues = $roles->filter(function($item) {
             return $item->isVenue() && $item->name;
         });
+        $venues = $venues->mapWithKeys(function ($venue) {
+            $venue->id = UrlUtils::encodeId($venue->id);
+            return [$venue->id => $venue];
+        });
+    
         $members = $roles->filter(function($item) {
             return ($item->isTalent() || $item->isVendor()) && $item->name;
         });
-    
-        
+        $members = $members->mapWithKeys(function ($member) {
+            $member->id = UrlUtils::encodeId($member->id);
+            return [$member->id => $member];
+        });
+            
         return view('event/edit', [
             'role' => $role,
             'user' => $user,
