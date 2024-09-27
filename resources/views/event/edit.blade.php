@@ -715,6 +715,8 @@
           this.selectedMembers.push(member);
         }
         this.memberSearchResults = this.memberSearchResults.filter(m => m.id !== member.id);
+        this.memberSearchEmail = "";
+        this.memberSearchResults = [];
         this.showMemberTypeRadio = false;
       },
       removeMember(member) {
