@@ -281,4 +281,5 @@ return [
     'members' => 'Members',
     'no_contact_info' => 'No contact info',
     'youtube_video_url' => 'Youtube Video URL',
+    'youtube_videos' => 'YouTube Videos',
 ];
