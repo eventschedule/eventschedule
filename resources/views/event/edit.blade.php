@@ -438,7 +438,7 @@
                                         <div class="mb-6">
                                             <x-input-label for="no_contact_member_youtube_url" :value="__('messages.youtube_video_url')" />
                                             <x-text-input id="no_contact_member_youtube_url"
-                                                v-model="memberYoutubeUrl" type="text" class="mr-2 block w-full" autocomplete="off" />
+                                                v-model="memberYoutubeUrl" type="text" class="mr-2 block w-full" @keydown.enter.prevent="addNewMember" autocomplete="off" />
                                         </div>
 
                                     </div>
@@ -458,7 +458,7 @@
 
                                     <div class="mb-6">
                                         <x-input-label for="no_contact_member_youtube_url" :value="__('messages.youtube_video_url')" />
-                                        <x-text-input id="no_contact_member_youtube_url"
+                                        <x-text-input id="no_contact_member_youtube_url" @keydown.enter.prevent="addNoContactMember"
                                             v-model="memberYoutubeUrl" type="text" class="mr-2 block w-full" autocomplete="off" />
                                     </div>
                                 
@@ -783,6 +783,7 @@
         this.selectedMembers.push(newMember);
         this.memberEmail = "";
         this.memberName = "";
+        this.memberYoutubeUrl = "";
         this.memberSearchEmail = "";
         this.showMemberTypeRadio = false;
       },
@@ -810,6 +811,7 @@
         };
         this.selectedMembers.push(newMember);
         this.memberName = "";
+        this.memberYoutubeUrl = "";
         this.showMemberTypeRadio = false;
       },
       setFocusBasedOnMemberType() {
