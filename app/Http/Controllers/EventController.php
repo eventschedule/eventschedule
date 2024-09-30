@@ -144,6 +144,7 @@ class EventController extends Controller
         });
         $venues = $venues->mapWithKeys(function ($venue) {
             $venue->id = UrlUtils::encodeId($venue->id);
+            $venue->url = $venue->getGuestUrl();
             return [$venue->id => $venue];
         });
     
@@ -152,6 +153,7 @@ class EventController extends Controller
         });
         $members = $members->mapWithKeys(function ($member) {
             $member->id = UrlUtils::encodeId($member->id);
+            $member->url = $member->getGuestUrl();
             return [$member->id => $member];
         });
             

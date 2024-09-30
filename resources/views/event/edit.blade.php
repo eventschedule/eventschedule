@@ -191,7 +191,9 @@
                                         class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                         v-model="selectedVenue">
                                         <option value="" disabled selected>{{ __('messages.please_select') }}</option>                                
-                                        <option v-for="venue in venues" :key="venue.id" :value="venue">@{{ venue.name }}</option>
+                                        <option v-for="venue in venues" :key="venue.id" :value="venue">
+                                            @{{ venue.name }}
+                                        </option>
                                 </select>
                             </div>
 
@@ -215,7 +217,7 @@
                                             <input :id="'venue_' + venue.id" type="radio" :value="venue" v-model="selectedVenue"
                                                 class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                             <label :for="'venue_' + venue.id" class="ml-3 block text-sm font-medium text-gray-900 dark:text-gray-100">
-                                                @{{ venue.name }}
+                                                <a :href="venue.url" target="_blank" class="hover:underline">@{{ venue.name }}</a>
                                             </label>
                                         </div>
                                     </div>
@@ -301,7 +303,12 @@
                         <div v-else class="mb-6">
                             <div class="flex items-center justify-between">
                                 <span class="text-sm text-gray-900 dark:text-gray-100">
-                                    @{{ selectedVenue.name }}
+                                    <template v-if="selectedVenue.url">
+                                        <a :href="selectedVenue.url" target="_blank" class="hover:underline">@{{ selectedVenue.name }}</a>
+                                    </template>
+                                    <template v-else>
+                                        @{{ selectedVenue.name }}
+                                    </template>
                                 </span>
                                 <x-secondary-button @click="clearSelectedVenue" type="button" class="fixed-size-button">
                                     {{ __('messages.remove') }}
@@ -322,7 +329,12 @@
                             <div v-if="selectedMembers && selectedMembers.length > 0" class="mb-6">
                                 <div v-for="member in selectedMembers" :key="member.id" class="flex items-center justify-between mb-2">
                                     <span class="text-sm text-gray-900 dark:text-gray-100">
-                                        @{{ member.name }}
+                                        <template v-if="member.url">
+                                            <a :href="member.url" target="_blank" class="hover:underline">@{{ member.name }}</a>
+                                        </template>
+                                        <template v-else>
+                                            @{{ member.name }}
+                                        </template>
                                     </span>
                                     <x-secondary-button @click="removeMember(member)" type="button" class="fixed-size-button">
                                         {{ __('messages.remove') }}
@@ -378,7 +390,9 @@
                                         <x-input-label :value="__('messages.search_results')" />
                                         <div class="mt-2 space-y-2">
                                             <div v-for="member in memberSearchResults" :key="member.id" class="flex items-center justify-between">
-                                                <span class="text-sm text-gray-900 dark:text-gray-100">@{{ member.name }}</span>
+                                                <span class="text-sm text-gray-900 dark:text-gray-100">
+                                                    <a :href="member.url" target="_blank" class="hover:underline">@{{ member.name }}</a>
+                                                </span>
                                                 <x-primary-button @click="addMember(member)" type="button" class="fixed-size-button">
                                                     {{ __('messages.add') }}
                                                 </x-primary-button>
