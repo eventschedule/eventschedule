@@ -7,7 +7,7 @@
 
 <x-slot name="head">
   <style>
-    .fixed-size-button {
+    button {
       min-width: 100px;
       min-height: 40px;
     }
@@ -204,7 +204,7 @@
                                     <div class="flex mt-1">
                                         <x-text-input id="venue_search_email" v-model="venueSearchEmail" type="email" class="block w-full mr-2"
                                             :placeholder="''" required autofocus @keydown.enter.prevent="searchVenues" autocomplete="off" />
-                                        <x-primary-button @click="searchVenues" type="button" class="fixed-size-button">
+                                        <x-primary-button @click="searchVenues" type="button">
                                             {{ __('messages.search') }}
                                         </x-primary-button>
                                     </div>
@@ -229,7 +229,7 @@
                                         <div class="flex mt-1">
                                             <x-text-input id="venue_email" name="venue_email" type="email" class="mr-2 block w-full"
                                                 v-model="venueEmail" required disabled autocomplete="off" />
-                                            <x-secondary-button @click="clearVenueSearch" type="button" class="fixed-size-button">
+                                            <x-secondary-button @click="clearVenueSearch" type="button">
                                                 {{ __('messages.clear') }}
                                             </x-secondary-button>
                                         </div>
@@ -310,7 +310,7 @@
                                         @{{ selectedVenue.name }}
                                     </template>
                                 </span>
-                                <x-secondary-button @click="clearSelectedVenue" type="button" class="fixed-size-button">
+                                <x-secondary-button @click="clearSelectedVenue" type="button">
                                     {{ __('messages.remove') }}
                                 </x-secondary-button>
                             </div>
@@ -336,7 +336,7 @@
                                             @{{ member.name }}
                                         </template>
                                     </span>
-                                    <x-secondary-button @click="removeMember(member)" type="button" class="fixed-size-button">
+                                    <x-secondary-button @click="removeMember(member)" type="button">
                                         {{ __('messages.remove') }}
                                     </x-secondary-button>
                                 </div>
@@ -380,7 +380,7 @@
                                         <div class="flex mt-1">
                                             <x-text-input id="member_search_email" v-model="memberSearchEmail" type="email" class="block w-full mr-2"
                                                 :placeholder="''" required autofocus @keydown.enter.prevent="searchMembers" autocomplete="off" />
-                                            <x-primary-button @click="searchMembers" type="button" class="fixed-size-button">
+                                            <x-primary-button @click="searchMembers" type="button">
                                                 {{ __('messages.search') }}
                                             </x-primary-button>
                                         </div>
@@ -393,7 +393,7 @@
                                                 <span class="text-sm text-gray-900 dark:text-gray-100">
                                                     <a :href="member.url" target="_blank" class="hover:underline">@{{ member.name }}</a>
                                                 </span>
-                                                <x-primary-button @click="addMember(member)" type="button" class="fixed-size-button">
+                                                <x-primary-button @click="addMember(member)" type="button">
                                                     {{ __('messages.add') }}
                                                 </x-primary-button>
                                             </div>
@@ -405,7 +405,7 @@
                                         <div class="flex mt-1">
                                             <x-text-input id="member_email" name="member_email" type="email" class="mr-2 block w-full"
                                                 v-model="memberEmail" required disabled autocomplete="off" />
-                                            <x-secondary-button @click="clearMemberSearch" type="button" class="fixed-size-button">
+                                            <x-secondary-button @click="clearMemberSearch" type="button">
                                                 {{ __('messages.clear') }}
                                             </x-secondary-button>
                                         </div>
@@ -420,7 +420,7 @@
                                         <div class="flex mt-1">
                                             <x-text-input id="member_name" name="member_name" type="text" class="mr-2 block w-full"
                                                 v-model="memberName" required autofocus @keydown.enter.prevent="addNewMember" autocomplete="off" />
-                                            <x-primary-button @click="addNewMember" type="button" class="fixed-size-button">
+                                            <x-primary-button @click="addNewMember" type="button">
                                                 {{ __('messages.add') }}
                                             </x-primary-button>
                                         </div>
@@ -433,7 +433,7 @@
                                     <div class="flex mt-1">
                                         <x-text-input id="no_contact_member_name" @keydown.enter.prevent="addNoContactMember"
                                             v-model="memberName" type="text" class="mr-2 block w-full" required autocomplete="off" />
-                                        <x-primary-button @click="addNoContactMember" type="button" class="fixed-size-button">
+                                        <x-primary-button @click="addNoContactMember" type="button">
                                             {{ __('messages.add') }}
                                         </x-primary-button>
                                     </div>
@@ -441,7 +441,7 @@
                             </div>
 
                             <div v-if="!showMemberTypeRadio" class="mt-4 flex justify-end">
-                                <x-secondary-button @click="showAddMemberForm" type="button" class="fixed-size-button">
+                                <x-secondary-button @click="showAddMemberForm" type="button">
                                     {{ __('messages.add') }}
                                 </x-secondary-button>
                             </div>
@@ -560,15 +560,15 @@
         <div class="max-w-7xl mx-auto space-y-6">
             <div class="flex gap-4 items-center justify-between">
                 <div class="flex gap-4">
-                    <x-primary-button class="fixed-size-button">{{ __('messages.save') }}</x-primary-button>                    
-                    <x-cancel-button class="fixed-size-button"></x-cancel-button>
+                    <x-primary-button>{{ __('messages.save') }}</x-primary-button>                    
+                    <x-cancel-button></x-cancel-button>
                 </div>
 
                 <div>
                     @if ($event->exists)
                     <x-delete-button
                         :url="route('event.delete', ['subdomain' => $subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)])"
-                        class="fixed-size-button">
+                       >
                     </x-delete-button>
                     @endif
                 </div>
