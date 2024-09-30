@@ -415,29 +415,48 @@
                                         <x-input-error class="mt-2" :messages="$errors->get('member_email')" />
                                     </div>
 
-                                    <div v-if="memberEmail" class="mb-6">
-                                        <x-input-label for="member_name" :value="__('messages.name') . ' *'" />
-                                        <div class="flex mt-1">
-                                            <x-text-input id="member_name" name="member_name" type="text" class="mr-2 block w-full"
-                                                v-model="memberName" required autofocus @keydown.enter.prevent="addNewMember" autocomplete="off" />
-                                            <x-primary-button @click="addNewMember" type="button">
-                                                {{ __('messages.add') }}
-                                            </x-primary-button>
+                                    <div v-if="memberEmail">
+                                        <div class="mb-6">
+                                            <x-input-label for="member_name" :value="__('messages.name') . ' *'" />
+                                            <div class="flex mt-1">
+                                                <x-text-input id="member_name" name="member_name" type="text" class="mr-2 block w-full"
+                                                    v-model="memberName" required autofocus @keydown.enter.prevent="addNewMember" autocomplete="off" />
+                                                <x-primary-button @click="addNewMember" type="button">
+                                                    {{ __('messages.add') }}
+                                                </x-primary-button>
+                                            </div>
+                                            <x-input-error class="mt-2" :messages="$errors->get('member_name')" />
                                         </div>
-                                        <x-input-error class="mt-2" :messages="$errors->get('member_name')" />
+
+                                        <div class="mb-6">
+                                            <x-input-label for="no_contact_member_youtube_url" :value="__('messages.youtube_video_url')" />
+                                            <x-text-input id="no_contact_member_youtube_url"
+                                                v-model="memberYoutubeUrl" type="text" class="mr-2 block w-full" autocomplete="off" />
+                                        </div>
+
                                     </div>
                                 </div>
 
-                                <div v-if="memberType === 'no_contact_info'" class="mb-6">
-                                    <x-input-label for="no_contact_member_name" :value="__('messages.name') . ' *'" />
-                                    <div class="flex mt-1">
-                                        <x-text-input id="no_contact_member_name" @keydown.enter.prevent="addNoContactMember"
-                                            v-model="memberName" type="text" class="mr-2 block w-full" required autocomplete="off" />
-                                        <x-primary-button @click="addNoContactMember" type="button">
-                                            {{ __('messages.add') }}
-                                        </x-primary-button>
+                                <div v-if="memberType === 'no_contact_info'"> 
+                                    <div class="mb-6">
+                                        <x-input-label for="no_contact_member_name" :value="__('messages.name') . ' *'" />
+                                        <div class="flex mt-1">
+                                            <x-text-input id="no_contact_member_name" @keydown.enter.prevent="addNoContactMember"
+                                                v-model="memberName" type="text" class="mr-2 block w-full" required autocomplete="off" />
+                                            <x-primary-button @click="addNoContactMember" type="button">
+                                                {{ __('messages.add') }}
+                                            </x-primary-button>
+                                        </div>
                                     </div>
+
+                                    <div class="mb-6">
+                                        <x-input-label for="no_contact_member_youtube_url" :value="__('messages.youtube_video_url')" />
+                                        <x-text-input id="no_contact_member_youtube_url"
+                                            v-model="memberYoutubeUrl" type="text" class="mr-2 block w-full" autocomplete="off" />
+                                    </div>
+                                
                                 </div>
+                                
                             </div>
 
                             <div v-if="!showMemberTypeRadio" class="mt-4 flex justify-end">
@@ -604,6 +623,7 @@
         selectedMember: "",
         memberEmail: "",
         memberName: "",
+        memberYoutubeUrl: "",
         showMemberTypeRadio: true,
       }
     },
@@ -697,6 +717,7 @@
           if (data.length === 0) {
             this.memberEmail = this.memberSearchEmail;
             this.memberName = '';
+            this.memberYoutubeUrl = '';
             this.$nextTick(() => {
               const memberNameInput = document.getElementById('member_name');
               if (memberNameInput) {
@@ -712,6 +733,7 @@
       clearMemberSearch() {
         this.memberEmail = "";
         this.memberName = "";
+        this.memberYoutubeUrl = "";
         this.memberSearchEmail = "";
         this.memberSearchResults = [];
         
@@ -748,6 +770,7 @@
           id: 'new_' + Date.now(),
           name: this.memberName,
           email: this.memberEmail,
+          youtube: this.memberYoutubeUrl,
         };
 
         this.selectedMembers.push(newMember);
@@ -776,6 +799,7 @@
           id: 'new_' + Date.now(),
           name: this.memberName,
           email: null,
+          youtube: this.memberYoutubeUrl,
         };
         this.selectedMembers.push(newMember);
         this.memberName = "";

@@ -120,7 +120,6 @@ return [
     'add' => 'Add',
     'remove' => 'Remove',
     'payment_links' => 'Payment Links',
-    'youtube_videos' => 'YouTube Videos',
     'add_link' => 'Add Link',
     'are_you_sure' => 'Are you sure?',
     'no_requests' => 'No requests',
@@ -239,8 +238,6 @@ return [
     'updated_curator' => 'Successfully updated curator',
     'deleted_curator' => 'Successfully deleted curator',
     'flyer_image' => 'Flyer Image',
-    'youtube_videos' => 'YouTube Videos',
-    'video_url' => 'Video URL',
     'event_added' => 'Successfully added event',
     'please_select' => 'Please select',
     'claim_email_line1' => 'Sign up to customize the event page or feel free to ignore this email',
@@ -283,4 +280,5 @@ return [
     'clear' => 'Clear',
     'members' => 'Members',
     'no_contact_info' => 'No contact info',
+    'youtube_video_url' => 'Youtube Video URL',
 ];
