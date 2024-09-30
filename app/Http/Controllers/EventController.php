@@ -154,6 +154,7 @@ class EventController extends Controller
         $members = $members->mapWithKeys(function ($member) {
             $member->id = UrlUtils::encodeId($member->id);
             $member->url = $member->getGuestUrl();
+            $member->youtube = $member->getFirstVideoUrl();
             return [$member->id => $member];
         });
             
