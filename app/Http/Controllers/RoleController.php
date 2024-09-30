@@ -1088,12 +1088,14 @@ class RoleController extends Controller
                 'user_id',
                 'profile_image_url',
                 'country_code',
+                'youtube_links',
             ]);
 
         $roles = $roles->map(function ($role) {
             $role->id = UrlUtils::encodeId($role->id);
             $role->user_id = UrlUtils::encodeId($role->user_id);
             $role->url = $role->getGuestUrl();
+            $role->youtube = $role->getFirstVideoUrl();
             return $role;
         });
 
