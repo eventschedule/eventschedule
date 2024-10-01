@@ -473,8 +473,8 @@
                                         </div>
 
                                         <div class="mb-6">
-                                            <x-input-label for="no_contact_member_youtube_url" :value="__('messages.youtube_video_url')" />
-                                            <x-text-input id="no_contact_member_youtube_url"
+                                            <x-input-label for="member_youtube_url" :value="__('messages.youtube_video_url')" />
+                                            <x-text-input id="member_youtube_url"
                                                 v-model="memberYoutubeUrl" type="url" class="mr-2 block w-full" 
                                                 @keydown.enter.prevent="addNewMember" autocomplete="off" />
                                         </div>
@@ -497,7 +497,7 @@
                                     <div class="mb-6">
                                         <x-input-label for="no_contact_member_youtube_url" :value="__('messages.youtube_video_url')" />
                                         <x-text-input id="no_contact_member_youtube_url" @keydown.enter.prevent="addNoContactMember"
-                                            v-model="memberYoutubeUrl" type="text" class="mr-2 block w-full" autocomplete="off" />
+                                            v-model="memberYoutubeUrl" type="url" class="mr-2 block w-full" autocomplete="off" />
                                     </div>
                                 
                                 </div>
@@ -831,6 +831,12 @@
           return;
         }
 
+        const youtubeInput = document.getElementById('member_youtube_url');
+        if (youtubeInput && youtubeInput.value && !youtubeInput.checkValidity()) {
+          youtubeInput.reportValidity();
+          return;
+        }
+
         const newMember = {
           id: 'new_' + Date.now(),
           name: this.memberName,
@@ -858,6 +864,12 @@
         const nameInput = document.getElementById('no_contact_member_name');    
         if (!nameInput.checkValidity()) {
           nameInput.reportValidity();
+          return;
+        }
+
+        const youtubeInput = document.getElementById('no_contact_member_youtube_url');
+        if (youtubeInput && youtubeInput.value && !youtubeInput.checkValidity()) {
+          youtubeInput.reportValidity();
           return;
         }
 
