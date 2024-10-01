@@ -309,6 +309,9 @@
                                     <template v-else>
                                         @{{ selectedVenue.name }}
                                     </template>
+                                    <template v-if="selectedVenue.email">
+                                        (<a :href="'mailto:' + selectedVenue.email" class="hover:underline">@{{ selectedVenue.email }}</a>)
+                                    </template>
                                 </span>
                                 <x-secondary-button @click="clearSelectedVenue" type="button">
                                     {{ __('messages.remove') }}
@@ -360,6 +363,9 @@
                                                 <template v-else>
                                                     @{{ member.name }}
                                                 </template>
+                                                <template v-if="member.email">
+                                                    (<a :href="'mailto:' + member.email" class="hover:underline">@{{ member.email }}</a>)
+                                                </template>
                                             </span>
                                             <a v-if="member.youtube" :href="member.youtube" target="_blank" class="ml-2">
                                                 <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -407,7 +413,9 @@
                                     <select v-model="selectedMember" @change="addExistingMember" :required="selectedMembers.length === 0"
                                         class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                         <option value="" disabled selected>{{ __('messages.please_select') }}</option>
-                                        <option v-for="member in filteredMembers" :key="member.id" :value="member">@{{ member.name }}</option>
+                                        <option v-for="member in filteredMembers" :key="member.id" :value="member">
+                                            @{{ member.name }} <template v-if="member.email">(@{{ member.email }})</template>
+                                        </option>
                                     </select>
                                 </div>
 
@@ -430,6 +438,9 @@
                                                 <div class="flex items-center">
                                                     <span class="text-sm text-gray-900 dark:text-gray-100">
                                                         <a :href="member.url" target="_blank" class="hover:underline">@{{ member.name }}</a>
+                                                        <template v-if="member.email">
+                                                            (<a :href="'mailto:' + member.email" class="hover:underline">@{{ member.email }}</a>)
+                                                        </template>
                                                     </span>
                                                     <a v-if="member.youtube" :href="member.youtube" target="_blank" class="ml-2">
                                                         <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
