@@ -243,9 +243,7 @@ class RoleController extends Controller
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
-                        ->whereHas('roles', function ($query) use ($role) {
-                            $query->where('role_id', $role->id);
-                        });
+                        ->where('role_id', $role->id);
                 })
                 ->orderBy('starts_at')
                 ->get();
@@ -340,9 +338,7 @@ class RoleController extends Controller
                         ->whereIn('id', function ($query) use ($role) {
                             $query->select('event_id')
                                 ->from('event_role')
-                                ->whereHas('roles', function ($query) use ($role) {
-                                    $query->where('role_id', $role->id);
-                                });
+                                ->where('role_id', $role->id);
                         })
                         ->orderBy('starts_at')
                         ->get();    
