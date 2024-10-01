@@ -345,7 +345,8 @@
 
                                         <div class="mb-6">
                                             <x-input-label for="edit_member_youtube_url" :value="__('messages.youtube_video_url')" />
-                                            <x-text-input id="edit_member_youtube_url" v-bind:name="'selected_members[' + member.id + '][youtube]'" type="url" class="mr-2 block w-full" 
+                                            <x-text-input v-bind:id="'edit_member_youtube_url_' + member.id" 
+                                                v-bind:name="'selected_members[' + member.id + '][youtube]'" type="url" class="mr-2 block w-full" 
                                                 v-model="selectedMembers.find(m => m.id === member.id).youtube" @keydown.enter.prevent="editMember()" autocomplete="off" />
                                         </div>
 
@@ -815,6 +816,11 @@
             }
           });
         } else {
+          const youtubeInput = document.getElementById(`edit_member_youtube_url_${this.editMemberId}`);
+          if (youtubeInput && youtubeInput.value && !youtubeInput.checkValidity()) {
+            youtubeInput.reportValidity();
+            return;
+          }
           this.editMemberId = "";
         }
       },
