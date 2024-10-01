@@ -509,31 +509,13 @@ class EventController extends Controller
             }
         }
 
-        $role = false;
+        foreach ($request->members as $memberId => $member) {
+            if (strpos($memberId, 'new_') === 0) {
 
-        if ($vendor) {
-            $role = $vendor;            
-        } else if ($talent) {
-            $role = $talent;
-        } else if ($request->role_id) {
-
-            $roleId = UrlUtils::decodeId($request->role_id);
-            $role = Role::findOrFail($roleId);
-            
-        } else {
-
-            $role = Role::find($request->role_email);
-
-            if ($role && $role->isVenue()) {
-                return redirect()
-                        ->back()
-                        ->withInput()
-                        ->withErrors(['venue_email' => __('messages.email_associated_with_venue')]);
-            } elseif (! $role) {
                 $role = new Role;
-                $role->name = $request->role_name;
-                $role->subdomain = Role::generateSubdomain($request->role_name);
-                $role->email = $request->role_email;
+                $role->name = $member['name'];
+                $role->subdomain = Role::generateSubdomain($member['name']);
+                $role->email = $member['email'];
                 $role->type = $request->role_type ? $request->role_type : 'talent';
                 $role->timezone = $user->timezone;
                 $role->language_code = $user->language_code;
@@ -542,11 +524,8 @@ class EventController extends Controller
                 $role->font_color = '#ffffff';
 
                 $links = [];
-                if ($request->first_video_url) {
-                    $links[] = UrlUtils::getUrlDetails($request->first_video_url);
-                }
-                if ($request->second_video_url) {
-                    $links[] = UrlUtils::getUrlDetails($request->second_video_url);
+                if ($member['youtube_url']) {
+                    $links[] = UrlUtils::getUrlDetails($member['youtube_url']);
                 }
                 $role->youtube_links = json_encode($links);
 
@@ -561,8 +540,25 @@ class EventController extends Controller
                     $role->save();
                     $matchingUser->roles()->attach($role->id, ['level' => 'owner', 'created_at' => now()]);
                 }
+            } else {
+                $roleId = UrlUtils::decodeId($memberId);
+                $role = Role::findOrFail($roleId);
+
+                if (!$role->isClaimed()) {
+                    $role->name = $member['name'];
+
+                    $links = [];
+                    if ($member['youtube_url']) {
+                        $links[] = UrlUtils::getUrlDetails($member['youtube_url']);
+                    }
+                    $role->youtube_links = json_encode($links);
+    
+                    $role->save();
+                }
+
             }
         }
+
 
         $event = false;
 
