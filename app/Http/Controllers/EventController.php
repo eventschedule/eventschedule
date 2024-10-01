@@ -614,15 +614,10 @@ class EventController extends Controller
                 $event->curator_id = $subdomainRole->id;
             }
 
-            $event->save();
-
-            foreach ($roleIds as $roleId) {
-                $event->roles()->attach($roleId);
-            }
-
-            // Handle curator selections
             $selectedCurators = $request->input('curators', []);
-            $event->curators()->sync($selectedCurators);
+
+            $event->save();
+            $event->roles()->sync($roleIds + $selectedCurators);
 
             if ($request->hasFile('flyer_image_url')) {
                 if ($event->flyer_image_url) {
