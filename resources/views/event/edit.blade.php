@@ -328,15 +328,15 @@
                         <div>
                             <div v-if="selectedMembers && selectedMembers.length > 0" class="mb-6">
                                 <div v-for="member in selectedMembers" :key="member.id" class="flex items-center justify-between mb-2">
-                                    <div v-show="editMemberId === member.id">
+                                    <div v-show="editMemberId === member.id" class="w-full">
                                         <div class="mb-6">
                                             <x-input-label for="member_name" :value="__('messages.name') . ' *'" />
                                             <div class="flex mt-1">
                                                 <x-text-input id="member_name" v-bind:name="'member_name_' + member.id" type="text" class="mr-2 block w-full"
                                                     v-model="selectedMembers.find(m => m.id === member.id).name" required autofocus
                                                     @keydown.enter.prevent="editMember()" autocomplete="off" />
-                                                <x-primary-button @click="addNewMember" type="button">
-                                                    {{ __('messages.add') }}
+                                                <x-primary-button @click="editMember()" type="button">
+                                                    {{ __('messages.done') }}
                                                 </x-primary-button>
                                             </div>
                                             <x-input-error class="mt-2" :messages="$errors->get('member_name')" />
