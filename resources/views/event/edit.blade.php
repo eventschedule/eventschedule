@@ -328,24 +328,52 @@
                         <div>
                             <div v-if="selectedMembers && selectedMembers.length > 0" class="mb-6">
                                 <div v-for="member in selectedMembers" :key="member.id" class="flex items-center justify-between mb-2">
-                                    <div class="flex items-center">
-                                        <span class="text-sm text-gray-900 dark:text-gray-100">
-                                            <template v-if="member.url">
-                                                <a :href="member.url" target="_blank" class="hover:underline">@{{ member.name }}</a>
-                                            </template>
-                                            <template v-else>
-                                                @{{ member.name }}
-                                            </template>
-                                        </span>
-                                        <a v-if="member.youtube" :href="member.youtube" target="_blank" class="ml-2">
-                                            <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                                            </svg>
-                                        </a>
+                                    <div v-show="editMemberId === member.id">
+                                        <div class="mb-6">
+                                            <x-input-label for="member_name" :value="__('messages.name') . ' *'" />
+                                            <div class="flex mt-1">
+                                                <x-text-input id="member_name" v-bind:name="'member_name_' + member.id" type="text" class="mr-2 block w-full"
+                                                    v-model="selectedMembers.find(m => m.id === member.id).name" required autofocus
+                                                    @keydown.enter.prevent="editMember()" autocomplete="off" />
+                                                <x-primary-button @click="addNewMember" type="button">
+                                                    {{ __('messages.add') }}
+                                                </x-primary-button>
+                                            </div>
+                                            <x-input-error class="mt-2" :messages="$errors->get('member_name')" />
+                                        </div>
+
+                                        <div class="mb-6">
+                                            <x-input-label for="member_youtube_url" :value="__('messages.youtube_video_url')" />
+                                            <x-text-input id="member_youtube_url" v-bind:name="'member_youtube_url_' + member.id" type="text" class="mr-2 block w-full" 
+                                                v-model="selectedMembers.find(m => m.id === member.id).youtube" @keydown.enter.prevent="editMember()" autocomplete="off" />
+                                        </div>
+
                                     </div>
-                                    <x-secondary-button @click="removeMember(member)" type="button">
-                                        {{ __('messages.remove') }}
-                                    </x-secondary-button>
+                                    <div v-show="editMemberId !== member.id" class="flex justify-between w-full">
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-900 dark:text-gray-100">
+                                                <template v-if="member.url">
+                                                    <a :href="member.url" target="_blank" class="hover:underline">@{{ member.name }}</a>
+                                                </template>
+                                                <template v-else>
+                                                    @{{ member.name }}
+                                                </template>
+                                            </span>
+                                            <a v-if="member.youtube" :href="member.youtube" target="_blank" class="ml-2">
+                                                <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                        <div>
+                                            <x-secondary-button v-if="!member.user_id" @click="editMember(member)" type="button" class="mr-2">
+                                                {{ __('messages.edit') }}
+                                            </x-secondary-button>
+                                            <x-secondary-button @click="removeMember(member)" type="button">
+                                                {{ __('messages.remove') }}
+                                            </x-secondary-button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -635,6 +663,7 @@
         memberSearchEmail: "",
         memberSearchResults: [],
         selectedMember: "",
+        editMemberId: "",
         memberEmail: "",
         memberName: "",
         memberYoutubeUrl: "",
@@ -771,6 +800,13 @@
         this.selectedMembers = this.selectedMembers.filter(m => m.id !== member.id);
         if (this.selectedMembers.length === 0) {
           this.showMemberTypeRadio = true;
+        }
+      },
+      editMember(member) {
+        if (member) {
+            this.editMemberId = member.id;
+        } else {
+            this.editMemberId = "";
         }
       },
       addNewMember() {
