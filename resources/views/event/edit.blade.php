@@ -931,7 +931,6 @@
     },
     watch: {
       venueType() {
-        this.event.venue_id = "";
         this.venueEmail = "";
         this.venueSearchEmail = "";
         this.venueSearchResults = [];
@@ -944,6 +943,11 @@
         this.memberName = "";
         this.setFocusBasedOnMemberType();
       },
+      selectedVenue() {
+        this.venueEmail = "";
+        this.venueSearchEmail = "";
+        this.venueSearchResults = [];
+      }
     },
     mounted() {
       this.setFocusBasedOnVenueType();
