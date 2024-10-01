@@ -330,9 +330,10 @@
                                 <div v-for="member in selectedMembers" :key="member.id" class="flex items-center justify-between mb-2">
                                     <div v-show="editMemberId === member.id" class="w-full">
                                         <div class="mb-6">
-                                            <x-input-label for="member_name" :value="__('messages.name') . ' *'" />
+                                            <x-input-label :value="__('messages.name') . ' *'" />
                                             <div class="flex mt-1">
-                                                <x-text-input id="member_name" v-bind:name="'member_name_' + member.id" type="text" class="mr-2 block w-full"
+                                                <x-text-input v-bind:id="'edit_member_name_' + member.id" 
+                                                    v-bind:name="'selected_members[' + member.id + '][name]'" type="text" class="mr-2 block w-full"
                                                     v-model="selectedMembers.find(m => m.id === member.id).name" required autofocus
                                                     @keydown.enter.prevent="editMember()" autocomplete="off" />
                                                 <x-primary-button @click="editMember()" type="button">
@@ -343,8 +344,8 @@
                                         </div>
 
                                         <div class="mb-6">
-                                            <x-input-label for="member_youtube_url" :value="__('messages.youtube_video_url')" />
-                                            <x-text-input id="member_youtube_url" v-bind:name="'member_youtube_url_' + member.id" type="text" class="mr-2 block w-full" 
+                                            <x-input-label for="edit_member_youtube_url" :value="__('messages.youtube_video_url')" />
+                                            <x-text-input id="edit_member_youtube_url" v-bind:name="'selected_members[' + member.id + '][youtube]'" type="text" class="mr-2 block w-full" 
                                                 v-model="selectedMembers.find(m => m.id === member.id).youtube" @keydown.enter.prevent="editMember()" autocomplete="off" />
                                         </div>
 
@@ -804,9 +805,15 @@
       },
       editMember(member) {
         if (member) {
-            this.editMemberId = member.id;
+          this.editMemberId = member.id;
+          this.$nextTick(() => {
+            const memberNameInput = document.getElementById(`edit_member_name_${member.id}`);
+            if (memberNameInput) {
+              memberNameInput.focus();
+            }
+          });
         } else {
-            this.editMemberId = "";
+          this.editMemberId = "";
         }
       },
       addNewMember() {
