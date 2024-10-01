@@ -461,12 +461,13 @@ class EventController extends Controller
         $venue = $role->isVenue() ? $role : null;
         $talent = $role->isTalent() ? $role : null;
         $vendor = $role->isVendor() ? $role : null;
+        $curator = $role->isCurator() ? $role : null;
 
         if (! $venue && $request->venue_id) {
             $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
         }
 
-        if ($venue && ! auth()->user()->isMember($venue->subdomain) && ! $venue->acceptRequests()) {
+        if ($venue && ! $curator && ! auth()->user()->isMember($venue->subdomain) && ! $venue->acceptRequests()) {
             return redirect()
                     ->back()
                     ->withInput()
