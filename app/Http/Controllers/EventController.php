@@ -610,17 +610,14 @@ class EventController extends Controller
                 //Notification::route('mail', $emails)->notify(new EventRequestNotification($venue, $role));
             }
 
-            if ($subdomainRole->isCurator()) {
+            if ($subdomainRole->isCurator()) {                
                 $event->curator_id = $subdomainRole->id;
             }
 
             $event->save();
 
             foreach ($roleIds as $roleId) {
-                EventRole::create([
-                    'event_id' => $event->id,
-                    'role_id' => $roleId,
-                ]);
+                $event->roles()->attach($roleId);
             }
 
             // Handle curator selections
