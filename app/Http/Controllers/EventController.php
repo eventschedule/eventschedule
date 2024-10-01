@@ -454,7 +454,7 @@ class EventController extends Controller
 
     public function store(Request $request, $subdomain)
     {
-        dd($request->all());
+        //dd($request->all());
 
         $user = $request->user();
         $subdomainRole = $role = Role::subdomain($subdomain)->firstOrFail();
@@ -509,6 +509,7 @@ class EventController extends Controller
             }
         }
 
+        $roleIds = [];
         foreach ($request->members as $memberId => $member) {
             if (strpos($memberId, 'new_') === 0) {
 
@@ -540,6 +541,8 @@ class EventController extends Controller
                     $role->save();
                     $matchingUser->roles()->attach($role->id, ['level' => 'owner', 'created_at' => now()]);
                 }
+
+                $roleIds[] = $role->id;
             } else {
                 $roleId = UrlUtils::decodeId($memberId);
                 $role = Role::findOrFail($roleId);
@@ -551,17 +554,18 @@ class EventController extends Controller
                     if ($member['youtube_url']) {
                         $links[] = UrlUtils::getUrlDetails($member['youtube_url']);
                     }
-                    $role->youtube_links = json_encode($links);
-    
+                    $role->youtube_links = json_encode($links);    
+
                     $role->save();
                 }
 
+                $roleIds[] = $role->id;
             }
         }
 
-
         $event = false;
 
+        /*
         if ($subdomainRole->isCurator()) {
             $date = explode(' ', $request->starts_at)[0];
             $event = Event::whereHas('roles', function ($query) use ($role) {
@@ -571,6 +575,7 @@ class EventController extends Controller
                     ->where('starts_at', 'like', $date . '%')
                     ->first();
         }
+        */
 
         if ($event) {
             $message = __('messages.event_added');
@@ -598,7 +603,7 @@ class EventController extends Controller
                 $event->is_accepted = true;
                 $message = __('messages.event_created');
             } else {
-                $subdomain = $role->subdomain;
+                //$subdomain = $role->subdomain;
                 $message = __('messages.event_requested');
 
                 $emails = $venue->members()->pluck('email');
@@ -611,10 +616,12 @@ class EventController extends Controller
 
             $event->save();
 
-            $er = EventRole::create([
-                'event_id' => $event->id,
-                'role_id' => $role->id,
-            ]);
+            foreach ($roleIds as $roleId) {
+                EventRole::create([
+                    'event_id' => $event->id,
+                    'role_id' => $roleId,
+                ]);
+            }
 
             // Handle curator selections
             $selectedCurators = $request->input('curators', []);
