@@ -447,6 +447,8 @@ class EventController extends Controller
 
     public function store(Request $request, $subdomain)
     {
+        dd($request->all());
+
         $user = $request->user();
         $subdomainRole = $role = Role::subdomain($subdomain)->firstOrFail();
         $venue = $role->isVenue() ? $role : null;
