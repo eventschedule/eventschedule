@@ -345,7 +345,7 @@
 
                                         <div class="mb-6">
                                             <x-input-label for="edit_member_youtube_url" :value="__('messages.youtube_video_url')" />
-                                            <x-text-input id="edit_member_youtube_url" v-bind:name="'selected_members[' + member.id + '][youtube]'" type="text" class="mr-2 block w-full" 
+                                            <x-text-input id="edit_member_youtube_url" v-bind:name="'selected_members[' + member.id + '][youtube]'" type="url" class="mr-2 block w-full" 
                                                 v-model="selectedMembers.find(m => m.id === member.id).youtube" @keydown.enter.prevent="editMember()" autocomplete="off" />
                                         </div>
 
@@ -474,7 +474,8 @@
                                         <div class="mb-6">
                                             <x-input-label for="no_contact_member_youtube_url" :value="__('messages.youtube_video_url')" />
                                             <x-text-input id="no_contact_member_youtube_url"
-                                                v-model="memberYoutubeUrl" type="text" class="mr-2 block w-full" @keydown.enter.prevent="addNewMember" autocomplete="off" />
+                                                v-model="memberYoutubeUrl" type="url" class="mr-2 block w-full" 
+                                                @keydown.enter.prevent="addNewMember" autocomplete="off" />
                                         </div>
 
                                     </div>
@@ -805,6 +806,7 @@
       },
       editMember(member) {
         if (member) {
+          this.showMemberTypeRadio = false;
           this.editMemberId = member.id;
           this.$nextTick(() => {
             const memberNameInput = document.getElementById(`edit_member_name_${member.id}`);
@@ -879,8 +881,9 @@
           }
         });
       },
-      showAddMemberForm() {
+      showAddMemberForm() {        
         this.showMemberTypeRadio = true;
+        this.editMemberId = "";
         this.setFocusBasedOnMemberType();
       },
     },
