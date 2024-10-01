@@ -333,7 +333,7 @@
                                             <x-input-label :value="__('messages.name') . ' *'" />
                                             <div class="flex mt-1">
                                                 <x-text-input v-bind:id="'edit_member_name_' + member.id" 
-                                                    v-bind:name="'selected_members[' + member.id + '][name]'" type="text" class="mr-2 block w-full"
+                                                    v-bind:name="'members[' + member.id + '][name]'" type="text" class="mr-2 block w-full"
                                                     v-model="selectedMembers.find(m => m.id === member.id).name" required autofocus
                                                     @keydown.enter.prevent="editMember()" autocomplete="off" />
                                                 <x-primary-button @click="editMember()" type="button">
@@ -346,7 +346,7 @@
                                         <div class="mb-6">
                                             <x-input-label for="edit_member_youtube_url" :value="__('messages.youtube_video_url')" />
                                             <x-text-input v-bind:id="'edit_member_youtube_url_' + member.id" 
-                                                v-bind:name="'selected_members[' + member.id + '][youtube]'" type="url" class="mr-2 block w-full" 
+                                                v-bind:name="'members[' + member.id + '][youtube]'" type="url" class="mr-2 block w-full" 
                                                 v-model="selectedMembers.find(m => m.id === member.id).youtube" @keydown.enter.prevent="editMember()" autocomplete="off" />
                                         </div>
 
@@ -638,10 +638,6 @@
                 </div>
             </div>
         </div>
-
-        <template v-for="member in selectedMembers">
-            <input type="hidden" name="members[]" :value="member.id">
-        </template>
 
     </form>
 </div>
