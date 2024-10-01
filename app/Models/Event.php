@@ -136,7 +136,13 @@ class Event extends Model
             return $this->name;
         }
 
-        return $this->roles->where('type', 'talent')->first()->name;
+        $role = $this->roles->where('type', 'talent')->first();
+
+        if ($role) {
+            return $role->name;
+        }
+
+        return $this->venue->getDisplayName();
     }
 
     public function getGuestUrl($subdomain = false, $date = null)
