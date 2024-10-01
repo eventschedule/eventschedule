@@ -142,20 +142,27 @@ class EventController extends Controller
         $venues = $roles->filter(function($item) {
             return $item->isVenue() && $item->name;
         });
-        $venues = $venues->mapWithKeys(function ($venue) {
-            $venue->id = UrlUtils::encodeId($venue->id);
-            $venue->url = $venue->getGuestUrl();
-            return [$venue->id => $venue];
+        $venues = $venues->map(function ($venue) {
+            $url = $venue->getGuestUrl();
+            $youtube = $venue->getFirstVideoUrl();
+            $venue = $venue->toArray();
+            $venue['id'] = UrlUtils::encodeId($venue['id']);
+            $venue['url'] = $url;
+            $venue['youtube'] = $youtube;
+            return $venue;
         });
     
         $members = $roles->filter(function($item) {
             return ($item->isTalent() || $item->isVendor()) && $item->name;
         });
-        $members = $members->mapWithKeys(function ($member) {
-            $member->id = UrlUtils::encodeId($member->id);
-            $member->url = $member->getGuestUrl();
-            $member->youtube = $member->getFirstVideoUrl();
-            return [$member->id => $member];
+        $members = $members->map(function ($member) {
+            $url = $member->getGuestUrl();
+            $youtube = $member->getFirstVideoUrl();
+            $member = $member->toArray(); 
+            $member['id'] = UrlUtils::encodeId($member['id']);            
+            $member['url'] = $url;
+            $member['youtube'] = $youtube;
+            return $member;
         });
             
         return view('event/edit', [
