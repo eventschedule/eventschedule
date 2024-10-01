@@ -816,6 +816,12 @@
             }
           });
         } else {
+           const memberNameInput = document.getElementById(`edit_member_name_${member.id}`);
+           if (memberNameInput && !memberNameInput.checkValidity()) {
+            memberNameInput.reportValidity();
+            return;
+          }
+
           const youtubeInput = document.getElementById(`edit_member_youtube_url_${this.editMemberId}`);
           if (youtubeInput && youtubeInput.value && !youtubeInput.checkValidity()) {
             youtubeInput.reportValidity();
