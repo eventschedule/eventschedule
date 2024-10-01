@@ -192,7 +192,7 @@
                                         v-model="selectedVenue">
                                         <option value="" disabled selected>{{ __('messages.please_select') }}</option>                                
                                         <option v-for="venue in venues" :key="venue.id" :value="venue">
-                                            @{{ venue.name }}
+                                            @{{ venue.name }} <template v-if="venue.email">(@{{ venue.email }})</template>
                                         </option>
                                 </select>
                             </div>
@@ -218,6 +218,9 @@
                                                 class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
                                             <label :for="'venue_' + venue.id" class="ml-3 block text-sm font-medium text-gray-900 dark:text-gray-100">
                                                 <a :href="venue.url" target="_blank" class="hover:underline">@{{ venue.name }}</a>
+                                                <template v-if="venue.email">
+                                                    (<a :href="'mailto:' + venue.email" class="hover:underline">@{{ venue.email }}</a>)
+                                                </template>
                                             </label>
                                         </div>
                                     </div>
