@@ -823,7 +823,7 @@
             }
           });
         } else {
-           const memberNameInput = document.getElementById(`edit_member_name_${member.id}`);
+           const memberNameInput = document.getElementById(`edit_member_name_${this.editMemberId}`);
            if (memberNameInput && !memberNameInput.checkValidity()) {
             memberNameInput.reportValidity();
             return;
@@ -834,6 +834,7 @@
             youtubeInput.reportValidity();
             return;
           }
+
           this.editMemberId = "";
         }
       },
