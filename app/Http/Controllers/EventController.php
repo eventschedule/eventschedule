@@ -135,8 +135,6 @@ class EventController extends Controller
             $event->members = [$talent->toData()];
         } else if ($vendor) {
             $event->members = [$vendor->toData()];
-        } else if ($curator) {
-            //$event->role_id = $curator->id;
         }
 
         if ($request->date) {

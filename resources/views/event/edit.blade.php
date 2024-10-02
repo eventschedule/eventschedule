@@ -583,7 +583,7 @@
                             $curators = $user->editableCurators();
                         @endphp
                         
-                        @if($curators->count() > 0 && $role->isTalent())
+                        @if ($curators->count() > 0)
                         <div class="mb-6">
                             <x-input-label for="curators" :value="__('messages.add_to_schedules')" />
                             @foreach($curators as $curator)
@@ -592,7 +592,7 @@
                                        id="curator_{{ $curator->id }}" 
                                        name="curators[]" 
                                        value="{{ $curator->id }}"
-                                       {{ $event->curators->contains($curator->id) ? 'checked' : '' }}
+                                       {{ (! $event->exists && $role->subdomain == $curator->subdomain) || $event->curators->contains($curator->id) ? 'checked' : '' }}
                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                                 <label for="curator_{{ $curator->id }}" class="ml-2 block text-sm text-gray-900 dark:text-gray-100">
                                     {{ $curator->name }}
