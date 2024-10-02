@@ -1099,6 +1099,8 @@ class RoleController extends Controller
             return $role;
         });
 
+        $roles = array_values($roles->toArray());
+
         return response()->json($roles);
     }
 }

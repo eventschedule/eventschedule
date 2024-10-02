@@ -164,7 +164,10 @@ class EventController extends Controller
             $member['youtube'] = $youtube;
             return $member;
         });
-            
+
+        $venues = array_values($venues->toArray());
+        $members = array_values($members->toArray());
+        
         return view('event/edit', [
             'role' => $role,
             'user' => $user,
