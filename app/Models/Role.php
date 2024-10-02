@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use App\Utils\MarkdownUtils;
+use App\Utils\UrlUtils;
 use App\Notifications\VerifyEmail as CustomVerifyEmail;
 
 class Role extends Model implements MustVerifyEmail
@@ -385,5 +386,19 @@ class Role extends Model implements MustVerifyEmail
     public function isPro()
     {
         return $this->plan_expires >= now()->format('Y-m-d');
+    }
+
+    public function toData()
+    {
+        $url = $this->getGuestUrl();
+        $youtubeUrl = $this->getFirstVideoUrl();
+        
+        $data = $this->toArray();   
+        $data['id'] = UrlUtils::encodeId($data['id']);
+        $data['user_id'] = UrlUtils::encodeId($data['user_id']);
+        $role['url'] = $url;
+        $data['youtube_url'] = $youtubeUrl;
+
+        return $data;
     }
 }

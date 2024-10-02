@@ -1089,14 +1089,7 @@ class RoleController extends Controller
             ]);
 
         $roles = $roles->map(function ($role) {
-            $url = $role->getGuestUrl();
-            $youtube = $role->getFirstVideoUrl();
-            $role = $role->toArray();   
-            $role['id'] = UrlUtils::encodeId($role['id']);
-            $role['user_id'] = UrlUtils::encodeId($role['user_id']);
-            $role['url'] = $url;
-            $role['youtube'] = $youtube;
-            return $role;
+            return $role->toData();
         });
 
         $roles = array_values($roles->toArray());

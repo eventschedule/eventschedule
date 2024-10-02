@@ -132,9 +132,9 @@ class EventController extends Controller
         if ($venue) {
             $event->venue_id = $venue->id;
         } else if ($talent) {
-            $event->members = [$talent];
+            $event->members = [$talent->toData()];
         } else if ($vendor) {
-            $event->members = [$vendor];
+            $event->members = [$vendor->toData()];
         } else if ($curator) {
             //$event->role_id = $curator->id;
         }
@@ -156,26 +156,14 @@ class EventController extends Controller
             return $item->isVenue() && $item->name;
         });
         $venues = $venues->map(function ($venue) {
-            $url = $venue->getGuestUrl();
-            $youtube = $venue->getFirstVideoUrl();
-            $venue = $venue->toArray();
-            $venue['id'] = UrlUtils::encodeId($venue['id']);
-            $venue['url'] = $url;
-            $venue['youtube'] = $youtube;
-            return $venue;
+            return $venue->toData();
         });
     
         $members = $roles->filter(function($item) {
             return ($item->isTalent() || $item->isVendor()) && $item->name;
         });
         $members = $members->map(function ($member) {
-            $url = $member->getGuestUrl();
-            $youtube = $member->getFirstVideoUrl();
-            $member = $member->toArray(); 
-            $member['id'] = UrlUtils::encodeId($member['id']);            
-            $member['url'] = $url;
-            $member['youtube'] = $youtube;
-            return $member;
+            return $member->toData();
         });
 
         $venues = array_values($venues->toArray());
