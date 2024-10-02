@@ -516,7 +516,7 @@ class EventController extends Controller
                 $role = new Role;
                 $role->name = $member['name'];
                 $role->subdomain = Role::generateSubdomain($member['name']);
-                $role->email = $member['email'];
+                $role->email = isset($member['email']) && $member['email'] !== '' ? $member['email'] : null;
                 $role->type = $request->role_type ? $request->role_type : 'talent';
                 $role->timezone = $user->timezone;
                 $role->language_code = $user->language_code;
