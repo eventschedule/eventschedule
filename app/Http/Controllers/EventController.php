@@ -98,13 +98,12 @@ class EventController extends Controller
         }
 
         $event = new Event;
+        $selectedMembers = [];
 
-        if ($venue) {
-            $event->venue_id = $venue->id;
-        } else if ($talent) {
-            $event->members = [$talent->toData()];
+        if ($talent) {
+            $selectedMembers = [$talent->toData()];
         } else if ($vendor) {
-            $event->members = [$vendor->toData()];
+            $selectedMembers = [$vendor->toData()];
         }
 
         if ($request->date) {
@@ -144,7 +143,8 @@ class EventController extends Controller
             'title' => $title,
             'selectedVenue' => $venue,
             'venues' => $venues,
-            'selectedMembers' => $members,
+            'selectedMembers' => $selectedMembers,
+            'members' => $members,
         ]);
     }
 
