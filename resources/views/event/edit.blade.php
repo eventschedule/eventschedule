@@ -19,15 +19,15 @@
             allowInput: true,
             enableTime: true,
             altInput: true,
-            time_24hr: "{{ $venue && $venue->use_24_hour_time ? 'true' : 'false' }}",
-            altFormat: "{{ $venue && $venue->use_24_hour_time ? 'M j, Y • H:i' : 'M j, Y • h:i K' }}",
+            time_24hr: "{{ $role && $role->use_24_hour_time ? 'true' : 'false' }}",
+            altFormat: "{{ $role && $role->use_24_hour_time ? 'M j, Y • H:i' : 'M j, Y • h:i K' }}",
             dateFormat: "Y-m-d H:i:S",
         });
         // https://github.com/flatpickr/flatpickr/issues/892#issuecomment-604387030
         f._input.onkeydown = () => false;
 
         $("#venue_country").countrySelect({
-            defaultCountry: "{{ $venue ? $venue->country_code : '' }}",
+            defaultCountry: "{{ $role && $role->country_code ? $role->country_code : '' }}",
         });
     });
 
@@ -256,21 +256,21 @@
                                     <x-input-label for="venue_address1" :value="__('messages.street_address') . ' *'" />
                                     <x-text-input id="venue_address1" name="venue_address1" type="text"
                                         class="mt-1 block w-full" required
-                                        :value="old('venue_address1', $venue ? $venue->address1 : '')" autocomplete="off" />
+                                        :value="old('venue_address1', $role ? $role->address1 : '')" autocomplete="off" />
                                     <x-input-error class="mt-2" :messages="$errors->get('venue_address1')" />
                                 </div>
 
                                 <div class="mb-6">
                                     <x-input-label for="venue_city" :value="__('messages.city')" />
                                     <x-text-input id="venue_city" name="venue_city" type="text" class="mt-1 block w-full"
-                                        :value="old('venue_city', $venue ? $venue->city : '')" autocomplete="off" />
+                                        :value="old('venue_city', $role ? $role->city : '')" autocomplete="off" />
                                     <x-input-error class="mt-2" :messages="$errors->get('venue_city')" />
                                 </div>
 
                                 <div class="mb-6">
                                     <x-input-label for="venue_state" :value="__('messages.state_province')" />
                                     <x-text-input id="venue_state" name="venue_state" type="text" class="mt-1 block w-full"
-                                        :value="old('venue_state', $venue ? $venue->state : '')" autocomplete="off" />
+                                        :value="old('venue_state', $role ? $role->state : '')" autocomplete="off" />
                                     <x-input-error class="mt-2" :messages="$errors->get('venue_state')" />
                                 </div>
 
@@ -278,7 +278,7 @@
                                     <x-input-label for="venue_postal_code" :value="__('messages.postal_code')" />
                                     <x-text-input id="venue_postal_code" name="venue_postal_code" type="text"
                                         class="mt-1 block w-full"
-                                        :value="old('venue_postal_code', $venue ? $venue->postal_code : '')" autocomplete="off" />
+                                        :value="old('venue_postal_code', $role ? $role->postal_code : '')" autocomplete="off" />
                                     <x-input-error class="mt-2" :messages="$errors->get('venue_postal_code')" />
                                 </div>
 
@@ -565,10 +565,10 @@
 
                         <div class="mb-6">
                             <x-input-label for="starts_at"
-                                :value="__('messages.date_and_time') . ($venue && $venue->user_id ? '' : ' *')" />
+                                :value="__('messages.date_and_time') . '*'"/>
                             <x-text-input type="text" id="starts_at" name="starts_at" class="datepicker"
                                 :value="old('starts_at', $event->localStartsAt())"
-                                :required="! $venue || ! $venue->user_id" autocomplete="off" />
+                                required autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('starts_at')" />
                         </div>
 
@@ -673,8 +673,8 @@
         venueEmail: "",
         venueSearchEmail: "",
         venueSearchResults: [],
-        selectedVenue: @json($venue ? $venue->toData() : ""),
-        selectedMembers: @json($event->members ?? []),
+        selectedVenue: @json($selectedVenue ? $selectedVenue->toData() : ""),
+        selectedMembers: @json($selectedMembers ?? []),
         memberSearchEmail: "",
         memberSearchResults: [],
         selectedMember: "",
