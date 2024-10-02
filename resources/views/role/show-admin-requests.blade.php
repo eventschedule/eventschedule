@@ -20,15 +20,15 @@
 <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 pt-5">
     @foreach($requests as $event)
     <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow">
-        <a href="{{ $event->role->getGuestUrl() }}" target="_blank" class="hover:underline">
+        <a href="{{ $event->role()->getGuestUrl() }}" target="_blank" class="hover:underline">
             <div class="flex flex-1 flex-col p-8">
-                @if ($event->role->profile_image_url)
-                <img class="mx-auto h-32 w-32 flex-shrink-0 object-cover" src="{{ $event->role->profile_image_url }}"
+                @if ($event->role()->profile_image_url)
+                <img class="mx-auto h-32 w-32 flex-shrink-0 object-cover" src="{{ $event->role()->profile_image_url }}"
                     alt="Profile Image">
                 @endif
-                <h3 class="mt-6 text-sm font-medium text-gray-900">{{ $event->role->name }}</h3>
+                <h3 class="mt-6 text-sm font-medium text-gray-900">{{ $event->role()->name }}</h3>
                 <dl class="mt-1 flex flex-grow flex-col justify-between">
-                    <dd class="text-sm text-gray-500 line-clamp-3">{{ $event->role->description }}</dd>
+                    <dd class="text-sm text-gray-500 line-clamp-3">{{ $event->role()->description }}</dd>
                 </dl>
             </div>
         </a>

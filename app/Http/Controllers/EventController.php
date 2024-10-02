@@ -104,8 +104,8 @@ class EventController extends Controller
             'subdomain' => $subdomain,
             'venue' => $event->venue,
             'role' => $event->role,
-            'talent' => $event->role->type == 'talent' ? $event->role : false,
-            'vendor' => $event->role->type == 'vendor' ? $event->role : false,
+            //'talent' => $event->role->type == 'talent' ? $event->role : false,
+            //'vendor' => $event->role->type == 'vendor' ? $event->role : false,
             'title' => __('messages.edit_event'),
         ];
 
@@ -422,7 +422,7 @@ class EventController extends Controller
         $event->is_accepted = true;
         $event->save();
 
-        $emails = $event->role->members()->pluck('email');
+        //$emails = $event->role->members()->pluck('email');
         //Notification::route('mail', $emails)->notify(new RequestAcceptedNotification($event));
         
         return redirect('/' . $subdomain . '/requests')
@@ -440,7 +440,7 @@ class EventController extends Controller
         $event->is_accepted = false;
         $event->save();
 
-        $emails = $event->role->members()->pluck('email');
+        //$emails = $event->role->members()->pluck('email');
         //Notification::route('mail', $emails)->notify(new RequestDeclinedNotification($event));
 
         if ($request->redirect_to == 'schedule') {

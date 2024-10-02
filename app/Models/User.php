@@ -186,7 +186,17 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
-        return $this->isMember($event->venue->subdomain) || $this->isMember($event->role->subdomain);
+        if ($this->isMember($event->venue->subdomain)) {
+            return true;
+        }
+
+        foreach ($event->roles as $role) {
+            if ($this->isMember($role->subdomain)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function getProfileImageUrlAttribute($value)

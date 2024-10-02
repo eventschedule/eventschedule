@@ -38,7 +38,7 @@
 
                 @if ($event)
                 @if (! $user || ! $user->isConnected($event->role()->subdomain))
-                <a href="{{ route('role.follow', ['subdomain' => $event->role->subdomain]) }}" class="pl-2">
+                <a href="{{ route('role.follow', ['subdomain' => $event->role()->subdomain]) }}" class="pl-2">
                     <button type="button" style="background-color: {{ $otherRole->accent_color }}"
                         class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
@@ -192,10 +192,10 @@
 
             @if ($event->role()->youtube_links)
                 <div class="container mx-auto py-8">
-                    <div class="grid grid-cols-1 md:grid-cols-{{ $event->role->getVideoColumns() }} gap-8">
-                        @foreach (json_decode($event->role->youtube_links) as $link)
+                    <div class="grid grid-cols-1 md:grid-cols-{{ $event->role()->getVideoColumns() }} gap-8">
+                        @foreach (json_decode($event->role()->youtube_links) as $link)
                         <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-                            <iframe class="w-full" style="height:{{ $event->role->getVideoHeight() }}px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                            <iframe class="w-full" style="height:{{ $event->role()->getVideoHeight() }}px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                         </div>
                         @endforeach
                     </div>
@@ -241,7 +241,7 @@
                 <div>
                 @if ($role->isVenue() && $role->accept_talent_requests && $role->isClaimed())
                 <a href="{{ route('event.sign_up', ['subdomain' => $role->subdomain])}}">
-                    <button type="button" style="background-color: {{ $event ? $event->role->accent_color : $role->accent_color }}"
+                    <button type="button" style="background-color: {{ $event ? $event->role()->accent_color : $role->accent_color }}"
                         class="inline-flex items-center rounded-md shadow-sm px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
                                 aria-hidden="true">
@@ -255,7 +255,7 @@
 
                 @if ($role->isVenue() && $role->accept_vendor_requests && $role->isClaimed())
                 <a href="{{ route('event.sign_up', ['subdomain' => $role->subdomain])}}">
-                    <button type="button" style="background-color: {{ $event ? $event->role->accent_color : $role->accent_color }}"
+                    <button type="button" style="background-color: {{ $event ? $event->role()->accent_color : $role->accent_color }}"
                         class="inline-flex items-center rounded-md shadow-sm px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                         <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
                                 aria-hidden="true">
