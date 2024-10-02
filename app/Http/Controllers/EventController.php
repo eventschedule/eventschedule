@@ -117,14 +117,27 @@ class EventController extends Controller
     {
         $user = $request->user();
         $role = Role::subdomain($subdomain)->firstOrFail();
+        
         $venue = $role->isVenue() ? $role : null;
+        $talent = $role->isTalent() ? $role : null;
+        $vendor = $role->isVendor() ? $role : null;
+        $curator = $role->isCurator() ? $role : null;
 
         if (! $role->email_verified_at) {
             return redirect('/');
         }
 
         $event = new Event;
-        $event->venue_id = $venue ? $venue->id : "";
+
+        if ($venue) {
+            $event->venue_id = $venue->id;
+        } else if ($talent) {
+            $event->members = [$talent];
+        } else if ($vendor) {
+            $event->members = [$vendor];
+        } else if ($curator) {
+            //$event->role_id = $curator->id;
+        }
 
         if ($request->date) {
             $defaultTime = Carbon::now($user->timezone)->setTime(20, 0, 0);
