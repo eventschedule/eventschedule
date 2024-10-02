@@ -289,7 +289,7 @@ class Event extends Model
         if ($subdomain == $this->role()->subdomain) {
             return $this->venue;
         } else {
-            return $this->role;
+            return $this->role();
         }
     }
 }
