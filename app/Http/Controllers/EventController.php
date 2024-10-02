@@ -82,36 +82,6 @@ class EventController extends Controller
                 ->with('message', __('messages.event_deleted'));
     }
 
-    /*
-    public function editOld(Request $request, $subdomain, $hash)
-    {
-        $user = $request->user();
-        $subdomainRole = Role::subdomain($subdomain)->firstOrFail();
-        $event_id = UrlUtils::decodeId($hash);
-        $event = Event::findOrFail($event_id);
-
-        if (! $user->canEditEvent($event)) {
-            return redirect()->back();
-        }
-
-        $venueSubdomain = $event->venue->subdomain;
-        $roleSubdomain = $event->role()->subdomain;
- 
-        $data = [
-            'subdomainRole' => $subdomainRole,
-            'event' => $event,
-            'user' => $user,
-            'subdomain' => $subdomain,
-            'venue' => $event->venue,
-            'role' => $event->role,
-            //'talent' => $event->role->type == 'talent' ? $event->role : false,
-            //'vendor' => $event->role->type == 'vendor' ? $event->role : false,
-            'title' => __('messages.edit_event'),
-        ];
-
-        return view('event/edit_old', $data);
-    }
-    */
 
     public function create(Request $request, $subdomain)
     {
@@ -182,131 +152,50 @@ class EventController extends Controller
     {
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
-
-        return view('event/edit', [
-            'event' => $event,
-            'subdomain' => $subdomain,
-            'hash' => $hash,
-            'title' => __('messages.edit_event'),
-        ]);
-    }
-
-    /*
-    public function createOld(Request $request, $subdomain)
-    {
-        $request->validate([
-            'venue_email' => ['sometimes', new NoFakeEmail],
-            'role_email' => ['sometimes', new NoFakeEmail],
-        ]);
-
         $user = $request->user();
-        $subdomainRole = Role::subdomain($subdomain)->firstOrFail();
-        $role = null;
-        $roles = [];
 
-        if (! $subdomainRole->email_verified_at) {
+        if (! $user->canEditEvent($event)) {
+            return redirect()->back();
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $venue = $role->venue;
+
+        if (! $role->email_verified_at) {
             return redirect('/');
         }
 
-        $venue = $subdomainRole->isVenue() ? $subdomainRole : null;
-        $role = $talent = $subdomainRole->isTalent() ? $subdomainRole : null;
-        $role = $vendor = $subdomainRole->isVendor() ? $subdomainRole : null;        
-
-        if ($venue && ! auth()->user()->isMember($venue->subdomain)) {
-            if (! $user->isMember($subdomain) && ! $venue->acceptRequests()) {
-                return redirect('/');
-            }
-
-            foreach ($user->talent()->get() as $each) {
-                $roles[] = $each;
-            }
-            
-            foreach ($user->vendors()->get() as $each) {
-                $roles[] = $each;
-            }
-
-            if (count($roles) == 0) {
-                return redirect(route('new', ['type' => $venue->accept_talent_requests ? 'talent' : 'vendor']));
-            } elseif (count($roles) == 1) {
-                if ($roles[0]->isVendor()) {
-                    $vendor = $roles[0];
-                } else {
-                    $talent = $roles[0];
-                }
-            }
-        }
-
-        if (! $talent && ! $vendor) {
-            if ($request->role_email) {
-                if ($role = Role::whereEmail($request->role_email)->where('type', '!=', 'venue')->first()) {
-                    if ($role->isTalent()) {
-                        $talent = $role;
-                    } else {
-                        $vendor = $role;
-                    }
-                }
-            } else if ($request->role_id) {
-                if ($role = Role::findOrFail(UrlUtils::decodeId($request->role_id))) {
-                    if ($role->isTalent()) {
-                        $talent = $role;
-                    } else {
-                        $vendor = $role;
-                    }
-                }
-            } else {
-                return view('event/role_search', [
-                    'subdomain' => $subdomain, 
-                    'roles' => $user->connectedTalentOrVendors()->get(),
-                ]);
-            }
-        } 
+        $title = __('messages.edit_event');
         
-        if (! $venue) {
-            if ($request->venue_email) {
-                $venue = Role::whereEmail($request->venue_email)->where('type', '=', 'venue')->first();
-            } else if ($request->venue_id) {
-                $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
-            } else if ($request->no_email) {
-                // do nothing
-            } else {
-                return view('event/venue_search', [
-                    'subdomain' => $subdomain, 
-                    'venues' => $user->connectedVenues()
-                                    ->whereNotNull('email')
-                                    ->get(),
-                ]);
-            }
-        }
+        $roles = $user->roles()->get();
+    
+        $venues = $roles->filter(function($item) {
+            return $item->isVenue() && $item->name;
+        })->map(function ($venue) {
+            return $venue->toData();
+        });
+    
+        $members = $roles->filter(function($item) {
+            return ($item->isTalent() || $item->isVendor()) && $item->name;
+        })->map(function ($member) {
+            return $member->toData();
+        });
 
-
-        $event = new Event;
-        if ($request->date) {
-            $defaultTime = Carbon::now($user->timezone)->setTime(20, 0, 0);
-            $utcTime = $defaultTime->setTimezone('UTC');
-            $event->starts_at = $request->date . $utcTime->format('H:i:s');
-        }
-
-        $title = __('messages.add_event');
-        if (strpos($request->url(), '/sign_up') > 0 || ($venue && ! auth()->user()->isMember($venue->subdomain))) {
-            $title = __('messages.sign_up');
-        }
-
-        $data = [
-            'subdomainRole' => $subdomainRole,
+        $venues = array_values($venues->toArray());
+        $members = array_values($members->toArray());
+        
+        return view('event/edit', [
             'role' => $role,
-            'user' => $request->user(),
-            'subdomain' => $subdomain,
-            'event' => $event,
-            'venue' => $venue,
-            'talent' => $talent,
-            'vendor' => $vendor,
-            'title' => $title,
+            'user' => $user,
             'roles' => $roles,
-        ];
-
-        return view('event/edit_old', $data);
+            'event' => $event,
+            'subdomain' => $subdomain,
+            'title' => $title,
+            'venue' => $venue,
+            'venues' => $venues,
+            'members' => $members,
+        ]);
     }
-    */
 
     public function update(Request $request, $subdomain, $hash)
     {
