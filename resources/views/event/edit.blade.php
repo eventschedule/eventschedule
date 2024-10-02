@@ -673,7 +673,7 @@
         venueEmail: "",
         venueSearchEmail: "",
         venueSearchResults: [],
-        selectedVenue: "",
+        selectedVenue: @json($venue ? $venue->toData() : ""),
         selectedMembers: @json($event->members ?? []),
         memberSearchEmail: "",
         memberSearchResults: [],
