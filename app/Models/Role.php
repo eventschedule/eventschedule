@@ -396,7 +396,7 @@ class Role extends Model implements MustVerifyEmail
         $data = $this->toArray();   
         $data['id'] = UrlUtils::encodeId($data['id']);
         $data['user_id'] = UrlUtils::encodeId($data['user_id']);
-        $role['url'] = $url;
+        $data['url'] = $url;
         $data['youtube_url'] = $youtubeUrl;
 
         return $data;
