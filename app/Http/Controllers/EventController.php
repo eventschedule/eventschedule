@@ -159,7 +159,7 @@ class EventController extends Controller
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-        $venue = $role->venue;
+        $venue = $event->venue;
 
         if (! $role->email_verified_at) {
             return redirect('/');
@@ -171,14 +171,14 @@ class EventController extends Controller
     
         $venues = $roles->filter(function($item) {
             return $item->isVenue() && $item->name;
-        })->map(function ($venue) {
-            return $venue->toData();
+        })->map(function ($item) {
+            return $item->toData();
         });
     
         $members = $roles->filter(function($item) {
             return ($item->isTalent() || $item->isVendor()) && $item->name;
-        })->map(function ($member) {
-            return $member->toData();
+        })->map(function ($item) {
+            return $item->toData();
         });
 
         $venues = array_values($venues->toArray());
