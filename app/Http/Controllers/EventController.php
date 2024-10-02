@@ -152,15 +152,13 @@ class EventController extends Controller
     
         $venues = $roles->filter(function($item) {
             return $item->isVenue() && $item->name;
-        });
-        $venues = $venues->map(function ($venue) {
+        })->map(function ($venue) {
             return $venue->toData();
         });
     
         $members = $roles->filter(function($item) {
             return ($item->isTalent() || $item->isVendor()) && $item->name;
-        });
-        $members = $members->map(function ($member) {
+        })->map(function ($member) {
             return $member->toData();
         });
 
