@@ -92,6 +92,11 @@ class Role extends Model implements MustVerifyEmail
 
     }
 
+    public function encodeId()
+    {
+        return UrlUtils::encodeId($this->id);
+    }
+
     public function sendEmailVerificationNotification()
     {
         $this->notify(new CustomVerifyEmail('role', $this->subdomain));
