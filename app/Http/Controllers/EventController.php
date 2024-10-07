@@ -169,8 +169,8 @@ class EventController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         $venue = $event->venue;
         $selectedMembers = [];
-        foreach ($event->roles as $role) {
-            $selectedMembers[] = $role->toData();
+        foreach ($event->roles as $each) {
+            $selectedMembers[] = $each->toData();
         }
 
         if (! $role->email_verified_at) {
@@ -196,6 +196,7 @@ class EventController extends Controller
         $venues = array_values($venues->toArray());
         $members = array_values($members->toArray());
     
+        
 
         return view('event/edit', [
             'role' => $role,
@@ -302,7 +303,7 @@ class EventController extends Controller
         ];
 
         return redirect(route('role.view_admin', $data))
-                ->with('message', $message);
+                ->with('message', __('messages.event_created'));
     }
 
     public function curate(Request $request, $subdomain, $hash)

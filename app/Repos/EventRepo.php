@@ -172,9 +172,16 @@ class EventRepo
         }
 
         $selectedCurators = $request->input('curators', []);
+        $roleIds = $roleIds + $selectedCurators;
 
         $event->save();
-        $event->roles()->sync($roleIds + $selectedCurators);
+        // Log attached role IDs before sync
+        \Log::info('Role IDs before sync: ' . implode(', ', $event->roles()->pluck('role_id')->toArray()));
+
+        $event->roles()->sync($roleIds);
+
+        // Log attached role IDs after sync
+        \Log::info('Role IDs after sync: ' . implode(', ', $event->roles()->pluck('role_id')->toArray()));
 
         if ($request->hasFile('flyer_image_url')) {
             if ($event->flyer_image_url) {
@@ -202,7 +209,7 @@ class EventRepo
                 Mail::to($role->email)->send(new ClaimRole($event));
             }
         }
-        
+
         if ($subdomainRole->isCurator() && ! $subdomainRole->events()->where('event_id', $event->id)->exists()) {
             $subdomainRole->events()->attach($event->id);
         }
