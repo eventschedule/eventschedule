@@ -130,13 +130,13 @@ class EventController extends Controller
         $roles = $user->roles()->get();
     
         $venues = $roles->filter(function($item) {
-            return $item->isVenue() && $item->name;
+            return $item->isVenue() && $item->email;
         })->map(function ($venue) {
             return $venue->toData();
         });
     
         $members = $roles->filter(function($item) {
-            return ($item->isTalent() || $item->isVendor()) && $item->name;
+            return ($item->isTalent() || $item->isVendor()) && $item->email;
         })->map(function ($member) {
             return $member->toData();
         });
@@ -184,13 +184,13 @@ class EventController extends Controller
         $roles = $user->roles()->get();
     
         $venues = $roles->filter(function($item) {
-            return $item->isVenue() && $item->name;
+            return $item->isVenue() && $item->email;
         })->map(function ($item) {
             return $item->toData();
         });
     
         $members = $roles->filter(function($item) {
-            return ($item->isTalent() || $item->isVendor()) && $item->name;
+            return ($item->isTalent() || $item->isVendor()) && $item->email;
         })->map(function ($item) {
             return $item->toData();
         });
