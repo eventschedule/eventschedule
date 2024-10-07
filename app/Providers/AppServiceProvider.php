@@ -37,23 +37,19 @@ class AppServiceProvider extends ServiceProvider
             $view->with([
                 'isFollowingVenues' => $allRoles->where('type', 'venue')
                     ->where('pivot.level', 'follower')
-                    ->whereNotNull('user_id')
-                    ->whereNotNull('email_verified_at')
+                    ->whereNotNull('email')
                     ->count(),
                 'isFollowingTalent' => $allRoles->where('type', 'talent')
                     ->where('pivot.level', 'follower')
-                    ->whereNotNull('user_id')
-                    ->whereNotNull('email_verified_at')
+                    ->whereNotNull('email')
                     ->count(),
                 'isFollowingVendors' => $allRoles->where('type', 'vendor')
                     ->where('pivot.level', 'follower')
-                    ->whereNotNull('user_id')
-                    ->whereNotNull('email_verified_at')
+                    ->whereNotNull('email')
                     ->count(),
                 'isFollowingCurators' => $allRoles->where('type', 'curator')
                     ->where('pivot.level', 'follower')
-                    ->whereNotNull('user_id')
-                    ->whereNotNull('email_verified_at')
+                    ->whereNotNull('email')
                     ->count(),
                 'venues' => $allRoles
                     ->where('type', 'venue')

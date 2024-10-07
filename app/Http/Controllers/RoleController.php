@@ -514,6 +514,7 @@ class RoleController extends Controller
         $user = auth()->user();
         $roleIds = $user->followingTalent()->pluck('roles.id');
         $roles = Role::whereIn('id', $roleIds)
+                    ->whereNotNull('email')
                     ->orderBy('name', 'ASC')
                     ->get();
 
@@ -530,6 +531,7 @@ class RoleController extends Controller
         $user = auth()->user();
         $roleIds = $user->followingVendors()->pluck('roles.id');
         $roles = Role::whereIn('id', $roleIds)
+                    ->whereNotNull('email')
                     ->orderBy('name', 'ASC')
                     ->get();
 
@@ -546,6 +548,7 @@ class RoleController extends Controller
         $user = auth()->user();
         $roleIds = $user->followingCurators()->pluck('roles.id');
         $roles = Role::whereIn('id', $roleIds)
+                    ->whereNotNull('email')
                     ->orderBy('name', 'ASC')
                     ->get();
 
