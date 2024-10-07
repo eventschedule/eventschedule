@@ -112,6 +112,7 @@
     function previewImage(input) {
         var preview = document.getElementById('preview_img');
         var previewDiv = document.getElementById('image_preview');
+        var warningElement = document.getElementById('image_size_warning');
         
         if (input.files && input.files[0]) {
             var reader = new FileReader();
@@ -122,9 +123,21 @@
             }
             
             reader.readAsDataURL(input.files[0]);
+
+            // Check file size
+            var fileSize = input.files[0].size / 1024 / 1024; // in MB
+            if (fileSize > 2.5) {
+                warningElement.textContent = "{{ __('messages.image_size_warning') }}";
+                warningElement.style.display = 'block';
+            } else {
+                warningElement.textContent = '';
+                warningElement.style.display = 'none';
+            }
         } else {
             preview.src = '#';
             previewDiv.style.display = 'none';
+            warningElement.textContent = '';
+            warningElement.style.display = 'none';
         }
     }
 
@@ -600,6 +613,9 @@
                         <input id="flyer_image_url" name="flyer_image_url" type="file" class="mt-1 block w-full" 
                                 accept="image/png, image/jpeg" onchange="previewImage(this);" />
                             <x-input-error class="mt-2" :messages="$errors->get('flyer_image_url')" />
+                            <p id="image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                                {{ __('messages.image_size_warning') }}
+                            </p>
 
                             <div id="image_preview" class="mt-3" style="display: none;">
                                 <img id="preview_img" src="#" alt="Preview" style="max-height:120px" />
