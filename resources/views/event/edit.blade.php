@@ -589,12 +589,12 @@
                             @foreach($curators as $curator)
                             <div class="flex items-center mb-4 mt-1">
                                 <input type="checkbox" 
-                                       id="curator_{{ $curator->id }}" 
+                                       id="curator_{{ $curator->encodeId() }}" 
                                        name="curators[]" 
-                                       value="{{ $curator->id }}"
+                                       value="{{ $curator->encodeId() }}"
                                        {{ (! $event->exists && $role->subdomain == $curator->subdomain) || $event->curators->contains($curator->id) ? 'checked' : '' }}
                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                                <label for="curator_{{ $curator->id }}" class="ml-2 block text-sm text-gray-900 dark:text-gray-100">
+                                <label for="curator_{{ $curator->encodeId() }}" class="ml-2 block text-sm text-gray-900 dark:text-gray-100">
                                     {{ $curator->name }}
                                 </label>
                             </div>
