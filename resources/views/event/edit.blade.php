@@ -596,10 +596,10 @@
                         @endif
 
                         <div class="mb-6">
-                        <x-input-label for="flyer_image" :value="__('messages.flyer_image')" />
-                        <input id="flyer_image" name="flyer_image" type="file" class="mt-1 block w-full" 
+                        <x-input-label for="flyer_image_url" :value="__('messages.flyer_image')" />
+                        <input id="flyer_image_url" name="flyer_image_url" type="file" class="mt-1 block w-full" 
                                 accept="image/png, image/jpeg" onchange="previewImage(this);" />
-                            <x-input-error class="mt-2" :messages="$errors->get('flyer_image')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('flyer_image_url')" />
 
                             <div id="image_preview" class="mt-3" style="display: none;">
                                 <img id="preview_img" src="#" alt="Preview" style="max-height:120px" />

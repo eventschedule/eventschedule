@@ -15,9 +15,9 @@ class EventCreateRequest extends FormRequest
      * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
      */
     public function rules(): array
-    {
+    {        
         return [
-            'flyer_image' => ['image', 'max:2500'],
+            'flyer_image_url' => ['image', 'max:2500'],
         ];
     }
 }
