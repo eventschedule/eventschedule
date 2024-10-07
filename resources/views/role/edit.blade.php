@@ -48,7 +48,7 @@
                 const preview = document.getElementById(previewId);
                 const file = input.files[0];
                 const reader = new FileReader();
-
+        
                 reader.onloadend = function () {
                     preview.src = reader.result;
                     preview.style.display = 'block';
@@ -62,9 +62,24 @@
 
                 if (file) {
                     reader.readAsDataURL(file);
+
+                    var warningElement = document.getElementById('image_size_warning');
+
+                    // Check file size
+                    var fileSize = input.files[0].size / 1024 / 1024; // in MB
+                    if (fileSize > 2.5) {
+                        warningElement.textContent = "{{ __('messages.image_size_warning') }}";
+                        warningElement.style.display = 'block';
+                    } else {
+                        warningElement.textContent = '';
+                        warningElement.style.display = 'none';
+                    }
+
                 } else {
                     preview.src = '';
                     preview.style.display = 'none';
+                    warningElement.textContent = '';
+                    warningElement.style.display = 'none';
                     updatePreview();
                 }
             }
@@ -271,6 +286,9 @@
                             <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full"
                                 :value="old('profile_image')" accept="image/png, image/jpeg" />
                             <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
+                            <p id="image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                                {{ __('messages.image_size_warning') }}
+                            </p>
 
                             <img id="profile_image_preview" src="#" alt="Profile Image Preview" style="max-height:120px; display:none;" class="pt-3" />
 

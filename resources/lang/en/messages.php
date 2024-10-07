@@ -283,4 +283,5 @@ return [
     'youtube_video_url' => 'Youtube Video URL',
     'youtube_videos' => 'YouTube Videos',
     'done' => 'Done',
+    'image_size_warning' => 'The image size must be less than 2.5MB',
 ];
