@@ -215,14 +215,7 @@
                 $('#state').val(validatedAddress['state']);
                 $('#postal_code').val(validatedAddress['postal_code']);
                 $("#country").countrySelect("selectCountry", validatedAddress['country_code']);
-                
-                // Update hidden fields
-                $('#formatted_address').val(validatedAddress['formatted_address']);
-                $('#google_place_id').val(validatedAddress['google_place_id']);
-                $('#geo_address').val(validatedAddress['geo_address']);
-                $('#geo_lat').val(validatedAddress['geo_lat']);
-                $('#geo_lon').val(validatedAddress['geo_lon']);
-                
+                                
                 // Hide the address response and accept button after accepting
                 $('#address_response').hide();
                 $('#accept_button').hide();
@@ -347,11 +340,6 @@
                         </div>
 
                         <div id="address_response" class="mb-6 hidden text-gray-900 dark:text-gray-100"></div>
-                        <input type="hidden" name="formatted_address" id="formatted_address"/>
-                        <input type="hidden" name="google_place_id" id="google_place_id"/>
-                        <input type="hidden" name="geo_address" id="geo_address"/>
-                        <input type="hidden" name="geo_lat" id="geo_lat"/>
-                        <input type="hidden" name="geo_lon" id="geo_lon"/>
 
                     </div>
                 </div>

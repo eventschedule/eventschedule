@@ -960,11 +960,7 @@ class RoleController extends Controller
                     'state' => $state,
                     'postal_code' => $postal_code,
                     'country_code' => $country,
-                    'geo_address' => $address,
                     'formatted_address' => $result['formatted_address'],
-                    'google_place_id' => $result['place_id'],
-                    'geo_lat' => $result['geometry']['location']['lat'],
-                    'geo_lon' => $result['geometry']['location']['lng'],
                 ]);
             } else {
                 \Log::error('Google Maps Error: ' . json_encode($responseData));
