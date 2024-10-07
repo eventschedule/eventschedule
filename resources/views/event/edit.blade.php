@@ -950,6 +950,12 @@
         this.venueSearchEmail = "";
         this.venueSearchResults = [];
         this.setFocusBasedOnVenueType();
+
+        this.$nextTick(() => {
+            $("#venue_country").countrySelect({
+                defaultCountry: "{{ $role && $role->country_code ? $role->country_code : '' }}",
+            });
+        });
       },
       memberType() {
         this.memberSearchEmail = "";
