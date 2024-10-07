@@ -726,6 +726,10 @@
               if (venueNameInput) {
                 venueNameInput.focus();
               }
+
+              $("#venue_country").countrySelect({
+                defaultCountry: "{{ $role && $role->country_code ? $role->country_code : '' }}",
+              });
             });
           }
         })
@@ -796,6 +800,7 @@
               if (memberNameInput) {
                 memberNameInput.focus();
               }
+
             });
           }
         })
