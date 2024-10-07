@@ -48,33 +48,52 @@
                 const preview = document.getElementById(previewId);
                 const file = input.files[0];
                 const reader = new FileReader();
-        
+                var warningElement = document.getElementById('image_size_warning');
+
                 reader.onloadend = function () {
-                    preview.src = reader.result;
-                    preview.style.display = 'block';
-                    updatePreview();
-                    
-                    if (previewId === 'background_image_preview') {
-                        $('#style_background_image img:not(#background_image_preview)').hide();
-                        $('#style_background_image a').hide();
-                    }
+                    const img = new Image();
+                    img.onload = function() {
+                        const width = this.width;
+                        const height = this.height;
+                        const fileSize = file.size / 1024 / 1024; // in MB
+                        let warningMessage = '';
+
+                        if (fileSize > 2.5) {
+                            warningMessage += "{{ __('messages.image_size_warning') }}";
+                        }
+
+                        if (width !== height) {
+                            if (warningMessage) warningMessage += " ";
+                            warningMessage += "{{ __('messages.image_not_square') }}";
+                        }
+
+                        if (warningMessage) {
+                            warningElement.textContent = warningMessage;
+                            warningElement.style.display = 'block';
+                        } else {
+                            warningElement.textContent = '';
+                            warningElement.style.display = 'none';
+                        }
+
+                        if (width === height && fileSize <= 2.5) {
+                            preview.src = reader.result;
+                            preview.style.display = 'block';
+                            updatePreview();
+                            
+                            if (previewId === 'background_image_preview') {
+                                $('#style_background_image img:not(#background_image_preview)').hide();
+                                $('#style_background_image a').hide();
+                            }
+                        } else {
+                            preview.src = '';
+                            preview.style.display = 'none';
+                        }
+                    };
+                    img.src = reader.result;
                 }
 
                 if (file) {
                     reader.readAsDataURL(file);
-
-                    var warningElement = document.getElementById('image_size_warning');
-
-                    // Check file size
-                    var fileSize = input.files[0].size / 1024 / 1024; // in MB
-                    if (fileSize > 2.5) {
-                        warningElement.textContent = "{{ __('messages.image_size_warning') }}";
-                        warningElement.style.display = 'block';
-                    } else {
-                        warningElement.textContent = '';
-                        warningElement.style.display = 'none';
-                    }
-
                 } else {
                     preview.src = '';
                     preview.style.display = 'none';
