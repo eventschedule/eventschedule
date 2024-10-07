@@ -102,14 +102,7 @@
             $('#venue_state').val(validatedAddress['state']);
             $('#venue_postal_code').val(validatedAddress['postal_code']);
             $("#venue_country").countrySelect("selectCountry", validatedAddress['country_code']);
-            
-            // Update hidden fields
-            $('#formatted_address').val(validatedAddress['formatted_address']);
-            $('#google_place_id').val(validatedAddress['google_place_id']);
-            $('#geo_address').val(validatedAddress['geo_address']);
-            $('#geo_lat').val(validatedAddress['geo_lat']);
-            $('#geo_lon').val(validatedAddress['geo_lon']);
-            
+                        
             // Hide the address response and accept button after accepting
             $('#address_response').hide();
             $('#accept_button').hide();
