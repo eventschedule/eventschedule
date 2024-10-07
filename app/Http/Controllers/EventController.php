@@ -22,6 +22,8 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Rules\NoFakeEmail;
 use App\Repos\EventRepo;
+use App\Http\Requests\EventCreateRequest;
+use App\Http\Requests\EventUpdateRequest;
 
 class EventController extends Controller
 {
@@ -212,7 +214,7 @@ class EventController extends Controller
         ]);
     }
 
-    public function update(Request $request, $subdomain, $hash)
+    public function update(EventUpdateRequest $request, $subdomain, $hash)
     {
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
@@ -281,7 +283,7 @@ class EventController extends Controller
         }        
     }
 
-    public function store(Request $request, $subdomain)
+    public function store(EventCreateRequest $request, $subdomain)
     {
         //dd($request->all());
 
