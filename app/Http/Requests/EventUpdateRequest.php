@@ -17,7 +17,7 @@ class EventUpdateRequest extends FormRequest
     public function rules(): array
     {        
         return [
-            'flyer_image_url' => ['image', 'max:2500'],
+            'flyer_image_url' => ['image', 'max:25'],
         ];
     }
 }
