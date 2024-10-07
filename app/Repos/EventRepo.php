@@ -194,14 +194,12 @@ class EventRepo
             $event->save();
         }
 
-        if ($event->wasRecentlyCreated) {
-            if (! $venue->isClaimed() && $venue->is_subscribed && $venue->email) {
-                Mail::to($venue->email)->send(new ClaimVenue($event));
-            }
+        if ($venue->wasRecentlyCreated && ! $venue->isClaimed() && $venue->is_subscribed && $venue->email) {
+            Mail::to($venue->email)->send(new ClaimVenue($event));
+        }
 
-            if (! $role->isClaimed() && $role->is_subscribed && $role->email) {
-                Mail::to($role->email)->send(new ClaimRole($event));
-            }
+        if ($role->wasRecentlyCreated && ! $role->isClaimed() && $role->is_subscribed && $role->email) {
+            Mail::to($role->email)->send(new ClaimRole($event));
         }
 
         if ($subdomainRole->isCurator() && ! $subdomainRole->events()->where('event_id', $event->id)->exists()) {
