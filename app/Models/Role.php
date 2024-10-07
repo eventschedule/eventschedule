@@ -270,8 +270,12 @@ class Role extends Model implements MustVerifyEmail
         return $subdomain;
     }
 
-    public static function generateSubdomain($name)
+    public static function generateSubdomain($name = "")
     {
+        if (! $name) {
+            $name = strtolower(\Str::random(8));
+        }
+
         $subdomain = self::cleanSubdomain($name);
 
         $originalSubdomain = $subdomain;
