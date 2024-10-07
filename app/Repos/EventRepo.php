@@ -26,18 +26,20 @@ class EventRepo
             $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
         }
 
+        /*
         if ($venue && ! $curator && ! auth()->user()->isMember($venue->subdomain) && ! $venue->acceptRequests()) {
             return redirect()
                     ->back()
                     ->withInput()
                     ->withErrors(['venue_email' => __('messages.venue_not_accepting_requests')]);
         }
+        */
 
         if (! $venue) {
             $venue = new Role;
             $venue->name = $request->venue_name ?? null;
             $venue->email = $request->venue_email ?? null;
-            $venue->subdomain = Role::generateSubdomain($request->venue_name);
+            $venue->subdomain = Role::generateSubdomain($request->venue_email ? $request->venue_email : null);
             $venue->type = 'venue';
             $venue->timezone = $user->timezone;
             $venue->language_code = $user->language_code;
@@ -74,8 +76,8 @@ class EventRepo
 
                 $role = new Role;
                 $role->name = $member['name'];
-                $role->subdomain = Role::generateSubdomain($member['name']);
                 $role->email = isset($member['email']) && $member['email'] !== '' ? $member['email'] : null;
+                $role->subdomain = Role::generateSubdomain($role->email ? $role->email : null);
                 $role->type = $request->role_type ? $request->role_type : 'talent';
                 $role->timezone = $user->timezone;
                 $role->language_code = $user->language_code;
