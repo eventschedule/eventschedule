@@ -141,6 +141,7 @@ class EventRepo
 
         if (! $event) {
             $event = new Event;       
+            $event->is_accepted = true;
         }
 
         $event->fill($request->all());
@@ -163,7 +164,7 @@ class EventRepo
                 ->setTimezone('UTC')
                 ->format('Y-m-d H:i:s');
         }
-
+        
         /*
         if (auth()->user()->isMember($venue->subdomain) || !$venue->user_id) {
             $event->is_accepted = true;
