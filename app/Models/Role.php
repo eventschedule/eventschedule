@@ -60,6 +60,10 @@ class Role extends Model implements MustVerifyEmail
 
             $model->description_html = MarkdownUtils::convertToHtml($model->description);
 
+            if ($model->accent_color == '#ffffff') {
+                $model->accent_color = '#000000';
+            }
+
             $address = $model->fullAddress();
 
             if ($address && $address != $model->geo_address) {
