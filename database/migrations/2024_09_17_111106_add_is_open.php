@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('events', function (Blueprint $table) {
             $table->foreignId('venue_id')->nullable(false)->change();
             $table->foreignId('role_id')->nullable(false)->change();
-        });        
+        });
 
         Schema::table('roles', function (Blueprint $table) {
             $table->string('name')->nullable()->change();
