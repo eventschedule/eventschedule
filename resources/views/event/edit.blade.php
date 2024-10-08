@@ -986,6 +986,20 @@
             this.isInPerson = true;
           }
         }
+        this.savePreferences();
+      },
+      savePreferences() {
+        localStorage.setItem('eventPreferences', JSON.stringify({
+          isInPerson: this.isInPerson,
+          isOnline: this.isOnline
+        }));
+      },
+      loadPreferences() {
+        const preferences = JSON.parse(localStorage.getItem('eventPreferences'));
+        if (preferences) {
+          this.isInPerson = preferences.isInPerson;
+          this.isOnline = preferences.isOnline;
+        }
       },
     },
     computed: {
@@ -1022,11 +1036,13 @@
         if (!newValue) {
           this.clearSelectedVenue();
         }
+        this.savePreferences();
       },
       isOnline(newValue) {
         if (!newValue) {
           this.clearEventUrl();
         }
+        this.savePreferences();
       },
     },
     mounted() {
@@ -1034,16 +1050,17 @@
       this.setFocusBasedOnMemberType();
       this.showMemberTypeRadio = this.selectedMembers.length === 0;
 
-      // Set isInPerson and isOnline based on existing event data
       if (this.event.id) {
         this.isInPerson = !!this.event.venue_id;
         this.isOnline = !!this.event.event_url;
       } else {
-        // Default to in-person for new events
-        this.isInPerson = true;
+        this.loadPreferences();
+
+        if (!this.isInPerson && !this.isOnline) {
+          this.isInPerson = true;
+        }
       }
 
-      // Ensure at least one is checked
       this.ensureOneChecked('in_person');
     }
   }).mount('#app')
