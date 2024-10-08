@@ -155,7 +155,7 @@
                         <ol class="mt-4 divide-y divide-gray-100 text-sm leading-6 md:col-span-7 xl:col-span-8">
                             @foreach ($events as $each)
                             @if ($each->matchesDate($currentDate))
-                            <li class="relative group">
+                            <li class="relative group hover:pr-8">
                                 <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate) }}"
                                     class="flex has-tooltip" data-tooltip="<b>{{ $each->role()->name }}</b><br/>{{ $each->getVenueDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
                                     onclick="event.stopPropagation();" {{ ($route == 'admin' || (isset($embed) && $embed)) ? 'target="_blank"' : '' }}>
