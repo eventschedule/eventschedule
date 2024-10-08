@@ -26,7 +26,7 @@ class Event extends Model
         });
 
         static::deleting(function ($event) {
-            if (! $event->venue->email) {
+            if ($event->venue && ! $event->venue->email) {
                 $event->venue->delete();
             }
         });
@@ -143,7 +143,30 @@ class Event extends Model
             return $role->name;
         }
 
-        return $this->venue->getDisplayName();
+        if ($this->venue) {
+            return $this->venue->getDisplayName();
+        }
+
+        return $this->getEventUrlDomain();
+    }
+
+    public function getVenueDisplayName()
+    {
+        if ($this->venue) {
+            return $this->venue->name;
+        }
+
+        return $this->getEventUrlDomain();
+    }
+
+    public function getEventUrlDomain()
+    {
+        if ($this->event_url) {
+            $parsedUrl = parse_url($this->event_url);
+            return $parsedUrl['host'];
+        }
+
+        return '';
     }
 
     public function getGuestUrl($subdomain = false, $date = null)

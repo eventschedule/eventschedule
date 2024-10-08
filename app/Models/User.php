@@ -186,7 +186,7 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
-        if ($this->isMember($event->venue->subdomain)) {
+        if ($event->venue && $this->isMember($event->venue->subdomain)) {
             return true;
         }
 

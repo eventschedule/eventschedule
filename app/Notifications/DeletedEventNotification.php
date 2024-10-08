@@ -39,7 +39,6 @@ class DeletedEventNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $role = $this->event->role;
-        $venue = $this->event->venue;
         $user = $this->user;
 
         return (new MailMessage)
@@ -47,7 +46,7 @@ class DeletedEventNotification extends Notification
                     ->subject(__('messages.event_has_been_deleted'))
                     ->line(str_replace(
                         [':name', ':venue', ':user'],
-                        [$role->name, $venue->name, $user->name],
+                        [$role->name, $event->getVenueDisplayName(), $user->name],
                         __('messages.event_has_been_deleted_details'))
                     );
     }
