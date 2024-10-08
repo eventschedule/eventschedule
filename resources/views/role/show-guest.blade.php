@@ -2,9 +2,9 @@
 
     <div class="p-10 pb-0 max-w-5xl mx-auto px-4">
         <div class="flex items-start justify-between pb-6">
-            <a href="{{ $event ? $event->venue->getGuestUrl() : $role->getGuestUrl() }}" class="hover:underline">
+            <a href="{{ $event ? ($event->venue ? $event->venue->getGuestUrl() : '#') : $role->getGuestUrl() }}" class="hover:underline">
                 <div id="venue_title" class="text-4xl font-bold">
-                    {{ $event ? $event->venue->name : $role->name }}
+                    {{ $event ? ($event->venue ? $event->venue->name : '') : $role->name }}
                 </div>
             </a>
             <div>
@@ -22,7 +22,7 @@
                 </a>                
                 @endif
 
-                @if (($event && $event->venue->bestAddress()) || $role->bestAddress())
+                @if (($event && $event->venue && $event->venue->bestAddress()) || $role->bestAddress())
                 <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event ? $event->venue->bestAddress() : $role->bestAddress()) }}" target="_blank" class="pl-2">
                     <button type="button" style="background-color: {{ $event ? $otherRole->accent_color : $role->accent_color }}"
                         class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">

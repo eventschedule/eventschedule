@@ -214,7 +214,11 @@ class RoleController extends Controller
         } 
 
         if ($event) {
-            $otherRole = $event->venue->subdomain == $subdomain ? $event->role() : $event->venue;
+            if ($event->venue) {
+                $otherRole = $event->venue->subdomain == $subdomain ? $event->role() : $event->venue;
+            } else {
+                $otherRole = $role;
+            }
 
             if ($event->starts_at) {
                 $startAtDate = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);

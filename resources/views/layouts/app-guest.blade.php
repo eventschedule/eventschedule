@@ -81,7 +81,7 @@
         }
 
         @if ($event)
-            @if ($subdomain == $event->venue->subdomain)
+            @if ($event->venue && $subdomain == $event->venue->subdomain)
             #event_title
             @else
             #venue_title
