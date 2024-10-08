@@ -14,6 +14,7 @@ class Event extends Model
         'duration',
         'description',
         'event_url',
+        'event_password',
     ];
 
     protected static function boot()
