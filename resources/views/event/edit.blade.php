@@ -189,6 +189,8 @@
                             </div>
                         </div>
 
+                        <x-text-input name="venue_id" v-bind:value="selectedVenue.id" type="hidden" />
+
                         <div v-if="isInPerson">
                             <div v-if="!selectedVenue" class="mb-6">
                                 <fieldset>                                
@@ -353,7 +355,6 @@
                                 </div>
                             </div>                        
 
-                            <x-text-input name="venue_id" v-bind:value="selectedVenue.id" type="hidden" />
                         </div>
 
                         <div v-if="isOnline">
