@@ -174,7 +174,7 @@
                                     <input id="in_person" name="event_type" type="checkbox" v-model="isInPerson"
                                         class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                                         @change="ensureOneChecked('in_person')">
-                                    <label for="in_person" class="ml-2 block text-sm text-gray-900 dark:text-gray-100">
+                                    <label for="in_person" class="ml-3 block text-gray-900 dark:text-gray-100">
                                         {{ __('messages.in_person') }}
                                     </label>
                                 </div>
@@ -182,7 +182,7 @@
                                     <input id="online" name="event_type" type="checkbox" v-model="isOnline"
                                         class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                                         @change="ensureOneChecked('online')">
-                                    <label for="online" class="ml-2 block text-sm text-gray-900 dark:text-gray-100">
+                                    <label for="online" class="ml-3 block text-gray-900 dark:text-gray-100">
                                         {{ __('messages.online') }}
                                     </label>
                                 </div>
