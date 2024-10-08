@@ -158,14 +158,15 @@
                             <li class="relative group">
                                 <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate) }}"
                                     class="flex has-tooltip" data-tooltip="<b>{{ $each->role()->name }}</b><br/>{{ $each->getVenueDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
-                                    target="_blank">
+                                    onclick="event.stopPropagation();" {{ ($route == 'admin' || (isset($embed) && $embed)) ? 'target="_blank"' : '' }}>
                                     <p class="flex-auto truncate font-medium group-hover:text-indigo-600 text-gray-900">
                                         {{ isset($subdomain) && $subdomain == $each->role()->subdomain ? $each->getVenueDisplayName() : $each->role()->name }}
                                     </p>
                                 </a>
-                                @if ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at)
+                                @if ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at && auth()->user()->canEditEvent($each))
                                 <a href="{{ route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}"
-                                    class="absolute right-0 top-0 hidden group-hover:inline-block text-indigo-600 hover:text-indigo-900">
+                                    class="absolute right-0 top-0 hidden group-hover:inline-block text-indigo-600 hover:text-indigo-900"
+                                    onclick="event.stopPropagation();">
                                     {{ __('messages.edit') }}
                                 </a>
                                 @endif
@@ -202,7 +203,7 @@
                 @endphp
 
                 @if ($isRecurringToday || $isEventOnDate)
-                <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate) }}" {{ isset($embed) && $embed ? 'target="blank"' : '' }}>
+                <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate) }}" {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}>
                     <li class="relative flex items-center space-x-6 py-6 px-4 xl:static">
                         @if ($each->getImageUrl())
                         <img src="{{ $each->getImageUrl() }}" class="h-14 w-14 flex-none">
@@ -245,6 +246,15 @@
                                 </div>
                             </dl>
                         </div>
+                        @if ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at && auth()->user()->canEditEvent($each))                        
+                        <div class="absolute right-10">
+                            <a href="{{ route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}"
+                                class="text-indigo-600 hover:text-indigo-900 hover:underline"
+                                onclick="event.stopPropagation();">
+                                {{ __('messages.edit') }}
+                            </a>
+                        </div>
+                        @endif
                     </li>
                 </a>
                 @endif
