@@ -35,7 +35,7 @@ class EventRepo
         }
         */
 
-        if (! $venue) {
+        if (! $venue && $request->venue_address1) {
             $venue = new Role;
             $venue->name = $request->venue_name ?? null;
             $venue->email = $request->venue_email ?? null;
@@ -70,7 +70,9 @@ class EventRepo
             }
         }
 
+        $roles = [];
         $roleIds = [];
+
         foreach ($request->members as $memberId => $member) {
             if (strpos($memberId, 'new_') === 0) {
 
@@ -120,6 +122,7 @@ class EventRepo
                     $role->save();
                 }
 
+                $roles[] = $role;
                 $roleIds[] = $role->id;
             }
         }
@@ -142,7 +145,10 @@ class EventRepo
 
         $event->fill($request->all());
         $event->user_id = auth()->user()->id;
-        $event->venue_id = $venue->id;
+
+        if ($venue) {
+            $event->venue_id = $venue->id;
+        }
 
         $days_of_week = '';
         $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
@@ -202,12 +208,14 @@ class EventRepo
             $event->save();
         }
 
-        if ($venue->wasRecentlyCreated && ! $venue->isClaimed() && $venue->is_subscribed && $venue->email) {
+        if ($venue && $venue->wasRecentlyCreated && ! $venue->isClaimed() && $venue->is_subscribed && $venue->email) {
             Mail::to($venue->email)->send(new ClaimVenue($event));
         }
 
-        if ($role->wasRecentlyCreated && ! $role->isClaimed() && $role->is_subscribed && $role->email) {
-            Mail::to($role->email)->send(new ClaimRole($event));
+        foreach ($roles as $role) {
+            if ($role->wasRecentlyCreated && ! $role->isClaimed() && $role->is_subscribed && $role->email) {
+                Mail::to($role->email)->send(new ClaimRole($event));
+            }
         }
 
         return $event;

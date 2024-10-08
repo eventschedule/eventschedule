@@ -160,7 +160,7 @@
                                     class="group flex has-tooltip" data-tooltip="<b>{{ $each->role()->name }}</b><br/>{{ $each->venue->getDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
                                     {{ isset($embed) && $embed ? 'target="blank"' : '' }}>
                                     <p class="flex-auto truncate font-medium group-hover:text-indigo-600 text-gray-900">
-                                        {{ isset($subdomain) && $subdomain == $each->role()->subdomain ? $each->venue->getDisplayName() : $each->role()->name }}
+                                        {{ isset($subdomain) && $subdomain == $each->role()->subdomain ? $each->getVenueDisplayName() : $each->role()->name }}
                                     </p>
                                     <!--
                                     <time datetime="{{ $each->localStartsAt() }}"
