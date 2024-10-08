@@ -172,14 +172,16 @@
                             <div class="flex items-center space-x-6">
                                 <div class="flex items-center">
                                     <input id="in_person" name="event_type" type="checkbox" v-model="isInPerson"
-                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                        @change="ensureOneChecked('in_person')">
                                     <label for="in_person" class="ml-2 block text-sm text-gray-900 dark:text-gray-100">
                                         {{ __('messages.in_person') }}
                                     </label>
                                 </div>
                                 <div class="flex items-center">
                                     <input id="online" name="event_type" type="checkbox" v-model="isOnline"
-                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                        @change="ensureOneChecked('online')">
                                     <label for="online" class="ml-2 block text-sm text-gray-900 dark:text-gray-100">
                                         {{ __('messages.online') }}
                                     </label>
@@ -976,6 +978,15 @@
       clearEventUrl() {
         this.event.event_url = "";
       },
+      ensureOneChecked(type) {
+        if (!this.isInPerson && !this.isOnline) {
+          if (type === 'in_person') {
+            this.isOnline = true;
+          } else {
+            this.isInPerson = true;
+          }
+        }
+      },
     },
     computed: {
       filteredMembers() {
@@ -1031,6 +1042,9 @@
         // Default to in-person for new events
         this.isInPerson = true;
       }
+
+      // Ensure at least one is checked
+      this.ensureOneChecked('in_person');
     }
   }).mount('#app')
 </script>
