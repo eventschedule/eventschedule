@@ -21,7 +21,7 @@ class EventRepo
         $talent = $role->isTalent() ? $role : null;
         $vendor = $role->isVendor() ? $role : null;
         $curator = $role->isCurator() ? $role : null;
-
+        
         if (! $venue && $request->venue_id) {
             $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
         }
@@ -142,13 +142,12 @@ class EventRepo
         if (! $event) {
             $event = new Event;       
             $event->is_accepted = true;
+            $event->user_id = auth()->user()->id;
         }
 
         $event->fill($request->all());
-        $event->user_id = auth()->user()->id;
-
-        if ($venue) {
-            $event->venue_id = $venue->id;
+        if ($event->venue_id) {
+            $event->venue_id = UrlUtils::decodeId($event->venue_id);
         }
 
         $days_of_week = '';
@@ -164,7 +163,7 @@ class EventRepo
                 ->setTimezone('UTC')
                 ->format('Y-m-d H:i:s');
         }
-        
+
         /*
         if (auth()->user()->isMember($venue->subdomain) || !$venue->user_id) {
             $event->is_accepted = true;
