@@ -357,7 +357,7 @@
                         <div v-if="isOnline">
                             <x-input-label for="event_url" :value="__('messages.event_url') . ' *'" />
                             <x-text-input id="event_url" name="event_url" type="url" class="mt-1 block w-full"
-                                :value="old('event_url', $event->event_url)" required autofocus autocomplete="off" />
+                                v-model="event.event_url" required autofocus autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('event_url')" />
                         </div>
                     </div>
@@ -973,6 +973,9 @@
         this.editMemberId = "";
         this.setFocusBasedOnMemberType();
       },
+      clearEventUrl() {
+        this.event.event_url = "";
+      },
     },
     computed: {
       filteredMembers() {
@@ -1003,7 +1006,17 @@
         this.venueEmail = "";
         this.venueSearchEmail = "";
         this.venueSearchResults = [];
-      }
+      },
+      isInPerson(newValue) {
+        if (!newValue) {
+          this.clearSelectedVenue();
+        }
+      },
+      isOnline(newValue) {
+        if (!newValue) {
+          this.clearEventUrl();
+        }
+      },
     },
     mounted() {
       this.setFocusBasedOnVenueType();
