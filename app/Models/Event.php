@@ -124,7 +124,7 @@ class Event extends Model
             return $this->flyer_image_url;
         } elseif ($this->role()->profile_image_url) {
             return $this->role()->profile_image_url;
-        } elseif ($this->venue->profile_image_url) {
+        } elseif ($this->venue && $this->venue->profile_image_url) {
             return $this->venue->profile_image_url;
         }
         
@@ -173,6 +173,7 @@ class Event extends Model
     {        
         $role = $this->role();
         $venue = $this->venue;
+        $otherSubdomain = '';
 
         if (! $subdomain) {
             $subdomain = $this->curator_id ? $this->curator->subdomain : $role->subdomain;
@@ -180,19 +181,21 @@ class Event extends Model
     
         if ($subdomain == $role->subdomain) {
             $subdomain = $role->subdomain;
-            $otherSubdomain = $venue->subdomain;
-        } else if ($subdomain == $venue->subdomain) {
+            if ($venue) {
+                $otherSubdomain = $venue->subdomain;
+            }
+        } else if ($venue && $subdomain == $venue->subdomain) {
             $subdomain = $venue->subdomain;
             $otherSubdomain = $role->subdomain;
         } else {
             if ($role->isClaimed()) {
                 $subdomain = $role->subdomain;
-                if ($venue->isClaimed()) {
+                if ($venue && $venue->isClaimed()) {
                     $otherSubdomain = $venue->subdomain;
                 } else {
                     $otherSubdomain = UrlUtils::encodeId($this->id);
                 }
-            } else if ($venue->isClaimed()) {
+            } else if ($venue &&$venue->isClaimed()) {
                 $subdomain = $venue->subdomain;
                 $otherSubdomain = UrlUtils::encodeId($this->id);
             } else {

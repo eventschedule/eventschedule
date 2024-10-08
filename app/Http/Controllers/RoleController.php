@@ -345,7 +345,7 @@ class RoleController extends Controller
                                 ->where('role_id', $role->id);
                         })
                         ->orderBy('starts_at')
-                        ->get();    
+                        ->get();   
                 } else {
                     $events = Event::with(['roles', 'venue'])
                         ->where(function ($query) use ($role) {
@@ -354,7 +354,6 @@ class RoleController extends Controller
                                     $query->where('role_id', $role->id);
                                 });
                         })
-                        ->whereNotNull('is_accepted')
                         ->where(function ($query) use ($startOfMonth, $endOfMonth) {
                             $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
                                 ->orWhereNotNull('days_of_week');
