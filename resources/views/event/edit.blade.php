@@ -188,7 +188,7 @@
                         </div>
 
                         <div v-if="isInPerson">
-                            <div v-if="!selectedVenue">
+                            <div v-if="!selectedVenue" class="mb-6">
                                 <fieldset>                                
                                     <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                                         <div v-if="Object.keys(venues).length > 0" class="flex items-center">
@@ -352,6 +352,13 @@
                             </div>                        
 
                             <x-text-input name="venue_id" v-bind:value="selectedVenue.id" type="hidden" />
+                        </div>
+
+                        <div v-if="isOnline">
+                            <x-input-label for="event_url" :value="__('messages.event_url') . ' *'" />
+                            <x-text-input id="event_url" name="event_url" type="url" class="mt-1 block w-full"
+                                :value="old('event_url', $event->event_url)" required autofocus autocomplete="off" />
+                            <x-input-error class="mt-2" :messages="$errors->get('event_url')" />
                         </div>
                     </div>
                 </div>

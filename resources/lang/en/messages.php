@@ -288,4 +288,5 @@ return [
     'select' => 'Select',
     'online' => 'Online',
     'in_person' => 'In-person',
+    'event_url' => 'Event URL',
 ];
