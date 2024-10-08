@@ -286,4 +286,6 @@ return [
     'image_size_warning' => 'The image size must be less than 2.5MB',
     'image_not_square' => 'The image must be a square',
     'select' => 'Select',
+    'online' => 'Online',
+    'in_person' => 'In-person',
 ];
