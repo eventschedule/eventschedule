@@ -164,6 +164,7 @@ class EventRepo
                 ->format('Y-m-d H:i:s');
         }
 
+        /*
         if (auth()->user()->isMember($venue->subdomain) || !$venue->user_id) {
             $event->is_accepted = true;
             $message = __('messages.event_created');
@@ -174,6 +175,7 @@ class EventRepo
             $emails = $venue->members()->pluck('email');
             //Notification::route('mail', $emails)->notify(new EventRequestNotification($venue, $role));
         }
+        */
 
         if ($subdomainRole->isCurator()) {                
             $event->curator_id = $subdomainRole->id;
