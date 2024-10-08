@@ -289,4 +289,8 @@ return [
     'online' => 'Online',
     'in_person' => 'In-person',
     'event_url' => 'Event URL',
+    'view_venue' => 'View Venue',
+    'view_talent' => 'View Talent',
+    'view_vendor' => 'View Vendor',
+    'view_curator' => 'View Curator',
 ];
