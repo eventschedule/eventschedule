@@ -723,7 +723,7 @@
         memberName: "",
         memberYoutubeUrl: "",
         showMemberTypeRadio: true,
-        isInPerson: true,
+        isInPerson: false,
         isOnline: false,
       }
     },
@@ -1009,6 +1009,15 @@
       this.setFocusBasedOnVenueType();
       this.setFocusBasedOnMemberType();
       this.showMemberTypeRadio = this.selectedMembers.length === 0;
+
+      // Set isInPerson and isOnline based on existing event data
+      if (this.event.id) {
+        this.isInPerson = !!this.event.venue_id;
+        this.isOnline = !!this.event.event_url;
+      } else {
+        // Default to in-person for new events
+        this.isInPerson = true;
+      }
     }
   }).mount('#app')
 </script>
