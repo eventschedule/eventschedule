@@ -180,7 +180,7 @@
                                             {{ __('messages.in_person') }}
                                         </label>
                                     </div>
-                                    <div class="flex items-center">
+                                    <div class="flex items-center pl-3">
                                         <input id="online" name="event_type" type="checkbox" v-model="isOnline"
                                             class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                                             @change="ensureOneChecked('online')">
