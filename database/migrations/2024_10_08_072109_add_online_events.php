@@ -15,6 +15,12 @@ return new class extends Migration
             $table->string('event_password')->nullable();
             $table->foreignId('venue_id')->nullable()->change();
         });
+
+        Schema::table('roles', function (Blueprint $table) {
+            $table->boolean('is_open')->default(true)->change();
+        });
+
+        DB::table('roles')->update(['is_open' => true]);
     }
 
     /**
