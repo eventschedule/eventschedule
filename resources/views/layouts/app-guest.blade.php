@@ -11,18 +11,18 @@
         @if ($event && $event->exists) 
             @if ($event->description_html)
             <meta name="description" content="{{ trim(strip_tags($event->description_html)) }}">
-            @else ($event->role()->description_html)
+            @else ($event->role() && $event->role()->description_html)
             <meta name="description" content="{{ trim(strip_tags($event->role()->description_html)) }}">
             @endif
-            <meta property="og:title" content="{{ $event->getDisplayName() }}">
+            <meta property="og:title" content="{{ $event->name }}">
             <meta property="og:description" content="{{ $event->getMetaDescription($date) }}">
             <meta property="og:image" content="{{ $event->getImageUrl() }}">
             <meta property="og:url" content="{{ request()->url() }}">
             <meta property="og:site_name" content="Event Schedule">
-            <meta name="twitter:title" content="{{ $event->getDisplayName() }}">
+            <meta name="twitter:title" content="{{ $event->name }}">
             <meta name="twitter:description" content="{{ $event->getMetaDescription($date) }}">
             <meta name="twitter:image" content="{{ $event->getImageUrl() }}">
-            <meta name="twitter:image:alt" content="{{ $event->getDisplayName() }}">
+            <meta name="twitter:image:alt" content="{{ $event->name }}">
             <meta name="twitter:card" content="summary_large_image">
         @elseif ($role->exists)
             <meta name="description" content="{{ trim(strip_tags($role->description_html)) }}">

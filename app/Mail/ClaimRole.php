@@ -43,7 +43,7 @@ class ClaimRole extends Mailable
         return new Envelope(
             subject: str_replace(
                         [':venue', ':role', ':event'], 
-                        [$event->getVenueDisplayName(), $role->name, $event->getDisplayName()],
+                        [$event->getVenueDisplayName(), $role->name, $event->name],
                         __('messages.claim_your_role')),
             replyTo: [
                 new Address($user->email, $user->name),
