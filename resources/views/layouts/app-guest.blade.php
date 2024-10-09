@@ -11,7 +11,7 @@
         @if ($event && $event->exists) 
             @if ($event->description_html)
             <meta name="description" content="{{ trim(strip_tags($event->description_html)) }}">
-            @else ($event->role() && $event->role()->description_html)
+            @elseif ($event->role() && $event->role()->description_html)
             <meta name="description" content="{{ trim(strip_tags($event->role()->description_html)) }}">
             @endif
             <meta property="og:title" content="{{ $event->name }}">
@@ -42,7 +42,7 @@
     <x-slot name="head">
 
         <link href="https://fonts.googleapis.com/css2?family={{ $role->font_family }}:wght@400;700&display=swap" rel="stylesheet">
-        @if ($event)
+        @if ($event && $event->role())
             <link href="https://fonts.googleapis.com/css2?family={{ $event->getOtherRole($role->subdomain)->font_family }}:wght@400;700&display=swap" rel="stylesheet">
         @endif
 
@@ -51,7 +51,7 @@
             font-family: '{{ $role->font_family }}', sans-serif !important;
             min-height: 100%;
             background-attachment: scroll;
-            @if ($event && $otherRole->isClaimed())
+            @if ($event && $otherRole && $otherRole->isClaimed())
                 color: {{ $otherRole->font_color }} !important;
                 background-color: #888 !important;
                 @if ($otherRole->background == 'gradient')
@@ -80,7 +80,7 @@
             @endif
         }
 
-        @if ($event)
+        @if ($event && $otherRole)
             @if ($event->venue && $subdomain == $event->venue->subdomain)
             #event_title
             @else
