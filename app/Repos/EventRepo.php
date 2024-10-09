@@ -73,60 +73,62 @@ class EventRepo
         $roles = [];
         $roleIds = [];
 
-        foreach ($request->members as $memberId => $member) {
-            if (strpos($memberId, 'new_') === 0) {
+        if ($request->members) {
+            foreach ($request->members as $memberId => $member) {
+                if (strpos($memberId, 'new_') === 0) {
 
-                $role = new Role;
-                $role->name = $member['name'];
-                $role->email = isset($member['email']) && $member['email'] !== '' ? $member['email'] : null;
-                $role->subdomain = Role::generateSubdomain($role->email ? $role->email : null);
-                $role->type = $request->role_type ? $request->role_type : 'talent';
-                $role->timezone = $user->timezone;
-                $role->language_code = $user->language_code;
-                $role->background_colors = ColorUtils::randomGradient();
-                $role->background_rotation = rand(0, 359);
-                $role->font_color = '#ffffff';
-
-                $links = [];
-                if ($member['youtube_url']) {
-                    $links[] = UrlUtils::getUrlDetails($member['youtube_url']);
-                }
-                $role->youtube_links = json_encode($links);
-
-                $role->save();
-                $role->refresh();
-
-                $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
-
-                if ($matchingUser = User::whereEmail($role->email)->first()) {
-                    $role->user_id = $matchingUser->id;
-                    $role->email_verified_at = $matchingUser->email_verified_at;
-                    $role->save();
-                    $matchingUser->roles()->attach($role->id, ['level' => 'owner', 'created_at' => now()]);
-                }
-
-                $roleIds[] = $role->id;
-            } else {
-                $roleId = UrlUtils::decodeId($memberId);
-                $role = Role::findOrFail($roleId);
-
-                if (!$role->isClaimed()) {
+                    $role = new Role;
                     $role->name = $member['name'];
+                    $role->email = isset($member['email']) && $member['email'] !== '' ? $member['email'] : null;
+                    $role->subdomain = Role::generateSubdomain($role->email ? $role->email : null);
+                    $role->type = $request->role_type ? $request->role_type : 'talent';
+                    $role->timezone = $user->timezone;
+                    $role->language_code = $user->language_code;
+                    $role->background_colors = ColorUtils::randomGradient();
+                    $role->background_rotation = rand(0, 359);
+                    $role->font_color = '#ffffff';
 
                     $links = [];
                     if ($member['youtube_url']) {
                         $links[] = UrlUtils::getUrlDetails($member['youtube_url']);
                     }
-                    $role->youtube_links = json_encode($links);    
+                    $role->youtube_links = json_encode($links);
 
                     $role->save();
-                }
+                    $role->refresh();
 
-                $roles[] = $role;
-                $roleIds[] = $role->id;
+                    $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
+
+                    if ($matchingUser = User::whereEmail($role->email)->first()) {
+                        $role->user_id = $matchingUser->id;
+                        $role->email_verified_at = $matchingUser->email_verified_at;
+                        $role->save();
+                        $matchingUser->roles()->attach($role->id, ['level' => 'owner', 'created_at' => now()]);
+                    }
+
+                    $roleIds[] = $role->id;
+                } else {
+                    $roleId = UrlUtils::decodeId($memberId);
+                    $role = Role::findOrFail($roleId);
+
+                    if (!$role->isClaimed()) {
+                        $role->name = $member['name'];
+
+                        $links = [];
+                        if ($member['youtube_url']) {
+                            $links[] = UrlUtils::getUrlDetails($member['youtube_url']);
+                        }
+                        $role->youtube_links = json_encode($links);    
+
+                        $role->save();
+                    }
+
+                    $roles[] = $role;
+                    $roleIds[] = $role->id;
+                }
             }
         }
-
+        
         /*
         if ($subdomainRole->isCurator()) {
             $date = explode(' ', $request->starts_at)[0];

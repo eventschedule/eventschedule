@@ -128,7 +128,7 @@ class Event extends Model
     {
         if ($this->flyer_image_url) {
             return $this->flyer_image_url;
-        } elseif ($this->role()->profile_image_url) {
+        } elseif ($this->role() && $this->role()->profile_image_url) {
             return $this->role()->profile_image_url;
         } elseif ($this->venue && $this->venue->profile_image_url) {
             return $this->venue->profile_image_url;
@@ -166,14 +166,14 @@ class Event extends Model
             $subdomain = $this->curator_id ? $this->curator->subdomain : $role->subdomain;
         }
     
-        if ($subdomain == $role->subdomain) {
+        if ($role && $subdomain == $role->subdomain) {
             $subdomain = $role->subdomain;
             if ($venue) {
                 $otherSubdomain = $venue->subdomain;
             }
         } else if ($venue && $subdomain == $venue->subdomain) {
             $subdomain = $venue->subdomain;
-            $otherSubdomain = $role->subdomain;
+            $otherSubdomain = $role ? $role->subdomain : '';
         } else {
             if ($role->isClaimed()) {
                 $subdomain = $role->subdomain;
@@ -203,7 +203,12 @@ class Event extends Model
     {
         $title = __('messages.event_title');
 
-        return str_replace([':role', ':venue'], [$this->role()->name, $this->venue->getDisplayName()], $title);
+        return str_replace([':role', ':venue'], [$this->name, $this->venue->getDisplayName()], $title);
+    }
+
+    public function getUse24HourTime()
+    {
+        return $this->role() ? $this->role()->use_24_hour_time : $this->venue->use_24_hour_time;
     }
 
     public function getMetaDescription($date = null)
