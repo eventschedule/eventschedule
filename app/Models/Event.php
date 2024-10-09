@@ -161,6 +161,7 @@ class Event extends Model
         $role = $this->role();
         $venue = $this->venue;
         $otherSubdomain = '';
+        $eventName = '';
 
         if (! $subdomain) {
             if ($this->curator_id) {
@@ -194,11 +195,13 @@ class Event extends Model
 
         if (! $otherSubdomain) {
             $otherSubdomain = UrlUtils::encodeId($this->id);
+            $eventName = UrlUtils::cleanSlug($this->name);
         }
 
         $data = [
             'subdomain' => $subdomain, 
             'other_subdomain' => $otherSubdomain, 
+            'event_name' => $eventName,
             'date' => $date ? $date->format('Y-m-d') : Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d'),
         ];
 

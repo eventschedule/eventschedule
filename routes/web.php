@@ -10,7 +10,7 @@ if (config('app.env') != 'local') {
     Route::domain('{subdomain}.eventschedule.com')->group(function () {
         Route::get('/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
-        Route::get('/{other_subdomain?}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
+        Route::get('/{other_subdomain?}/{event_name?}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
     });
 }
 
@@ -70,7 +70,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
 });
 
 if (config('app.env') == 'local') {
-    Route::get('/{subdomain}/view/{other_subdomain?}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
+    Route::get('/{subdomain}/view/{other_subdomain?}/{event_name?}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
     Route::get('/{subdomain}/view', [RoleController::class, 'viewGuest'])->name('role.view_guest');
     Route::get('/{subdomain}/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');

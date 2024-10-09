@@ -34,6 +34,14 @@ class UrlUtils
         return preg_replace($pattern, '', $url);
     }
 
+    public static function cleanSlug($slug)
+    {
+        $slug = preg_replace('/[^a-zA-Z0-9]/', '', trim($slug));
+        $slug = strtolower(trim($slug));
+
+        return $slug;
+    }
+
     public static function getBrand($url)
     {
         $url = self::clean($url);
