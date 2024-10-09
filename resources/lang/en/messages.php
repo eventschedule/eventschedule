@@ -293,4 +293,5 @@ return [
     'view_talent' => 'View Talent',
     'view_vendor' => 'View Vendor',
     'view_curator' => 'View Curator',
+    'event_name' => 'Event Name',
 ];

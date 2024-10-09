@@ -21,6 +21,22 @@ return new class extends Migration
         });
 
         DB::table('roles')->update(['is_open' => true]);
+
+        DB::table('events')->chunkById(100, function ($events) {
+            foreach ($events as $event) {
+                $firstRole = DB::table('event_role')
+                    ->join('roles', 'event_role.role_id', '=', 'roles.id')
+                    ->where('event_role.event_id', $event->id)
+                    ->select('roles.name')
+                    ->first();
+
+                if ($firstRole) {
+                    DB::table('events')
+                        ->where('id', $event->id)
+                        ->update(['name' => $firstRole->name]);
+                }
+            }
+        });
     }
 
     /**
