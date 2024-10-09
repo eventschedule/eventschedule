@@ -16,6 +16,7 @@ class Event extends Model
         'event_url',
         'event_password',
         'venue_id',
+        'name',
     ];
 
     protected static function boot()
