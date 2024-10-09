@@ -122,11 +122,6 @@ class EventController extends Controller
             $event->starts_at = $request->date . $utcTime->format('H:i:s');
         }
 
-        $title = __('messages.add_event');
-        if (strpos($request->url(), '/sign_up') > 0) {
-            $title = __('messages.sign_up');
-        }
-        
         $roles = $user->roles()->get();
     
         $venues = $roles->filter(function($item) {
@@ -150,7 +145,7 @@ class EventController extends Controller
             'roles' => $roles,
             'event' => $event,
             'subdomain' => $subdomain,
-            'title' => $title,
+            'title' => __('messages.add_event'),
             'selectedVenue' => $venue,
             'venues' => $venues,
             'selectedMembers' => $selectedMembers,
