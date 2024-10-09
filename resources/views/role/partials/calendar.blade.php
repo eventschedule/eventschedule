@@ -158,7 +158,7 @@
                             <li class="relative group hover:pr-8">
                                 <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate) }}"
                                     class="flex has-tooltip" data-tooltip="<b>{{ $each->name }}</b><br/>{{ $each->getVenueDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
-                                    onclick="event.stopPropagation();" {{ ($route == 'admin' || (isset($embed) && $embed)) ? 'target="_blank"' : '' }}>
+                                    onclick="event.stopPropagation();" {{ ($route != 'guest' || (isset($embed) && $embed)) ? 'target="_blank"' : '' }}>
                                     <p class="flex-auto truncate font-medium group-hover:text-indigo-600 text-gray-900">
                                         {{ isset($subdomain) && $each->role() && $subdomain == $each->role()->subdomain ? $each->getVenueDisplayName() : $each->name }}
                                     </p>
