@@ -163,7 +163,13 @@ class Event extends Model
         $otherSubdomain = '';
 
         if (! $subdomain) {
-            $subdomain = $this->curator_id ? $this->curator->subdomain : $role->subdomain;
+            if ($this->curator_id) {
+                $subdomain = $this->curator->subdomain;
+            } else if ($role) {
+                $subdomain = $role->subdomain;
+            } else if ($venue) {
+                $subdomain = $venue->subdomain;
+            }
         }
     
         if ($role && $subdomain == $role->subdomain) {
