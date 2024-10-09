@@ -142,9 +142,13 @@
                 <div class="mx-auto max-w-6xl px-6 lg:px-8">
                     <div class="mx-auto max-w-2xl text-center">
                         <p class="mt-2 text-6xl font-bold tracking-tight">
+                            @if ($event->role() && $event->role()->email)
                             <a href="{{ $event->role()->getGuestUrl() }}" class="hover:underline">
                                 {{ $event->name }}
                             </a>
+                            @else
+                            {{ $event->name }}
+                            @endif
                         </p>
                         <p class="mt-6 text-2xl leading-8">
                             {!! $event->starts_at ? $event->localStartsAt(true, $date, true) : __('messages.date_to_be_announced') . '...' !!}

@@ -173,12 +173,8 @@ class Event extends Model
         }
     
         if ($role && $subdomain == $role->subdomain) {
-            $subdomain = $role->subdomain;
-            if ($venue) {
-                $otherSubdomain = $venue->subdomain;
-            }
+            $otherSubdomain = $venue ? $venue->subdomain : '';
         } else if ($venue && $subdomain == $venue->subdomain) {
-            $subdomain = $venue->subdomain;
             $otherSubdomain = $role ? $role->subdomain : '';
         } else {
             if ($role->isClaimed()) {
@@ -194,6 +190,10 @@ class Event extends Model
             } else {
                 $otherSubdomain = UrlUtils::encodeId($this->id);
             }
+        }
+
+        if (! $otherSubdomain) {
+            $otherSubdomain = UrlUtils::encodeId($this->id);
         }
 
         $data = [
@@ -225,7 +225,7 @@ class Event extends Model
     public function getGoogleCalendarUrl($date = null)
     {
         $title = $this->getTitle();
-        $description = $this->description_html ? strip_tags($this->description_html) : strip_tags($this->role()->description_html);
+        $description = $this->description_html ? strip_tags($this->description_html) : ($this->role() ? strip_tags($this->role()->description_html) : '');
         $location = $this->venue->bestAddress();
         $duration = $this->duration > 0 ? $this->duration : 2;
         $startAt = $this->getStartDateTime($date);
@@ -244,7 +244,7 @@ class Event extends Model
     public function getAppleCalendarUrl($date = null)
     {
         $title = $this->getTitle();
-        $description = $this->description_html ? strip_tags($this->description_html) : strip_tags($this->role()->description_html);
+        $description = $this->description_html ? strip_tags($this->description_html) : ($this->role() ? strip_tags($this->role()->description_html) : '');
         $location = $this->venue->bestAddress();
         $duration = $this->duration > 0 ? $this->duration : 2;
         $startAt = $this->getStartDateTime($date);
@@ -265,7 +265,7 @@ class Event extends Model
     public function getMicrosoftCalendarUrl($date = null)
     {
         $title = $this->getTitle();
-        $description = $this->description_html ? strip_tags($this->description_html) : strip_tags($this->role()->description_html);
+        $description = $this->description_html ? strip_tags($this->description_html) : ($this->role() ? strip_tags($this->role()->description_html) : '');
         $location = $this->venue->bestAddress();
         $duration = $this->duration > 0 ? $this->duration : 2;
         $startAt = $this->getStartDateTime($date);
@@ -310,8 +310,8 @@ class Event extends Model
         }
     }
 
-    public function getOtherRole($subdomain) {
-        if ($subdomain == $this->role()->subdomain) {
+    public function getOtherRole($subdomain) {        
+        if ($this->role() && $subdomain == $this->role()->subdomain) {
             return $this->venue;
         } else {
             return $this->role();
