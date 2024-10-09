@@ -44,7 +44,7 @@ class ClaimVenue extends Mailable
         return new Envelope(
             subject: str_replace(
                         [':role', ':venue', ':event'], 
-                        [$role->name, $venue->name, $event->getDisplayName()],
+                        [$role->name, $venue->name, $event->name],
                         $subject),
             replyTo: [
                 new Address($user->email, $user->name),

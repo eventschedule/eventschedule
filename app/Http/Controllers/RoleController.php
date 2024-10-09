@@ -215,7 +215,15 @@ class RoleController extends Controller
 
         if ($event) {
             if ($event->venue) {
-                $otherRole = $event->venue->subdomain == $subdomain ? $event->role() : $event->venue;
+                if ($event->venue->subdomain == $subdomain) {
+                    if ($event->roles->count() > 0) {
+                        $otherRole = $event->roles[0];
+                    } else {
+                        $otherRole = $role;
+                    }
+                } else {
+                    $otherRole = $event->venue;
+                }
             } else {
                 $otherRole = $role;
             }

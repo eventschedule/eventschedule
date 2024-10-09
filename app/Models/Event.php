@@ -56,7 +56,11 @@ class Event extends Model
 
     public function role()
     {
-        return $this->roles[0];
+        if ($this->roles->count() > 0) {    
+            return $this->roles[0];
+        }
+
+        return null;
     }
 
     public function curators()
@@ -131,25 +135,6 @@ class Event extends Model
         }
         
         return null;
-    }
-
-    public function getDisplayName()
-    {
-        if ($this->name) {
-            return $this->name;
-        }
-
-        $role = $this->roles->where('type', 'talent')->first();
-
-        if ($role) {
-            return $role->name;
-        }
-
-        if ($this->venue) {
-            return $this->venue->getDisplayName();
-        }
-
-        return $this->getEventUrlDomain();
     }
 
     public function getVenueDisplayName()
