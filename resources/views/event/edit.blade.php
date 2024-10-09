@@ -576,6 +576,15 @@
                             {{ __('messages.details') }}
                         </h2>
 
+                        <div class="mb-6">
+                            <x-input-label for="event_name" :value="__('messages.event_name') . ' *'" />
+                            <x-text-input id="event_name" name="event_name" type="text" class="mt-1 block w-full"
+                                :value="old('event_name', $event->name)"
+                                v-model="eventName"
+                                required autocomplete="off" />
+                            <x-input-error class="mt-2" :messages="$errors->get('event_name')" />
+                        </div>
+
                         @if (! $role->isCurator())
                         <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                             <div class="flex items-center">
@@ -729,6 +738,7 @@
         showMemberTypeRadio: true,
         isInPerson: false,
         isOnline: false,
+        eventName: @json($event->name ?? ''),
       }
     },
     methods: {
@@ -1007,7 +1017,7 @@
     computed: {
       filteredMembers() {
         return this.members.filter(member => !this.selectedMembers.some(selected => selected.id === member.id));
-      }
+      },
     },
     watch: {
       venueType() {
@@ -1046,6 +1056,14 @@
         }
         this.savePreferences();
       },
+      selectedMembers: {
+        handler(newValue) {
+          if (!this.eventName && newValue.length === 1) {
+            this.eventName = newValue[0].name;
+          }
+        },
+        deep: true
+      }
     },
     mounted() {
       this.setFocusBasedOnVenueType();
@@ -1061,6 +1079,12 @@
         if (!this.isInPerson && !this.isOnline) {
           this.isInPerson = true;
         }
+      }
+
+      if (this.event.id) {
+        this.eventName = this.event.name;
+      } else if (this.selectedMembers.length === 1) {
+        this.eventName = this.selectedMembers[0].name;
       }
 
       this.ensureOneChecked('in_person');
