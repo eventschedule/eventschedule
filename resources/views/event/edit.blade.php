@@ -578,11 +578,11 @@
 
                         <div class="mb-6">
                             <x-input-label for="event_name" :value="__('messages.event_name') . ' *'" />
-                            <x-text-input id="event_name" name="event_name" type="text" class="mt-1 block w-full"
-                                :value="old('event_name', $event->name)"
+                            <x-text-input id="event_name" name="name" type="text" class="mt-1 block w-full"
+                                :value="old('name', $event->name)"
                                 v-model="eventName"
                                 required autocomplete="off" />
-                            <x-input-error class="mt-2" :messages="$errors->get('event_name')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('name')" />
                         </div>
 
                         @if (! $role->isCurator())
