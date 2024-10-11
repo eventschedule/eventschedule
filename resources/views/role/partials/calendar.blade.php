@@ -154,8 +154,11 @@
                         </div>
                         <ol class="mt-4 divide-y divide-gray-100 text-sm leading-6 md:col-span-7 xl:col-span-8">
                             @foreach ($events as $each)
+                            @php
+                            $canEdit = $route == 'admin' && $tab == 'schedule' && $role->email_verified_at && auth()->user()->canEditEvent($each);
+                            @endphp
                             @if ($each->matchesDate($currentDate))
-                            <li class="relative group hover:pr-8">
+                            <li class="relative group {{ $canEdit ? 'hover:pr-8' : '' }}">
                                 <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate) }}"
                                     class="flex has-tooltip" data-tooltip="<b>{{ $each->name }}</b><br/>{{ $each->getVenueDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
                                     onclick="event.stopPropagation();" {{ ($route != 'guest' || (isset($embed) && $embed)) ? 'target="_blank"' : '' }}>
@@ -163,7 +166,7 @@
                                         {{ isset($subdomain) && $each->isRoleAMember($subdomain) ? $each->getVenueDisplayName() : $each->name }}
                                     </p>
                                 </a>
-                                @if ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at && auth()->user()->canEditEvent($each))
+                                @if ($canEdit)
                                 <a href="{{ route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}"
                                     class="absolute right-0 top-0 hidden group-hover:inline-block text-indigo-600 hover:text-indigo-900"
                                     onclick="event.stopPropagation();">
