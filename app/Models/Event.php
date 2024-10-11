@@ -63,6 +63,13 @@ class Event extends Model
         return null;
     }
 
+    public function isRoleAMember($subdomain)
+    {
+        return $this->roles->contains(function ($role) use ($subdomain) {
+            return $role->subdomain == $subdomain;
+        });
+    }
+
     public function curators()
     {
         return $this->belongsToMany(Role::class, 'event_role', 'event_id', 'role_id');
