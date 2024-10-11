@@ -160,7 +160,7 @@
                                     class="flex has-tooltip" data-tooltip="<b>{{ $each->name }}</b><br/>{{ $each->getVenueDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
                                     onclick="event.stopPropagation();" {{ ($route != 'guest' || (isset($embed) && $embed)) ? 'target="_blank"' : '' }}>
                                     <p class="flex-auto truncate font-medium group-hover:text-indigo-600 text-gray-900">
-                                        {{ isset($subdomain) && $each->role() && $subdomain == $each->role()->subdomain ? $each->getVenueDisplayName() : $each->name }}
+                                        {{ isset($subdomain) && $each->isRoleAMember($subdomain) ? $each->getVenueDisplayName() : $each->name }}
                                     </p>
                                 </a>
                                 @if ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at && auth()->user()->canEditEvent($each))
