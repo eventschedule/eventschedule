@@ -20,6 +20,7 @@
 <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 pt-5">
     @foreach($requests as $event)
     <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow">
+        @if ($role->isVenue())
         <a href="{{ $event->role()->getGuestUrl() }}" target="_blank" class="hover:underline">
             <div class="flex flex-1 flex-col p-8">
                 @if ($event->role()->profile_image_url)
@@ -32,6 +33,20 @@
                 </dl>
             </div>
         </a>
+        @else
+        <a href="{{ $event->venue->getGuestUrl() }}" target="_blank" class="hover:underline">
+            <div class="flex flex-1 flex-col p-8">
+                @if ($event->venue->profile_image_url)
+                <img class="mx-auto h-32 w-32 flex-shrink-0 object-cover" src="{{ $event->venue->profile_image_url }}"
+                    alt="Profile Image">
+                @endif
+                <h3 class="mt-6 text-sm font-medium text-gray-900">{{ $event->venue->name }}</h3>
+                <dl class="mt-1 flex flex-grow flex-col justify-between">
+                    <dd class="text-sm text-gray-500 line-clamp-3">{{ $event->venue->description }}</dd>
+                </dl>
+            </div>
+        </a>
+        @endif
         <div>
             <div class="-mt-px flex divide-x divide-gray-200">
                 <div class="flex w-0 flex-1 cursor-pointer"
