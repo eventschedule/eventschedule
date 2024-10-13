@@ -243,10 +243,20 @@ class EventController extends Controller
             return redirect('/');
         }
 
+        $user = $request->user();
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);        
-        $event->is_accepted = true;
-        $event->save();
+
+        if ($user->isMember($event->venue->subdomain)) {
+            $event->is_accepted = true;
+            $event->save();
+        }
+
+        foreach ($event->roles as $role) {
+            if ($user->isMember($role->subdomain)) {
+                $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
+            }
+        }
 
         //$emails = $event->role->members()->pluck('email');
         //Notification::route('mail', $emails)->notify(new RequestAcceptedNotification($event));
