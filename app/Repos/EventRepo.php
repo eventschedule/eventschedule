@@ -129,18 +129,6 @@ class EventRepo
             }
         }
 
-        /*
-        if ($subdomainRole->isCurator()) {
-            $date = explode(' ', $request->starts_at)[0];
-            $event = Event::whereHas('roles', function ($query) use ($role) {
-                        $query->where('role_id', $role->id);
-                    })
-                    ->where('venue_id', $venue->id)
-                    ->where('starts_at', 'like', $date . '%')
-                    ->first();
-        }
-        */
-
         if (! $event) {
             $event = new Event;       
             $event->user_id = auth()->user()->id;
