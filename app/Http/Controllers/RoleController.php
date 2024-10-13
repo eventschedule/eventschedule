@@ -921,6 +921,14 @@ class RoleController extends Controller
         session(['pending_venue' => $subdomain]);
 
         $mainDomain = config('app.url');
+        $user = auth()->user();
+        
+        if ($request->type == 'talent' && $user->talent()->count() == 0) {
+            return redirect()->route('new', ['type' => 'talent']);
+        } else if ($request->type == 'vendor' && $user->vendors()->count() == 0) {
+            return redirect()->route('new', ['type' => 'vendor']);
+        }
+
         $redirectUrl = $mainDomain . route('event.create', ['subdomain' => $subdomain], false);
 
         return redirect($redirectUrl);
