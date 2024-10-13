@@ -144,7 +144,7 @@ class EventRepo
         if (! $event) {
             $event = new Event;       
             $event->user_id = auth()->user()->id;
-            $event->is_accepted = request()->starts_at ? true : null;
+            $event->is_accepted = $user->isMember($venue->subdomain) ? true : null;
         }
 
         $event->fill($request->all());
@@ -188,13 +188,19 @@ class EventRepo
             return UrlUtils::decodeId($id);
         }, $selectedCurators);
 
-        $roleIds = array_merge($roleIds, $selectedCurators);
+        $roleIds = array_merge($roleIds, $selectedCurators);        
 
         $event->save();        
         //\Log::info('Role IDs before sync: ' . json_encode($event->roles()->pluck('roles.id')->toArray()));
         $event->roles()->sync($roleIds);
         //\Log::info('Role IDs after sync: ' . json_encode($event->roles()->pluck('roles.id')->toArray()));
 
+        foreach ($event->roles as $role) {
+            if ($user->isMember($role->subdomain)) {
+                $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
+            }
+        }
+        
         if ($request->hasFile('flyer_image_url')) {
             if ($event->flyer_image_url) {
                 $path = $event->getAttributes()['flyer_image_url'];

@@ -38,11 +38,11 @@ return new class extends Migration
             }
         });
 
-        Schema::table('role_user', function (Blueprint $table) {
+        Schema::table('event_role', function (Blueprint $table) {
             $table->boolean('is_accepted')->nullable();
         });
 
-        DB::table('role_user')->update(['is_accepted' => true]);
+        DB::table('event_role')->update(['is_accepted' => true]);
     }
 
     /**
@@ -61,7 +61,7 @@ return new class extends Migration
 
         DB::table('roles')->update(['is_open' => false]);
 
-        Schema::table('role_user', function (Blueprint $table) {
+        Schema::table('event_role', function (Blueprint $table) {
             $table->dropColumn('is_accepted');
         });
     }
