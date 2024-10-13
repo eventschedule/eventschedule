@@ -186,6 +186,8 @@ class EventRepo
         foreach ($event->roles as $role) {
             if ($user->isMember($role->subdomain)) {
                 $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
+            } else if ($role->isCurator() && $role->is_open) {
+                $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
             }
         }
         
