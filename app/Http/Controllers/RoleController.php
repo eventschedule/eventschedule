@@ -267,7 +267,8 @@ class RoleController extends Controller
                 })
                 ->where(function ($query) use ($role) {
                     if ($role->isVenue()) {
-                        $query->where('venue_id', $role->id);
+                        $query->where('venue_id', $role->id)
+                            ->where('is_accepted', true);
                     } else {
                         $query->whereHas('roles', function ($query) use ($role) {
                             $query->where('role_id', $role->id)
@@ -275,7 +276,6 @@ class RoleController extends Controller
                         });
                     }
                 })
-                ->where('is_accepted', true)
                 ->orderBy('starts_at')
                 ->get();
         }
@@ -353,29 +353,35 @@ class RoleController extends Controller
                 } else {
                     $events = Event::with(['roles', 'venue'])
                         ->where(function ($query) use ($role) {
-                            $query->where('venue_id', $role->id)
-                                ->orWhereHas('roles', function ($query) use ($role) {
+                            if ($role->isVenue()) {
+                                $query->where('venue_id', $role->id)
+                                    ->where('is_accepted', true);
+                            } else {
+                                $query->whereHas('roles', function ($query) use ($role) {
                                     $query->where('role_id', $role->id)
-                                          ->where('is_accepted', true);
+                                        ->where('is_accepted', true);
                                 });
+                            }                                
                         })
                         ->where(function ($query) use ($startOfMonth, $endOfMonth) {
                             $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
                                 ->orWhereNotNull('days_of_week');
                         })
-                        ->where('is_accepted', true)
                         ->orderBy('starts_at')
                         ->get();
 
                     $unscheduled = Event::with(['roles', 'venue'])
                         ->where(function ($query) use ($role) {
-                            $query->where('venue_id', $role->id)
-                                ->orWhereHas('roles', function ($query) use ($role) {
+                            if ($role->isVenue()) {
+                                $query->where('venue_id', $role->id)
+                                    ->where('is_accepted', true);
+                            } else {
+                                $query->whereHas('roles', function ($query) use ($role) {
                                     $query->where('role_id', $role->id)
-                                          ->where('is_accepted', true);
+                                        ->where('is_accepted', true);
                                 });
+                            }
                         })
-                        ->where('is_accepted', true)
                         ->whereNull('starts_at')
                         ->orderBy('created_at', 'desc')
                         ->get();
@@ -395,21 +401,18 @@ class RoleController extends Controller
 
         $requests = Event::with(['roles', 'venue'])
                         ->where(function ($query) use ($role) {
-                            $query->where('venue_id', $role->id)
-                                ->orWhereHas('roles', function ($query) use ($role) {
-                                    $query->where('role_id', $role->id);
-                                    
-                                    if ($role->isTalent() || $role->isVendor()) {
-                                        $query->whereNull('is_accepted');
-                                    }
+                            if ($role->isVenue()) {
+                                $query->where('venue_id', $role->id)
+                                    ->whereNull('is_accepted');
+                            } else {
+                                $query->whereHas('roles', function ($query) use ($role) {
+                                    $query->where('role_id', $role->id)
+                                        ->whereNull('is_accepted');
                                 });
-                        });
-
-        if ($role->isVenue()) {
-            $requests->whereNull('is_accepted');
-        }
-
-        $requests = $requests->orderBy('created_at', 'desc')->get();
+                            }
+                        })
+                        ->orderBy('created_at', 'desc')
+                        ->get();
 
         return view('role/show-admin', compact(
             'subdomain',
