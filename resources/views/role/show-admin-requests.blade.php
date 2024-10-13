@@ -28,6 +28,9 @@
                     alt="Profile Image">
                 @endif
                 <h3 class="mt-6 text-sm font-medium text-gray-900">{{ $event->role()->name }}</h3>
+                @if ($event->starts_at)
+                <p class="text-sm text-gray-500">{{ $event->localStartsAt(true) }}</p>
+                @endif
                 <dl class="mt-1 flex flex-grow flex-col justify-between">
                     <dd class="text-sm text-gray-500 line-clamp-3">{{ $event->role()->description }}</dd>
                 </dl>
@@ -41,6 +44,9 @@
                     alt="Profile Image">
                 @endif
                 <h3 class="mt-6 text-sm font-medium text-gray-900">{{ $event->venue->name }}</h3>
+                @if ($event->starts_at)
+                <p class="text-sm text-gray-500">{{ $event->localStartsAt(true) }}</p>
+                @endif
                 <dl class="mt-1 flex flex-grow flex-col justify-between">
                     <dd class="text-sm text-gray-500 line-clamp-3">{{ $event->venue->description }}</dd>
                 </dl>
