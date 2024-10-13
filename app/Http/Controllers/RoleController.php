@@ -391,25 +391,25 @@ class RoleController extends Controller
                                 ->first();
                 $datesUnavailable = json_decode($roleUser->dates_unavailable);
             }
-        } else if ($tab == 'requests') {
-            $requests = Event::with(['roles', 'venue'])
-                            ->where(function ($query) use ($role) {
-                                $query->where('venue_id', $role->id)
-                                    ->orWhereHas('roles', function ($query) use ($role) {
-                                        $query->where('role_id', $role->id);
-                                        
-                                        if ($role->isTalent() || $role->isVendor()) {
-                                            $query->whereNull('is_accepted');
-                                        }
-                                    });
-                            });
-
-            if ($role->isVenue()) {
-                $requests->whereNull('is_accepted');
-            }
-
-            $requests =$requests->orderBy('created_at', 'desc')->get();
         }
+
+        $requests = Event::with(['roles', 'venue'])
+                        ->where(function ($query) use ($role) {
+                            $query->where('venue_id', $role->id)
+                                ->orWhereHas('roles', function ($query) use ($role) {
+                                    $query->where('role_id', $role->id);
+                                    
+                                    if ($role->isTalent() || $role->isVendor()) {
+                                        $query->whereNull('is_accepted');
+                                    }
+                                });
+                        });
+
+        if ($role->isVenue()) {
+            $requests->whereNull('is_accepted');
+        }
+
+        $requests = $requests->orderBy('created_at', 'desc')->get();
 
         return view('role/show-admin', compact(
             'subdomain',
