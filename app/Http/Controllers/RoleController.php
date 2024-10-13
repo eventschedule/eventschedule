@@ -270,7 +270,8 @@ class RoleController extends Controller
                         $query->where('venue_id', $role->id);
                     } else {
                         $query->whereHas('roles', function ($query) use ($role) {
-                            $query->where('role_id', $role->id);
+                            $query->where('role_id', $role->id)
+                                ->where('is_accepted', true);
                         });
                     }
                 })
@@ -324,11 +325,6 @@ class RoleController extends Controller
         $endOfMonth = '';
         $datesUnavailable = [];
 
-        // TODO remove once supported
-        if ($tab == 'requests' && ! $role->isVenue()) {
-            $tab = 'schedule';
-        }
-
         if ($tab == 'schedule' || $tab == 'availability') {
             if (! $month) {
                 $month = now()->month;
@@ -359,7 +355,8 @@ class RoleController extends Controller
                         ->where(function ($query) use ($role) {
                             $query->where('venue_id', $role->id)
                                 ->orWhereHas('roles', function ($query) use ($role) {
-                                    $query->where('role_id', $role->id);
+                                    $query->where('role_id', $role->id)
+                                          ->where('is_accepted', true);
                                 });
                         })
                         ->where(function ($query) use ($startOfMonth, $endOfMonth) {
@@ -374,7 +371,8 @@ class RoleController extends Controller
                         ->where(function ($query) use ($role) {
                             $query->where('venue_id', $role->id)
                                 ->orWhereHas('roles', function ($query) use ($role) {
-                                    $query->where('role_id', $role->id);
+                                    $query->where('role_id', $role->id)
+                                          ->where('is_accepted', true);
                                 });
                         })
                         ->where('is_accepted', true)
@@ -399,11 +397,18 @@ class RoleController extends Controller
                                 $query->where('venue_id', $role->id)
                                     ->orWhereHas('roles', function ($query) use ($role) {
                                         $query->where('role_id', $role->id);
+                                        
+                                        if ($role->isTalent() || $role->isVendor()) {
+                                            $query->whereNull('is_accepted');
+                                        }
                                     });
-                            })
-                            ->whereNull('is_accepted')
-                            ->orderBy('created_at', 'desc')
-                            ->get();
+                            });
+
+            if ($role->isVenue()) {
+                $requests->whereNull('is_accepted');
+            }
+
+            $requests =$requests->orderBy('created_at', 'desc')->get();
         }
 
         return view('role/show-admin', compact(
