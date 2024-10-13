@@ -128,7 +128,7 @@ class EventRepo
                 }
             }
         }
-        
+
         /*
         if ($subdomainRole->isCurator()) {
             $date = explode(' ', $request->starts_at)[0];
@@ -143,8 +143,8 @@ class EventRepo
 
         if (! $event) {
             $event = new Event;       
-            $event->is_accepted = true;
             $event->user_id = auth()->user()->id;
+            $event->is_accepted = request()->starts_at ? true : null;
         }
 
         $event->fill($request->all());
