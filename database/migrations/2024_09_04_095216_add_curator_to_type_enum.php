@@ -11,7 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE `roles` MODIFY `type` ENUM('venue', 'talent', 'vendor', 'curator') NOT NULL");
+        if (config('database.default') !== 'sqlite') {
+            DB::statement("ALTER TABLE `roles` MODIFY `type` ENUM('venue', 'talent', 'vendor', 'curator') NOT NULL");
+        }
 
         Schema::create('event_role', function (Blueprint $table) {
             $table->id();
