@@ -366,6 +366,7 @@ class RoleController extends Controller
                             $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
                                 ->orWhereNotNull('days_of_week');
                         })
+                        ->where('is_accepted', true)
                         ->orderBy('starts_at')
                         ->get();
 
