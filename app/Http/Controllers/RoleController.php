@@ -325,6 +325,25 @@ class RoleController extends Controller
         $endOfMonth = '';
         $datesUnavailable = [];
 
+        $requests = Event::with(['roles', 'venue'])
+                        ->where(function ($query) use ($role) {
+                            if ($role->isVenue()) {
+                                $query->where('venue_id', $role->id)
+                                    ->whereNull('is_accepted');
+                            } else {
+                                $query->whereHas('roles', function ($query) use ($role) {
+                                    $query->where('role_id', $role->id)
+                                        ->whereNull('is_accepted');
+                                });
+                            }
+                        })
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+
+        if ($tab == 'requests' && ! count($requests)) {
+            return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
+        }
+
         if ($tab == 'schedule' || $tab == 'availability') {
             if (! $month) {
                 $month = now()->month;
@@ -398,21 +417,6 @@ class RoleController extends Controller
                 $datesUnavailable = json_decode($roleUser->dates_unavailable);
             }
         }
-
-        $requests = Event::with(['roles', 'venue'])
-                        ->where(function ($query) use ($role) {
-                            if ($role->isVenue()) {
-                                $query->where('venue_id', $role->id)
-                                    ->whereNull('is_accepted');
-                            } else {
-                                $query->whereHas('roles', function ($query) use ($role) {
-                                    $query->where('role_id', $role->id)
-                                        ->whereNull('is_accepted');
-                                });
-                            }
-                        })
-                        ->orderBy('created_at', 'desc')
-                        ->get();
 
         return view('role/show-admin', compact(
             'subdomain',
