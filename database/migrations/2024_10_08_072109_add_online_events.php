@@ -37,6 +37,12 @@ return new class extends Migration
                 }
             }
         });
+
+        Schema::table('role_user', function (Blueprint $table) {
+            $table->boolean('is_accepted')->nullable();
+        });
+
+        DB::table('role_user')->update(['is_accepted' => true]);
     }
 
     /**
@@ -47,6 +53,16 @@ return new class extends Migration
         Schema::table('events', function (Blueprint $table) {
             $table->dropColumn('event_password');
             $table->foreignId('venue_id')->nullable(false)->change();
+        });
+
+        Schema::table('roles', function (Blueprint $table) {
+            $table->boolean('is_open')->default(false)->change();
+        });
+
+        DB::table('roles')->update(['is_open' => false]);
+
+        Schema::table('role_user', function (Blueprint $table) {
+            $table->dropColumn('is_accepted');
         });
     }
 };
