@@ -1011,10 +1011,17 @@
       },
       loadPreferences() {
         const preferences = JSON.parse(localStorage.getItem('eventPreferences'));
+        @if (! $event->exists && $selectedVenue)
+        this.isInPerson = true;
+        if (preferences) {
+          this.isOnline = preferences.isOnline;
+        }
+        @else
         if (preferences) {
           this.isInPerson = preferences.isInPerson;
           this.isOnline = preferences.isOnline;
         }
+        @endif
       },
     },
     computed: {
