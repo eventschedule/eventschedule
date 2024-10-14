@@ -56,11 +56,9 @@ class Event extends Model
 
     public function role()
     {
-        if ($this->roles->count() > 0) {    
-            return $this->roles[0];
-        }
-
-        return null;
+        return $this->roles->first(function($role) {
+            return $role->isTalent() || $role->isVendor();
+        });
     }
 
     public function isRoleAMember($subdomain)
