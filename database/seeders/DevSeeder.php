@@ -47,6 +47,7 @@ class DevSeeder extends Seeder
         \DB::table('roles')->insert([
             [
                 'name' => 'Truklin',
+                'type' => 'venue',
                 'user_id' => 1,
                 'subdomain' => 'truklin',
                 'description' => 'Music Venue',
