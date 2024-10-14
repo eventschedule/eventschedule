@@ -64,7 +64,7 @@ class Event extends Model
     public function isRoleAMember($subdomain)
     {
         return $this->roles->contains(function ($role) use ($subdomain) {
-            return $role->subdomain == $subdomain;
+            return $role->subdomain == $subdomain && ($role->isTalent() || $role->isVendor());
         });
     }
 
