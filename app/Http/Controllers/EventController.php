@@ -167,7 +167,9 @@ class EventController extends Controller
         $venue = $event->venue;
         $selectedMembers = [];
         foreach ($event->roles as $each) {
-            $selectedMembers[] = $each->toData();
+            if ($each->isTalent() || $each->isVendor()) {
+                $selectedMembers[] = $each->toData();
+            }
         }
 
         if (! $role->email_verified_at) {
