@@ -27,6 +27,7 @@ return new class extends Migration
                 $firstRole = DB::table('event_role')
                     ->join('roles', 'event_role.role_id', '=', 'roles.id')
                     ->where('event_role.event_id', $event->id)
+                    ->where('roles.type', 'talent')
                     ->select('roles.name')
                     ->first();
 
