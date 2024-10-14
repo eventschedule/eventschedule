@@ -16,8 +16,6 @@ return new class extends Migration
             DB::table('event_role')->insert([
                 'event_id' => $event->id,
                 'role_id' => $event->role_id,
-                'created_at' => now(),
-                'updated_at' => now(),
             ]);
         });
 
