@@ -272,7 +272,6 @@ return [
     'to' => 'to',
     'allow_everyone_to_add_events' => 'Allow everyone to add events',
     'add_to_schedules' => 'Add to schedules',
-    //
     'claim_your_role_curated' => ':event at :venue was added to the :curator schedule',
     'use_existing' => 'Use existing',
     'private_address' => 'Private address',
@@ -294,4 +293,5 @@ return [
     'view_vendor' => 'View Vendor',
     'view_curator' => 'View Curator',
     'event_name' => 'Event Name',
+    //
 ];
