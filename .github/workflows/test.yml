@@ -46,7 +46,9 @@ jobs:
       - name: Install npm dependencies and build assets
         run: |
           npm ci
-          npm run build
+          npm run dev
+        env:
+          LARAVEL_BYPASS_ENV_CHECK: 1
 
       - name: Start Laravel server in background
         run: |
