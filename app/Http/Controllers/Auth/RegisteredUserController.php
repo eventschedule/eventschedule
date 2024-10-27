@@ -42,8 +42,8 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'timezone' => $request->timezone,
-            'language_code' => $request->language_code,
+            'timezone' => $request->timezone ?? 'America/New_York',
+            'language_code' => $request->language_code ?? 'en',
         ]);
 
         $roles = Role::whereEmail($user->email)
