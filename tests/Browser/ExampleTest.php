@@ -52,33 +52,33 @@ class ExampleTest extends DuskTestCase
                     ->assertPathIs('/home')
                     ->assertSee($name);
 
+            // Create/edit venue
+            $browser->visit('/new/venue')
+                    ->type('name', 'Test Venue')
+                    ->scrollIntoView('button[type="submit"]')
+                    ->press('SAVE')
+                    ->assertPathIs('/testvenue')
+                    ->clickLink('Edit Venue')
+                    ->assertPathIs('/testvenue/edit')
+                    ->type('website', 'https://google.com')
+                    ->scrollIntoView('button[type="submit"]')
+                    ->press('SAVE')
+                    ->assertPathIs('/testvenue')
+                    ->assertSee('google.com');
 
-            // Create a new venue
-            $venueName = 'Test Venue';
-            $browser->clickLink('Create a Venue')
-                    ->assertPathIs('/create-venue')
-                    ->type('name', $venueName)
-                    ->type('subdomain', 'testvenue')
-                    ->type('description', 'A test venue for Dusk')
-                    ->type('email', 'venue@example.com')
-                    ->type('phone', '1234567890')
-                    ->type('website', 'https://testvenue.com')
-                    ->type('city', 'Test City')
-                    ->type('postal_code', '12345')
-                    ->select('timezone', 'America/New_York')
-                    ->press('CREATE VENUE')
-                    ->assertPathIs('/testvenue/admin')
-                    ->assertSee($venueName)
-                    ->assertSee('Venue created successfully');
-
-            // Verify venue details
-            $browser->assertSee($venueName)
-                    ->assertSee('A test venue for Dusk')
-                    ->assertSee('venue@example.com')
-                    ->assertSee('1234567890')
-                    ->assertSee('https://testvenue.com')
-                    ->assertSee('Test City')
-                    ->assertSee('12345');
+            // Create/edit talent
+            $browser->visit('/new/talent')
+                    ->type('name', 'Test Talent')
+                    ->scrollIntoView('button[type="submit"]')
+                    ->press('SAVE')
+                    ->assertPathIs('/testtalent')
+                    ->clickLink('Edit Talent')
+                    ->assertPathIs('/testtalent/edit')
+                    ->type('website', 'https://google.com')
+                    ->scrollIntoView('button[type="submit"]')
+                    ->press('SAVE')
+                    ->assertPathIs('/testtalent')
+                    ->assertSee('google.com');
         });
     }
 }
