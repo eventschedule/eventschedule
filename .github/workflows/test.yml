@@ -61,3 +61,10 @@ jobs:
 
       - name: Run Laravel Dusk tests
         run: php artisan dusk
+
+      - name: Upload Dusk Screenshots
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: dusk-screenshots
+          path: tests/Browser/screenshots        
