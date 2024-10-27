@@ -21,6 +21,7 @@ class ExampleTest extends DuskTestCase
         $password = 'password';
 
         $this->browse(function (Browser $browser) use ($name, $email, $password) {
+            // Sign up
             $browser->visit('/sign_up')
                     ->type('name', $name)
                     ->type('email', $email)
@@ -37,6 +38,19 @@ class ExampleTest extends DuskTestCase
             $browser->visit('/home')                
                     ->assertPathIs('/home')
                     ->assertSee($name);            
+
+            // Log out
+            $browser->press($name)
+                    ->clickLink('Log Out')
+                    ->assertPathIs('/');
+
+            // Log back in
+            $browser->visit('/login')
+                    ->type('email', $email)
+                    ->type('password', $password)
+                    ->press('LOG IN')
+                    ->assertPathIs('/home')
+                    ->assertSee($name);
         });
     }
 }
