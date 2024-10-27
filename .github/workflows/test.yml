@@ -46,7 +46,7 @@ jobs:
       - name: Install npm dependencies and build assets
         run: |
           npm ci
-          npm run dev
+          npm run dev &
         env:
           LARAVEL_BYPASS_ENV_CHECK: 1
 
