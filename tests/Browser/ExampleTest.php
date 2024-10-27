@@ -79,6 +79,23 @@ class ExampleTest extends DuskTestCase
                     ->press('SAVE')
                     ->assertPathIs('/testtalent')
                     ->assertSee('google.com');
+
+            // Create/edit event
+            $browser->visit('/testtalent/add_event?date=' . date('Y-m-d'))
+                    ->select('#selected_venue')
+                    ->scrollIntoView('button[type="submit"]')
+                    ->press('SAVE')
+                    ->assertPathIs('/testtalent/schedule')
+                    ->assertSee('Test Venue');
+            
+            // Create/edit event
+            $browser->visit('/testvenue/add_event?date=' . date('Y-m-d'))
+                    ->select('#selected_member')
+                    ->type('name', 'Venue Event')
+                    ->scrollIntoView('button[type="submit"]')
+                    ->press('SAVE')
+                    ->assertPathIs('/testvenue/schedule')
+                    ->assertSee('Venue Event');
         });
     }
 }
