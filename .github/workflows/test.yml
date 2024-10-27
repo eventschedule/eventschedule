@@ -62,7 +62,7 @@ jobs:
           APP_URL: http://127.0.0.1:8000
   
       - name: Upload Dusk Screenshots
-        if: failure()
+        #if: failure()
         uses: actions/upload-artifact@v3
         with:
           name: dusk-screenshots
