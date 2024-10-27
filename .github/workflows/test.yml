@@ -40,7 +40,7 @@ jobs:
       - name: Install npm dependencies and build assets
         run: |
           npm ci
-          npm run dev
+          npm run build
 
       - name: Start Chromedriver
         run: php artisan serve &
