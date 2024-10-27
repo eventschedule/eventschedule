@@ -47,8 +47,10 @@ jobs:
           npm ci
           npm run build
 
-      - name: Start Chromedriver
-        run: php artisan serve &
+      - name: Start Laravel server in background
+        run: |
+          php artisan serve --host=127.0.0.1 --port=8000 &
+          sleep 10
         env:
           APP_ENV: testing
           APP_DEBUG: true
