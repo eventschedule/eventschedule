@@ -50,14 +50,14 @@ jobs:
         env:
           LARAVEL_BYPASS_ENV_CHECK: 1
 
-      - name: Start Laravel server in background
-        run: |
-          php artisan serve --host=127.0.0.1 --port=8000 &
-          sleep 10
-        env:
-          APP_ENV: testing
-          APP_DEBUG: true
-          APP_URL: http://127.0.0.1:8000
+      #- name: Start Laravel server in background
+      #  run: |
+      #    php artisan serve --host=127.0.0.1 --port=8000 &
+      #    sleep 10
+      #  env:
+      #    APP_ENV: testing
+      #    APP_DEBUG: true
+      #    APP_URL: http://127.0.0.1:8000
 
       - name: Run Laravel Dusk tests
         run: php artisan dusk
