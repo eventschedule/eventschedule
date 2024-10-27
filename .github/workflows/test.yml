@@ -31,8 +31,8 @@ jobs:
       - name: Configure SQLite database
         run: |
           touch /tmp/database.sqlite
-          sed -i 's/DB_DATABASE=.*/DB_DATABASE=\/tmp\/database.sqlite/' .env.dusk.local
-          sed -i 's/APP_URL=.*/APP_URL=http:\/\/127.0.0.1:8000/' .env.dusk.local
+          sed -i 's/DB_DATABASE=.*/DB_DATABASE=\/tmp\/database.sqlite/' .env
+          sed -i 's/APP_URL=.*/APP_URL=http:\/\/127.0.0.1:8000/' .env
 
       - name: Generate application key
         run: php artisan key:generate
@@ -50,17 +50,19 @@ jobs:
         env:
           LARAVEL_BYPASS_ENV_CHECK: 1
 
-      #- name: Start Laravel server in background
-      #  run: |
-      #    php artisan serve --host=127.0.0.1 --port=8000 &
-      #    sleep 10
-      #  env:
-      #    APP_ENV: testing
-      #    APP_DEBUG: true
-      #    APP_URL: http://127.0.0.1:8000
+      - name: Start Laravel server in background
+        run: |
+          php artisan serve --host=127.0.0.1 --port=8000 &
+          sleep 10
+        env:
+          APP_ENV: testing
+          APP_DEBUG: true
+          APP_URL: http://127.0.0.1:8000
 
       - name: Run Laravel Dusk tests
-        run: php artisan dusk
+        run: |
+          cp .env .env.dusk.local
+          php artisan dusk
 
       - name: Upload Dusk Screenshots
         if: failure()
