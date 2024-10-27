@@ -51,19 +51,16 @@ jobs:
           LARAVEL_BYPASS_ENV_CHECK: 1
 
       - name: Start Laravel server in background
-        run: |
-          php artisan serve --host=127.0.0.1 --port=8000 &
-          sleep 20
-        env:
-          APP_ENV: testing
-          APP_DEBUG: true
-          APP_URL: http://127.0.0.1:8000
+        run: php artisan serve > /dev/null 2>&1 &
 
       - name: Run Laravel Dusk tests
         run: |
           cp .env .env.dusk.local
           php artisan dusk
-
+        env:
+          APP_ENV: local
+          APP_URL: http://127.0.0.1:8000
+  
       - name: Upload Dusk Screenshots
         if: failure()
         uses: actions/upload-artifact@v3
