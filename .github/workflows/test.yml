@@ -1,0 +1,53 @@
+name: Laravel Dusk Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  dusk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v2
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, pdo, sqlite
+          tools: composer, npm
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-ansi --no-interaction --no-scripts --no-progress
+
+      - name: Copy .env
+        run: cp .env.example .env
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Set up Dusk environment
+        run: |
+          php artisan dusk:install
+          php artisan storage:link
+          php artisan migrate --env=testing --force
+
+      - name: Install npm dependencies and build assets
+        run: |
+          npm ci
+          npm run dev
+
+      - name: Start Chromedriver
+        run: php artisan serve &
+        env:
+          APP_ENV: testing
+          APP_DEBUG: true
+          APP_URL: http://127.0.0.1:8000
+
+      - name: Run Laravel Dusk tests
+        run: php artisan dusk
