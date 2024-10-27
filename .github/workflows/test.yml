@@ -28,6 +28,11 @@ jobs:
       - name: Copy .env
         run: cp .env.example .env
 
+      - name: Configure SQLite database
+        run: |
+          touch /tmp/database.sqlite
+          sed -i 's/DB_DATABASE=.*/DB_DATABASE=\/tmp\/database.sqlite/' .env.dusk.local
+
       - name: Generate application key
         run: php artisan key:generate
 
