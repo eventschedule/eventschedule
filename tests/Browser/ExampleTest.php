@@ -51,6 +51,34 @@ class ExampleTest extends DuskTestCase
                     ->press('LOG IN')
                     ->assertPathIs('/home')
                     ->assertSee($name);
+
+
+            // Create a new venue
+            $venueName = 'Test Venue';
+            $browser->clickLink('Create a Venue')
+                    ->assertPathIs('/create-venue')
+                    ->type('name', $venueName)
+                    ->type('subdomain', 'testvenue')
+                    ->type('description', 'A test venue for Dusk')
+                    ->type('email', 'venue@example.com')
+                    ->type('phone', '1234567890')
+                    ->type('website', 'https://testvenue.com')
+                    ->type('city', 'Test City')
+                    ->type('postal_code', '12345')
+                    ->select('timezone', 'America/New_York')
+                    ->press('CREATE VENUE')
+                    ->assertPathIs('/testvenue/admin')
+                    ->assertSee($venueName)
+                    ->assertSee('Venue created successfully');
+
+            // Verify venue details
+            $browser->assertSee($venueName)
+                    ->assertSee('A test venue for Dusk')
+                    ->assertSee('venue@example.com')
+                    ->assertSee('1234567890')
+                    ->assertSee('https://testvenue.com')
+                    ->assertSee('Test City')
+                    ->assertSee('12345');
         });
     }
 }
