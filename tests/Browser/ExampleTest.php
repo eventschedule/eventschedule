@@ -17,14 +17,22 @@ class ExampleTest extends DuskTestCase
     public function testBasicExample(): void
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
-                    ->assertSee('Event Schedule');
+            $browser->visit('/sign_up')
+                    ->type('name', 'John Doe')
+                    ->type('email', 'test@gmail.com')
+                    ->type('password', 'password123')
+                    ->type('password_confirmation', 'password123')
+                    ->check('terms')
+                    ->press('REGISTER')
+                    ->assertPathIs('/verify-email');
 
-            $browser->loginAs(User::find(1));
-            $browser->visit('/home');
-            $browser->screenshot('home');
+            $user = User::where('email', 'test@gmail.com')->first();
+            $user->email_verified_at = now();
+            $user->save();
 
-
+            $browser->visit('/home')                
+                    ->assertPathIs('/home')
+                    ->assertSee('John Doe');            
         });
 
     }
