@@ -155,7 +155,7 @@
                         <ol class="mt-4 divide-y divide-gray-100 text-sm leading-6 md:col-span-7 xl:col-span-8">
                             @foreach ($events as $each)
                             @php
-                            $canEdit = $route == 'admin' && $tab == 'schedule' && $role->email_verified_at && auth()->user()->canEditEvent($each);
+                            $canEdit = auth()->user() && auth()->user()->canEditEvent($each);
                             @endphp
                             @if ($each->matchesDate($currentDate))
                             <li class="relative group {{ $canEdit ? 'hover:pr-8' : '' }}">
@@ -167,7 +167,7 @@
                                     </p>
                                 </a>
                                 @if ($canEdit)
-                                <a href="{{ route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}"
+                                <a href="{{ isset($role) ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) : route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}"
                                     class="absolute right-0 top-0 hidden group-hover:inline-block text-indigo-600 hover:text-indigo-900"
                                     onclick="event.stopPropagation();">
                                     {{ __('messages.edit') }}

@@ -27,7 +27,7 @@
         f._input.onkeydown = () => false;
 
         $("#venue_country").countrySelect({
-            defaultCountry: "{{ $role && $role->country_code ? $role->country_code : '' }}",
+            defaultCountry: "{{ $selectedVenue && $selectedVenue->country ? $selectedVenue->country : ($role && $role->country_code ? $role->country_code : '') }}",
         });
     });
 
@@ -292,21 +292,21 @@
                                         <x-input-label for="venue_address1" :value="__('messages.street_address') . ' *'" />
                                         <x-text-input id="venue_address1" name="venue_address1" type="text"
                                             class="mt-1 block w-full" required
-                                            :value="old('venue_address1', $role ? $role->address1 : '')" autocomplete="off" />
+                                            :value="old('venue_address1', $selectedVenue ? $selectedVenue->address1 : '')" autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_address1')" />
                                     </div>
 
                                     <div class="mb-6">
                                         <x-input-label for="venue_city" :value="__('messages.city')" />
                                         <x-text-input id="venue_city" name="venue_city" type="text" class="mt-1 block w-full"
-                                            :value="old('venue_city', $role ? $role->city : '')" autocomplete="off" />
+                                            :value="old('venue_city', $selectedVenue ? $selectedVenue->city : '')" autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_city')" />
                                     </div>
 
                                     <div class="mb-6">
                                         <x-input-label for="venue_state" :value="__('messages.state_province')" />
                                         <x-text-input id="venue_state" name="venue_state" type="text" class="mt-1 block w-full"
-                                            :value="old('venue_state', $role ? $role->state : '')" autocomplete="off" />
+                                            :value="old('venue_state', $selectedVenue ? $selectedVenue->state : '')" autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_state')" />
                                     </div>
 
@@ -314,7 +314,7 @@
                                         <x-input-label for="venue_postal_code" :value="__('messages.postal_code')" />
                                         <x-text-input id="venue_postal_code" name="venue_postal_code" type="text"
                                             class="mt-1 block w-full"
-                                            :value="old('venue_postal_code', $role ? $role->postal_code : '')" autocomplete="off" />
+                                            :value="old('venue_postal_code', $selectedVenue ? $selectedVenue->postal_code : '')" autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_postal_code')" />
                                     </div>
 

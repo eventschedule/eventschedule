@@ -30,6 +30,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::post('/validate_address', [RoleController::class, 'validateAddress'])->name('validate_address')->middleware('throttle:25,1440');
     Route::post('/store', [RoleController::class, 'store'])->name('role.store');
     Route::get('/search_roles', [RoleController::class, 'search'])->name('role.search');
+    Route::get('/edit_event/{hash}', [EventController::class, 'editAdmin'])->name('event.edit_admin');
     
     Route::get('/venues', [RoleController::class, 'viewVenues'])->name('venues');
     Route::get('/talent', [RoleController::class, 'viewTalent'])->name('talent');
