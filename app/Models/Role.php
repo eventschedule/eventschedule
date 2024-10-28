@@ -265,24 +265,6 @@ class Role extends Model implements MustVerifyEmail
         $subdomain = preg_replace('/[^a-zA-Z0-9]/', '', trim($name));
         $subdomain = strtolower(trim($subdomain));
 
-        if (strlen($subdomain) < 4) {
-            return strtolower(\Str::random(8));
-        }
-    
-        return $subdomain;
-    }
-
-    public static function generateSubdomain($name = "")
-    {
-        if (! $name) {
-            $name = strtolower(\Str::random(8));
-        }
-
-        $subdomain = self::cleanSubdomain($name);
-
-        $originalSubdomain = $subdomain;
-        $count = 1;
-
         $reserved = [
             'home',
             'privacy',
@@ -306,9 +288,133 @@ class Role extends Model implements MustVerifyEmail
             'docs',
             'api',
             'faq',
+            'newyork',
+            'london',
+            'paris',
+            'tokyo',
+            'shanghai',
+            'singapore',
+            'dubai',
+            'hongkong',
+            'beijing',
+            'sydney',
+            'losangeles',
+            'sanfrancisco',
+            'chicago',
+            'moscow',
+            'seoul',
+            'mumbai',
+            'berlin',
+            'bangkok',
+            'delhi',
+            'istanbul',
+            'miami',
+            'boston',
+            'barcelona',
+            'madrid',
+            'rome',
+            'vienna',
+            'amsterdam',
+            'brussels',
+            'cairo',
+            'jakarta',
+            'mexicocity',
+            'kualalumpur',
+            'buenosaires',
+            'manila',
+            'lisbon',
+            'athens',
+            'rio',
+            'prague',
+            'stockholm',
+            'copenhagen',
+            'toronto',
+            'montreal',
+            'zurich',
+            'helsinki',
+            'dublin',
+            'warsaw',
+            'budapest',
+            'venice',
+            'bucharest',
+            'hamburg',
+            'milan',
+            'vancouver',
+            'brisbane',
+            'oslo',
+            'birmingham',
+            'edmonton',
+            'munich',
+            'kyoto',
+            'stpetersburg',
+            'nairobi',
+            'lagos',
+            'casablanca',
+            'doha',
+            'auckland',
+            'kolkata',
+            'riyadh',
+            'abuja',
+            'chennai',
+            'jaipur',
+            'lahore',
+            'karachi',
+            'vienna',
+            'porto',
+            'telaviv',
+            'sofia',
+            'minsk',
+            'capetown',
+            'manchester',
+            'leeds',
+            'durban',
+            'brisbane',
+            'perth',
+            'adelaide',
+            'goldcoast',
+            'quezoncity',
+            'beirut',
+            'algiers',
+            'medellin',
+            'guadalajara',
+            'valencia',
+            'lyon',
+            'marseille',
+            'naples',
+            'florence',
+            'malaga',
+            'seville',
+            'santodomingo',
+            'phnompenh',
+            'kingston',
+            'kuwaitcity',
+            'minneapolis',
+            'detroit',
         ];
 
-        while (self::where('subdomain', $subdomain)->exists() || in_array($subdomain, $reserved)) {
+        if (in_array($subdomain, $reserved)) {
+            $subdomain = '';
+        }
+
+        if (strlen($subdomain) < 4) {
+            return strtolower(\Str::random(8));
+        }
+    
+        return $subdomain;
+    }
+
+    public static function generateSubdomain($name = "")
+    {
+        if (! $name) {
+            $name = strtolower(\Str::random(8));
+        }
+
+        $subdomain = self::cleanSubdomain($name);
+
+        $originalSubdomain = $subdomain;
+        $count = 1;
+
+        while (self::where('subdomain', $subdomain)->exists()) {
             $subdomain = $originalSubdomain . $count;
             $count++;
         }
