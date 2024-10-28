@@ -249,9 +249,9 @@
                                 </div>
                             </dl>
                         </div>
-                        @if ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at && auth()->user()->canEditEvent($each))                        
+                        @if (auth()->user()->canEditEvent($each))                        
                         <div class="absolute right-10">
-                            <a href="{{ route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}"
+                            <a href="{{ isset($role) ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) : route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}"
                                 class="text-indigo-600 hover:text-indigo-900 hover:underline"
                                 onclick="event.stopPropagation();">
                                 {{ __('messages.edit') }}
