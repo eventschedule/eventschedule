@@ -153,6 +153,28 @@ class EventController extends Controller
         ]);
     }
 
+    public function editAdmin(Request $request, $hash)
+    {
+        $event_id = UrlUtils::decodeId($hash);
+        $event = Event::findOrFail($event_id);
+        $user = $request->user();
+
+        if ($user->isMember($event->venue->subdomain)) {
+            $subdomain = $event->venue->subdomain;
+        }
+
+        if (! $subdomain) {
+            foreach ($event->roles as $each) {
+                if ($user->isMember($each->subdomain)) {
+                    $subdomain = $each->subdomain;
+                    break;
+                }
+            }
+        }
+
+        return redirect(route('event.edit', ['subdomain' => $subdomain, 'hash' => $hash]));
+    }
+
     public function edit(Request $request, $subdomain, $hash)
     {
         $event_id = UrlUtils::decodeId($hash);
@@ -195,8 +217,6 @@ class EventController extends Controller
         $venues = array_values($venues->toArray());
         $members = array_values($members->toArray());
     
-        
-
         return view('event/edit', [
             'role' => $role,
             'user' => $user,
