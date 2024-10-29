@@ -273,7 +273,6 @@ return [
     'add_to_schedules' => 'Zu den Zeitplänen hinzufügen',
     'claim_your_role_curated' => ':event bei :venue wurde zum :curator Zeitplan hinzugefügt',
     'use_existing' => 'Vorhandenes verwenden',
-    'private_address' => 'Private Adresse',
     'search_results' => 'Suchergebnisse',
     'clear' => 'Löschen',
     'members' => 'Mitglieder',

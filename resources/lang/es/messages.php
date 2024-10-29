@@ -273,7 +273,6 @@ return [
     'add_to_schedules' => 'Agregar a los horarios',
     'claim_your_role_curated' => ':event en :venue fue agregado al horario de :curator',
     'use_existing' => 'Usar existente',
-    'private_address' => 'Dirección privada',
     'search_results' => 'Resultados de la búsqueda',
     'clear' => 'Limpiar',
     'members' => 'Miembros',
