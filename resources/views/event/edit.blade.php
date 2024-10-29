@@ -351,10 +351,10 @@
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm text-gray-900 dark:text-gray-100">
                                         <template v-if="selectedVenue.url">
-                                            <a :href="selectedVenue.url" target="_blank" class="hover:underline">@{{ selectedVenue.name }}</a>
+                                            <a :href="selectedVenue.url" target="_blank" class="hover:underline">@{{ selectedVenue.name || selectedVenue.address1 }}</a>
                                         </template>
                                         <template v-else>
-                                            @{{ selectedVenue.name }}
+                                            @{{ selectedVenue.name || selectedVenue.address1 }}
                                         </template>
                                         <template v-if="selectedVenue.email">
                                             (<a :href="'mailto:' + selectedVenue.email" class="hover:underline">@{{ selectedVenue.email }}</a>)
