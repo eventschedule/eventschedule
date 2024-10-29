@@ -287,7 +287,7 @@
                                     </div>
                                 </div>
 
-                                <div v-if="showAddressFields()">
+                                <div v-show="showAddressFields()">
                                     <div class="mb-6">
                                         <x-input-label for="venue_name" :value="__('messages.name')" />
                                         <x-text-input id="venue_name" name="venue_name" type="text"
