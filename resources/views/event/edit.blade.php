@@ -211,10 +211,10 @@
                                                 class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.search_create') }}</label>
                                         </div>
                                         <div class="flex items-center">
-                                            <input id="private_address_venue" name="venue_type" type="radio" value="private_address" v-model="venueType"
+                                            <input id="no_contact_info_venue" name="venue_type" type="radio" value="no_contact_info" v-model="venueType"
                                                 class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                                            <label for="private_address_venue"
-                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.private_address') }}</label>
+                                            <label for="no_contact_info_venue"
+                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.no_contact_info') }}</label>
                                         </div>
                                     </div>
                                 </fieldset>
@@ -288,6 +288,14 @@
                                 </div>
 
                                 <div v-if="showAddressFields()">
+                                    <div class="mb-6">
+                                        <x-input-label for="venue_name" :value="__('messages.name')" />
+                                        <x-text-input id="venue_name" name="venue_name" type="text"
+                                            class="mt-1 block w-full"
+                                            :value="old('venue_name', $selectedVenue ? $selectedVenue->name : '')" autocomplete="off" />
+                                        <x-input-error class="mt-2" :messages="$errors->get('venue_name')" />
+                                    </div>
+
                                     <div class="mb-6">
                                         <x-input-label for="venue_address1" :value="__('messages.street_address') . ' *'" />
                                         <x-text-input id="venue_address1" name="venue_address1" type="text"
@@ -807,8 +815,8 @@
             if (searchInput) {
               searchInput.focus();
             }
-          } if (this.venueType === 'private_address') {
-            const venueSelect = document.querySelector('input[name="venue_address1"]');
+          } else if (this.venueType === 'no_contact_info') {
+            const venueSelect = document.querySelector('input[name="venue_name"]');
             if (venueSelect) {
               venueSelect.focus();
             }
@@ -817,7 +825,7 @@
       },
       showAddressFields() {
         return (this.venueType === 'use_existing' && this.selectedVenue && !this.selectedVenue.user_id) 
-            || this.venueType === 'private_address' 
+            || this.venueType === 'no_contact_info' 
             || (this.venueType === 'search_create' && this.venueEmail);
       },
       searchMembers() {

@@ -273,7 +273,6 @@ return [
     'add_to_schedules' => 'Toevoegen aan roosters',
     'claim_your_role_curated' => ':event bij :venue is toegevoegd aan het schema van :curator',
     'use_existing' => 'Gebruik bestaande',
-    'private_address' => 'Privéadres',
     'search_results' => 'Zoekresultaten',
     'clear' => 'Wissen',
     'members' => 'Leden',

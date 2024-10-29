@@ -273,7 +273,6 @@ return [
     'add_to_schedules' => 'إضافة إلى الجداول',
     'claim_your_role_curated' => ':event في :venue تمت إضافته إلى جدول :curator',
     'use_existing' => 'استخدام الموجود',
-    'private_address' => 'عنوان خاص',
     'search_results' => 'نتائج البحث',
     'clear' => 'مسح',
     'members' => 'الأعضاء',

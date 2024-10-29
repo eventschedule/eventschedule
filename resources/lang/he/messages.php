@@ -275,7 +275,6 @@ return [
     'add_to_schedules' => 'הוסף ללוחות הזמנים',
     'claim_your_role_curated' => ':event ב-:venue נוסף ללוח הזמנים של :curator',
     'use_existing' => 'השתמש בקיים',
-    'private_address' => 'כתובת פרטית',
     'search_results' => 'תוצאות חיפוש',
     'clear' => 'נקה',
     'members' => 'חברים',

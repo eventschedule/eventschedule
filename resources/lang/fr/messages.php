@@ -275,7 +275,6 @@ return [
     'add_to_schedules' => 'Ajouter aux plannings',
     'claim_your_role_curated' => ':event à :venue a été ajouté à l\'emploi du temps de :curator',
     'use_existing' => 'Utiliser existant',
-    'private_address' => 'Adresse privée',
     'search_results' => 'Résultats de la recherche',
     'clear' => 'Effacer',
     'members' => 'Membres',

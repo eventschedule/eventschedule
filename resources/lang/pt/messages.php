@@ -273,7 +273,6 @@ return [
     'add_to_schedules' => 'Adicionar aos cronogramas',
     'claim_your_role_curated' => ':event em :venue foi adicionado à programação de :curator',
     'use_existing' => 'Usar existente',
-    'private_address' => 'Endereço privado',
     'search_results' => 'Resultados da pesquisa',
     'clear' => 'Limpar',
     'members' => 'Membros',

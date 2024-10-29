@@ -43,6 +43,7 @@ class EventRepo
             $venue->type = 'venue';
             $venue->timezone = $user->timezone;
             $venue->language_code = $user->language_code;
+            $venue->name = $request->venue_name ?? null;
             $venue->address1 = $request->venue_address1;
             $venue->address2 = $request->venue_address2;
             $venue->city = $request->venue_city;
