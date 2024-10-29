@@ -145,7 +145,7 @@ class Event extends Model
     public function getVenueDisplayName()
     {
         if ($this->venue) {
-            return $this->venue->name;
+            return $this->venue->getDisplayName();
         }
 
         return $this->getEventUrlDomain();
