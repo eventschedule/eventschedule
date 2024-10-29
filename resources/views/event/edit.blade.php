@@ -195,8 +195,8 @@
                         <x-text-input name="venue_id" v-bind:value="selectedVenue.id" type="hidden" />
 
                         <div v-if="isInPerson">
-                            <div v-if="!selectedVenue" class="mb-6">
-                                <fieldset>                                
+                            <div v-if="!selectedVenue || showVenueAddressFields" class="mb-6">
+                                <fieldset v-if="!selectedVenue">                                
                                     <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                                         <div v-if="Object.keys(venues).length > 0" class="flex items-center">
                                             <input id="use_existing_venue" name="venue_type" type="radio" value="use_existing" v-model="venueType"
@@ -348,21 +348,28 @@
                             </div>
 
                             <div v-else class="mb-6">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-sm text-gray-900 dark:text-gray-100">
-                                        <template v-if="selectedVenue.url">
-                                            <a :href="selectedVenue.url" target="_blank" class="hover:underline">@{{ selectedVenue.name || selectedVenue.address1 }}</a>
-                                        </template>
-                                        <template v-else>
-                                            @{{ selectedVenue.name || selectedVenue.address1 }}
-                                        </template>
-                                        <template v-if="selectedVenue.email">
-                                            (<a :href="'mailto:' + selectedVenue.email" class="hover:underline">@{{ selectedVenue.email }}</a>)
-                                        </template>
-                                    </span>
-                                    <x-secondary-button @click="clearSelectedVenue" type="button">
-                                        {{ __('messages.remove') }}
-                                    </x-secondary-button>
+                                <div class="flex justify-between w-full">
+                                    <div class="flex items-center">
+                                        <span class="text-sm text-gray-900 dark:text-gray-100">
+                                            <template v-if="selectedVenue.url">
+                                                <a :href="selectedVenue.url" target="_blank" class="hover:underline">@{{ selectedVenue.name || selectedVenue.address1 }}</a>
+                                            </template>
+                                            <template v-else>
+                                                @{{ selectedVenue.name || selectedVenue.address1 }}
+                                            </template>
+                                            <template v-if="selectedVenue.email">
+                                                (<a :href="'mailto:' + selectedVenue.email" class="hover:underline">@{{ selectedVenue.email }}</a>)
+                                            </template>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <x-secondary-button v-if="!selectedVenue.user_id" @click="editSelectedVenue" type="button" class="mr-2">
+                                            {{ __('messages.edit') }}
+                                        </x-secondary-button>
+                                        <x-secondary-button @click="clearSelectedVenue" type="button">
+                                            {{ __('messages.remove') }}
+                                        </x-secondary-button>
+                                    </div>
                                 </div>
                             </div>                        
 
@@ -731,7 +738,7 @@
         event: @json($event),
         venues: @json($venues),
         members: @json($members ?? []),
-        venueType: "use_existing",
+        venueType: "{{ $selectedVenue && !$selectedVenue->user_id ? 'no_contact_info' : 'use_existing' }}",
         memberType: "use_existing",
         venueName: "",
         venueEmail: "",
@@ -747,6 +754,7 @@
         memberName: "",
         memberYoutubeUrl: "",
         showMemberTypeRadio: true,
+        showVenueAddressFields: false,
         isInPerson: false,
         isOnline: false,
         eventName: @json($event->name ?? ''),
@@ -755,6 +763,9 @@
     methods: {
       clearSelectedVenue() {
         this.selectedVenue = "";
+      },
+      editSelectedVenue() {
+        this.showVenueAddressFields = true;
       },
       searchVenues() {
         const emailInput = document.getElementById('venue_search_email');
