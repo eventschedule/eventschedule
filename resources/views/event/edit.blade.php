@@ -1074,9 +1074,6 @@
         this.venueSearchResults = [];
       },
       isInPerson(newValue) {
-        if (!newValue) {
-          this.clearSelectedVenue();
-        }
         this.savePreferences();
       },
       isOnline(newValue) {
