@@ -57,16 +57,17 @@ class HomeController extends Controller
         $events = Event::with(['roles', 'venue'])
             ->where(function ($query) use ($roleIds) {
                 $query->where(function ($query) use ($roleIds) {
-                    $query->whereIn('venue_id', $roleIds);
+                    $query->whereIn('venue_id', $roleIds)
+                          ->where('is_accepted', true);
                 })->orWhere(function ($query) use ($roleIds) {
                     $query->whereIn('id', function ($query) use ($roleIds) {
-                        $query->select('event_id')
-                            ->from('event_role')
-                            ->whereIn('role_id', $roleIds);
+                            $query->select('event_id')
+                                ->from('event_role')
+                                ->whereIn('role_id', $roleIds)
+                                ->where('is_accepted', true);
                     });
                 });
             })
-            ->where('is_accepted', true)
             ->where(function ($query) use ($startOfMonth, $endOfMonth) {
                 $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
                     ->orWhereNotNull('days_of_week');
