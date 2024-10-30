@@ -158,6 +158,7 @@ class EventController extends Controller
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
         $user = $request->user();
+        $subdomain = null;
 
         if ($user->isMember($event->venue->subdomain)) {
             $subdomain = $event->venue->subdomain;
