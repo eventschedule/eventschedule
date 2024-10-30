@@ -291,47 +291,45 @@
                                     <div class="mb-6">
                                         <x-input-label for="venue_name" :value="__('messages.name')" />
                                         <x-text-input id="venue_name" name="venue_name" type="text"
-                                            class="mt-1 block w-full"
-                                            :value="old('venue_name', $selectedVenue ? $selectedVenue->name : '')" autocomplete="off" />
+                                            class="mt-1 block w-full" v-model="selectedVenue.name" autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_name')" />
                                     </div>
 
                                     <div class="mb-6">
                                         <x-input-label for="venue_address1" :value="__('messages.street_address') . ' *'" />
                                         <x-text-input id="venue_address1" name="venue_address1" type="text"
-                                            class="mt-1 block w-full" required
-                                            :value="old('venue_address1', $selectedVenue ? $selectedVenue->address1 : '')" autocomplete="off" />
+                                            class="mt-1 block w-full" required v-model="selectedVenue.address1" autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_address1')" />
                                     </div>
 
                                     <div class="mb-6">
                                         <x-input-label for="venue_city" :value="__('messages.city')" />
                                         <x-text-input id="venue_city" name="venue_city" type="text" class="mt-1 block w-full"
-                                            :value="old('venue_city', $selectedVenue ? $selectedVenue->city : '')" autocomplete="off" />
+                                            v-model="selectedVenue.city" autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_city')" />
                                     </div>
 
                                     <div class="mb-6">
                                         <x-input-label for="venue_state" :value="__('messages.state_province')" />
                                         <x-text-input id="venue_state" name="venue_state" type="text" class="mt-1 block w-full"
-                                            :value="old('venue_state', $selectedVenue ? $selectedVenue->state : '')" autocomplete="off" />
+                                            v-model="selectedVenue.state" autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_state')" />
                                     </div>
 
                                     <div class="mb-6">
                                         <x-input-label for="venue_postal_code" :value="__('messages.postal_code')" />
                                         <x-text-input id="venue_postal_code" name="venue_postal_code" type="text"
-                                            class="mt-1 block w-full"
-                                            :value="old('venue_postal_code', $selectedVenue ? $selectedVenue->postal_code : '')" autocomplete="off" />
+                                            class="mt-1 block w-full" v-model="selectedVenue.postal_code" autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_postal_code')" />
                                     </div>
 
                                     <div class="mb-6">
                                         <x-input-label for="venue_country" :value="__('messages.country')" />
                                         <x-text-input id="venue_country" name="venue_country" type="text" class="mt-1 block w-full"
-                                            :value="old('venue_country')" onchange="onChangeCountry()" autocomplete="off" />
+                                            onchange="onChangeCountry()" autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('country')" />
-                                        <input type="hidden" id="venue_country_code" name="venue_country_code" />
+                                        <input type="hidden" id="venue_country_code" name="venue_country_code" 
+                                            v-model="selectedVenue.country_code"/>
                                     </div>
 
                                     <div class="mb-6">
@@ -339,6 +337,7 @@
                                             <x-secondary-button id="view_map_button" onclick="viewMap()">{{ __('messages.view_map') }}</x-secondary-button>
                                             <x-secondary-button id="validate_button" onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
                                             <x-secondary-button id="accept_button" onclick="acceptAddress(event)" class="hidden">{{ __('messages.accept') }}</x-secondary-button>
+                                            <x-primary-button @click="updateSelectedVenue">{{ __('messages.done') }}</x-primary-button>
                                         </div>
                                     </div>
 
@@ -766,6 +765,9 @@
       },
       editSelectedVenue() {
         this.showVenueAddressFields = true;
+      },
+      updateSelectedVenue() {
+        this.showVenueAddressFields = false;
       },
       searchVenues() {
         const emailInput = document.getElementById('venue_search_email');
