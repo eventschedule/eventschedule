@@ -133,7 +133,7 @@ class EventRepo
         if (! $event) {
             $event = new Event;       
             $event->user_id = auth()->user()->id;
-            $event->is_accepted = ! $venue || $user->isMember($venue->subdomain) ? true : null;
+            $event->is_accepted = $venue && $user->isMember($venue->subdomain) ? true : null;
         }
 
         $event->fill($request->all());
