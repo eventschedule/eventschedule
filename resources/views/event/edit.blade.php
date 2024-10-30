@@ -364,7 +364,7 @@
                                             <template v-else>
                                                 @{{ venueName || venueAddress1 }}
                                             </template>
-                                            <template v-if="selectedVenue.email">
+                                            <template v-if="venueEmail">
                                                 (<a :href="'mailto:' + venueEmail" class="hover:underline">@{{ venueEmail }}</a>)
                                             </template>
                                         </span>
@@ -821,6 +821,13 @@
       },
       selectVenue(venue) {
         this.selectedVenue = venue;
+        this.venueName = venue.name;
+        this.venueEmail = venue.email;
+        this.venueAddress1 = venue.address1;
+        this.venueCity = venue.city;
+        this.venueState = venue.state;
+        this.venuePostalCode = venue.postal_code;
+        this.venueCountryCode = venue.country_code;
       },
       clearVenueSearch() {
         this.venueEmail = "";
@@ -1085,7 +1092,13 @@
         this.setFocusBasedOnMemberType();
       },
       selectedVenue() {
-        this.venueEmail = "";
+        this.venueName = this.selectedVenue ? this.selectedVenue.name : "";
+        this.venueEmail = this.selectedVenue ? this.selectedVenue.email : "";
+        this.venueAddress1 = this.selectedVenue ? this.selectedVenue.address1 : "";
+        this.venueCity = this.selectedVenue ? this.selectedVenue.city : "";
+        this.venueState = this.selectedVenue ? this.selectedVenue.state : "";
+        this.venuePostalCode = this.selectedVenue ? this.selectedVenue.postal_code : "";
+        this.venueCountryCode = this.selectedVenue ? this.selectedVenue.country_code : "";
         this.venueSearchEmail = "";
         this.venueSearchResults = [];
       },
