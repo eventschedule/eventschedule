@@ -148,8 +148,9 @@ class EventRepo
         }
 
         $event->fill($request->all());
-        if ($event->venue_id) {
-            $event->venue_id = UrlUtils::decodeId($event->venue_id);
+
+        if ($request->venue_id) {
+            $event->venue_id = UrlUtils::decodeId($request->venue_id);
         } else if ($venue) {
             $event->venue_id = $venue->id;
         }

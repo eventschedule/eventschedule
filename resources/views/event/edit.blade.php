@@ -161,6 +161,13 @@
         @method('put')
         @endif
 
+        <x-text-input name="venue_name" type="hidden" v-model="venueName" />                                                                
+        <x-text-input name="venue_address1" type="hidden" v-model="venueAddress1" />                                                                
+        <x-text-input name="venue_city" type="hidden" v-model="venueCity" />                                                                
+        <x-text-input name="venue_state" type="hidden" v-model="venueState" />                                                                
+        <x-text-input name="venue_postal_code" type="hidden" v-model="venuePostalCode" />                                                                
+        <x-text-input name="venue_country_code" type="hidden" v-model="venueCountryCode" />                                                                
+
         <div class="py-5">
             <div class="max-w-7xl mx-auto space-y-6">
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
@@ -291,35 +298,35 @@
                                     <div class="mb-6">
                                         <x-input-label for="venue_name" :value="__('messages.name')" />
                                         <x-text-input id="venue_name" name="venue_name" type="text"
-                                            class="mt-1 block w-full" v-model="selectedVenue.name" autocomplete="off" />
+                                            class="mt-1 block w-full" v-model="venueName" autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_name')" />
                                     </div>
 
                                     <div class="mb-6">
                                         <x-input-label for="venue_address1" :value="__('messages.street_address') . ' *'" />
                                         <x-text-input id="venue_address1" name="venue_address1" type="text"
-                                            class="mt-1 block w-full" required v-model="selectedVenue.address1" autocomplete="off" />
+                                            class="mt-1 block w-full" required v-model="venueAddress1" autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_address1')" />
                                     </div>
 
                                     <div class="mb-6">
                                         <x-input-label for="venue_city" :value="__('messages.city')" />
                                         <x-text-input id="venue_city" name="venue_city" type="text" class="mt-1 block w-full"
-                                            v-model="selectedVenue.city" autocomplete="off" />
+                                            v-model="venueCity" autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_city')" />
                                     </div>
 
                                     <div class="mb-6">
                                         <x-input-label for="venue_state" :value="__('messages.state_province')" />
                                         <x-text-input id="venue_state" name="venue_state" type="text" class="mt-1 block w-full"
-                                            v-model="selectedVenue.state" autocomplete="off" />
+                                            v-model="venueState" autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_state')" />
                                     </div>
 
                                     <div class="mb-6">
                                         <x-input-label for="venue_postal_code" :value="__('messages.postal_code')" />
                                         <x-text-input id="venue_postal_code" name="venue_postal_code" type="text"
-                                            class="mt-1 block w-full" v-model="selectedVenue.postal_code" autocomplete="off" />
+                                            class="mt-1 block w-full" v-model="venuePostalCode" autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_postal_code')" />
                                     </div>
 
@@ -329,7 +336,7 @@
                                             onchange="onChangeCountry()" autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('country')" />
                                         <input type="hidden" id="venue_country_code" name="venue_country_code" 
-                                            v-model="selectedVenue.country_code"/>
+                                            v-model="venueCountryCode"/>
                                     </div>
 
                                     <div class="mb-6">
@@ -337,15 +344,13 @@
                                             <x-secondary-button id="view_map_button" onclick="viewMap()">{{ __('messages.view_map') }}</x-secondary-button>
                                             <x-secondary-button id="validate_button" onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
                                             <x-secondary-button id="accept_button" onclick="acceptAddress(event)" class="hidden">{{ __('messages.accept') }}</x-secondary-button>
-                                            <x-primary-button type="button" @click="updateSelectedVenue()">{{ __('messages.done') }}</x-primary-button>
+                                            <x-primary-button v-if="showVenueAddressFields" type="button" @click="updateSelectedVenue()">{{ __('messages.done') }}</x-primary-button>
                                         </div>
                                     </div>
 
                                     <div id="address_response" class="mb-6 hidden text-gray-900 dark:text-gray-100"></div>
 
                                 </div>
-
-
                             </div>
 
               
@@ -354,13 +359,13 @@
                                     <div class="flex items-center">
                                         <span class="text-sm text-gray-900 dark:text-gray-100">
                                             <template v-if="selectedVenue.url">
-                                                <a :href="selectedVenue.url" target="_blank" class="hover:underline">@{{ selectedVenue.name || selectedVenue.address1 }}</a>
+                                                <a :href="selectedVenue.url" target="_blank" class="hover:underline">@{{ venueName || venueAddress1 }}</a>
                                             </template>
                                             <template v-else>
-                                                @{{ selectedVenue.name || selectedVenue.address1 }}
+                                                @{{ venueName || venueAddress1 }}
                                             </template>
                                             <template v-if="selectedVenue.email">
-                                                (<a :href="'mailto:' + selectedVenue.email" class="hover:underline">@{{ selectedVenue.email }}</a>)
+                                                (<a :href="'mailto:' + venueEmail" class="hover:underline">@{{ venueEmail }}</a>)
                                             </template>
                                         </span>
                                     </div>
@@ -386,12 +391,6 @@
                     </div>
                 </div>
 
-                <x-text-input name="venue_name" type="hidden" v-model="selectedVenue.name" />                                                                
-                <x-text-input name="venue_address1" type="hidden" v-model="selectedVenue.address1" />                                                                
-                <x-text-input name="venue_city" type="hidden" v-model="selectedVenue.city" />                                                                
-                <x-text-input name="venue_state" type="hidden" v-model="selectedVenue.state" />                                                                
-                <x-text-input name="venue_postal_code" type="hidden" v-model="selectedVenue.postal_code" />                                                                
-                <x-text-input name="venue_country_code" type="hidden" v-model="selectedVenue.country_code" />                                                                
 
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">                                                
@@ -749,8 +748,13 @@
         members: @json($members ?? []),
         venueType: "{{ $selectedVenue && !$selectedVenue->isClaimed() ? 'no_contact_info' : 'use_existing' }}",
         memberType: "use_existing",
-        venueName: "",
-        venueEmail: "",
+        venueName: "{{ $selectedVenue ? $selectedVenue->name : '' }}",
+        venueEmail: "{{ $selectedVenue ? $selectedVenue->email : '' }}",
+        venueAddress1: "{{ $selectedVenue ? $selectedVenue->address1 : '' }}",
+        venueCity: "{{ $selectedVenue ? $selectedVenue->city : '' }}",
+        venueState: "{{ $selectedVenue ? $selectedVenue->state : '' }}",
+        venuePostalCode: "{{ $selectedVenue ? $selectedVenue->postal_code : '' }}",
+        venueCountryCode: "{{ $selectedVenue ? $selectedVenue->country_code : '' }}",
         venueSearchEmail: "",
         venueSearchResults: [],
         selectedVenue: @json($selectedVenue ? $selectedVenue->toData() : ""),
