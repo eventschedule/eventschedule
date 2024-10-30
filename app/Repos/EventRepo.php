@@ -35,39 +35,50 @@ class EventRepo
         }
         */
 
-        if (! $venue && $request->venue_address1) {
-            $venue = new Role;
-            $venue->name = $request->venue_name ?? null;
-            $venue->email = $request->venue_email ?? null;
-            $venue->subdomain = Role::generateSubdomain($request->venue_email ? $request->venue_email : null);
-            $venue->type = 'venue';
-            $venue->timezone = $user->timezone;
-            $venue->language_code = $user->language_code;
-            $venue->name = $request->venue_name ?? null;
-            $venue->address1 = $request->venue_address1;
-            $venue->address2 = $request->venue_address2;
-            $venue->city = $request->venue_city;
-            $venue->state = $request->venue_state;
-            $venue->postal_code = $request->venue_postal_code;
-            $venue->country_code = $request->venue_country_code;
-            $venue->background_colors = ColorUtils::randomGradient();
-            $venue->background_rotation = rand(0, 359);
-            $venue->font_color = '#ffffff';
-            $venue->save();
-            $venue->refresh();
-            
-            $matchingUser = false;
-            
-            if ($venue->email && $matchingUser = User::whereEmail($venue->email)->first()) {
-                $venue->user_id = $matchingUser->id;
-                $venue->email_verified_at = $matchingUser->email_verified_at;
+        if ($request->venue_address1) {
+            if (! $venue) {
+                $venue = new Role;
+                $venue->name = $request->venue_name ?? null;
+                $venue->email = $request->venue_email ?? null;
+                $venue->subdomain = Role::generateSubdomain($request->venue_email ? $request->venue_email : null);
+                $venue->type = 'venue';
+                $venue->timezone = $user->timezone;
+                $venue->language_code = $user->language_code;
+                $venue->name = $request->venue_name ?? null;
+                $venue->address1 = $request->venue_address1;
+                $venue->address2 = $request->venue_address2;
+                $venue->city = $request->venue_city;
+                $venue->state = $request->venue_state;
+                $venue->postal_code = $request->venue_postal_code;
+                $venue->country_code = $request->venue_country_code;
+                $venue->background_colors = ColorUtils::randomGradient();
+                $venue->background_rotation = rand(0, 359);
+                $venue->font_color = '#ffffff';
                 $venue->save();
+                $venue->refresh();
                 
-                $matchingUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
-            }
+                $matchingUser = false;
+                
+                if ($venue->email && $matchingUser = User::whereEmail($venue->email)->first()) {
+                    $venue->user_id = $matchingUser->id;
+                    $venue->email_verified_at = $matchingUser->email_verified_at;
+                    $venue->save();
+                    
+                    $matchingUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
+                }
 
-            if (! $matchingUser || $matchingUser->id != $user->id) { 
-                $user->roles()->attach($venue->id, ['level' => 'follower', 'created_at' => now()]);
+                if (! $matchingUser || $matchingUser->id != $user->id) { 
+                    $user->roles()->attach($venue->id, ['level' => 'follower', 'created_at' => now()]);
+                }
+            } else if ($venue && ! $venue->isClaimed()) {
+                $venue->name = $request->venue_name ?? null;
+                $venue->address1 = $request->venue_address1;
+                $venue->address2 = $request->venue_address2;
+                $venue->city = $request->venue_city;
+                $venue->state = $request->venue_state;
+                $venue->postal_code = $request->venue_postal_code;
+                $venue->country_code = $request->venue_country_code;
+                $venue->save();
             }
         }
 

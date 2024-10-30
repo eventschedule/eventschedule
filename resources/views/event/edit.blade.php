@@ -287,7 +287,7 @@
                                     </div>
                                 </div>
 
-                                <div v-show="showAddressFields()">
+                                <div v-if="showAddressFields()">
                                     <div class="mb-6">
                                         <x-input-label for="venue_name" :value="__('messages.name')" />
                                         <x-text-input id="venue_name" name="venue_name" type="text"
@@ -344,8 +344,11 @@
                                     <div id="address_response" class="mb-6 hidden text-gray-900 dark:text-gray-100"></div>
 
                                 </div>
+
+
                             </div>
 
+              
                             <div v-else class="mb-6">
                                 <div class="flex justify-between w-full">
                                     <div class="flex items-center">
@@ -382,6 +385,13 @@
                         </div>
                     </div>
                 </div>
+
+                <x-text-input name="venue_name" type="hidden" v-model="selectedVenue.name" />                                                                
+                <x-text-input name="venue_address1" type="hidden" v-model="selectedVenue.address1" />                                                                
+                <x-text-input name="venue_city" type="hidden" v-model="selectedVenue.city" />                                                                
+                <x-text-input name="venue_state" type="hidden" v-model="selectedVenue.state" />                                                                
+                <x-text-input name="venue_postal_code" type="hidden" v-model="selectedVenue.postal_code" />                                                                
+                <x-text-input name="venue_country_code" type="hidden" v-model="selectedVenue.country_code" />                                                                
 
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">                                                
