@@ -160,7 +160,7 @@ class EventController extends Controller
         $user = $request->user();
         $subdomain = null;
 
-        if ($user->isMember($event->venue->subdomain)) {
+        if ($event->venue && $user->isMember($event->venue->subdomain)) {
             $subdomain = $event->venue->subdomain;
         }
 
