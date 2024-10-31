@@ -241,7 +241,7 @@ class EventController extends Controller
             return redirect()->back();
         }
 
-        $this->eventRepo->saveEvent($request, $subdomain, $event);
+        $this->eventRepo->saveEvent($request, $event);
 
         if ($event->starts_at) {
             $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
@@ -315,7 +315,7 @@ class EventController extends Controller
     {
         //dd($request->all());
 
-        $event = $this->eventRepo->saveEvent($request, $subdomain);
+        $event = $this->eventRepo->saveEvent($request);
         
         session()->forget('pending_venue');
 

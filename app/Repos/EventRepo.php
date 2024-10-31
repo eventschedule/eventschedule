@@ -13,27 +13,14 @@ use Illuminate\Support\Str;
 
 class EventRepo
 {
-    public function saveEvent($request, $subdomain, $event = null)
+    public function saveEvent($request, $event = null)
     {
         $user = $request->user();
-        $subdomainRole = $role = Role::subdomain($subdomain)->firstOrFail();
-        $venue = $role->isVenue() ? $role : null;
-        $talent = $role->isTalent() ? $role : null;
-        $vendor = $role->isVendor() ? $role : null;
-        $curator = $role->isCurator() ? $role : null;
-        
-        if (! $venue && $request->venue_id) {
+        $venue = null;
+
+        if ($request->venue_id) {
             $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
         }
-
-        /*
-        if ($venue && ! $curator && ! auth()->user()->isMember($venue->subdomain) && ! $venue->acceptRequests()) {
-            return redirect()
-                    ->back()
-                    ->withInput()
-                    ->withErrors(['venue_email' => __('messages.venue_not_accepting_requests')]);
-        }
-        */
 
         if ($request->venue_address1) {
             if (! $venue) {
@@ -141,19 +128,20 @@ class EventRepo
             }
         }
 
-        if (! $event) {
+        $venueId = $venue ? $venue->id : null;
+
+        if ($event) {
+            if ($event->venue_id != $venueId) {
+                $event->is_accepted = null;
+            }
+        } else {
             $event = new Event;       
             $event->user_id = auth()->user()->id;
             $event->is_accepted = $venue && $user->isMember($venue->subdomain) ? true : null;
         }
 
         $event->fill($request->all());
-
-        if ($request->venue_id) {
-            $event->venue_id = UrlUtils::decodeId($request->venue_id);
-        } else if ($venue) {
-            $event->venue_id = $venue->id;
-        }
+        $event->venue_id = $venueId;
 
         $days_of_week = '';
         $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
@@ -182,9 +170,6 @@ class EventRepo
         }
         */
 
-        if ($subdomainRole->isCurator()) {                
-            $event->curator_id = $subdomainRole->id;
-        }
 
         $selectedCurators = $request->input('curators', []);
         $selectedCurators = array_map(function($id) {
