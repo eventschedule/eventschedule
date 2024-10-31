@@ -32,7 +32,7 @@ class ClaimVenue extends Mailable
     {
         $event = $this->event;
         $venue = $event->venue;
-        $role = $event->role;
+        $role = $event->role();
         $user = $event->user;
 
         if ($event->is_curated) {
@@ -58,7 +58,7 @@ class ClaimVenue extends Mailable
     public function content(): Content
     {
         $event = $this->event;
-        $role = $event->role;
+        $role = $event->role();
         $venue = $event->venue;
         $user = $event->user;
 
@@ -93,7 +93,7 @@ class ClaimVenue extends Mailable
 
     public function headers(): Headers
     {
-        $role = $this->event->role;
+        $role = $this->event->role();
 
         return new Headers(
             text: [

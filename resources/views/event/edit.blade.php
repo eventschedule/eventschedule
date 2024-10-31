@@ -270,12 +270,12 @@
                                         </div>
                                     </div>
 
-                                    <div v-if="venueEmail && !event.id">
+                                    <div v-if="venueEmail">
                                         <div class="mb-6">
                                             <x-input-label for="venue_email" :value="__('messages.email') . ' *'" />
                                             <div class="flex mt-1">
                                                 <x-text-input id="venue_email" name="venue_email" type="email" class="mr-2 block w-full"
-                                                    v-model="venueEmail" required disabled autocomplete="off" />
+                                                    v-model="venueEmail" required readonly autocomplete="off" />
                                                 <x-secondary-button @click="clearVenueSearch" type="button">
                                                     {{ __('messages.clear') }}
                                                 </x-secondary-button>
@@ -296,7 +296,7 @@
                                 </div>
 
                                 <div v-if="showAddressFields()">
-                                    <div class="mb-6">
+                                    <div class="mb-6" v-if="! venueEmail">
                                         <x-input-label for="venue_name" :value="__('messages.name')" />
                                         <x-text-input id="venue_name" name="venue_name" type="text"
                                             class="mt-1 block w-full" v-model="venueName" autocomplete="off" />
@@ -531,7 +531,7 @@
                                         <x-input-label for="member_email" :value="__('messages.email') . ' *'" />
                                         <div class="flex mt-1">
                                             <x-text-input id="member_email" name="member_email" type="email" class="mr-2 block w-full"
-                                                v-model="memberEmail" required disabled autocomplete="off" />
+                                                v-model="memberEmail" required readonly autocomplete="off" />
                                             <x-secondary-button @click="clearMemberSearch" type="button">
                                                 {{ __('messages.clear') }}
                                             </x-secondary-button>

@@ -38,7 +38,7 @@ class DeletedEventNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $role = $this->event->role;
+        $role = $this->event->role();
         $user = $this->user;
 
         return (new MailMessage)

@@ -31,7 +31,7 @@ class ClaimRole extends Mailable
     public function envelope(): Envelope
     {
         $event = $this->event;  
-        $role = $event->role;
+        $role = $event->role();
         $user = $event->user;
 
         if ($event->is_curated) {
@@ -57,7 +57,7 @@ class ClaimRole extends Mailable
     public function content(): Content
     {
         $event = $this->event;
-        $role = $event->role;
+        $role = $event->role();
         $user = $event->user;
 
         if ($event->is_curated) {
@@ -90,7 +90,7 @@ class ClaimRole extends Mailable
 
     public function headers(): Headers
     {
-        $role = $this->event->role;
+        $role = $this->event->role();
 
         return new Headers(
             text: [
