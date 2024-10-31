@@ -13,7 +13,7 @@
 {{ __('messages.sign_up') }}
 </x-mail::button>
 
-{{ __('messages.claim_email_line2', ['click_here' => '<a href="' . route('role.show_unsubscribe', ['email' => $role->email]) . '">' . __('messages.click_here') . '</a>']) }}
+{!! __('messages.claim_email_line2', ['click_here' => '<a href="' . route('role.show_unsubscribe', ['email' => $role->email]) . '">' . __('messages.click_here') . '</a>']) !!}
 
 Thanks,<br>
 {{ config('app.name') }}
