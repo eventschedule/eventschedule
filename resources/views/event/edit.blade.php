@@ -204,99 +204,101 @@
 
                         <div v-if="isInPerson">
                             <div v-if="!selectedVenue || showVenueAddressFields" class="mb-6">
-                                <fieldset v-if="!selectedVenue">                                
-                                    <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
-                                        <div v-if="Object.keys(venues).length > 0" class="flex items-center">
-                                            <input id="use_existing_venue" name="venue_type" type="radio" value="use_existing" v-model="venueType"
-                                                class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                                            <label for="use_existing_venue"
-                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
+                                <div v-if="!selectedVenue">
+                                    <fieldset>                                
+                                        <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
+                                            <div v-if="Object.keys(venues).length > 0" class="flex items-center">
+                                                <input id="use_existing_venue" name="venue_type" type="radio" value="use_existing" v-model="venueType"
+                                                    class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                                <label for="use_existing_venue"
+                                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input id="search_create_venue" name="venue_type" type="radio" value="search_create" v-model="venueType"
+                                                    class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                                <label for="search_create_venue"
+                                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.search_create') }}</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input id="no_contact_info_venue" name="venue_type" type="radio" value="no_contact_info" v-model="venueType"
+                                                    class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                                <label for="no_contact_info_venue"
+                                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.no_contact_info') }}</label>
+                                            </div>
                                         </div>
-                                        <div class="flex items-center">
-                                            <input id="search_create_venue" name="venue_type" type="radio" value="search_create" v-model="venueType"
-                                                class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                                            <label for="search_create_venue"
-                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.search_create') }}</label>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <input id="no_contact_info_venue" name="venue_type" type="radio" value="no_contact_info" v-model="venueType"
-                                                class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                                            <label for="no_contact_info_venue"
-                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.no_contact_info') }}</label>
-                                        </div>
-                                    </div>
-                                </fieldset>
+                                    </fieldset>
 
-                                <div v-if="venueType === 'use_existing'">
-                                    <select required id="selected_venue"
-                                            class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                            v-model="selectedVenue">
-                                            <option value="" disabled selected>{{ __('messages.please_select') }}</option>                                
-                                            <option v-for="venue in venues" :key="venue.id" :value="venue">
-                                                @{{ venue.name }} <template v-if="venue.email">(@{{ venue.email }})</template>
-                                            </option>
-                                    </select>
-                                </div>
-
-                                <div v-if="venueType === 'search_create'">
-
-                                    <div v-if="!venueEmail" class="mb-6">
-                                        <x-input-label for="venue_search_email" :value="__('messages.email') . ' *'" />
-                                        <div class="flex mt-1">
-                                            <x-text-input id="venue_search_email" v-model="venueSearchEmail" type="email" class="block w-full mr-2"
-                                                :placeholder="''" required autofocus @keydown.enter.prevent="searchVenues" autocomplete="off" />
-                                            <x-primary-button @click="searchVenues" type="button">
-                                                {{ __('messages.search') }}
-                                            </x-primary-button>
-                                        </div>
+                                    <div v-if="venueType === 'use_existing'">
+                                        <select required id="selected_venue"
+                                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                                v-model="selectedVenue">
+                                                <option value="" disabled selected>{{ __('messages.please_select') }}</option>                                
+                                                <option v-for="venue in venues" :key="venue.id" :value="venue">
+                                                    @{{ venue.name }} <template v-if="venue.email">(@{{ venue.email }})</template>
+                                                </option>
+                                        </select>
                                     </div>
 
-                                    <div v-if="venueSearchResults.length" class="mb-6">
-                                        <x-input-label :value="__('messages.search_results')" />
-                                        <div class="mt-2 space-y-2">
-                                            <div v-for="venue in venueSearchResults" :key="venue.id" class="flex items-center justify-between">
-                                                <div class="flex items-center">
-                                                    <span class="text-sm text-gray-900 dark:text-gray-100">
-                                                        <a :href="venue.url" target="_blank" class="hover:underline">@{{ venue.name }}</a>
-                                                        <template v-if="venue.email">
-                                                            (<a :href="'mailto:' + venue.email" class="hover:underline">@{{ venue.email }}</a>)
-                                                        </template>
-                                                    </span>
-                                                </div>
-                                                <x-primary-button @click="selectVenue(venue)" type="button">
-                                                    {{ __('messages.select') }}
+                                    <div v-if="venueType === 'search_create'">
+
+                                        <div v-if="!venueEmail" class="mb-6">
+                                            <x-input-label for="venue_search_email" :value="__('messages.email') . ' *'" />
+                                            <div class="flex mt-1">
+                                                <x-text-input id="venue_search_email" v-model="venueSearchEmail" type="email" class="block w-full mr-2"
+                                                    :placeholder="''" required autofocus @keydown.enter.prevent="searchVenues" autocomplete="off" />
+                                                <x-primary-button @click="searchVenues" type="button">
+                                                    {{ __('messages.search') }}
                                                 </x-primary-button>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div v-if="venueEmail">
-                                        <div class="mb-6">
-                                            <x-input-label for="venue_email" :value="__('messages.email') . ' *'" />
-                                            <div class="flex mt-1">
-                                                <x-text-input id="venue_email" name="venue_email" type="email" class="mr-2 block w-full"
-                                                    v-model="venueEmail" required readonly autocomplete="off" />
-                                                <x-secondary-button @click="clearVenueSearch" type="button">
-                                                    {{ __('messages.clear') }}
-                                                </x-secondary-button>
+                                        <div v-if="venueSearchResults.length" class="mb-6">
+                                            <x-input-label :value="__('messages.search_results')" />
+                                            <div class="mt-2 space-y-2">
+                                                <div v-for="venue in venueSearchResults" :key="venue.id" class="flex items-center justify-between">
+                                                    <div class="flex items-center">
+                                                        <span class="text-sm text-gray-900 dark:text-gray-100">
+                                                            <a :href="venue.url" target="_blank" class="hover:underline">@{{ venue.name }}</a>
+                                                            <template v-if="venue.email">
+                                                                (<a :href="'mailto:' + venue.email" class="hover:underline">@{{ venue.email }}</a>)
+                                                            </template>
+                                                        </span>
+                                                    </div>
+                                                    <x-primary-button @click="selectVenue(venue)" type="button">
+                                                        {{ __('messages.select') }}
+                                                    </x-primary-button>
+                                                </div>
                                             </div>
-                                            <p class="mt-2 text-sm text-gray-500">
-                                                {{ __('messages.an_email_will_be_sent') }}
-                                            </p>
-                                            <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
                                         </div>
 
-                                        <div class="mb-6">
-                                            <x-input-label for="venue_name" :value="__('messages.name') . ' *'" />
-                                            <x-text-input id="venue_name" name="venue_name" type="text" class="mt-1 block w-full"
-                                                v-model="venueName" required autofocus autocomplete="off" />
-                                            <x-input-error class="mt-2" :messages="$errors->get('venue_name')" />
+                                        <div v-if="venueEmail">
+                                            <div class="mb-6">
+                                                <x-input-label for="venue_email" :value="__('messages.email') . ' *'" />
+                                                <div class="flex mt-1">
+                                                    <x-text-input id="venue_email" name="venue_email" type="email" class="mr-2 block w-full"
+                                                        v-model="venueEmail" required readonly autocomplete="off" />
+                                                    <x-secondary-button @click="clearVenueSearch" type="button">
+                                                        {{ __('messages.clear') }}
+                                                    </x-secondary-button>
+                                                </div>
+                                                <p class="mt-2 text-sm text-gray-500">
+                                                    {{ __('messages.an_email_will_be_sent') }}
+                                                </p>
+                                                <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
+                                            </div>
+
+                                            <div class="mb-6">
+                                                <x-input-label for="venue_name" :value="__('messages.name') . ' *'" />
+                                                <x-text-input id="venue_name" name="venue_name" type="text" class="mt-1 block w-full"
+                                                    v-model="venueName" required autofocus autocomplete="off" />
+                                                <x-input-error class="mt-2" :messages="$errors->get('venue_name')" />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div v-if="showAddressFields()">
-                                    <div class="mb-6" v-if="! venueEmail">
+                                    <div class="mb-6" v-if="! venueEmail || venueType != 'search_create'">
                                         <x-input-label for="venue_name" :value="__('messages.name')" />
                                         <x-text-input id="venue_name" name="venue_name" type="text"
                                             class="mt-1 block w-full" v-model="venueName" autocomplete="off" />
