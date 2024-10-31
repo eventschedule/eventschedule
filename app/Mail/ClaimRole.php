@@ -34,7 +34,7 @@ class ClaimRole extends Mailable
         $role = $event->role();
         $user = $event->user;
 
-        if ($event->is_curated) {
+        if ($event->curator_id) {
             $subject = __('messages.claim_your_role_curated');
         } else {
             $subject = __('messages.claim_your_role');
@@ -44,7 +44,7 @@ class ClaimRole extends Mailable
             subject: str_replace(
                         [':venue', ':role', ':event'], 
                         [$event->getVenueDisplayName(), $role->name, $event->name],
-                        __('messages.claim_your_role')),
+                        $subject),
             replyTo: [
                 new Address($user->email, $user->name),
             ],                        
@@ -60,7 +60,7 @@ class ClaimRole extends Mailable
         $role = $event->role();
         $user = $event->user;
 
-        if ($event->is_curated) {
+        if ($event->curator_id) {
             $subject = __('messages.claim_your_role_curated');
         } else {
             $subject = __('messages.claim_your_role');
@@ -72,7 +72,10 @@ class ClaimRole extends Mailable
                 'event' => $event,
                 'role' => $role,
                 'user' => $user,
-                'subject' => $subject,
+                'subject' => str_replace(
+                        [':venue', ':role', ':event'], 
+                        [$event->getVenueDisplayName(), $role->name, $event->name],
+                        $subject),
                 'unsubscribe_url' => route('role.unsubscribe', ['subdomain' => $role->subdomain]),
             ]
         );

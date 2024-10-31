@@ -35,8 +35,8 @@ class ClaimVenue extends Mailable
         $role = $event->role();
         $user = $event->user;
 
-        if ($event->is_curated) {
-            $subject = __('messages.claim_your_role_curated');
+        if ($event->curator_id) {
+            $subject = __('messages.claim_your_venue_curated');
         } else {
             $subject = __('messages.claim_your_venue');
         }        
@@ -62,8 +62,8 @@ class ClaimVenue extends Mailable
         $venue = $event->venue;
         $user = $event->user;
 
-        if ($event->is_curated) {
-            $subject = __('messages.claim_your_role_curated');
+        if ($event->curator_id) {
+            $subject = __('messages.claim_your_venue_curated');
         } else {
             $subject = __('messages.claim_your_venue');
         }        
@@ -75,7 +75,10 @@ class ClaimVenue extends Mailable
                 'role' => $role,
                 'venue' => $venue,
                 'user' => $user,
-                'subject' => $subject,
+                'subject' => str_replace(
+                        [':role', ':venue', ':event'], 
+                        [$role->name, $venue->name, $event->name],
+                        $subject),
                 'unsubscribe_url' => route('role.unsubscribe', ['subdomain' => $venue->subdomain]),
             ]
         );
