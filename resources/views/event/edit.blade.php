@@ -286,19 +286,12 @@
                                                 </p>
                                                 <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
                                             </div>
-
-                                            <div class="mb-6">
-                                                <x-input-label for="venue_name" :value="__('messages.name') . ' *'" />
-                                                <x-text-input id="venue_name" name="venue_name" type="text" class="mt-1 block w-full"
-                                                    v-model="venueName" required autofocus autocomplete="off" />
-                                                <x-input-error class="mt-2" :messages="$errors->get('venue_name')" />
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div v-if="showAddressFields()">
-                                    <div class="mb-6" v-if="! venueEmail || venueType != 'search_create'">
+                                    <div class="mb-6">
                                         <x-input-label for="venue_name" :value="__('messages.name')" />
                                         <x-text-input id="venue_name" name="venue_name" type="text"
                                             class="mt-1 block w-full" v-model="venueName" autocomplete="off" />
