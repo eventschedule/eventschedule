@@ -8,8 +8,6 @@ use App\Notifications\RequestDeclinedNotification;
 use App\Notifications\RequestAcceptedNotification;
 use App\Notifications\DeletedEventNotification;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\ClaimRole;
-use App\Mail\ClaimVenue;
 use Illuminate\Support\Facades\Storage;
 use App\Utils\ColorUtils;
 use Illuminate\Http\Request;

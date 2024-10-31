@@ -37,7 +37,7 @@ class RequestDeclinedNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $venue = $this->event->venue;
-        $role = $this->event->role;
+        $role = $this->event->role();
 
         return (new MailMessage)
                     ->replyTo($this->venue->user->email, $this->venue->user->name)
