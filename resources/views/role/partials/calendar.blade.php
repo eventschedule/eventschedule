@@ -249,7 +249,7 @@
                                 </div>
                             </dl>
                         </div>
-                        @if (auth()->user()->canEditEvent($each))                        
+                        @if (auth()->user() && auth()->user()->canEditEvent($each))                        
                         <div class="absolute right-10">
                             <a href="{{ isset($role) ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) : route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}"
                                 class="text-indigo-600 hover:text-indigo-900 hover:underline"
