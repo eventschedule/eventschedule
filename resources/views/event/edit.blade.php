@@ -398,6 +398,7 @@
                         <div>
                             <div v-if="selectedMembers && selectedMembers.length > 0" class="mb-6">
                                 <div v-for="member in selectedMembers" :key="member.id" class="flex items-center justify-between mb-2">
+                                    <input type="hidden" v-bind:name="'members[' + member.id + '][email]'" v-bind:value="member.email" />
                                     <div v-show="editMemberId === member.id" class="w-full">
                                         <div class="mb-6">
                                             <x-input-label :value="__('messages.name') . ' *'" />
