@@ -34,6 +34,7 @@
     function onChangeCountry() {
         var selected = $('#venue_country').countrySelect('getSelectedCountryData');
         $('#venue_country_code').val(selected.iso2);
+        app.venueCountryCode = selected.iso2;
     }
 
     function onChangeDateType() {
@@ -740,7 +741,7 @@
 <script>
   const { createApp, ref } = Vue
 
-  createApp({
+  app = createApp({
     data() {
       return {
         event: @json($event),
@@ -779,6 +780,14 @@
       },
       editSelectedVenue() {
         this.showVenueAddressFields = true;
+        
+
+        this.$nextTick(() => {
+            console.log('this.venueCountryCode', this.venueCountryCode);
+            $("#venue_country").countrySelect({
+                defaultCountry: this.venueCountryCode,
+            });
+        });
       },
       updateSelectedVenue() {
         this.showVenueAddressFields = false;
