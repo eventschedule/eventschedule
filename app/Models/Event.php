@@ -57,14 +57,14 @@ class Event extends Model
     public function role()
     {
         return $this->roles->first(function($role) {
-            return $role->isTalent() || $role->isVendor();
+            return $role->isSchedule();
         });
     }
 
     public function isRoleAMember($subdomain)
     {
         return $this->roles->contains(function ($role) use ($subdomain) {
-            return $role->subdomain == $subdomain && ($role->isTalent() || $role->isVendor());
+            return $role->subdomain == $subdomain && $role->isSchedule();
         });
     }
 

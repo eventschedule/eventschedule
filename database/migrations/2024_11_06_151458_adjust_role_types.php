@@ -22,6 +22,14 @@ return new class extends Migration
         if (config('database.default') !== 'sqlite') {
             DB::statement("ALTER TABLE `roles` MODIFY `type` ENUM('venue', 'curator', 'schedule') NOT NULL");
         }
+
+
+        Schema::table('roles', function (Blueprint $table) {
+            $table->boolean('accept_requests')->default(false);
+
+            $table->dropColumn('accept_vendor_requests');
+            $table->dropColumn('accept_talent_requests');            
+        });
     }
 
     /**
@@ -29,6 +37,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::table('roles', function (Blueprint $table) {
+        $table->boolean('accept_talent_requests')->default(true);
+        $table->boolean('accept_vendor_requests')->default(false);        
+
+            $table->dropColumn('accept_requests');
+        });
     }
 };

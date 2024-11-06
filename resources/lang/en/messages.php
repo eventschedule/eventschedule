@@ -294,6 +294,7 @@ return [
     'following' => 'Following',
     'standard' => 'Standard',
     'schedule' => 'Schedule',
+    'schedules' => 'Schedules',
     'new_schedule' => 'New Schedule',
     'edit_schedule' => 'Edit Schedule',
     'your_schedules' => 'Your Schedules',

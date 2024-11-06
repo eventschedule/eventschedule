@@ -101,14 +101,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->member()->type('venue');
     }
 
-    public function talent()
+    public function schedules()
     {
-        return $this->member()->type('talent');
-    }
-
-    public function vendors()
-    {
-        return $this->member()->type('vendor');
+        return $this->member()->type('schedule');
     }
 
     public function curators()
@@ -116,24 +111,10 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->member()->type('curator');
     }
 
-    public function connectedTalentOrVendors()
-    {
-        return $this->roles()->whereIn('type', ['vendor', 'talent']);
-    }
-
-    public function connectedVenues()
-    {
-        return $this->roles()->whereIn('type', ['venue']);
-    }
-
-    public function connectedCurators()
-    {
-        return $this->roles()->whereIn('type', ['curator']);
-    }
-
     public function editableCurators()
     {
-        return $this->connectedCurators()
+        return $this->roles()
+                    ->whereIn('type', ['curator'])
                     ->get()
                     ->filter(function ($role) {
                         return $role->is_open 
@@ -168,7 +149,7 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         foreach ($event->roles as $role) {
-            if ($this->isMember($role->subdomain)) {
+            if ($role->isSchedule() && $this->isMember($role->subdomain)) {
                 return true;
             }
         }

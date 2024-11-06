@@ -97,8 +97,7 @@ class EventController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         
         $venue = $role->isVenue() ? $role : null;
-        $talent = $role->isTalent() ? $role : null;
-        $vendor = $role->isVendor() ? $role : null;
+        $schedule = $role->isSchedule() ? $role : null;
         $curator = $role->isCurator() ? $role : null;
 
         if (! $role->email_verified_at) {
@@ -108,10 +107,8 @@ class EventController extends Controller
         $event = new Event;
         $selectedMembers = [];
 
-        if ($talent) {
-            $selectedMembers = [$talent->toData()];
-        } else if ($vendor) {
-            $selectedMembers = [$vendor->toData()];
+        if ($schedule) {
+            $selectedMembers = [$schedule->toData()];
         }
 
         if ($request->date) {
@@ -129,7 +126,7 @@ class EventController extends Controller
         });
     
         $members = $roles->filter(function($item) {
-            return ($item->isTalent() || $item->isVendor()) && $item->email;
+            return $item->isSchedule() && $item->email;
         })->map(function ($member) {
             return $member->toData();
         });
@@ -188,7 +185,7 @@ class EventController extends Controller
         $venue = $event->venue;
         $selectedMembers = [];
         foreach ($event->roles as $each) {
-            if ($each->isTalent() || $each->isVendor()) {
+            if ($each->isSchedule()) {
                 $selectedMembers[] = $each->toData();
             }
         }
@@ -208,7 +205,7 @@ class EventController extends Controller
         });
     
         $members = $roles->filter(function($item) {
-            return ($item->isTalent() || $item->isVendor()) && $item->email;
+            return $item->isSchedule() && $item->email;
         })->map(function ($item) {
             return $item->toData();
         });
