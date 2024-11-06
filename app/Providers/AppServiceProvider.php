@@ -35,30 +35,11 @@ class AppServiceProvider extends ServiceProvider
         View::composer('layouts.navigation', function ($view) {
             $allRoles = app('userRoles');
             $view->with([
-                'isFollowingVenues' => $allRoles->where('type', 'venue')
-                    ->where('pivot.level', 'follower')
-                    ->whereNotNull('email')
-                    ->count(),
-                'isFollowingTalent' => $allRoles->where('type', 'talent')
-                    ->where('pivot.level', 'follower')
-                    ->whereNotNull('email')
-                    ->count(),
-                'isFollowingVendors' => $allRoles->where('type', 'vendor')
-                    ->where('pivot.level', 'follower')
-                    ->whereNotNull('email')
-                    ->count(),
-                'isFollowingCurators' => $allRoles->where('type', 'curator')
-                    ->where('pivot.level', 'follower')
-                    ->whereNotNull('email')
-                    ->count(),
                 'venues' => $allRoles
                     ->where('type', 'venue')
                     ->whereIn('pivot.level', ['owner', 'admin']),
                 'talent' => $allRoles
                     ->where('type', 'talent')
-                    ->whereIn('pivot.level', ['owner', 'admin']),
-                'vendors' => $allRoles
-                    ->where('type', 'vendor')
                     ->whereIn('pivot.level', ['owner', 'admin']),
                 'curators' => $allRoles
                     ->where('type', 'curator')
