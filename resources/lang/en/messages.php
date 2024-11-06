@@ -295,4 +295,7 @@ return [
     //
     'following' => 'Following',
     'standard' => 'Standard',
+    'schedule' => 'Schedule',
+    'new_schedule' => 'New Schedule',
+    'edit_schedule' => 'Edit Schedule',
 ];
