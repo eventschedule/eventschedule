@@ -35,11 +35,11 @@ class AppServiceProvider extends ServiceProvider
         View::composer('layouts.navigation', function ($view) {
             $allRoles = app('userRoles');
             $view->with([
+                'schedules' => $allRoles
+                    ->where('type', 'schedule')
+                    ->whereIn('pivot.level', ['owner', 'admin']),
                 'venues' => $allRoles
                     ->where('type', 'venue')
-                    ->whereIn('pivot.level', ['owner', 'admin']),
-                'talent' => $allRoles
-                    ->where('type', 'talent')
                     ->whereIn('pivot.level', ['owner', 'admin']),
                 'curators' => $allRoles
                     ->where('type', 'curator')

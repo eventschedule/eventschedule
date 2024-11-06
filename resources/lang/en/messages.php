@@ -253,8 +253,6 @@ return [
     'resend_invite' => 'Resend Invite',
     'invite_resent' => 'Successfully sent invite',
     'new_schedule' => 'New Schedule',
-    'new_talent' => 'New Talent',
-    'new_vendor' => 'New Vendor',
     'new_venue' => 'New Venue',
     'new_curator' => 'New Curator',
     'supported_by_both' => 'Supported by :link1 and :link2',
@@ -298,4 +296,5 @@ return [
     'schedule' => 'Schedule',
     'new_schedule' => 'New Schedule',
     'edit_schedule' => 'Edit Schedule',
+    'your_schedules' => 'Your Schedules',
 ];
