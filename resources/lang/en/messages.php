@@ -268,7 +268,6 @@ return [
     'view_venue' => 'View Venue',
     'view_curator' => 'View Curator',
     'event_name' => 'Event Name',
-    //
     'following' => 'Following',
     'standard' => 'Standard',
     'schedule' => 'Schedule',
