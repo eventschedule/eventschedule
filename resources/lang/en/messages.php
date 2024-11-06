@@ -294,4 +294,5 @@ return [
     'event_name' => 'Event Name',
     //
     'following' => 'Following',
+    'standard' => 'Standard',
 ];
