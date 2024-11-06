@@ -83,20 +83,17 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function owner()
     {
-        return $this->roles()
-                    ->wherePivotIn('level', ['owner']);
+        return $this->roles()->wherePivotIn('level', ['owner']);
     }
 
     public function member()
     {
-        return $this->roles()
-                    ->wherePivotIn('level', ['owner', 'admin']);
+        return $this->roles()->wherePivotIn('level', ['owner', 'admin']);
     }
 
     public function following()
     {
-        return $this->roles()
-                    ->wherePivot('level', 'follower');
+        return $this->roles()->wherePivot('level', 'follower');
     }
 
     public function venues()
@@ -143,26 +140,6 @@ class User extends Authenticatable implements MustVerifyEmail
                             || $role->pivot->level == 'admin' 
                             || $role->pivot->level == 'owner';
                     });
-    }
-
-    public function followingVenues()
-    {
-        return $this->following()->type('venue');
-    }
-
-    public function followingTalent()
-    {
-        return $this->following()->type('talent');
-    }
-
-    public function followingVendors()
-    {
-        return $this->following()->type('vendor');
-    }
-
-    public function followingCurators()
-    {
-        return $this->following()->type('curator');
     }
 
     public function isMember($subdomain): bool

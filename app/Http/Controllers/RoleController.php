@@ -131,7 +131,7 @@ class RoleController extends Controller
             $user->roles()->detach($role->id);
         }
 
-        return redirect(route($role->getTypePlural()))
+        return redirect(route('following'))
                 ->with('message', str_replace(':name', $role->name, __('messages.unfollowed_role')));
     }
 
@@ -247,6 +247,7 @@ class RoleController extends Controller
         $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
         if ($role->isCurator()) {
+            // TODO this may not be needed
             $events = Event::with(['roles', 'venue'])
                 ->where(function ($query) use ($startOfMonth, $endOfMonth) {
                     $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
@@ -357,6 +358,7 @@ class RoleController extends Controller
 
             if ($tab == 'schedule') {
                 if ($role->isCurator()) {
+                    // TODO this may not be needed
                     $events = Event::with(['roles', 'venue'])
                         ->where(function ($query) use ($startOfMonth, $endOfMonth) {
                             $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
@@ -516,10 +518,10 @@ class RoleController extends Controller
                     ->with('message', __('messages.removed_member'));
     }
 
-    public function viewVenues()
+    public function following()
     {
         $user = auth()->user();
-        $roleIds = $user->followingVenues()->pluck('roles.id');
+        $roleIds = $user->following()->pluck('roles.id');
         $roles = Role::whereIn('id', $roleIds)
                     ->whereNotNull('email')
                     ->orderBy('name', 'ASC')
@@ -527,62 +529,11 @@ class RoleController extends Controller
 
         $data = [
             'roles' => $roles,
-            'type' => 'venue',
         ];
 
         return view('role/index', $data);
     }
 
-    public function viewTalent()
-    {
-        $user = auth()->user();
-        $roleIds = $user->followingTalent()->pluck('roles.id');
-        $roles = Role::whereIn('id', $roleIds)
-                    ->whereNotNull('email')
-                    ->orderBy('name', 'ASC')
-                    ->get();
-
-        $data = [
-            'roles' => $roles,
-            'type' => 'talent',
-        ];
-
-        return view('role/index', $data);
-    }
-
-    public function viewVendors()
-    {
-        $user = auth()->user();
-        $roleIds = $user->followingVendors()->pluck('roles.id');
-        $roles = Role::whereIn('id', $roleIds)
-                    ->whereNotNull('email')
-                    ->orderBy('name', 'ASC')
-                    ->get();
-
-        $data = [
-            'roles' => $roles,
-            'type' => 'vendor',
-        ];
-
-        return view('role/index', $data);
-    }
-
-    public function viewCurators()
-    {
-        $user = auth()->user();
-        $roleIds = $user->followingCurators()->pluck('roles.id');
-        $roles = Role::whereIn('id', $roleIds)
-                    ->whereNotNull('email')
-                    ->orderBy('name', 'ASC')
-                    ->get();
-
-        $data = [
-            'roles' => $roles,
-            'type' => 'curator',
-        ];
-
-        return view('role/index', $data);
-    }
 
     public function create($type)
     {

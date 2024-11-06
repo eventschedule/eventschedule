@@ -31,12 +31,8 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::post('/store', [RoleController::class, 'store'])->name('role.store');
     Route::get('/search_roles', [RoleController::class, 'search'])->name('role.search');
     Route::get('/edit_event/{hash}', [EventController::class, 'editAdmin'])->name('event.edit_admin');
+    Route::get('/following', [RoleController::class, 'following'])->name('following');
     
-    Route::get('/venues', [RoleController::class, 'viewVenues'])->name('venues');
-    Route::get('/talent', [RoleController::class, 'viewTalent'])->name('talent');
-    Route::get('/vendors', [RoleController::class, 'viewVendors'])->name('vendors');
-    Route::get('/curators', [RoleController::class, 'viewCurators'])->name('curators');
-
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
