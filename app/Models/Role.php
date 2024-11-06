@@ -36,8 +36,7 @@ class Role extends Model implements MustVerifyEmail
         'country_code',
         'language_code',
         'description',
-        'accept_talent_requests',
-        'accept_vendor_requests',
+        'accept_requests',
         'use_24_hour_time',
         'timezone',
         'formatted_address',
@@ -187,14 +186,9 @@ class Role extends Model implements MustVerifyEmail
         return $this->type == 'venue';
     }
 
-    public function isVendor()
+    public function isSchedule()
     {
-        return $this->type == 'vendor';
-    }
-
-    public function isTalent()
-    {
-        return $this->type == 'talent';
+        return $this->type == 'schedule';
     }
 
     public function isCurator()
@@ -207,24 +201,12 @@ class Role extends Model implements MustVerifyEmail
         return $this->email_verified_at != null && $this->user_id != null;
     }
 
-    public function canHaveAddress()
-    {
-        return $this->isVenue() || $this->isVendor();
-    }
-
-    public function acceptRequests()
-    {
-        return $this->accept_talent_requests || $this->accept_vendor_requests;
-    }
-
     public function getTypePlural()
     {
         if ($this->isVenue()) {
             return 'venues';
-        } else if ($this->isTalent()) {
-            return 'talent';
-        } else if ($this->isVendor()) {
-            return 'vendors';
+        } else if ($this->isSchedule()) {
+            return 'schedules';
         } else if ($this->isCurator()) {
             return 'curators';
         }
@@ -271,8 +253,6 @@ class Role extends Model implements MustVerifyEmail
             'terms',
             'register',
             'venues',
-            'talent',
-            'vendors',
             'profile',
             'view',
             'edit',

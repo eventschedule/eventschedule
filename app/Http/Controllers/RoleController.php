@@ -545,7 +545,6 @@ class RoleController extends Controller
         $role->background = 'gradient';
         $role->background_colors = ColorUtils::randomGradient();
         $role->background_rotation = rand(0, 359);
-        $role->accept_talent_requests = true;
         $role->timezone = auth()->user()->timezone;
         $role->language_code = auth()->user()->language_code;
 
@@ -887,10 +886,8 @@ class RoleController extends Controller
         $mainDomain = config('app.url');
         $user = auth()->user();
         
-        if ($request->type == 'talent' && $user->talent()->count() == 0) {
-            return redirect()->route('new', ['type' => 'talent']);
-        } else if ($request->type == 'vendor' && $user->vendors()->count() == 0) {
-            return redirect()->route('new', ['type' => 'vendor']);
+        if ($user->schedules()->count() == 0) {
+            return redirect()->route('new', ['type' => 'schedule']);
         }
 
         $redirectUrl = $mainDomain . route('event.create', ['subdomain' => $subdomain], false);
@@ -1048,7 +1045,7 @@ class RoleController extends Controller
         $type = $request->type;
         $search = $request->search;
 
-        $roles = Role::whereIn('type', $type == 'venue' ? ['venue'] : ['talent', 'vendor'])
+        $roles = Role::whereIn('type', $type == 'venue' ? ['venue'] : ['schedule'])
             ->where(function($query) use ($search) {
                 $query->where('email', '=', $search);
                   //->orWhere('phone', '=', $search)

@@ -324,7 +324,7 @@
                     </div>
                 </div>
 
-                @if ($role->canHaveAddress())
+                @if ($role->isVenue())
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">
 
@@ -602,19 +602,11 @@
 
                         @if ($role->isVenue())
                         <div class="mb-6">
-                            <x-checkbox name="accept_talent_requests"
-                                label="{{ __('messages.accept_talent_requests') }}"
-                                checked="{{ old('accept_talent_requests', $role->accept_talent_requests) }}"
+                            <x-checkbox name="accept_requests"
+                                label="{{ __('messages.accept_requests') }}"
+                                checked="{{ old('accept_requests', $role->accept_requests) }}"
                                 data-custom-attribute="value" />
-                            <x-input-error class="mt-2" :messages="$errors->get('accept_talent_requests')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-checkbox name="accept_vendor_requests"
-                                label="{{ __('messages.accept_vendor_requests') }}"
-                                checked="{{ old('accept_vendor_requests', $role->accept_vendor_requests) }}"
-                                data-custom-attribute="value" />
-                            <x-input-error class="mt-2" :messages="$errors->get('accept_vendor_requests')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('accept_requests')" />
                         </div>
 
                         @elseif ($role->isCurator())
