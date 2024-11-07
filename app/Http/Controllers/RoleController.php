@@ -523,7 +523,6 @@ class RoleController extends Controller
         $user = auth()->user();
         $roleIds = $user->following()->pluck('roles.id');
         $roles = Role::whereIn('id', $roleIds)
-                    ->whereNotNull('email')
                     ->orderBy('name', 'ASC')
                     ->get();
 
