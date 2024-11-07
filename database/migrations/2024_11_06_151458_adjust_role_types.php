@@ -26,6 +26,7 @@ return new class extends Migration
 
         Schema::table('roles', function (Blueprint $table) {
             $table->boolean('accept_requests')->default(false);
+            $table->boolean('is_deleted')->default(false);
 
             $table->dropColumn('accept_vendor_requests');
             $table->dropColumn('accept_talent_requests');            
@@ -38,10 +39,11 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('roles', function (Blueprint $table) {
-        $table->boolean('accept_talent_requests')->default(true);
-        $table->boolean('accept_vendor_requests')->default(false);        
+            $table->boolean('accept_talent_requests')->default(true);
+            $table->boolean('accept_vendor_requests')->default(false);        
 
             $table->dropColumn('accept_requests');
+            $table->dropColumn('is_deleted');
         });
     }
 };

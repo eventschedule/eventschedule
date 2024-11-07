@@ -127,6 +127,11 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         $user = $request->user();
 
+        if (! $role->email) {
+            $role->is_deleted = true;
+            $role->save();
+        }
+
         if ($user->isConnected($role->subdomain)) {
             $user->roles()->detach($role->id);
         }
