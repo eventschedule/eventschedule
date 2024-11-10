@@ -17,7 +17,7 @@ use App\Mail\ClaimVenue;
 
 class EventRepo
 {
-    public function saveEvent($request, $event = null)
+    public function saveEvent($request, $event = null, $curatorId = null)
     {
         $user = $request->user();
         $venue = null;
@@ -141,6 +141,7 @@ class EventRepo
         } else {
             $event = new Event;       
             $event->user_id = auth()->user()->id;
+            $event->curator_id = $curatorId;
             $event->is_accepted = $venue && $user->isMember($venue->subdomain) ? true : null;
         }
 
