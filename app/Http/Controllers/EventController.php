@@ -131,8 +131,8 @@ class EventController extends Controller
             return $member->toData();
         });
 
-        $venues = array_values($venues->toArray());
-        $members = array_values($members->toArray());
+        $venues = array_values($venues->sortBy('name')->toArray());
+        $members = array_values($members->sortBy('name')->toArray());
         
         return view('event/edit', [
             'role' => $role,
