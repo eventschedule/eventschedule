@@ -42,8 +42,8 @@ class ClaimRole extends Mailable
 
         return new Envelope(
             subject: str_replace(
-                        [':venue', ':role', ':event'], 
-                        [$event->getVenueDisplayName(), $role->name, $event->name],
+                        [':venue', ':role', ':event', ':curator'], 
+                        [$event->getVenueDisplayName(), $role->name, $event->name, $event->curator ? $event->curator->name : ''],
                         $subject),
             replyTo: [
                 new Address($user->email, $user->name),
@@ -73,8 +73,8 @@ class ClaimRole extends Mailable
                 'role' => $role,
                 'user' => $user,
                 'subject' => str_replace(
-                        [':venue', ':role', ':event'], 
-                        [$event->getVenueDisplayName(), $role->name, $event->name],
+                        [':venue', ':role', ':event', ':curator'], 
+                        [$event->getVenueDisplayName(), $role->name, $event->name, $event->curator ? $event->curator->name : ''],
                         $subject),
                 'unsubscribe_url' => route('role.unsubscribe', ['subdomain' => $role->subdomain]),
             ]
