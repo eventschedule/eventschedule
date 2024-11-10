@@ -286,7 +286,7 @@ class RoleController extends Controller
                 ->get();
         }
 
-        $embed = request()->embed && $role->isPro();
+        $embed = request()->embed;
         $response = response()
             ->view($embed ? 'role/show-guest-embed' : 'role/show-guest', compact(
             'subdomain',
