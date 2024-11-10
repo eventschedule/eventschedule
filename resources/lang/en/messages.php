@@ -280,4 +280,5 @@ return [
     'deleted_schedule' => 'Successfully deleted schedule',
     'created_schedule' => 'Successfully created schedule',
     'updated_schedule' => 'Successfully updated schedule',
+    'embed' => 'Embed',
 ];
