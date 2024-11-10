@@ -310,14 +310,9 @@ class EventController extends Controller
     {
         //dd($request->all());
 
-        $event = $this->eventRepo->saveEvent($request);
-
         $role = Role::subdomain($subdomain)->firstOrFail();
-        if ($role->isCurator()) {
-            $event->curator_id = $role->id;
-            $event->save();
-        }
-        
+        $event = $this->eventRepo->saveEvent($request, null, $role->isCurator() ? $role->id : null);
+
         session()->forget('pending_venue');
 
         if ($event->starts_at) {
