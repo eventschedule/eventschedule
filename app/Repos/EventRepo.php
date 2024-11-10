@@ -212,12 +212,12 @@ class EventRepo
             $event->save();
         }
 
-        if ($venue && $venue->wasRecentlyCreated && ! $venue->isClaimed() && $venue->is_subscribed && $venue->email) {
+        if ($event->wasRecentlyCreated && $venue && ! $venue->isClaimed() && $venue->is_subscribed && $venue->email) {
             Mail::to($venue->email)->send(new ClaimVenue($event));
         }
 
         foreach ($roles as $role) {
-            if ($role->wasRecentlyCreated && ! $role->isClaimed() && $role->is_subscribed && $role->email) {
+            if ($event->wasRecentlyCreated && ! $role->isClaimed() && $role->is_subscribed && $role->email) {
                 Mail::to($role->email)->send(new ClaimRole($event));
             }
         }
