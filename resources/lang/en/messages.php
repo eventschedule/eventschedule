@@ -281,4 +281,5 @@ return [
     'created_schedule' => 'Successfully created schedule',
     'updated_schedule' => 'Successfully updated schedule',
     'embed' => 'Embed',
+    'about' => 'About',
 ];
