@@ -1,352 +1,314 @@
 <x-app-guest-layout :role="$role" :event="$event" :date="$date">
 
-    <div class="p-10 pb-0 max-w-5xl mx-auto px-4">
-        <div class="flex items-start justify-between pb-6">
-            <a href="{{ $event ? ($event->venue ? $event->venue->getGuestUrl() : '#') : $role->getGuestUrl() }}" class="hover:underline">
-                <div id="venue_title" class="text-4xl font-bold">
-                    {{ $event ? ($event->venue ? $event->venue->name : '') : $role->name }}
-                </div>
-            </a>
-            <div>
-                @if (auth()->check() && auth()->user()->isMember($role->subdomain))
-                <a href="{{ config('app.url') . '/' . $role->subdomain }}" class="pl-2">
-                    <button type="button" style="background-color: {{ $event ? $otherRole->accent_color : $role->accent_color }}"
-                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
-                        <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
-                                aria-hidden="true">
-                                <path
-                                    d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
-                            </svg>
-                        {{ __('messages.edit') }}
-                    </button>
-                </a>                
-                @endif
-
-                @if (($event && $event->venue && $event->venue->bestAddress()) || $role->bestAddress())
-                <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event ? $event->venue->bestAddress() : $role->bestAddress()) }}" target="_blank" class="pl-2">
-                    <button type="button" style="background-color: {{ $event ? $otherRole->accent_color : $role->accent_color }}"
-                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
-                        <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
-                                aria-hidden="true">
-                                <path
-                                    d="M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z" />
-                            </svg>
-                        {{ __('messages.map') }}
-                    </button>
-                </a>
-                @endif
-
-                @if ($event)
-                @if ($event->role() && (! $user || ! $user->isConnected($event->role()->subdomain)))
-                <a href="{{ route('role.follow', ['subdomain' => $event->role()->subdomain]) }}" class="pl-2">
-                    <button type="button" style="background-color: {{ $otherRole->accent_color }}"
-                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
-                        <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
-                                aria-hidden="true">
-                                <path
-                                    d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M21.61 2.39C21.61 2.39 16.66 .269 11 5.93C8.81 8.12 7.5 10.53 6.65 12.64C6.37 13.39 6.56 14.21 7.11 14.77L9.24 16.89C9.79 17.45 10.61 17.63 11.36 17.35C13.5 16.53 15.88 15.19 18.07 13C23.73 7.34 21.61 2.39 21.61 2.39M14.54 9.46C13.76 8.68 13.76 7.41 14.54 6.63S16.59 5.85 17.37 6.63C18.14 7.41 18.15 8.68 17.37 9.46C16.59 10.24 15.32 10.24 14.54 9.46M8.88 16.53L7.47 15.12L8.88 16.53M6.24 22L9.88 18.36C9.54 18.27 9.21 18.12 8.91 17.91L4.83 22H6.24M2 22H3.41L8.18 17.24L6.76 15.83L2 20.59V22M2 19.17L6.09 15.09C5.88 14.79 5.73 14.47 5.64 14.12L2 17.76V19.17Z" />
-                            </svg>
-                        {{ __('messages.follow') }}
-                    </button>
-                </a>
-                @endif
-                @else
-                @if (! $user || ! $user->isConnected($role->subdomain))
-                <a href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}" class="pl-2">
-                    <button type="button" style="background-color: {{ $role->accent_color }}"
-                        class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
-                        <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
-                            aria-hidden="true">
-                            <path
-                                d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M21.61 2.39C21.61 2.39 16.66 .269 11 5.93C8.81 8.12 7.5 10.53 6.65 12.64C6.37 13.39 6.56 14.21 7.11 14.77L9.24 16.89C9.79 17.45 10.61 17.63 11.36 17.35C13.5 16.53 15.88 15.19 18.07 13C23.73 7.34 21.61 2.39 21.61 2.39M14.54 9.46C13.76 8.68 13.76 7.41 14.54 6.63S16.59 5.85 17.37 6.63C18.14 7.41 18.15 8.68 17.37 9.46C16.59 10.24 15.32 10.24 14.54 9.46M8.88 16.53L7.47 15.12L8.88 16.53M6.24 22L9.88 18.36C9.54 18.27 9.21 18.12 8.91 17.91L4.83 22H6.24M2 22H3.41L8.18 17.24L6.76 15.83L2 20.59V22M2 19.17L6.09 15.09C5.88 14.79 5.73 14.47 5.64 14.12L2 17.76V19.17Z" />
-                        </svg>
-                        {{ __('messages.follow') }}
-                    </button>
-                </a>
-                @endif
-                @endif
-
-                @if($event && $curatorRoles->count() > 0)
-                    @php
-                        $eventInRole = false;
-                        foreach ($curatorRoles as $curatorRole) {
-                            if ($curatorRole->events()->where('event_role.event_id', $event->id)->exists()) {
-                                $eventInRole = true;
-                                break;
-                            }
-                        }
-                    @endphp
-
-                    @if($eventInRole)
-                        <form action="{{ route('event.uncurate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="POST" style="display: inline-block;" class="ml-2 pb-2">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" style="background-color: {{ $event ? $otherRole->accent_color : $role->accent_color }}"
-                            class="inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
-                                <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
-                                    aria-hidden="true">
-                                    <path
-                                        d="M5.8 21L7.4 14L2 9.2L9.2 8.6L12 2L14.8 8.6L22 9.2L18.8 12H18C14.9 12 12.4 14.3 12 17.3L5.8 21M20.1 14.5L18 16.6L15.9 14.5L14.5 15.9L16.6 18L14.5 20.1L15.9 21.5L18 19.4L20.1 21.5L21.5 20.1L19.4 18L21.5 15.9L20.1 14.5Z" />
-                                </svg>
-                                {{ __('messages.uncurate') }}
-                            </button>
-                        </form>
-                    @else
-                        @if($curatorRoles->count() == 1)
-                            <form action="{{ route('event.curate', ['subdomain' => $curatorRoles->first()->subdomain, 'hash' => $event->hashedId()]) }}" method="GET" style="display: inline-block;" class="ml-2 pb-2">
-                                @csrf
-                                <button type="submit" style="background-color: {{ $event ? $otherRole->accent_color : $role->accent_color }}"
-                                    class="btn btn-primary inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
-                                    <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
-                                        aria-hidden="true">
-                                        <path
-                                            d="M5.8 21L7.4 14L2 9.2L9.2 8.6L12 2L14.8 8.6L22 9.2L18.8 12H18C14.9 12 12.4 14.3 12 17.3L5.8 21M17 14V17H14V19H17V22H19V19H22V17H19V14H17Z" />
-                                    </svg>
-                                    {{ __('messages.curate') }}
-                                </button>
-                            </form>
-                        @else
-                            <div class="ml-2 pb-2 shadow-sm relative inline-block text-left">
-                                <button type="button" style="background-color: {{ $event ? $otherRole->accent_color : $role->accent_color }}"
-                                    onclick="onPopUpClick('curator-pop-up-menu', event)"
-                                    class="btn btn-primary inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2" 
-                                    id="menu-button" aria-expanded="true" aria-haspopup="true">
-                                    <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
-                                        aria-hidden="true">
-                                        <path fill-rule="evenodd" d="M5.8 21L7.4 14L2 9.2L9.2 8.6L12 2L14.8 8.6L22 9.2L18.8 12H18C14.9 12 12.4 14.3 12 17.3L5.8 21M17 14V17H14V19H17V22H19V19H22V17H19V14H17Z" clip-rule="evenodd" />
-                                    </svg>
-                                    {{ __('messages.curate') }}
-                                </button>
-
-                                <div id="curator-pop-up-menu" class="pop-up-menu hidden absolute right-0 z-10 mt-2 w-40 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" 
-                                    style="font-family: sans-serif" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-                                    <div class="py-1" role="none" onclick="onPopUpClick('curator-pop-up-menu', event)">
-                                        @foreach($curatorRoles as $curatorRole)
-                                        <a href="{{ route('event.curate', ['subdomain' => $curatorRole->subdomain, 'hash' => $event->hashedId()]) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-0">
-                                            {{ $curatorRole->name }}
-                                        </a>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            </div>
-
-                        @endif
-                    @endif
-                @endif                
-            </div>
+    <header class="bg-white dark:bg-[#151B26]">
+      <div
+        class="container flex flex-row justify-between items-center py-7 px-5"
+      >
+        <a href="/">
+          <svg
+            width="205"
+            height="40"
+            viewBox="0 0 205 40"
+            fill="none"
+            class="fill-[#151B26] dark:fill-white w-[140px] sm:w-[205px]"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M58.4212 24.8872H49.6994V21.3533H58.1204V18.6466H49.6994V15.0375H58.4212V12.1804H46.767C46.767 17.3684 46.767 22.5563 46.767 27.7443H58.4212V24.8872ZM68.8723 16.7669L67.3685 20.4511L65.7144 25.0375L64.0603 20.4511L62.5565 16.8421H59.6242L64.2858 27.8195H67.2181L71.8798 16.8421H68.8723V16.7669ZM83.9851 23.233C84.4362 18.7217 82.1054 16.4661 78.4212 16.4661C74.8873 16.4661 72.6317 18.8721 72.6317 22.1804C72.6317 25.7142 74.8873 28.0451 78.6467 28.0451C80.3008 28.0451 82.1806 27.4436 83.3836 26.2405L81.6542 24.5112C81.0527 25.1879 79.6994 25.5638 78.7219 25.5638C76.8422 25.5638 75.6392 24.5864 75.4888 23.233H83.9851ZM75.4888 20.9774C75.8648 19.5488 77.0678 18.8721 78.5715 18.8721C80.1505 18.8721 81.2031 19.5488 81.4287 20.9774H75.4888ZM96.8422 27.7443V22.03C96.8422 18.5714 94.8121 16.6917 92.1805 16.6917C90.8272 16.6917 89.6994 17.218 88.5715 18.3458L88.4212 16.8421H86.0151V27.8195H88.7219V22.2556C88.7219 20.6014 89.8497 19.1729 91.5039 19.1729C93.2332 19.1729 94.1354 20.4511 94.1354 22.1052V27.8195H96.8422V27.7443ZM99.8497 13.9849V16.8421H97.8196V19.1729H99.8497V23.9097C99.8497 26.6165 101.429 27.9699 103.759 27.8947C104.587 27.8947 105.188 27.7443 106.015 27.4435L105.263 25.1127C104.887 25.3383 104.361 25.4135 103.985 25.4135C103.158 25.4135 102.556 24.8872 102.556 23.8345V19.0977H105.564V16.7669H102.556V13.6842L99.8497 13.9849ZM123.684 14.5864C122.181 12.3308 120.226 11.9548 117.97 11.9548C115.414 11.9548 112.03 13.0075 112.03 16.2405C112.03 19.0977 114.962 19.6992 117.744 20.2255C120.301 20.7518 122.857 21.2029 122.857 23.5338C122.857 26.3157 119.85 26.8421 117.895 26.8421C116.015 26.8421 113.534 25.9398 112.556 23.9849L111.504 24.5112C112.707 26.9172 115.489 27.8947 117.895 27.8947C120.526 27.8947 124.06 27.0676 124.06 23.5338C124.06 20.1503 120.978 19.624 117.97 19.0977C115.338 18.6466 113.233 18.1202 113.233 16.1654C113.233 13.6841 116.09 13.0075 117.97 13.0075C119.699 13.0075 121.579 13.3082 122.707 15.1127L123.684 14.5864ZM134.737 25.4887C133.835 26.3909 132.632 26.8421 131.504 26.8421C129.023 26.8421 126.917 25.1879 126.917 22.2556C126.917 19.3233 129.023 17.6691 131.504 17.6691C132.707 17.6691 133.91 18.1202 134.812 18.9473L135.489 18.2706C134.361 17.218 132.932 16.6165 131.504 16.6165C128.346 16.6165 125.865 18.7217 125.865 22.1804C125.865 25.639 128.421 27.7443 131.504 27.7443C132.932 27.7443 134.361 27.218 135.489 26.0902L134.737 25.4887ZM137.669 12.1804V27.7443H138.722V21.7293C138.722 19.4736 140.301 17.6691 142.632 17.6691C145.113 17.6691 146.165 19.1729 146.165 21.5037V27.8195H147.218V21.5037C147.218 18.6466 145.714 16.6917 142.632 16.6917C141.128 16.6917 139.549 17.2932 138.647 18.8721V12.2556H137.669V12.1804ZM155.038 27.8947C156.767 27.8947 158.722 27.218 159.775 25.7894L159.023 25.1879C158.196 26.2405 156.541 26.8421 155.038 26.8421C152.782 26.8421 150.827 25.3383 150.602 22.7819H160.451C160.902 18.4962 158.12 16.6165 155.038 16.6165C151.955 16.6165 149.474 19.0225 149.474 22.2556C149.474 25.7142 151.955 27.8947 155.038 27.8947ZM150.602 21.8044C150.827 19.0977 152.782 17.5939 155.038 17.5939C157.669 17.5939 159.474 19.0977 159.474 21.8044H150.602ZM168.271 17.6691C170.827 17.6691 172.782 19.5488 172.782 22.2556C172.782 24.9623 170.902 26.8421 168.271 26.8421C165.79 26.8421 163.759 25.2631 163.759 22.2556C163.759 19.1729 165.79 17.6691 168.271 17.6691ZM172.782 12.1804V19.1729C171.88 17.3684 170.15 16.6165 168.196 16.6165C165.113 16.6165 162.707 18.6466 162.707 22.2556C162.707 25.8646 165.113 27.8947 168.196 27.8947C170.075 27.8947 171.88 26.9924 172.782 25.2631V27.6691H173.835V12.1052H172.782V12.1804ZM186.617 27.7443V16.7669H185.564V22.8571C185.564 25.1127 183.985 26.8421 181.729 26.8421C179.323 26.8421 177.82 25.5639 177.82 23.0075V16.6917H176.767V23.0075C176.767 26.015 178.797 27.8195 181.729 27.8195C183.233 27.8195 184.812 27.1428 185.639 25.639V27.5939H186.617V27.7443ZM189.474 12.1804V27.7443H190.526V12.1804H189.474ZM198.572 27.8947C200.301 27.8947 202.256 27.218 203.308 25.7894L202.556 25.1879C201.729 26.2405 200.075 26.8421 198.572 26.8421C196.316 26.8421 194.361 25.3383 194.135 22.7819H203.985C204.436 18.4962 201.654 16.6165 198.572 16.6165C195.489 16.6165 193.008 19.0225 193.008 22.2556C193.008 25.7142 195.489 27.8947 198.572 27.8947ZM194.135 21.8044C194.361 19.0977 196.316 17.5939 198.572 17.5939C201.203 17.5939 203.008 19.0977 203.008 21.8044H194.135Z"
+            />
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M20 0C31.0526 0 40 8.94737 40 20C40 31.0526 31.0526 40 20 40C8.94737 40 0 31.0526 0 20C0 8.94737 8.94737 0 20 0ZM21.203 25.7143C21.8045 25.8647 22.6316 25.8647 23.2331 25.7143C23.609 23.0827 23.0075 23.6842 21.8045 23.6842C21.0526 23.6842 21.1278 23.609 21.1278 24.2857C21.0526 24.7368 21.1278 25.2632 21.203 25.7143ZM17.3684 25.7143C17.9699 25.9399 18.7218 25.7895 19.3985 25.7143C19.8496 23.0827 19.0226 23.609 18.3459 23.609C17.7444 23.609 16.9173 23.1579 17.3684 25.7143ZM21.1278 15.8647L21.203 17.2932C21.8797 17.4436 22.6316 17.4436 23.3083 17.2932C23.609 14.7368 23.2331 15.2632 22.2556 15.2632C21.3534 15.188 21.1278 14.9624 21.1278 15.8647ZM9.69925 25.7143C10.3008 25.8647 11.1278 25.8647 11.7293 25.7143C11.8045 25.4135 11.8045 24.4361 11.8045 24.1353C11.7293 23.4586 11.5038 23.609 10.3008 23.609C9.62406 23.609 9.32331 23.7594 9.69925 25.7143ZM10.3008 17.3684C11.9549 17.3684 11.8045 17.4436 11.8045 16.2406C11.8045 15.0376 11.9549 15.188 10.3008 15.188C9.3985 15.188 9.62406 15.2632 9.62406 16.2406C9.62406 17.1429 9.47368 17.3684 10.3008 17.3684ZM17.3684 21.5038C18.1203 21.6541 18.6466 21.6541 19.3985 21.5038C19.5489 19.0226 19.6241 19.3985 18.1203 19.3985C17.3684 19.3985 17.3684 19.3233 17.2932 20C17.218 20.4511 17.2932 21.0526 17.3684 21.5038ZM21.203 21.5038H23.2331C23.3083 21.1278 23.3083 20.2256 23.3083 19.8496C23.2331 19.1729 23.0075 19.3233 22.1805 19.3985C21.5038 19.3985 20.7519 18.9474 21.203 21.5038ZM17.3684 17.218C18.3459 17.3684 18.421 17.2932 19.3985 17.2932C19.4737 16.9173 19.4737 15.9398 19.4737 15.6391C19.3985 15.0376 19.6241 15.3384 19.1729 15.188C19.1729 15.188 18.4962 15.188 18.4211 15.188C17.6692 15.188 17.4436 15.0376 17.3684 15.7143C17.218 16.015 17.2932 16.9173 17.3684 17.218ZM13.5338 21.5038H15.5639L15.6391 20C15.6391 19.3233 15.7143 19.3985 15.1128 19.3233C13.0075 19.1729 13.4586 19.6241 13.4586 20.0752C13.4586 20.6015 13.4586 21.0526 13.5338 21.5038ZM9.62406 20.3007V21.5038C10.6015 21.6541 10.6015 21.579 11.6541 21.579C11.7293 21.1278 11.7293 20.7519 11.7293 20.3759C11.7293 19.6992 11.8797 19.5489 11.2782 19.4737H9.92481C9.47368 19.5489 9.62406 19.6241 9.62406 20.3007ZM13.5338 25.7143H15.5639C15.6391 23.7594 15.8647 23.6842 15.1128 23.609C13.0827 23.4586 13.4586 23.9098 13.4586 24.3609C13.4586 24.812 13.4586 25.2632 13.5338 25.7143ZM13.5338 17.2932H15.5639C15.7143 15.4887 16.0902 15.0376 13.985 15.188C13.3083 15.2632 13.4586 15.188 13.4586 15.9399C13.4586 16.391 13.4586 16.8421 13.5338 17.2932ZM27.4436 20L32.1053 17.218C31.6541 15.0376 32.0301 15.2632 32.1804 13.4587C31.7293 13.0075 29.5489 11.5038 29.0977 11.3534C28.797 12.2556 27.9699 12.9323 27.4436 15.0376C27.0677 16.6917 27.2932 18.3459 27.4436 20ZM30.8271 25.5639L30.4511 21.4286V21.3534C30.4511 21.203 30.4511 20.9774 30.3759 20.8271C29.9248 21.0526 29.5489 21.3534 29.0977 21.579C28.9474 21.6541 28.8722 21.7293 28.7218 21.8045C28.7218 22.1053 28.797 22.406 28.797 22.7068C29.0226 24.7368 29.0226 26.391 29.0226 28.4962C29.0226 32.7068 28.1203 32.1053 22.4812 32.1053H12.406C11.6541 32.1053 11.1278 31.8797 10.7519 31.5789H10.1504C9.69925 31.5789 9.17293 31.5789 8.7218 31.5038C9.3985 33.3835 11.203 33.8346 13.3083 33.8346H26.0902C31.5038 33.7594 30.9023 29.8496 30.8271 25.5639ZM12.5564 6.2406C11.6541 6.2406 10.9774 6.99249 10.9774 7.81955V11.579C10.9774 12.4812 11.7293 13.1579 12.5564 13.1579C13.4586 13.1579 14.1353 12.406 14.1353 11.579V10.5263H18.9474V8.87218H14.1353V7.81955C14.2105 6.9173 13.4586 6.2406 12.5564 6.2406ZM12.5564 7.14286C12.1804 7.14286 11.8797 7.44361 11.8797 7.81955V11.579C11.8797 11.9549 12.1804 12.2556 12.5564 12.2556C12.9323 12.2556 13.2331 11.9549 13.2331 11.579V7.81955C13.3083 7.44361 13.0075 7.14286 12.5564 7.14286ZM21.1278 6.2406C20.2256 6.2406 19.5489 6.99249 19.5489 7.81955V11.579C19.5489 12.4812 20.3008 13.1579 21.1278 13.1579C22.0301 13.1579 22.7068 12.406 22.7068 11.579V10.6015H27.6692C25.9398 14.1353 25.1128 14.8872 25.7895 20C26.015 22.0301 26.015 23.6842 26.015 25.7895C26.015 30 25.1128 29.3985 19.4737 29.3985H9.39849C7.06767 29.3985 7.14286 27.594 7.14286 25.4887V13.3083C7.14286 9.92482 8.94737 10.7519 10.5263 10.4511V8.87218C7.96992 8.42105 6.09023 9.62406 5.56391 11.579C5.33835 12.5564 5.41353 24.9624 5.48872 26.9925C5.48872 30.3008 7.74436 30.9774 10.3008 30.9774H23.0827C28.7218 30.9774 27.594 26.5414 27.594 21.8797C28.2707 21.3534 29.3233 20.8271 30.0752 20.3007C31.1278 19.6241 37.5188 15.8647 37.9699 15.4887L37.8947 15.4135L37.218 14.8872C34.812 13.1579 32.2556 11.1278 29.9248 9.54888C29.0226 8.94738 29.1729 8.797 27.8947 8.797C26.5414 8.797 23.985 8.94738 22.5564 8.797V7.81955C22.7068 6.9173 21.9549 6.2406 21.1278 6.2406ZM21.1278 7.14286C20.7519 7.14286 20.4511 7.44361 20.4511 7.81955V11.579C20.4511 11.9549 20.7519 12.2556 21.1278 12.2556C21.5038 12.2556 21.8045 11.9549 21.8045 11.579V7.81955C21.8045 7.44361 21.5038 7.14286 21.1278 7.14286Z"
+            />
+          </svg>
+        </a>
+        <div class="flex flex-row gap-x-3 md:gap-x-10">
+          <a
+            href="{{ route('login') }}"
+            class="inline-flex items-center justify-center"
+          >
+            <button
+              type="button"
+              name="login"
+              class="text-base duration-300 text-[#4E81FA] hover:text-[#1A48B3] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-90"
+            >
+              {{ __('messages.log_in') }}
+            </button>
+          </a>
+          <a
+            href="{{ route('sign_up') }}"
+            class="inline-flex items-center justify-center"
+          >
+            <button
+              type="button"
+              name="sign-up"
+              class="inline-flex items-center justify-center rounded-xl text-base duration-300 bg-[#4E81FA] hover:bg-[#1A48B3] text-white py-4 px-8 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-90"
+            >
+              {{ __('messages.sign_up') }}
+            </button>
+          </a>
         </div>
-
-        @if ($event)
-
-            <div id="event_title" class="py-16">
-                <div class="mx-auto max-w-6xl px-6 lg:px-8">
-                    <div class="mx-auto max-w-2xl text-center">
-                        <p class="mt-2 text-6xl font-bold tracking-tight">
-                            @if ($event->role() && $event->role()->email)
-                            <a href="{{ $event->role()->getGuestUrl() }}" class="hover:underline">
-                                {{ $event->name }}
-                            </a>
-                            @else
-                            {{ $event->name }}
-                            @endif
-                        </p>
-                        <p class="mt-6 text-2xl leading-8">
-                            {!! $event->starts_at ? $event->localStartsAt(true, $date, true) : __('messages.date_to_be_announced') . '...' !!}
-                        </p>
-
-                        <div style="font-family: sans-serif" class="mt-8 relative inline-block text-left">
-                            <div style="letter-spacing: .35em">
-                                <button type="button" 
-                                    onclick="onPopUpClick('calendar-pop-up-menu', event)"
-                                    class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
-                                {{ strtoupper(__('messages.add_to_calendar')) }}
-                                <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                                </svg>
-                                </button>
-                            </div>
-
-                            <div id="calendar-pop-up-menu" class="pop-up-menu hidden absolute right-0 z-10 mt-2 w-40 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-                                <div class="py-1" role="none" onclick="onPopUpClick('calendar-pop-up-menu', event)">
-                                    <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-0">
-                                        <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                        <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
-                                        </svg>
-                                        Google
-                                    </a>
-                                    <a href="{{ $event->getAppleCalendarUrl($date) }}" target="_blank" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-1">
-                                        <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                        <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
-                                        </svg>
-                                        Apple
-                                    </a>
-                                    <a href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-1">
-                                        <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                        <path d="M2,3H11V12H2V3M11,22H2V13H11V22M21,3V12H12V3H21M21,22H12V13H21V22Z" />
-                                        </svg>
-                                        Microsoft
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
+      </div>
+    </header>
+    <main>
+      <div>
+        <div class="container py-10 px-5">
+          <div class="bg-[#F5F9FE] rounded-2xl mb-6">
+            <div
+              class="relative before:block before:absolute before:bg-[#00000033] before:-inset-0"
+            >
+              <img
+                class="block max-h-72 w-full object-cover rounded-t-2xl"
+                src="./images/slider-image.jpeg"
+                alt="hero slider"
+              />
             </div>
-
-            @if ($event->role() && $event->role()->youtube_links)
-                <div class="container mx-auto py-8">
-                    <div class="grid grid-cols-1 md:grid-cols-{{ $event->role()->getVideoColumns() }} gap-8">
-                        @foreach (json_decode($event->role()->youtube_links) as $link)
-                        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-                            <iframe class="w-full" style="height:{{ $event->role()->getVideoHeight() }}px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-
-            @if ($event->description_html)
-                <div class="container mx-auto pb-8 max-w-xl text-lg">
-                    {!! nl2br($event->description_html) !!}
-                </div>
-            @endif
-
-            @if ($event->flyer_image_url)
-                <div class="container mx-auto pb-8 flex justify-center">
-                    <img src="{{ $event->flyer_image_url }}" class="block"/>
-                </div>
-            @endif
-        
-        @elseif (! $role->isVenue() && ! $role->isCurator() && $role->youtube_links)
-
-            @if ($role->youtube_links)
-            <div class="container mx-auto py-8">
-                <div class="grid grid-cols-1 md:grid-cols-{{ $role->getVideoColumns() }} gap-8">
-                    @foreach (json_decode($role->youtube_links) as $link)
-                    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-                        <iframe class="w-full" style="height:{{ $role->getVideoHeight() }}px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-            @endif
-
-        @endif
-
-        @include('role/partials/calendar', ['route' => 'guest', 'tab' => ''])
-
-        @if(! $event)
-        <div class="py-6">
-            <div class="flex items-start justify-between pb-6">
-                <div>
-                    {!! $role->description_html !!}
-                </div>
-                <div>
-                @if ($role->isVenue() && $role->accept_requests && $role->isClaimed())
-                <a href="{{ route('event.sign_up', ['subdomain' => $role->subdomain]) }}">
-                    <button type="button" style="background-color: {{ $event && $event->role() ? $event->role()->accent_color : $role->accent_color }}"
-                        class="inline-flex items-center rounded-md shadow-sm px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
-                        <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="white"
-                                aria-hidden="true">
-                                <path
-                                    d="M19.59,3H22V5H20.41L16.17,9.24C15.8,8.68 15.32,8.2 14.76,7.83L19.59,3M12,8A4,4 0 0,1 16,12C16,13.82 14.77,15.42 13,15.87V16A5,5 0 0,1 8,21A5,5 0 0,1 3,16A5,5 0 0,1 8,11H8.13C8.58,9.24 10.17,8 12,8M12,10.5A1.5,1.5 0 0,0 10.5,12A1.5,1.5 0 0,0 12,13.5A1.5,1.5 0 0,0 13.5,12A1.5,1.5 0 0,0 12,10.5M6.94,14.24L6.23,14.94L9.06,17.77L9.77,17.06L6.94,14.24Z" />
-                        </svg>
-                        {{ __('messages.sign_up') }}
-                    </button>
+            <div class="px-6 lg:px-16 pb-12 relative z-10">
+              <img
+                class="rounded-full w-[180px] h-[180px] -mt-[90px] mb-8 object-cover border-solid border-sm border-[#F5F9FE]"
+                src="./images/person.png"
+                alt="person"
+              />
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-[32px] font-semibold leading-10 text-[#151B26]">
+                  {{ $role->name }}
+                </h3>
+                <a
+                  href="route('role.follow', ['subdomain' => $event->role()->subdomain])"
+                  class="inline-flex items-center justify-center"
+                >
+                  <button
+                    type="button"
+                    name="follow"
+                    class="inline-flex items-center justify-center rounded-xl text-base duration-300 bg-[#4E81FA] hover:bg-[#1A48B3] text-white py-4 px-8 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-90"
+                  >
+                    {{ __('messages.follow') }}
+                  </button>
                 </a>
-                @endif
+              </div>
+              <!--
+              <div class="flex gap-3 justify-start flex-col sm:flex-row mb-6">
+                <div class="py-3 px-4 bg-white rounded-[32px] text-center">
+                  <p class="text-sm font-semibold text-[#4E81FA]">
+                    Personal coach
+                  </p>
                 </div>
-            </div>
-        </div>
-        @endif
-
-        @if (($role->isVenue() || $role->isCurator()) && $role->youtube_links && ! $event)
-            <div class="container mx-auto py-8">
-                <div class="grid grid-cols-1 md:grid-cols-{{ $role->getVideoColumns() }} gap-8">
-                    @foreach (json_decode($role->youtube_links) as $link)
-                    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-                        <iframe class="w-full" style="height:{{ $role->getVideoHeight() }}px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                    </div>
-                    @endforeach
+                <div class="py-3 px-4 bg-white rounded-[32px] text-center">
+                  <p class="text-sm font-semibold text-[#4E81FA]">
+                    Yoga trainer
+                  </p>
                 </div>
-            </div>
-        @endif
-
-        <div class="flex items-center justify-between pb-16">
-            <div class="mt-1 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6">
-                @if($role->email && $role->show_email)
-                <div class="mt-2 flex items-center text-sm">
-                    <svg class="mr-1.5 h-5 w-5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"
-                        aria-hidden="true">
-                        <path
-                            d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" />
-                    </svg>
-                    <div class="mt-1">
-                        <a href="mailto:{{ $role->email }}" class="hover:underline">
-                            {{ $role->email }}
-                        </a>
-                    </div>
+                <div class="py-3 px-4 bg-white rounded-[32px] text-center">
+                  <p class="text-sm font-semibold text-[#4E81FA]">
+                    Fitness trainer
+                  </p>
                 </div>
-                @endif
-
+              </div>
+              -->
+              <div class="flex flex-col sm:flex-row gap-4 items-center">
                 @if($role->phone)
-                <div class="mt-2 flex items-center text-sm">
-                    <svg class="mr-1.5 h-5 w-5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"
-                        aria-hidden="true">
-                        <path
-                            d="M6.62,10.79C8.06,13.62 10.38,15.94 13.21,17.38L15.41,15.18C15.69,14.9 16.08,14.82 16.43,14.93C17.55,15.3 18.75,15.5 20,15.5A1,1 0 0,1 21,16.5V20A1,1 0 0,1 20,21A17,17 0 0,1 3,4A1,1 0 0,1 4,3H7.5A1,1 0 0,1 8.5,4C8.5,5.25 8.7,6.45 9.07,7.57C9.18,7.92 9.1,8.31 8.82,8.59L6.62,10.79Z" />
-                    </svg>
-                    <div class="mt-1">
-                        <a href="tel:{{ $role->phone }}" class="hover:underline">
-                            {{ $role->phone }}
-                        </a>
-                    </div>
+                <div
+                  class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] fill-[#33383C] hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-[#33383C]"
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M10.0376 5.31617L10.6866 6.4791C11.2723 7.52858 11.0372 8.90532 10.1147 9.8278C10.1147 9.8278 10.1147 9.8278 10.1147 9.8278C10.1146 9.82792 8.99588 10.9468 11.0245 12.9755C13.0525 15.0035 14.1714 13.8861 14.1722 13.8853C14.1722 13.8853 14.1722 13.8853 14.1722 13.8853C15.0947 12.9628 16.4714 12.7277 17.5209 13.3134L18.6838 13.9624C20.2686 14.8468 20.4557 17.0692 19.0628 18.4622C18.2258 19.2992 17.2004 19.9505 16.0669 19.9934C14.1588 20.0658 10.9183 19.5829 7.6677 16.3323C4.41713 13.0817 3.93421 9.84122 4.00655 7.93309C4.04952 6.7996 4.7008 5.77423 5.53781 4.93723C6.93076 3.54428 9.15317 3.73144 10.0376 5.31617Z"
+                    />
+                  </svg>
+                  <a href="tel:{{ $role->phone }}" class="text-sm"
+                    >{{ $role->phone }}</a
+                  >
                 </div>
                 @endif
-
+                @if($role->email)
+                <div
+                  class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] fill-[#33383C] hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px]"
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M3.17157 5.17157C2 6.34315 2 8.22876 2 12C2 15.7712 2 17.6569 3.17157 18.8284C4.34315 20 6.22876 20 10 20H14C17.7712 20 19.6569 20 20.8284 18.8284C22 17.6569 22 15.7712 22 12C22 8.22876 22 6.34315 20.8284 5.17157C19.6569 4 17.7712 4 14 4H10C6.22876 4 4.34315 4 3.17157 5.17157ZM18.5762 7.51986C18.8413 7.83807 18.7983 8.31099 18.4801 8.57617L16.2837 10.4066C15.3973 11.1452 14.6789 11.7439 14.0448 12.1517C13.3843 12.5765 12.7411 12.8449 12 12.8449C11.2589 12.8449 10.6157 12.5765 9.95518 12.1517C9.32112 11.7439 8.60271 11.1452 7.71636 10.4066L5.51986 8.57617C5.20165 8.31099 5.15866 7.83807 5.42383 7.51986C5.68901 7.20165 6.16193 7.15866 6.48014 7.42383L8.63903 9.22291C9.57199 10.0004 10.2197 10.5384 10.7666 10.8901C11.2959 11.2306 11.6549 11.3449 12 11.3449C12.3451 11.3449 12.7041 11.2306 13.2334 10.8901C13.7803 10.5384 14.428 10.0004 15.361 9.22291L17.5199 7.42383C17.8381 7.15866 18.311 7.20165 18.5762 7.51986Z"
+                    />
+                  </svg>
+                  <a href="mailto:{{ $role->email }}" class="text-sm"
+                    >{{ $role->email }}</a
+                  >
+                </div>
+                @endif
                 @if($role->website)
-                <div class="mt-2 flex items-center text-sm">
-                    <svg class="mr-1.5 h-5 w-5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"
-                        aria-hidden="true">
-                        <path
-                            d="M10.59,13.41C11,13.8 11,14.44 10.59,14.83C10.2,15.22 9.56,15.22 9.17,14.83C7.22,12.88 7.22,9.71 9.17,7.76V7.76L12.71,4.22C14.66,2.27 17.83,2.27 19.78,4.22C21.73,6.17 21.73,9.34 19.78,11.29L18.29,12.78C18.3,11.96 18.17,11.14 17.89,10.36L18.36,9.88C19.54,8.71 19.54,6.81 18.36,5.64C17.19,4.46 15.29,4.46 14.12,5.64L10.59,9.17C9.41,10.34 9.41,12.24 10.59,13.41M13.41,9.17C13.8,8.78 14.44,8.78 14.83,9.17C16.78,11.12 16.78,14.29 14.83,16.24V16.24L11.29,19.78C9.34,21.73 6.17,21.73 4.22,19.78C2.27,17.83 2.27,14.66 4.22,12.71L5.71,11.22C5.7,12.04 5.83,12.86 6.11,13.65L5.64,14.12C4.46,15.29 4.46,17.19 5.64,18.36C6.81,19.54 8.71,19.54 9.88,18.36L13.41,14.83C14.59,13.66 14.59,11.76 13.41,10.59C13,10.2 13,9.56 13.41,9.17Z" />
-                    </svg>
-                    <div class="mt-1">
-                        <a href="{{ $role->website }}" target="_blank" class="hover:underline">
-                            {{ \App\Utils\UrlUtils::clean($role->website) }}
-                        </a>
-                    </div>
+                <div
+                  class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] fill-[#33383C] hover:text-[#4E81FA] hover:fill-[#4E81FA]"
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M2.02783 11.25C2.41136 6.07745 6.72957 2 12.0001 2C11.1693 2 10.4295 2.36421 9.82093 2.92113C9.21541 3.47525 8.70371 4.24878 8.28983 5.16315C7.87352 6.08292 7.55013 7.15868 7.33126 8.32611C7.1558 9.26194 7.04903 10.2485 7.01344 11.25H2.02783ZM2.02783 12.75H7.01344C7.04903 13.7515 7.1558 14.7381 7.33126 15.6739C7.55013 16.8413 7.87351 17.9171 8.28983 18.8368C8.70371 19.7512 9.21541 20.5247 9.82093 21.0789C10.4295 21.6358 11.1693 22 12.0001 22C6.72957 22 2.41136 17.9226 2.02783 12.75Z"
+                    />
+                    <path
+                      d="M12.0001 3.39535C11.7251 3.39535 11.3699 3.51236 10.9567 3.89042C10.5406 4.27126 10.1239 4.86815 9.75585 5.68137C9.3902 6.4892 9.09329 7.46441 8.88897 8.55419C8.72806 9.41242 8.62824 10.3222 8.59321 11.25H15.4071C15.372 10.3222 15.2722 9.41242 15.1113 8.5542C14.907 7.46441 14.6101 6.48921 14.2444 5.68137C13.8763 4.86815 13.4597 4.27126 13.0435 3.89042C12.6304 3.51236 12.2751 3.39535 12.0001 3.39535Z"
+                    />
+                    <path
+                      d="M8.88897 15.4458C9.09329 16.5356 9.3902 17.5108 9.75585 18.3186C10.1239 19.1319 10.5406 19.7287 10.9567 20.1096C11.3698 20.4876 11.7251 20.6047 12.0001 20.6047C12.2751 20.6047 12.6304 20.4876 13.0435 20.1096C13.4597 19.7287 13.8763 19.1319 14.2444 18.3186C14.6101 17.5108 14.907 16.5356 15.1113 15.4458C15.2722 14.5876 15.372 13.6778 15.4071 12.75H8.59321C8.62824 13.6778 8.72806 14.5876 8.88897 15.4458Z"
+                    />
+                    <path
+                      d="M12.0001 2C12.831 2 13.5708 2.36421 14.1793 2.92113C14.7849 3.47525 15.2966 4.24878 15.7104 5.16315C16.1267 6.08292 16.4501 7.15868 16.669 8.32612C16.8445 9.26194 16.9512 10.2485 16.9868 11.25H21.9724C21.5889 6.07745 17.2707 2 12.0001 2Z"
+                    />
+                    <path
+                      d="M16.669 15.6739C16.4501 16.8413 16.1267 17.9171 15.7104 18.8368C15.2966 19.7512 14.7849 20.5247 14.1793 21.0789C13.5708 21.6358 12.831 22 12.0001 22C17.2707 22 21.5889 17.9226 21.9724 12.75H16.9868C16.9512 13.7515 16.8445 14.7381 16.669 15.6739Z"
+                    />
+                  </svg>
+                  <a href="{{ $role->website }}" class="text-sm">{{ $role->website }}</a>
                 </div>
                 @endif
-
+              </div>
             </div>
-            <div class="flex space-x-4">
-                @if ($role->social_links)
-                @foreach (json_decode($role->social_links) as $link)
-                    <a href="{{ $link->url }}" target="_blank">
-                        <x-url-icon>
-                            {{ \App\Utils\UrlUtils::clean($link->url) }}
-                        </x-url-icon>
-                    </a>
-                @endforeach
-                @endif
-            </div>
-        </div>
-    </div>
-
-    <footer class="bottom-0 left-0 right-0 bg-black text-white py-4 w-full">
-        <div class="container mx-auto text-center">
-            <p>
-                {!! str_replace(':link', '<a href="' . url('/') . '" target="_blank" class="hover:underline">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}
-                •
-                @if (($role->country_code == 'il' && $role->id != 6) || ($event && $event->venue && $event->venue->country_code == 'il' && $event->venue->id != 6))
-                {!! str_replace(':link', '<a href="https://myjewishsoulmate.com" target="_blank" class="hover:underline">My Jewish Soulmate</a>',  __('messages.supported_by')) !!}
-                @else
-                {!! str_replace([':link1', ':link2'], ['<a href="https://invoiceninja.com" target="_blank" class="hover:underline" title="Leading small-business platform to manage invoices, expenses & tasks">Invoice Ninja</a>', '<a href="https://mudeo.app" target="_blank" class="hover:underline" title="Make music together">mudeo</a>'],  __('messages.supported_by_both')) !!}
-                @endif
+          </div>
+          <div
+            class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-12 flex flex-col gap-6"
+          >
+            <h3 class="text-[32px] font-semibold leading-10 text-[#151B26]">
+              {{ __('messages.about') }}
+            </h3>
+            <p class="text-[#33383C] text-base">
+              Cameron Williamson has been living and teaching wellness practices
+              for most of his life and has inspired hundreds of students over
+              the years both in America and Israel. He made aliyah from Florida
+              ten years ago and after living in Pardes Hana for ten years he now
+              resides in Efrat. When David is not teaching Yoga or Qi Gong he is
+              seeing clients in his clinic in Efrat and Pardes Hana for
+              treatments in Acupuncture, Craniosacral Therapy and Internal
+              Family Systems.
             </p>
+          </div>
         </div>
+      </div>
+      <div class="container px-5 py-[80px]">
+        <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6">
+          <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] mb-6">
+            November 2024
+          </h3>
+        </div>
+        <div class="bg-[#F5F9FE] rounded-2xl p-8">
+          <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] mb-6">
+            Social media
+          </h3>
+          <div class="flex flex-row gap-4 items-center">
+            <a
+              href="https://x.com/ScheduleEvent"
+              target="_blank"
+              class="w-[44px] h-[44px] rounded-full flex justify-center items-center bg-[#4E81FA] hover:bg-[#151B26] duration-300"
+            >
+              <svg
+                width="16"
+                height="17"
+                viewBox="0 0 16 17"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M13.6141 4.55592C14.2725 4.17092 14.7084 3.64543 14.9218 2.97712C14.2814 3.3008 13.6435 3.52279 13.0063 3.64543C12.4335 3.05862 11.7084 2.76056 10.839 2.76056C9.98922 2.76056 9.27141 3.04465 8.68559 3.59731C8.10303 4.15384 7.8089 4.82992 7.8089 5.61931C7.8089 5.85916 7.84067 6.07339 7.90422 6.25502C5.39799 6.17352 3.32359 5.18309 1.68916 3.27673C1.41214 3.74323 1.27363 4.21827 1.27363 4.7096C1.27363 5.71944 1.72094 6.51971 2.61393 7.10729C2.10469 7.06615 1.65576 6.94352 1.27363 6.74248C1.27363 7.46357 1.49606 8.0659 1.94174 8.59605C2.38905 9.12076 2.96346 9.45531 3.66498 9.59813C3.41077 9.66022 3.14271 9.68972 2.86732 9.68972C2.61311 9.68972 2.43305 9.66954 2.32631 9.62529C2.51371 10.2129 2.86732 10.6895 3.37818 11.0543C3.88741 11.4207 4.47323 11.6139 5.13156 11.631C4.04629 12.4421 2.8054 12.8434 1.40155 12.8434C1.05772 12.8434 0.814099 12.8388 0.666626 12.8139C2.04929 13.6693 3.58839 14.0939 5.29126 14.0939C7.03405 14.0939 8.57397 13.6732 9.91426 12.8318C11.2546 11.995 12.2437 10.9627 12.8792 9.74716C13.518 8.53318 13.8341 7.26952 13.8341 5.94998V5.58671C14.4517 5.14428 14.9512 4.64596 15.3333 4.09563C14.7792 4.32305 14.2065 4.47752 13.6141 4.55592Z"
+                  fill="white"
+                />
+              </svg>
+            </a>
+            <a
+              href="https://www.facebook.com/appeventschedule"
+              target="_blank"
+              class="w-[44px] h-[44px] rounded-full flex justify-center items-center bg-[#4E81FA] hover:bg-[#151B26] duration-300"
+              ><svg
+                width="16"
+                height="17"
+                viewBox="0 0 16 17"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M11.3398 8.92719L11.7101 6.51416H9.39475V4.94828C9.39475 4.28812 9.71819 3.64463 10.7552 3.64463H11.8078V1.59021C11.8078 1.59021 10.8526 1.42719 9.93928 1.42719C8.03251 1.42719 6.78616 2.58291 6.78616 4.6751V6.51416H4.66663V8.92719H6.78616V14.7605H9.39475V8.92719H11.3398Z"
+                  fill="white"
+                />
+              </svg>
+            </a>
+            <a
+              href="https://www.linkedin.com/company/eventschedule/"
+              target="_blank"
+              class="w-[44px] h-[44px] rounded-full flex justify-center items-center bg-[#4E81FA] hover:bg-[#151B26] duration-300"
+            >
+              <svg
+                width="16"
+                height="17"
+                viewBox="0 0 16 17"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g clip-path="url(#clip0_491_201)">
+                  <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M4.36737 14.4537V5.87129H1.51506V14.4537H4.36737V14.4537ZM2.94151 4.69994C3.93586 4.69994 4.55526 4.04035 4.55526 3.21679C4.53646 2.37491 3.93586 1.73395 2.96016 1.73395C1.9843 1.73397 1.34644 2.37494 1.34644 3.21681C1.34644 4.04038 1.9655 4.69996 2.92274 4.69996L2.94151 4.69994ZM5.94602 14.4537C5.94602 14.4537 5.98344 6.67655 5.94602 5.87132H8.79878V7.11595H8.77985C9.15495 6.53028 9.83073 5.66978 11.3694 5.66978C13.2466 5.66978 14.6537 6.89642 14.6537 9.53262V14.4537H11.8014V9.86239C11.8014 8.70871 11.3887 7.92147 10.3562 7.92147C9.56831 7.92147 9.09878 8.4522 8.89258 8.96522C8.81714 9.14783 8.79878 9.40431 8.79878 9.66082V14.4537H5.94602Z"
+                    fill="white"
+                  />
+                </g>
+                <defs>
+                  <clipPath id="clip0_491_201">
+                    <rect
+                      width="13.3333"
+                      height="13.3333"
+                      fill="white"
+                      transform="translate(1.33337 1.42719)"
+                    />
+                  </clipPath>
+                </defs>
+              </svg>
+            </a>
+            <a
+              href="#"
+              target="_blank"
+              class="w-[44px] h-[44px] rounded-full flex justify-center items-center bg-[#4E81FA] hover:bg-[#151B26] duration-300"
+            >
+              <svg
+                width="16"
+                height="17"
+                viewBox="0 0 16 17"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10.0749 14.5607C9.53769 14.778 8.95781 14.8693 8.37979 14.8277C7.80317 14.8753 7.22354 14.7837 6.68968 14.5607C6.61607 14.5012 6.55686 14.4258 6.51647 14.3402C6.47608 14.2546 6.45555 14.161 6.45642 14.0664C6.45642 13.8811 6.44968 13.3944 6.44631 12.7468C4.28715 13.2159 3.83157 11.706 3.83157 11.706C3.68881 11.2368 3.38295 10.8342 2.96926 10.5708C2.26526 10.0891 3.02231 10.0992 3.02231 10.0992C3.26833 10.1333 3.50334 10.223 3.7094 10.3617C3.91547 10.5003 4.08715 10.6842 4.21136 10.8992C4.31653 11.0907 4.4586 11.2593 4.62937 11.3955C4.80013 11.5316 4.9962 11.6326 5.20623 11.6925C5.41626 11.7524 5.63608 11.7701 5.85299 11.7445C6.06989 11.7189 6.27957 11.6506 6.46989 11.5434C6.50544 11.1496 6.68044 10.7814 6.96336 10.5051C5.24042 10.3098 3.42821 9.64365 3.42821 6.67018C3.41689 5.89897 3.70274 5.15298 4.22652 4.58681C3.98998 3.91763 4.01739 3.18345 4.30315 2.53376C4.30315 2.53376 4.9541 2.32492 6.43705 3.32955C7.70902 2.98082 9.05139 2.98082 10.3234 3.32955C11.8055 2.32492 12.4556 2.53376 12.4556 2.53376C12.7419 3.18328 12.7696 3.91756 12.533 4.58681C13.0568 5.15292 13.3424 5.89902 13.3305 6.67018C13.3305 9.65123 11.5158 10.3081 9.78694 10.5001C9.97214 10.6881 10.1149 10.9136 10.2057 11.1614C10.2965 11.4092 10.3332 11.6735 10.3133 11.9367C10.3133 12.9742 10.304 13.8121 10.304 14.0664C10.3088 14.1612 10.2905 14.2557 10.2506 14.3419C10.2107 14.428 10.1504 14.5031 10.0749 14.5607Z"
+                  fill="white"
+                />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="bg-[#151B26]">
+      <div
+        class="container flex flex-row justify-center items-center py-8 px-5"
+      >
+        <p class="text-[#F5F9FE] text-base text-center">© 2024 EventSchedule</p>
+      </div>
     </footer>
 
 </x-app-guest-layout>
