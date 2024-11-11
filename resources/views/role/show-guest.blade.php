@@ -63,7 +63,6 @@
               <img
                 class="block max-h-72 w-full object-cover rounded-t-2xl"
                 src="./images/slider-image.jpeg"
-                alt="hero slider"
               />
             </div>
             <div class="px-6 lg:px-16 pb-12 relative z-10">
@@ -202,13 +201,11 @@
       </div>
       <div class="container mx-auto px-5 py-[80px]">
         <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6">
-          <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] mb-6">
-            November 2024
-          </h3>
+          
         </div>
         <div class="bg-[#F5F9FE] rounded-2xl p-8">
           <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] mb-6">
-            Social media
+            {{ __('messages.social_media') }}
           </h3>
           <div class="flex flex-row gap-4 items-center">
             <a
