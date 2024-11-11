@@ -183,6 +183,8 @@
               </div>
             </div>
           </div>
+
+          @if($role->description_html)
           <div
             class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-12 flex flex-col gap-6"
           >
@@ -190,16 +192,12 @@
               {{ __('messages.about') }}
             </h3>
             <p class="text-[#33383C] text-base">
-              Cameron Williamson has been living and teaching wellness practices
-              for most of his life and has inspired hundreds of students over
-              the years both in America and Israel. He made aliyah from Florida
-              ten years ago and after living in Pardes Hana for ten years he now
-              resides in Efrat. When David is not teaching Yoga or Qi Gong he is
-              seeing clients in his clinic in Efrat and Pardes Hana for
-              treatments in Acupuncture, Craniosacral Therapy and Internal
-              Family Systems.
+              {!! $role->description_html !!}
             </p>
+
           </div>
+          @endif
+
         </div>
       </div>
       <div class="container mx-auto px-5 py-[80px]">
