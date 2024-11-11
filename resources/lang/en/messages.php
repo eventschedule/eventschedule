@@ -282,4 +282,5 @@ return [
     'updated_schedule' => 'Successfully updated schedule',
     'embed' => 'Embed',
     'about' => 'About',
+    'social_media' => 'Social Media',
 ];
