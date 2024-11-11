@@ -2,7 +2,7 @@
 
     <header class="bg-white dark:bg-[#151B26]">
       <div
-        class="container flex flex-row justify-between items-center py-7 px-5"
+        class="container mx-auto flex flex-row justify-between items-center py-7 px-5"
       >
         <a href="/">
           <svg
@@ -55,7 +55,7 @@
     </header>
     <main>
       <div>
-        <div class="container py-10 px-5">
+        <div class="container mx-auto py-10 px-5">
           <div class="bg-[#F5F9FE] rounded-2xl mb-6">
             <div
               class="relative before:block before:absolute before:bg-[#00000033] before:-inset-0"
@@ -202,7 +202,7 @@
           </div>
         </div>
       </div>
-      <div class="container px-5 py-[80px]">
+      <div class="container mx-auto px-5 py-[80px]">
         <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6">
           <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] mb-6">
             November 2024
@@ -305,7 +305,7 @@
 
     <footer class="bg-[#151B26]">
       <div
-        class="container flex flex-row justify-center items-center py-8 px-5"
+        class="container mx-auto flex flex-row justify-center items-center py-8 px-5"
       >
         <p class="text-[#F5F9FE] text-base text-center">© 2024 EventSchedule</p>
       </div>
