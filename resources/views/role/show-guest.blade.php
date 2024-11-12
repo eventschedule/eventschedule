@@ -197,11 +197,15 @@
           </div>
           @endif
 
-        <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6">          
-
+        <div 
+          class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-12 flex flex-col gap-6 mb-6"
+        >          
+          @include('role/partials/calendar', ['route' => 'guest', 'tab' => ''])
         </div>
 
-        <div class="bg-[#F5F9FE] rounded-2xl p-8">
+        <div 
+          class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-12 flex flex-col gap-6 mb-6"
+        >
           <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] mb-6">
             {{ __('messages.social_media') }}
           </h3>
