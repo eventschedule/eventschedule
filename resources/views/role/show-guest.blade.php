@@ -203,6 +203,7 @@
           @include('role/partials/calendar', ['route' => 'guest', 'tab' => ''])
         </div>
 
+        @if ($role->social_links)
         <div 
           class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-12 flex flex-col gap-6 mb-6"
         >
@@ -210,6 +211,18 @@
             {{ __('messages.social_media') }}
           </h3>
           <div class="flex flex-row gap-4 items-center">
+            @foreach (json_decode($role->social_links) as $link)
+              <a 
+                href="{{ $link->url }}" target="_blank"
+                class="w-[44px] h-[44px] rounded-full flex justify-center items-center bg-[#4E81FA] hover:bg-[#151B26] duration-300"
+                >
+                <x-url-icon>
+                  {{ \App\Utils\UrlUtils::clean($link->url) }}
+                </x-url-icon>
+              </a>
+            @endforeach
+
+            <!--
             <a
               href="https://x.com/ScheduleEvent"
               target="_blank"
@@ -295,8 +308,10 @@
                 />
               </svg>
             </a>
+            -->
           </div>
         </div>
+        @endif
       </div>
     </main>
 
