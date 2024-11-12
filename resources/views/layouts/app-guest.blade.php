@@ -51,6 +51,9 @@
             @media (prefers-color-scheme: dark) {
                 color: #33383C !important;
             }
+            @media (prefers-color-scheme: light) {
+                color: #33383C !important;
+            }
             font-family: '{{ $role->font_family }}', sans-serif !important;
             min-height: 100%;
             background-attachment: scroll;
