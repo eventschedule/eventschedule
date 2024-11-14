@@ -20,7 +20,7 @@
             <button
               type="button"
               name="follow"
-              style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
+              style="background-color: {{ $otherRole->accent_color ?? '#4E81FA' }}"
               class="inline-flex items-center rounded-md px-8 py-4 hover:opacity-90 font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
             >
               {{ __('messages.follow') }}
@@ -245,7 +245,7 @@
                 <button
                   type="button"
                   name="follow"
-                  style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
+                  style="background-color: {{ $otherRole->accent_color ?? '#4E81FA' }}"
                   class="inline-flex items-center rounded-md px-8 py-4 hover:opacity-90 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
                   {{ __('messages.follow') }}
@@ -286,7 +286,7 @@
 
       <div class="flex flex-col gap-6">
         @if ($event->venue)
-        <div class="p-6 rounded-xl flex flex-col gap-6" style="background-color: {{ $role->accent_color ?? '#4E81FA' }}">
+        <div class="p-6 rounded-xl flex flex-col gap-6" style="background-color: {{ $otherRole->accent_color ?? '#4E81FA' }}">
           <h4 class="text-white text-[24px] leading-snug font-semibold">
             {{ __('messages.contact_venue') }}
           </h4>
@@ -371,7 +371,7 @@
             @foreach (json_decode($event->venue->social_links) as $link)
               <a 
                 href="{{ $link->url }}" target="_blank"
-                style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
+                style="background-color: {{ $otherRole->accent_color ?? '#4E81FA' }}"
                 class="w-[44px] h-[44px] rounded-full flex justify-center items-center hover:opacity-90 duration-300"
                 >
                 <x-url-icon>
