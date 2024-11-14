@@ -261,12 +261,4 @@
       </div>
     </main>
 
-    <footer class="bg-[#151B26]">
-      <div
-        class="container mx-auto flex flex-row justify-center items-center py-8 px-5"
-      >
-        <p class="text-[#F5F9FE] text-base text-center">© 2024 EventSchedule</p>
-      </div>
-    </footer>
-
 </x-app-guest-layout>
