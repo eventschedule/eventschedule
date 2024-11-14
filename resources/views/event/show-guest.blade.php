@@ -173,7 +173,7 @@
           </div>
         </div>
         <div>
-          @foreach ($event->roles as $role)
+          @foreach ($event->roles as $each)
           <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4">
             <div
               class="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center"
@@ -191,7 +191,7 @@
                 </a>
               </div>
               <a
-                href="route('role.follow', ['subdomain' => $role->subdomain])"
+                href="route('role.follow', ['subdomain' => $each->subdomain])"
                 class="inline-flex items-center justify-center"
               >
                 <button
@@ -241,6 +241,7 @@
           </div>
         </div>
       </div>
+
       <div class="flex flex-col gap-6">
         @if ($event->venue)
         <div class="p-6 rounded-xl flex flex-col gap-6" style="background-color: {{ $role->accent_color ?? '#4E81FA' }}">
