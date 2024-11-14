@@ -33,7 +33,8 @@
             <button
               type="button"
               name="login"
-              class="text-base duration-300 text-[#4E81FA] hover:text-[#1A48B3] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-90"
+              style="color: {{ $role->accent_color ?? '#4E81FA' }}"
+              class="text-base duration-300 hover:opacity-90 disabled:cursor-not-allowed"
             >
               {{ __('messages.log_in') }}
             </button>
@@ -45,7 +46,8 @@
             <button
               type="button"
               name="sign-up"
-              class="inline-flex items-center justify-center rounded-xl text-base duration-300 bg-[#4E81FA] hover:bg-[#1A48B3] text-white py-4 px-8 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-90"
+              style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
+              class="inline-flex items-center rounded-md px-5 py-3 hover:opacity-90 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
             >
               {{ __('messages.sign_up') }}
             </button>
@@ -84,7 +86,8 @@
                   <button
                     type="button"
                     name="follow"
-                    class="inline-flex items-center justify-center rounded-xl text-base duration-300 bg-[#4E81FA] hover:bg-[#1A48B3] text-white py-4 px-8 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-90"
+                    style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
+                    class="inline-flex items-center rounded-md px-8 py-4 hover:opacity-90 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                   >
                     {{ __('messages.follow') }}
                   </button>
@@ -244,7 +247,8 @@
             @foreach (json_decode($role->social_links) as $link)
               <a 
                 href="{{ $link->url }}" target="_blank"
-                class="w-[44px] h-[44px] rounded-full flex justify-center items-center bg-[#4E81FA] hover:bg-[#151B26] duration-300"
+                style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
+                class="w-[44px] h-[44px] rounded-full flex justify-center items-center hover:opacity-90 duration-300"
                 >
                 <x-url-icon>
                   {{ \App\Utils\UrlUtils::clean($link->url) }}
