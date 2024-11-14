@@ -154,18 +154,7 @@
       class="container mx-auto flex flex-col-reverse sm:grid px-5 py-[80px] gap-[48px] sm:grid-cols-[minmax(0px,_auto)_minmax(0px,_344px)]"
     >
       <div class="flex flex-col gap-10">
-        @if ($event->description)
-        <div>
-          <h2
-            class="text-[#151B26] text-[40px] sm:text-{52px} leading-snug font-semibold mb-6"
-          >
-            {{ __('messages.about') }}
-          </h2>
-          <p class="text-[#33383C] text-base mb-10">
-            {{ $event->description }}
-          </p>
-        </div>
-        @endif
+        <!--
         <div>
           <h3 class="text-[32px] leading-snug text-black mb-6">
             {{ __('messages.date_and_time') }}
@@ -210,7 +199,20 @@
             </div>
           </div>
         </div>
+        -->
         <div>
+          @if ($event->description_html)
+          <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4">
+            <h2
+              class="text-[#151B26] text-[40px] sm:text-{52px} leading-snug font-semibold"
+            >
+              {{ __('messages.about') }}
+            </h2>
+            <p class="text-[#33383C] text-base">
+              {!! $event->description_html !!}
+            </p>
+          </div>
+          @endif
           @foreach ($event->roles as $each)
           <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4">
             <div
