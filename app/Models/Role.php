@@ -150,6 +150,25 @@ class Role extends Model implements MustVerifyEmail
         }
     }
 
+    public function shortAddress()
+    {
+        $str = '';
+
+        if ($this->address1) {
+            $str .= $this->address1;
+        }
+
+        if ($this->city) {
+            if ($str) {
+                $str .= ', ';
+            }
+
+            $str .= $this->city;
+        }
+
+        return $str;
+    }
+
     public function fullAddress()
     {
         $str = '';
