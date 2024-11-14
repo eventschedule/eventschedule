@@ -116,24 +116,21 @@
       class="container mx-auto flex flex-col-reverse sm:grid px-5 py-[80px] gap-[48px] sm:grid-cols-[minmax(0px,_auto)_minmax(0px,_344px)]"
     >
       <div class="flex flex-col gap-10">
+        @if ($event->description)
         <div>
           <h2
             class="text-[#151B26] text-[40px] sm:text-{52px} leading-snug font-semibold mb-6"
           >
-            About event
+            {{ __('messages.about') }}
           </h2>
           <p class="text-[#33383C] text-base mb-10">
-            Join us for an immersive Women's Breathwork Session, designed to
-            help you relax, heal, and connect. This session will guide you
-            through a series of breathing techniques to help release stress
-            and improve mindfulness. Whether you're joining in-person or
-            virtually, we invite all women to be part of this transformative
-            experience.
+            {{ $event->description }}
           </p>
         </div>
+        @endif
         <div>
           <h3 class="text-[32px] leading-snug text-black mb-6">
-            Date & time
+            {{ __('messages.date_and_time') }}
           </h3>
           <div class="flex flex-col gap-3">
             <div
@@ -154,7 +151,7 @@
                   d="M2 12C2 11.161 2 10.4153 2.0129 9.75H21.9871C22 10.4153 22 11.161 22 12V14C22 17.7712 22 19.6569 20.8284 20.8284C19.6569 22 17.7712 22 14 22H10C6.22876 22 4.34315 22 3.17157 20.8284C2 19.6569 2 17.7712 2 14V12ZM17 14C17.5523 14 18 13.5523 18 13C18 12.4477 17.5523 12 17 12C16.4477 12 16 12.4477 16 13C16 13.5523 16.4477 14 17 14ZM17 18C17.5523 18 18 17.5523 18 17C18 16.4477 17.5523 16 17 16C16.4477 16 16 16.4477 16 17C16 17.5523 16.4477 18 17 18ZM13 13C13 13.5523 12.5523 14 12 14C11.4477 14 11 13.5523 11 13C11 12.4477 11.4477 12 12 12C12.5523 12 13 12.4477 13 13ZM13 17C13 17.5523 12.5523 18 12 18C11.4477 18 11 17.5523 11 17C11 16.4477 11.4477 16 12 16C12.5523 16 13 16.4477 13 17ZM7 14C7.55228 14 8 13.5523 8 13C8 12.4477 7.55228 12 7 12C6.44772 12 6 12.4477 6 13C6 13.5523 6.44772 14 7 14ZM7 18C7.55228 18 8 17.5523 8 17C8 16.4477 7.55228 16 7 16C6.44772 16 6 16.4477 6 17C6 17.5523 6.44772 18 7 18Z"
                 />
               </svg>
-              <p class="text-sm">October 1, 2024</p>
+              <p class="text-sm">{{ $event->getStartDateTime($date)->format('F j, Y') }}</p>
             </div>
             <div
               class="flex flex-row gap-2 items-center relative text-[#33383C] fill-[#33383C]"
@@ -171,25 +168,12 @@
                   d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12ZM12.75 8C12.75 7.58579 12.4142 7.25 12 7.25C11.5858 7.25 11.25 7.58579 11.25 8V12C11.25 12.1989 11.329 12.3897 11.4697 12.5303L13.9697 15.0303C14.2626 15.3232 14.7374 15.3232 15.0303 15.0303C15.3232 14.7374 15.3232 14.2626 15.0303 13.9697L12.75 11.6893V8Z"
                 />
               </svg>
-              <p class="text-sm">6:00 PM - 8:00 PM</p>
+              <p class="text-sm">{{ $event->getStartEndTime($date) }}</p>
             </div>
           </div>
         </div>
         <div>
-          <h3 class="text-[32px] leading-snug text-black mb-6">
-            Event Format
-          </h3>
-          <p class="text-[#33383C] text-base mb-10">
-            In-person event: Located at Pine Wellness Studio. Bring your yoga
-            mat and comfortable clothing.
-          </p>
-        </div>
-        <div>
-          <h3
-            class="text-[32px] leading-snug font-semibold text-[#151B26] mb-6"
-          >
-            Event Hosts
-          </h3>
+          @foreach ($event->roles as $role)
           <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4">
             <div
               class="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center"
@@ -248,79 +232,16 @@
               Craniosacral Therapy and Internal Family Systems.
             </p>
           </div>
-          <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4">
-            <div
-              class="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center"
-            >
-              <div class="flex gap-3 flex-row items-center">
-                <img
-                  src="./images/person.png"
-                  class="rounded-full w-[56px] h-[56px]"
-                />
-                <a
-                  href="#"
-                  class="text-base text-[#151B26] hover:text-[#4E81FA] cursor-pointer duration-300"
-                >
-                  Kathryn Murphy
-                </a>
-              </div>
-              <a href="/follow" class="inline-flex items-center">
-                <button
-                  type="button"
-                  name="follow"
-                  class="inline-flex rounded-xl text-base duration-300 bg-[#4E81FA] hover:bg-[#1A48B3] text-white py-4 px-8 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-90"
-                >
-                  Follow
-                </button>
-              </a>
-            </div>
-            <div class="flex gap-3 justify-start flex-col sm:flex-row mb-6">
-              <div class="py-3 px-4 bg-white rounded-[32px] text-center">
-                <p class="text-sm font-semibold text-[#4E81FA]">
-                  Yoga trainer
-                </p>
-              </div>
-              <div class="py-3 px-4 bg-white rounded-[32px] text-center">
-                <p class="text-sm font-semibold text-[#4E81FA]">
-                  Fitness trainer
-                </p>
-              </div>
-            </div>
-            <p class="text-base text-[#33383C]">
-              Kathryn Murphy is a certified yoga trainer with over 10 years of
-              experience in mindfulness and holistic wellness practices. Known
-              for her calming presence and deep understanding of body-mind
-              connections, she has helped countless individuals find balance
-              and inner peace through tailored yoga sessions.
-            </p>
-          </div>
+
+          @endforeach
         </div>
         <div>
-          <h3
-            class="text-[32px] leading-snug font-semibold text-[#151B26] mb-6"
-          >
-            Related events
-          </h3>
           <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6">
             <h4
               class="text-[24px] font-semibold leading-10 text-[#151B26] mb-6"
             >
               November 2024
             </h4>
-          </div>
-        </div>
-        <div>
-          <h3
-            class="text-[32px] leading-snug font-semibold text-[#151B26] mb-6"
-          >
-            Photo from past events
-          </h3>
-          <div class="grid gap-4 grid-cols-3">
-            <img src="./images/event-photo.png" class="rounded-xl" />
-            <img src="./images/event-photo.png" class="rounded-xl" />
-            <img src="./images/event-photo.png" class="rounded-xl" />
-            <img src="./images/event-photo.png" class="rounded-xl" />
-            <img src="./images/event-photo.png" class="rounded-xl" />
           </div>
         </div>
       </div>
