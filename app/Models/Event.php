@@ -291,6 +291,18 @@ class Event extends Model
         return $url;
     }
 
+    public function getStartEndTime($date = null)
+    {
+        $date = $this->getStartDateTime($date);
+
+        if ($this->duration > 0) {
+            $endDate = $date->copy()->addSeconds($this->duration * 3600);
+            return $date->format($this->role()->use_24_hour_time ? 'H:i' : 'g:i A') . ' - ' . $endDate->format($this->role()->use_24_hour_time ? 'H:i' : 'g:i A');
+        } else {
+            return $date->format($this->role()->use_24_hour_time ? 'H:i' : 'g:i A');
+        }        
+    }
+
     public function getStartDateTime($date = null)
     {
         $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
