@@ -327,6 +327,7 @@
             @endif
           </div>
 
+          @if ($event->venue->social_links)
           <div class="flex flex-row gap-4 items-center">
             @foreach (json_decode($event->venue->social_links) as $link)
               <a 
@@ -340,6 +341,7 @@
               </a>
             @endforeach
           </div>
+          @endif
         </div>
         @endif
 
