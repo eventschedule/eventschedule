@@ -12,11 +12,15 @@
           >
             {{ $event->name }}
           </h2>
-          <a href="{{ route('role.follow', ['subdomain' => $event->role()->subdomain]) }}" class="inline-flex items-center">
+          <a
+            href="route('role.follow', ['subdomain' => $event->role()->subdomain])"
+            class="inline-flex items-center justify-center"
+          >
             <button
               type="button"
               name="follow"
-              class="inline-flex rounded-xl text-base duration-300 bg-[#4E81FA] hover:bg-[#1A48B3] text-white py-4 px-8 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-90"
+              style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
+              class="inline-flex items-center rounded-md px-8 py-4 hover:opacity-90 font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
             >
               {{ __('messages.follow') }}
             </button>
@@ -202,13 +206,17 @@
                   Cameron Williamson
                 </a>
               </div>
-              <a href="/follow" class="inline-flex items-center">
+              <a
+                href="route('role.follow', ['subdomain' => $role->subdomain])"
+                class="inline-flex items-center justify-center"
+              >
                 <button
                   type="button"
                   name="follow"
-                  class="inline-flex rounded-xl text-base duration-300 bg-[#4E81FA] hover:bg-[#1A48B3] text-white py-4 px-8 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-90"
+                  style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
+                  class="inline-flex items-center rounded-md px-8 py-4 hover:opacity-90 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
-                  Follow
+                  {{ __('messages.follow') }}
                 </button>
               </a>
             </div>
