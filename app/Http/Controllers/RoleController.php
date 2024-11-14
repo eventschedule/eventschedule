@@ -287,8 +287,16 @@ class RoleController extends Controller
         }
 
         $embed = request()->embed;
+        $view = 'role/show-guest';
+
+        if ($embed) {
+            $view = 'role/show-guest-embed';
+        } else if ($event) {
+            $view = 'event/show-guest';
+        }
+
         $response = response()
-            ->view($embed ? 'role/show-guest-embed' : 'role/show-guest', compact(
+            ->view($view, compact(
             'subdomain',
             'events',
             'role',
