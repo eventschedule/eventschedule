@@ -27,8 +27,15 @@
                             @foreach ($roles as $role)
                             <tr class="bg-white">
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
+                                    @if ($role->isClaimed())
                                     <a href="{{ $role->getGuestUrl() }}"
-                                        target="_blank" class="hover:underline">{{ $role->name }}</a>
+                                        target="_blank" class="hover:underline">{{ $role->name }}
+                                    </a>
+                                    @else
+                                    <p class="text-sm text-gray-500">
+                                        {{ $role->name }}
+                                    </p>
+                                    @endif
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     <a href="mailto:{{ $role->email }}">{{ $role->email }}</a>

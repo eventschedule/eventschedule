@@ -116,7 +116,7 @@ class RoleController extends Controller
         session()->forget('pending_follow');
 
         $mainDomain = config('app.url');
-        $redirectUrl = $mainDomain . route($role->getTypePlural(), [], false);
+        $redirectUrl = $mainDomain . route('following', [], false);
 
         return redirect($redirectUrl)
                 ->with('message', str_replace(':name', $role->name, __('messages.followed_role')));
