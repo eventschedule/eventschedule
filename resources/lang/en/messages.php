@@ -283,4 +283,5 @@ return [
     'embed' => 'Embed',
     'about' => 'About',
     'social_media' => 'Social Media',
+    'contact_venue' => 'Contact Venue',
 ];
