@@ -284,4 +284,6 @@ return [
     'about' => 'About',
     'social_media' => 'Social Media',
     'contact_venue' => 'Contact Venue',
+    'create_schedule' => 'Create Schedule',
+    'create_your_own_event_schedule' => 'Create your own event schedule!',
 ];
