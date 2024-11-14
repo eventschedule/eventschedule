@@ -288,7 +288,7 @@
         @if ($event->venue)
         <div class="p-6 rounded-xl flex flex-col gap-6" style="background-color: {{ $otherRole->accent_color ?? '#4E81FA' }}">
           <h4 class="text-white text-[24px] leading-snug font-semibold">
-            {{ __('messages.contact_venue') }}
+            {{ $event->venue->name }}
           </h4>
           <div class="flex flex-col gap-4">
             @if ($event->venue->phone)
