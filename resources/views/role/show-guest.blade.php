@@ -25,7 +25,7 @@
                 {{ $role->name }}
               </h3>
               <a
-                href="route('role.follow', ['subdomain' => $event->role()->subdomain])"
+                href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
                 class="inline-flex items-center justify-center"
               >
                 <button

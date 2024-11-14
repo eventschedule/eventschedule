@@ -188,7 +188,7 @@
                 @if ($each->isClaimed())                
                 <a
                   href="{{ route('role.view_guest', ['subdomain' => $each->subdomain]) }}"
-                  class="text-base text-[#151B26] hover:text-[#4E81FA] cursor-pointer duration-300"
+                  class="text-base text-[#151B26] hover:underline cursor-pointer duration-300"
                 >
                   {{ $each->name }}
                 </a>
@@ -198,6 +198,7 @@
                 </p>
                 @endif
               </div>
+              @if ($each->isClaimed())
               <a
                 href="route('role.follow', ['subdomain' => $each->subdomain])"
                 class="inline-flex items-center justify-center"
@@ -211,6 +212,7 @@
                   {{ __('messages.follow') }}
                 </button>
               </a>
+              @endif
             </div>
             <!--
             <div class="flex gap-3 justify-start flex-col sm:flex-row mb-6">

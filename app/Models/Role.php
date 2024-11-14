@@ -220,17 +220,6 @@ class Role extends Model implements MustVerifyEmail
         return $this->email_verified_at != null && $this->user_id != null;
     }
 
-    public function getTypePlural()
-    {
-        if ($this->isVenue()) {
-            return 'venues';
-        } else if ($this->isSchedule()) {
-            return 'schedules';
-        } else if ($this->isCurator()) {
-            return 'curators';
-        }
-    }
-
     public function getProfileImageUrlAttribute($value)
     {
         if (! $value) {
