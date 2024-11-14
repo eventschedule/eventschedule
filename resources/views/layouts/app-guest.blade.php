@@ -134,7 +134,7 @@
             <button
                 type="button"
                 name="login"
-                style="color: {{ $otherRole->accent_color ?? '#4E81FA' }}"
+                style="color: {{ $role && $role->accent_color ? $role->accent_color : ($other && $otherRole->accent_color ?? '#4E81FA') }}"
                 class="text-base duration-300 hover:opacity-90 disabled:cursor-not-allowed"
             >
                 {{ __('messages.log_in') }}
@@ -147,7 +147,7 @@
             <button
                 type="button"
                 name="sign-up"
-                style="background-color: {{ $otherRole->accent_color ?? '#4E81FA' }}"
+                style="background-color: {{ $role && $role->accent_color ? $role->accent_color : ($other && $otherRole->accent_color ?? '#4E81FA') }}"
                 class="inline-flex items-center rounded-md px-5 py-3 hover:opacity-90 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
             >
                 {{ __('messages.sign_up') }}
