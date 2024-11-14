@@ -66,11 +66,13 @@
               />
             </div>
             <div class="px-6 lg:px-16 pb-12 relative z-10">
+              @if ($role->profile_image_url)
               <img
-                class="rounded-full w-[180px] h-[180px] -mt-[90px] mb-8 object-cover border-solid border-sm border-[#F5F9FE]"
-                src="./images/person.png"
+                class="rounded-2xl w-[180px] h-[180px] -mt-[90px] mb-8 object-cover border-solid border-sm border-[#F5F9FE]"
+                src="{{ $role->profile_image_url }}"
                 alt="person"
               />
+              @endif
               <div class="flex justify-between items-center mb-4">
                 <h3 class="text-[32px] font-semibold leading-10 text-[#151B26]">
                   {{ $role->name }}
