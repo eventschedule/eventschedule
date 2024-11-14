@@ -340,6 +340,7 @@
         </div>
         @endif
 
+        <!--
         <div class="p-6 rounded-xl flex flex-col gap-6 bg-[#F5F9FE]">
           <h4 class="text-[#151B26] text-[24px] leading-snug font-semibold">
             Add to Calendar
@@ -353,17 +354,19 @@
             /></a>
           </div>
         </div>
+        -->
+        
         <div class="p-6 rounded-xl flex flex-col gap-6 bg-[#F5F9FE]">
           <h4 class="text-[#151B26] text-[24px] leading-snug font-semibold">
-            Create your Own ‘Event Schedule’!
+            {{ __('messages.create_your_own_event_schedule') }}
           </h4>
-          <a href="https://eventschedule.com/login">
+          <a href="https://eventschedule.com" target="_blank">
             <button
               type="button"
               name="login"
               class="inline-flex items-center justify-center rounded-xl text-base duration-300 bg-transparent border-[1px] border-[#4E81FA] hover:border-[#1A48B3] hover:bg-[#1A48B3] text-[#4E81FA] hover:text-white py-4 px-8 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-90"
             >
-              Create Event
+              {{ __('messages.create_schedule') }}
             </button>
           </a>
         </div>
