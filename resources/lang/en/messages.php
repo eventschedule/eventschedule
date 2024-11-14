@@ -53,7 +53,7 @@ return [
     'venue' => 'Venue',
     'type' => 'Type',
     'details' => 'Details',
-    'date_and_time' => 'Date and Time',
+    'date_and_time' => 'Date & Time',
     'duration_in_hours' => 'Duration in Hours',
     'private' => 'Private',
     'unlisted' => 'Unlisted',
