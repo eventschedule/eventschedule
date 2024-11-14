@@ -190,7 +190,7 @@ return [
     'no_scheduled_events' => 'No scheduled events',
     'create_new_account' => 'Create new account',
     'questions_or_suggestions' => 'If you have any questions or suggestions email us at :email',
-    'add_to_calendar' => 'Add to calendar',
+    'add_to_calendar' => 'Add to Calendar',
     'event_title' => ':role at :venue',
     'full_name' => 'Full Name',
     'claim_your_venue' => ':role scheduled an event at :venue',
