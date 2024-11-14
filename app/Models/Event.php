@@ -291,7 +291,7 @@ class Event extends Model
         return $url;
     }
 
-    private function getStartDateTime($date = null)
+    public function getStartDateTime($date = null)
     {
         $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
         
