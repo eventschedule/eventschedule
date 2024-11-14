@@ -179,16 +179,24 @@
               class="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center"
             >
               <div class="flex gap-3 flex-row items-center">
+                @if ($each->profile_image_url)
                 <img
-                  src="./images/person.png"
-                  class="rounded-full w-[56px] h-[56px]"
+                  src="{{ $each->profile_image_url }}"
+                  class="rounded-2xl w-[56px] h-[56px]"
                 />
+                @endif
+                @if ($each->isClaimed())                
                 <a
-                  href="#"
+                  href="{{ route('role.view_guest', ['subdomain' => $each->subdomain]) }}"
                   class="text-base text-[#151B26] hover:text-[#4E81FA] cursor-pointer duration-300"
                 >
-                  Cameron Williamson
+                  {{ $each->name }}
                 </a>
+                @else
+                <p class="text-base text-[#151B26]">
+                  {{ $each->name }}
+                </p>
+                @endif
               </div>
               <a
                 href="route('role.follow', ['subdomain' => $each->subdomain])"
@@ -204,6 +212,7 @@
                 </button>
               </a>
             </div>
+            <!--
             <div class="flex gap-3 justify-start flex-col sm:flex-row mb-6">
               <div class="py-3 px-4 bg-white rounded-[32px] text-center">
                 <p class="text-sm font-semibold text-[#4E81FA]">
@@ -221,15 +230,9 @@
                 </p>
               </div>
             </div>
+            -->
             <p class="text-base text-[#33383C]">
-              Cameron Williamson has been living and teaching wellness
-              practices for most of his life and has inspired hundreds of
-              students over the years both in America and Israel. He made
-              aliyah from Florida ten years ago and after living in Pardes
-              Hana for ten years he now resides in Efrat. When David is not
-              teaching Yoga or Qi Gong he is seeing clients in his clinic in
-              Efrat and Pardes Hana for treatments in Acupuncture,
-              Craniosacral Therapy and Internal Family Systems.
+              {!! $each->description_html !!}
             </p>
           </div>
 
