@@ -31,7 +31,7 @@ class EventRepo
                 $venue = new Role;
                 $venue->name = $request->venue_name ?? null;
                 $venue->email = $request->venue_email ?? null;
-                $venue->subdomain = Role::generateSubdomain($request->venue_email ? $request->venue_email : null);
+                $venue->subdomain = Role::generateSubdomain($request->venue_email ? $request->venue_name : null);
                 $venue->type = 'venue';
                 $venue->timezone = $user->timezone;
                 $venue->language_code = $user->language_code;
