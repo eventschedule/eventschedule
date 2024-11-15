@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role">
+<x-app-guest-layout :role="$role" :fonts="$fonts">
 
   <main>
     <div>
