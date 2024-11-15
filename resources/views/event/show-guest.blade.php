@@ -206,7 +206,7 @@
         </div>
         -->
         <div>
-          @if ($event->description_html)
+        @if ($event->description_html)
           <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4">
             <h2
               class="text-[#151B26] text-[40px] sm:text-{52px} leading-snug font-semibold"
@@ -216,6 +216,11 @@
             <p class="text-[#33383C] text-base">
               {!! $event->description_html !!}
             </p>
+          </div>
+          @endif
+          @if ($event->flyer_image_url)
+          <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4">
+            <img src="{{ $event->flyer_image_url }}" class="block"/>
           </div>
           @endif
           @foreach ($event->roles as $each)
