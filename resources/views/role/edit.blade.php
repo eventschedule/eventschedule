@@ -333,9 +333,9 @@
                         </h2>
 
                         <div class="mb-6">
-                            <x-input-label for="address1" :value="__('messages.street_address')" />
+                            <x-input-label for="address1" :value="__('messages.street_address') . ' *'" />
                             <x-text-input id="address1" name="address1" type="text" class="mt-1 block w-full"
-                                :value="old('address1', $role->address1)" autocomplete="off" />
+                                :value="old('address1', $role->address1)" autocomplete="off" required />
                             <x-input-error class="mt-2" :messages="$errors->get('address1')" />
                         </div>
 
