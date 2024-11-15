@@ -217,7 +217,7 @@ class Event extends Model
     {
         $title = __('messages.event_title');
 
-        return str_replace([':role', ':venue'], [$this->name, $this->venue->getDisplayName()], $title);
+        return str_replace([':role', ':venue'], [$this->name, $this->venue ? $this->venue->getDisplayName() : $this->getEventUrlDomain()], $title);
     }
 
     public function getUse24HourTime()
@@ -227,14 +227,24 @@ class Event extends Model
 
     public function getMetaDescription($date = null)
     {
-        return $this->venue->getDisplayName() . ' | ' . $this->localStartsAt(true, $date);
+        $str = '';
+
+        if ($this->venue) {
+            $str .= $this->venue->getDisplayName();
+        } else {
+            $str .= $this->getEventUrlDomain();
+        }
+
+        $str .=  ' | ' . $this->localStartsAt(true, $date);
+
+        return $str;
     }
 
     public function getGoogleCalendarUrl($date = null)
     {
         $title = $this->getTitle();
         $description = $this->description_html ? strip_tags($this->description_html) : ($this->role() ? strip_tags($this->role()->description_html) : '');
-        $location = $this->venue->bestAddress();
+        $location = $this->venue ? $this->venue->bestAddress() : '';
         $duration = $this->duration > 0 ? $this->duration : 2;
         $startAt = $this->getStartDateTime($date);
         $startDate = $startAt->format('Ymd\THis\Z');
@@ -253,7 +263,7 @@ class Event extends Model
     {
         $title = $this->getTitle();
         $description = $this->description_html ? strip_tags($this->description_html) : ($this->role() ? strip_tags($this->role()->description_html) : '');
-        $location = $this->venue->bestAddress();
+        $location = $this->venue ? $this->venue->bestAddress() : '';
         $duration = $this->duration > 0 ? $this->duration : 2;
         $startAt = $this->getStartDateTime($date);
         $startDate = $startAt->format('Ymd\THis\Z');
@@ -274,7 +284,7 @@ class Event extends Model
     {
         $title = $this->getTitle();
         $description = $this->description_html ? strip_tags($this->description_html) : ($this->role() ? strip_tags($this->role()->description_html) : '');
-        $location = $this->venue->bestAddress();
+        $location = $this->venue ? $this->venue->bestAddress() : '';
         $duration = $this->duration > 0 ? $this->duration : 2;
         $startAt = $this->getStartDateTime($date);
         $startDate = $startAt->format('Y-m-d\TH:i:s\Z');
