@@ -163,7 +163,7 @@
                 .css('font-family', fontFamily)
                 .css('background-size', 'cover')
                 .css('background-position', 'center')
-                .text(name);
+                .html('<div class="bg-[#F5F9FE] rounded-2xl px-12 py-4 flex flex-col">' + name + '</div>');
 
             if (background == 'gradient') {
                 $('#custom_colors').toggle(backgroundColors == '');
