@@ -19,6 +19,8 @@
               src="{{ $role->profile_image_url }}"
               alt="person"
             />
+            @else
+            <div style="height: 42px;"></div>
             @endif
             <div class="flex justify-between items-center mb-4">
               <h3 class="text-[32px] font-semibold leading-10 text-[#151B26]">
