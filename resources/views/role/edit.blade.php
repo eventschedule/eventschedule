@@ -431,6 +431,7 @@
 
                     <div class="flex flex-col lg:flex-row gap-6">
                         <div class="w-full lg:w-1/2">
+                            <!--
                             <div class="mb-6">
                                 <x-input-label for="font_family" :value="__('messages.font_family')" />
                                 <select id="font_family" name="font_family" onchange="onChangeFont()"
@@ -450,13 +451,7 @@
                                     :value="old('font_color', $role->font_color)" oninput="updatePreview()" />
                                 <x-input-error class="mt-2" :messages="$errors->get('font_color')" />
                             </div>
-
-                            <div class="mb-6">
-                                <x-input-label for="accent_color" :value="__('messages.accent_color')" />
-                                <x-text-input id="accent_color" name="accent_color" type="color" class="mt-1 block w-1/2"
-                                    :value="old('accent_color', $role->accent_color)" />
-                                <x-input-error class="mt-2" :messages="$errors->get('accent_color')" />
-                            </div>
+                            -->
 
                             <div class="mb-6">
                                 <x-input-label for="background" :value="__('messages.background')" />
@@ -529,6 +524,14 @@
                                     <x-input-error class="mt-2" :messages="$errors->get('background_rotation')" />
                                 </div>
                             </div>
+
+                            <div class="mb-6">
+                                <x-input-label for="accent_color" :value="__('messages.accent_color')" />
+                                <x-text-input id="accent_color" name="accent_color" type="color" class="mt-1 block w-1/2"
+                                    :value="old('accent_color', $role->accent_color)" />
+                                <x-input-error class="mt-2" :messages="$errors->get('accent_color')" />
+                            </div>
+
                         </div>
 
                         <div class="w-full flex-grow">
