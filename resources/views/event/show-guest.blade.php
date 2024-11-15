@@ -218,23 +218,35 @@
               class="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center"
             >
               <div class="flex gap-3 flex-row items-center">
+                @if ($each->isClaimed())                
+                @if ($each->profile_image_url)
+                <a
+                  href="{{ route('role.view_guest', ['subdomain' => $each->subdomain]) }}"                  
+                >                
+                  <img
+                    src="{{ $each->profile_image_url }}"
+                    class="rounded-2xl w-[56px] h-[56px]"
+                  />
+                </a>
+                @endif
+                <a
+                  href="{{ route('role.view_guest', ['subdomain' => $each->subdomain]) }}"
+                  class="text-base text-[#151B26] hover:underline cursor-pointer duration-300"
+                >                
+                  <h3 class="text-[28px] font-semibold leading-10 text-[#151B26]">
+                    {{ $each->name }}
+                  </h3>
+                </a>
+                @else
                 @if ($each->profile_image_url)
                 <img
                   src="{{ $each->profile_image_url }}"
                   class="rounded-2xl w-[56px] h-[56px]"
                 />
                 @endif
-                @if ($each->isClaimed())                
-                <a
-                  href="{{ route('role.view_guest', ['subdomain' => $each->subdomain]) }}"
-                  class="text-base text-[#151B26] hover:underline cursor-pointer duration-300"
-                >
+                <h3 class="text-[28px] font-semibold leading-10 text-[#151B26]">
                   {{ $each->name }}
-                </a>
-                @else
-                <p class="text-base text-[#151B26]">
-                  {{ $each->name }}
-                </p>
+                </h3>
                 @endif
               </div>
               @if ($each->isClaimed())
