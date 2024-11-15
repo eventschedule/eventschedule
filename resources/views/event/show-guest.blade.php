@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role" :event="$event" :date="$date">
+<x-app-guest-layout :role="$role" :event="$event" :date="$date" :fonts="$fonts">
 
   <main>
     <div

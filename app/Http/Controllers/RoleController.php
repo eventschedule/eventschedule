@@ -295,6 +295,20 @@ class RoleController extends Controller
             $view = 'event/show-guest';
         }
 
+        $fonts = [];
+        if ($event) {
+            $fonts[] = $event->venue->font_family;
+            foreach ($event->roles as $each) {
+                if ($each->isClaimed() && $each->isSchedule()) {
+                    $fonts[] = $each->font_family;
+                }
+            }
+        } else {
+            $fonts[] = $role->font_family;
+        }
+
+        $fonts = array_unique($fonts);
+
         $response = response()
             ->view($view, compact(
             'subdomain',
@@ -310,6 +324,7 @@ class RoleController extends Controller
             'embed',
             'date',
             'curatorRoles',
+            'fonts',
         ));
 
 

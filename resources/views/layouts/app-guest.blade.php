@@ -41,10 +41,9 @@
 
     <x-slot name="head">
 
-        <link href="https://fonts.googleapis.com/css2?family={{ $role->font_family }}:wght@400;700&display=swap" rel="stylesheet">
-        @if ($event && $event->role())
-            <link href="https://fonts.googleapis.com/css2?family={{ $event->getOtherRole($role->subdomain)->font_family }}:wght@400;700&display=swap" rel="stylesheet">
-        @endif
+        @foreach($fonts as $font)
+            <link href="https://fonts.googleapis.com/css2?family={{ $font }}:wght@400;700&display=swap" rel="stylesheet">
+        @endforeach
 
         <style>
         body {
@@ -54,7 +53,7 @@
             @media (prefers-color-scheme: light) {
                 color: #33383C !important;
             }
-            font-family: '{{ $role->font_family }}', sans-serif !important;
+            font-family: '{{ $otherRole ? $otherRole->font_family : $role->font_family }}', sans-serif !important;
             min-height: 100%;
             background-attachment: scroll;
             @if ($event && $otherRole && $otherRole->isClaimed())
@@ -85,17 +84,6 @@
                 @endif
             @endif
         }
-
-        @if ($event && $otherRole)
-            @if ($event->venue && $subdomain == $event->venue->subdomain)
-            #event_title
-            @else
-            #venue_title
-            @endif
-            {
-                font-family: '{{ $otherRole->font_family }}', sans-serif !important;
-            }
-        @endif
         </style>
 
     </x-slot>

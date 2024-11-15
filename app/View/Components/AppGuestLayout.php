@@ -13,6 +13,7 @@ class AppGuestLayout extends Component
         public Role $role,
         public ?Event $event = null,
         public ?string $date = null,
+        public array $fonts = [],
     ) {}
 
     /**
