@@ -310,7 +310,7 @@ class RoleController extends Controller
 
         $fonts = array_unique($fonts);
         */
-        
+
         $response = response()
             ->view($view, compact(
             'subdomain',
@@ -794,6 +794,12 @@ class RoleController extends Controller
         $links = json_decode($links);
 
         foreach(explode(',', $request->link) as $link) {
+            $link = trim($link);
+
+            if (! $link) {
+                continue;
+            }
+
             $links[] = UrlUtils::getUrlDetails($link);
         }
 
