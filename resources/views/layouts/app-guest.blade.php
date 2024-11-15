@@ -46,6 +46,12 @@
         @endforeach
 
         <style>
+        @if (request()->embed)
+        html {
+            height: 100%;
+        }
+        @endif
+
         body {
             @media (prefers-color-scheme: dark) {
                 color: #33383C !important;
