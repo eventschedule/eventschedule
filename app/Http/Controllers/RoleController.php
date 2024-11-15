@@ -296,6 +296,7 @@ class RoleController extends Controller
         }
 
         $fonts = [];
+        /*
         if ($event) {
             $fonts[] = $event->venue->font_family;
             foreach ($event->roles as $each) {
@@ -308,7 +309,8 @@ class RoleController extends Controller
         }
 
         $fonts = array_unique($fonts);
-
+        */
+        
         $response = response()
             ->view($view, compact(
             'subdomain',
