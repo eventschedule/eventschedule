@@ -213,7 +213,9 @@
           </div>
           @endif
           @foreach ($event->roles as $each)
-          <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4">
+          <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4" 
+            style="font-family: {{ $each->isClaimed() ? $each->font_family : $otherRole->font_family }}, sans-serif;"
+          >
             <div
               class="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center"
             >
@@ -307,7 +309,7 @@
 
       <div class="flex flex-col gap-6">
         @if ($event->venue)
-        <div class="p-6 rounded-xl flex flex-col gap-6" style="background-color: {{ $otherRole->accent_color ?? '#4E81FA' }}">
+        <div class="p-6 rounded-xl flex flex-col gap-6" style="background-color: {{ $otherRole->accent_color ?? '#4E81FA' }}; font-family: {{ $event->venue->font_family }}, sans-serif;">
           <h4 class="text-white text-[24px] leading-snug font-semibold">
             {{ $event->venue->name }}
           </h4>
