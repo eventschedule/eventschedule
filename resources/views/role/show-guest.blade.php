@@ -15,7 +15,7 @@
           <div class="px-6 lg:px-16 pb-12 relative z-10">
             @if ($role->profile_image_url)
             <img
-              class="rounded-2xl w-[180px] h-[180px] -mt-[90px] mb-8 object-cover border-solid border-sm border-[#F5F9FE]"
+              class="rounded-2xl w-[180px] h-[180px] -mt-[90px] mb-8"
               src="{{ $role->profile_image_url }}"
               alt="person"
             />
