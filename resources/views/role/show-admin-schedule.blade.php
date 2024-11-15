@@ -14,7 +14,7 @@
             <a href="{{ $event->role()->getGuestUrl() }}" target="_blank">
                 <div class="flex flex-1 flex-col p-8">
                     @if ($event->role()->profile_image_url)
-                    <img class="mx-auto h-32 w-32 flex-shrink-0 object-cover"
+                    <img class="mx-auto rounded-2xl h-32 w-32 flex-shrink-0 object-cover"
                         src="{{ $event->role()->profile_image_url }}"
                         alt="Profile Image">
                     @endif

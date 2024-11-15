@@ -123,7 +123,7 @@
         <div class="mt-2 flex items-center justify-between">
             @if ($role->profile_image_url)
                 <div class="pr-4">
-                    <img src="{{ $role->profile_image_url }}" class="h-14 w-14 flex-none">
+                    <img src="{{ $role->profile_image_url }}" class="rounded-2xl h-14 w-14 flex-none">
                 </div>
             @endif
             <div class="min-w-0 flex-1">
