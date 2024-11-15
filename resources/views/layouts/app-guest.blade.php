@@ -53,7 +53,7 @@
             @media (prefers-color-scheme: light) {
                 color: #33383C !important;
             }
-            font-family: '{{ $otherRole ? $otherRole->font_family : $role->font_family }}', sans-serif !important;
+            font-family: '{{ isset($otherRole) && $otherRole ? $otherRole->font_family : $role->font_family }}', sans-serif !important;
             min-height: 100%;
             background-attachment: scroll;
             @if ($event && $otherRole && $otherRole->isClaimed())
