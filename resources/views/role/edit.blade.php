@@ -48,7 +48,7 @@
                 const preview = document.getElementById(previewId);
                 const file = input.files[0];
                 const reader = new FileReader();
-                var warningElement = document.getElementById('image_size_warning');
+                var warningElement = document.getElementById(previewId.split('_')[0] + '_image_size_warning');
 
                 reader.onloadend = function () {
                     const img = new Image();
@@ -62,7 +62,7 @@
                             warningMessage += "{{ __('messages.image_size_warning') }}";
                         }
 
-                        if (width !== height) {
+                        if (width !== height && previewId == 'profile_image_preview') {
                             if (warningMessage) warningMessage += " ";
                             warningMessage += "{{ __('messages.image_not_square') }}";
                         }
@@ -75,7 +75,7 @@
                             warningElement.style.display = 'none';
                         }
 
-                        if (width === height && fileSize <= 2.5) {
+                        if (warningMessage == '') {
                             preview.src = reader.result;
                             preview.style.display = 'block';
                             updatePreview();
@@ -105,6 +105,10 @@
 
             $('#profile_image').on('change', function() {
                 previewImage(this, 'profile_image_preview');
+            });
+
+            $('#header_image').on('change', function() {
+                previewImage(this, 'header_image_preview');
             });
 
             $('#background_image').on('change', function() {
@@ -305,7 +309,7 @@
                             <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full"
                                 :value="old('profile_image')" accept="image/png, image/jpeg" />
                             <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
-                            <p id="image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                            <p id="profile_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
                                 {{ __('messages.image_size_warning') }}
                             </p>
 
@@ -326,7 +330,7 @@
                             <input id="header_image" name="header_image" type="file" class="mt-1 block w-full"
                                 :value="old('header_image')" accept="image/png, image/jpeg" />
                             <x-input-error class="mt-2" :messages="$errors->get('header_image')" />
-                            <p id="image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                            <p id="header_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
                                 {{ __('messages.image_size_warning') }}
                             </p>
 
@@ -486,6 +490,9 @@
                                     @endforeach
                                 </select>
                                 <x-input-error class="mt-2" :messages="$errors->get('background')" />
+                                <p id="background_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                                    {{ __('messages.image_size_warning') }}
+                                </p>
                             </div>
 
                             <div class="mb-6" id="style_background_image" style="display:none">
