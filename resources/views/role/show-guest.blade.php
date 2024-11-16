@@ -7,10 +7,14 @@
           <div
             class="relative before:block before:absolute before:bg-[#00000033] before:-inset-0"
           >
+            @if ($role->header_image_url)
             <img
               class="block max-h-72 w-full object-cover rounded-t-2xl"
-              src="{{ $role->header_image_url ? $role->header_image_url : './images/slider-image.jpeg' }}"
+              src="{{ $role->header_image_url }}"
             />
+            @else
+            <div class="max-h-72 w-full bg-[#4E81FA]"></div>
+            @endif
           </div>
           <div class="px-6 lg:px-16 pb-12 relative z-10">
             @if ($role->profile_image_url)

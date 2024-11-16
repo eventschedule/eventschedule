@@ -63,7 +63,6 @@
             min-height: 100%;
             background-attachment: scroll;
             @if ($event && $otherRole && $otherRole->isClaimed())
-                color: {{ $otherRole->font_color }} !important;
                 background-color: #888 !important;
                 @if ($otherRole->background == 'gradient')
                     background-image: linear-gradient({{ $otherRole->background_rotation }}deg, {{ $otherRole->background_colors }});
@@ -76,7 +75,6 @@
                     margin: 0;
                 @endif
             @else
-                color: {{ $role->font_color }} !important;
                 background-color: #888 !important;
                 @if ($role->background == 'gradient')
                     background-image: linear-gradient({{ $role->background_rotation }}deg, {{ $role->background_colors }});
