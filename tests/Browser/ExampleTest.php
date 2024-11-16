@@ -55,6 +55,7 @@ class ExampleTest extends DuskTestCase
             // Create/edit venue
             $browser->visit('/new/venue')
                     ->type('name', 'Test Venue')
+                    ->type('address1', '123 Test St')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
                     ->assertPathIs('/testvenue')
