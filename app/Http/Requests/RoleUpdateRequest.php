@@ -27,6 +27,7 @@ class RoleUpdateRequest extends FormRequest
             'new_subdomain' => ['required', 'string', 'max:255', 'min:4', 'max:50'],
             'profile_image' => ['image', 'max:2500', new SquareImage],
             'background_image_url' => ['image', 'max:2500'],
+            'header_image_url' => ['image', 'max:2500'],
         ];
     }
 }

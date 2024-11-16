@@ -57,6 +57,17 @@ class RoleController extends Controller
                 $role->background_image_url = null;
                 $role->save();
             }    
+        } else if ($request->image_type == 'header') {
+            if ($role->header_image_url) {
+                $path = $role->getAttributes()['header_image_url'];
+                if (config('filesystems.default') == 'local') {
+                    $path = 'public/' . $path;
+                }
+                Storage::delete($path);
+
+                $role->header_image_url = null;
+                $role->save();
+            }
         }
 
         return redirect(route('role.edit', ['subdomain' => $subdomain]))
@@ -75,6 +86,14 @@ class RoleController extends Controller
 
         if ($role->profile_image_url) {
             $path = $role->getAttributes()['profile_image_url'];
+            if (config('filesystems.default') == 'local') {
+                $path = 'public/' . $path;
+            }
+            Storage::delete($path);
+        }
+
+        if ($role->header_image_url) {
+            $path = $role->getAttributes()['header_image_url'];
             if (config('filesystems.default') == 'local') {
                 $path = 'public/' . $path;
             }
@@ -643,6 +662,23 @@ class RoleController extends Controller
             $role->save();
         }
 
+        if ($request->hasFile('header_image')) {
+            if ($role->header_image_url) {
+                $path = $role->getAttributes()['header_image_url'];
+                if (config('filesystems.default') == 'local') {
+                    $path = 'public/' . $path;
+                }
+                Storage::delete($path);
+            }
+
+            $file = $request->file('header_image');
+            $filename = strtolower('header_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+
+            $role->header_image_url = $filename;
+            $role->save();
+        }
+
         if ($role->background == 'image' && $request->hasFile('background_image')) {
             if ($role->background_image_url) {
                 $path = $role->getAttributes()['background_image_url'];
@@ -747,6 +783,23 @@ class RoleController extends Controller
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             $role->profile_image_url = $filename;
+            $role->save();
+        }
+
+        if ($request->hasFile('header_image')) {
+            if ($role->header_image_url) {
+                $path = $role->getAttributes()['header_image_url'];
+                if (config('filesystems.default') == 'local') {
+                    $path = 'public/' . $path;
+                }
+                Storage::delete($path);
+            }
+
+            $file = $request->file('header_image');
+            $filename = strtolower('header_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+
+            $role->header_image_url = $filename;
             $role->save();
         }
 

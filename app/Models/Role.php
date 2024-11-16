@@ -220,6 +220,21 @@ class Role extends Model implements MustVerifyEmail
         return $this->email_verified_at != null && $this->user_id != null;
     }
 
+    public function getHeaderImageUrlAttribute($value)
+    {
+        if (! $value) {
+            return '';
+        }
+
+        if (config('filesystems.default') == 'do_spaces') {
+            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $value;
+        } else if (config('filesystems.default') == 'local') {
+            return url('/storage/' . $value);
+        } else {
+            return $value;
+        }
+    }
+
     public function getProfileImageUrlAttribute($value)
     {
         if (! $value) {
