@@ -54,6 +54,13 @@ class Event extends Model
         return $this->belongsToMany(Role::class);
     }
 
+    public function members()
+    {
+        return $this->roles->filter(function($role) {
+            return $role->isSchedule();
+        });
+    }
+
     public function role()
     {
         return $this->roles->first(function($role) {
