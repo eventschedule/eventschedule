@@ -223,7 +223,7 @@
             <img src="{{ $event->flyer_image_url }}" class="block"/>
           </div>
           @endif
-          @foreach ($event->roles as $each)
+          @foreach ($event->members() as $each)          
           <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4" 
             style="font-family: {{ $each->isClaimed() ? $each->font_family : $otherRole->font_family }}, sans-serif;"
           >
