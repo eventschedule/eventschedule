@@ -83,7 +83,7 @@
                 >
               </div>
               @endif
-              @if($role->email)
+              @if($role->email && $role->show_email)
               <div
                 class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] fill-[#33383C] hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px]"
               >
