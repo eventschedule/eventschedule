@@ -1,5 +1,5 @@
 <div class="flex h-full flex-col pt-1">
-    <header class="flex items-center justify-between md:pl-6 py-4 md:flex-none">
+    <header class="flex items-center justify-between py-4 md:flex-none">
         <h1 class="text-lg font-semibold leading-6">
             <time
                 datetime="{{ sprintf('%04d-%02d', $year, $month) }}">{{ Carbon\Carbon::create($year, $month, 1)->format('F Y') }}</time>
