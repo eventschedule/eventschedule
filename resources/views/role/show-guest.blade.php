@@ -13,7 +13,7 @@
               src="{{ $role->header_image_url }}"
             />
             @else
-            <div class="max-h-72 w-full bg-[#4E81FA]"></div>
+            <div class="h-72 w-full bg-[#ccc] rounded-t-2xl"></div>
             @endif
           </div>
           <div class="px-6 lg:px-16 pb-12 relative z-10">
