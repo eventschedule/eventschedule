@@ -127,4 +127,5 @@ return [
     'address_not_found' => 'כתובת לא נמצאה',
     'create_schedule' => 'צור לוח זמנים',
     'create_your_own_event_schedule' => 'צור לוח זמנים משלך!',
+    'header_image' => 'תמונת כותרת',
 ];

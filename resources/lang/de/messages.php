@@ -282,4 +282,5 @@ return [
     'social_media' => 'Soziale Medien',
     'create_schedule' => 'Zeitplan erstellen',
     'create_your_own_event_schedule' => 'Erstellen Sie Ihren eigenen Veranstaltungsplan!',
+    'header_image' => 'Kopfzeile',
 ];

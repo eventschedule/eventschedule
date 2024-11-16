@@ -131,4 +131,5 @@ return [
     'address_not_found' => 'Adres niet gevonden',
     'create_schedule' => 'Schema Aanmaken',
     'create_your_own_event_schedule' => 'Maak je eigen evenementenschema!',
+    'header_image' => 'Header Image',
 ];

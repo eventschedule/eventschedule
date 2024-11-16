@@ -285,4 +285,5 @@ return [
     'social_media' => 'Réseaux Sociaux',
     'create_schedule' => 'Créer un Programme',
     'create_your_own_event_schedule' => 'Créez votre propre programme d\'événements !',
+    'header_image' => 'Image de la Barre d\'En-Tête',
 ];

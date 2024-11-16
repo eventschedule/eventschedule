@@ -285,4 +285,6 @@ return [
     'social_media' => 'Social Media',
     'create_schedule' => 'Create Schedule',
     'create_your_own_event_schedule' => 'Create your own event schedule!',
+    'header_image' => 'Header Image',
+    //
 ];

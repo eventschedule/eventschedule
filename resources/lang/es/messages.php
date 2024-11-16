@@ -285,4 +285,5 @@ return [
     'social_media' => 'Redes Sociales',
     'create_schedule' => 'Crear Horario',
     'create_your_own_event_schedule' => '¡Crea tu propio horario de eventos!',
+    'header_image' => 'Imagen de Cabecera',
 ];
