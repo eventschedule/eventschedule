@@ -321,6 +321,27 @@
                             @endif
                         </div>
 
+                        <div class="mb-6">
+                            <x-input-label for="header_image" :value="__('messages.header_image')" />
+                            <input id="header_image" name="header_image" type="file" class="mt-1 block w-full"
+                                :value="old('header_image')" accept="image/png, image/jpeg" />
+                            <x-input-error class="mt-2" :messages="$errors->get('header_image')" />
+                            <p id="image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                                {{ __('messages.image_size_warning') }}
+                            </p>
+
+                            <img id="header_image_preview" src="#" alt="Header Image Preview" style="max-height:120px; display:none;" class="pt-3" />
+
+                            @if ($role->header_image_url)
+                            <img src="{{ $role->header_image_url }}" style="max-height:120px" class="pt-3" />
+                            <a href="#"
+                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}'; }"
+                                class="hover:underline">
+                                {{ __('messages.delete_image') }}
+                            </a>
+                            @endif
+                        </div>
+
                     </div>
                 </div>
 

@@ -9,7 +9,7 @@
           >
             <img
               class="block max-h-72 w-full object-cover rounded-t-2xl"
-              src="./images/slider-image.jpeg"
+              src="{{ $role->header_image_url ? $role->header_image_url : './images/slider-image.jpeg' }}"
             />
           </div>
           <div class="px-6 lg:px-16 pb-12 relative z-10">

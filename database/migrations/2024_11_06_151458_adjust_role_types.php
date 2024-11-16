@@ -27,6 +27,7 @@ return new class extends Migration
         Schema::table('roles', function (Blueprint $table) {
             $table->boolean('accept_requests')->default(false);
             $table->boolean('is_deleted')->default(false);
+            $table->string('header_image_url')->nullable();
 
             $table->dropColumn('accept_vendor_requests');
             $table->dropColumn('accept_talent_requests');            
@@ -44,6 +45,7 @@ return new class extends Migration
 
             $table->dropColumn('accept_requests');
             $table->dropColumn('is_deleted');
+            $table->dropColumn('header_image_url');
         });
     }
 };

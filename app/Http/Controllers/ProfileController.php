@@ -91,6 +91,14 @@ class ProfileController extends Controller
                 Storage::delete($path);
             }
     
+            if ($role->header_image_url) {
+                $path = $role->getAttributes()['header_image_url'];
+                if (config('filesystems.default') == 'local') {
+                    $path = 'public/' . $path;
+                }
+                Storage::delete($path);
+            }
+    
             if ($role->background_image_url) {
                 $path = $role->getAttributes()['background_image_url'];
                 if (config('filesystems.default') == 'local') {
