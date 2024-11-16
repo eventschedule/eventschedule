@@ -134,4 +134,5 @@ return [
     'address_not_found' => 'Indirizzo non trovato',
     'create_schedule' => 'Crea Programma',
     'create_your_own_event_schedule' => 'Crea il tuo programma di eventi!',
+    'header_image' => 'Immagine della Barra d\'Intestazione',
 ];

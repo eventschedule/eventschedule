@@ -282,4 +282,5 @@ return [
     'social_media' => 'وسائل التواصل الاجتماعي',
     'create_schedule' => 'إنشاء جدول',
     'create_your_own_event_schedule' => 'أنشئ جدول أحداثك الخاص!',
+    'header_image' => 'صورة الرأس',
 ];

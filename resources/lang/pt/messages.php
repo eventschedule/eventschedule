@@ -132,4 +132,5 @@ return [
     'address_not_found' => 'Endereço não encontrado',
     'create_schedule' => 'Criar Agenda',
     'create_your_own_event_schedule' => 'Crie sua própria agenda de eventos!',
+    'header_image' => 'Imagem da Barra de Título',
 ];
