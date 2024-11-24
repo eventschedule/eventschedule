@@ -338,8 +338,7 @@
                     <p class="mt-6 text-lg leading-8 text-gray-300">We'd love to hear from you! Whether you have
                         questions,
                         feedback, or need assistance, you can reach out to us by sending an email to <a
-                            href="mailto:contact@eventschedule.com">contact@eventschedule.com</a>
-                        or by filling out the contact form.</p>
+                            href="mailto:contact@eventschedule.com">contact@eventschedule.com</a>.
                     <dl class="mt-10 space-y-4 text-base leading-7 text-gray-300">
                         <!--
                         <div class="flex gap-x-4">
