@@ -969,8 +969,11 @@ class RoleController extends Controller
 
     public function signUp(Request $request, $subdomain)
     {
-        session(['pending_venue' => $subdomain]);
-
+        if (! auth()->user()) {
+            session(['pending_venue' => $subdomain]);
+            return redirect()->route('sign_up');
+        }
+        
         $mainDomain = config('app.url');
         $user = auth()->user();
         
