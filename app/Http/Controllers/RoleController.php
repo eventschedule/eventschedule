@@ -1150,7 +1150,7 @@ class RoleController extends Controller
                 'address2', 
                 'city', 
                 'state', 
-                'zip', 
+                'postal_code', 
                 'email',
                 'user_id',
                 'profile_image_url',
