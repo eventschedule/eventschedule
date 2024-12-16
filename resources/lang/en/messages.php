@@ -270,7 +270,6 @@ return [
     'view_curator' => 'View Curator',
     'event_name' => 'Event Name',
     'following' => 'Following',
-    'standard' => 'Standard',
     'schedule' => 'Schedule',
     'schedules' => 'Schedules',
     'new_schedule' => 'New Schedule',

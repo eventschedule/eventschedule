@@ -270,7 +270,6 @@ return [
     'view_curator' => 'Voir le Conservateur',
     'event_name' => 'Nom de l\'Événement',
     'following' => 'Suivant',
-    'standard' => 'Standard',
     'schedule' => 'Programme',
     'schedules' => 'Programmes',
     'new_schedule' => 'Nouveau Programme',
