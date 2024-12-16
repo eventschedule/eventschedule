@@ -267,7 +267,6 @@ return [
     'view_curator' => 'Kurator anzeigen',
     'event_name' => 'Veranstaltungsname',
     'following' => 'Folgen',
-    'standard' => 'Standard',
     'schedule' => 'Zeitplan',
     'schedules' => 'Zeitpläne',
     'new_schedule' => 'Neuer Zeitplan',

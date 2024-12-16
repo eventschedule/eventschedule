@@ -270,7 +270,6 @@ return [
     'view_curator' => 'Ver Curador',
     'event_name' => 'Nombre del Evento',
     'following' => 'Siguiendo',
-    'standard' => 'Estándar',
     'schedule' => 'Horario',
     'schedules' => 'Horarios',
     'new_schedule' => 'Nuevo Horario',

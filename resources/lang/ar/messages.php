@@ -267,7 +267,6 @@ return [
     'view_curator' => 'عرض المنظم',
     'event_name' => 'اسم الحدث',
     'following' => 'متابعة',
-    'standard' => 'قياسي',
     'schedule' => 'جدول',
     'schedules' => 'الجداول',
     'new_schedule' => 'جدول جديد',
