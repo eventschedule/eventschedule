@@ -286,4 +286,5 @@ return [
     'create_your_own_event_schedule' => 'Create your own event schedule!',
     'header_image' => 'Header Image',
     //
+    'events' => 'Events',
 ];
