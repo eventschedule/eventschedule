@@ -24,7 +24,7 @@ Route::post('/unsubscribe', [RoleController::class, 'unsubscribe'])->name('role.
 
 Route::middleware(['auth', 'verified'])->group(function () 
 {
-    Route::get('/home', [HomeController::class, 'home'])->name('home');
+    Route::get('/events', [HomeController::class, 'home'])->name('home');
     
     Route::get('/new/{type}', [RoleController::class, 'create'])->name('new');
     Route::post('/validate_address', [RoleController::class, 'validateAddress'])->name('validate_address')->middleware('throttle:25,1440');
