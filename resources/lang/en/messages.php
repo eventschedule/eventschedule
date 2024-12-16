@@ -287,4 +287,5 @@ return [
     'header_image' => 'Header Image',
     //
     'events' => 'Events',
+    'manage_account' => 'Manage Account',
 ];
