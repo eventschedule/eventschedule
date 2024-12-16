@@ -33,9 +33,9 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/edit_event/{hash}', [EventController::class, 'editAdmin'])->name('event.edit_admin');
     Route::get('/following', [RoleController::class, 'following'])->name('following');
     
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/account', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/account', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/account', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::post('/{subdomain}/availability', [RoleController::class, 'availability'])->name('role.availability');
     Route::get('/{subdomain}/edit', [RoleController::class, 'edit'])->name('role.edit');
