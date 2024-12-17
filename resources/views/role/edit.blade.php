@@ -283,7 +283,7 @@
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('messages.details') }}
+                            {{ __('messages.' . $role->type . '_details') }}
                         </h2>
 
                         @if(! $role->exists)
@@ -354,7 +354,7 @@
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('messages.address') }}
+                            {{ __('messages.venue_address') }}
                         </h2>
 
                         <div class="mb-6">
@@ -451,7 +451,7 @@
                     <div>
 
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                        {{ __('messages.style') }}
+                        {{ __('messages.schedule_style') }}
                     </h2>
 
                     <div class="flex flex-col lg:flex-row gap-6">
@@ -575,7 +575,7 @@
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('messages.settings') }}
+                            {{ __('messages.schedule_settings') }}
                         </h2>
                         
                         @if ($role->exists)
