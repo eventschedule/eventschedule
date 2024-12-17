@@ -288,4 +288,13 @@ return [
     //
     'events' => 'Events',
     'manage_account' => 'Manage Account',
+    'venue_details' => 'Venue Details',
+    'curator_details' => 'Curator Details',
+    'schedule_details' => 'Schedule Details',
+    'venue_address' => 'Venue Address',
+    'schedule_settings' => 'Schedule Settings',
+    'schedule_style' => 'Schedule Style',
+    'event_venue' => 'Event Venue',
+    'event_members' => 'Event Members',
+    'event_details' => 'Event Details',
 ];
