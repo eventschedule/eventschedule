@@ -26,6 +26,32 @@
             font-size: 3rem;
         }
 
+        .color-select-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .color-nav-button {
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.375rem;
+            border: 1px solid #e5e7eb;
+            background: white;
+            cursor: pointer;
+        }
+
+        .color-nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .color-nav-button:hover:not(:disabled) {
+            background: #f3f4f6;
+        }
+
         </style>
 
         <script>
@@ -257,6 +283,26 @@
                 // Hide the address response and accept button after accepting
                 $('#address_response').hide();
                 $('#accept_button').hide();
+            }
+        }
+
+        function updateColorNavButtons() {
+            const select = document.getElementById('background_colors');
+            const prevButton = document.getElementById('prev_color');
+            const nextButton = document.getElementById('next_color');
+            
+            prevButton.disabled = select.selectedIndex === 0;
+            nextButton.disabled = select.selectedIndex === select.options.length - 1;
+        }
+
+        function changeBackgroundColor(direction) {
+            const select = document.getElementById('background_colors');
+            const newIndex = select.selectedIndex + direction;
+            
+            if (newIndex >= 0 && newIndex < select.options.length) {
+                select.selectedIndex = newIndex;
+                select.dispatchEvent(new Event('input'));
+                updateColorNavButtons();
             }
         }
 
@@ -519,14 +565,36 @@
                             <div id="style_background_gradient" style="display:none">
                                 <div class="mb-6">
                                     <x-input-label for="background_colors" :value="__('messages.colors')" />
-                                    <select id="background_colors" name="background_colors" oninput="updatePreview()"
-                                        class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
-                                        @foreach($gradients as $gradient => $name)
-                                        <option value="{{ $gradient }}"
-                                            {{ $role->background_colors == $gradient || (! array_key_exists($role->background_colors, $gradients) && ! $gradient) ? 'SELECTED' : '' }}>
-                                            {{ $name }}</option>
-                                        @endforeach
-                                    </select>
+                                    <div class="color-select-container">
+                                        <select id="background_colors" name="background_colors" oninput="updatePreview(); updateColorNavButtons()"
+                                            class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                            @foreach($gradients as $gradient => $name)
+                                            <option value="{{ $gradient }}"
+                                                {{ $role->background_colors == $gradient || (! array_key_exists($role->background_colors, $gradients) && ! $gradient) ? 'SELECTED' : '' }}>
+                                                {{ $name }}</option>
+                                            @endforeach
+                                        </select>
+                                    
+                                        <button type="button" 
+                                                id="prev_color" 
+                                                class="color-nav-button" 
+                                                onclick="changeBackgroundColor(-1)"
+                                                title="{{ __('messages.previous') }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                            </svg>
+                                        </button>
+                                                                                
+                                        <button type="button" 
+                                                id="next_color" 
+                                                class="color-nav-button" 
+                                                onclick="changeBackgroundColor(1)"
+                                                title="{{ __('messages.next') }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                            </svg>
+                                        </button>
+                                    </div>
                                     <div class="text-xs pt-1">
                                         <a href="https://uigradients.com" target="_blank" class="hover:underline">{{ __('messages.gradients_from', ['name' => 'uiGradients']) }}</a>
                                     </div>
