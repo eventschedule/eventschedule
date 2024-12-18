@@ -217,7 +217,10 @@
                     .css('background-color', '')
                     .css('background-image', gradient);
             } else if (background == 'image') {
-                var backgroundImageUrl = $('#background_image_preview').attr('src') || "{{ $role->background_image_url }}";
+
+                //var backgroundImageUrl = $('#background_image_preview').attr('src') || "{{ $role->background_image_url }}";
+                var backgroundImageUrl = "{{ asset('images/backgrounds') }}" + '/' + $('#background_image_url').find(':selected').val() + '.png';
+                console.log(backgroundImageUrl);
                 $('#preview')
                     .css('background-color', '')
                     .css('background-image', 'url("' + backgroundImageUrl + '")');
@@ -310,7 +313,7 @@
             }
         }
 
-        function updateImageNavButtons() {
+        function updateImageNavButtons() { 
             const select = document.getElementById('background_image_url');
             const prevButton = document.getElementById('prev_image');
             const nextButton = document.getElementById('next_image');
@@ -613,15 +616,12 @@
                                             "River_of_Dreams",
                                             "Sea_Chaos",
                                             "Simple",
-                                            "Storm",
                                             "Stormy_Night",
                                             "Tatooin",
-                                            "Tile_Me_Blue",
                                             "Trippy",
-                                            "Washed_Oragami",
                                         ] as $image)
-                                        <option value="{{ $background }}"
-                                            {{ $role->background == $background ? 'SELECTED' : '' }}>
+                                        <option value="{{ $image }}"
+                                            {{ str_ends_with($role->background_image_url, $image) ? 'SELECTED' : '' }}>
                                             {{ str_replace('_', ' ', $image) }}</option>
                                         @endforeach
                                     </select>
