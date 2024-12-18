@@ -69,6 +69,7 @@
             onChangeBackground();
             onChangeCountry();
             onChangeFont();
+            updateImageNavButtons();
 
             function previewImage(input, previewId) {
                 const preview = document.getElementById(previewId);
@@ -306,6 +307,26 @@
                 select.selectedIndex = newIndex;
                 select.dispatchEvent(new Event('input'));
                 updateColorNavButtons();
+            }
+        }
+
+        function updateImageNavButtons() {
+            const select = document.getElementById('background_image');
+            const prevButton = document.getElementById('prev_image');
+            const nextButton = document.getElementById('next_image');
+            
+            prevButton.disabled = select.selectedIndex === 0;
+            nextButton.disabled = select.selectedIndex === select.options.length - 1;
+        }
+
+        function changeBackgroundImage(direction) {
+            const select = document.getElementById('background_image');
+            const newIndex = select.selectedIndex + direction;
+            
+            if (newIndex >= 0 && newIndex < select.options.length) {
+                select.selectedIndex = newIndex;
+                select.dispatchEvent(new Event('input'));
+                updateImageNavButtons();
             }
         }
 
@@ -553,57 +574,78 @@
 
                             <div class="mb-6" id="style_background_image" style="display:none">
                                 <x-input-label for="image" :value="__('messages.image')" />
-                                <select id="background" name="background"
-                                    class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm mb-6"
-                                    oninput="onChangeBackground(); updatePreview();">
-                                    @foreach([                                        
-                                        "Abstract_Sunrise",
-                                        "Abstract_Sunset",
-                                        "Autumn",
-                                        "Barn_Wall",
-                                        "Bloomless",
-                                        "Book_Abstract",
-                                        "Bookshelf",
-                                        "Calm",
-                                        "Celebrate",
-                                        "Class",
-                                        "Color_Splash",
-                                        "Desert_Retreat",
-                                        "Fall_Pastel",
-                                        "Flower_Experience",
-                                        "Flower_Field",
-                                        "Flowers_of_Fire",
-                                        "Gallery",
-                                        "Garden",
-                                        "Go_Green",
-                                        "Green_Splash",
-                                        "Greyscale",
-                                        "Leafy_Blues",
-                                        "Nature_Layers",
-                                        "Not_Orange",
-                                        "Oil_Pallet",
-                                        "Painted_Fence",
-                                        "Picnic",
-                                        "Purple_Lillies",
-                                        "Rainbow_Splash",
-                                        "Rainbow",
-                                        "RGBIV",
-                                        "River_of_Dreams",
-                                        "Sea_Chaos",
-                                        "Simple",
-                                        "Storm",
-                                        "Stormy_Night",
-                                        "Tatooin",
-                                        "Tile_Me_Blue",
-                                        "Trippy",
-                                        "Washed_Oragami",
-                                    ] as $image)
-                                    <option value="{{ $background }}"
-                                        {{ $role->background == $background ? 'SELECTED' : '' }}>
-                                        {{ str_replace('_', ' ', $image) }}</option>
-                                    @endforeach
-                                </select>
-                                <x-input-error class="mt-2" :messages="$errors->get('background')" />
+                                <div class="color-select-container">
+                                    <select id="background" name="background"
+                                        class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                        oninput="onChangeBackground(); updatePreview(); updateImageNavButtons();">
+                                        @foreach([                                        
+                                            "Abstract_Sunrise",
+                                            "Abstract_Sunset",
+                                            "Autumn",
+                                            "Barn_Wall",
+                                            "Bloomless",
+                                            "Book_Abstract",
+                                            "Bookshelf",
+                                            "Calm",
+                                            "Celebrate",
+                                            "Class",
+                                            "Color_Splash",
+                                            "Desert_Retreat",
+                                            "Fall_Pastel",
+                                            "Flower_Experience",
+                                            "Flower_Field",
+                                            "Flowers_of_Fire",
+                                            "Gallery",
+                                            "Garden",
+                                            "Go_Green",
+                                            "Green_Splash",
+                                            "Greyscale",
+                                            "Leafy_Blues",
+                                            "Nature_Layers",
+                                            "Not_Orange",
+                                            "Oil_Pallet",
+                                            "Painted_Fence",
+                                            "Picnic",
+                                            "Purple_Lillies",
+                                            "Rainbow_Splash",
+                                            "Rainbow",
+                                            "RGBIV",
+                                            "River_of_Dreams",
+                                            "Sea_Chaos",
+                                            "Simple",
+                                            "Storm",
+                                            "Stormy_Night",
+                                            "Tatooin",
+                                            "Tile_Me_Blue",
+                                            "Trippy",
+                                            "Washed_Oragami",
+                                        ] as $image)
+                                        <option value="{{ $background }}"
+                                            {{ $role->background == $background ? 'SELECTED' : '' }}>
+                                            {{ str_replace('_', ' ', $image) }}</option>
+                                        @endforeach
+                                    </select>
+
+                                    <button type="button" 
+                                            id="prev_image" 
+                                            class="color-nav-button" 
+                                            onclick="changeBackgroundImage(-1)"
+                                            title="{{ __('messages.previous') }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                        </svg>
+                                    </button>
+                                                                                
+                                    <button type="button" 
+                                            id="next_image" 
+                                            class="color-nav-button" 
+                                            onclick="changeBackgroundImage(1)"
+                                            title="{{ __('messages.next') }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                        </svg>
+                                    </button>
+                                </div>
 
                                 <input id="background_image" name="background_image" type="file" class="mt-1 block w-full"
                                     :value="old('background_image')" oninput="updatePreview()" accept="image/png, image/jpeg" />
