@@ -156,11 +156,11 @@
             $('#style_background_solid').hide();
             
             if (background == 'image') {
-                $('#style_background_image').fadeIn();
+                $('#style_background_image').show();
             } else if (background == 'gradient') {
-                $('#style_background_gradient').fadeIn();
+                $('#style_background_gradient').show();
             } else if (background == 'solid') {
-                $('#style_background_solid').fadeIn();
+                $('#style_background_solid').show();
             }
         }
 
