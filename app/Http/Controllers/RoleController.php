@@ -607,7 +607,7 @@ class RoleController extends Controller
         asort($gradientOptions);
 
         $gradientOptions = [
-            '' => 'Custom',
+            '' => __('messages.custom'),
         ] + $gradientOptions;
 
         $fonts = file_get_contents(base_path('storage/fonts.json'));
@@ -728,8 +728,7 @@ class RoleController extends Controller
         asort($gradientOptions);
 
         $gradientOptions = [
-            '#7468E6, #C44B85' => 'Default', 
-            '' => 'Custom',
+            '' => __('messages.custom'),
         ] + $gradientOptions;
 
         $fonts = file_get_contents(base_path('storage/fonts.json'));
