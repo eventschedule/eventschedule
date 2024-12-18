@@ -633,7 +633,7 @@
                                             "Trippy",
                                         ] as $image)
                                         <option value="{{ $image }}"
-                                            {{ str_ends_with($role->background_image_url, $image) ? 'SELECTED' : '' }}>
+                                            {{ $role->background_image == $image ? 'SELECTED' : '' }}>
                                             {{ str_replace('_', ' ', $image) }}</option>
                                         @endforeach
                                     </select>
