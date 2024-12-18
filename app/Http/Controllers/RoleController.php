@@ -682,7 +682,7 @@ class RoleController extends Controller
         if ($role->background == 'image' && $request->background_image) {
             $role->background_image = $request->background_image;
             $role->save();
-        } elseif ($role->background == 'image' && $request->hasFile('background_image')) {
+        } elseif ($role->background == 'image' && $request->hasFile('background_image_url')) {
             if ($role->background_image_url) {
                 $path = $role->getAttributes()['background_image_url'];
                 if (config('filesystems.default') == 'local') {
@@ -691,7 +691,7 @@ class RoleController extends Controller
                 Storage::delete($path);
             }
 
-            $file = $request->file('background_image');
+            $file = $request->file('background_image_url');
             $filename = strtolower('background_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
@@ -808,7 +808,7 @@ class RoleController extends Controller
         if ($role->background == 'image' && $request->background_image) {
             $role->background_image = $request->background_image;
             $role->save();
-        } elseif ($role->background == 'image' && $request->hasFile('background_image')) {
+        } elseif ($role->background == 'image' && $request->hasFile('background_image_url')) {
             if ($role->background_image_url) {
                 $path = $role->getAttributes()['background_image_url'];
                 if (config('filesystems.default') == 'local') {
@@ -817,7 +817,7 @@ class RoleController extends Controller
                 Storage::delete($path);
             }
 
-            $file = $request->file('background_image');
+            $file = $request->file('background_image_url');
             $filename = strtolower('background_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 

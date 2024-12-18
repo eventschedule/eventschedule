@@ -672,16 +672,16 @@
                                         accept="image/png, image/jpeg" />
 
                                     <img id="background_image_preview" src="" alt="Background Image Preview" style="max-height:120px; display:none;" class="pt-3" />
-                                </div>
 
-                                @if ($role->background_image_url)
-                                <img src="{{ $role->background_image_url }}" style="max-height:120px" class="pt-3" />
-                                <a href="#"
-                                    onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}'; return false; }"
-                                    class="hover:underline">
-                                    {{ __('messages.delete_image') }}
-                                </a>
-                                @endif
+                                    @if ($role->background_image_url)
+                                    <img src="{{ $role->background_image_url }}" style="max-height:120px" class="pt-3" />
+                                    <a href="#"
+                                        onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}'; return false; }"
+                                        class="hover:underline">
+                                        {{ __('messages.delete_image') }}
+                                    </a>
+                                    @endif
+                                </div>
                             </div>
 
                             <div id="style_background_gradient" style="display:none">
