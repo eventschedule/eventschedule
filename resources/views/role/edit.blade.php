@@ -70,6 +70,7 @@
             onChangeCountry();
             onChangeFont();
             updateImageNavButtons();
+            toggleCustomImageInput();
 
             function previewImage(input, previewId) {
                 const preview = document.getElementById(previewId);
@@ -219,7 +220,6 @@
             } else if (background == 'image') {
                 //var backgroundImageUrl = $('#background_image_preview').attr('src') || "{{ $role->background_image_url }}";
                 var backgroundImageUrl = "{{ asset('images/backgrounds') }}" + '/' + $('#background_image_url').find(':selected').val() + '.png';
-                console.log(backgroundImageUrl);
                 $('#preview')
                     .css('background-color', '')
                     .css('background-image', 'url("' + backgroundImageUrl + '")');
@@ -330,6 +330,12 @@
                 select.dispatchEvent(new Event('input'));
                 updateImageNavButtons();
             }
+        }
+
+        function toggleCustomImageInput() {
+            const select = document.getElementById('background_image_url');
+            const customInput = document.getElementById('custom_image_input');
+            customInput.style.display = select.value === '' ? 'block' : 'none';
         }
 
         </script>
@@ -576,10 +582,10 @@
 
                             <div class="mb-6" id="style_background_image" style="display:none">
                                 <x-input-label for="image" :value="__('messages.image')" />
-                                <div class="color-select-container">
+                                <div class="color-select-container mb-6">
                                     <select id="background_image_url" name="background_image_url"
                                         class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                        oninput="onChangeBackground(); updatePreview(); updateImageNavButtons();">
+                                        oninput="onChangeBackground(); updatePreview(); updateImageNavButtons(); toggleCustomImageInput();">
                                         <option value="">{{ __('messages.custom') }}</option>
                                         @foreach([                                        
                                             "Abstract_Sunrise",
@@ -647,12 +653,16 @@
                                     </button>
                                 </div>
 
-                                <input id="background_image" name="background_image" type="file" class="mt-1 block w-full"
-                                    :value="old('background_image')" oninput="updatePreview()" accept="image/png, image/jpeg" />
-                                <div class="text-xs pt-1">
-                                    <a href="https://www.pexels.com" target="_blank" class="hover:underline">{{ __('messages.we_recommend', ['name' => 'pexels.com']) }}</a>
+                                <div id="custom_image_input" style="display:none">
+                                    <input id="background_image" name="background_image" type="file" 
+                                        class="mt-1 block w-full text-gray-900 dark:text-gray-100" 
+                                        :value="old('background_image')" 
+                                        oninput="updatePreview()" 
+                                        accept="image/png, image/jpeg" />
+                                    <div class="text-xs pt-1 text-gray-600 dark:text-gray-400">
+                                        <a href="https://www.pexels.com" target="_blank" class="hover:underline">{{ __('messages.we_recommend', ['name' => 'pexels.com']) }}</a>
+                                    </div>
                                 </div>
-                                <x-input-error class="mt-2" :messages="$errors->get('background_image')" />
 
                                 <img id="background_image_preview" src="" alt="Background Image Preview" style="max-height:120px; display:none;" class="pt-3" />
 
