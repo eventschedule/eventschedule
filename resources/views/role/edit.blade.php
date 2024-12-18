@@ -311,7 +311,7 @@
         }
 
         function updateImageNavButtons() {
-            const select = document.getElementById('background_image');
+            const select = document.getElementById('background_image_url');
             const prevButton = document.getElementById('prev_image');
             const nextButton = document.getElementById('next_image');
             
@@ -320,7 +320,7 @@
         }
 
         function changeBackgroundImage(direction) {
-            const select = document.getElementById('background_image');
+            const select = document.getElementById('background_image_url');
             const newIndex = select.selectedIndex + direction;
             
             if (newIndex >= 0 && newIndex < select.options.length) {
@@ -575,7 +575,7 @@
                             <div class="mb-6" id="style_background_image" style="display:none">
                                 <x-input-label for="image" :value="__('messages.image')" />
                                 <div class="color-select-container">
-                                    <select id="background" name="background"
+                                    <select id="background_image_url" name="background_image_url"
                                         class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                         oninput="onChangeBackground(); updatePreview(); updateImageNavButtons();">
                                         @foreach([                                        
