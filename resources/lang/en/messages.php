@@ -299,5 +299,5 @@ return [
     'event_details' => 'Event Details',
     'solid' => 'Solid',
     'background_color' => 'Background Color',
-    
+    'custom' => 'Custom',
 ];
