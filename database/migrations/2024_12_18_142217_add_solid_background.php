@@ -17,6 +17,7 @@ return new class extends Migration
 
         Schema::table('roles', function (Blueprint $table) {
             $table->string('background_color')->nullable();
+            $table->string('background_image')->nullable();
         });
     }
 
@@ -27,6 +28,7 @@ return new class extends Migration
     {
         Schema::table('roles', function (Blueprint $table) {
             $table->dropColumn('background_color');
+            $table->dropColumn('background_image');
         });
     }
 };

@@ -139,7 +139,7 @@
                 previewImage(this, 'header_image_preview');
             });
 
-            $('#background_image').on('change', function() {
+            $('#background_image_url').on('change', function() {
                 previewImage(this, 'background_image_preview');
                 updatePreview();
             });
@@ -219,9 +219,9 @@
                     .css('background-image', gradient);
             } else if (background == 'image') {
 
-                var backgroundImageUrl = $('#background_image_url').find(':selected').val();
+                var backgroundImageUrl = $('#background_image').find(':selected').val();
                 if (backgroundImageUrl) {
-                    backgroundImageUrl = "{{ asset('images/backgrounds') }}" + '/' + $('#background_image_url').find(':selected').val() + '.png';
+                    backgroundImageUrl = "{{ asset('images/backgrounds') }}" + '/' + $('#background_image').find(':selected').val() + '.png';
                 } else {
                     backgroundImageUrl = $('#background_image_preview').attr('src') || "{{ $role->background_image_url }}";
                 }
@@ -319,7 +319,7 @@
         }
 
         function updateImageNavButtons() { 
-            const select = document.getElementById('background_image_url');
+            const select = document.getElementById('background_image');
             const prevButton = document.getElementById('prev_image');
             const nextButton = document.getElementById('next_image');
             
@@ -328,7 +328,7 @@
         }
 
         function changeBackgroundImage(direction) {
-            const select = document.getElementById('background_image_url');
+            const select = document.getElementById('background_image');
             const newIndex = select.selectedIndex + direction;
             
             if (newIndex >= 0 && newIndex < select.options.length) {
@@ -339,7 +339,7 @@
         }
 
         function toggleCustomImageInput() {
-            const select = document.getElementById('background_image_url');
+            const select = document.getElementById('background_image');
             const customInput = document.getElementById('custom_image_input');
             customInput.style.display = select.value === '' ? 'block' : 'none';
         }
@@ -589,7 +589,7 @@
                             <div class="mb-6" id="style_background_image" style="display:none">
                                 <x-input-label for="image" :value="__('messages.image')" />
                                 <div class="color-select-container">
-                                    <select id="background_image_url" name="background_image_url"
+                                    <select id="background_image" name="background_image"
                                         class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                         oninput="onChangeBackground(); updatePreview(); updateImageNavButtons(); toggleCustomImageInput();">
                                         <option value="">{{ __('messages.custom') }}</option>
@@ -665,9 +665,9 @@
                                 </div>
 
                                 <div id="custom_image_input" style="display:none">
-                                    <input id="background_image" name="background_image" type="file" 
+                                    <input id="background_image_url" name="background_image_url" type="file" 
                                         class="mt-1 block w-full text-gray-900 dark:text-gray-100" 
-                                        :value="old('background_image')" 
+                                        :value="old('background_image_url')" 
                                         oninput="updatePreview()" 
                                         accept="image/png, image/jpeg" />
 
@@ -718,11 +718,11 @@
                                         </button>
                                     </div>
                                     <div class="text-xs pt-1">
-                                        <a href="https://uigradients.com" target="_blank" class="hover:underline">{{ __('messages.gradients_from', ['name' => 'uiGradients']) }}</a>
+                                        <a href="https://uigradients.com" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.gradients_from', ['name' => 'uiGradients']) }}</a>
                                     </div>
                                     <x-input-error class="mt-2" :messages="$errors->get('background_colors')" />
 
-                                    <div id="custom_colors" style="display:none">
+                                    <div id="custom_colors" style="display:none" class="mt-4">
                                         <x-text-input id="custom_color1" name="custom_color1" type="color"
                                             class="mt-1 block w-1/2"
                                             :value="old('custom_color1', $role->background_colors ? explode(', ', $role->background_colors)[0] : '')"
