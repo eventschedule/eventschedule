@@ -582,7 +582,7 @@
 
                             <div class="mb-6" id="style_background_image" style="display:none">
                                 <x-input-label for="image" :value="__('messages.image')" />
-                                <div class="color-select-container mb-6">
+                                <div class="color-select-container">
                                     <select id="background_image_url" name="background_image_url"
                                         class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                         oninput="onChangeBackground(); updatePreview(); updateImageNavButtons(); toggleCustomImageInput();">
@@ -651,6 +651,11 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                                         </svg>
                                     </button>
+        
+                                </div>
+
+                                <div class="text-xs pt-1 text-gray-600 dark:text-gray-400 mb-6">
+                                    <a href="https://www.pexels.com" target="_blank" class="hover:underline">{{ __('messages.images_from', ['name' => 'pexels.com']) }}</a>
                                 </div>
 
                                 <div id="custom_image_input" style="display:none">
@@ -659,9 +664,6 @@
                                         :value="old('background_image')" 
                                         oninput="updatePreview()" 
                                         accept="image/png, image/jpeg" />
-                                    <div class="text-xs pt-1 text-gray-600 dark:text-gray-400">
-                                        <a href="https://www.pexels.com" target="_blank" class="hover:underline">{{ __('messages.we_recommend', ['name' => 'pexels.com']) }}</a>
-                                    </div>
                                 </div>
 
                                 <img id="background_image_preview" src="" alt="Background Image Preview" style="max-height:120px; display:none;" class="pt-3" />
