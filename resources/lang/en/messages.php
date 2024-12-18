@@ -297,4 +297,7 @@ return [
     'event_venue' => 'Event Venue',
     'event_members' => 'Event Members',
     'event_details' => 'Event Details',
+    'solid' => 'Solid',
+    'background_color' => 'Background Color',
+    
 ];

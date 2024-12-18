@@ -153,11 +153,14 @@
 
             $('#style_background_image').hide();
             $('#style_background_gradient').hide();
-
+            $('#style_background_solid').hide();
+            
             if (background == 'image') {
                 $('#style_background_image').fadeIn();
             } else if (background == 'gradient') {
                 $('#style_background_gradient').fadeIn();
+            } else if (background == 'solid') {
+                $('#style_background_solid').fadeIn();
             }
         }
 
@@ -529,7 +532,7 @@
                                 <select id="background" name="background"
                                     class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                     oninput="onChangeBackground(); updatePreview();">
-                                    @foreach(['gradient', 'image'] as $background)
+                                    @foreach(['gradient', 'solid', 'image'] as $background)
                                     <option value="{{ $background }}"
                                         {{ $role->background == $background ? 'SELECTED' : '' }}>
                                         {{ __('messages.' . $background) }}</option>
@@ -539,6 +542,13 @@
                                 <p id="background_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
                                     {{ __('messages.image_size_warning') }}
                                 </p>
+                            </div>
+
+                            <div class="mb-6" id="style_background_solid" style="display:none">
+                                <x-input-label for="background_color" :value="__('messages.background_color')" />
+                                <x-text-input id="background_color" name="background_color" type="color" class="mt-1 block w-1/2"
+                                    :value="old('background_color', $role->background_color)" oninput="updatePreview()" />
+                                <x-input-error class="mt-2" :messages="$errors->get('background_color')" />
                             </div>
 
                             <div class="mb-6" id="style_background_image" style="display:none">
