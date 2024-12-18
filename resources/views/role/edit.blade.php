@@ -218,8 +218,14 @@
                     .css('background-color', '')
                     .css('background-image', gradient);
             } else if (background == 'image') {
-                //var backgroundImageUrl = $('#background_image_preview').attr('src') || "{{ $role->background_image_url }}";
-                var backgroundImageUrl = "{{ asset('images/backgrounds') }}" + '/' + $('#background_image_url').find(':selected').val() + '.png';
+
+                var backgroundImageUrl = $('#background_image_url').find(':selected').val();
+                if (backgroundImageUrl) {
+                    backgroundImageUrl = "{{ asset('images/backgrounds') }}" + '/' + $('#background_image_url').find(':selected').val() + '.png';
+                } else {
+                    backgroundImageUrl = $('#background_image_preview').attr('src') || "{{ $role->background_image_url }}";
+                }
+
                 $('#preview')
                     .css('background-color', '')
                     .css('background-image', 'url("' + backgroundImageUrl + '")');
