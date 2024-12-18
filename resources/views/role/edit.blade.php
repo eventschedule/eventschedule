@@ -552,7 +552,59 @@
                             </div>
 
                             <div class="mb-6" id="style_background_image" style="display:none">
-                                <x-input-label for="background_image" :value="__('messages.image')" />
+                                <x-input-label for="image" :value="__('messages.image')" />
+                                <select id="background" name="background"
+                                    class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm mb-6"
+                                    oninput="onChangeBackground(); updatePreview();">
+                                    @foreach([                                        
+                                        "Abstract_Sunrise",
+                                        "Abstract_Sunset",
+                                        "Autumn",
+                                        "Barn_Wall",
+                                        "Bloomless",
+                                        "Book_Abstract",
+                                        "Bookshelf",
+                                        "Calm",
+                                        "Celebrate",
+                                        "Class",
+                                        "Color_Splash",
+                                        "Desert_Retreat",
+                                        "Fall_Pastel",
+                                        "Flower_Experience",
+                                        "Flower_Field",
+                                        "Flowers_of_Fire",
+                                        "Gallery",
+                                        "Garden",
+                                        "Go_Green",
+                                        "Green_Splash",
+                                        "Greyscale",
+                                        "Leafy_Blues",
+                                        "Nature_Layers",
+                                        "Not_Orange",
+                                        "Oil_Pallet",
+                                        "Painted_Fence",
+                                        "Picnic",
+                                        "Purple_Lillies",
+                                        "Rainbow_Splash",
+                                        "Rainbow",
+                                        "RGBIV",
+                                        "River_of_Dreams",
+                                        "Sea_Chaos",
+                                        "Simple",
+                                        "Storm",
+                                        "Stormy_Night",
+                                        "Tatooin",
+                                        "Tile_Me_Blue",
+                                        "Trippy",
+                                        "Washed_Oragami",
+                                    ] as $image)
+                                    <option value="{{ $background }}"
+                                        {{ $role->background == $background ? 'SELECTED' : '' }}>
+                                        {{ str_replace('_', ' ', $image) }}</option>
+                                    @endforeach
+                                </select>
+                                <x-input-error class="mt-2" :messages="$errors->get('background')" />
+
                                 <input id="background_image" name="background_image" type="file" class="mt-1 block w-full"
                                     :value="old('background_image')" oninput="updatePreview()" accept="image/png, image/jpeg" />
                                 <div class="text-xs pt-1">
