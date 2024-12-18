@@ -803,20 +803,22 @@ class RoleController extends Controller
         }
 
         if ($role->background == 'image' && $request->hasFile('background_image')) {
-            if ($role->background_image_url) {
-                $path = $role->getAttributes()['background_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+            if (true) {
+                if ($role->background_image_url) {
+                    $path = $role->getAttributes()['background_image_url'];
+                    if (config('filesystems.default') == 'local') {
+                        $path = 'public/' . $path;
+                    }
+                    Storage::delete($path);
                 }
-                Storage::delete($path);
+
+                $file = $request->file('background_image');
+                $filename = strtolower('background_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+                $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+
+                $role->background_image_url = $filename;
+                $role->save();
             }
-
-            $file = $request->file('background_image');
-            $filename = strtolower('background_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
-
-            $role->background_image_url = $filename;
-            $role->save();
         }
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]))
