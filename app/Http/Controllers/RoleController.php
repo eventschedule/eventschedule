@@ -591,11 +591,29 @@ class RoleController extends Controller
         $role->font_color = '#ffffff';
         $role->accent_color = '#007BFF';
         $role->background = 'gradient';
+        $role->background_color = '#888888';
         $role->background_colors = ColorUtils::randomGradient();
+        $role->background_image = ColorUtils::randomBackgroundImage();
         $role->background_rotation = rand(0, 359);
         $role->timezone = auth()->user()->timezone;
         $role->language_code = auth()->user()->language_code;
 
+        // Background images
+        $backgrounds = file_get_contents(base_path('storage/backgrounds.json'));
+        $backgrounds = json_decode($backgrounds);
+
+        $backgroundOptions = [];
+        foreach ($backgrounds as $background) {
+            $backgroundOptions[$background->name] = $background->name;
+        }
+
+        asort($backgroundOptions);
+
+        $backgroundOptions = [
+            '' => __('messages.custom'),
+        ] + $backgroundOptions;
+
+        // Background gradients
         $gradients = file_get_contents(base_path('storage/gradients.json'));
         $gradients = json_decode($gradients);
 
@@ -618,6 +636,7 @@ class RoleController extends Controller
             'user' => auth()->user(),
             'title' => __('messages.new_' . $role->type),
             'gradients' => $gradientOptions,
+            'backgrounds' => $backgroundOptions,
             'fonts' => $fonts,
         ];
 
@@ -720,6 +739,23 @@ class RoleController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
+        // Background images
+        $backgrounds = file_get_contents(base_path('storage/backgrounds.json'));
+        $backgrounds = json_decode($backgrounds);
+
+        $backgroundOptions = [];
+        foreach ($backgrounds as $background) {
+            $backgroundOptions[$background->name] = $background->name;
+        }
+
+        asort($backgroundOptions);
+
+        $backgroundOptions = [
+            '' => __('messages.custom'),
+        ] + $backgroundOptions;
+
+
+        // Background gradients
         $gradients = file_get_contents(base_path('storage/gradients.json'));
         $gradients = json_decode($gradients);
 
@@ -742,6 +778,7 @@ class RoleController extends Controller
             'role' => $role,
             'title' => __('messages.edit_' . $role->type),
             'gradients' => $gradientOptions,
+            'backgrounds' => $backgroundOptions,
             'fonts' => $fonts,
         ];
 

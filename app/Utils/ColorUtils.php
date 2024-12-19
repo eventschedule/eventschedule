@@ -18,4 +18,14 @@ class ColorUtils
         
         return $gradientOptions[$random];
     }
+
+    public static function randomBackgroundImage()
+    {
+        $backgrounds = file_get_contents(base_path('storage/backgrounds.json'));
+        $backgrounds = json_decode($backgrounds);
+
+        $random = rand(0, count($backgrounds) - 1);
+        
+        return $backgrounds[$random]->name;
+    }
 }
