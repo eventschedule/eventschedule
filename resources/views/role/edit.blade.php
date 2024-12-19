@@ -596,7 +596,6 @@
                                     <select id="background_image" name="background_image"
                                         class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                         oninput="onChangeBackground(); updatePreview(); updateImageNavButtons(); toggleCustomImageInput();">
-                                        <option value="">{{ __('messages.custom') }}</option>
                                         @foreach($backgrounds as $background => $name)
                                         <option value="{{ $background }}"
                                             {{ $role->background_image == $background ? 'SELECTED' : '' }}>
