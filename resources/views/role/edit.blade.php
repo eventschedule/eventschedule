@@ -151,7 +151,7 @@
         }
 
         function onChangeBackground() {
-            var background = $('#background').find(':selected').val();
+            var background = $('input[name="background"]:checked').val();
 
             $('#style_background_image').hide();
             $('#style_background_gradient').hide();
@@ -181,7 +181,7 @@
         }
 
         function updatePreview() {
-            var background = $('#background').find(':selected').val();
+            var background = $('input[name="background"]:checked').val();
             var backgroundColor = $('#background_color').val();
             var backgroundColors = $('#background_colors').val();
             var backgroundRotation = $('#background_rotation').val();
@@ -563,20 +563,24 @@
                             -->
 
                             <div class="mb-6">
-                                <x-input-label for="background" :value="__('messages.background')" />
-                                <select id="background" name="background"
-                                    class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                    oninput="onChangeBackground(); updatePreview();">
+                                <x-input-label :value="__('messages.background')" />
+                                <div class="mt-2 space-y-2">
                                     @foreach(['gradient', 'solid', 'image'] as $background)
-                                    <option value="{{ $background }}"
-                                        {{ $role->background == $background ? 'SELECTED' : '' }}>
-                                        {{ __('messages.' . $background) }}</option>
+                                    <div class="flex items-center">
+                                        <input type="radio" 
+                                            id="background_{{ $background }}" 
+                                            name="background" 
+                                            value="{{ $background }}"
+                                            {{ $role->background == $background ? 'checked' : '' }}
+                                            class="border-gray-300 dark:border-gray-700 focus:ring-indigo-500 dark:focus:ring-indigo-600 h-4 w-4"
+                                            onchange="onChangeBackground(); updatePreview();">
+                                        <label for="background_{{ $background }}" class="ml-2 text-gray-900 dark:text-gray-100">
+                                            {{ __('messages.' . $background) }}
+                                        </label>
+                                    </div>
                                     @endforeach
-                                </select>
+                                </div>
                                 <x-input-error class="mt-2" :messages="$errors->get('background')" />
-                                <p id="background_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
-                                    {{ __('messages.image_size_warning') }}
-                                </p>
                             </div>
 
                             <div class="mb-6" id="style_background_solid" style="display:none">
