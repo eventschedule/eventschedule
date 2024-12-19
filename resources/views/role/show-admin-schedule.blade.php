@@ -40,7 +40,7 @@
                         </div>
                     </div>
                     <div class="-ml-px flex w-0 flex-1 cursor-pointer"
-                        onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.decline', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id), 'redirect_to' => 'schedule']) }}'; return false; }">
+                        onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.decline', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id), 'redirect_to' => 'schedule']) }}'; } return false;">
                         <div
                             class="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900">
                             <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor"
