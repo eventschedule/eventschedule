@@ -68,7 +68,11 @@
                 @elseif ($otherRole->background == 'solid')
                     background-color: {{ $otherRole->background_color }} !important;
                 @elseif ($otherRole->background == 'image')
-                    background-image: url("{{ $otherRole->background_image_url }}");
+                    @if ($otherRole->background_image)
+                        background-image: url("{{ asset('images/backgrounds/' . $otherRole->background_image . '.png') }}");
+                    @else
+                        background-image: url("{{ $otherRole->background_image_url }}");
+                    @endif
                     background-size: cover;
                     background-position: center;
                     background-repeat: no-repeat;
@@ -81,7 +85,11 @@
                 @elseif ($role->background == 'solid')
                     background-color: {{ $role->background_color }} !important;
                 @elseif ($role->background == 'image')
-                    background-image: url("{{ $role->background_image_url }}");
+                    @if ($role->background_image)
+                        background-image: url("{{ asset('images/backgrounds/' . $role->background_image . '.png') }}");
+                    @else
+                        background-image: url("{{ $role->background_image_url }}");
+                    @endif
                     background-size: cover;
                     background-position: center;
                     background-repeat: no-repeat;
