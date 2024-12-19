@@ -604,7 +604,7 @@ class RoleController extends Controller
 
         $backgroundOptions = [];
         foreach ($backgrounds as $background) {
-            $backgroundOptions[$background->name] = $background->name;
+            $backgroundOptions[$background->name] = str_replace('_', ' ', $background->name);
         }
 
         asort($backgroundOptions);
@@ -745,7 +745,7 @@ class RoleController extends Controller
 
         $backgroundOptions = [];
         foreach ($backgrounds as $background) {
-            $backgroundOptions[$background->name] = $background->name;
+            $backgroundOptions[$background->name] = str_replace('_', ' ', $background->name);
         }
 
         asort($backgroundOptions);

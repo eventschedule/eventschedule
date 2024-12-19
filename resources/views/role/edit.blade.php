@@ -322,7 +322,7 @@
             const select = document.getElementById('background_image');
             const prevButton = document.getElementById('prev_image');
             const nextButton = document.getElementById('next_image');
-            
+
             prevButton.disabled = select.selectedIndex === 0;
             nextButton.disabled = select.selectedIndex === select.options.length - 1;
         }
@@ -568,13 +568,13 @@
                                     @foreach(['gradient', 'solid', 'image'] as $background)
                                     <div class="flex items-center">
                                         <input type="radio" 
-                                            id="background_{{ $background }}" 
+                                            id="background_type_{{ $background }}" 
                                             name="background" 
                                             value="{{ $background }}"
                                             {{ $role->background == $background ? 'checked' : '' }}
                                             class="border-gray-300 dark:border-gray-700 focus:ring-indigo-500 dark:focus:ring-indigo-600 h-4 w-4"
                                             onchange="onChangeBackground(); updatePreview();">
-                                        <label for="background_{{ $background }}" class="ml-2 text-gray-900 dark:text-gray-100">
+                                        <label for="background_type_{{ $background }}" class="ml-2 text-gray-900 dark:text-gray-100">
                                             {{ __('messages.' . $background) }}
                                         </label>
                                     </div>
@@ -597,10 +597,10 @@
                                         class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                         oninput="onChangeBackground(); updatePreview(); updateImageNavButtons(); toggleCustomImageInput();">
                                         <option value="">{{ __('messages.custom') }}</option>
-                                        @foreach($backgrounds as $background)
+                                        @foreach($backgrounds as $background => $name)
                                         <option value="{{ $background }}"
                                             {{ $role->background_image == $background ? 'SELECTED' : '' }}>
-                                            {{ str_replace('_', ' ', $background) }}</option>
+                                            {{ $name }}</option>
                                         @endforeach
                                     </select>
 
