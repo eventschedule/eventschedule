@@ -107,7 +107,7 @@
         <div
         class="container mx-auto flex flex-row justify-between items-center py-7 px-5"
         >
-        <a href="/">
+        <a href="{{ config('app.url') }}" target="_blank">
             <svg
             width="205"
             height="40"
