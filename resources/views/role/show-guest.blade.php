@@ -18,15 +18,17 @@
           </div>
           <div class="px-6 lg:px-16 pb-12 relative z-10">
             @if ($role->profile_image_url)
-            <img
-              class="rounded-2xl w-[180px] h-[180px] -mt-[90px] mb-8"
-              src="{{ $role->profile_image_url }}"
-              alt="person"
-            />
+            <div class="rounded-2xl w-[196px] h-[196px] -mt-[96px] mb-8 bg-[#F5F9FE] flex items-center justify-center">
+              <img
+                class="rounded-2xl w-[180px] h-[180px] object-cover"
+                src="{{ $role->profile_image_url }}"
+                alt="person"
+              />
+            </div>
             @else
             <div style="height: 42px;"></div>
             @endif
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex justify-between items-center mb-4" style="padding-left: 8px; padding-right: 8px;">
               <h3 class="text-[32px] font-semibold leading-10 text-[#151B26]">
                 {{ $role->name }}
               </h3>
@@ -63,7 +65,7 @@
               </div>
             </div>
             -->
-            <div class="flex flex-col sm:flex-row gap-4 items-center">
+            <div class="flex flex-col sm:flex-row gap-4 items-center" style="padding-left: 8px; padding-right: 8px;">
               @if($role->phone)
               <div
                 class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] fill-[#33383C] hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-[#33383C]"
