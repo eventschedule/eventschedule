@@ -384,7 +384,7 @@
                         <div class="mb-6">
                             <x-input-label for="description" :value="__('messages.description')" />
                             <textarea id="description" name="description"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">{{ old('description', $role->description) }}</textarea>
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">{{ old('description', $role->description) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
 
@@ -544,7 +544,7 @@
                             <div class="mb-6">
                                 <x-input-label for="font_family" :value="__('messages.font_family')" />
                                 <select id="font_family" name="font_family" onchange="onChangeFont()"
-                                    class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                    class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                     @foreach($fonts as $font)
                                     <option value="{{ $font->value }}"
                                         {{ $role->font_family == $font->value ? 'SELECTED' : '' }}>
@@ -572,7 +572,7 @@
                                             name="background" 
                                             value="{{ $background }}"
                                             {{ $role->background == $background ? 'checked' : '' }}
-                                            class="border-gray-300 dark:border-gray-700 focus:ring-indigo-500 dark:focus:ring-indigo-600 h-4 w-4"
+                                            class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4"
                                             onchange="onChangeBackground(); updatePreview();">
                                         <label for="background_type_{{ $background }}" class="ml-2 text-gray-900 dark:text-gray-100">
                                             {{ __('messages.' . $background) }}
@@ -594,7 +594,7 @@
                                 <x-input-label for="image" :value="__('messages.image')" />
                                 <div class="color-select-container">
                                     <select id="background_image" name="background_image"
-                                        class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                        class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
                                         oninput="onChangeBackground(); updatePreview(); updateImageNavButtons(); toggleCustomImageInput();">
                                         @foreach($backgrounds as $background => $name)
                                         <option value="{{ $background }}"
@@ -654,7 +654,7 @@
                                     <x-input-label for="background_colors" :value="__('messages.colors')" />
                                     <div class="color-select-container">
                                         <select id="background_colors" name="background_colors" oninput="updatePreview(); updateColorNavButtons()"
-                                            class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                            class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                             @foreach($gradients as $gradient => $name)
                                             <option value="{{ $gradient }}"
                                                 {{ $role->background_colors == $gradient || (! array_key_exists($role->background_colors, $gradients) && ! $gradient) ? 'SELECTED' : '' }}>
@@ -746,7 +746,7 @@
                         <div class="mb-6">
                             <x-input-label for="language_code" :value="__('messages.language') " />
                             <select name="language_code" id="language_code" required
-                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                 @foreach([
                                 'ar' => 'arabic',
                                 'en' => 'english',
@@ -769,7 +769,7 @@
                         <div class="mb-6">
                             <x-input-label for="timezone" :value="__('messages.timezone')" />
                             <select name="timezone" id="timezone" required
-                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                 @foreach(\Carbon\CarbonTimeZone::listIdentifiers() as $timezone)
                                 <option value="{{ $timezone }}" {{ $role->timezone == $timezone ? 'SELECTED' : '' }}>
                                     {{ $timezone }}

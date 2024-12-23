@@ -234,7 +234,7 @@
         <div class="sm:hidden">
             <label for="current-tab" class="sr-only">{{ __('messages.select_a_tab') }}</label>
             <select id="current-tab" name="current-tab" onchange="onTabChange()"
-                class="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600">
+                class="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-[#4E81FA]">
                 <option value="schedule" {{ $tab == 'schedule' ? 'selected' : '' }}>{{ __('messages.schedule') }}</option>
                 @if ($role->isSchedule())
                 <option value="availability" {{ $tab == 'availability' ? 'selected' : '' }}>{{ __('messages.availability') }}</option>
@@ -255,21 +255,21 @@
         <div class="hidden sm:block">
             <nav class="-mb-px flex space-x-8">
                 <a href="{{ route('role.view_admin', ((now()->year == $year && now()->month == $month) || $tab == '') ? ['subdomain' => $role->subdomain] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'month' => $month] : ['subdomain' => $role->subdomain, 'year' => $year, 'month' => $month])) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'schedule' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.schedule') }}</a>
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'schedule' ? 'border-[#4E81FA] px-1 pb-4 text-sm font-medium text-[#4E81FA]' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.schedule') }}</a>
                 @if ($role->isSchedule())
                 <a href=" {{ route('role.view_admin', ((now()->year == $year && now()->month == $month) || $tab == 'availability') ? ['subdomain' => $role->subdomain, 'tab' => 'availability'] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'tab' => 'availability', 'month' => $month] : ['subdomain' => $role->subdomain, 'tab' => 'availability', 'year' => $year, 'month' => $month])) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'availability' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.availability') }}</a>
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'availability' ? 'border-[#4E81FA] px-1 pb-4 text-sm font-medium text-[#4E81FA]' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.availability') }}</a>
                 @endif
                 @if (count($requests))
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'requests']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'requests' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</a>
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'requests' ? 'border-[#4E81FA] px-1 pb-4 text-sm font-medium text-[#4E81FA]' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</a>
                 @endif
                 <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'profile']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'profile' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.profile') }}</a>
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'profile' ? 'border-[#4E81FA] px-1 pb-4 text-sm font-medium text-[#4E81FA]' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.profile') }}</a>
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'followers']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'followers' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.followers') }}{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</a>
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'followers' ? 'border-[#4E81FA] px-1 pb-4 text-sm font-medium text-[#4E81FA]' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.followers') }}{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</a>
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'team' ? 'border-indigo-500 px-1 pb-4 text-sm font-medium text-indigo-600' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.team') }}{{ count($members) ? ' (' . count($members) . ')' : '' }}</a>
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'team' ? 'border-[#4E81FA] px-1 pb-4 text-sm font-medium text-[#4E81FA]' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.team') }}{{ count($members) ? ' (' . count($members) . ')' : '' }}</a>
             </nav>
         </div>
 
