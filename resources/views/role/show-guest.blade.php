@@ -147,10 +147,9 @@
           <h3 class="text-[32px] font-semibold leading-10 text-[#151B26]">
             {{ __('messages.about') }}
           </h3>
-          <p class="text-[#33383C] text-base">
+          <div class="text-[#33383C] text-base">
             {!! $role->description_html !!}
-          </p>
-
+          </div>
         </div>
         @endif
 
