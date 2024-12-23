@@ -182,7 +182,7 @@
                                 <div class="flex items-center space-x-6">
                                     <div class="flex items-center">
                                         <input id="in_person" name="event_type" type="checkbox" v-model="isInPerson"
-                                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
                                             @change="ensureOneChecked('in_person')">
                                         <label for="in_person" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                             {{ __('messages.in_person') }}
@@ -190,7 +190,7 @@
                                     </div>
                                     <div class="flex items-center pl-3">
                                         <input id="online" name="event_type" type="checkbox" v-model="isOnline"
-                                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
                                             @change="ensureOneChecked('online')">
                                         <label for="online" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                             {{ __('messages.online') }}
@@ -209,19 +209,19 @@
                                         <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                                             <div v-if="Object.keys(venues).length > 0" class="flex items-center">
                                                 <input id="use_existing_venue" name="venue_type" type="radio" value="use_existing" v-model="venueType"
-                                                    class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                                    class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                                 <label for="use_existing_venue"
                                                     class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
                                             </div>
                                             <div class="flex items-center">
                                                 <input id="search_create_venue" name="venue_type" type="radio" value="search_create" v-model="venueType"
-                                                    class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                                    class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                                 <label for="search_create_venue"
                                                     class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.search_create') }}</label>
                                             </div>
                                             <div class="flex items-center">
                                                 <input id="no_contact_info_venue" name="venue_type" type="radio" value="no_contact_info" v-model="venueType"
-                                                    class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                                    class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                                 <label for="no_contact_info_venue"
                                                     class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.no_contact_info') }}</label>
                                             </div>
@@ -230,7 +230,7 @@
 
                                     <div v-if="venueType === 'use_existing'">
                                         <select required id="selected_venue"
-                                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
                                                 v-model="selectedVenue">
                                                 <option value="" disabled selected>{{ __('messages.please_select') }}</option>                                
                                                 <option v-for="venue in venues" :key="venue.id" :value="venue">
@@ -458,19 +458,19 @@
                                     <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                                         <div v-if="Object.keys(members).length > 0" class="flex items-center">
                                             <input id="use_existing_members" name="member_type" type="radio" value="use_existing" v-model="memberType"
-                                                class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                                class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                             <label for="use_existing_members"
                                                 class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
                                         </div>
                                         <div class="flex items-center">
                                             <input id="search_create_members" name="member_type" type="radio" value="search_create" v-model="memberType"
-                                                class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                                class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                             <label for="search_create_members"
                                                 class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.search_create') }}</label>
                                         </div>
                                         <div class="flex items-center">
                                             <input id="no_contact_info_members" name="member_type" type="radio" value="no_contact_info" v-model="memberType"
-                                                class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                                class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                             <label for="no_contact_info_members"
                                                 class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.no_contact_info') }}</label>
                                         </div>
@@ -479,7 +479,7 @@
 
                                 <div v-if="memberType === 'use_existing'">
                                     <select v-model="selectedMember" @change="addExistingMember" id="selected_member"
-                                        class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                        class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                         <option value="" disabled selected>{{ __('messages.please_select') }}</option>
                                         <option v-for="member in filteredMembers" :key="member.id" :value="member">
                                             @{{ member.name }} <template v-if="member.email">(@{{ member.email }})</template>
@@ -612,13 +612,13 @@
                         <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                             <div class="flex items-center">
                                 <input id="one_time" name="schedule_type" type="radio" value="one_time" onchange="onChangeDateType()" {{ $event->days_of_week ? '' : 'CHECKED' }}
-                                    class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                    class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                 <label for="one_time"
                                     class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.one_time') }}</label>
                             </div>
                             <div class="flex items-center">
                                 <input id="recurring" name="schedule_type" type="radio" value="recurring" onchange="onChangeDateType()"  {{ $event->days_of_week ? 'CHECKED' : '' }}
-                                    class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                    class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                 <label for="recurring"
                                     class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.recurring') }}</label>
                             </div>
@@ -628,7 +628,7 @@
                             <x-input-label for="duration" :value="__('messages.days_of_week')" />
                             @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $index => $day)
                             <label for="days_of_week_{{ $index }}" class="mr-3 text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">
-                                <input type="checkbox" id="days_of_week_{{ $index }}" name="days_of_week_{{ $index }}" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                                <input type="checkbox" id="days_of_week_{{ $index }}" name="days_of_week_{{ $index }}" class="h-4 w-4 rounded border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]"
                                     {{ $event && $event->days_of_week && $event->days_of_week[$index] == '1' ? 'checked' : '' }}/> &nbsp;
                                 {{ __('messages.' . $day) }}
                             </label>
@@ -666,7 +666,7 @@
                                        name="curators[]" 
                                        value="{{ $curator->encodeId() }}"
                                        {{ (! $event->exists && $role->subdomain == $curator->subdomain) || $event->curators->contains($curator->id) ? 'checked' : '' }}
-                                       class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                       class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
                                 <label for="curator_{{ $curator->encodeId() }}" class="ml-2 block text-sm text-gray-900 dark:text-gray-100">
                                     {{ $curator->name }}
                                 </label>
@@ -701,7 +701,7 @@
                         <div class="mb-6">
                             <x-input-label for="description" :value="__('messages.description')" />
                             <textarea id="description" name="description"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
                                 autocomplete="off">{{ old('description', $event->description) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>

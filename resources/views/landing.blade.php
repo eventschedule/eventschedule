@@ -160,7 +160,7 @@
                 <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
                     <div class="flex flex-col">
                         <dt class="text-base font-semibold leading-7 text-white">
-                            <div class="mb-6 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-500">
+                            <div class="mb-6 flex h-10 w-10 items-center justify-center rounded-lg bg-[#4E81FA]">
                                 <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                     stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -175,7 +175,7 @@
                                 calls—everything you need is in one place.</p>
                             <!--
     <p class="mt-6">
-      <a href="#" class="text-sm font-semibold leading-6 text-indigo-400">Learn more <span aria-hidden="true">→</span></a>
+      <a href="#" class="text-sm font-semibold leading-6 text-[#4E81FA]">Learn more <span aria-hidden="true">→</span></a>
     </p>
     -->
 
@@ -183,7 +183,7 @@
                     </div>
                     <div class="flex flex-col">
                         <dt class="text-base font-semibold leading-7 text-white">
-                            <div class="mb-6 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-500">
+                            <div class="mb-6 flex h-10 w-10 items-center justify-center rounded-lg bg-[#4E81FA]">
                                 <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                     stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -198,14 +198,14 @@
                                 feedback, and build a stronger fan base.</p>
                             <!--
     <p class="mt-6">
-      <a href="#" class="text-sm font-semibold leading-6 text-indigo-400">Learn more <span aria-hidden="true">→</span></a>
+      <a href="#" class="text-sm font-semibold leading-6 text-[#4E81FA]">Learn more <span aria-hidden="true">→</span></a>
     </p>
     -->
                         </dd>
                     </div>
                     <div class="flex flex-col">
                         <dt class="text-base font-semibold leading-7 text-white">
-                            <div class="mb-6 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-500">
+                            <div class="mb-6 flex h-10 w-10 items-center justify-center rounded-lg bg-[#4E81FA]">
                                 <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                     stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -220,7 +220,7 @@
                                 easier to secure gigs and grow your business.</p>
                             <!--
     <p class="mt-6">
-      <a href="#" class="text-sm font-semibold leading-6 text-indigo-400">Learn more <span aria-hidden="true">→</span></a>
+      <a href="#" class="text-sm font-semibold leading-6 text-[#4E81FA]">Learn more <span aria-hidden="true">→</span></a>
     </p>
     -->
                         </dd>
@@ -234,7 +234,7 @@
     <section class="bg-white px-6 py-24 sm:py-32 lg:px-8">
         <figure class="mx-auto max-w-2xl">
             <p class="sr-only">5 out of 5 stars</p>
-            <div class="flex gap-x-1 text-indigo-600">
+            <div class="flex gap-x-1 text-[#4E81FA]">
                 <svg class="h-5 w-5 flex-none" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd"
                         d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z"
@@ -394,10 +394,10 @@
                     <div class="mt-6 flex max-w-md gap-x-4">
                         <label for="email-address" class="sr-only">Email address</label>
                         <input id="email-address" name="email" type="email" autocomplete="email" required
-                            class="min-w-0 flex-auto rounded-md border-0 bg-white/5 px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+                            class="min-w-0 flex-auto rounded-md border-0 bg-white/5 px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-[#4E81FA] sm:text-sm sm:leading-6"
                             placeholder="Enter your email">
                         <button type="submit"
-                            class="flex-none rounded-md bg-indigo-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Subscribe</button>
+                            class="flex-none rounded-md bg-[#4E81FA] px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#4E81FA] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]">Subscribe</button>
                     </div>
                 </div>
                 <dl class="grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:pt-2">
