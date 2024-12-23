@@ -394,7 +394,7 @@
                 />
               </svg>
               <a href="{{ $event->venue->website }}" class="text-sm hover:underline">
-                {{ $event->venue->website }}
+                {{ App\Utils\UrlUtils::clean($event->venue->website) }}
               </a>
             </div>
             @endif
