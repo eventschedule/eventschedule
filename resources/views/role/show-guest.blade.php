@@ -33,16 +33,15 @@
                 {{ $role->name }}
               </h3>
               <a
-                href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
+                href="{{ auth()->user() && auth()->user()->isMember($role->subdomain) ? route('role.view_admin', ['subdomain' => $role->subdomain]) : route('role.follow', ['subdomain' => $role->subdomain]) }}"
                 class="inline-flex items-center justify-center"
               >
                 <button
                   type="button"
-                  name="follow"
                   style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
                   class="inline-flex items-center rounded-md px-8 py-4 hover:opacity-90 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
-                  {{ __('messages.follow') }}
+                  {{ auth()->user() && auth()->user()->isMember($role->subdomain) ? __('messages.manage') : __('messages.follow') }}
                 </button>
               </a>
             </div>
