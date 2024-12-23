@@ -103,4 +103,20 @@ class HomeController extends Controller
 
         return redirect(route('landing'))->with('message', __('messages.message_sent'));
     }
+
+    public function sitemap()
+    {
+        $roles = Role::whereNotNull('email')
+                    ->orWhereNotNull('phone')
+                    ->orderBy('subdomain', 'asc')
+                    ->get();
+
+        $content = view('sitemap', [
+            'roles' => $roles,
+            'lastmod' => now()->toIso8601String()
+        ]);
+        
+        return response($content)
+            ->header('Content-Type', 'application/xml');
+    }
 }

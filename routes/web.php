@@ -16,6 +16,7 @@ if (config('app.env') != 'local') {
 
 require __DIR__.'/auth.php';
 
+Route::get('/sitemap.xml', [HomeController::class, 'sitemap'])->name('sitemap');
 Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
 Route::post('/message', [HomeController::class, 'message'])->name('message')->middleware('throttle:2,2');
@@ -78,4 +79,3 @@ if (config('app.env') == 'local') {
 }
 
 Route::get('/', [HomeController::class, 'landing'])->name('landing');
-
