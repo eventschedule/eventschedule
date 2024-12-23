@@ -344,7 +344,7 @@
               >
             </div>
             @endif
-            @if ($event->venue->email)
+            @if ($event->venue->email && $event->venue->show_email)
             <div
               class="flex flex-row gap-2 items-center relative duration-300 text-white fill-white"
             >
