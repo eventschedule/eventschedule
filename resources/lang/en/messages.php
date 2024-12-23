@@ -295,10 +295,10 @@ return [
     'schedule_settings' => 'Schedule Settings',
     'schedule_style' => 'Schedule Style',
     'event_venue' => 'Event Venue',
-    'event_members' => 'Event Members',
     'event_details' => 'Event Details',
     'solid' => 'Solid',
     'background_color' => 'Background Color',
     'custom' => 'Custom',
     'images_from' => 'Images from :name',
+    'event_participants' => 'Event Participants',
 ];
