@@ -27,7 +27,7 @@
     <h3 class="mt-2 text-sm font-semibold text-gray-900">{{ __('messages.no_followers') }}</h3>
     <p class="mt-1 text-sm text-gray-500">{{ __('messages.share_your_event_schedule_link') }}</p>
     <div class="mt-3">
-        <a href="{{ 'https://' . $role->subdomain . 'eventschedule.com' }}" target="_blank" class="hover:underline">
+        <a href="{{ $role->getGuestUrl() }}" target="_blank" class="hover:underline">
             {{ $role->subdomain . '.eventschedule.com' }}
         </a>
     </div>
