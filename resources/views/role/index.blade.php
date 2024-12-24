@@ -38,7 +38,7 @@
                                     @endif
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    <a href="mailto:{{ $role->email }}">{{ $role->email }}</a>
+                                    <a href="mailto:{{ $role->email }}" class="hover:underline">{{ $role->email }}</a>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     {{ $role->phone }}
