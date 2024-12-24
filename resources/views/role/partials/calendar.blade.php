@@ -189,7 +189,7 @@
                 </div>
             </div>
         </div>
-        <div class="px-4 py-10 sm:px-6 md:hidden">
+        <div class="py-10 sm:px-6 md:hidden">
             @php
             $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth();
             $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth();
@@ -214,9 +214,6 @@
                 @if ($isRecurringToday || $isEventOnDate)
                 <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate) }}" {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}>
                     <li class="relative flex items-center space-x-6 py-6 px-4 xl:static">
-                        @if ($each->getImageUrl())
-                        <img src="{{ $each->getImageUrl() }}" class="h-14 w-14 flex-none">
-                        @endif
                         <div class="flex-auto">
                             <h3 class="pr-10 font-semibold text-gray-900 xl:pr-0">
                                 {{ $each->name }}
@@ -256,7 +253,10 @@
                             </dl>
                         </div>
                         @if (auth()->user() && auth()->user()->canEditEvent($each))                        
-                        <div class="absolute right-10">
+                        <div class="absolute right-4 text-right">
+                            @if ($each->getImageUrl())
+                            <img src="{{ $each->getImageUrl() }}" class="h-14 w-14 mb-4 flex-none rounded-lg object-cover">
+                            @endif
                             <a href="{{ isset($role) ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) : route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}"
                                 class="text-[#4E81FA] hover:text-[#4E81FA] hover:underline"
                                 onclick="event.stopPropagation();">
