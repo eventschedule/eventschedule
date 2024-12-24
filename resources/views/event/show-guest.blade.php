@@ -156,7 +156,7 @@
       </div>
     </div>
     <div
-      class="container mx-auto flex flex-col-reverse sm:grid px-5 py-[80px] gap-[48px] sm:grid-cols-[minmax(0px,_auto)_minmax(0px,_344px)]"
+      class="container mx-auto flex flex-col sm:grid px-5 py-[80px] lg:gap-[48px] gap-[8px] lg:grid-cols-[minmax(0px,_auto)_minmax(0px,_344px)]"
     >
       <div class="flex flex-col gap-10">
         <!--
@@ -228,7 +228,7 @@
             style="font-family: {{ $each->isClaimed() ? $each->font_family : $otherRole->font_family }}, sans-serif;"
           >
             <div
-              class="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center"
+              class="flex flex-row justify-between items-center"
             >
               <div class="flex gap-3 flex-row items-center">
                 @if ($each->isClaimed())                
