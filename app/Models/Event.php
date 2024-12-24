@@ -91,20 +91,18 @@ class Event extends Model
             return '';
         }
 
-        $timezone = 'UTC';
         $enable24 = false;
 
         if ($user = auth()->user()) {
-            $timezone = $user->timezone;
+            //    
         } else {
-            $timezone = $this->venue->timezone;
             $enable24 = $this->venue->use_24_hour_time;
         }
 
-        $startAt = $this->getStartDateTime($date);
+        $startAt = $this->getStartDateTime($date, true);
+        
         $format = $pretty ? ($enable24 ? 'l, F jS • H:i' : 'l, F jS • g:i A') : 'Y-m-d H:i:s';
-
-        $value = $startAt->setTimezone($timezone)->format($format);
+        $value = $startAt->format($format);
         
         if ($endTime && $this->duration > 0) {
             $startDate = $startAt->format('Y-m-d');
@@ -308,9 +306,32 @@ class Event extends Model
         return $url;
     }
 
+    public function getStartDateTime($date = null, $locale = false)
+    {
+        $timezone = 'UTC';
+        if ($user = auth()->user()) {
+            $timezone = $user->timezone;
+        } else {
+            $timezone = $this->venue->timezone;
+        }
+
+        $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
+
+        if ($locale) {
+            $startAt->setTimezone($timezone);        
+        }
+
+        if ($date) {
+            $customDate = Carbon::createFromFormat('Y-m-d', $date);
+            $startAt->setDate($customDate->year, $customDate->month, $customDate->day);
+        }
+        
+        return $startAt;
+    }
+
     public function getStartEndTime($date = null)
     {
-        $date = $this->getStartDateTime($date);
+        $date = $this->getStartDateTime($date, true);
 
         if ($this->duration > 0) {
             $endDate = $date->copy()->addSeconds($this->duration * 3600);
@@ -318,18 +339,6 @@ class Event extends Model
         } else {
             return $date->format($this->role()->use_24_hour_time ? 'H:i' : 'g:i A');
         }        
-    }
-
-    public function getStartDateTime($date = null)
-    {
-        $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
-        
-        if ($date) {
-            $customDate = Carbon::createFromFormat('Y-m-d', $date);
-            $startAt->setDate($customDate->year, $customDate->month, $customDate->day);
-        }
-        
-        return $startAt;
     }
 
     public function getFlyerImageUrlAttribute($value)
