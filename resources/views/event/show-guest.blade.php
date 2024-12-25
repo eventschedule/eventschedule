@@ -288,7 +288,7 @@
               </div>
               @if ($each->isClaimed())
               <a
-                href="route('role.follow', ['subdomain' => $each->subdomain])"
+                href="{{ route('role.follow', ['subdomain' => $each->subdomain]) }}"
                 class="inline-flex items-center justify-center"
               >
                 <button
