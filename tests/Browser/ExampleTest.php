@@ -35,8 +35,8 @@ class ExampleTest extends DuskTestCase
             $user->email_verified_at = now();
             $user->save();
 
-            $browser->visit('/home')                
-                    ->assertPathIs('/home')
+            $browser->visit('/events')                
+                    ->assertPathIs('/events')
                     ->assertSee($name);            
 
             // Log out
@@ -49,7 +49,7 @@ class ExampleTest extends DuskTestCase
                     ->type('email', $email)
                     ->type('password', $password)
                     ->press('LOG IN')
-                    ->assertPathIs('/home')
+                    ->assertPathIs('/events')
                     ->assertSee($name);
 
             // Create/edit venue
