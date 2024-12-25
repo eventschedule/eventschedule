@@ -329,15 +329,47 @@ class Event extends Model
         return $startAt;
     }
 
+    public function use24HourTime()
+    {
+        if ($this->role() && $this->role()->use_24_hour_time) {
+            return true;
+        } else if ($this->venue && $this->venue->use_24_hour_time) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function getTimeFormat()
+    {
+        return $this->use24HourTime() ? 'H:i' : 'g:i A';
+    }
+
+    public function getDateTimeFormat($includeYear = false)
+    {
+        $format = $this->getTimeFormat();
+
+        if ($includeYear) {
+            return 'F jS, Y ' . $format;
+        } else {
+            return 'F jS ' . $format;
+        }
+    }
+
+    public function isMultiDay()
+    {
+        return ! $this->getStartDateTime()->isSameDay($this->getStartDateTime()->addHours($this->duration));
+    }
+
     public function getStartEndTime($date = null)
     {
         $date = $this->getStartDateTime($date, true);
 
         if ($this->duration > 0) {
-            $endDate = $date->copy()->addSeconds($this->duration * 3600);
-            return $date->format($this->role()->use_24_hour_time ? 'H:i' : 'g:i A') . ' - ' . $endDate->format($this->role()->use_24_hour_time ? 'H:i' : 'g:i A');
+            $endDate = $date->copy()->addHours($this->duration);
+            return $date->format($this->use24HourTime() ? 'H:i' : 'g:i A') . ' - ' . $endDate->format($this->use24HourTime() ? 'H:i' : 'g:i A');
         } else {
-            return $date->format($this->role()->use_24_hour_time ? 'H:i' : 'g:i A');
+            return $date->format($this->use24HourTime() ? 'H:i' : 'g:i A');
         }        
     }
 
