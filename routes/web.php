@@ -7,7 +7,7 @@ use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 if (config('app.env') != 'local') {
-    Route::domain('{subdomain}.eventschedule.com')->where('subdomain', '^(?!app$).*')->group(function () {
+    Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!app$).*'])->group(function () {
         Route::get('/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
         Route::get('/{other_subdomain?}/{event_name?}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
