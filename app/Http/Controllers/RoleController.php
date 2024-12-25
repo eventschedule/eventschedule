@@ -1011,20 +1011,23 @@ class RoleController extends Controller
 
     public function signUp(Request $request, $subdomain)
     {
+        $mainDomain = config('app.url');
+
         if (! auth()->user()) {
             session(['pending_venue' => $subdomain]);
-            return redirect()->route('sign_up');
+            $redirectUrl = $mainDomain . route('sign_up', [], false);
+            return redirect($redirectUrl);
         }
         
-        $mainDomain = config('app.url');
         $user = auth()->user();
         
         if ($user->schedules()->count() == 0) {
-            return redirect()->route('new', ['type' => 'schedule']);
+            session(['pending_venue' => $subdomain]);
+            $redirectUrl = $mainDomain . route('new', ['type' => 'schedule'], false);
+            return redirect($redirectUrl);
         }
 
         $redirectUrl = $mainDomain . route('event.create', ['subdomain' => $subdomain], false);
-
         return redirect($redirectUrl);
     }
 
