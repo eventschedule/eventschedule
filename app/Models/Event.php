@@ -358,7 +358,7 @@ class Event extends Model
 
     public function isMultiDay()
     {
-        return ! $this->getStartDateTime()->isSameDay($this->getStartDateTime()->addHours($this->duration));
+        return ! $this->getStartDateTime(null, true)->isSameDay($this->getStartDateTime(null, true)->addHours($this->duration));
     }
 
     public function getStartEndTime($date = null)
