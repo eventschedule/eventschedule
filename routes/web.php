@@ -73,7 +73,7 @@ if (config('app.env') == 'local') {
     Route::get('/{subdomain}/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
 } else {
-    Route::domain('{subdomain}.eventschedule.com')->group(function () {
+    Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!app$).*'])->group(function () {
         Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');
     });
 }
