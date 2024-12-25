@@ -130,7 +130,7 @@
         </a>
         <div class="flex flex-row gap-x-3 md:gap-x-10">
             <a
-            href="{{ route('login') }}"
+            href="{{ config('app.url') . route('login', [], false) }}"
             class="inline-flex items-center justify-center"
             >
             <button
@@ -143,7 +143,7 @@
             </button>
             </a>
             <a
-            href="{{ route('sign_up') }}"
+            href="{{ config('app.url') . route('sign_up', [], false) }}"
             class="inline-flex items-center justify-center"
             >
             <button
