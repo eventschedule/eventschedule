@@ -53,7 +53,7 @@ class HomeController extends Controller
         $roleIds = $user->roles()->pluck('roles.id');
         
         $events = Event::with(['roles', 'venue'])
-            ->where(function ($query) use ($roleIds) {
+            ->where(function ($query) use ($roleIds, $user) {
                 $query->where(function ($query) use ($roleIds) {
                     $query->whereIn('venue_id', $roleIds)
                           ->where('is_accepted', true);
@@ -64,6 +64,8 @@ class HomeController extends Controller
                                 ->whereIn('role_id', $roleIds)
                                 ->where('is_accepted', true);
                     });
+                })->orWhere(function ($query) use ($user) {
+                    $query->where('user_id', $user->id);
                 });
             })
             ->where(function ($query) use ($startOfMonth, $endOfMonth) {
