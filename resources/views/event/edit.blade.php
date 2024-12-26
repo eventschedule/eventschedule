@@ -153,6 +153,7 @@
   </h2>
 
   <form method="POST"
+        @submit="validateForm"
         action="{{ $event->exists ? route('event.update', ['subdomain' => $subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) : route('event.store', ['subdomain' => $subdomain]) }}"
         enctype="multipart/form-data">
 
@@ -1070,11 +1071,20 @@
         }
         @endif
       },
+      validateForm(event) {
+        if (!this.isFormValid) {
+          event.preventDefault();
+          alert("{{ __('messages.please_select_venue_or_participant') }}");
+        }
+      },
     },
     computed: {
       filteredMembers() {
         return this.members.filter(member => !this.selectedMembers.some(selected => selected.id === member.id));
       },
+      isFormValid() {
+        return this.selectedVenue || this.selectedMembers.length > 0;
+      }
     },
     watch: {
       venueType() {
