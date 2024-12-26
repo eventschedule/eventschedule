@@ -172,17 +172,24 @@ class RoleController extends Controller
 
         $otherRole = null;
         $event = null;
-        $month = $request->month;
-        $year = $request->year;
         $date = $request->date;
+
+        if ($date) {
+            $dateObj = Carbon::parse($date);
+            $month = $dateObj->month;
+            $year = $dateObj->year;
+        } else {
+            $month = $request->month;
+            $year = $request->year;
+        }
 
         if ($otherSubdomain) {
             if ($eventRole = Role::subdomain($otherSubdomain)->first()) {
                 $eventVenueId = $role->isVenue() ? $role->id : $eventRole->id;
                 $eventRoleId = $role->isVenue() ? $eventRole->id : $role->id;
 
-                if ($request->date) {
-                    $eventDate = Carbon::parse($request->date);
+                if ($date) {
+                    $eventDate = Carbon::parse($date);
                     $event = Event::whereHas('roles', function ($query) use ($eventRoleId) {
                             $query->where('role_id', $eventRoleId);
                         })
@@ -252,7 +259,7 @@ class RoleController extends Controller
                 $otherRole = $role;
             }
 
-            if ($event->starts_at) {
+            if ($event->starts_at && ! $date) {
                 $startAtDate = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
                 $month = $startAtDate->month;
                 $year = $startAtDate->year;
