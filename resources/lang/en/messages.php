@@ -302,4 +302,5 @@ return [
     'event_participants' => 'Event Participants',
     'manage' => 'Manage',
     //
+    'please_select_venue_or_participant' => 'Please select a venue or participant',    
 ];
