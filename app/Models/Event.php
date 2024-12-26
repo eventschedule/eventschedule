@@ -188,14 +188,14 @@ class Event extends Model
         } else if ($venue && $subdomain == $venue->subdomain) {
             $otherSubdomain = $role ? $role->subdomain : '';
         } else {
-            if ($role->isClaimed()) {
+            if ($role && $role->isClaimed()) {
                 $subdomain = $role->subdomain;
                 if ($venue && $venue->isClaimed()) {
                     $otherSubdomain = $venue->subdomain;
                 } else {
                     $otherSubdomain = UrlUtils::encodeId($this->id);
                 }
-            } else if ($venue &&$venue->isClaimed()) {
+            } else if ($venue && $venue->isClaimed()) {
                 $subdomain = $venue->subdomain;
                 $otherSubdomain = UrlUtils::encodeId($this->id);
             } else {
