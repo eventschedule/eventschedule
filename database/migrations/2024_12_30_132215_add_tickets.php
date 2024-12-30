@@ -21,14 +21,13 @@ return new class extends Migration
             $table->text('ticket_notes')->nullable();
         });
 
-        Schema::table('event_tickets', function (Blueprint $table) {
+        Schema::create('event_tickets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('event_id')->constrained()->onDelete('cascade');
             $table->string('type')->nullable();
             $table->integer('quantity')->nullable();
             $table->integer('sold')->default(0);
             $table->decimal('price', 13, 3)->nullable();
-            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
 
@@ -40,7 +39,7 @@ return new class extends Migration
             $table->string('email');
             $table->string('secret');
             $table->integer('quantity');
-            $table->boolean('used')->default(false);
+            $table->boolean('is_used')->default(false);
             $table->timestamps();
         });
     }
