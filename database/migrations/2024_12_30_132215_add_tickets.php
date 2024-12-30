@@ -29,6 +29,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('event_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
+            $table->string('type');
             $table->string('name');
             $table->string('email');
             $table->string('secret');
