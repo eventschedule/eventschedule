@@ -110,7 +110,7 @@ class HomeController extends Controller
     {
         $roles = Role::whereNotNull('email')
                     ->orWhereNotNull('phone')
-                    ->orderBy('subdomain', 'asc')
+                    ->orderBy(request()->sort_order == 'id' ? 'id' : 'subdomain', request()->sort_order == 'id' ? 'desc' : 'asc')
                     ->get();
 
         $content = view('sitemap', [
