@@ -17,19 +17,25 @@ return new class extends Migration
 
         Schema::table('events', function (Blueprint $table) {
             $table->boolean('tickets_enabled')->default(false);            
-            $table->integer('ticket_quantity')->nullable();
-            $table->integer('ticket_sold')->nullable();
-            $table->decimal('ticket_price', 13, 3)->nullable();
-            $table->string('ticket_types')->nullable();
             $table->string('ticket_currency_code')->nullable();
             $table->text('ticket_notes')->nullable();
         });
 
-        Schema::create('tickets', function (Blueprint $table) {
+        Schema::table('event_tickets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('event_id')->constrained()->onDelete('cascade');
+            $table->string('type')->nullable();
+            $table->integer('quantity')->nullable();
+            $table->integer('sold')->default(0);
+            $table->decimal('price', 13, 3)->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
+
+        Schema::create('tickets', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('event_ticket_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
-            $table->string('type');
             $table->string('name');
             $table->string('email');
             $table->string('secret');
@@ -48,16 +54,13 @@ return new class extends Migration
             $table->dropColumn('header_image');
         });        
 
+        Schema::dropIfExists('event_tickets');
+        Schema::dropIfExists('tickets');
+
         Schema::table('events', function (Blueprint $table) {
             $table->dropColumn('tickets_enabled');
-            $table->dropColumn('ticket_quantity');
-            $table->dropColumn('ticket_sold');
-            $table->dropColumn('ticket_price');
-            $table->dropColumn('ticket_types');
             $table->dropColumn('ticket_currency_code');
             $table->dropColumn('ticket_notes');
-        });
-
-        Schema::dropIfExists('tickets');
+        });        
     }
 };
