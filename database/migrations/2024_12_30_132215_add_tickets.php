@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('roles', function (Blueprint $table) {
             $table->string('header_image')->nullable();
+            $table->text('default_tickets')->nullable();
         });
 
         Schema::table('events', function (Blueprint $table) {
@@ -51,6 +52,7 @@ return new class extends Migration
     {
         Schema::table('roles', function (Blueprint $table) {
             $table->dropColumn('header_image');
+            $table->dropColumn('default_tickets');
         });        
 
         Schema::dropIfExists('event_tickets');
