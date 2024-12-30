@@ -22,15 +22,18 @@ return new class extends Migration
             $table->decimal('ticket_price', 13, 3)->nullable();
             $table->string('ticket_types')->nullable();
             $table->string('ticket_currency_code')->nullable();
+            $table->text('ticket_notes')->nullable();
         });
 
-        Schema::table('tickets', function (Blueprint $table) {
+        Schema::create('tickets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('event_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('name');
             $table->string('email');
+            $table->string('secret');
             $table->integer('quantity');
+            $table->boolean('used')->default(false);
             $table->timestamps();
         });
     }
@@ -51,6 +54,7 @@ return new class extends Migration
             $table->dropColumn('ticket_price');
             $table->dropColumn('ticket_types');
             $table->dropColumn('ticket_currency_code');
+            $table->dropColumn('ticket_notes');
         });
 
         Schema::dropIfExists('tickets');
