@@ -288,7 +288,9 @@
               </div>
               @if ($each->isClaimed())
               <a
-                href="{{ route('role.follow', ['subdomain' => $each->subdomain]) }}"
+                href="{{ auth()->user() && auth()->user()->isMember($each->subdomain)
+                  ? config('app.url') . route('role.view_admin', ['subdomain' => $each->subdomain], false) 
+                  : route('role.follow', ['subdomain' => $each->subdomain]) }}"
                 class="inline-flex items-center justify-center"
               >
                 <button
@@ -297,7 +299,7 @@
                   style="background-color: {{ $otherRole->accent_color ?? '#4E81FA' }}"
                   class="inline-flex items-center rounded-md px-8 py-4 hover:opacity-90 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
-                  {{ __('messages.follow') }}
+                  {{ auth()->user() && auth()->user()->isMember($role->subdomain) ? __('messages.manage') : __('messages.follow') }}
                 </button>
               </a>
               @endif
