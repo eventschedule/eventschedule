@@ -29,6 +29,7 @@ return new class extends Migration
             $table->integer('quantity')->nullable();
             $table->integer('sold')->default(0);
             $table->decimal('price', 13, 3)->nullable();
+            $table->boolean('is_default')->default(false);
             $table->timestamps();
         });
 
@@ -41,6 +42,7 @@ return new class extends Migration
             $table->string('secret');
             $table->integer('quantity');
             $table->boolean('is_used')->default(false);
+            $table->string('transaction_reference')->nullable();
             $table->timestamps();
         });
     }
