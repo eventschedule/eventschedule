@@ -29,7 +29,7 @@ return new class extends Migration
             $table->integer('quantity')->nullable();
             $table->integer('sold')->default(0);
             $table->decimal('price', 13, 3)->nullable();
-            $table->boolean('is_default')->default(false);
+            $table->boolean('is_deleted')->default(false);
             $table->timestamps();
         });
 
