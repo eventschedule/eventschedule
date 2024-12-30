@@ -33,7 +33,9 @@
                 {{ $role->name }}
               </h3>
               <a
-                href="{{ auth()->user() && auth()->user()->isMember($role->subdomain) ? route('role.view_admin', ['subdomain' => $role->subdomain]) : route('role.follow', ['subdomain' => $role->subdomain]) }}"
+                href="{{ auth()->user() && auth()->user()->isMember($role->subdomain)
+                  ? config('app.url') . route('role.view_admin', ['subdomain' => $role->subdomain], false) 
+                  : route('role.follow', ['subdomain' => $role->subdomain]) }}"
                 class="inline-flex items-center justify-center"
               >
                 <button
