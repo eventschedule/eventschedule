@@ -714,7 +714,7 @@
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('messages.tickets') }}
+                            {{ __('messages.event_tickets') }}
                         </h2>
 
                         <div class="mb-6">
@@ -741,7 +741,6 @@
                             </div>
 
                             <div class="mb-6">
-                                <x-input-label :value="__('messages.ticket_types')" />
                                 <div v-for="(ticket, index) in tickets" :key="index" class="mt-4 p-4 border rounded-lg">
                                     <input type="hidden" v-bind:name="`tickets[${index}][id]`" v-model="ticket.id">
                                     <div class="grid grid-cols-2 gap-4">
@@ -774,12 +773,12 @@
                                 </div>
 
                                 <x-secondary-button @click="addTicket" type="button" class="mt-4">
-                                    {{ __('messages.add_ticket_type') }}
+                                    {{ __('messages.add_type') }}
                                 </x-secondary-button>
                             </div>
 
                             <div class="mb-6">
-                                <x-input-label for="ticket_notes" :value="__('messages.general_ticket_notes')" />
+                                <x-input-label for="ticket_notes" :value="__('messages.ticket_notes')" />
                                 <textarea id="ticket_notes" name="ticket_notes" v-model="ticketNotes"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
                             </div>

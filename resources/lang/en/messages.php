@@ -302,5 +302,11 @@ return [
     'event_participants' => 'Event Participants',
     'manage' => 'Manage',
     //
-    'please_select_venue_or_participant' => 'Please select a venue or participant',    
+    'please_select_venue_or_participant' => 'Please select a venue or participant',
+    'event_tickets' => 'Event Tickets',
+    'enable_tickets' => 'Enable Tickets',
+    'currency' => 'Currency',
+    'select_currency' => 'Select Currency',
+    'add_type' => 'Add Type',
+    'ticket_notes' => 'Ticket Notes',
 ];
