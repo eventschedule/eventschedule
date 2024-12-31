@@ -22,7 +22,7 @@ return new class extends Migration
             $table->text('ticket_notes')->nullable();
         });
 
-        Schema::create('event_tickets', function (Blueprint $table) {
+        Schema::create('tickets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('event_id')->constrained()->onDelete('cascade');
             $table->string('type')->nullable();
@@ -34,9 +34,10 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('tickets', function (Blueprint $table) {
+        Schema::create('sales', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('event_ticket_id')->constrained()->onDelete('cascade');
+            $table->foreignId('ticket_id')->constrained()->onDelete('cascade');
+            $table->foreignId('event_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('name');
             $table->string('email');
@@ -58,7 +59,7 @@ return new class extends Migration
             $table->dropColumn('default_tickets');
         });        
 
-        Schema::dropIfExists('event_tickets');
+        Schema::dropIfExists('sales');
         Schema::dropIfExists('tickets');
 
         Schema::table('events', function (Blueprint $table) {

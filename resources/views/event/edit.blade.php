@@ -714,6 +714,82 @@
             </div>
         </div>
 
+        <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+            <div class="max-w-xl">                                                
+                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                    {{ __('messages.tickets') }}
+                </h2>
+
+                <div class="mb-6">
+                    <div class="flex items-center">
+                        <input id="tickets_enabled" name="tickets_enabled" type="checkbox" v-model="ticketsEnabled"
+                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                        <label for="tickets_enabled" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                            {{ __('messages.enable_tickets') }}
+                        </label>
+                    </div>
+                </div>
+
+                <div v-if="ticketsEnabled">
+                    <div class="mb-6">
+                        <x-input-label for="ticket_currency_code" :value="__('messages.currency') . ' *'" />
+                        <select id="ticket_currency_code" name="ticket_currency_code" v-model="ticketCurrencyCode" required
+                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                            <option value="" disabled>{{ __('messages.select_currency') }}</option>
+                            <option value="USD">USD - US Dollar</option>
+                            <option value="EUR">EUR - Euro</option>
+                            <option value="GBP">GBP - British Pound</option>
+                            <!-- Add more currencies as needed -->
+                        </select>
+                    </div>
+
+                    <div class="mb-6">
+                        <x-input-label :value="__('messages.ticket_types')" />
+                        <div v-for="(ticket, index) in tickets" :key="index" class="mt-4 p-4 border rounded-lg">
+                            <input type="hidden" v-bind:name="`tickets[${index}][id]`" v-model="ticket.id">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <x-input-label :value="__('messages.type')" />
+                                    <x-text-input v-bind:name="`tickets[${index}][type]`" v-model="ticket.type" 
+                                        class="mt-1 block w-full" required />
+                                </div>
+                                <div>
+                                    <x-input-label :value="__('messages.price')" />
+                                    <x-text-input type="number" step="0.01" v-bind:name="`tickets[${index}][price]`" 
+                                        v-model="ticket.price" class="mt-1 block w-full" required />
+                                </div>
+                                <div>
+                                    <x-input-label :value="__('messages.quantity')" />
+                                    <x-text-input type="number" v-bind:name="`tickets[${index}][quantity]`" 
+                                        v-model="ticket.quantity" class="mt-1 block w-full" />
+                                </div>
+                                <div class="flex items-end">
+                                    <x-secondary-button @click="removeTicket(index)" type="button" class="mt-1">
+                                        {{ __('messages.remove') }}
+                                    </x-secondary-button>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <x-input-label :value="__('messages.notes')" />
+                                <textarea v-bind:name="`tickets[${index}][notes]`" v-model="ticket.notes"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
+                            </div>
+                        </div>
+
+                        <x-secondary-button @click="addTicket" type="button" class="mt-4">
+                            {{ __('messages.add_ticket_type') }}
+                        </x-secondary-button>
+                    </div>
+
+                    <div class="mb-6">
+                        <x-input-label for="ticket_notes" :value="__('messages.general_ticket_notes')" />
+                        <textarea id="ticket_notes" name="ticket_notes" v-model="ticketNotes"
+                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="max-w-7xl mx-auto space-y-6">
             <div class="flex gap-4 items-center justify-between">
                 <div class="flex gap-4">
@@ -769,6 +845,10 @@
         isInPerson: false,
         isOnline: false,
         eventName: @json($event->name ?? ''),
+        ticketsEnabled: @json($event->tickets_enabled ?? false),
+        ticketCurrencyCode: @json($event->ticket_currency_code ?? ''),
+        ticketNotes: @json($event->ticket_notes ?? ''),
+        tickets: @json($event->tickets ?? []),
       }
     },
     methods: {
@@ -1076,6 +1156,18 @@
           event.preventDefault();
           alert("{{ __('messages.please_select_venue_or_participant') }}");
         }
+      },
+      addTicket() {
+        this.tickets.push({
+            id: null,
+            type: '',
+            quantity: null,
+            price: null,
+            notes: ''
+        });
+      },
+      removeTicket(index) {
+        this.tickets.splice(index, 1);
       },
     },
     computed: {
