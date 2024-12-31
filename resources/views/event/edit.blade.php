@@ -766,8 +766,8 @@
                                         </div>
                                     </div>
                                     <div class="mt-4">
-                                        <x-input-label :value="__('messages.notes')" />
-                                        <textarea v-bind:name="`tickets[${index}][notes]`" v-model="ticket.notes"
+                                        <x-input-label :value="__('messages.description')" />
+                                        <textarea v-bind:name="`tickets[${index}][description]`" v-model="ticket.description"
                                             class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
                                     </div>
                                 </div>

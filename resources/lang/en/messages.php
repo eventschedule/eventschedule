@@ -309,4 +309,6 @@ return [
     'select_currency' => 'Select Currency',
     'add_type' => 'Add Type',
     'ticket_notes' => 'Ticket Notes',
+    'price' => 'Price',
+    'quantity' => 'Quantity',
 ];
