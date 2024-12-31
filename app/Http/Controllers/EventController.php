@@ -134,6 +134,9 @@ class EventController extends Controller
         $venues = array_values($venues->sortBy('name')->toArray());
         $members = array_values($members->sortBy('name')->toArray());
         
+        $currencies = file_get_contents(base_path('storage/currencies.json'));
+        $currencies = json_decode($currencies);
+
         return view('event/edit', [
             'role' => $role,
             'user' => $user,
@@ -145,6 +148,7 @@ class EventController extends Controller
             'venues' => $venues,
             'selectedMembers' => $selectedMembers,
             'members' => $members,
+            'currencies' => $currencies,
         ]);
     }
 
@@ -213,6 +217,9 @@ class EventController extends Controller
         $venues = array_values($venues->toArray());
         $members = array_values($members->toArray());
     
+        $currencies = file_get_contents(base_path('storage/currencies.json'));
+        $currencies = json_decode($currencies);
+
         return view('event/edit', [
             'role' => $role,
             'user' => $user,
@@ -224,6 +231,7 @@ class EventController extends Controller
             'venues' => $venues,
             'selectedMembers' => $selectedMembers,
             'members' => $members,
+            'currencies' => $currencies,
         ]);
     }
 

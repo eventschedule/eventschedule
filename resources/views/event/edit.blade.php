@@ -733,10 +733,9 @@
                                 <select id="ticket_currency_code" name="ticket_currency_code" v-model="ticketCurrencyCode" required
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                     <option value="" disabled>{{ __('messages.select_currency') }}</option>
-                                    <option value="USD">USD - US Dollar</option>
-                                    <option value="EUR">EUR - Euro</option>
-                                    <option value="GBP">GBP - British Pound</option>
-                                    <!-- Add more currencies as needed -->
+                                    @foreach ($currencies as $currency)
+                                    <option :value="{{ $currency->value }}">{{ $currency->value }} - {{ $currency->label }}</option>
+                                    @endforeach
                                 </select>
                             </div>
 
