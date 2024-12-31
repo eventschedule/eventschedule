@@ -43,6 +43,7 @@ return new class extends Migration
             $table->string('email');
             $table->string('secret');
             $table->integer('quantity');
+            $table->boolean('is_paid')->default(false);
             $table->boolean('is_used')->default(false);
             $table->string('transaction_reference')->nullable();
             $table->timestamps();
