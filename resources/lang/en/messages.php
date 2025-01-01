@@ -311,4 +311,6 @@ return [
     'ticket_notes' => 'Ticket Notes',
     'price' => 'Price',
     'quantity' => 'Quantity',
+    'unlimited' => 'Unlimited',
+    'free' => 'Free',
 ];

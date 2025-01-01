@@ -744,19 +744,19 @@
                                     <input type="hidden" v-bind:name="`tickets[${index}][id]`" v-model="ticket.id">
                                     <div class="grid grid-cols-2 gap-4">
                                         <div>
-                                            <x-input-label :value="__('messages.type')" />
-                                            <x-text-input v-bind:name="`tickets[${index}][type]`" v-model="ticket.type" 
-                                                class="mt-1 block w-full" required />
-                                        </div>
-                                        <div>
                                             <x-input-label :value="__('messages.price')" />
                                             <x-text-input type="number" step="0.01" v-bind:name="`tickets[${index}][price]`" 
-                                                v-model="ticket.price" class="mt-1 block w-full" required />
+                                                v-model="ticket.price" class="mt-1 block w-full" required placeholder="{{ __('messages.free') }}" />
                                         </div>
                                         <div>
                                             <x-input-label :value="__('messages.quantity')" />
                                             <x-text-input type="number" v-bind:name="`tickets[${index}][quantity]`" 
-                                                v-model="ticket.quantity" class="mt-1 block w-full" />
+                                                v-model="ticket.quantity" class="mt-1 block w-full" placeholder="{{ __('messages.unlimited') }}" />
+                                        </div>
+                                        <div>
+                                            <x-input-label :value="__('messages.type')" />
+                                            <x-text-input v-bind:name="`tickets[${index}][type]`" v-model="ticket.type" 
+                                                class="mt-1 block w-full" required />
                                         </div>
                                         <div class="flex items-end">
                                             <x-secondary-button @click="removeTicket(index)" type="button" class="mt-1">
