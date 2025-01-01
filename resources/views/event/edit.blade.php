@@ -753,20 +753,20 @@
                                             <x-text-input type="number" v-bind:name="`tickets[${index}][quantity]`" 
                                                 v-model="ticket.quantity" class="mt-1 block w-full" placeholder="{{ __('messages.unlimited') }}" />
                                         </div>
-                                        <div>
+                                        <div v-if="tickets.length > 1">
                                             <x-input-label :value="__('messages.type')" />
                                             <x-text-input v-bind:name="`tickets[${index}][type]`" v-model="ticket.type" 
                                                 class="mt-1 block w-full" required />
                                         </div>
-                                        <div class="flex items-end">
+                                        <div v-if="tickets.length > 1" class="flex items-end">
                                             <x-secondary-button @click="removeTicket(index)" type="button" class="mt-1">
                                                 {{ __('messages.remove') }}
                                             </x-secondary-button>
                                         </div>
                                     </div>
-                                    <div class="mt-4">
+                                    <div v-if="tickets.length > 1" class="mt-4">
                                         <x-input-label :value="__('messages.description')" />
-                                        <textarea v-bind:name="`tickets[${index}][description]`" v-model="ticket.description"
+                                        <textarea v-bind:name="`tickets[${index}][description]`" v-model="ticket.description" rows="4"
                                             class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
                                     </div>
                                 </div>
@@ -778,7 +778,7 @@
 
                             <div class="mb-6">
                                 <x-input-label for="ticket_notes" :value="__('messages.ticket_notes')" />
-                                <textarea id="ticket_notes" name="ticket_notes" v-model="event.ticket_notes"
+                                <textarea id="ticket_notes" name="ticket_notes" v-model="event.ticket_notes" rows="4"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
                             </div>
                         </div>
