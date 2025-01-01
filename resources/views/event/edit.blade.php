@@ -719,7 +719,7 @@
 
                         <div class="mb-6">
                             <div class="flex items-center">
-                                <input id="tickets_enabled" name="tickets_enabled" type="checkbox" v-model="ticketsEnabled"
+                                <input id="tickets_enabled" name="tickets_enabled" type="checkbox" v-model="event.tickets_enabled"
                                     class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
                                 <label for="tickets_enabled" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                     {{ __('messages.enable_tickets') }}
@@ -727,10 +727,10 @@
                             </div>
                         </div>
 
-                        <div v-if="ticketsEnabled">
+                        <div v-if="event.tickets_enabled">
                             <div class="mb-6">
                                 <x-input-label for="ticket_currency_code" :value="__('messages.currency') . ' *'" />
-                                <select id="ticket_currency_code" name="ticket_currency_code" v-model="ticketCurrencyCode" required
+                                <select id="ticket_currency_code" name="ticket_currency_code" v-model="event.ticket_currency_code" required
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                     <option value="" disabled>{{ __('messages.select_currency') }}</option>
                                     @foreach ($currencies as $currency)
@@ -778,7 +778,7 @@
 
                             <div class="mb-6">
                                 <x-input-label for="ticket_notes" :value="__('messages.ticket_notes')" />
-                                <textarea id="ticket_notes" name="ticket_notes" v-model="ticketNotes"
+                                <textarea id="ticket_notes" name="ticket_notes" v-model="event.ticket_notes"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
                             </div>
                         </div>
@@ -842,9 +842,6 @@
         isInPerson: false,
         isOnline: false,
         eventName: @json($event->name ?? ''),
-        ticketsEnabled: @json($event->tickets_enabled ?? false),
-        ticketCurrencyCode: @json($event->ticket_currency_code ?? ''),
-        ticketNotes: @json($event->ticket_notes ?? ''),
         tickets: @json($event->tickets ?? []),
       }
     },
