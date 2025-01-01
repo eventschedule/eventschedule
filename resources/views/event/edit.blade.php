@@ -626,7 +626,7 @@
                         </div>
 
                         <div id="days_of_week_div" class="mb-6 {{ ! $event || ! $event->days_of_week ? 'hidden' : '' }}">
-                            <x-input-label for="duration" :value="__('messages.days_of_week')" />
+                            <x-input-label :value="__('messages.days_of_week')" />
                             @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $index => $day)
                             <label for="days_of_week_{{ $index }}" class="mr-3 text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">
                                 <input type="checkbox" id="days_of_week_{{ $index }}" name="days_of_week_{{ $index }}" class="h-4 w-4 rounded border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]"
@@ -648,7 +648,7 @@
 
                         <div class="mb-6">
                             <x-input-label for="duration" :value="__('messages.duration_in_hours')" />
-                            <x-text-input type="number" id="duration" name="duration"
+                            <x-text-input type="number" id="duration" name="duration" step="0.01"
                                 :value="old('duration', $event->duration)" autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('duration')" />
                         </div>
