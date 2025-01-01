@@ -734,7 +734,9 @@
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                     <option value="" disabled>{{ __('messages.select_currency') }}</option>
                                     @foreach ($currencies as $currency)
-                                    <option :value="{{ $currency->value }}">{{ $currency->value }} - {{ $currency->label }}</option>
+                                    <option value="{{ $currency->value }}" {{ $event->ticket_currency_code == $currency->value ? 'selected' : '' }}>
+                                        {{ $currency->value }} - {{ $currency->label }}
+                                    </option>
                                     @endforeach
                                 </select>
                             </div>
