@@ -15,6 +15,7 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Models\EventRole;
 use App\Models\User;
+use App\Models\Ticket;
 use App\Utils\UrlUtils;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -106,6 +107,13 @@ class EventController extends Controller
 
         $event = new Event;
         $selectedMembers = [];
+        
+        
+        $event->tickets = [
+            [
+                new Ticket(),
+            ]
+        ];
 
         if ($schedule) {
             $selectedMembers = [$schedule->toData()];
