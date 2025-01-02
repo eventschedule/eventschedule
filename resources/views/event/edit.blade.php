@@ -748,7 +748,7 @@
                                         <div>
                                             <x-input-label :value="__('messages.price')" />
                                             <x-text-input type="number" step="0.01" v-bind:name="`tickets[${index}][price]`" 
-                                                v-model="ticket.price" class="mt-1 block w-full" required placeholder="{{ __('messages.free') }}" />
+                                                v-model="ticket.price" class="mt-1 block w-full" placeholder="{{ __('messages.free') }}" />
                                         </div>
                                         <div>
                                             <x-input-label :value="__('messages.quantity')" />
@@ -756,7 +756,7 @@
                                                 v-model="ticket.quantity" class="mt-1 block w-full" placeholder="{{ __('messages.unlimited') }}" />
                                         </div>
                                         <div v-if="tickets.length > 1">
-                                            <x-input-label :value="__('messages.type')" />
+                                            <x-input-label :value="__('messages.type') . ' *'" />
                                             <x-text-input v-bind:name="`tickets[${index}][type]`" v-model="ticket.type" 
                                                 class="mt-1 block w-full" required />
                                         </div>
