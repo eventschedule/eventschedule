@@ -848,7 +848,7 @@
         isInPerson: false,
         isOnline: false,
         eventName: @json($event->name ?? ''),
-        tickets: @json($event->tickets ?? []),
+        tickets: @json($event->tickets ?? [new Ticket()]),
       }
     },
     methods: {

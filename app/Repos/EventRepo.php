@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ClaimRole;
 use App\Mail\ClaimVenue;
+use App\Models\Ticket;
 
 
 class EventRepo
@@ -221,6 +222,41 @@ class EventRepo
             if ($event->wasRecentlyCreated && ! $role->isClaimed() && $role->is_subscribed && $role->email) {
                 Mail::to($role->email)->send(new ClaimRole($event));
             }
+        }
+
+        if ($event->tickets_enabled) {
+            $ticketData = $request->input('tickets', []);
+            $ticketIds = [];
+
+            foreach ($ticketData as $data) {
+                if (!empty($data['id'])) {
+                    $ticket = Ticket::find($data['id']);
+                    $ticketIds[] = $ticket->id;
+                    if ($ticket && $ticket->event_id == $event->id) {
+                        $ticket->update([
+                            'type' => $data['type'] ?? null,
+                            'quantity' => $data['quantity'] ?? null,
+                            'price' => $data['price'] ?? null,
+                            'description' => $data['description'] ?? null
+                        ]);
+                    }
+                } else {
+                    Ticket::create([
+                        'event_id' => $event->id,
+                        'type' => $data['type'] ?? null,
+                        'quantity' => $data['quantity'] ?? null, 
+                        'price' => $data['price'] ?? null,
+                        'description' => $data['description'] ?? null
+                    ]);
+                    $ticketIds[] = $ticket->id;
+                }
+            }
+
+            $event->tickets()
+                ->whereNotIn('id', $ticketIds)
+                ->update(['is_deleted' => true]);
+        } else {
+            $event->tickets()->update(['is_deleted' => true]);
         }
 
         return $event;

@@ -39,7 +39,7 @@ class Event extends Model
 
     public function tickets()
     {
-        return $this->hasMany(Ticket::class);
+        return $this->hasMany(Ticket::class)->where('is_deleted', false);
     }
 
     public function user()
