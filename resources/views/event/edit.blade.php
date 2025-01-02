@@ -719,8 +719,9 @@
 
                         <div class="mb-6">
                             <div class="flex items-center">
-                                <input id="tickets_enabled" name="tickets_enabled" type="checkbox" v-model="event.tickets_enabled"
+                                <input id="tickets_enabled" name="tickets_enabled" type="checkbox" v-model="event.tickets_enabled" :value="1"
                                     class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                                <input type="hidden" name="tickets_enabled" :value="event.tickets_enabled ? 1 : 0">
                                 <label for="tickets_enabled" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                     {{ __('messages.enable_tickets') }}
                                 </label>
@@ -816,7 +817,10 @@
   app = createApp({
     data() {
       return {
-        event: @json($event),
+        event: {
+          ...@json($event),
+          tickets_enabled: {{ $event->tickets_enabled ? 'true' : 'false' }},
+        },
         venues: @json($venues),
         members: @json($members ?? []),
         venueType: "{{ $selectedVenue && !$selectedVenue->isClaimed() ? 'no_contact_info' : (count($venues) > 0 ? 'use_existing' : 'search_create') }}",
