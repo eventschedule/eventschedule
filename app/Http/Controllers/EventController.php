@@ -108,7 +108,7 @@ class EventController extends Controller
         $event = new Event;
         $selectedMembers = [];
         
-        
+        $event->ticket_currency_code = 'USD';
         $event->tickets = [
             [
                 new Ticket(),
