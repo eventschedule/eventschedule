@@ -241,7 +241,7 @@ class EventRepo
                         ]);
                     }
                 } else {
-                    Ticket::create([
+                    $ticket = Ticket::create([
                         'event_id' => $event->id,
                         'type' => $data['type'] ?? null,
                         'quantity' => $data['quantity'] ?? null, 
