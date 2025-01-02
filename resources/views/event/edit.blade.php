@@ -732,7 +732,6 @@
                                 <x-input-label for="ticket_currency_code" :value="__('messages.currency') . ' *'" />
                                 <select id="ticket_currency_code" name="ticket_currency_code" v-model="event.ticket_currency_code" required
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
-                                    <option value="" disabled>{{ __('messages.select_currency') }}</option>
                                     @foreach ($currencies as $currency)
                                     <option value="{{ $currency->value }}" {{ $event->ticket_currency_code == $currency->value ? 'selected' : '' }}>
                                         {{ $currency->value }} - {{ $currency->label }}
@@ -742,7 +741,8 @@
                             </div>
 
                             <div class="mb-6">
-                                <div v-for="(ticket, index) in tickets" :key="index" class="mt-4 p-4 border rounded-lg">
+                                <div v-for="(ticket, index) in tickets" :key="index" 
+                                     :class="{'mt-4 p-4 border rounded-lg': tickets.length > 1, 'mt-4': tickets.length === 1}">
                                     <input type="hidden" v-bind:name="`tickets[${index}][id]`" v-model="ticket.id">
                                     <div class="grid grid-cols-2 gap-4">
                                         <div>
