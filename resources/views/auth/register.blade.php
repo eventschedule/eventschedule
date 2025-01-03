@@ -18,7 +18,7 @@
 
         <input type="hidden" id="timezone" name="timezone"/>
         <input type="hidden" id="language_code" name="language_code"/>
-
+        
         <!-- Name -->
         <div>
             <x-input-label for="name" :value="__('messages.full_name')" />
@@ -53,6 +53,11 @@
                 name="password_confirmation" required autocomplete="new-password" />
 
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+        </div>
+
+        <!-- Honeypot field -->
+        <div class="hidden">
+            <input type="text" name="website" autocomplete="off" tabindex="-1">
         </div>
 
         <div class="mt-4">
