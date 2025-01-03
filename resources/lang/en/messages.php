@@ -313,4 +313,5 @@ return [
     'quantity' => 'Quantity',
     'unlimited' => 'Unlimited',
     'free' => 'Free',
+    'invalid_request' => 'Invalid request',
 ];
