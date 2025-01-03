@@ -30,6 +30,11 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
+        <!-- Honeypot field -->
+        <div class="hidden">
+            <input type="text" name="website" autocomplete="off" tabindex="-1">
+        </div>
+
         <div class="flex items-center justify-end mt-4">
             <x-primary-button>
                 {{ __('messages.reset_password') }}
