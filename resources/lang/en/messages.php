@@ -314,4 +314,5 @@ return [
     'unlimited' => 'Unlimited',
     'free' => 'Free',
     'invalid_request' => 'Invalid request',
+    'email_not_verified' => 'Email not verified',
 ];
