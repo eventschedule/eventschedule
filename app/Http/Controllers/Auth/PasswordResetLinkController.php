@@ -27,12 +27,6 @@ class PasswordResetLinkController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        if ($request->filled('website')) {
-            throw ValidationException::withMessages([
-                'email' => __('messages.invalid_request'),
-            ]);
-        }
-
         $user = User::where('email', $request->email)->first();
         
         if ($user && !$user->email_verified_at) {
