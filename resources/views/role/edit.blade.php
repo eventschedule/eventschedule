@@ -390,7 +390,7 @@
 
                         <div class="mb-6">
                             <x-input-label for="profile_image" :value="__('messages.square_profile_image')" />
-                            <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full"
+                            <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full text-gray-900 dark:text-gray-100"
                                 :value="old('profile_image')" accept="image/png, image/jpeg" />
                             <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
                             <p id="profile_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
@@ -411,7 +411,7 @@
 
                         <div class="mb-6">
                             <x-input-label for="header_image" :value="__('messages.header_image')" />
-                            <input id="header_image" name="header_image" type="file" class="mt-1 block w-full"
+                            <input id="header_image" name="header_image" type="file" class="mt-1 block w-full text-gray-900 dark:text-gray-100"
                                 :value="old('header_image')" accept="image/png, image/jpeg" />
                             <x-input-error class="mt-2" :messages="$errors->get('header_image')" />
                             <p id="header_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
