@@ -87,7 +87,7 @@
         <!--
         <div>
             <x-input-label for="profile_image" :value="__('messages.square_profile_image')" />
-            <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full"
+            <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full text-gray-900 dark:text-gray-100"
                 :value="old('profile_image')" accept="image/png, image/jpeg" />
             <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
 
