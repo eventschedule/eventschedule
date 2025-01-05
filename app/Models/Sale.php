@@ -10,7 +10,6 @@ class Sale extends Model
         'name',
         'email',
         'secret',
-        'quantity',
     ];
 
     public function ticket()
@@ -21,5 +20,10 @@ class Sale extends Model
     public function event()
     {
         return $this->belongsTo(Event::class);
+    }
+
+    public function tickets()
+    {
+        return $this->hasMany(SalesTicket::class);
     }
 }
