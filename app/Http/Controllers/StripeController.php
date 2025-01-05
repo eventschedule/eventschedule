@@ -64,4 +64,5 @@ class StripeController extends Controller
 
         return redirect()->route('profile.edit')->with('error', __('messages.failed_to_connect_stripe'));
     }
+
 }
