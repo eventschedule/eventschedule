@@ -16,11 +16,13 @@ class TicketController extends Controller
         $sale->save();
 
         foreach($request->tickets as $ticket) {
-            $sale->tickets()->create([
-                'sale_id' => $sale->id,
-                'ticket_id' => $ticket['id'],
-                'quantity' => $ticket['quantity'],
-            ]);
+            if ($ticket['quantity'] > 0) {
+                $sale->tickets()->create([
+                    'sale_id' => $sale->id,
+                    'ticket_id' => $ticket['id'],
+                    'quantity' => $ticket['quantity'],
+                ]);
+            }
         }
         
         dd($sale);
