@@ -12,6 +12,7 @@ if (config('app.env') != 'local') {
         Route::get('/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
         Route::get('/{other_subdomain?}/{event_name?}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
+        Route::post('/checkout', [EventController::class, 'checkout'])->name('event.checkout');
     });
 }
 
@@ -77,6 +78,7 @@ if (config('app.env') == 'local') {
     Route::get('/{subdomain}/view', [RoleController::class, 'viewGuest'])->name('role.view_guest');
     Route::get('/{subdomain}/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
+    Route::post('/{subdomain}/checkout', [EventController::class, 'checkout'])->name('event.checkout');
 } else {
     Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!app$).*'])->group(function () {
         Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');

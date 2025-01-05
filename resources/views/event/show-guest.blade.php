@@ -201,7 +201,7 @@
             {{ __('messages.buy_tickets') }}
         </h3>
           <p class="text-base text-black">
-                
+            @include('event.tickets', ['event' => $event, 'subdomain' => $subdomain])
           </p>
         </div>
         @else
