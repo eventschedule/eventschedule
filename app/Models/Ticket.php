@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Utils\UrlUtils;
 
 class Ticket extends Model
 {
@@ -23,5 +24,18 @@ class Ticket extends Model
     public function event()
     {
         return $this->belongsTo(Event::class);
+    }
+
+    public function toData()
+    {
+        $data = [];
+        $data['event_id'] = UrlUtils::encodeId($this->event_id);
+        $data['type'] = $this->type;
+        $data['quantity'] = $this->quantity;
+        $data['sold'] = $this->sold;
+        $data['price'] = $this->price;
+        $data['description'] = $this->description;
+
+        return $data;
     }
 }
