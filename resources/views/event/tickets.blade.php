@@ -72,7 +72,7 @@
             </div>
         </div>
 
-        <div v-if="totalAmount > 0" class="mt-4 text-lg font-bold">
+        <div class="my-4 text-lg font-bold">
             Total: @{{ formatPrice(totalAmount) }}
         </div>
 

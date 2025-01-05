@@ -751,7 +751,7 @@
                             </div>
                             @endif
 
-                            <div class="mb-6" v-if="event.payment_method === 'cash'">
+                            <div class="mb-6">
                                 <x-input-label for="ticket_currency_code" :value="__('messages.currency')"/>
                                 <select id="ticket_currency_code" name="ticket_currency_code" v-model="event.ticket_currency_code" required
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
