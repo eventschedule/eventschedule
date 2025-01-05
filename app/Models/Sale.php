@@ -13,6 +13,8 @@ class Sale extends Model
         'secret',
     ];
 
+    
+    
     public function ticket()
     {
         return $this->belongsTo(Ticket::class);

@@ -14,6 +14,13 @@ class SaleTicket extends Model
         'quantity',        
     ];
 
+    protected static function booted()
+    {
+        static::created(function ($saleTicket) {
+            $saleTicket->ticket->increment('sold', $saleTicket->quantity);
+        });
+    }
+
     public function sale()
     {
         return $this->belongsTo(Sale::class);
