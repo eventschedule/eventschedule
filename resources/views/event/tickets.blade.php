@@ -1,56 +1,57 @@
 <x-slot name="head">
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
   <script>
-    console.log('TEST');
     const { createApp, ref } = Vue
 
-    app = createApp({
-        el: '#ticket-selector',
-        data: {
-            tickets: @json($event->tickets),
-        },
-        created() {
-            console.log(this.tickets);
-            // Initialize selectedQty for each ticket
-            this.tickets.forEach(ticket => {
-                ticket.selectedQty = 0;
-                ticket.available = ticket.quantity - ticket.sold;
-            });
-        },
-        computed: {
-            totalAmount() {
-                return this.tickets.reduce((total, ticket) => {
-                    return total + (ticket.price * ticket.selectedQty);
-                }, 0);
+    document.addEventListener('DOMContentLoaded', function() {
+        app = createApp({
+            data: {
+                tickets: @json($event->tickets),
             },
-            hasSelectedTickets() {
-                return this.tickets.some(ticket => ticket.selectedQty > 0);
-            }
-        },
-        methods: {
-            formatPrice(price) {
-                return new Intl.NumberFormat('{{ app()->getLocale() }}', {
-                    style: 'currency',
-                    currency: '{{ $event->ticket_currency_code }}'
-                }).format(price);
+            created() {
+                console.log(this.tickets);
+                // Initialize selectedQty for each ticket
+                this.tickets.forEach(ticket => {
+                    ticket.selectedQty = 0;
+                    ticket.available = ticket.quantity - ticket.sold;
+                });
             },
-            validateForm(e) {
-                if (!this.hasSelectedTickets) {
-                    e.preventDefault();
-                    alert('Please select at least one ticket');
+            computed: {
+                totalAmount() {
+                    return this.tickets.reduce((total, ticket) => {
+                        return total + (ticket.price * ticket.selectedQty);
+                    }, 0);
+                },
+                hasSelectedTickets() {
+                    return this.tickets.some(ticket => ticket.selectedQty > 0);
+                }
+            },
+            methods: {
+                formatPrice(price) {
+                    return new Intl.NumberFormat('{{ app()->getLocale() }}', {
+                        style: 'currency',
+                        currency: '{{ $event->ticket_currency_code }}'
+                    }).format(price);
+                },
+                validateForm(e) {
+                    if (!this.hasSelectedTickets) {
+                        e.preventDefault();
+                        alert('Please select at least one ticket');
+                    }
                 }
             }
-        }
+        }).mount('#ticket-selector');
     });
 </script>
 </x-slot>
 
-<div id="ticket-selector">
-    <form action="{{ route('event.checkout', ['subdomain' => $subdomain]) }}" method="post" v-on:submit="validateForm">
-        @csrf
-        <input type="hidden" name="event_id" value="{{ $event->id }}">
-        
-        <p>{{ $event->tickets }}</p>
+<form action="{{ route('event.checkout', ['subdomain' => $subdomain]) }}" method="post" v-on:submit="validateForm">
+    @csrf
+    <input type="hidden" name="event_id" value="{{ $event->id }}">
+    
+    <p>{{ $event->tickets }}</p>
+
+    <div id="ticket-selector">
 
         <!-- Single ticket type -->
         <template v-if="tickets.length === 1">
@@ -102,14 +103,14 @@
                 Total: @{{ formatPrice(totalAmount) }}
             </div>
         </template>
+    </div>
 
-        <button 
-            type="submit" 
-            class="mt-4 inline-flex gap-x-1.5 rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-            :disabled="!hasSelectedTickets"
-        >
-            {{ __('messages.checkout') }}
-        </button>
-    </form>
-</div>
+    <button 
+        type="submit" 
+        class="mt-4 inline-flex gap-x-1.5 rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+        :disabled="!hasSelectedTickets"
+    >
+        {{ __('messages.checkout') }}
+    </button>
+</form>
 
