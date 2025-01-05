@@ -320,4 +320,7 @@ return [
     'connect_stripe' => 'Connect Stripe',
     'stripe_connected' => 'Stripe connected successfully!',
     'failed_to_connect_stripe' => 'Failed to connect Stripe',
+    'stripe_account_id' => 'Stripe Account ID',
+    'unlink_account' => 'Unlink Account',
+    'stripe_unlinked' => 'Stripe account unlinked successfully!',
 ];
