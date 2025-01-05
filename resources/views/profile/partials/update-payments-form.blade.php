@@ -37,7 +37,7 @@
 
         @if ($user->stripe_account_id)
             <div>
-                <x-input-label for="stripe_account_id" :value="__('messages.stripe_account_id')" />
+                <x-input-label for="stripe_account_id" :value="__('messages.stripe_account_id') . ($user->stripe_completed_at ? '' : ' [' . __('messages.pending') . ']')" />
                 <x-text-input type="text" class="mt-1 block w-full" :value="$user->stripe_account_id" readonly/>
                 <div class="text-xs pt-1">
                     <a href="#" onclick="return confirm('{{ __('messages.are_you_sure') }}') ? window.location.href='{{ route('stripe.unlink') }}' : false" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.unlink_account') }}</a>
