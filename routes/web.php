@@ -40,6 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::delete('/account', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/stripe/link', [StripeController::class, 'link'])->name('stripe.link');
+    Route::get('/stripe/unlink', [StripeController::class, 'unlink'])->name('stripe.unlink');
     Route::get('/stripe/complete/{stripe_account_id}', [StripeController::class, 'complete'])->name('stripe.complete');
 
     Route::post('/{subdomain}/availability', [RoleController::class, 'availability'])->name('role.availability');

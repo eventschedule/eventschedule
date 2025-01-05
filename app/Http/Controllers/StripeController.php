@@ -3,30 +3,31 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Stripe\StripeClient;
+use Stripe\Stripe;
 use Stripe\Account;
-
+use Stripe\AccountLink;
 
 class StripeController extends Controller
 {
+    public function __construct()
+    {
+        Stripe::setApiKey(config('services.stripe.key'));
+    }
+
     public function link()
     {
-        $stripe = new StripeClient([
-            'api_key' => config('services.stripe.key')
-        ]);
-
         $user = auth()->user();
         $accountId = $user->stripe_account_id;
 
         if (! $accountId) {
-            $account = $stripe->accounts->create();
+            $account = Account::create();
             $user->stripe_account_id = $account->id;
             $user->save();
 
             $accountId = $account->id;
         }
 
-        $link = $stripe->accountLinks->create([
+        $link = AccountLink::create([
             'account' => $accountId,
             'return_url' => route('stripe.complete', ['stripe_account_id' => $accountId]),
             'refresh_url' => route('profile.edit'),
@@ -36,6 +37,16 @@ class StripeController extends Controller
         return redirect($link->url);                  
     }
 
+    public function unlink()
+    {
+        $user = auth()->user();
+        $user->stripe_account_id = null;
+        $user->stripe_completed_at = null;
+        $user->save();
+
+        return redirect()->route('profile.edit')->with('success', __('messages.stripe_unlinked'));
+    }
+
     public function complete($stripeAccountId)
     {
         $user = auth()->user();
@@ -43,7 +54,7 @@ class StripeController extends Controller
         if ($stripeAccountId == $user->stripe_account_id) {
             $account = Account::retrieve($user->stripe_account_id);
             
-            if ($account->details_submitted) {
+            if ($account->charges_enabled) {
                 $user->update([
                     'stripe_completed_at' => now()
                 ]);
