@@ -78,18 +78,20 @@
             Total: @{{ formatPrice(totalAmount) }}
         </div>
 
+
+        <button 
+            type="submit" 
+            class="mt-4 inline-flex gap-x-1.5 rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="!hasSelectedTickets"
+        >
+            {{ strtoupper(__('messages.checkout')) }}
+        </button>
+        
+        <a href="{{ request()->fullUrlWithQuery(['tickets' => false]) }}" class="hover:underline ml-8">
+            {{ strtoupper(__('messages.cancel')) }}
+        </a>
+
     </div>
 
-    <button 
-        type="submit" 
-        class="mt-4 inline-flex gap-x-1.5 rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-        :disabled="!hasSelectedTickets"
-    >
-        {{ strtoupper(__('messages.checkout')) }}
-    </button>
-    
-    <a href="{{ request()->fullUrlWithQuery(['tickets' => false]) }}" class="hover:underline ml-8">
-        {{ strtoupper(__('messages.cancel')) }}
-    </a>
 </form>
 
