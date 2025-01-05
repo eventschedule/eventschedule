@@ -14,6 +14,8 @@ if (config('app.env') != 'local') {
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
         Route::get('/{other_subdomain?}/{event_name?}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
         Route::post('/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
+        Route::get('/checkout/success', [TicketController::class, 'success'])->name('checkout.success');
+        Route::get('/checkout/cancel', [TicketController::class, 'cancel'])->name('checkout.cancel');
     });
 }
 
