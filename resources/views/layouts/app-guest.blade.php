@@ -100,6 +100,7 @@
         }
         </style>
 
+        {{ isset($head) ? $head : '' }}
     </x-slot>
     
     @if (! request()->embed)
