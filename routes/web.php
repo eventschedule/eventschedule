@@ -14,8 +14,8 @@ if (config('app.env') != 'local') {
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
         Route::get('/{other_subdomain?}/{event_name?}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
         Route::post('/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
-        Route::get('/checkout/success', [TicketController::class, 'success'])->name('checkout.success');
-        Route::get('/checkout/cancel', [TicketController::class, 'cancel'])->name('checkout.cancel');
+        Route::get('/checkout/success/{sale_id}', [TicketController::class, 'success'])->name('checkout.success');
+        Route::get('/checkout/cancel/{sale_id}', [TicketController::class, 'cancel'])->name('checkout.cancel');
     });
 }
 
@@ -82,6 +82,9 @@ if (config('app.env') == 'local') {
     Route::get('/{subdomain}/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
     Route::post('/{subdomain}/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
+    Route::get('/{subdomain}/checkout/success/{sale_id}', [TicketController::class, 'success'])->name('checkout.success');
+    Route::get('/{subdomain}/checkout/cancel/{sale_id}', [TicketController::class, 'cancel'])->name('checkout.cancel');
+
 } else {
     Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!app$).*'])->group(function () {
         Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');
