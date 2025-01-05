@@ -1,12 +1,14 @@
 <x-slot name="head">
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
   <script>
-    const { createApp, ref } = Vue
+    window.addEventListener('DOMContentLoaded', function() {
+        const { createApp, ref } = Vue;
 
-    document.addEventListener('DOMContentLoaded', function() {
-        app = createApp({
-            data: {
-                tickets: @json($event->tickets),
+        const app = createApp({
+            data() {
+                return {
+                    tickets: @json($event->tickets),
+                };
             },
             created() {
                 console.log(this.tickets);
@@ -49,8 +51,6 @@
     @csrf
     <input type="hidden" name="event_id" value="{{ $event->id }}">
     
-    <p>{{ $event->tickets }}</p>
-
     <div id="ticket-selector">
 
         <!-- Single ticket type -->
