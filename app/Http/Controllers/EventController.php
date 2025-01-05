@@ -370,9 +370,4 @@ class EventController extends Controller
 
         return back()->with('message', __('messages.uncurate_event'));
     }
-
-    public function checkout(Request $request, $subdomain)
-    {
-        dd($request->all());
-    }
 }
