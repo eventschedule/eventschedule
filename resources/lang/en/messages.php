@@ -323,4 +323,5 @@ return [
     'stripe_account_id' => 'Stripe Account ID',
     'unlink_account' => 'Unlink Account',
     'stripe_unlinked' => 'Stripe account unlinked successfully!',
+    'payment_method' => 'Payment Method',
 ];
