@@ -48,6 +48,19 @@
 <form action="{{ route('event.checkout', ['subdomain' => $subdomain]) }}" method="post" v-on:submit="validateForm">
     @csrf
     <input type="hidden" name="event_id" value="{{ $event->id }}">
+
+    <div class="mb-6">
+        <label for="name" class="text-gray-900">{{ __('messages.name') . ' *' }}</label>
+        <input type="text" name="name" id="name" class="mt-1 block w-full max-w-md border-gray-300 bg-white text-gray-900" 
+            :value="old('name', auth()->check() ? auth()->user()->name : '')" required autofocus />
+    </div>
+
+    <div class="mb-12">
+        <label for="email" class="text-gray-900">{{ __('messages.email') . ' *' }}</label>
+        <input type="email" name="email" id="email" class="mt-1 block w-full max-w-md border-gray-300 bg-white text-gray-900" 
+            :value="old('email', auth()->check() ? auth()->user()->email : '')" required />
+    </div>
+
     
     <div id="ticket-selector">
 
@@ -80,10 +93,9 @@
             Total: @{{ formatPrice(totalAmount) }}
         </div>
 
-
         <button 
             type="submit" 
-            class="mt-4 inline-flex gap-x-1.5 rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            class="mt-4 inline-flex gap-x-1.5 rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
             :disabled="!hasSelectedTickets"
         >
             {{ strtoupper(__('messages.checkout')) }}
