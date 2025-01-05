@@ -29,6 +29,7 @@ class Ticket extends Model
     public function toData()
     {
         $data = [];
+        $data['id'] = UrlUtils::encodeId($this->id);
         $data['event_id'] = UrlUtils::encodeId($this->event_id);
         $data['type'] = $this->type;
         $data['quantity'] = $this->quantity;
