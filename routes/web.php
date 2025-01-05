@@ -5,6 +5,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\StripeController;
+use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 
 if (config('app.env') != 'local') {
@@ -12,7 +13,7 @@ if (config('app.env') != 'local') {
         Route::get('/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
         Route::get('/{other_subdomain?}/{event_name?}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
-        Route::post('/checkout', [EventController::class, 'checkout'])->name('event.checkout');
+        Route::post('/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
     });
 }
 
@@ -78,7 +79,7 @@ if (config('app.env') == 'local') {
     Route::get('/{subdomain}/view', [RoleController::class, 'viewGuest'])->name('role.view_guest');
     Route::get('/{subdomain}/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
-    Route::post('/{subdomain}/checkout', [EventController::class, 'checkout'])->name('event.checkout');
+    Route::post('/{subdomain}/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
 } else {
     Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!app$).*'])->group(function () {
         Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');
