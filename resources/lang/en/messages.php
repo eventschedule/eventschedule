@@ -327,4 +327,5 @@ return [
     'manage_payment_methods' => 'Manage payment methods',
     'buy_tickets' => 'Buy Tickets',
     'checkout' => 'Checkout',
+    'tickets' => 'Tickets',
 ];
