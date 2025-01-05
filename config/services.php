@@ -41,4 +41,8 @@ return [
         'analytics' => env('ANALYTICS_ID'),
     ],
 
+    'stripe' => [
+        'key' => env('STRIPE_KEY'),
+    ],
+
 ];

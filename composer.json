@@ -12,7 +12,8 @@
         "laravel/tinker": "^2.9",
         "league/commonmark": "^2.5",
         "league/flysystem-aws-s3-v3": "^3.28",
-        "sentry/sentry-laravel": "^4.10"
+        "sentry/sentry-laravel": "^4.10",
+        "stripe/stripe-php": "^16.4"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.13",

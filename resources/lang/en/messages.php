@@ -315,4 +315,9 @@ return [
     'free' => 'Free',
     'invalid_request' => 'Invalid request',
     'email_not_verified' => 'Email not verified',
+    'payment_methods' => 'Payment Methods',
+    'update_your_payment_methods' => 'Update your payment methods to start accepting payments',
+    'connect_stripe' => 'Connect Stripe',
+    'stripe_connected' => 'Stripe connected successfully!',
+    'failed_to_connect_stripe' => 'Failed to connect Stripe',
 ];

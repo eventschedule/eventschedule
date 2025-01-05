@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\StripeController;
 use Illuminate\Support\Facades\Route;
 
 if (config('app.env') != 'local') {
@@ -37,6 +38,9 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/account', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/account', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/account', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/stripe/link', [StripeController::class, 'link'])->name('stripe.link');
+    Route::get('/stripe/complete/{stripe_account_id}', [StripeController::class, 'complete'])->name('stripe.complete');
 
     Route::post('/{subdomain}/availability', [RoleController::class, 'availability'])->name('role.availability');
     Route::get('/{subdomain}/edit', [RoleController::class, 'edit'])->name('role.edit');

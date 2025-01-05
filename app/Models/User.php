@@ -23,6 +23,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'timezone',
         'language_code',
+        'stripe_account_id',
+        'invoiceninja_api_key',
     ];
 
     /**
@@ -33,6 +35,8 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'stripe_account_id',
+        'invoiceninja_api_key',
     ];
 
     protected static function boot()
