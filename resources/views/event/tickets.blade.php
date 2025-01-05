@@ -12,9 +12,8 @@
             },
             created() {
                 this.tickets.forEach(ticket => {
-                    ticket.selectedQty = this.tickets.length === 1 ? 1 : 0;
-                    ticket.available = ticket.quantity - ticket.sold;
-                    ticket.maxQty = Math.min(20, ticket.available);
+                    ticket.selectedQty = 0;
+                    ticket.available = ticket.quantity ? (ticket.quantity - ticket.sold) : 20;
                 });
             },
             computed: {
@@ -55,24 +54,20 @@
         <div v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-8">
             <div class="flex items-center justify-between max-w-md">
                 <div>
-                    <h3 class="text-lg font-medium">
-                        <template v-if="ticket.type">@{{ ticket.type }}</template>
-                        <template v-else>@{{ formatPrice(ticket.price) }}</template>
-                    </h3>
+                    <h3 class="text-lg font-medium">@{{ ticket.type }}</h3>
                     <p v-if="ticket.description" class="text-sm text-gray-600">@{{ ticket.description }}</p>
-                    <p v-if="ticket.type" class="text-sm font-medium">@{{ formatPrice(ticket.price) }}</p>
+                    <p class="text-sm font-medium">@{{ formatPrice(ticket.price) }}</p>
                 </div>
                 <div>
-                    <select
+                    <select 
                         v-model="ticket.selectedQty"
                         class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         :name="`tickets[${index}][quantity]`"
                     >
-                        <option 
-                            v-for="n in ticket.maxQty" 
-                            :key="n" 
-                            :value="tickets.length > 1 ? n-1 : n"
-                        >@{{ tickets.length > 1 ? n-1 : n }}</option>
+                        <option value="0">0</option>
+                        <template v-for="n in ticket.available">
+                            <option :value="n">@{{ n }}</option>
+                        </template>
                     </select>
                     <input type="hidden" :value="ticket.id" :name="`tickets[${index}][id]`">
                 </div>
@@ -88,7 +83,7 @@
 
         <button 
             type="submit" 
-            class="mt-4 inline-flex gap-x-1.5 rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="mt-4 inline-flex gap-x-1.5 rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
             :disabled="!hasSelectedTickets"
         >
             {{ strtoupper(__('messages.checkout')) }}

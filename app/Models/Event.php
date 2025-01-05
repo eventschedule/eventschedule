@@ -40,7 +40,7 @@ class Event extends Model
 
     public function tickets()
     {
-        return $this->hasMany(Ticket::class)->where('is_deleted', false);
+        return $this->hasMany(Ticket::class)->where('is_deleted', false)->orderBy('price', 'desc');
     }
 
     public function user()
