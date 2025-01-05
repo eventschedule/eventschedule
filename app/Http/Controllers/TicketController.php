@@ -88,13 +88,13 @@ class TicketController extends Controller
         //
     }
 
-    public function success($sale_id)
+    public function success($subdomain, $sale_id)
     {
-        dd($sale_id);
+        dd($subdomain, $sale_id);
     }
 
-    public function cancel($sale_id)
+    public function cancel($subdomain, $sale_id)
     {
-        dd($sale_id);
+        dd($subdomain, $sale_id);
     }
 }
