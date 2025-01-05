@@ -743,6 +743,11 @@
                                     <option value="invoiceninja">Invoice Ninja</option>
                                     @endif
                                 </select>
+                                <div class="text-xs pt-1">
+                                    <a href="{{ route('profile.edit') }}" class="hover:underline text-gray-600 dark:text-gray-400" target="_blank">
+                                        {{ __('messages.manage_payment_methods') }}
+                                    </a>
+                                </div>
                             </div>
                             @endif
 
@@ -756,6 +761,13 @@
                                     </option>
                                     @endforeach
                                 </select>
+                                @if (! $user->stripe_completed_at && ! $user->invoiceninja_api_key)
+                                <div class="text-xs pt-1">
+                                    <a href="{{ route('profile.edit') }}" class="hover:underline text-gray-600 dark:text-gray-400" target="_blank">
+                                        {{ __('messages.manage_payment_methods') }}
+                                    </a>
+                                </div>
+                                @endif
                             </div>
 
                             <div class="mb-6">
