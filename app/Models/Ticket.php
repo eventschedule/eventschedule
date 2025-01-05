@@ -15,10 +15,6 @@ class Ticket extends Model
         'description',
     ];
 
-    protected $hidden = [
-        'sold',
-    ];
-
     public function sales()
     {
         return $this->hasMany(Sale::class);

@@ -11,8 +11,6 @@
                 };
             },
             created() {
-                console.log(this.tickets);
-                // Initialize selectedQty for each ticket
                 this.tickets.forEach(ticket => {
                     ticket.selectedQty = 0;
                     ticket.available = ticket.quantity - ticket.sold;
@@ -53,54 +51,31 @@
     
     <div id="ticket-selector">
 
-        <!-- Single ticket type -->
-        <template v-if="tickets.length === 1">
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">
-                    @{{ tickets[0].type }}
-                    <span v-if="tickets[0].price" class="ml-1">
-                        (@{{ formatPrice(tickets[0].price) }})
-                    </span>
-                </label>
-                <input 
-                    type="number" 
-                    v-model="tickets[0].selectedQty"
-                    :max="tickets[0].available"
-                    min="0"
-                    class="mt-1 block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    name="tickets[0][quantity]"
-                >
-                <input type="hidden" :value="tickets[0].id" name="tickets[0][id]">
-            </div>
-        </template>
-
-        <!-- Multiple ticket types -->
-        <template v-else>
-            <div v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-4">
-                <div class="flex items-center justify-between max-w-md">
-                    <div>
-                        <h3 class="text-lg font-medium">@{{ ticket.type }}</h3>
-                        <p v-if="ticket.description" class="text-sm text-gray-600">@{{ ticket.description }}</p>
-                        <p class="text-sm font-medium">@{{ formatPrice(ticket.price) }}</p>
-                    </div>
-                    <div>
-                        <input 
-                            type="number" 
-                            v-model="ticket.selectedQty"
-                            :max="ticket.available"
-                            min="0"
-                            class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            :name="`tickets[${index}][quantity]`"
-                        >
-                        <input type="hidden" :value="ticket.id" :name="`tickets[${index}][id]`">
-                    </div>
+        <div v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-4">
+            <div class="flex items-center justify-between max-w-md">
+                <div>
+                    <h3 class="text-lg font-medium">@{{ ticket.type }}</h3>
+                    <p v-if="ticket.description" class="text-sm text-gray-600">@{{ ticket.description }}</p>
+                    <p class="text-sm font-medium">@{{ formatPrice(ticket.price) }}</p>
+                </div>
+                <div>
+                    <input 
+                        type="number" 
+                        v-model="ticket.selectedQty"
+                        :max="ticket.available"
+                        min="0"
+                        class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        :name="`tickets[${index}][quantity]`"
+                    >
+                    <input type="hidden" :value="ticket.id" :name="`tickets[${index}][id]`">
                 </div>
             </div>
+        </div>
 
-            <div v-if="totalAmount > 0" class="mt-4 text-lg font-bold">
-                Total: @{{ formatPrice(totalAmount) }}
-            </div>
-        </template>
+        <div v-if="totalAmount > 0" class="mt-4 text-lg font-bold">
+            Total: @{{ formatPrice(totalAmount) }}
+        </div>
+
     </div>
 
     <button 
