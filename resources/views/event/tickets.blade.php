@@ -7,7 +7,7 @@
         const app = createApp({
             data() {
                 return {
-                    tickets: @json($event->tickets),
+                    tickets: @json($event->tickets->map(function ($ticket) { return $ticket->toData(); })),
                 };
             },
             created() {
@@ -47,7 +47,7 @@
 
 <form action="{{ route('event.checkout', ['subdomain' => $subdomain]) }}" method="post" v-on:submit="validateForm">
     @csrf
-    <input type="hidden" name="event_id" value="{{ $event->id }}">
+    <input type="hidden" name="event_id" value="{{ \App\Utils\UrlUtils::encodeId($event->id) }}">
 
     <div class="mb-6">
         <label for="name" class="text-gray-900">{{ __('messages.name') . ' *' }}</label>
