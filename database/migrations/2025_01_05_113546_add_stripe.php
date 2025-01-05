@@ -25,7 +25,7 @@ return new class extends Migration
             $table->dropColumn(['ticket_id', 'quantity', 'is_used']);
         });
 
-        Schema::create('sales_tickets', function (Blueprint $table) {
+        Schema::create('sale_tickets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('sale_id')->constrained()->onDelete('cascade');
             $table->foreignId('ticket_id')->constrained()->onDelete('cascade');
@@ -48,11 +48,11 @@ return new class extends Migration
             $table->dropColumn('payment_method');
         });
 
-        Schema::dropIfExists('sales_tickets');
+        Schema::dropIfExists('sale_tickets');
 
         Schema::table('sales', function (Blueprint $table) {
-            $table->foreignId('ticket_id')->constrained()->onDelete('cascade');
-            $table->integer('quantity');
+            $table->foreignId('ticket_id')->nullable()->constrained()->onDelete('cascade');
+            $table->integer('quantity')->nullable();
             $table->boolean('is_used')->default(false);
         });
     }

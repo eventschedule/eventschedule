@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Sale extends Model
 {
     protected $fillable = [
+        'event_id',
         'name',
         'email',
         'secret',
@@ -24,6 +25,6 @@ class Sale extends Model
 
     public function tickets()
     {
-        return $this->hasMany(SalesTicket::class);
+        return $this->hasMany(SaleTicket::class);
     }
 }
