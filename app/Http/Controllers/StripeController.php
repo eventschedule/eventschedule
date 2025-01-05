@@ -29,7 +29,7 @@ class StripeController extends Controller
 
         $link = AccountLink::create([
             'account' => $accountId,
-            'return_url' => route('stripe.complete', ['stripe_account_id' => $accountId]),
+            'return_url' => route('stripe.complete'),
             'refresh_url' => route('profile.edit'),
             'type' => 'account_onboarding',
         ]);
@@ -47,17 +47,16 @@ class StripeController extends Controller
         return redirect()->route('profile.edit')->with('success', __('messages.stripe_unlinked'));
     }
 
-    public function complete($stripeAccountId)
+    public function complete()
     {
         $user = auth()->user();
         
-        if ($stripeAccountId == $user->stripe_account_id) {
+        if ($user->stripe_account_id) {
             $account = Account::retrieve($user->stripe_account_id);
             
             if ($account->charges_enabled) {
-                $user->update([
-                    'stripe_completed_at' => now()
-                ]);
+                $user->stripe_completed_at = now();
+                $user->save();
                 
                 return redirect()->route('profile.edit')->with('success', __('messages.stripe_connected'));
             }
