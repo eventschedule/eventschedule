@@ -55,9 +55,12 @@
         <div v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-8">
             <div class="flex items-center justify-between max-w-md">
                 <div>
-                    <h3 class="text-lg font-medium">@{{ ticket.type }}</h3>
+                    <h3 class="text-lg font-medium">
+                        <template v-if="ticket.type">@{{ ticket.type }}</template>
+                        <template v-else>@{{ formatPrice(ticket.price) }}</template>
+                    </h3>
                     <p v-if="ticket.description" class="text-sm text-gray-600">@{{ ticket.description }}</p>
-                    <p class="text-sm font-medium">@{{ formatPrice(ticket.price) }}</p>
+                    <p v-if="ticket.type" class="text-sm font-medium">@{{ formatPrice(ticket.price) }}</p>
                 </div>
                 <div>
                     <select
@@ -65,7 +68,11 @@
                         class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         :name="`tickets[${index}][quantity]`"
                     >
-                        <option v-for="n in ticket.maxQty + 1" :key="n" :value="n-1">@{{ n-1 }}</option>
+                        <option 
+                            v-for="n in ticket.maxQty" 
+                            :key="n" 
+                            :value="tickets.length > 1 ? n-1 : n"
+                        >@{{ tickets.length > 1 ? n-1 : n }}</option>
                     </select>
                     <input type="hidden" :value="ticket.id" :name="`tickets[${index}][id]`">
                 </div>
