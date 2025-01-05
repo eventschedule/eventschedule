@@ -14,6 +14,11 @@ return new class extends Migration
             $table->timestamp('stripe_completed_at')->nullable();
             $table->string('invoiceninja_api_key')->nullable();
         });
+
+
+        Schema::table('events', function (Blueprint $table) {
+            $table->enum('payment_method', ['cash', 'stripe', 'invoiceninja'])->default('cash');
+        });
     }
 
     public function down()
@@ -24,6 +29,10 @@ return new class extends Migration
                 'stripe_completed_at',
                 'invoiceninja_api_key',
             ]);
+        });
+
+        Schema::table('events', function (Blueprint $table) {
+            $table->dropColumn('payment_method');
         });
     }
 };

@@ -20,6 +20,7 @@ class Event extends Model
         'tickets_enabled',
         'ticket_currency_code',
         'ticket_notes',
+        'payment_method',
     ];
 
     protected static function boot()
