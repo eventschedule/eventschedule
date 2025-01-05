@@ -196,10 +196,10 @@
     >
       <div class="flex flex-col gap-10">
         @if (request()->get('tickets') === 'true')
-        <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4">
-          <h3 class="text-[32px] leading-snug text-black mb-6">
+        <div class="bg-[#F5F9FE] rounded-2xl p-8 pt-10 mb-6 flex flex-col gap-4">
+          <h3 class="text-[32px] leading-snug text-black">
             {{ __('messages.buy_tickets') }}
-        </h3>
+         </h3>
           <p class="text-base text-black">
             @include('event.tickets', ['event' => $event, 'subdomain' => $subdomain])
           </p>
