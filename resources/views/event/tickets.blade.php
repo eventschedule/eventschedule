@@ -55,7 +55,6 @@
 
         <!-- Single ticket type -->
         <template v-if="tickets.length === 1">
-            TEST 1
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700">
                     @{{ tickets[0].type }}
@@ -77,7 +76,6 @@
 
         <!-- Multiple ticket types -->
         <template v-else>
-            TEST 2
             <div v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-4">
                 <div class="flex items-center justify-between max-w-md">
                     <div>
