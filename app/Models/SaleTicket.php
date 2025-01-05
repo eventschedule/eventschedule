@@ -9,6 +9,8 @@ class SaleTicket extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'sale_id',
+        'ticket_id',
         'quantity',        
     ];
 
