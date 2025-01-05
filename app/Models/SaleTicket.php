@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class SaleTicket extends Model
 {
+    public $timestamps = false;
+
     protected $fillable = [
         'quantity',        
     ];
