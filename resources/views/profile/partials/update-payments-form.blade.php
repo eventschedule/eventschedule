@@ -46,8 +46,10 @@
             </div>
         @endif
 
-        <x-secondary-button onclick="window.location.href='{{ route('stripe.link') }}'">
-            {{ __('messages.connect_stripe') }}
-        </x-secondary-button>
+        @if (! $user->stripe_completed_at)
+            <x-secondary-button onclick="window.location.href='{{ route('stripe.link') }}'">
+                {{ __('messages.connect_stripe') }}
+            </x-secondary-button>
+        @endif
     </form>
 </section>
