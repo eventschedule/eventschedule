@@ -30,12 +30,14 @@
 
           <div style="font-family: sans-serif" class="mt-8 relative inline-block text-left">
           @if ($event->tickets_enabled)
-            <a href="{{ request()->fullUrlWithQuery(['tickets' => 'true']) }}">
-                <button type="button" 
-                      class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
-                  {{ __('messages.buy_tickets') }}
-              </button>            
-            </a>
+            @if (request()->get('tickets') !== 'true')            
+              <a href="{{ request()->fullUrlWithQuery(['tickets' => 'true']) }}">
+                  <button type="button" 
+                        class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                    {{ __('messages.buy_tickets') }}
+                </button>            
+              </a>
+            @endif
           @else
                 <button type="button" 
                     onclick="onPopUpClick('calendar-pop-up-menu', event)"
@@ -188,10 +190,21 @@
         </div>
       </div>
     </div>
+
     <div
       class="container mx-auto flex flex-col sm:grid px-5 py-[80px] lg:gap-[48px] gap-[8px] lg:grid-cols-[minmax(0px,_auto)_minmax(0px,_344px)]"
     >
       <div class="flex flex-col gap-10">
+        @if (request()->get('tickets') === 'true')
+        <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4">
+          <h3 class="text-[32px] leading-snug text-black mb-6">
+            {{ __('messages.buy_tickets') }}
+        </h3>
+          <p class="text-base text-black">
+                
+          </p>
+        </div>
+        @else
         <!--
         <div>
           <h3 class="text-[32px] leading-snug text-black mb-6">
@@ -351,6 +364,7 @@
             @include('role/partials/calendar', ['route' => 'guest', 'tab' => ''])
           </div>
         </div>
+        @endif
       </div>
 
       <div class="flex flex-col gap-6">
