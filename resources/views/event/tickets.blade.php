@@ -51,7 +51,7 @@
     
     <div id="ticket-selector">
 
-        <div v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-4">
+        <div v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-8">
             <div class="flex items-center justify-between max-w-md">
                 <div>
                     <h3 class="text-lg font-medium">@{{ ticket.type }}</h3>
