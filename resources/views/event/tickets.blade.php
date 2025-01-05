@@ -56,7 +56,7 @@
                 <div>
                     <h3 class="text-lg font-medium">@{{ ticket.type }}</h3>
                     <p v-if="ticket.description" class="text-sm text-gray-600">@{{ ticket.description }}</p>
-                    <p class="text-sm font-medium">@{{ formatPrice(ticket.price) }}</p>
+                    <p :class="{'text-lg': tickets.length === 1, 'text-sm': tickets.length > 1}" class="font-medium">@{{ formatPrice(ticket.price) }}</p>
                 </div>
                 <div>
                     <select 
