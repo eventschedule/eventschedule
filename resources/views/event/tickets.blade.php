@@ -12,8 +12,9 @@
             },
             created() {
                 this.tickets.forEach(ticket => {
-                    ticket.selectedQty = 0;
+                    ticket.selectedQty = this.tickets.length === 1 ? 1 : 0;
                     ticket.available = ticket.quantity - ticket.sold;
+                    ticket.maxQty = Math.min(20, ticket.available);
                 });
             },
             computed: {
@@ -59,14 +60,13 @@
                     <p class="text-sm font-medium">@{{ formatPrice(ticket.price) }}</p>
                 </div>
                 <div>
-                    <input 
-                        type="number" 
+                    <select
                         v-model="ticket.selectedQty"
-                        :max="ticket.available"
-                        min="0"
                         class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         :name="`tickets[${index}][quantity]`"
                     >
+                        <option v-for="n in ticket.maxQty + 1" :key="n" :value="n-1">@{{ n-1 }}</option>
+                    </select>
                     <input type="hidden" :value="ticket.id" :name="`tickets[${index}][id]`">
                 </div>
             </div>
