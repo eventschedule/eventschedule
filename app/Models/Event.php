@@ -104,7 +104,7 @@ class Event extends Model
 
         if ($user = auth()->user()) {
             //    
-        } else {
+        } else if ($this->venue) {
             $enable24 = $this->venue->use_24_hour_time;
         }
 
