@@ -729,6 +729,22 @@
                         </div>
 
                         <div v-if="event.tickets_enabled">
+
+                            @if ($user->stripe_completed_at || $user->invoiceninja_api_key)
+                            <div class="mb-6">
+                                <x-input-label for="payment_method" :value="__('messages.payment_method')"/>
+                                <select id="payment_method" name="payment_method" v-model="event.payment_method" required
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                    <option value="cash">Cash</option>
+                                    @if ($user->stripe_completed_at)
+                                    <option value="stripe">Stripe</option>
+                                    @endif
+                                    @if ($user->invoiceninja_api_key)
+                                    <option value="invoiceninja">Invoice Ninja</option>
+                                    @endif
+                                </select>
+                            </div>
+                            @endif
                             <div class="mb-6">
                                 <x-input-label for="ticket_currency_code" :value="__('messages.currency')"/>
                                 <select id="ticket_currency_code" name="ticket_currency_code" v-model="event.ticket_currency_code" required
