@@ -13,6 +13,17 @@ class Sale extends Model
         'secret',
     ];
 
+    protected static function booted()
+    {
+        static::updated(function ($sale) {
+            if ($sale->isDirty('status') && ($sale->status === 'cancelled' || $sale->status === 'refunded')) {
+                foreach ($sale->saleTickets as $saleTicket) {
+                    $saleTicket->ticket->decrement('sold', $saleTicket->quantity);
+                }
+            }
+        });
+    }
+
     public function event()
     {
         return $this->belongsTo(Event::class);
