@@ -62,7 +62,7 @@ class TicketController extends Controller
 
         $stripe = new StripeClient(config('services.stripe.key'));
         $data = [
-            'sale_id' => $sale->id, 
+            'sale_id' => UrlUtils::encodeId($sale->id), 
             'subdomain' => $subdomain, 
         ];
         
@@ -103,12 +103,12 @@ class TicketController extends Controller
 
     public function cancel($subdomain, $sale_id)
     {
-        $sale = Sale::find($sale_id);
+        $sale = Sale::find(UrlUtils::decodeId($sale_id));
         $sale->status = 'cancelled';
         $sale->save();
 
         $event = $sale->event;
-
-        return redirect()->route($event->getGuestRoute($subdomain, $sale->date));
+        
+        return redirect($event->getGuestUrl($subdomain, $sale->event_date));
     }
 }

@@ -221,7 +221,7 @@ class Event extends Model
             'subdomain' => $subdomain, 
             'other_subdomain' => $otherSubdomain, 
             'event_name' => $eventName,
-            'date' => $date ? $date->format('Y-m-d') : Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d'),
+            'date' => $date ? (is_string($date) ? $date : $date->format('Y-m-d')) : Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d'),
         ];
 
         return route('event.view_guest', $data);
