@@ -26,6 +26,7 @@ class TicketController extends Controller
                     'sale_id' => $sale->id,
                     'ticket_id' => UrlUtils::decodeId($ticket['id']),
                     'quantity' => $ticket['quantity'],
+                    'date' => $date,
                 ]);
             }
         }
@@ -34,15 +35,15 @@ class TicketController extends Controller
 
         switch ($event->payment_method) {
             case 'stripe':
-                return $this->stripeCheckout($subdomain, $sale, $event, $date);
+                return $this->stripeCheckout($subdomain, $sale, $event);
             case 'invoiceninja':
-                return $this->invoiceninjaCheckout($subdomain, $sale, $event, $date);
+                return $this->invoiceninjaCheckout($subdomain, $sale, $event);
             default:
-                return $this->cashCheckout($subdomain, $sale, $event, $date);
+                return $this->cashCheckout($subdomain, $sale, $event);
         }
     }
 
-    private function stripeCheckout($subdomain, $sale, $event, $date)
+    private function stripeCheckout($subdomain, $sale, $event)
     {
         $lineItems = [];
         foreach ($sale->saleTickets as $saleTicket) {
@@ -63,7 +64,6 @@ class TicketController extends Controller
         $data = [
             'sale_id' => $sale->id, 
             'subdomain' => $subdomain, 
-            'date' => $date
         ];
         
         $session = $stripe->checkout->sessions->create(
@@ -86,12 +86,12 @@ class TicketController extends Controller
         return redirect($session->url);
     }
 
-    private function invoiceninjaCheckout($subdomain, $sale, $event, $date)
+    private function invoiceninjaCheckout($subdomain, $sale, $event)
     {
         //
     }
 
-    private function cashCheckout($subdomain, $sale, $event, $date)
+    private function cashCheckout($subdomain, $sale, $event)
     {
         //
     }
@@ -107,6 +107,8 @@ class TicketController extends Controller
         $sale->status = 'cancelled';
         $sale->save();
 
-        return redirect()->route('event.show', ['subdomain' => $subdomain, 'event_id' => $sale->event_id]);
+        $event = $sale->event;
+
+        return redirect()->route($event->getGuestRoute($subdomain, $sale->date));
     }
 }

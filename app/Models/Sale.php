@@ -11,6 +11,7 @@ class Sale extends Model
         'name',
         'email',
         'secret',
+        'date',
     ];
 
     protected static function booted()
