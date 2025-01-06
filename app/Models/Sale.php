@@ -19,7 +19,7 @@ class Sale extends Model
         static::updated(function ($sale) {
             if ($sale->isDirty('status') && ($sale->status === 'cancelled' || $sale->status === 'refunded')) {
                 foreach ($sale->saleTickets as $saleTicket) {
-                    $saleTicket->ticket->decrement('sold', $saleTicket->quantity);
+                    $saleTicket->ticket->updateSold($saleTicket->date, -$saleTicket->quantity);
                 }
             }
         });
