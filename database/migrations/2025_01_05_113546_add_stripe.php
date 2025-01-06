@@ -22,7 +22,8 @@ return new class extends Migration
 
         Schema::table('sales', function (Blueprint $table) {
             $table->dropForeign(['ticket_id']);
-            $table->dropColumn(['ticket_id', 'quantity', 'is_used']);
+            $table->dropColumn(['ticket_id', 'quantity', 'is_used', 'is_paid']);
+            $table->enum('status', ['pending', 'paid', 'cancelled', 'refunded'])->default('pending');
         });
 
         Schema::create('sale_tickets', function (Blueprint $table) {
