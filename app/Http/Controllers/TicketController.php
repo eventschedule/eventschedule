@@ -12,6 +12,8 @@ class TicketController extends Controller
 {
     public function checkout(Request $request, $subdomain)
     {
+        $date = $request->date;
+
         $sale = new Sale();
         $sale->fill($request->all());
         $sale->event_id = UrlUtils::decodeId($request->event_id);
@@ -32,15 +34,15 @@ class TicketController extends Controller
 
         switch ($event->payment_method) {
             case 'stripe':
-                return $this->stripeCheckout($subdomain, $sale, $event);
+                return $this->stripeCheckout($subdomain, $sale, $event, $date);
             case 'invoiceninja':
-                return $this->invoiceninjaCheckout($subdomain, $sale, $event);
+                return $this->invoiceninjaCheckout($subdomain, $sale, $event, $date);
             default:
-                return $this->cashCheckout($subdomain, $sale, $event);
+                return $this->cashCheckout($subdomain, $sale, $event, $date);
         }
     }
 
-    private function stripeCheckout($subdomain, $sale, $event)
+    private function stripeCheckout($subdomain, $sale, $event, $date)
     {
         $lineItems = [];
         foreach ($sale->saleTickets as $saleTicket) {
@@ -58,6 +60,12 @@ class TicketController extends Controller
         }
 
         $stripe = new StripeClient(config('services.stripe.key'));
+        $data = [
+            'sale_id' => $sale->id, 
+            'subdomain' => $subdomain, 
+            'date' => $date
+        ];
+        
         $session = $stripe->checkout->sessions->create(
             [
                 'line_items' => $lineItems,                
@@ -67,8 +75,8 @@ class TicketController extends Controller
                 'metadata' => [
                     'customer_name' => $sale->name,
                 ],
-                'success_url' => route('checkout.success', ['sale_id' => $sale->id, 'subdomain' => $subdomain]),
-                'cancel_url' => route('checkout.cancel', ['sale_id' => $sale->id, 'subdomain' => $subdomain]),
+                'success_url' => route('checkout.success', $data),
+                'cancel_url' => route('checkout.cancel', $data),
             ],
             [
                 'stripe_account' => $event->user->stripe_account_id,
@@ -78,12 +86,12 @@ class TicketController extends Controller
         return redirect($session->url);
     }
 
-    private function invoiceninjaCheckout($subdomain, $sale, $event)
+    private function invoiceninjaCheckout($subdomain, $sale, $event, $date)
     {
         //
     }
 
-    private function cashCheckout($subdomain, $sale, $event)
+    private function cashCheckout($subdomain, $sale, $event, $date)
     {
         //
     }
