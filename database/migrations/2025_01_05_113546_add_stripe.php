@@ -65,7 +65,7 @@ return new class extends Migration
             $table->integer('quantity')->nullable();
             $table->boolean('is_used')->default(false);
             $table->boolean('is_paid')->default(false);
-            $table->dropColumn('event_date');
+            $table->dropColumn(['event_date', 'status']);
         });
     }
 };
