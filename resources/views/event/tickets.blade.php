@@ -7,7 +7,9 @@
         const app = createApp({
             data() {
                 return {
-                    tickets: @json($event->tickets->map(function ($ticket) { return $ticket->toData(); })),
+                    tickets: @json($event->tickets->map(function ($ticket) { 
+                        return $ticket->toData(request()->date); 
+                    })),
                 };
             },
             created() {

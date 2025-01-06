@@ -26,16 +26,27 @@ class Ticket extends Model
         return $this->belongsTo(Event::class);
     }
 
-    public function toData()
+    public function updateSold($date, $quantity)
+    {
+        $sold = json_decode($this->sold, true);
+        $sold[$date] = $sold[$date] ?? 0;
+        $sold[$date] += $quantity;
+        $this->sold = json_encode($sold);
+        $this->save();
+    }
+
+    public function toData($date = null)
     {
         $data = [];
         $data['id'] = UrlUtils::encodeId($this->id);
         $data['event_id'] = UrlUtils::encodeId($this->event_id);
         $data['type'] = $this->type;
         $data['quantity'] = $this->quantity;
-        $data['sold'] = $this->sold;
         $data['price'] = $this->price;
         $data['description'] = $this->description;
+
+        $sold = json_decode($this->sold, true);
+        $data['sold'] = $sold[$date] ?? 0;
 
         return $data;
     }
