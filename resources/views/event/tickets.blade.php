@@ -50,7 +50,7 @@
 <form action="{{ route('event.checkout', ['subdomain' => $subdomain]) }}" method="post" v-on:submit="validateForm">
     @csrf
     <input type="hidden" name="event_id" value="{{ \App\Utils\UrlUtils::encodeId($event->id) }}">
-    <input type="hidden" name="date" value="{{ $date }}">
+    <input type="hidden" name="event_date" value="{{ $date }}">
 
     <div class="mb-6">
         <label for="name" class="text-gray-900">{{ __('messages.name') . ' *' }}</label>
