@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Sale;
 use Illuminate\Support\Str;
+use App\Models\Sale;
 use App\Utils\UrlUtils;
 use Stripe\StripeClient;
 
