@@ -95,6 +95,10 @@ class TicketController extends Controller
 
     public function cancel($subdomain, $sale_id)
     {
-        dd($subdomain, $sale_id);
+        $sale = Sale::find($sale_id);
+        $sale->status = 'cancelled';
+        $sale->save();
+
+        return redirect()->route('event.show', ['subdomain' => $subdomain, 'event_id' => $sale->event_id]);
     }
 }
