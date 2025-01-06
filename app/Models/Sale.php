@@ -13,19 +13,12 @@ class Sale extends Model
         'secret',
     ];
 
-    
-    
-    public function ticket()
-    {
-        return $this->belongsTo(Ticket::class);
-    }
-
     public function event()
     {
         return $this->belongsTo(Event::class);
     }
 
-    public function tickets()
+    public function saleTickets()
     {
         return $this->hasMany(SaleTicket::class);
     }
