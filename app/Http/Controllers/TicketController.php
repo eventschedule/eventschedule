@@ -20,7 +20,7 @@ class TicketController extends Controller
 
         foreach($request->tickets as $ticket) {
             if ($ticket['quantity'] > 0) {
-                $sale->tickets()->create([
+                $sale->saleTickets()->create([
                     'sale_id' => $sale->id,
                     'ticket_id' => UrlUtils::decodeId($ticket['id']),
                     'quantity' => $ticket['quantity'],
@@ -43,17 +43,17 @@ class TicketController extends Controller
     private function stripeCheckout($subdomain, $sale, $event)
     {
         $lineItems = [];
-        foreach ($sale->tickets as $ticket) {
+        foreach ($sale->saleTickets as $saleTicket) {
             $lineItems[] = [
                 'price_data' => [
                     'currency' => $event->ticket_currency_code,
                     'product_data' => [
-                        'name' => $ticket->ticket->type ? $ticket->ticket->type : __('messages.tickets'),
-                        ...$ticket->ticket->description ? ['description' => $ticket->ticket->description] : [],
+                        'name' => $saleTicket->ticket->type ? $saleTicket->ticket->type : __('messages.tickets'),
+                        ...$saleTicket->ticket->description ? ['description' => $saleTicket->ticket->description] : [],
                     ],
-                    'unit_amount' => $ticket->ticket->price * 100,
+                    'unit_amount' => $saleTicket->ticket->price * 100,
                 ],
-                'quantity' => $ticket->quantity,
+                'quantity' => $saleTicket->quantity,
             ];
         }
 
