@@ -328,4 +328,5 @@ return [
     'buy_tickets' => 'Buy Tickets',
     'checkout' => 'Checkout',
     'tickets' => 'Tickets',
+    'requires_pro_plan' => 'Requires a Pro plan',    
 ];

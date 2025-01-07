@@ -720,10 +720,18 @@
                         <div class="mb-6">
                             <div class="flex items-center">
                                 <input id="tickets_enabled" name="tickets_enabled" type="checkbox" v-model="event.tickets_enabled" :value="1"
-                                    class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                                <input type="hidden" name="tickets_enabled" :value="event.tickets_enabled ? 1 : 0">
+                                    class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
+                                    {{ ! $role->isPro() ? 'disabled' : '' }}>
+                                <input type="hidden" name="tickets_enabled" :value="event.tickets_enabled ? 1 : 0" >
                                 <label for="tickets_enabled" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                     {{ __('messages.enable_tickets') }}
+                                    @if (! $role->isPro())
+                                    <div class="text-xs pt-1">
+                                        <a href="#" class="hover:underline text-gray-600 dark:text-gray-400" target="_blank">
+                                            {{ __('messages.requires_pro_plan') }}
+                                        </a>
+                                    </div>
+                                    @endif
                                 </label>
                             </div>
                         </div>
