@@ -65,4 +65,37 @@ class StripeController extends Controller
         return redirect()->route('profile.edit')->with('error', __('messages.failed_to_connect_stripe'));
     }
 
+    public function webhook(Request $request)
+    {
+        $endpoint_secret = config('services.stripe.webhook_secret');
+        $payload = $request->getContent();
+        $sig_header = $request->header('stripe-signature');
+
+        try {
+            $event = \Stripe\Webhook::constructEvent(
+                $payload, $sig_header, $endpoint_secret
+            );
+        } catch(\UnexpectedValueException $e) {
+            return response()->json(['error' => 'Invalid payload'], 400);
+        } catch(\Stripe\Exception\SignatureVerificationException $e) {
+            return response()->json(['error' => 'Invalid signature'], 400);
+        }
+
+        // Handle the event
+        switch ($event->type) {
+            case 'payment_intent.succeeded':
+                $paymentIntent = $event->data->object;
+                // handlePaymentIntentSucceeded($paymentIntent);
+                break;
+            case 'payment_method.attached':
+                $paymentMethod = $event->data->object;
+                // handlePaymentMethodAttached($paymentMethod);
+                break;
+            default:
+                \Log::warning('Received unknown event type: ' . $event->type);
+        }
+
+        return response()->json(['status' => 'success']);
+    }
+
 }
