@@ -10,7 +10,8 @@ return new class extends Migration
     public function up()
     {
         DB::table('roles')->update([
-            'plan_expires' => now()->addYear()->format('Y-m-d')
+            'plan_expires' => now()->addYear()->format('Y-m-d'),
+            'plan_type' => 'pro',
         ]);
 
         Schema::table('roles', function (Blueprint $table) {
