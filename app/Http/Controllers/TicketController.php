@@ -106,13 +106,13 @@ class TicketController extends Controller
             'stripe_account' => $sale->event->user->stripe_account_id,
         ]);
 
-        //$customer = $stripe->customers->retrieve($session->customer);
-        //dd($customer);
 
         if ($session->payment_status === 'paid') {            
             $sale->status = 'paid';
-            $sale->save();
         }
+
+        $sale->transaction_reference = $session->payment_intent;
+        $sale->save();
 
         return redirect($event->getGuestUrl($subdomain, $sale->event_date));
     }
