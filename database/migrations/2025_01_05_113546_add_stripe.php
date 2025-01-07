@@ -9,6 +9,15 @@ return new class extends Migration
 
     public function up()
     {
+        DB::table('roles')->update([
+            'plan_expires' => now()->addYear()->format('Y-m-d')
+        ]);
+
+        Schema::table('roles', function (Blueprint $table) {
+            $table->enum('plan_term', ['month', 'year'])->default('year');
+            $table->enum('plan_type', ['free', 'pro', 'enterprise'])->default('free');
+        });
+
         Schema::table('users', function (Blueprint $table) {
             $table->string('stripe_account_id')->nullable();
             $table->timestamp('stripe_completed_at')->nullable();
@@ -47,6 +56,10 @@ return new class extends Migration
 
     public function down()
     {
+        Schema::table('roles', function (Blueprint $table) {
+            $table->dropColumn(['plan_term', 'plan_type']);
+        });
+
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn([
                 'stripe_account_id',
