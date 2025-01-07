@@ -29,7 +29,7 @@
           -->
 
           <div style="font-family: sans-serif" class="mt-8 relative inline-block text-left">
-          @if ($event->tickets_enabled)
+          @if ($event->tickets_enabled && $event->isPro())
             @if (request()->get('tickets') !== 'true')            
               <a href="{{ request()->fullUrlWithQuery(['tickets' => 'true']) }}">
                   <button type="button" 
@@ -195,7 +195,7 @@
       class="container mx-auto flex flex-col sm:grid px-5 py-[80px] lg:gap-[48px] gap-[8px] lg:grid-cols-[minmax(0px,_auto)_minmax(0px,_344px)]"
     >
       <div class="flex flex-col gap-10">
-        @if (request()->get('tickets') === 'true')
+        @if (request()->get('tickets') === 'true' && $event->isPro())
         <div class="bg-[#F5F9FE] rounded-2xl p-8 pt-10 mb-6 flex flex-col gap-4">
           <h3 class="text-[32px] leading-snug text-black">
             {{ __('messages.buy_tickets') }}
