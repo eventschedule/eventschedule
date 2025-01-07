@@ -659,6 +659,11 @@ class RoleController extends Controller
         $role->subdomain = Role::generateSubdomain($request->name);
         $role->user_id = $user->id;
 
+        // TODO remove this
+        $role->plan_expires = now()->addYear()->format('Y-m-d');
+        $role->plan_type = 'pro';
+        $role->plan_term = 'year';
+
         if ($role->email == $user->email) {
             $role->email_verified_at = $user->email_verified_at;
         }
