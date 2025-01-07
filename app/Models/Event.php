@@ -77,6 +77,21 @@ class Event extends Model
         });
     }
 
+    public function isPro()
+    {
+        if ($this->venue && $this->venue->isPro()) {
+            return true;
+        }
+
+        foreach ($this->roles as $role) {
+            if ($role->isPro()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function isRoleAMember($subdomain)
     {
         return $this->roles->contains(function ($role) use ($subdomain) {
