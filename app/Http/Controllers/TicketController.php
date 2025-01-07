@@ -75,7 +75,7 @@ class TicketController extends Controller
                 'metadata' => [
                     'customer_name' => $sale->name,
                 ],
-                'success_url' => route('checkout.success', $data),
+                'success_url' => route('checkout.success', $data) . '?session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => route('checkout.cancel', $data),
             ],
             [
@@ -98,7 +98,20 @@ class TicketController extends Controller
 
     public function success($subdomain, $sale_id)
     {
-        dd($subdomain, $sale_id);
+        $sale = Sale::find(UrlUtils::decodeId($sale_id));
+        $event = $sale->event;
+
+        $stripe = new StripeClient(config('services.stripe.key'));
+        $session = $stripe->checkout->sessions->retrieve(request()->session_id, [], [
+            'stripe_account' => $sale->event->user->stripe_account_id,
+        ]);
+
+        if ($session->payment_status === 'paid') {            
+            $sale->status = 'paid';
+            $sale->save();
+        }
+
+        return redirect($event->getGuestUrl($subdomain, $sale->event_date));
     }
 
     public function cancel($subdomain, $sale_id)
