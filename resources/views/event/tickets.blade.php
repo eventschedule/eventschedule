@@ -15,7 +15,6 @@
             created() {
                 this.tickets.forEach(ticket => {
                     ticket.selectedQty = 0;
-                    ticket.available = ticket.quantity ? (ticket.quantity - ticket.sold) : 20;
                 });
             },
             computed: {
@@ -81,7 +80,7 @@
                         :name="`tickets[${index}][quantity]`"
                     >
                         <option value="0">0</option>
-                        <template v-for="n in ticket.available">
+                        <template v-for="n in ticket.quantity">
                             <option :value="n">@{{ n }}</option>
                         </template>
                     </select>
