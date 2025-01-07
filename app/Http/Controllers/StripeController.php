@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Stripe\Stripe;
 use Stripe\Account;
 use Stripe\AccountLink;
+use App\Models\Sale;
 
 class StripeController extends Controller
 {
@@ -81,16 +82,19 @@ class StripeController extends Controller
             return response()->json(['error' => 'Invalid signature'], 400);
         }
 
-        // Handle the event
         switch ($event->type) {
             case 'payment_intent.succeeded':
                 $paymentIntent = $event->data->object;
-                // handlePaymentIntentSucceeded($paymentIntent);
+                $sale = Sale::where('transaction_reference', $paymentIntent->id)->firstOrFail();
+                $sale->status = 'paid';
+                $sale->save();
                 break;
+            /*
             case 'payment_method.attached':
                 $paymentMethod = $event->data->object;
                 // handlePaymentMethodAttached($paymentMethod);
                 break;
+            */
             default:
                 \Log::warning('Received unknown event type: ' . $event->type);
         }
