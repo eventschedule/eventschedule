@@ -125,6 +125,6 @@ class TicketController extends Controller
 
         $event = $sale->event;
         
-        return redirect($event->getGuestUrl($subdomain, $sale->event_date));
+        return redirect($event->getGuestUrl($subdomain, $sale->event_date) . '&tickets=true');
     }
 }
