@@ -109,6 +109,7 @@ class EventController extends Controller
         $selectedMembers = [];
         
         $event->ticket_currency_code = 'USD';
+        $event->payment_method = 'cash';
         $event->tickets = [
             [
                 new Ticket(),
@@ -191,6 +192,14 @@ class EventController extends Controller
 
         if (! $user->canEditEvent($event)) {
             return redirect()->back();
+        }
+
+        if ($event->tickets->count() == 0) {
+            $event->tickets = [
+                [
+                    new Ticket(),
+                ]
+            ];
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
