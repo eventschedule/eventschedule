@@ -464,7 +464,9 @@ class RoleController extends Controller
                         ->get();
 
                     foreach ($members as $member) {
-                        $datesUnavailable[e($member->name)] = json_decode($member->pivot->dates_unavailable);
+                        if ($member->pivot->dates_unavailable) {
+                            $datesUnavailable[e($member->name)] = json_decode($member->pivot->dates_unavailable);
+                        }
                     }
                 }
             } else if ($tab == 'availability') {                                       
@@ -472,7 +474,10 @@ class RoleController extends Controller
                 $roleUser = RoleUser::where('user_id', $user->id)
                                 ->where('role_id', $role->id)
                                 ->first();
-                $datesUnavailable = json_decode($roleUser->dates_unavailable);
+
+                if ($roleUser && $roleUser->dates_unavailable) {
+                    $datesUnavailable = json_decode($roleUser->dates_unavailable);
+                }
             }
         }
 
