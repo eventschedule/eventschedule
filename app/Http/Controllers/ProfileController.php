@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use App\Utils\InvoiceNinja;
 
 class ProfileController extends Controller
 {
@@ -119,9 +120,26 @@ class ProfileController extends Controller
     public function updatePayments(Request $request): RedirectResponse
     {
         $user = $request->user();
+        $apiKey = $request->invoiceninja_api_key;
+        $name = '';
 
-        $user->invoiceninja_api_key = $request->invoiceninja_api_key;
-        $user->save();
+        if ($apiKey) {
+            try {
+                $invoiceNinja = new InvoiceNinja($apiKey);
+                $company = $invoiceNinja->getCompany();
+                $name = $company['settings']['name'];
+            } catch (\Exception $e) {
+                //
+            }
+            
+            if ($name) {
+                $user->invoiceninja_api_key = $request->invoiceninja_api_key;
+                $user->save();
+            }
+        } else {
+            $user->invoiceninja_api_key = '';
+            $user->save();
+        }
 
         return Redirect::route('profile.edit')->with('status', 'payments-updated');
     }

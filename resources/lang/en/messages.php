@@ -254,7 +254,7 @@ return [
     'claim_your_venue_curated' => ':event at :venue was added to the :curator schedule',
     'use_existing' => 'Use existing',
     'search_results' => 'Search results',
-    'clear' => 'Clear',
+    'ck' => 'Clear',
     'members' => 'Members',
     'no_contact_info' => 'No contact info',
     'youtube_video_url' => 'Youtube Video URL',
@@ -331,4 +331,5 @@ return [
     'requires_pro_plan' => 'Requires a Pro plan',    
     'save_as_default' => 'Save as default',
     'invoiceninja_api_key' => 'Invoice Ninja - API Key',
+    'learn_more' => 'Learn more',
 ];
