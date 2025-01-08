@@ -1183,7 +1183,8 @@
       savePreferences() {
         localStorage.setItem('eventPreferences', JSON.stringify({
           isInPerson: this.isInPerson,
-          isOnline: this.isOnline
+          isOnline: this.isOnline,
+          ticketsEnabled: this.event.tickets_enabled
         }));
       },
       loadPreferences() {
@@ -1191,12 +1192,14 @@
         @if (! $event->exists && $selectedVenue)
         this.isInPerson = true;
         if (preferences) {
-          this.isOnline = preferences.isOnline;
+          this.isOnline = preferences.isOnline;          
+          this.event.tickets_enabled = preferences.ticketsEnabled ?? false;
         }
         @else
         if (preferences) {
           this.isInPerson = preferences.isInPerson;
           this.isOnline = preferences.isOnline;
+          this.event.tickets_enabled = preferences.ticketsEnabled ?? false;
         }
         @endif
       },
@@ -1274,7 +1277,10 @@
           }
         },
         deep: true
-      }
+      },
+      'event.tickets_enabled'(newValue) {
+        this.savePreferences();
+      },
     },
     mounted() {
       this.setFocusBasedOnVenueType();
