@@ -45,6 +45,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     
     Route::get('/account', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/account', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/account/payments', [ProfileController::class, 'updatePayments'])->name('profile.update_payments');
     Route::delete('/account', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/stripe/link', [StripeController::class, 'link'])->name('stripe.link');

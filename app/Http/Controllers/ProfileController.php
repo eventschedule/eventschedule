@@ -115,4 +115,14 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+    public function updatePayments(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        $user->invoiceninja_api_key = $request->invoiceninja_api_key;
+        $user->save();
+
+        return Redirect::route('profile.edit')->with('status', 'payments-updated');
+    }
 }
