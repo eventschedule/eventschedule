@@ -21,6 +21,7 @@ return new class extends Migration
 
         Schema::table('users', function (Blueprint $table) {
             $table->string('stripe_account_id')->nullable();
+            $table->string('stripe_company_name')->nullable();
             $table->timestamp('stripe_completed_at')->nullable();
             $table->string('invoiceninja_api_key')->nullable();
             $table->string('invoiceninja_company_name')->nullable();
@@ -65,6 +66,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn([
                 'stripe_account_id',
+                'stripe_company_name',
                 'stripe_completed_at',
                 'invoiceninja_api_key',
                 'invoiceninja_company_name',
