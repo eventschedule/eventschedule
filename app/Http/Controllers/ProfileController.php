@@ -134,10 +134,12 @@ class ProfileController extends Controller
             
             if ($name) {
                 $user->invoiceninja_api_key = $request->invoiceninja_api_key;
+                $user->invoiceninja_company_name = $name;
                 $user->save();
             }
         } else {
-            $user->invoiceninja_api_key = '';
+            $user->invoiceninja_api_key = null;
+            $user->invoiceninja_company_name = null;
             $user->save();
         }
 
