@@ -20,7 +20,6 @@
                 <div class="text-xs pt-1">
                     <a href="#" onclick="return confirm('{{ __('messages.are_you_sure') }}') ? window.location.href='{{ route('stripe.unlink') }}' : false" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.unlink_account') }}</a>
                 </div>
-
             </div>
         @endif
 
@@ -35,6 +34,11 @@
             <x-text-input id="invoiceninja_api_key" name="invoiceninja_api_key" type="text" class="mt-1 block w-full" 
                 :value="old('invoiceninja_api_key', $user->invoiceninja_api_key)" />
             <x-input-error class="mt-2" :messages="$errors->get('invoiceninja_api_key')" />
+            <div class="text-xs pt-1">
+                <a href="https://invoiceninja.com/payments" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">
+                    {{ __('messages.learn_more') }}
+                </a>
+            </div>
         </div>
 
         <div class="flex items-center gap-4">

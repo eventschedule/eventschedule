@@ -9,20 +9,21 @@ return new class extends Migration
 
     public function up()
     {
-        DB::table('roles')->update([
-            'plan_expires' => now()->addYear()->format('Y-m-d'),
-            'plan_type' => 'pro',
-        ]);
-
         Schema::table('roles', function (Blueprint $table) {
             $table->enum('plan_term', ['month', 'year'])->default('year');
             $table->enum('plan_type', ['free', 'pro', 'enterprise'])->default('free');
         });
 
+        DB::table('roles')->update([
+            'plan_expires' => now()->addYear()->format('Y-m-d'),
+            'plan_type' => 'pro',
+        ]);
+
         Schema::table('users', function (Blueprint $table) {
             $table->string('stripe_account_id')->nullable();
             $table->timestamp('stripe_completed_at')->nullable();
             $table->string('invoiceninja_api_key')->nullable();
+            $table->string('invoiceninja_company_name')->nullable();
         });
 
 
@@ -42,7 +43,7 @@ return new class extends Migration
         Schema::table('sales', function (Blueprint $table) {
             $table->dropForeign(['ticket_id']);
             $table->dropColumn(['ticket_id', 'quantity', 'is_used', 'is_paid']);
-            $table->enum('status', ['pending', 'paid', 'cancelled', 'refunded'])->default('pending');
+            $table->enum('status', ['pending', 'paid', 'cancelled', 'refunded', 'expired'])->default('pending');
             $table->string('event_date');
         });
 
@@ -66,6 +67,7 @@ return new class extends Migration
                 'stripe_account_id',
                 'stripe_completed_at',
                 'invoiceninja_api_key',
+                'invoiceninja_company_name',
             ]);
         });
 
