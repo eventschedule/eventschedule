@@ -7,6 +7,8 @@ use Illuminate\Support\Str;
 use App\Models\Sale;
 use App\Utils\UrlUtils;
 use Stripe\StripeClient;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 
 class TicketController extends Controller
 {
@@ -17,7 +19,7 @@ class TicketController extends Controller
         $sale = new Sale();
         $sale->fill($request->all());
         $sale->event_id = UrlUtils::decodeId($request->event_id);
-        $sale->secret = Str::random(8);
+        $sale->secret = Str::random(16);
         $sale->save();
 
         foreach($request->tickets as $ticket) {
@@ -132,4 +134,39 @@ class TicketController extends Controller
     {
         return view('ticket.scan');
     }
+
+    public function qrCode($eventId, $secret)
+    {
+        $event = Event::find(UrlUtils::decodeId($eventId));
+        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->first();
+
+        if (! $sale) {
+            return abort(404);
+        }
+
+        $url = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $secret]);
+
+        $qrCode = QrCode::create($url)            
+            ->setSize(300)
+            ->setMargin(10);
+
+        $writer = new PngWriter();
+        $result = $writer->write($qrCode);
+        
+        header('Content-Type: ' . $result->getMimeType());
+        header('Content-Disposition: attachment; filename="qr-code.png"');
+            
+        echo $result->getString();
+
+        exit;
+    }
+
+    public function view($eventId, $secret)
+    {
+        $event = Event::find(UrlUtils::decodeId($eventId));
+        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->first();
+
+        return view('ticket.view', compact('event', 'sale'));
+    }
+
 }
