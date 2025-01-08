@@ -821,6 +821,18 @@
                                 <textarea id="ticket_notes" name="ticket_notes" v-model="event.ticket_notes" rows="4"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
                             </div>
+
+                            @if ($user->isMember($subdomain))
+                            <div class="mb-6">
+                                <div class="flex items-center">
+                                    <input id="save_default_tickets" name="save_default_tickets" type="checkbox"
+                                        class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                                    <label for="save_default_tickets" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                        {{ __('messages.save_as_default') }}
+                                    </label>
+                                </div>
+                            </div>
+                            @endif
                         </div>
                     </div>
                 </div>

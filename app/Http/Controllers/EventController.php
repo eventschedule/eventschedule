@@ -108,13 +108,16 @@ class EventController extends Controller
         $event = new Event;
         $selectedMembers = [];
         
-        $event->ticket_currency_code = 'USD';
-        $event->payment_method = 'cash';
-        $event->tickets = [
-            [
-                new Ticket(),
-            ]
-        ];
+        if ($role->default_tickets) {
+            $defaultTickets = json_decode($role->default_tickets, true);
+            $event->ticket_currency_code = $defaultTickets['currency_code'] ?? 'USD';
+            $event->payment_method = $defaultTickets['payment_method'] ?? 'cash';
+            $event->tickets = $defaultTickets['tickets'] ?? [new Ticket()];
+        } else {
+            $event->ticket_currency_code = 'USD';
+            $event->payment_method = 'cash';
+            $event->tickets = [new Ticket()];
+        }
 
         if ($schedule) {
             $selectedMembers = [$schedule->toData()];
@@ -263,6 +266,24 @@ class EventController extends Controller
 
         $this->eventRepo->saveEvent($request, $event);
 
+        if ($request->has('save_default_tickets')) {
+            $role = Role::subdomain($subdomain)->firstOrFail();
+            $defaultTickets = [
+                'currency_code' => $event->ticket_currency_code,
+                'payment_method' => $event->payment_method,
+                'tickets' => $event->tickets->map(function($ticket) {
+                    return [
+                        'type' => $ticket->type,
+                        'quantity' => $ticket->quantity,
+                        'price' => $ticket->price,
+                        'description' => $ticket->description,
+                    ];
+                })->toArray()
+            ];
+            $role->default_tickets = json_encode($defaultTickets);
+            $role->save();
+        }
+
         if ($event->starts_at) {
             $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
         } else {
@@ -338,6 +359,24 @@ class EventController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         $curatorId = $role->isCurator() ? $role->id : null;
         $event = $this->eventRepo->saveEvent($request, null, $curatorId);
+
+        if ($request->has('save_default_tickets')) {
+            $role = Role::subdomain($subdomain)->firstOrFail();
+            $defaultTickets = [
+                'currency_code' => $event->ticket_currency_code,
+                'payment_method' => $event->payment_method,
+                'tickets' => $event->tickets->map(function($ticket) {
+                    return [
+                        'type' => $ticket->type,
+                        'quantity' => $ticket->quantity,
+                        'price' => $ticket->price,
+                        'description' => $ticket->description,
+                    ];
+                })->toArray()
+            ];
+            $role->default_tickets = json_encode($defaultTickets);
+            $role->save();
+        }
 
         session()->forget('pending_venue');
 

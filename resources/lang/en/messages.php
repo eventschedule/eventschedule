@@ -329,4 +329,5 @@ return [
     'checkout' => 'Checkout',
     'tickets' => 'Tickets',
     'requires_pro_plan' => 'Requires a Pro plan',    
+    'save_as_default' => 'Save as default',
 ];
