@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\Sale;
+use App\Models\Event;
 use App\Utils\UrlUtils;
 use Stripe\StripeClient;
 use Endroid\QrCode\QrCode;
@@ -147,14 +148,13 @@ class TicketController extends Controller
         $url = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $secret]);
 
         $qrCode = QrCode::create($url)            
-            ->setSize(300)
+            ->setSize(200)
             ->setMargin(10);
 
         $writer = new PngWriter();
         $result = $writer->write($qrCode);
         
         header('Content-Type: ' . $result->getMimeType());
-        header('Content-Disposition: attachment; filename="qr-code.png"');
             
         echo $result->getString();
 
