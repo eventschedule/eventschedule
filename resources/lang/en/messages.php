@@ -332,4 +332,5 @@ return [
     'save_as_default' => 'Save as default',
     'invoiceninja_api_key' => 'Invoice Ninja - API Key',
     'learn_more' => 'Learn more',
+    'invoiceninja_company' => 'Invoice Ninja - Company',
 ];
