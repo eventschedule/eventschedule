@@ -320,7 +320,7 @@ return [
     'connect_stripe' => 'Connect Stripe',
     'stripe_connected' => 'Stripe connected successfully!',
     'failed_to_connect_stripe' => 'Failed to connect Stripe',
-    'stripe_account_id' => 'Stripe - Account ID',
+    'account_id' => 'Account ID',
     'unlink_account' => 'Unlink Account',
     'stripe_unlinked' => 'Stripe account unlinked successfully!',
     'payment_method' => 'Payment Method',
@@ -330,7 +330,6 @@ return [
     'tickets' => 'Tickets',
     'requires_pro_plan' => 'Requires a Pro plan',    
     'save_as_default' => 'Save as default',
-    'invoiceninja_api_key' => 'Invoice Ninja - API Key',
+    'api_key' => 'API Key',
     'learn_more' => 'Learn more',
-    'invoiceninja_company' => 'Invoice Ninja - Company',
 ];
