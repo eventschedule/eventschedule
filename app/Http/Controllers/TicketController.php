@@ -15,8 +15,6 @@ class TicketController extends Controller
 {
     public function checkout(Request $request, $subdomain)
     {
-        $date = $request->date;
-
         $sale = new Sale();
         $sale->fill($request->all());
         $sale->event_id = UrlUtils::decodeId($request->event_id);
@@ -28,8 +26,7 @@ class TicketController extends Controller
                 $sale->saleTickets()->create([
                     'sale_id' => $sale->id,
                     'ticket_id' => UrlUtils::decodeId($ticket['id']),
-                    'quantity' => $ticket['quantity'],
-                    'date' => $date,
+                    'seats' => json_encode(array_fill(1, $ticket['quantity'], null)),
                 ]);
             }
         }
