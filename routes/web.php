@@ -6,6 +6,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\InvoiceNinjaController;
 use Illuminate\Support\Facades\Route;
 
 if (config('app.env') != 'local') {
