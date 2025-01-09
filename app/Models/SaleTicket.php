@@ -11,6 +11,7 @@ class SaleTicket extends Model
     protected $fillable = [
         'sale_id',
         'ticket_id',
+        'seats',
     ];
 
     protected static function booted()
