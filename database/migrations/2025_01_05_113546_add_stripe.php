@@ -52,8 +52,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('sale_id')->constrained()->onDelete('cascade');
             $table->foreignId('ticket_id')->constrained()->onDelete('cascade');
-            $table->integer('quantity');
-            $table->integer('quantity_used')->default(0);
+            $table->text('seats');
         });
     }
 
