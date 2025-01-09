@@ -59,7 +59,7 @@ class TicketController extends Controller
                     ],
                     'unit_amount' => $saleTicket->ticket->price * 100,
                 ],
-                'quantity' => $saleTicket->quantity,
+                'quantity' => $saleTicket->quantity(),
             ];
         }
 
