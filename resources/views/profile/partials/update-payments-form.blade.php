@@ -15,8 +15,12 @@
 
         @if ($user->stripe_account_id)
             <div>
-                <x-input-label for="stripe_account_id" :value="__('messages.stripe_account_id') . ($user->stripe_completed_at ? '' : ' [' . __('messages.pending') . ']')" />
-                <x-text-input type="text" class="mt-1 block w-full" :value="$user->stripe_account_id" readonly/>
+                @if ($user->stripe_completed_at)
+                    <x-input-label for="stripe_account_id" :value="'Stripe'" />
+                @else
+                    <x-input-label for="stripe_account_id" :value="'Stripe - ' . __('messages.account_id') . ' [' . __('messages.pending') . ']'" />
+                @endif
+                <x-text-input type="text" class="mt-1 block w-full" :value="$user->stripe_company_name ? $user->stripe_company_name : $user->stripe_account_id" readonly/>
                 <div class="text-xs pt-1">
                     <a href="#" onclick="return confirm('{{ __('messages.are_you_sure') }}') ? window.location.href='{{ route('stripe.unlink') }}' : false" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.unlink_account') }}</a>
                 </div>
@@ -33,7 +37,7 @@
 
         @if ($user->invoiceninja_api_key)
             <div>
-                <x-input-label for="invoiceninja_company_name" :value="__('messages.invoiceninja_company')" />
+                <x-input-label :value="'Invoice Ninja'" />
                 <x-text-input type="text" class="mt-1 block w-full" :value="$user->invoiceninja_company_name" readonly/>
                 <div class="text-xs pt-1">
                     <a href="#" onclick="return confirm('{{ __('messages.are_you_sure') }}') ? window.location.href='{{ route('invoiceninja.unlink') }}' : false" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.unlink_account') }}</a>
@@ -41,7 +45,7 @@
             </div>        
         @else
             <div>
-                <x-input-label for="invoiceninja_api_key" :value="__('messages.invoiceninja_api_key')" />
+                <x-input-label for="invoiceninja_api_key" :value="'Invoice Ninja - ' . __('messages.api_key')" />
                 <x-text-input id="invoiceninja_api_key" name="invoiceninja_api_key" type="text" class="mt-1 block w-full" 
                     :value="old('invoiceninja_api_key', $user->invoiceninja_api_key)" />
                 <x-input-error class="mt-2" :messages="$errors->get('invoiceninja_api_key')" />
