@@ -103,7 +103,7 @@ class TicketController extends Controller
 
         $invoice = $invoiceNinja->createInvoice($client['id'], $lineItems);
 
-        return redirect($invoice['invitations'][0]['url']);
+        return redirect($invoice['invitations'][0]['link']);
     }
 
     private function cashCheckout($subdomain, $sale, $event)
