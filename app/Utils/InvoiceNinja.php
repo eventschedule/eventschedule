@@ -16,6 +16,34 @@ class InvoiceNinja
         return $company;
     }
 
+    public function createClient($name, $email, $currencyCode) {
+        $parts = explode(' ', $name);
+        $lastName = array_pop($parts); 
+        $firstName = implode(' ', $parts);
+
+        $client = $this->sendRequest('clients', 'POST', [
+            'currency_code' => $currencyCode,                    
+            'contacts' => [
+                [
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'email' => $email,
+                ],
+            ],
+        ]);
+
+        return $client;
+    }
+
+    public function createInvoice($clientId, $lineItems) {
+        $invoice = $this->sendRequest('invoices', 'POST', [
+            'client_id' => $clientId,
+            'line_items' => $lineItems,
+        ]);
+
+        return $invoice;
+    }
+
     public function sendRequest($route, $method = 'GET', $data = false)
     {
         // $key = esc_attr( get_option( 'invoiceninja_api_token' ) );

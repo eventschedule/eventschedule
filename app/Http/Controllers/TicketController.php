@@ -10,7 +10,7 @@ use App\Utils\UrlUtils;
 use Stripe\StripeClient;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
-
+use App\Utils\InvoiceNinja;
 class TicketController extends Controller
 {
     public function checkout(Request $request, $subdomain)
@@ -88,7 +88,22 @@ class TicketController extends Controller
 
     private function invoiceninjaCheckout($subdomain, $sale, $event)
     {
-        //
+        $invoiceNinja = new InvoiceNinja($event->user->invoiceninja_api_key);
+        $client = $invoiceNinja->createClient($sale->name, $sale->email, $event->ticket_currency_code);
+
+        $lineItems = [];
+        foreach ($sale->saleTickets as $saleTicket) {
+            $lineItems[] = [
+                'product_key' => $saleTicket->ticket->type,
+                'notes' => $saleTicket->ticket->description,
+                'quantity' => $saleTicket->quantity(),
+                'cost' => $saleTicket->ticket->price,
+            ];
+        }
+
+        $invoice = $invoiceNinja->createInvoice($client['id'], $lineItems);
+
+        return redirect($invoice['invitations'][0]['url']);
     }
 
     private function cashCheckout($subdomain, $sale, $event)
