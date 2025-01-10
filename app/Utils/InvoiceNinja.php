@@ -84,7 +84,7 @@ class InvoiceNinja
 
         if ($method == 'POST') {
             curl_setopt($response, CURLOPT_POST, 1);
-            curl_setopt($response, CURLOPT_POSTFIELDS, $data);
+            curl_setopt($response, CURLOPT_POSTFIELDS, json_encode($data));
         }
 
         curl_setopt($response, CURLOPT_HTTPHEADER, [
