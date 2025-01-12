@@ -101,7 +101,8 @@ class TicketController extends Controller
             ];
         }
 
-        $invoice = $invoiceNinja->createInvoice($client['id'], $lineItems);
+        $qrCodeUrl = route('ticket.qr_code', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+        $invoice = $invoiceNinja->createInvoice($client['id'], $lineItems, $qrCodeUrl);
 
         return redirect($invoice['invitations'][0]['link']);
     }
