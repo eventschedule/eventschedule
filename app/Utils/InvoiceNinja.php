@@ -37,14 +37,13 @@ class InvoiceNinja
         ]);
     }
 
-    public function createClient($name, $email, $currencyCode, $qrCodeUrl) {
+    public function createClient($name, $email, $currencyCode) {
         $parts = explode(' ', $name);
         $lastName = array_pop($parts); 
         $firstName = implode(' ', $parts);
 
         $client = $this->sendRequest('clients', 'POST', [
-            'currency_code' => $currencyCode,                    
-            'public_notes' => '<img src="' . $qrCodeUrl . '" />',
+            'currency_code' => $currencyCode,
             'contacts' => [
                 [
                     'first_name' => $firstName,
@@ -57,9 +56,10 @@ class InvoiceNinja
         return $client;
     }
 
-    public function createInvoice($clientId, $lineItems) {
-        $invoice = $this->sendRequest('invoices', 'POST', [
+    public function createInvoice($clientId, $lineItems, $qrCodeUrl) {
+        $invoice = $this->sendRequest('invoices', 'POST', [            
             'client_id' => $clientId,
+            'public_notes' => '<img src="' . $qrCodeUrl . '" />',
             'line_items' => $lineItems,
         ]);
 
