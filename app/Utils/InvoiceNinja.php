@@ -28,6 +28,14 @@ class InvoiceNinja
         return $webhook;
     }
 
+    public function deleteWebhook($id)
+    {
+        $this->sendRequest('webhooks/bulk', 'POST', [
+            'ids' => [$id],
+            'action' => 'delete',
+        ]);
+    }
+
     public function createClient($name, $email, $currencyCode, $qrCodeUrl) {
         $parts = explode(' ', $name);
         $lastName = array_pop($parts); 
