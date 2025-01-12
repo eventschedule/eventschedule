@@ -4,9 +4,10 @@ namespace App\Utils;
 
 class InvoiceNinja
 {
-    public function __construct($apiKey)
+    public function __construct($apiKey, $apiUrl)
     {
         $this->apiKey = $apiKey;
+        $this->apiUrl = $apiUrl;
     }
 
     public function getCompany()
@@ -67,9 +68,7 @@ class InvoiceNinja
 
     public function sendRequest($route, $method = 'GET', $data = false)
     {
-        // $key = esc_attr( get_option( 'invoiceninja_api_token' ) );
-        // $url = esc_attr( get_option( 'invoiceninja_api_url' ) );
-        $url = '';
+        $url = $this->apiUrl;
 
         if ( ! $this->apiKey ) {
             return null;
