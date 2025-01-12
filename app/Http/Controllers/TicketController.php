@@ -34,13 +34,22 @@ class TicketController extends Controller
             }
         }
 
-        switch ($event->payment_method) {
-            case 'stripe':
-                return $this->stripeCheckout($subdomain, $sale, $event);
-            case 'invoiceninja':
-                return $this->invoiceninjaCheckout($subdomain, $sale, $event);
-            default:
-                return $this->cashCheckout($subdomain, $sale, $event);
+        $total = $sale->calculateTotal();
+        
+        if ($total == 0) {
+            $sale->status = 'paid';
+            $sale->save();
+
+            return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+        } else {
+            switch ($event->payment_method) {
+                case 'stripe':
+                    return $this->stripeCheckout($subdomain, $sale, $event);
+                case 'invoiceninja':
+                    return $this->invoiceninjaCheckout($subdomain, $sale, $event);
+                default:
+                    return $this->cashCheckout($subdomain, $sale, $event);
+            }
         }
     }
 
@@ -114,7 +123,7 @@ class TicketController extends Controller
 
     private function cashCheckout($subdomain, $sale, $event)
     {
-        //
+        return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
     }
 
     public function success($subdomain, $sale_id)
