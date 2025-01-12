@@ -25,6 +25,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'language_code',
         'stripe_account_id',
         'invoiceninja_api_key',
+        'invoiceninja_api_url',
     ];
 
     /**

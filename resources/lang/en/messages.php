@@ -333,4 +333,5 @@ return [
     'save_as_default' => 'Save as default',
     'api_key' => 'API Key',
     'learn_more' => 'Learn more',
+    'api_url' => 'API URL',
 ];
