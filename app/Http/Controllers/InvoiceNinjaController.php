@@ -2,11 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Utils\InvoiceNinja;
+
 class InvoiceNinjaController extends Controller
 {
     public function unlink()
     {
         $user = auth()->user();
+
+        $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key);
+        $company = $invoiceNinja->getCompany();
+        
+        foreach ($company['webhooks'] as $webhook) {
+            if ($webhook['target_url'] == route('invoiceninja.webhook', ['secret' => $user->invoiceninja_webhook_secret])) {
+                $invoiceNinja->deleteWebhook($webhook['id']);
+            }
+        }
+
         $user->invoiceninja_api_key = null;
         $user->invoiceninja_company_name = null;
         $user->invoiceninja_webhook_secret = null;
