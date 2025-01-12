@@ -33,10 +33,10 @@ class InvoiceNinjaController extends Controller
     public function webhook(Request $request, $secret)
     {
         $payload = json_decode($request->getContent(), true);    
-        $invoiceId = $payload['paymentables'][0]['invoice_id'] ?? null;
+        $invoiceId = $payload['paymentables'][0]['invoice_id'];
         
         if (! $invoiceId) {
-            return response()->json(['status' => 'error', 'message' => 'No invoice ID found'], 400);
+            return response()->json(['status' => 'error', 'message' => 'No invoice_id found'], 400);
         }
 
         $sale = Sale::where('transaction_reference', $invoiceId)->firstOrFail();
