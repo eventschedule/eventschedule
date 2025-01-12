@@ -131,7 +131,7 @@ class ProfileController extends Controller
 
                 $user->invoiceninja_api_key = $request->invoiceninja_api_key;
                 $user->invoiceninja_company_name = $name;
-                $user->invoiceninja_webhook_secret = strtolower(\Str::random(16));
+                $user->invoiceninja_webhook_secret = strtolower(\Str::random(32));
                 $user->save();
 
                 $invoiceNinja->createWebhook(route('invoiceninja.webhook', ['secret' => $user->invoiceninja_webhook_secret]));

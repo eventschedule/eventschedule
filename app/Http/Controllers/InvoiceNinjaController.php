@@ -32,6 +32,12 @@ class InvoiceNinjaController extends Controller
 
     public function webhook(Request $request, $secret)
     {
+        $user = User::where('invoiceninja_webhook_secret', $secret)->first();
+
+        if (! $user) {
+            return response()->json(['status' => 'error', 'message' => 'Invalid webhook secret'], 400);
+        }
+    
         $payload = json_decode($request->getContent(), true);    
         $invoiceId = $payload['paymentables'][0]['invoice_id'];
         
@@ -41,12 +47,15 @@ class InvoiceNinjaController extends Controller
 
         $sale = Sale::where('payment_method', 'invoiceninja')
             ->where('transaction_reference', $invoiceId)
-            ->firstOrFail();
-
-        if ($sale->event->user->invoiceninja_webhook_secret != $secret) {
-            return response()->json(['status' => 'error', 'message' => 'Invalid webhook secret'], 400);
+            ->whereHas('event', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->first();
+        
+        if (! $sale) {
+            return response()->json(['status' => 'error', 'message' => 'Sale not found'], 400);
         }
-
+        
         $sale->status = 'paid';
         $sale->save();
 

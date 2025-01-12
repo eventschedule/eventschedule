@@ -20,7 +20,7 @@ class TicketController extends Controller
         $sale = new Sale();
         $sale->fill($request->all());
         $sale->event_id = $event->id;
-        $sale->secret = strtolower(Str::random(16));
+        $sale->secret = strtolower(Str::random(32));
         $sale->payment_method = $event->payment_method;
         $sale->save();
 
