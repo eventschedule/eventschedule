@@ -107,6 +107,12 @@
             {{ strtoupper(__('messages.cancel')) }}
         </a>
 
+        @if ($event->payment_instructions)
+            <div class="mt-8 text-lg font-bold">
+                {{ $event->payment_instructions }}
+            </div>
+        @endif
+
     </div>
 
 </form>
