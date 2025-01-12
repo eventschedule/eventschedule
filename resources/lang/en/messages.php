@@ -334,4 +334,5 @@ return [
     'api_key' => 'API Key',
     'learn_more' => 'Learn more',
     'api_url' => 'API URL',
+    'payment_instructions' => 'Payment Instructions',
 ];
