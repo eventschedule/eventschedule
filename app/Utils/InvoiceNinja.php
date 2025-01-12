@@ -11,9 +11,21 @@ class InvoiceNinja
 
     public function getCompany()
     {
-        $company = $this->sendRequest('companies/current', 'POST');
+        $company = $this->sendRequest('companies/current?include=webhooks', 'POST');
 
         return $company;
+    }
+
+    public function createWebhook($url)
+    {
+        $webhook = $this->sendRequest('webhooks', 'POST', [
+            'rest_method' => 'post',
+            'format' => 'json',
+            'event_id' => '4',
+            'target_url' => $url,
+        ]);
+
+        return $webhook;
     }
 
     public function createClient($name, $email, $currencyCode, $qrCodeUrl) {

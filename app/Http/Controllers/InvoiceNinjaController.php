@@ -13,4 +13,18 @@ class InvoiceNinjaController extends Controller
 
         return redirect()->back()->with('success', __('messages.invoiceninja_unlinked'));
     }
+
+    public function webhook(Request $request)
+    {
+        $endpoint_secret = config('services.invoiceninja.webhook_secret');
+
+        $request = $request->getContent();
+        $event = json_decode($request);
+
+        $sale = Sale::where('transaction_reference', $paymentIntent->id)->firstOrFail();
+        $sale->status = 'paid';
+        $sale->save();
+
+        return response()->json(['status' => 'success']);
+    }
 }
