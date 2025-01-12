@@ -37,6 +37,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
         'stripe_account_id',
         'invoiceninja_api_key',
+        'invoiceninja_api_url',
+        'invoiceninja_webhook_secret',
     ];
 
     protected static function boot()

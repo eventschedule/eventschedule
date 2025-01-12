@@ -48,7 +48,6 @@ return [
 
     'invoiceninja' => [
         'api_key' => env('INVOICENINJA_API_KEY'),
-        'webhook_secret' => env('INVOICENINJA_WEBHOOK_SECRET'),
     ],
 
 ];
