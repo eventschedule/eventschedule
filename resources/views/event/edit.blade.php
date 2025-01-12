@@ -711,6 +711,7 @@
                 </div>
                 @endif
                 
+                @if ($event->user_id == $user->id)
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
@@ -836,6 +837,8 @@
                         </div>
                     </div>
                 </div>
+                @endif
+
             </div>
         </div>
 

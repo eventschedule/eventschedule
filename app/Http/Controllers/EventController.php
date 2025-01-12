@@ -106,6 +106,7 @@ class EventController extends Controller
         }
 
         $event = new Event;
+        $event->user_id = $user->id;
         $selectedMembers = [];
         
         if ($role->default_tickets) {
