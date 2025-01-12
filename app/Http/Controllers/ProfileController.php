@@ -128,17 +128,16 @@ class ProfileController extends Controller
                 $invoiceNinja = new InvoiceNinja($apiKey);
                 $company = $invoiceNinja->getCompany();
                 $name = $company['settings']['name'];
+
+                $user->invoiceninja_api_key = $request->invoiceninja_api_key;
+                $user->invoiceninja_company_name = $name;
+                $user->invoiceninja_webhook_secret = \Str::random(32);
+                $user->save();
+
+                $invoiceNinja->createWebhook(route('invoiceninja.webhook', ['secret' => $user->invoiceninja_webhook_secret]));
             } catch (\Exception $e) {
                 //
             }
-            
-            if ($name) {
-                $user->invoiceninja_api_key = $request->invoiceninja_api_key;
-                $user->invoiceninja_company_name = $name;
-                $user->save();
-
-                $invoiceNinja->createWebhook(route('invoiceninja.webhook'));
-            }            
         }
 
         return Redirect::route('profile.edit')->with('status', 'payments-updated');
