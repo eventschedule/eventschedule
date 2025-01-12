@@ -113,6 +113,7 @@ class EventController extends Controller
             $defaultTickets = json_decode($role->default_tickets, true);
             $event->ticket_currency_code = $defaultTickets['currency_code'] ?? 'USD';
             $event->payment_method = $defaultTickets['payment_method'] ?? 'cash';
+            $event->payment_instructions = $defaultTickets['payment_instructions'] ?? null;
             $event->tickets = $defaultTickets['tickets'] ?? [new Ticket()];
         } else {
             $event->ticket_currency_code = 'USD';
@@ -272,6 +273,7 @@ class EventController extends Controller
             $defaultTickets = [
                 'currency_code' => $event->ticket_currency_code,
                 'payment_method' => $event->payment_method,
+                'payment_instructions' => $event->payment_instructions,
                 'tickets' => $event->tickets->map(function($ticket) {
                     return [
                         'type' => $ticket->type,
@@ -366,6 +368,7 @@ class EventController extends Controller
             $defaultTickets = [
                 'currency_code' => $event->ticket_currency_code,
                 'payment_method' => $event->payment_method,
+                'payment_instructions' => $event->payment_instructions,
                 'tickets' => $event->tickets->map(function($ticket) {
                     return [
                         'type' => $ticket->type,
