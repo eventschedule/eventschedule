@@ -760,7 +760,7 @@
                             </div>
                             @endif
 
-                            <div class="mb-6">
+                            <div class="mb-6" v-if="event.payment_method == 'cash'">
                                 <x-input-label for="payment_instructions" :value="__('messages.payment_instructions')" />
                                 <textarea id="payment_instructions" name="payment_instructions" v-model="event.payment_instructions" rows="4"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
