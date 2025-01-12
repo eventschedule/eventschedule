@@ -85,7 +85,9 @@ class StripeController extends Controller
         switch ($event->type) {
             case 'payment_intent.succeeded':
                 $paymentIntent = $event->data->object;
-                $sale = Sale::where('transaction_reference', $paymentIntent->id)->firstOrFail();
+                $sale = Sale::where('payment_method', 'stripe')
+                    ->where('transaction_reference', $paymentIntent->id)
+                    ->firstOrFail();
                 $sale->status = 'paid';
                 $sale->save();
                 break;

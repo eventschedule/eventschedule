@@ -39,7 +39,9 @@ class InvoiceNinjaController extends Controller
             return response()->json(['status' => 'error', 'message' => 'No invoice_id found'], 400);
         }
 
-        $sale = Sale::where('transaction_reference', $invoiceId)->firstOrFail();
+        $sale = Sale::where('payment_method', 'invoiceninja')
+            ->where('transaction_reference', $invoiceId)
+            ->firstOrFail();
 
         if ($sale->event->user->invoiceninja_webhook_secret != $secret) {
             return response()->json(['status' => 'error', 'message' => 'Invalid webhook secret'], 400);
