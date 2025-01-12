@@ -89,7 +89,8 @@ class TicketController extends Controller
 
     private function invoiceninjaCheckout($subdomain, $sale, $event)
     {
-        $invoiceNinja = new InvoiceNinja($event->user->invoiceninja_api_key);
+        $user = $event->user;
+        $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
         $client = $invoiceNinja->createClient($sale->name, $sale->email, $event->ticket_currency_code);
 
         $lineItems = [];

@@ -121,11 +121,12 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $apiKey = $request->invoiceninja_api_key;
+        $apiUrl = $request->invoiceninja_api_url;
         $name = '';
 
         if ($apiKey) {
             try {
-                $invoiceNinja = new InvoiceNinja($apiKey);
+                $invoiceNinja = new InvoiceNinja($apiKey, $apiUrl);
                 $company = $invoiceNinja->getCompany();
                 $name = $company['settings']['name'];
 

@@ -13,7 +13,7 @@ class InvoiceNinjaController extends Controller
     {
         $user = auth()->user();
 
-        $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key);
+        $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
         $company = $invoiceNinja->getCompany();
         
         foreach ($company['webhooks'] as $webhook) {
