@@ -34,4 +34,11 @@ class Sale extends Model
     {
         return $this->hasMany(SaleTicket::class);
     }
+
+    public function calculateTotal()
+    {
+        return $this->saleTickets->sum(function ($saleTicket) {
+            return $saleTicket->ticket->price * $saleTicket->quantity();
+        });
+    }
 }
