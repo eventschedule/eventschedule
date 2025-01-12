@@ -24,7 +24,9 @@ return new class extends Migration
             $table->string('stripe_company_name')->nullable();
             $table->timestamp('stripe_completed_at')->nullable();
             $table->string('invoiceninja_api_key')->nullable();
+            $table->string('invoiceninja_api_url')->nullable();
             $table->string('invoiceninja_company_name')->nullable();
+            $table->string('invoiceninja_webhook_secret')->nullable();
         });
 
 
@@ -46,6 +48,7 @@ return new class extends Migration
             $table->dropColumn(['ticket_id', 'quantity', 'is_used', 'is_paid']);
             $table->enum('status', ['pending', 'paid', 'cancelled', 'refunded', 'expired'])->default('pending');
             $table->string('event_date');
+            $table->enum('payment_method', ['cash', 'stripe', 'invoiceninja'])->default('cash');
         });
 
         Schema::create('sale_tickets', function (Blueprint $table) {
@@ -68,7 +71,9 @@ return new class extends Migration
                 'stripe_company_name',
                 'stripe_completed_at',
                 'invoiceninja_api_key',
+                'invoiceninja_api_url',
                 'invoiceninja_company_name',
+                'invoiceninja_webhook_secret',
             ]);
         });
 
@@ -83,7 +88,7 @@ return new class extends Migration
             $table->integer('quantity')->nullable();
             $table->boolean('is_used')->default(false);
             $table->boolean('is_paid')->default(false);
-            $table->dropColumn(['event_date', 'status']);
+            $table->dropColumn(['event_date', 'status', 'payment_method']);
         });
     }
 };
