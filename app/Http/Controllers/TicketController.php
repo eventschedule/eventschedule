@@ -15,10 +15,13 @@ class TicketController extends Controller
 {
     public function checkout(Request $request, $subdomain)
     {
+        $event = Event::find(UrlUtils::decodeId($request->event_id));
+
         $sale = new Sale();
         $sale->fill($request->all());
-        $sale->event_id = UrlUtils::decodeId($request->event_id);
+        $sale->event_id = $event->id;
         $sale->secret = Str::random(16);
+        $sale->payment_method = $event->payment_method;
         $sale->save();
 
         foreach($request->tickets as $ticket) {
@@ -30,8 +33,6 @@ class TicketController extends Controller
                 ]);
             }
         }
-        
-        $event = $sale->event;
 
         switch ($event->payment_method) {
             case 'stripe':

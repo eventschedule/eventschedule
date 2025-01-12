@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Utils\InvoiceNinja;
+use App\Models\User;
+use App\Models\Sale;
+use Illuminate\Http\Request;
 
 class InvoiceNinjaController extends Controller
 {
@@ -29,13 +32,19 @@ class InvoiceNinjaController extends Controller
 
     public function webhook(Request $request, $secret)
     {
-        $request = $request->getContent();
-        $event = json_decode($request);
+        $payload = json_decode($request->getContent(), true);    
+        $invoiceId = $payload['paymentables'][0]['invoice_id'] ?? null;
+        
+        if (! $invoiceId) {
+            return response()->json(['status' => 'error', 'message' => 'No invoice ID found'], 400);
+        }
 
-        // get invoice id
-        // check webhook secret 
+        $sale = Sale::where('transaction_reference', $invoiceId)->firstOrFail();
 
-        $sale = Sale::where('transaction_reference', $paymentIntent->id)->firstOrFail();
+        if ($sale->event->user->invoiceninja_webhook_secret != $secret) {
+            return response()->json(['status' => 'error', 'message' => 'Invalid webhook secret'], 400);
+        }
+
         $sale->status = 'paid';
         $sale->save();
 
