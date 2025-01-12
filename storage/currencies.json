@@ -1,5 +1,13 @@
 [
     {"value": "USD", "label": "US Dollar"},
     {"value": "EUR", "label": "Euro"},
-    {"value": "GBP", "label": "British Pound"}
+    {"value": "AUD", "label": "Australian Dollar"},
+    {"value": "GBP", "label": "British Pound"},
+    {"value": "CAD", "label": "Canadian Dollar"},
+    {"value": "HKD", "label": "Hong Kong Dollar"},
+    {"value": "INR", "label": "Indian Rupee"},
+    {"value": "NIS", "label": "Israeli New Shekel"},
+    {"value": "NZD", "label": "New Zealand Dollar"},
+    {"value": "SGD", "label": "Singapore Dollar"},
+    {"value": "ZAR", "label": "South African Rand"}
 ]
