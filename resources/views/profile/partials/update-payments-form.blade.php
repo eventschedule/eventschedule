@@ -44,7 +44,7 @@
                 </div>
             </div>        
         @else
-            <div>
+        <div>
                 <x-input-label for="invoiceninja_api_key" :value="'Invoice Ninja - ' . __('messages.api_key')" />
                 <x-text-input id="invoiceninja_api_key" name="invoiceninja_api_key" type="text" class="mt-1 block w-full" 
                     :value="old('invoiceninja_api_key', $user->invoiceninja_api_key)" />
@@ -54,6 +54,13 @@
                         {{ __('messages.learn_more') }}
                     </a>
                 </div>
+            </div>
+
+            <div>
+                <x-input-label for="invoiceninja_api_url" :value="'Invoice Ninja - ' . __('messages.api_url')" />
+                <x-text-input id="invoiceninja_api_url" name="invoiceninja_api_url" type="url" class="mt-1 block w-full" 
+                    :value="old('invoiceninja_api_url', $user->invoiceninja_api_url)" placeholder="https://invoicing.co" />
+                <x-input-error class="mt-2" :messages="$errors->get('invoiceninja_api_url')" />
             </div>
 
             <div class="flex items-center gap-4">
