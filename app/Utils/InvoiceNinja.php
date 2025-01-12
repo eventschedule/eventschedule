@@ -16,13 +16,14 @@ class InvoiceNinja
         return $company;
     }
 
-    public function createClient($name, $email, $currencyCode) {
+    public function createClient($name, $email, $currencyCode, $qrCodeUrl) {
         $parts = explode(' ', $name);
         $lastName = array_pop($parts); 
         $firstName = implode(' ', $parts);
 
         $client = $this->sendRequest('clients', 'POST', [
             'currency_code' => $currencyCode,                    
+            'public_notes' => '<img src="' . $qrCodeUrl . '" />',
             'contacts' => [
                 [
                     'first_name' => $firstName,
