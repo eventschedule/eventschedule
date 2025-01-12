@@ -47,7 +47,7 @@ class Ticket extends Model
 
         $sold = json_decode($this->sold, true);
         $sold = $sold[$date] ?? 0;
-        $data['quantity'] = max(0, min(20, $this->quantity - $sold));
+        $data['quantity'] = $this->quantity > 0 ? max(0, min(20, $this->quantity - $sold)) : 20;
 
         return $data;
     }
