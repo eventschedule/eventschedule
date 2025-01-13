@@ -113,10 +113,13 @@
             </div>
         @endif
 
-
-        @if ($event->expire_unpaid_tickets)
-            <div class="mt-8 text-lg font-bold">
-                {{ __('messages.payment_must_be_completed_within_24_hours') }}
+        @if ($event->expire_unpaid_tickets > 0)
+            <div class="mt-8">
+                @if ($event->expire_unpaid_tickets == 1)
+                    {{ __('messages.payment_must_be_completed_within_hour') }}
+                @else
+                    {{ __('messages.payment_must_be_completed_within_hours', ['count' => $event->expire_unpaid_tickets]) }}
+                @endif
             </div>
         @endif
 
