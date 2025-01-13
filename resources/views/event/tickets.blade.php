@@ -54,13 +54,13 @@
     <div class="mb-6">
         <label for="name" class="text-gray-900">{{ __('messages.name') . ' *' }}</label>
         <input type="text" name="name" id="name" class="mt-1 block w-full max-w-md border-gray-300 bg-white text-gray-900" 
-            :value="old('name', auth()->check() ? auth()->user()->name : '')" required autofocus />
+            :value="old('name', auth()->check() ? auth()->user()->name : '')" required autofocus autocomplete="name" />
     </div>
 
     <div class="mb-12">
         <label for="email" class="text-gray-900">{{ __('messages.email') . ' *' }}</label>
         <input type="email" name="email" id="email" class="mt-1 block w-full max-w-md border-gray-300 bg-white text-gray-900" 
-            :value="old('email', auth()->check() ? auth()->user()->email : '')" required />
+            :value="old('email', auth()->check() ? auth()->user()->email : '')" required autocomplete="email" />
     </div>
 
     
