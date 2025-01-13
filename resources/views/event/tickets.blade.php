@@ -107,9 +107,16 @@
             {{ strtoupper(__('messages.cancel')) }}
         </a>
 
-        @if ($event->payment_instructions)
+        @if ($event->payment_method == 'cash' && $event->payment_instructions)
             <div class="mt-8 text-lg font-bold">
                 {{ $event->payment_instructions }}
+            </div>
+        @endif
+
+
+        @if ($event->expire_unpaid_tickets)
+            <div class="mt-8 text-lg font-bold">
+                {{ __('messages.payment_must_be_completed_within_24_hours') }}
             </div>
         @endif
 

@@ -832,6 +832,30 @@
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
                             </div>
 
+                            <div class="mb-6">
+                                <div class="flex items-center">
+                                    <input id="expire_unpaid_tickets_checkbox" name="expire_unpaid_tickets_checkbox" type="checkbox" 
+                                        v-model="showExpireUnpaid"
+                                        class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
+                                        @change="toggleExpireUnpaid">
+                                    <label for="expire_unpaid_tickets_checkbox" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                        {{ __('messages.expire_unpaid_tickets') }}
+                                    </label>
+                                </div>
+                            </div>                                                        
+
+                            <div class="mb-6" v-if="showExpireUnpaid">
+                                <x-input-label for="expire_unpaid_tickets" :value="__('messages.hours')" />
+                                <x-text-input id="expire_unpaid_tickets" name="expire_unpaid_tickets" type="number" class="mt-1 block w-full"
+                                    :value="old('expire_unpaid_tickets', $event->expire_unpaid_tickets)"
+                                    v-model="event.expire_unpaid_tickets"
+                                    autocomplete="off" />
+                                <x-input-error class="mt-2" :messages="$errors->get('expire_unpaid_tickets')" />
+                            </div>
+                            <div v-else>
+                                <input type="hidden" name="expire_unpaid_tickets" value="0"/>
+                            </div>
+
                             @if ($user->isMember($subdomain))
                             <div class="mb-6">
                                 <div class="flex items-center">
@@ -910,6 +934,7 @@
         isOnline: false,
         eventName: @json($event->name ?? ''),
         tickets: @json($event->tickets ?? [new Ticket()]),
+        showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
       }
     },
     methods: {
@@ -1232,6 +1257,13 @@
       },
       removeTicket(index) {
         this.tickets.splice(index, 1);
+      },
+      toggleExpireUnpaid() {
+        if (this.event.expire_unpaid_tickets == 0) {
+          this.event.expire_unpaid_tickets = 24;
+        } else {
+          this.event.expire_unpaid_tickets = 0;
+        }
       },
     },
     computed: {
