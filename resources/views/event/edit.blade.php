@@ -845,7 +845,7 @@
                             </div>                                                        
 
                             <div class="mb-6" v-if="showExpireUnpaid">
-                                <x-input-label for="expire_unpaid_tickets" :value="__('messages.hours')" />
+                                <x-input-label for="expire_unpaid_tickets" :value="__('messages.after_number_of_hours')" />
                                 <x-text-input id="expire_unpaid_tickets" name="expire_unpaid_tickets" type="number" class="mt-1 block w-full"
                                     :value="old('expire_unpaid_tickets', $event->expire_unpaid_tickets)"
                                     v-model="event.expire_unpaid_tickets"
