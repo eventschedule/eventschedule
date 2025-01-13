@@ -7,6 +7,7 @@
         const app = createApp({
             data() {
                 return {
+                    createAccount: false,
                     tickets: @json($event->tickets->map(function ($ticket) { 
                         return $ticket->toData(request()->date); 
                     })),
@@ -46,25 +47,44 @@
 </script>
 </x-slot>
 
-<form action="{{ route('event.checkout', ['subdomain' => $subdomain]) }}" method="post" v-on:submit="validateForm">
-    @csrf
-    <input type="hidden" name="event_id" value="{{ \App\Utils\UrlUtils::encodeId($event->id) }}">
-    <input type="hidden" name="event_date" value="{{ $date }}">
+<div id="ticket-selector">
+    <form action="{{ route('event.checkout', ['subdomain' => $subdomain]) }}" method="post" v-on:submit="validateForm">
+        @csrf
+        <input type="hidden" name="event_id" value="{{ \App\Utils\UrlUtils::encodeId($event->id) }}">
+        <input type="hidden" name="event_date" value="{{ $date }}">
 
-    <div class="mb-6">
-        <label for="name" class="text-gray-900">{{ __('messages.name') . ' *' }}</label>
-        <input type="text" name="name" id="name" class="mt-1 block w-full max-w-md border-gray-300 bg-white text-gray-900" 
-            :value="old('name', auth()->check() ? auth()->user()->name : '')" required autofocus autocomplete="name" />
-    </div>
+        <div class="mb-6">
+            <label for="name" class="text-gray-900">{{ __('messages.name') . ' *' }}</label>
+            <input type="text" name="name" id="name" class="mt-1 block w-full max-w-md border-gray-300 bg-white text-gray-900" 
+                value="{{ old('name', auth()->check() ? auth()->user()->name : '') }}" required autofocus autocomplete="name" />
+        </div>
 
-    <div class="mb-12">
-        <label for="email" class="text-gray-900">{{ __('messages.email') . ' *' }}</label>
-        <input type="email" name="email" id="email" class="mt-1 block w-full max-w-md border-gray-300 bg-white text-gray-900" 
-            :value="old('email', auth()->check() ? auth()->user()->email : '')" required autocomplete="email" />
-    </div>
+        <div class="mb-12">
+            <label for="email" class="text-gray-900">{{ __('messages.email') . ' *' }}</label>
+            <input type="email" name="email" id="email" class="mt-1 block w-full max-w-md border-gray-300 bg-white text-gray-900" 
+                value="{{ old('email', auth()->check() ? auth()->user()->email : '') }}" required autocomplete="email" />
+
+            @if (auth()->check())
+                <div class="mt-6">
+                    <div class="flex items-center">
+                        <input id="create_account" name="create_account" type="checkbox" 
+                            v-model="createAccount" value="1"
+                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                        <label for="create_account" class="ml-3 block text-sm font-medium leading-6 text-gray-900">
+                            {{ __('messages.create_account') }}
+                        </label>
+                    </div>
+
+                    <div class="mt-6" v-if="createAccount">
+                        <label for="password" class="text-gray-900">{{ __('messages.password') . ' *' }}</label>
+                        <input type="password" name="password" id="password" class="mt-1 block w-full max-w-md border-gray-300 bg-white text-gray-900" 
+                            required autocomplete="new-password" />
+                    </div>
+                </div>
+            @endif
+        </div>
 
     
-    <div id="ticket-selector">
 
         <div v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-8">
             <div class="flex items-center justify-between max-w-md">
@@ -125,7 +145,7 @@
             </div>
         @endif
 
-    </div>
 
-</form>
+    </form>
+</div>
 

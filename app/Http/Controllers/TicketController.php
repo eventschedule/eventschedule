@@ -17,6 +17,16 @@ class TicketController extends Controller
     {
         $event = Event::find(UrlUtils::decodeId($request->event_id));
 
+        if ($request->create_account) {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'timezone' => $event->user->timezone,
+                'language_code' => $event->user->language_code,
+            ]);
+        }
+
         $sale = new Sale();
         $sale->fill($request->all());
         $sale->event_id = $event->id;
