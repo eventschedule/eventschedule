@@ -33,6 +33,7 @@ return new class extends Migration
         Schema::table('events', function (Blueprint $table) {
             $table->enum('payment_method', ['cash', 'stripe', 'invoiceninja'])->default('cash');
             $table->text('payment_instructions')->nullable();
+            $table->integer('expire_unpaid_tickets')->default(0);
             $table->string('ticket_currency_code')->default('USD')->change();
         });
 
@@ -79,7 +80,7 @@ return new class extends Migration
         });
 
         Schema::table('events', function (Blueprint $table) {
-            $table->dropColumn(['payment_method', 'payment_instructions']);
+            $table->dropColumn(['payment_method', 'payment_instructions', 'expire_unpaid_tickets']);
         });
 
         Schema::dropIfExists('sale_tickets');

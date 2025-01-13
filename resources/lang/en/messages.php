@@ -335,4 +335,8 @@ return [
     'learn_more' => 'Learn more',
     'api_url' => 'API URL',
     'payment_instructions' => 'Payment Instructions',
+    'payment_must_be_completed_within_hour' => 'Payment must be completed within 1 hour',
+    'payment_must_be_completed_within_hours' => 'Payment must be completed within :count hours',
+    'expire_unpaid_tickets' => 'Expire unpaid tickets',
+    'hours' => 'Hours',
 ];
