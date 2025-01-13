@@ -338,5 +338,5 @@ return [
     'payment_must_be_completed_within_hour' => 'Payment must be completed within 1 hour',
     'payment_must_be_completed_within_hours' => 'Payment must be completed within :count hours',
     'expire_unpaid_tickets' => 'Expire unpaid tickets',
-    'hours' => 'Hours',
+    'after_number_of_hours' => 'After number of hours',
 ];
