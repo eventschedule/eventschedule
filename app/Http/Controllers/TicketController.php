@@ -16,8 +16,9 @@ class TicketController extends Controller
     public function checkout(Request $request, $subdomain)
     {
         $event = Event::find(UrlUtils::decodeId($request->event_id));
+        $user = auth()->user();
 
-        if ($request->create_account) {
+        if (! $user && $request->create_account) {
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -30,6 +31,7 @@ class TicketController extends Controller
         $sale = new Sale();
         $sale->fill($request->all());
         $sale->event_id = $event->id;
+        $sale->user_id = $user ? $user->id : null;
         $sale->secret = strtolower(Str::random(32));
         $sale->payment_method = $event->payment_method;
         $sale->save();
