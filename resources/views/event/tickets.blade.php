@@ -64,7 +64,7 @@
             <input type="email" name="email" id="email" class="mt-1 block w-full max-w-md border-gray-300 bg-white text-gray-900" 
                 value="{{ old('email', auth()->check() ? auth()->user()->email : '') }}" required autocomplete="email" />
 
-            @if (auth()->check())
+            @if (! auth()->check())
                 <div class="mt-6">
                     <div class="flex items-center">
                         <input id="create_account" name="create_account" type="checkbox" 
