@@ -17,7 +17,7 @@ class Sale extends Model
     protected static function booted()
     {
         static::updated(function ($sale) {
-            if ($sale->isDirty('status') && ($sale->status === 'cancelled' || $sale->status === 'refunded')) {
+            if ($sale->isDirty('status') && in_array($sale->status, ['cancelled', 'refunded', 'expired'])) {
                 foreach ($sale->saleTickets as $saleTicket) {
                     $saleTicket->ticket->updateSold($sale->event_date, -$saleTicket->quantity());
                 }
