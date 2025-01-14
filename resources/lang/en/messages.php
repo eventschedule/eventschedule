@@ -340,4 +340,5 @@ return [
     'expire_unpaid_tickets' => 'Expire unpaid tickets',
     'after_number_of_hours' => 'After number of hours',
     'create_account' => 'Create account',
+    'sold' => 'Sold',
 ];

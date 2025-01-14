@@ -799,7 +799,7 @@
                                                 v-model="ticket.price" class="mt-1 block w-full" placeholder="{{ __('messages.free') }}" />
                                         </div>
                                         <div>
-                                            <x-input-label :value="__('messages.quantity')" />
+                                            <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.quantity') }} @{{ Object.values(JSON.parse(ticket.sold))[0] > 0 ? ' - ' + Object.values(JSON.parse(ticket.sold))[0] + ' ' +soldLabel : '' }}</label>
                                             <x-text-input type="number" v-bind:name="`tickets[${index}][quantity]`" 
                                                 v-model="ticket.quantity" class="mt-1 block w-full" placeholder="{{ __('messages.unlimited') }}" />
                                         </div>
@@ -937,6 +937,7 @@
         eventName: @json($event->name ?? ''),
         tickets: @json($event->tickets ?? [new Ticket()]),
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
+        soldLabel: "{{ __('messages.sold') }}",
       }
     },
     methods: {

@@ -52,3 +52,4 @@ class Ticket extends Model
         return $data;
     }
 }
+  
