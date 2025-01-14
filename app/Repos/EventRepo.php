@@ -259,6 +259,8 @@ class EventRepo
             $event->tickets()->update(['is_deleted' => true]);
         }
 
+        $event->load('tickets');
+
         return $event;
     }
 }
