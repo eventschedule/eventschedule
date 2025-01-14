@@ -199,9 +199,9 @@
         <div class="flex flex-col xl:flex-row gap-10 bg-[#F5F9FE] rounded-2xl p-10 mb-4">
           <div class="flex-1">
             <div class="flex flex-col gap-4">
-              <h3 class="text-[32px] leading-snug text-black">
+              <h4 class="text-[32px] leading-snug text-black">
                 {{ __('messages.buy_tickets') }}
-            </h3>
+              </h4>
               <p class="text-base text-black">
                 @include('event.tickets', ['event' => $event, 'subdomain' => $subdomain])
               </p>
