@@ -801,7 +801,7 @@
                                                 v-model="ticket.price" class="mt-1 block w-full" placeholder="{{ __('messages.free') }}" />
                                         </div>
                                         <div>
-                                            <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.quantity') }} @{{ !isRecurring && Object.values(JSON.parse(ticket.sold))[0] > 0 ? ' - ' + Object.values(JSON.parse(ticket.sold))[0] + ' ' +soldLabel : '' }}</label>
+                                            <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.quantity') }} @{{ (! isRecurring && ticket.sold && Object.values(JSON.parse(ticket.sold))[0] > 0) ? (' - ' + Object.values(JSON.parse(ticket.sold))[0] + ' ' +soldLabel) : '' }}</label>
                                             <x-text-input type="number" v-bind:name="`tickets[${index}][quantity]`" 
                                                 v-model="ticket.quantity" class="mt-1 block w-full" placeholder="{{ __('messages.unlimited') }}" />
                                         </div>
