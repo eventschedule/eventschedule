@@ -361,8 +361,6 @@ class EventController extends Controller
 
     public function store(EventCreateRequest $request, $subdomain)
     {
-        //dd($request->all());
-
         $role = Role::subdomain($subdomain)->firstOrFail();
         $curatorId = $role->isCurator() ? $role->id : null;
         $event = $this->eventRepo->saveEvent($request, null, $curatorId);
