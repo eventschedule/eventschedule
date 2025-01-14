@@ -56,6 +56,7 @@ class StripeController extends Controller
             $account = Account::retrieve($user->stripe_account_id);
             
             if ($account->charges_enabled) {
+                $user->stripe_company_name = $account->business_profile->name;
                 $user->stripe_completed_at = now();
                 $user->save();
                 
