@@ -94,6 +94,8 @@
                     <p :class="{'text-lg': tickets.length === 1, 'text-sm': tickets.length > 1}" class="font-medium">@{{ formatPrice(ticket.price) }}</p>
                 </div>
                 <div>
+                    <p v-if="ticket.quantity === 0" class="text-lg font-medium text-gray-500">{{ __('messages.sold_out') }}</p>
+                    <p v-else>
                     <select 
                         v-model="ticket.selectedQty"
                         class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
@@ -102,8 +104,9 @@
                         <option value="0">0</option>
                         <template v-for="n in ticket.quantity">
                             <option :value="n">@{{ n }}</option>
-                        </template>
-                    </select>
+                            </template>
+                        </select>
+                    </p>
                     <input type="hidden" :value="ticket.id" :name="`tickets[${index}][id]`">
                 </div>
             </div>

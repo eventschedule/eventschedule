@@ -341,4 +341,5 @@ return [
     'after_number_of_hours' => 'After number of hours',
     'create_account' => 'Create account',
     'sold' => 'Sold',
+    'sold_out' => 'Sold Out',
 ];
