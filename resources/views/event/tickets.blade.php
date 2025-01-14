@@ -11,6 +11,9 @@
                     tickets: @json($event->tickets->map(function ($ticket) { 
                         return $ticket->toData(request()->date); 
                     })),
+                    name: '{{ old('name', auth()->check() ? auth()->user()->name : '') }}',
+                    email: '{{ old('email', auth()->check() ? auth()->user()->email : '') }}',
+                    password: ''
                 };
             },
             created() {
@@ -25,7 +28,10 @@
                     }, 0);
                 },
                 hasSelectedTickets() {
-                    return this.tickets.some(ticket => ticket.selectedQty > 0);
+                    const hasValidForm = this.tickets.some(ticket => ticket.selectedQty > 0) && 
+                        this.name.trim() !== '' &&
+                        this.email.trim() !== '';
+                    return hasValidForm;
                 }
             },
             methods: {
@@ -56,13 +62,13 @@
         <div class="mb-6">
             <label for="name" class="text-gray-900">{{ __('messages.name') . ' *' }}</label>
             <input type="text" name="name" id="name" class="mt-1 block w-full border-gray-300 bg-white text-gray-900" 
-                value="{{ old('name', auth()->check() ? auth()->user()->name : '') }}" required autofocus autocomplete="name" />
+                v-model="name" required autofocus autocomplete="name" />
         </div>
 
         <div class="mb-12">
             <label for="email" class="text-gray-900">{{ __('messages.email') . ' *' }}</label>
             <input type="email" name="email" id="email" class="mt-1 block w-full border-gray-300 bg-white text-gray-900" 
-                value="{{ old('email', auth()->check() ? auth()->user()->email : '') }}" required autocomplete="email" />
+                v-model="email" required autocomplete="email" />
 
             @if (! auth()->check())
                 <div class="mt-6">
@@ -78,7 +84,7 @@
                     <div class="mt-6" v-if="createAccount">
                         <label for="password" class="text-gray-900">{{ __('messages.password') . ' *' }}</label>
                         <input type="password" name="password" id="password" class="mt-1 block w-full border-gray-300 bg-white text-gray-900" 
-                            required autocomplete="new-password" />
+                            v-model="password" required autocomplete="new-password" />
                     </div>
                 </div>
             @endif
