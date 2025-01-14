@@ -196,13 +196,22 @@
     >
       <div class="flex flex-col gap-10">
         @if (request()->get('tickets') === 'true' && $event->isPro())
-        <div class="bg-[#F5F9FE] rounded-2xl p-8 pt-10 mb-6 flex flex-col gap-4">
-          <h3 class="text-[32px] leading-snug text-black">
-            {{ __('messages.buy_tickets') }}
-         </h3>
-          <p class="text-base text-black">
-            @include('event.tickets', ['event' => $event, 'subdomain' => $subdomain])
-          </p>
+        <div class="flex flex-col xl:flex-row gap-10 bg-[#F5F9FE] rounded-2xl p-10 mb-4">
+          <div class="flex-1">
+            <div class="flex flex-col gap-4">
+              <h3 class="text-[32px] leading-snug text-black">
+                {{ __('messages.buy_tickets') }}
+            </h3>
+              <p class="text-base text-black">
+                @include('event.tickets', ['event' => $event, 'subdomain' => $subdomain])
+              </p>
+            </div>
+          </div>
+          <div class="flex-1">
+            @if ($event->flyer_image_url)
+              <img src="{{ $event->flyer_image_url }}" class="block"/>
+            @endif
+          </div>
         </div>
         @else
         <!--

@@ -55,13 +55,13 @@
 
         <div class="mb-6">
             <label for="name" class="text-gray-900">{{ __('messages.name') . ' *' }}</label>
-            <input type="text" name="name" id="name" class="mt-1 block w-full max-w-md border-gray-300 bg-white text-gray-900" 
+            <input type="text" name="name" id="name" class="mt-1 block w-full border-gray-300 bg-white text-gray-900" 
                 value="{{ old('name', auth()->check() ? auth()->user()->name : '') }}" required autofocus autocomplete="name" />
         </div>
 
         <div class="mb-12">
             <label for="email" class="text-gray-900">{{ __('messages.email') . ' *' }}</label>
-            <input type="email" name="email" id="email" class="mt-1 block w-full max-w-md border-gray-300 bg-white text-gray-900" 
+            <input type="email" name="email" id="email" class="mt-1 block w-full border-gray-300 bg-white text-gray-900" 
                 value="{{ old('email', auth()->check() ? auth()->user()->email : '') }}" required autocomplete="email" />
 
             @if (! auth()->check())
@@ -77,7 +77,7 @@
 
                     <div class="mt-6" v-if="createAccount">
                         <label for="password" class="text-gray-900">{{ __('messages.password') . ' *' }}</label>
-                        <input type="password" name="password" id="password" class="mt-1 block w-full max-w-md border-gray-300 bg-white text-gray-900" 
+                        <input type="password" name="password" id="password" class="mt-1 block w-full border-gray-300 bg-white text-gray-900" 
                             required autocomplete="new-password" />
                     </div>
                 </div>
@@ -87,7 +87,7 @@
     
 
         <div v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-8">
-            <div class="flex items-center justify-between max-w-md">
+            <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-medium">@{{ ticket.type }}</h3>
                     <p v-if="ticket.description" class="text-sm text-gray-600">@{{ ticket.description }}</p>
@@ -109,13 +109,13 @@
             </div>
         </div>
 
-        <hr class="max-w-md"/>
+        <hr/>
         
         <div class="my-4 text-lg font-bold">
             Total: @{{ formatPrice(totalAmount) }}
         </div>
 
-        <div class="flex justify-center items-center py-4 gap-8 max-w-md">
+        <div class="flex justify-center items-center py-4 gap-8">
             <button 
                 type="submit" 
                 class="mt-4 inline-flex gap-x-1.5 rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
