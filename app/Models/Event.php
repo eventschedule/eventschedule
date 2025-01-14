@@ -31,6 +31,21 @@ class Event extends Model
 
         static::saving(function ($model) {
             $model->description_html = MarkdownUtils::convertToHtml($model->description);
+
+            if ($model->isDirty('starts_at') && ! $model->days_of_week) {
+                $model->tickets->each(function ($ticket) use ($model) {
+                    if ($ticket->sold) {               
+                        $sold = json_decode($ticket->sold, true);
+                        if ($oldDate = array_key_first($sold)) {
+                            $quantity = $sold[$oldDate];
+                            $newDate = Carbon::parse($model->starts_at)->format('Y-m-d');
+                            $sold = [$newDate => $quantity];
+                            $ticket->sold = json_encode($sold);
+                            $ticket->save();
+                        }
+                    }
+                });
+            }
         });
 
         static::deleting(function ($event) {
