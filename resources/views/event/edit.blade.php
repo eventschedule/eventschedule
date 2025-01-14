@@ -41,8 +41,10 @@
         var value = $('input[name="schedule_type"]:checked').val();
         if (value == 'one_time') {
             $('#days_of_week_div').hide();
+            app.isRecurring = false;
         } else {
             $('#days_of_week_div').show();
+            app.isRecurring = true;
         }
     }
 
@@ -799,7 +801,7 @@
                                                 v-model="ticket.price" class="mt-1 block w-full" placeholder="{{ __('messages.free') }}" />
                                         </div>
                                         <div>
-                                            <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.quantity') }} @{{ Object.values(JSON.parse(ticket.sold))[0] > 0 ? ' - ' + Object.values(JSON.parse(ticket.sold))[0] + ' ' +soldLabel : '' }}</label>
+                                            <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.quantity') }} @{{ !isRecurring && Object.values(JSON.parse(ticket.sold))[0] > 0 ? ' - ' + Object.values(JSON.parse(ticket.sold))[0] + ' ' +soldLabel : '' }}</label>
                                             <x-text-input type="number" v-bind:name="`tickets[${index}][quantity]`" 
                                                 v-model="ticket.quantity" class="mt-1 block w-full" placeholder="{{ __('messages.unlimited') }}" />
                                         </div>
@@ -938,6 +940,7 @@
         tickets: @json($event->tickets ?? [new Ticket()]),
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
         soldLabel: "{{ __('messages.sold') }}",
+        isRecurring: @json($event->days_of_week ? true : false),
       }
     },
     methods: {
