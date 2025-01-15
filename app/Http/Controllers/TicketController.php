@@ -18,15 +18,29 @@ class TicketController extends Controller
     {
         $user = auth()->user();
 
-        $sales = Sale::where('user_id', $user->id)
+        $sales = Sale::with('event', 'saleTickets')
+            ->where('user_id', $user->id)
             ->whereHas('event', function($query) {
                 $query->where('starts_at', '>=', now()->subDay()->startOfDay());
             })
-            ->with('event', 'saleTickets')
             ->orderBy('event_date', 'ASC')
             ->get();
 
         return view('ticket.index', compact('sales'));
+    }
+
+    public function sales()
+    {
+        $user = auth()->user();
+
+        $sales = Sale::with('event', 'saleTickets')
+            ->whereHas('event', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        return view('ticket.sales', compact('sales'));
     }
 
     public function checkout(Request $request, $subdomain)

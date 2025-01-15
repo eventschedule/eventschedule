@@ -42,6 +42,17 @@
                     </a>
                 </li>
 
+                <li>
+                    <a href="{{ route('sales') }}"
+                        class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('sales') ? 'bg-gray-800 text-white' : '' }}">
+                        <svg class="h-6 w-6 shrink-0" viewBox="0 0 24 24"
+                            fill="{{ request()->is('sales') ? '#ccc' : '#666' }}" aria-hidden="true">
+                            <path d="" />
+                        </svg>
+                        {{ __('messages.sales') }}
+                    </a>
+                </li>
+
             </ul>
         </li>
 

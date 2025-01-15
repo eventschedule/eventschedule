@@ -350,4 +350,5 @@ return [
     'cancelled' => 'Cancelled',
     'refunded' => 'Refunded',
     'view_ticket' => 'View Ticket',
+    'sales' => 'Sales',
 ];
