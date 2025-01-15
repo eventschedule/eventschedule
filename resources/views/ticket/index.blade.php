@@ -48,9 +48,8 @@
                                     {{ __('messages.' . $sale->status) }}
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    <a href="{{ $sale->getEventUrl() }}"
-                                        target="_blank" class="hover:underline">
-                                        {{ __('messages.view') }}
+                                    <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" target="_blank" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                                        {{ __('messages.view_ticket') }}                                        
                                     </a>
                                 </td>
                             </tr>
