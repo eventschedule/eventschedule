@@ -45,6 +45,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/search_roles', [RoleController::class, 'search'])->name('role.search');
     Route::get('/edit_event/{hash}', [EventController::class, 'editAdmin'])->name('event.edit_admin');
     Route::get('/following', [RoleController::class, 'following'])->name('following');
+    Route::get('/tickets', [TicketController::class, 'tickets'])->name('tickets');
     
     Route::get('/account', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/account', [ProfileController::class, 'update'])->name('profile.update');
