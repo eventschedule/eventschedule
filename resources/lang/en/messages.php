@@ -342,4 +342,11 @@ return [
     'create_account' => 'Create account',
     'sold' => 'Sold',
     'sold_out' => 'Sold Out',
+    'event' => 'Event',
+    'status' => 'Status',
+    'pending' => 'Pending',
+    'paid' => 'Paid',
+    'expired' => 'Expired',
+    'cancelled' => 'Cancelled',
+    'refunded' => 'Refunded',
 ];
