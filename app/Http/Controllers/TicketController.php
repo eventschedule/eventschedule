@@ -23,7 +23,7 @@ class TicketController extends Controller
                 $query->where('starts_at', '>=', now()->subDay()->startOfDay());
             })
             ->with('event', 'saleTickets')
-            ->orderBy('created_at', 'DESC')
+            ->orderBy('event_date', 'ASC')
             ->get();
 
         return view('ticket.index', compact('sales'));
