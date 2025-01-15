@@ -58,7 +58,8 @@
         @csrf
         <input type="hidden" name="event_id" value="{{ \App\Utils\UrlUtils::encodeId($event->id) }}">
         <input type="hidden" name="event_date" value="{{ $date }}">
-
+        <input type="hidden" name="subdomain" value="{{ $subdomain }}">
+        
         <div class="mb-6">
             <label for="name" class="text-gray-900">{{ __('messages.name') . ' *' }}</label>
             <input type="text" name="name" id="name" class="mt-1 block w-full border-gray-300 bg-white text-gray-900" 

@@ -48,9 +48,11 @@ return new class extends Migration
         Schema::table('sales', function (Blueprint $table) {
             $table->dropForeign(['ticket_id']);
             $table->dropColumn(['ticket_id', 'quantity', 'is_used', 'is_paid']);
-            $table->enum('status', ['pending', 'paid', 'cancelled', 'refunded', 'expired'])->default('pending');
+            $table->enum('status', ['unpaid', 'paid', 'cancelled', 'refunded', 'expired'])->default('unpaid');
             $table->string('event_date');
+            $table->string('subdomain');
             $table->enum('payment_method', ['cash', 'stripe', 'invoiceninja'])->default('cash');
+            $table->boolean('is_deleted')->default(false);
         });
 
         Schema::create('sale_tickets', function (Blueprint $table) {
@@ -90,7 +92,7 @@ return new class extends Migration
             $table->integer('quantity')->nullable();
             $table->boolean('is_used')->default(false);
             $table->boolean('is_paid')->default(false);
-            $table->dropColumn(['event_date', 'status', 'payment_method']);
+            $table->dropColumn(['event_date', 'status', 'payment_method', 'is_deleted', 'subdomain']);
         });
     }
 };
