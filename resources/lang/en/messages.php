@@ -344,7 +344,7 @@ return [
     'sold_out' => 'Sold Out',
     'event' => 'Event',
     'status' => 'Status',
-    'pending' => 'Pending',
+    'unpaid' => 'Unpaid',
     'paid' => 'Paid',
     'expired' => 'Expired',
     'cancelled' => 'Cancelled',

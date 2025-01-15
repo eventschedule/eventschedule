@@ -12,6 +12,7 @@ class Sale extends Model
         'email',
         'secret',
         'event_date',
+        'subdomain',
     ];
 
     protected static function booted()
@@ -40,5 +41,12 @@ class Sale extends Model
         return $this->saleTickets->sum(function ($saleTicket) {
             return $saleTicket->ticket->price * $saleTicket->quantity();
         });
+    }
+
+    public function getEventUrl()
+    {
+        $event = $this->event;
+
+        return $event->getGuestUrl($this->subdomain, $this->event_date);
     }
 }
