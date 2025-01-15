@@ -11,12 +11,17 @@ use Stripe\StripeClient;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use App\Utils\InvoiceNinja;
+
 class TicketController extends Controller
 {
     public function tickets()
     {
         $user = auth()->user();
+
         $tickets = Sale::where('user_id', $user->id)
+            ->whereHas('event', function($query) {
+                $query->where('starts_at', '>=', now()->subDay()->startOfDay());
+            })
             ->with('event', 'saleTickets')
             ->orderBy('created_at', 'DESC')
             ->get();
