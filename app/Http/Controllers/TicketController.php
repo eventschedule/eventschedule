@@ -13,6 +13,17 @@ use Endroid\QrCode\Writer\PngWriter;
 use App\Utils\InvoiceNinja;
 class TicketController extends Controller
 {
+    public function tickets()
+    {
+        $user = auth()->user();
+        $tickets = Sale::where('user_id', $user->id)
+            ->with('event', 'saleTickets')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        return view('ticket.index', compact('tickets'));
+    }
+
     public function checkout(Request $request, $subdomain)
     {
         $event = Event::find(UrlUtils::decodeId($request->event_id));
