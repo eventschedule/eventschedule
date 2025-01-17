@@ -56,6 +56,7 @@ class InvoiceNinjaController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Sale not found'], 400);
         }
         
+        $sale->payment_amount = $payload['paymentables'][0]['amount'];
         $sale->status = 'paid';
         $sale->save();
 

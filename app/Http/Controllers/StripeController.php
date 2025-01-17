@@ -89,6 +89,7 @@ class StripeController extends Controller
                 $sale = Sale::where('payment_method', 'stripe')
                     ->where('transaction_reference', $paymentIntent->id)
                     ->firstOrFail();
+                $sale->payment_amount = $paymentIntent->amount / 100;
                 $sale->status = 'paid';
                 $sale->save();
                 break;

@@ -55,6 +55,7 @@ return new class extends Migration
             $table->string('subdomain');
             $table->enum('payment_method', ['cash', 'stripe', 'invoiceninja'])->default('cash');
             $table->boolean('is_deleted')->default(false);
+            $table->decimal('payment_amount', 13, 3)->default(0);
         });
 
         Schema::create('sale_tickets', function (Blueprint $table) {
@@ -94,7 +95,7 @@ return new class extends Migration
             $table->integer('quantity')->nullable();
             $table->boolean('is_used')->default(false);
             $table->boolean('is_paid')->default(false);
-            $table->dropColumn(['event_date', 'status', 'payment_method', 'is_deleted', 'subdomain']);
+            $table->dropColumn(['event_date', 'status', 'payment_method', 'is_deleted', 'subdomain', 'payment_amount']);
         });
     }
 };
