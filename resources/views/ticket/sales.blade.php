@@ -15,7 +15,7 @@
                                     {{ __('messages.event') }}
                                 </th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                    {{ __('messages.date') }}
+                                    {{ __('messages.total') }}
                                 </th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                     {{ __('messages.transaction_reference') }}
@@ -38,7 +38,7 @@
                                     </a>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    {{ $sale->event->localStartsAt(true, $sale->event_date) }}
+                                    {{ number_format($sale->payment_amount, 2, '.', ',') }} {{ $sale->event->ticket_currency_code }}
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     {{ $sale->transaction_reference }}
