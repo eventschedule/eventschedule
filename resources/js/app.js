@@ -14,13 +14,16 @@ import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
 
 document.addEventListener('DOMContentLoaded', () => {
-    const easyMDE = new EasyMDE({ 
-        element: document.getElementById('description'),
-        toolbar: [
-            'bold', 'italic', 'heading', '|',
-            'quote', 'unordered-list', 'ordered-list', '|',
-            'link', '|',
-            'preview', 'guide'
-        ],
+    document.querySelectorAll('.html-editor').forEach(element => {
+        const easyMDE = new EasyMDE({ 
+            element: element,
+            toolbar: [
+                'bold', 'italic', 'heading', '|',
+                'quote', 'unordered-list', 'ordered-list', '|',
+                'link', '|',
+                'preview', 'guide'
+            ],
+            minHeight: "200px",
+        });
     });
 });

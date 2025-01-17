@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Utils\UrlUtils;
-
+use App\Utils\MarkdownUtils;
 class Ticket extends Model
 {
     protected $fillable = [
