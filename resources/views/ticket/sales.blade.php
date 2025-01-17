@@ -7,15 +7,18 @@
                     <table class="min-w-full divide-y divide-gray-300">
                         <thead>
                             <tr>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                    {{ __('messages.name') }}
+                                </th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                    {{ __('messages.email') }}
+                                </th>
                                 <th scope="col"
                                     class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
                                     {{ __('messages.event') }}
                                 </th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                     {{ __('messages.date') }}
-                                </th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                    {{ __('messages.venue') }}
                                 </th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                     {{ __('messages.status') }}
@@ -27,22 +30,18 @@
                             @foreach ($sales as $sale)
                             <tr class="bg-white">
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
+                                    {{ $sale->name }}
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                    <a href="mailto:{{ $sale->email }}" class="hover:underline">{{ $sale->email }}</a>
+                                </td>
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
                                     <a href="{{ $sale->getEventUrl() }}"
                                         target="_blank" class="hover:underline">{{ $sale->event->name }}
                                     </a>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     {{ $sale->event->localStartsAt(true, $sale->event_date) }}
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    @if ($sale->event->venue && $sale->event->venue->getGuestUrl())
-                                        <a href="{{ $sale->event->venue->getGuestUrl() }}"   
-                                            target="_blank" class="hover:underline">
-                                            {{ $sale->event->venue->name }}
-                                        </a>
-                                    @else
-                                        {{ $sale->event->getVenueDisplayName() }}
-                                    @endif
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     {{ __('messages.' . $sale->status) }}
