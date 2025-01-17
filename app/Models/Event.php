@@ -31,6 +31,8 @@ class Event extends Model
 
         static::saving(function ($model) {
             $model->description_html = MarkdownUtils::convertToHtml($model->description);
+            $model->ticket_notes_html = MarkdownUtils::convertToHtml($model->ticket_notes);
+            $model->payment_instructions_html = MarkdownUtils::convertToHtml($model->payment_instructions);
 
             if ($model->isDirty('starts_at') && ! $model->days_of_week) {
                 $model->tickets->each(function ($ticket) use ($model) {

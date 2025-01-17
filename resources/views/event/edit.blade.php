@@ -704,7 +704,7 @@
                         <div class="mb-6">
                             <x-input-label for="description" :value="__('messages.description')" />
                             <textarea id="description" name="description"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
                                 autocomplete="off">{{ old('description', $event->description) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
@@ -739,7 +739,7 @@
                             </div>
                         </div>
 
-                        <div v-if="event.tickets_enabled">
+                        <div v-show="event.tickets_enabled">
 
                             @if ($user->stripe_completed_at || $user->invoiceninja_api_key)
                             <div class="mb-6">
@@ -765,7 +765,7 @@
                             <div class="mb-6" v-if="event.payment_method == 'cash'">
                                 <x-input-label for="payment_instructions" :value="__('messages.payment_instructions')" />
                                 <textarea id="payment_instructions" name="payment_instructions" v-model="event.payment_instructions" rows="4"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
+                                    class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
                             </div>
 
                             <div class="mb-6">
@@ -831,7 +831,7 @@
                             <div class="mb-6">
                                 <x-input-label for="ticket_notes" :value="__('messages.ticket_notes')" />
                                 <textarea id="ticket_notes" name="ticket_notes" v-model="event.ticket_notes" rows="4"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
+                                    class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
                             </div>
 
                             <div v-if="hasLimitedPaidTickets">
