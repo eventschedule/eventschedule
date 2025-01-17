@@ -351,4 +351,6 @@ return [
     'refunded' => 'Refunded',
     'view_ticket' => 'View Ticket',
     'sales' => 'Sales',
+    'customer' => 'Customer',
+    'transaction_reference' => 'Transaction Reference',
 ];

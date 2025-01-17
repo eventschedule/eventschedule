@@ -8,10 +8,7 @@
                         <thead>
                             <tr>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                    {{ __('messages.name') }}
-                                </th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                    {{ __('messages.email') }}
+                                    {{ __('messages.customer') }}
                                 </th>
                                 <th scope="col"
                                     class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
@@ -19,6 +16,9 @@
                                 </th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                     {{ __('messages.date') }}
+                                </th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                    {{ __('messages.transaction_reference') }}
                                 </th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                     {{ __('messages.status') }}
@@ -30,10 +30,7 @@
                             @foreach ($sales as $sale)
                             <tr class="bg-white">
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
-                                    {{ $sale->name }}
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    <a href="mailto:{{ $sale->email }}" class="hover:underline">{{ $sale->email }}</a>
+                                    {{ $sale->name }} • <a href="mailto:{{ $sale->email }}" class="hover:underline">{{ $sale->email }}</a>
                                 </td>
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
                                     <a href="{{ $sale->getEventUrl() }}"
@@ -42,6 +39,9 @@
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     {{ $sale->event->localStartsAt(true, $sale->event_date) }}
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                    {{ $sale->transaction_reference }}
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     {{ __('messages.' . $sale->status) }}
