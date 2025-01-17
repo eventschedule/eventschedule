@@ -34,7 +34,7 @@ class TicketController extends Controller
         $user = auth()->user();
 
         $sales = Sale::with('event', 'saleTickets')
-            ->whereIn('status', ['paid', 'pending']) // TODO: remove this to show all sales
+            ->whereIn('status', ['paid', 'unpaid']) // TODO: remove this to show all sales
             ->whereHas('event', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
