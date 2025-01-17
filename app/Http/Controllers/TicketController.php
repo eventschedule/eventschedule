@@ -78,6 +78,9 @@ class TicketController extends Controller
         }
 
         $total = $sale->calculateTotal();
+
+        $sale->payment_amount = $total;
+        $sale->save();
         
         if ($total == 0) {
             $sale->status = 'paid';
@@ -159,6 +162,7 @@ class TicketController extends Controller
         $invoice = $invoiceNinja->createInvoice($client['id'], $lineItems, $qrCodeUrl);
 
         $sale->transaction_reference = $invoice['id'];
+        $sale->payment_amount = $invoice['amount'];
         $sale->save();
 
         return redirect($invoice['invitations'][0]['link']);
