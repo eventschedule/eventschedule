@@ -353,4 +353,5 @@ return [
     'sales' => 'Sales',
     'customer' => 'Customer',
     'transaction_reference' => 'Transaction Reference',
+    'total' => 'Total',
 ];
