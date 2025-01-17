@@ -52,6 +52,10 @@
         }
         @endif
 
+        main {
+            height: 100%;
+        }
+
         body {
             @media (prefers-color-scheme: dark) {
                 color: #33383C !important;
