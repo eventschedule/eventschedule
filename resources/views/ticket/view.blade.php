@@ -176,7 +176,7 @@
             <!-- <p class="text-[54px] leading-[0.8]">#</p> -->
           </div>
           <div class="justify-center flex">
-            <img class="w-[82px] h-[82px]" src="./images/qr-svg.svg" alt="" />
+            <img class="w-[82px] h-[82px]" src="{{ route('ticket.qr_code', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}" alt="QR Code" />
           </div>
         </div>
       </div>
@@ -184,7 +184,7 @@
       <div
         class="bg-[#4e81fa26] p-[18px] rounded-[24px] flex flex-col justify-between w-[400px] h-[185px] ml-[auto] mr-[auto]"
       >
-        @if ($event->ticket_notes)
+        @if ($event->ticket_notes_html)
         <div class="flex flex-col gap-[14px] text-[10px] uppercase leading-[1]">
           <div>
             <p class="mb-[8px] font-extrabold text-[#4E81FA]">{{ __('messages.notes') }}:</p>
