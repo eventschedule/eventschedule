@@ -354,4 +354,10 @@ return [
     'customer' => 'Customer',
     'transaction_reference' => 'Transaction Reference',
     'total' => 'Total',
+    'attendee_name' => 'Attendee Name',
+    'number_of_attendees' => 'Number of Attendees',
+    'terms_and_conditions' => 'Terms & Conditions',
+    'event_support_contact' => 'Event Support Contact',
+    'ticket' => 'Ticket',
+    'notes' => 'Notes',
 ];

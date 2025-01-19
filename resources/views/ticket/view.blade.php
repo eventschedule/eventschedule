@@ -29,7 +29,9 @@
       <p
           class="text-[12px] uppercase font-extrabold leading-[1.2] text-center color-[#151B26]"
         >
-        {{ $event->venue->shortAddress() }}
+        <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event->venue->bestAddress()) }}" target="_blank">
+          {{ $event->venue->shortAddress() }}
+        </a>
       </p>
 
       <div
@@ -112,7 +114,7 @@
               </defs>
             </svg>
 
-            <p class="text-[10px]">Attendee Name: {{ $sale->name }}</p>
+            <p class="text-[10px]">{{ __('messages.attendee_name') }}: {{ $sale->name }}</p>
           </div>
           <div class="flex gap-[8px] flex-row items-center">
             <svg
@@ -165,12 +167,12 @@
               </defs>
             </svg>
 
-            <p class="text-[10px]">#of Attendee(s): {{ $sale->quantity() }}</p>
+            <p class="text-[10px]">{{ __('messages.number_of_attendees') }}: {{ $sale->quantity() }}</p>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-x-[18px] gap-y-[12px] mt-[20px]">
           <div>
-            <p class="text-[44px] leading-[0.8]">Ticket</p>
+            <p class="text-[44px] leading-[0.8]">{{ __('messages.ticket') }}</p>
             <!-- <p class="text-[54px] leading-[0.8]">#</p> -->
           </div>
           <div class="justify-center flex">
@@ -185,9 +187,9 @@
         @if ($event->ticket_notes)
         <div class="flex flex-col gap-[14px] text-[10px] uppercase leading-[1]">
           <div>
-            <p class="mb-[8px] font-extrabold text-[#4E81FA]">Notes:</p>
+            <p class="mb-[8px] font-extrabold text-[#4E81FA]">{{ __('messages.notes') }}:</p>
             <p class="font-bold text-[#151B26]">
-              {{ $event->ticket_notes }}
+              {!! $event->ticket_notes_html !!}
             </p>
             </div>
           </div>
@@ -198,13 +200,13 @@
         >
           <div>
             <p class="mb-[8px] font-extrabold text-[#4E81FA]">
-              Terms & Conditions
+              {{ __('messages.terms_and_conditions') }}
             </p>
             <p class="font-bold text-[#151B26]"><a href="https://eventschedule.com/terms" target="_blank">eventschedule.com/terms</a></p>
           </div>
           <div>
             <p class="mb-[8px] font-extrabold text-[#4E81FA]">
-              Event Support Contact:
+              {{ __('messages.event_support_contact') }}:
             </p>
             <p class="font-bold text-[#151B26]"><a href="mailto:{{ $event->user->email }}" target="_blank">{{ $event->user->email }}</a></p>
           </div>
