@@ -9,7 +9,7 @@
       tabindex="0" 
     >
       <div
-        class="bg-[#4e81fa26] pt-[16px] pr-[35px] pb-[20px] pl-[35px] rounded-[24px] flex flex-col justify-between items-center w-[400px] h-[185px] ml-[auto] mr-[auto]"
+        class="bg-[#4e81fa26] pt-[20px] pr-[35px] pb-[20px] pl-[35px] rounded-[24px] flex flex-col justify-between items-center w-[400px] ml-[auto] mr-[auto]"
       >
         <div
           class="uppercase font-extrabold leading-[1.2] text-center color-[#151B26] flex flex-col items-center"
@@ -33,7 +33,7 @@
       </p>
 
       <div
-        class="bg-[#4E81FA] p-[18px] rounded-[24px] flex flex-col justify-between w-[400px] h-[185px] ml-[auto] mr-[auto] text-white leading-[1.2] font-bold uppercase"
+        class="bg-[#4E81FA] p-[18px] rounded-[24px] flex flex-col justify-between w-[400px] ml-[auto] mr-[auto] text-white leading-[1.2] font-bold uppercase"
       >
         <div class="grid grid-cols-2 gap-x-[18px] gap-y-[12px]">
           <div class="flex gap-[8px] flex-row items-center">
@@ -168,7 +168,7 @@
             <p class="text-[10px]">#of Attendee(s): {{ $sale->quantity() }}</p>
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-x-[18px] gap-y-[12px]">
+        <div class="grid grid-cols-2 gap-x-[18px] gap-y-[12px] mt-[20px]">
           <div>
             <p class="text-[44px] leading-[0.8]">Ticket</p>
             <!-- <p class="text-[54px] leading-[0.8]">#</p> -->
@@ -198,7 +198,7 @@
         >
           <div>
             <p class="mb-[8px] font-extrabold text-[#4E81FA]">
-              Link to Terms & Conditions
+              Terms & Conditions
             </p>
             <p class="font-bold text-[#151B26]"><a href="https://eventschedule.com/terms" target="_blank">eventschedule.com/terms</a></p>
           </div>
