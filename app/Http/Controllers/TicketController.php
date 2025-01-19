@@ -238,9 +238,10 @@ class TicketController extends Controller
     public function view($eventId, $secret)
     {
         $event = Event::find(UrlUtils::decodeId($eventId));
-        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->first();
+        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
+        $role = $event->role();        
 
-        return view('ticket.view', compact('event', 'sale'));
+        return view('ticket.view', compact('event', 'sale', 'role'));
     }
 
 }

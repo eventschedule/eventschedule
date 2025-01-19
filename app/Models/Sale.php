@@ -43,6 +43,13 @@ class Sale extends Model
         });
     }
 
+    public function quantity()
+    {
+        return $this->saleTickets->sum(function ($saleTicket) {
+            return $saleTicket->quantity();
+        });
+    }
+
     public function getEventUrl()
     {
         $event = $this->event;

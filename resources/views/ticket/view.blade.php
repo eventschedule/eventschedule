@@ -1,16 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <link href="../dist/output.css" rel="stylesheet" />
-  </head>
-  <body>
+<x-app-layout>
+
+    <x-slot name="head">
+        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap" rel="stylesheet">
+    </x-slot>
+
     <main
       class="font-['Manrope'] text-[15px] font-normal leading-[1.75em] flex flex-col gap-[10px] flex-1 relative z-0 overflow-y-auto p-[10px] focus:outline-none"
-      tabindex="0"
+      tabindex="0" 
     >
       <div
         class="bg-[#4e81fa26] pt-[16px] pr-[35px] pb-[20px] pl-[35px] rounded-[24px] flex flex-col justify-between items-center w-[400px] h-[185px] ml-[auto] mr-[auto]"
@@ -18,20 +14,23 @@
         <div
           class="uppercase font-extrabold leading-[1.2] text-center color-[#151B26] flex flex-col items-center"
         >
-          <img
-            class="w-[109px] mb-[18px]"
-            src="./images/invoice-ninja-logo.svg"
-            alt="invoice ninja logo"
-          />
-          <h1 class="text-[32px] mb-2">Imagine Dragons</h1>
-          <h2 class="text-[18px]">Worldwide tour 2025</h2>
+          @if ($role->profile_image_url)
+            <img
+              class="w-[109px] mb-[18px] rounded-2xl object-cover"
+              src="{{ $role->profile_image_url }}"
+              alt="Logo"
+            />
+          @endif
+          <h1 class="text-[32px] mb-2">{{ $event->name }}</h1>
+          <h2 class="text-[18px]">{{ $event->description }}</h2>
         </div>
-        <p
+      </div>
+
+      <p
           class="text-[12px] uppercase font-extrabold leading-[1.2] text-center color-[#151B26]"
         >
-          Venue, Location, Address: Park HaYarkon, Tel Aviv
-        </p>
-      </div>
+        {{ $event->venue->shortAddress() }}
+      </p>
 
       <div
         class="bg-[#4E81FA] p-[18px] rounded-[24px] flex flex-col justify-between w-[400px] h-[185px] ml-[auto] mr-[auto] text-white leading-[1.2] font-bold uppercase"
@@ -64,7 +63,7 @@
               </defs>
             </svg>
 
-            <p class="text-[10px]">Thursday, December 5, 2024</p>
+            <p class="text-[10px]">{{ $event->getStartDateTime($sale->date, true)->format('F j, Y') }}</p>
           </div>
           <div class="flex gap-[8px] flex-row items-center">
             <svg
@@ -113,7 +112,7 @@
               </defs>
             </svg>
 
-            <p class="text-[10px]">Attendee Name: Ben Sisko</p>
+            <p class="text-[10px]">Attendee Name: {{ $sale->name }}</p>
           </div>
           <div class="flex gap-[8px] flex-row items-center">
             <svg
@@ -141,7 +140,7 @@
                 </clipPath>
               </defs>
             </svg>
-            <p class="text-[10px]">6pm-11pm</p>
+            <p class="text-[10px]">{{ $event->getStartEndTime($sale->date) }}</p>
           </div>
           <div class="flex gap-[8px] flex-row items-center">
             <svg
@@ -166,13 +165,13 @@
               </defs>
             </svg>
 
-            <p class="text-[10px]">#of Attendee(s): 3</p>
+            <p class="text-[10px]">#of Attendee(s): {{ $sale->quantity() }}</p>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-x-[18px] gap-y-[12px]">
           <div>
             <p class="text-[44px] leading-[0.8]">Ticket</p>
-            <p class="text-[54px] leading-[0.8]">#009</p>
+            <!-- <p class="text-[54px] leading-[0.8]">#</p> -->
           </div>
           <div class="justify-center flex">
             <img class="w-[82px] h-[82px]" src="./images/qr-svg.svg" alt="" />
@@ -183,20 +182,16 @@
       <div
         class="bg-[#4e81fa26] p-[18px] rounded-[24px] flex flex-col justify-between w-[400px] h-[185px] ml-[auto] mr-[auto]"
       >
+        @if ($event->ticket_notes)
         <div class="flex flex-col gap-[14px] text-[10px] uppercase leading-[1]">
           <div>
             <p class="mb-[8px] font-extrabold text-[#4E81FA]">Notes:</p>
             <p class="font-bold text-[#151B26]">
-              Closed toed shoes required for entry, One entry per ticket
+              {{ $event->ticket_notes }}
             </p>
+            </div>
           </div>
-          <div>
-            <p class="mb-[8px] font-extrabold text-[#4E81FA]">Reminders:</p>
-            <p class="font-bold text-[#151B26]">
-              A bag check desk will be available for a fee
-            </p>
-          </div>
-        </div>
+        @endif
 
         <div
           class="flex flex-row justify-between gap-[14px] text-[10px] uppercase leading-[1]"
@@ -205,16 +200,16 @@
             <p class="mb-[8px] font-extrabold text-[#4E81FA]">
               Link to Terms & Conditions
             </p>
-            <p class="font-bold text-[#151B26]">eventschedule.com/terms</p>
+            <p class="font-bold text-[#151B26]"><a href="https://eventschedule.com/terms" target="_blank">eventschedule.com/terms</a></p>
           </div>
           <div>
             <p class="mb-[8px] font-extrabold text-[#4E81FA]">
               Event Support Contact:
             </p>
-            <p class="font-bold text-[#151B26]">contact@eventschedule.com</p>
+            <p class="font-bold text-[#151B26]"><a href="mailto:{{ $event->user->email }}" target="_blank">{{ $event->user->email }}</a></p>
           </div>
         </div>
       </div>
     </main>
-  </body>
-</html>
+
+</x-app-layout>
