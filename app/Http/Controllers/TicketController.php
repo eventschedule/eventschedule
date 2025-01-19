@@ -212,8 +212,8 @@ class TicketController extends Controller
 
     public function qrCode($eventId, $secret)
     {
-        $event = Event::find(UrlUtils::decodeId($eventId));
-        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->first();
+        $event = Event::findOrFail(UrlUtils::decodeId($eventId));
+        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
 
         if (! $sale) {
             return abort(404);
