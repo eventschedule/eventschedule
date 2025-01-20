@@ -29,29 +29,27 @@ return new class extends Migration
             $table->string('invoiceninja_company_name')->nullable();
             $table->string('invoiceninja_webhook_secret')->nullable();
         });
-        */
 
         DB::table('events')
             ->whereNull('ticket_currency_code')
             ->update(['ticket_currency_code' => 'USD']);
 
         Schema::table('events', function (Blueprint $table) {
-            /*
             $table->enum('payment_method', ['cash', 'stripe', 'invoiceninja'])->default('cash');
             $table->text('payment_instructions')->nullable();
             $table->text('payment_instructions_html')->nullable();
             $table->integer('expire_unpaid_tickets')->default(0);
-            */
             $table->string('ticket_currency_code')->default('USD')->change();
-            //$table->text('ticket_notes_html')->nullable();
+            $table->text('ticket_notes_html')->nullable();
         });
 
         Schema::table('tickets', function (Blueprint $table) {
             $table->dropColumn('sold');
         });
+        */
 
         Schema::table('tickets', function (Blueprint $table) {
-            $table->text('sold')->default('{}');
+            $table->text('sold')->nullable();
         });
 
         Schema::table('sales', function (Blueprint $table) {
