@@ -14,7 +14,7 @@ class Ticket extends Model
         'sold',
         'price',
         'description',
-    ];
+    ];    
 
     public function sales()
     {
@@ -28,6 +28,10 @@ class Ticket extends Model
 
     public function updateSold($date, $quantity)
     {
+        if (! $this->sold) {
+            $this->sold = json_encode([]);
+        }
+
         $sold = json_decode($this->sold, true);
         $sold[$date] = $sold[$date] ?? 0;
         $sold[$date] += $quantity;
@@ -45,7 +49,7 @@ class Ticket extends Model
         $data['price'] = $this->price;
         $data['description'] = $this->description;
 
-        $sold = json_decode($this->sold, true);
+        $sold = $this->sold ? json_decode($this->sold, true) : [];
         $sold = $sold[$date] ?? 0;
         $data['quantity'] = $this->quantity > 0 ? max(0, min(20, $this->quantity - $sold)) : 20;
 
