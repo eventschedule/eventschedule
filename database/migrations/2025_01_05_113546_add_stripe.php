@@ -9,6 +9,7 @@ return new class extends Migration
 
     public function up()
     {
+        /*
         Schema::table('roles', function (Blueprint $table) {
             $table->enum('plan_term', ['month', 'year'])->default('year');
             $table->enum('plan_type', ['free', 'pro', 'enterprise'])->default('free');
@@ -28,7 +29,11 @@ return new class extends Migration
             $table->string('invoiceninja_company_name')->nullable();
             $table->string('invoiceninja_webhook_secret')->nullable();
         });
+        */
 
+        DB::table('events')
+            ->whereNull('ticket_currency_code')
+            ->update(['ticket_currency_code' => 'USD']);
 
         Schema::table('events', function (Blueprint $table) {
             $table->enum('payment_method', ['cash', 'stripe', 'invoiceninja'])->default('cash');
