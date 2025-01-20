@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "ext-gd": "*",
         "endroid/qr-code": "^5.0",
         "ezyang/htmlpurifier": "^4.17",
         "laravel/framework": "^11.9",
