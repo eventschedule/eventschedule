@@ -360,4 +360,5 @@ return [
     'event_support_contact' => 'Event Support Contact',
     'ticket' => 'Ticket',
     'notes' => 'Notes',
+    //
 ];
