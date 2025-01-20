@@ -43,7 +43,7 @@ return new class extends Migration
             $table->integer('expire_unpaid_tickets')->default(0);
             */
             $table->string('ticket_currency_code')->default('USD')->change();
-            $table->text('ticket_notes_html')->nullable();
+            //$table->text('ticket_notes_html')->nullable();
         });
 
         Schema::table('tickets', function (Blueprint $table) {
