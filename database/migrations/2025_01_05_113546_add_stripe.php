@@ -9,7 +9,6 @@ return new class extends Migration
 
     public function up()
     {
-        /*
         Schema::table('roles', function (Blueprint $table) {
             $table->enum('plan_term', ['month', 'year'])->default('year');
             $table->enum('plan_type', ['free', 'pro', 'enterprise'])->default('free');
@@ -46,7 +45,6 @@ return new class extends Migration
         Schema::table('tickets', function (Blueprint $table) {
             $table->dropColumn('sold');
         });
-        */
 
         Schema::table('tickets', function (Blueprint $table) {
             $table->text('sold')->nullable();
