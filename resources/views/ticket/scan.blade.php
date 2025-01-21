@@ -35,15 +35,24 @@
             
             <div v-if="scanResult" class="mt-6 text-center">
                 <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <p class="text-green-800 font-medium">Successfully scanned!</p>
-                    <p class="text-sm text-green-600 mt-1">
-                        <span class="font-medium">Link:</span> 
-                        <a :href="scanResult" class="underline hover:text-green-700" target="_blank">
-                            @{{ scanResult }}
-                        </a>
-                    </p>
-                    <button @click="startNewScan" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                        Scan Again
+                    <p class="text-green-800 font-medium">Ticket Scanned Successfully!</p>
+                    
+                    <div v-if="eventDetails" class="mt-4 text-left">
+                        <h3 class="text-xl font-semibold text-gray-800">@{{ eventDetails.event }}</h3>
+                        <p class="text-gray-600 mt-1">@{{ eventDetails.date }}</p>
+                        
+                        <div class="mt-4">
+                            <div v-for="ticket in eventDetails.tickets" :key="ticket.type" class="mb-3">
+                                <h4 class="font-medium text-gray-700">@{{ ticket.type }} Ticket</h4>
+                                <div class="text-sm text-gray-600">
+                                    Seats: @{{ Object.keys(ticket.seats).join(', ') }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button @click="startNewScan" class="mt-6 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                        Scan Another Ticket
                     </button>
                 </div>
             </div>
@@ -57,7 +66,8 @@
             data() {
                 return {
                     html5QrcodeScanner: null,
-                    scanResult: null
+                    scanResult: null,
+                    eventDetails: null
                 }
             },
             methods: {
@@ -76,7 +86,12 @@
                     })
                     .then(response => response.json())
                     .then(data => {
-                        console.log('Success:', data);
+                        if (data.error) {
+                            this.scanResult = null;
+                            alert(data.error);
+                        } else {
+                            this.eventDetails = data;
+                        }
                     })
                     .catch((error) => {
                         console.error('Error:', error);

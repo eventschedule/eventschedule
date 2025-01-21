@@ -212,9 +212,14 @@ class TicketController extends Controller
 
     public function scanned($eventId, $secret)
     {
+        $user = auth()->user();
         $event = Event::find(UrlUtils::decodeId($eventId));
         $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
 
+        if (! $user->canEditEvent($event)) {
+            return response()->json(['error' => 'You are not authorized to scan this ticket.'], 403);
+        }
+        
         foreach ($sale->saleTickets as $saleTicket) {
             $seats = $saleTicket->seats;
             if ($seats) {
