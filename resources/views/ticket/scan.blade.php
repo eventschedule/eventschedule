@@ -50,11 +50,19 @@
                         <div class="mt-4">
                             <div v-for="ticket in eventDetails.tickets" :key="ticket.type" class="mb-3">
                                 <h4 class="font-medium text-gray-700">@{{ ticket.type }} {{ __('messages.ticket') }}</h4>
-                                <div class="text-sm text-gray-600">
-                                    Seats: @{{ Object.keys(ticket.seats).join(', ') }}
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <div v-for="(status, seat) in ticket.seats" 
+                                         :key="seat"
+                                         :class="[
+                                             'w-12 h-12 rounded-lg flex items-center justify-center font-medium border',
+                                             status ? 'bg-orange-100 text-orange-700 border-orange-200' : 'bg-green-100 text-green-700 border-green-200'
+                                         ]">
+                                        @{{ seat }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        <p v-if="hasUsedSeats" class="text-red-500 font-medium text-center">{{ __('messages.warning_ticket_used') }}</p>
                     </div>
 
                 </div>
@@ -133,9 +141,9 @@
                         false
                     );
 
-                    @if (config('app.env') == 'local')
+                    @if (false && config('app.env') == 'local')
                         this.scanResult = true;
-                        this.eventDetails = {"event":"Test Schedule","date":"Saturday, January 25th \u2022 8:00 PM","tickets":[{"type":"VIP","seats":{"1":1737465972,"2":1737465972}}]};
+                        this.eventDetails = {"event":"Test Schedule","date":"Saturday, January 25th \u2022 8:00 PM","tickets":[{"type":"VIP","seats":{"1":null,"2":null}}]};
                     @else
                         this.qrScanner.render(this.onScanSuccess, this.onScanFailure);
                     @endif
