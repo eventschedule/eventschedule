@@ -85,7 +85,7 @@
                                 </div>
                             </div>
                         </div>
-                        <p v-if="hasUsedSeats" class="text-red-500 font-medium text-center">{{ __('messages.warning_ticket_used') }}</p>
+                        <p v-if="hasUsedSeats" class="text-red-500 font-medium text-center py-2">{{ __('messages.warning_ticket_used') }}</p>
                     </div>
 
                 </div>
