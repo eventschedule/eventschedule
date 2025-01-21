@@ -36,14 +36,19 @@
             <div v-if="scanResult" class="mt-6 text-center">
                 <div :class="[
                     'border rounded-lg p-4',
+                    errorMessage ? 'bg-red-50 border-red-200' : 
                     hasUsedSeats ? 'bg-orange-50 border-orange-200' : 'bg-green-50 border-green-200'
                 ]">
                     <p :class="[
                         'font-medium',
+                        errorMessage ? 'text-red-800' :
                         hasUsedSeats ? 'text-orange-800' : 'text-green-800'
-                    ]">{{ __('messages.ticket_scanned_successfully') }}</p>
+                    ]">
+                        <template v-if="errorMessage">@{{ errorMessage }}</template>
+                        <template v-else>{{ __('messages.ticket_scanned_successfully') }}</template>
+                    </p>
                     
-                    <div v-if="eventDetails" class="mt-4 text-left">
+                    <div v-if="eventDetails && !errorMessage" class="mt-4 text-left">
                         <h3 class="text-xl font-semibold text-gray-800">@{{ eventDetails.event }}</h3>
                         <p class="text-gray-600 mt-1">@{{ eventDetails.date }}</p>
                         
@@ -86,7 +91,8 @@
                 return {
                     qrScanner: null,
                     scanResult: null,
-                    eventDetails: null
+                    eventDetails: null,
+                    errorMessage: null
                 }
             },
             computed: {
@@ -115,20 +121,24 @@
                     .then(data => {
                         if (data.error) {
                             this.scanResult = null;
-                            alert(data.error);
+                            this.errorMessage = data.error;
                         } else {
                             this.eventDetails = data;
                         }
                     })
                     .catch((error) => {
                         console.error('Error:', error);
+                        this.errorMessage = error.message;
                     });
                 },
                 onScanFailure(error) {
                     console.warn(`Scan failed: ${error}`);
+                    this.errorMessage = error.message;
                 },
                 startNewScan() {
                     this.scanResult = null;
+                    this.eventDetails = null;
+                    this.errorMessage = null;
                     this.initializeScanner();
                 },
                 initializeScanner() {
@@ -145,7 +155,7 @@
                         false
                     );
 
-                    @if (config('app.env') == 'local')
+                    @if (false && config('app.env') == 'local')
                         this.scanResult = true;
                         this.eventDetails = {"attendee":"Test Attendee","event":"Test Schedule","date":"Saturday, January 25th \u2022 8:00 PM","tickets":[{"type":"VIP","seats":{"1":null,"2":null}}]};
                     @else
