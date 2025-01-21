@@ -29,7 +29,7 @@
 
     <div id="app" class="max-w-2xl mx-auto px-4 py-8">
         <div class="bg-white rounded-2xl shadow-lg p-6">
-            <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">{{ __('messages.scan_qr_code') }}</h2>
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">{{ __('messages.scan_ticket') }}</h2>
             
             <div id="reader" class="max-w-md mx-auto"></div>
             

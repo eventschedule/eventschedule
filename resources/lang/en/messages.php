@@ -361,7 +361,7 @@ return [
     'ticket' => 'Ticket',
     'notes' => 'Notes',
     //
-    'scan_qr_code' => 'Scan QR Code',
+    'scan_ticket' => 'Scan Ticket',
     'scan_another_ticket' => 'Scan Another Ticket',
     'ticket_scanned_successfully' => 'Ticket Scanned Successfully!',
     'warning_ticket_used' => 'Warning: This ticket has already been used',
