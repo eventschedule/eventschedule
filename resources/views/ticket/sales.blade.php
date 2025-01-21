@@ -7,10 +7,11 @@
                     <table class="min-w-full divide-y divide-gray-300">
                         <thead>
                             <tr>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                <th scope="col" 
+                                    class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
                                     {{ __('messages.customer') }}
                                 </th>
-                                <th scope="col"
+                                <th scope="col" 
                                     class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
                                     {{ __('messages.event') }}
                                 </th>
