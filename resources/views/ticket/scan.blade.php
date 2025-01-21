@@ -34,8 +34,14 @@
             <div id="reader" class="max-w-md mx-auto"></div>
             
             <div v-if="scanResult" class="mt-6 text-center">
-                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <p class="text-green-800 font-medium">{{ __('messages.ticket_scanned_successfully') }}</p>
+                <div :class="[
+                    'border rounded-lg p-4',
+                    hasUsedSeats ? 'bg-orange-50 border-orange-200' : 'bg-green-50 border-green-200'
+                ]">
+                    <p :class="[
+                        'font-medium',
+                        hasUsedSeats ? 'text-orange-800' : 'text-green-800'
+                    ]">{{ __('messages.ticket_scanned_successfully') }}</p>
                     
                     <div v-if="eventDetails" class="mt-4 text-left">
                         <h3 class="text-xl font-semibold text-gray-800">@{{ eventDetails.event }}</h3>
@@ -69,6 +75,14 @@
                     qrScanner: null,
                     scanResult: null,
                     eventDetails: null
+                }
+            },
+            computed: {
+                hasUsedSeats() {
+                    if (!this.eventDetails) return false;
+                    return this.eventDetails.tickets.some(ticket => 
+                        Object.values(ticket.seats).some(seatValue => seatValue > 0)
+                    );
                 }
             },
             methods: {
