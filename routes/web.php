@@ -57,7 +57,9 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/stripe/unlink', [StripeController::class, 'unlink'])->name('stripe.unlink');
     Route::get('/stripe/complete', [StripeController::class, 'complete'])->name('stripe.complete');
     Route::get('/invoiceninja/unlink', [InvoiceNinjaController::class, 'unlink'])->name('invoiceninja.unlink');
+    
     Route::get('/scan', [TicketController::class, 'scan'])->name('ticket.scan');
+    Route::post('/ticket/view/{event_id}/{secret}', [TicketController::class, 'scanned'])->name('ticket.scanned');
 
     Route::post('/{subdomain}/availability', [RoleController::class, 'availability'])->name('role.availability');
     Route::get('/{subdomain}/edit', [RoleController::class, 'edit'])->name('role.edit');

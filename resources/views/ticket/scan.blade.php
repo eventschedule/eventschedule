@@ -30,12 +30,29 @@
 
     <script>
         function onScanSuccess(decodedText, decodedResult) {
-            // Display the result
+            html5QrcodeScanner.clear();
+
             document.getElementById('result').innerHTML = `
             <p>Scanned Link: <a href="${decodedText}" target="_blank">${decodedText}</a></p>
             `;
-            // Stop scanning after a successful scan
-            html5QrcodeScanner.clear();
+
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            fetch(decodedText, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+
         }
 
         function onScanFailure(error) {
