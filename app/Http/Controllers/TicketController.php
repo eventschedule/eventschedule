@@ -221,6 +221,7 @@ class TicketController extends Controller
         }
         
         $data = new \stdClass();
+        $data->attendee = $sale->name;
         $data->event = $event->name;
         $data->date = $event->localStartsAt(true, $sale->event_date);
         $data->tickets = [];
