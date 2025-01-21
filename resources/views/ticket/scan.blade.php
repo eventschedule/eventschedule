@@ -117,7 +117,12 @@
                             'X-CSRF-TOKEN': token
                         }
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP Error: ${response.status}`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         if (data.error) {
                             this.scanResult = null;
@@ -128,6 +133,7 @@
                     })
                     .catch((error) => {
                         console.error('Error:', error);
+                        //this.scanResult = null;
                         this.errorMessage = error.message;
                     });
                 },
