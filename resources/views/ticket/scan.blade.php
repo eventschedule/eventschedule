@@ -51,6 +51,9 @@
                             ${decodedText}
                         </a>
                     </p>
+                    <button onclick="startNewScan()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                        Scan Again
+                    </button>
                 </div>
             `;
 
@@ -76,6 +79,23 @@
         function onScanFailure(error) {
             // Log scan errors, if any
             console.warn(`Scan failed: ${error}`);
+        }
+
+        function startNewScan() {
+            document.getElementById('result').innerHTML = ''; // Clear the result
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "reader",
+                { 
+                    fps: 10, 
+                    qrbox: { width: 250, height: 250 },
+                    formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+                    supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA], 
+                    rememberLastUsedCamera: true,
+                    showTorchButtonIfSupported: true,
+                },
+                false
+            );
+            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
         }
 
         let html5QrcodeScanner = new Html5QrcodeScanner(

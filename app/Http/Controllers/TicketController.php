@@ -223,10 +223,6 @@ class TicketController extends Controller
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
         $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
 
-        if (! $fle) {
-            return abort(404);
-        }
-
         $url = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $secret]);
 
         $qrCode = QrCode::create($url)            
