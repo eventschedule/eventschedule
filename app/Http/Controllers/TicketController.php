@@ -215,6 +215,20 @@ class TicketController extends Controller
         $event = Event::find(UrlUtils::decodeId($eventId));
         $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
 
+        foreach ($sale->saleTickets as $saleTicket) {
+            $seats = $saleTicket->seats;
+            if ($seats) {
+                $seats = json_decode($seats, true);
+                foreach ($seats as $key => $value) {
+                    if (! $value) {
+                        $seats[$key] = time();
+                    }
+                }
+                $saleTicket->seats = json_encode($seats);
+                $saleTicket->save();
+            }
+        }
+        
         return response()->json($sale->toArray());
     }
 
