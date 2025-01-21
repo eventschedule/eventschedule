@@ -47,6 +47,11 @@ class Event extends Model
                         }
                     }
                 });
+
+                $model->sales->each(function ($sale) use ($model) {
+                    $sale->event_date = Carbon::parse($model->starts_at)->format('Y-m-d');
+                    $sale->save();
+                });    
             }
         });
 
@@ -80,6 +85,12 @@ class Event extends Model
     public function roles()
     {
         return $this->belongsToMany(Role::class);
+    }
+
+
+    public function sales()
+    {
+        return $this->hasMany(Sale::class)->where('is_deleted', false);
     }
 
     public function members()
