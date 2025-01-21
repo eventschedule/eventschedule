@@ -11,11 +11,12 @@
                                     class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
                                     {{ __('messages.event') }}
                                 </th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                    {{ __('messages.date') }}
+                                <th scope="col" 
+                                class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
+                                    {{ __('messages.venue') }}
                                 </th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                    {{ __('messages.venue') }}
+                                    {{ __('messages.date') }}
                                 </th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                     {{ __('messages.status') }}
@@ -31,10 +32,7 @@
                                         target="_blank" class="hover:underline">{{ $sale->event->name }}
                                     </a>
                                 </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    {{ $sale->event->localStartsAt(true, $sale->event_date) }}
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
                                     @if ($sale->event->venue && $sale->event->venue->getGuestUrl())
                                         <a href="{{ $sale->event->venue->getGuestUrl() }}"   
                                             target="_blank" class="hover:underline">
@@ -43,6 +41,9 @@
                                     @else
                                         {{ $sale->event->getVenueDisplayName() }}
                                     @endif
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                    {{ $sale->event->localStartsAt(true, $sale->event_date) }}
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     {{ __('messages.' . $sale->status) }}
