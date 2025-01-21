@@ -47,6 +47,10 @@
                         <h3 class="text-xl font-semibold text-gray-800">@{{ eventDetails.event }}</h3>
                         <p class="text-gray-600 mt-1">@{{ eventDetails.date }}</p>
                         
+                        <div class="mt-6 pb-2 text-gray-700">
+                            <p><span class="font-medium">{{ __('messages.attendee') }}:</span> @{{ eventDetails.attendee }}</p>
+                        </div>
+                        
                         <div class="mt-4">
                             <div v-for="ticket in eventDetails.tickets" :key="ticket.type" class="mb-3">
                                 <h4 class="font-medium text-gray-700">@{{ ticket.type }} {{ __('messages.ticket') }}</h4>
@@ -141,9 +145,9 @@
                         false
                     );
 
-                    @if (false && config('app.env') == 'local')
+                    @if (config('app.env') == 'local')
                         this.scanResult = true;
-                        this.eventDetails = {"event":"Test Schedule","date":"Saturday, January 25th \u2022 8:00 PM","tickets":[{"type":"VIP","seats":{"1":null,"2":null}}]};
+                        this.eventDetails = {"attendee":"Test Attendee","event":"Test Schedule","date":"Saturday, January 25th \u2022 8:00 PM","tickets":[{"type":"VIP","seats":{"1":null,"2":null}}]};
                     @else
                         this.qrScanner.render(this.onScanSuccess, this.onScanFailure);
                     @endif
