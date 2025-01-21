@@ -51,10 +51,11 @@
                         </div>
                     </div>
 
-                    <button @click="startNewScan" class="mt-6 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                        Scan Another Ticket
-                    </button>
                 </div>
+
+                <button @click="startNewScan" class="mt-6 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                        {{ __('messages.scan_another_ticket') }}
+                </button>
             </div>
         </div>
     </div>
@@ -65,14 +66,14 @@
         createApp({
             data() {
                 return {
-                    html5QrcodeScanner: null,
+                    qrScanner: null,
                     scanResult: null,
                     eventDetails: null
                 }
             },
             methods: {
                 onScanSuccess(decodedText, decodedResult) {
-                    this.html5QrcodeScanner.clear();
+                    this.qrScanner.clear();
                     this.scanResult = decodedText;
 
                     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -105,7 +106,7 @@
                     this.initializeScanner();
                 },
                 initializeScanner() {
-                    this.html5QrcodeScanner = new Html5QrcodeScanner(
+                    this.qrScanner = new Html5QrcodeScanner(
                         "reader",
                         { 
                             fps: 10, 
@@ -117,7 +118,13 @@
                         },
                         false
                     );
-                    this.html5QrcodeScanner.render(this.onScanSuccess, this.onScanFailure);
+
+                    @if (config('app.env') == 'local')
+                        this.scanResult = true;
+                        this.eventDetails = {"event":"Test Schedule","date":"Saturday, January 25th \u2022 8:00 PM","tickets":[{"type":"VIP","seats":{"1":1737465972,"2":1737465972}}]};
+                    @else
+                        this.qrScanner.render(this.onScanSuccess, this.onScanFailure);
+                    @endif
                 }
             },
             mounted() {
