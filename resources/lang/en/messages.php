@@ -363,4 +363,5 @@ return [
     //
     'scan_qr_code' => 'Scan QR Code',
     'scan_another_ticket' => 'Scan Another Ticket',
+    'ticket_scanned_successfully' => 'Ticket Scanned Successfully!',
 ];

@@ -35,7 +35,7 @@
             
             <div v-if="scanResult" class="mt-6 text-center">
                 <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <p class="text-green-800 font-medium">Ticket Scanned Successfully!</p>
+                    <p class="text-green-800 font-medium">{{ __('messages.ticket_scanned_successfully') }}</p>
                     
                     <div v-if="eventDetails" class="mt-4 text-left">
                         <h3 class="text-xl font-semibold text-gray-800">@{{ eventDetails.event }}</h3>
@@ -43,7 +43,7 @@
                         
                         <div class="mt-4">
                             <div v-for="ticket in eventDetails.tickets" :key="ticket.type" class="mb-3">
-                                <h4 class="font-medium text-gray-700">@{{ ticket.type }} Ticket</h4>
+                                <h4 class="font-medium text-gray-700">@{{ ticket.type }} {{ __('messages.ticket') }}</h4>
                                 <div class="text-sm text-gray-600">
                                     Seats: @{{ Object.keys(ticket.seats).join(', ') }}
                                 </div>
