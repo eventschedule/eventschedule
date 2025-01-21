@@ -365,8 +365,12 @@ class Event extends Model
         $timezone = 'UTC';
         if ($user = auth()->user()) {
             $timezone = $user->timezone;
-        } else {
+        } else if ($this->venue) {
             $timezone = $this->venue->timezone;
+        } else if ($this->role()) {
+            $timezone = $this->role()->timezone;
+        } else if ($this->curator) {
+            $timezone = $this->curator->timezone;
         }
 
         $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
