@@ -361,4 +361,5 @@ return [
     'ticket' => 'Ticket',
     'notes' => 'Notes',
     //
+    'scan_qr_code' => 'Scan QR Code',
 ];
