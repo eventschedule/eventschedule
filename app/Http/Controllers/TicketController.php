@@ -220,6 +220,18 @@ class TicketController extends Controller
             return response()->json(['error' => 'You are not authorized to scan this ticket.'], 403);
         }
         
+        $data = new \stdClass();
+        $data->event = $event->name;
+        $data->date = $event->localStartsAt(true, $sale->event_date);
+        $data->tickets = [];
+
+        foreach ($sale->saleTickets as $saleTicket) {
+            $data->tickets[] = [
+                'type' => $saleTicket->ticket->type,
+                'seats' => json_decode($saleTicket->seats, true),
+            ];
+        }
+
         foreach ($sale->saleTickets as $saleTicket) {
             $seats = $saleTicket->seats;
             if ($seats) {
@@ -234,18 +246,6 @@ class TicketController extends Controller
             }
         }
         
-        $data = new \stdClass();
-        $data->event = $event->name;
-        $data->date = $event->localStartsAt(true, $sale->event_date);
-        $data->tickets = [];
-
-        foreach ($sale->saleTickets as $saleTicket) {
-            $data->tickets[] = [
-                'type' => $saleTicket->ticket->type,
-                'seats' => json_decode($saleTicket->seats, true),
-            ];
-        }
-
         return response()->json($data);
     }
 
