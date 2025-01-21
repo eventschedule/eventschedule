@@ -5,7 +5,6 @@
         <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
         <style>
-
             #scanner {
                 text-align: center;
                 margin-top: 40px;
@@ -26,7 +25,7 @@
 
     <div id="scanner">
         <div id="reader"></div>
-        <div id="result">Scan a QR code to see the link here.</div>
+        <div id="result"></div>
     </div>
 
     <script>
@@ -46,7 +45,14 @@
 
         let html5QrcodeScanner = new Html5QrcodeScanner(
             "reader",
-            { fps: 10, qrbox: 250 },
+            { 
+                fps: 10, 
+                qrbox: 250, 
+                formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+                supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA], 
+                rememberLastUsedCamera: true,
+                showTorchButtonIfSupported: true,
+            },
             /* verbose= */ false
         );
 
