@@ -210,12 +210,20 @@ class TicketController extends Controller
         return view('ticket.scan');
     }
 
+    public function scanned($eventId, $secret)
+    {
+        $event = Event::find(UrlUtils::decodeId($eventId));
+        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
+
+        return response()->json($sale->toArray());
+    }
+
     public function qrCode($eventId, $secret)
     {
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
         $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
 
-        if (! $sale) {
+        if (! $fle) {
             return abort(404);
         }
 
