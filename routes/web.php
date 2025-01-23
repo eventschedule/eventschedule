@@ -10,7 +10,7 @@ use App\Http\Controllers\InvoiceNinjaController;
 use Illuminate\Support\Facades\Route;
 
 if (config('app.env') != 'local') {
-    Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!app$).*'])->group(function () {
+    Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app).*'])->group(function () {
         Route::get('/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
         Route::get('/{other_subdomain?}/{event_name?}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
@@ -100,7 +100,7 @@ if (config('app.env') == 'local') {
     Route::get('/{subdomain}/checkout/cancel/{sale_id}', [TicketController::class, 'cancel'])->name('checkout.cancel');
 
 } else {
-    Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!app$).*'])->group(function () {
+    Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app).*'])->group(function () {
         Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');
     });
 }
