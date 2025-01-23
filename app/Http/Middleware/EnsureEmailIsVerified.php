@@ -21,7 +21,6 @@ class EnsureEmailIsVerified
         return $request->routeIs('verification.notice')
             || $request->routeIs('verification.verify')
             || $request->routeIs('verification.send')
-            || $request->routeIs('landing')
             || $request->routeIs('logout');
     }
 }

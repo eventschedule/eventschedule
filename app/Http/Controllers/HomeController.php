@@ -13,7 +13,7 @@ class HomeController extends Controller
 {
     public function landing()
     {
-        return view('landing');
+        return redirect(route('home'));
     }
 
     public function home(Request $request)
@@ -92,18 +92,6 @@ class HomeController extends Controller
     public function terms() 
     {
         return view('terms');
-    }
-
-    public function message(Request $request)
-    {
-        $name = trim($request->first_name . ' ' . $request->last_name);
-        $email = $request->email;
-        $message = $request->message;
-
-        $mail = new SupportEmail($name, $email, $message);
-        Mail::to(config('mail.from.address'))->send($mail);
-
-        return redirect(route('landing'))->with('message', __('messages.message_sent'));
     }
 
     public function sitemap()
