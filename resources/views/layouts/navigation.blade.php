@@ -1,4 +1,4 @@
-<a href="{{ route('landing') }}">
+<a href="https://eventschedule.com">
     <div class="flex h-16 shrink-0 items-center">
         <img class="h-8 w-auto" src="{{ url('images/light-logo.png') }}"
             alt="Event Schedule">
