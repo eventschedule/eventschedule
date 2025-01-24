@@ -76,6 +76,7 @@
         </div>
 
         <div class="flex flex-col sm:flex-row gap-4 items-center">
+          @if (($event->venue && $event->venue->name) || $event->getEventUrlDomain())
           <div
             class="flex flex-row gap-2 items-center relative text-white fill-white sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-white"
           >
@@ -99,8 +100,9 @@
               @endif
             @else
               <p class="text-sm">{{ $event->getEventUrlDomain() }}</p>
-            @endif
-          </div>
+              @endif
+            </div>
+          @endif
           @if ($event->isMultiDay())
           <div
             class="flex flex-row gap-2 items-center relative text-white fill-white sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-white"
@@ -377,7 +379,7 @@
       </div>
 
       <div class="flex flex-col gap-6">
-        @if ($event->venue)
+        @if ($event->venue && $event->venue->name)
         <div class="p-6 rounded-xl flex flex-col gap-6" style="background-color: {{ $otherRole->accent_color ?? '#4E81FA' }}; font-family: {{ $event->venue->font_family }}, sans-serif;">
           <h4 class="text-white text-[24px] leading-snug font-semibold">
             {{ $event->venue->name }}
