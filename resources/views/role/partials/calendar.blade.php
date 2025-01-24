@@ -117,7 +117,23 @@
             $currentDate = $startOfMonth->copy();
             $totalDays = $endOfMonth->diffInDays($startOfMonth) + 1;
             $totalWeeks = ceil($totalDays / 7);
-            $unavailable = [];                
+            $unavailable = [];
+
+            // Create events map
+            $eventsMap = [];
+            foreach ($events as $event) {
+                $checkDate = $startOfMonth->copy();
+                while ($checkDate->lte($endOfMonth)) {
+                    if ($event->matchesDate($checkDate)) {
+                        $dateStr = $checkDate->format('Y-m-d');
+                        if (!isset($eventsMap[$dateStr])) {
+                            $eventsMap[$dateStr] = [];
+                        }
+                        $eventsMap[$dateStr][] = $event;
+                    }
+                    $checkDate->addDay();
+                }
+            }
             @endphp
             <div class="w-full md:grid md:grid-cols-7 md:grid-rows-{{ $totalWeeks }} md:gap-px">
                 @while ($currentDate->lte($endOfMonth))
@@ -159,11 +175,10 @@
                         @endif
                         </div>
                         <ol class="mt-4 divide-y divide-gray-100 text-sm leading-6 md:col-span-7 xl:col-span-8">
-                            @foreach ($events as $each)
+                            @foreach ($eventsMap[$currentDate->format('Y-m-d')] ?? [] as $each)
                             @php
                             $canEdit = auth()->user() && auth()->user()->canEditEvent($each);
                             @endphp
-                            @if ($each->matchesDate($currentDate))
                             <li class="relative group {{ $canEdit ? 'hover:pr-8' : '' }}">
                                 <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate) }}"
                                     class="flex has-tooltip" data-tooltip="<b>{{ $each->name }}</b><br/>{{ $each->getVenueDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
@@ -180,7 +195,6 @@
                                 </a>
                                 @endif
                             </li>
-                            @endif
                             @endforeach
                         </ol>
                     </div>
@@ -200,19 +214,9 @@
             <ol
                 class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow ring-1 ring-black ring-opacity-5">
                 @while ($currentDate->lte($endOfMonth))
-                @php
-                $currentDayOfWeek = $currentDate->dayOfWeek; // Get the day of the week (0 for Sunday, 6 for Saturday)
-                @endphp
-
-                @foreach ($events as $each)
-                @php
-                // Check if the event occurs on the current day of the week or matches the specific date
-                $isRecurringToday = isset($each->day_of_week) && $each->day_of_week[$currentDayOfWeek] == '1';
-                $isEventOnDate = $each->matchesDate($currentDate);
-                @endphp
-
-                @if ($isRecurringToday || $isEventOnDate)
-                <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate) }}" {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}>
+                @foreach ($eventsMap[$currentDate->format('Y-m-d')] ?? [] as $each)
+                <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate) }}" 
+                   {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}>
                     <li class="relative flex items-center space-x-6 py-6 px-4 xl:static">
                         <div class="flex-auto">
                             <h3 class="pr-10 font-semibold text-gray-900 xl:pr-0">
@@ -266,12 +270,8 @@
                         @endif
                     </li>
                 </a>
-                @endif
                 @endforeach
-
-                @php
-                $currentDate->addDay(); // Move to the next day
-                @endphp
+                @php $currentDate->addDay(); @endphp
                 @endwhile
             </ol>
             @elseif ($tab != 'availability')
