@@ -70,8 +70,16 @@ class InvoiceNinja
         return null;
     }
 
-    public function createInvoice($clientId, $lineItems, $qrCodeUrl) {
-        $invoice = $this->sendRequest('invoices', 'POST', [            
+    public function createInvoice($clientId, $lineItems, $qrCodeUrl, $sendEmail = false) {
+        $url = 'invoices';
+
+        if ($sendEmail) {
+            $url .= '?send_email=true';
+        } else {
+            $url .= '?mark_sent=true';
+        }
+
+        $invoice = $this->sendRequest($url, 'POST', [            
             'client_id' => $clientId,
             'public_notes' => '<img src="' . $qrCodeUrl . '" />',
             'line_items' => $lineItems,
