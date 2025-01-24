@@ -146,7 +146,12 @@ class TicketController extends Controller
     {
         $user = $event->user;
         $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
-        $client = $invoiceNinja->createClient($sale->name, $sale->email, $event->ticket_currency_code);
+
+        $client = $invoiceNinja->findClient($sale->email, $event->ticket_currency_code);
+
+        if (! $client) {
+            $client = $invoiceNinja->createClient($sale->name, $sale->email, $event->ticket_currency_code);
+        }
 
         $lineItems = [];
         foreach ($sale->saleTickets as $saleTicket) {
