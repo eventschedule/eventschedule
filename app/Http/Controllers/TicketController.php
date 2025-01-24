@@ -180,7 +180,7 @@ class TicketController extends Controller
         foreach ($sale->saleTickets as $saleTicket) {
             $lineItems[] = [
                 'product_key' => $saleTicket->ticket->type,
-                'notes' => $saleTicket->ticket->description,
+                'notes' => $saleTicket->ticket->description ?? __('messages.tickets'),
                 'quantity' => $saleTicket->quantity(),
                 'cost' => $saleTicket->ticket->price,
             ];
