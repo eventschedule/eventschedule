@@ -1,6 +1,6 @@
 <a href="https://eventschedule.com">
     <div class="flex h-16 shrink-0 items-center">
-        <img class="h-8 w-auto" src="{{ url('images/light-logo.png') }}"
+        <img class="h-8 w-auto" src="{{ url('images/blue_white_logo.png') }}"
             alt="Event Schedule">
     </div>
 </a>
