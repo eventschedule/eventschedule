@@ -183,14 +183,15 @@
                                 <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate) }}"
                                     class="flex has-tooltip" data-tooltip="<b>{{ $each->name }}</b><br/>{{ $each->getVenueDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
                                     onclick="event.stopPropagation();" {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
-                                    <p class="flex-auto {{ count($eventsMap[$currentDate->format('Y-m-d')]) == 1 ? '' : 'truncate' }} font-medium group-hover:text-[#4E81FA] text-gray-900">
+                                    <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900">
+                                        <span class="{{ count($eventsMap[$currentDate->format('Y-m-d')]) == 1 ? 'line-clamp-2' : 'truncate' }} ">
                                         @if (isset($subdomain) && $each->isRoleAMember($subdomain))
                                             {{ $each->getVenueDisplayName() }}
                                         @else
                                             {{ $each->name }}
                                         @endif
+                                        </span>
                                         @if (count($eventsMap[$currentDate->format('Y-m-d')]) == 1)
-                                            <br/>
                                             <span class="text-gray-400">
                                                 {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}
                                             </span>
