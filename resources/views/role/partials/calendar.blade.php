@@ -184,7 +184,7 @@
                                     class="flex has-tooltip" data-tooltip="<b>{{ $each->name }}</b><br/>{{ $each->getVenueDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
                                     onclick="event.stopPropagation();" {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
                                     <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900">
-                                        <span class="{{ count($eventsMap[$currentDate->format('Y-m-d')]) == 1 ? 'line-clamp-2' : 'truncate' }} ">
+                                        <span class="{{ count($eventsMap[$currentDate->format('Y-m-d')]) == 1 ? 'line-clamp-2' : 'truncate' }} hover:underline">
                                         @if (isset($subdomain) && $each->isRoleAMember($subdomain))
                                             {{ $each->getVenueDisplayName() }}
                                         @else
@@ -200,7 +200,7 @@
                                 </a>
                                 @if ($canEdit)
                                 <a href="{{ isset($role) ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) : route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}"
-                                    class="absolute right-0 top-0 hidden group-hover:inline-block text-[#4E81FA] hover:text-[#4E81FA]"
+                                    class="absolute right-0 top-0 hidden group-hover:inline-block text-[#4E81FA] hover:text-[#4E81FA] hover:underline"
                                     onclick="event.stopPropagation();">
                                     {{ __('messages.edit') }}
                                 </a>
