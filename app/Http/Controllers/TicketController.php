@@ -146,11 +146,34 @@ class TicketController extends Controller
     {
         $user = $event->user;
         $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
+        $company = null;
+
+        $foundClient = false;
+        $clientMachesEmail = false;
+        $requirePassword = false;
+        $sendEmail = false;
 
         $client = $invoiceNinja->findClient($sale->email, $event->ticket_currency_code);
 
-        if (! $client) {
+        if ($client) {
+            $foundClient = true;
+            if (auth()->user() && auth()->user()->email_verified_at) {
+                foreach ($client['contacts'] as $contact) {
+                    if ($contact['email'] == auth()->user()->email) {
+                        $clientMachesEmail = true;
+                    }
+                }
+            }
+            if (! $clientMachesEmail) {
+                $company = $invoiceNinja->getCompany();
+                $requirePassword = $company['settings']['enable_client_portal_password'];
+            }
+        } else {
             $client = $invoiceNinja->createClient($sale->name, $sale->email, $event->ticket_currency_code);
+        }
+
+        if ($foundClient && ! $clientMachesEmail && ! $requirePassword) {
+            $sendEmail = true;
         }
 
         $lineItems = [];
@@ -164,13 +187,17 @@ class TicketController extends Controller
         }
 
         $qrCodeUrl = route('ticket.qr_code', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
-        $invoice = $invoiceNinja->createInvoice($client['id'], $lineItems, $qrCodeUrl);
+        $invoice = $invoiceNinja->createInvoice($client['id'], $lineItems, $qrCodeUrl, $sendEmail);
 
         $sale->transaction_reference = $invoice['id'];
         $sale->payment_amount = $invoice['amount'];
         $sale->save();
-
-        return redirect($invoice['invitations'][0]['link']);
+        
+        if ($sendEmail) {
+            return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);    
+        } else {
+            return redirect($invoice['invitations'][0]['link']);
+        }
     }
 
     private function cashCheckout($subdomain, $sale, $event)
