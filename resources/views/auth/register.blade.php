@@ -68,7 +68,10 @@
                 </div>
                 <div class="ml-3 text-sm leading-6">
                     <label for="terms" class="font-medium text-gray-900 dark:text-gray-300">
-                        {!! str_replace([':terms', ':privacy'], ['<a href="' . route('terms') . '" target="_blank" class="hover:underline"> ' . __('messages.terms_of_service') . '</a>', '<a href="' . route('privacy') . '" target="_blank" class="hover:underline">' . __('messages.privacy_policy') . '</a>'], __('messages.i_accept_the_terms_and_privacy')) !!}
+                        {!! str_replace([':terms', ':privacy'], [
+                            '<a href="https://eventschedule.com/terms-of-service" target="_blank" class="hover:underline"> ' . __('messages.terms_of_service') . '</a>', 
+                            '<a href="https://eventschedule.com/privacy" target="_blank" class="hover:underline">' . __('messages.privacy_policy') . '</a>'
+                        ], __('messages.i_accept_the_terms_and_privacy')) !!}
                     </label>
                 </div>
             </div>

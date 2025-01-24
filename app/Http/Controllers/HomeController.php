@@ -84,16 +84,6 @@ class HomeController extends Controller
         ));
     }
 
-    public function privacy() 
-    {
-        return view('privacy');
-    }
-
-    public function terms() 
-    {
-        return view('terms');
-    }
-
     public function sitemap()
     {
         $roles = Role::whereNotNull('email')
