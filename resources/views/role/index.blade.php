@@ -33,7 +33,7 @@
                                     </a>
                                     @else
                                     <p class="text-sm text-gray-500">
-                                        {{ $role->name }}
+                                        {{ $role->getDisplayName() }}
                                     </p>
                                     @endif
                                 </td>
