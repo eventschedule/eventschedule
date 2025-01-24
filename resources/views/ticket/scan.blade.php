@@ -39,21 +39,21 @@
                     errorMessage ? 'bg-red-50 border-red-200' : 
                     hasUsedSeats ? 'bg-orange-50 border-orange-200' : 'bg-green-50 border-green-200'
                 ]">
-                    <div class="flex items-center justify-center gap-2">
+                    <div class="flex flex-col items-center justify-center">
                         <!-- Success Icon -->
-                        <svg v-if="!errorMessage && !hasUsedSeats" class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg v-if="!errorMessage && !hasUsedSeats" class="w-12 h-12 text-green-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4C12.76,4 13.5,4.11 14.2,4.31L15.77,2.74C14.61,2.26 13.34,2 12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12M7.91,10.08L6.5,11.5L11,16L21,6L19.59,4.58L11,13.17L7.91,10.08Z"></path>
                         </svg>
                         <!-- Warning Icon -->
-                        <svg v-if="hasUsedSeats && !errorMessage" class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg v-if="hasUsedSeats && !errorMessage" class="w-12 h-12 text-orange-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                         </svg>
                         <!-- Error Icon -->
-                        <svg v-if="errorMessage" class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg v-if="errorMessage" class="w-12 h-12 text-red-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                         <p :class="[
-                            'font-medium',
+                            'font-medium text-center',
                             errorMessage ? 'text-red-800' :
                             hasUsedSeats ? 'text-orange-800' : 'text-green-800'
                         ]">
