@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\Sale;
@@ -249,9 +250,13 @@ class TicketController extends Controller
         $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
 
         if (! $user->canEditEvent($event)) {
-            return response()->json(['error' => 'You are not authorized to scan this ticket.'], 403);
+            return response()->json(['error' => 'You are not authorized to scan this ticket.'], 200);
         }
         
+        if (Carbon::parse($sale->event_date)->format('Y-m-d') !== now()->format('Y-m-d')) {
+            return response()->json(['error' => 'This ticket is not valid for today.'], 200);
+        }
+
         $data = new \stdClass();
         $data->attendee = $sale->name;
         $data->event = $event->name;

@@ -139,15 +139,12 @@
                     })
                     .then(data => {
                         if (data.error) {
-                            this.scanResult = null;
                             this.errorMessage = data.error;
                         } else {
                             this.eventDetails = data;
                         }
                     })
                     .catch((error) => {
-                        console.error('Error:', error);
-                        //this.scanResult = null;
                         this.errorMessage = error.message;
                     });
                 },
