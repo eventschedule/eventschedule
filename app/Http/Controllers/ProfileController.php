@@ -136,8 +136,10 @@ class ProfileController extends Controller
                 $user->save();
 
                 $invoiceNinja->createWebhook(route('invoiceninja.webhook', ['secret' => $user->invoiceninja_webhook_secret]));
+
+                return Redirect::route('profile.edit')->with('message', __('messages.invoiceninja_connected'));
             } catch (\Exception $e) {
-                //
+                return Redirect::route('profile.edit')->with('error', __('messages.error_invoiceninja_connection'));
             }
         }
 

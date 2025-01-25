@@ -178,6 +178,17 @@
                     background: '#4BB543',
                 }
             }).showToast();
+            @elseif (session('error'))
+            Toastify({
+                text: "{{ session('error') }}",
+                close: true,
+                gravity: 'bottom',
+                position: 'center',
+                stopOnFocus: true,
+                style: {
+                    background: '#FF0000',
+                }
+            }).showToast();
             @endif
         });
 
