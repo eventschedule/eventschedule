@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\Sale;
 use App\Models\Event;
+use App\Models\SaleTicket;
 use App\Utils\UrlUtils;
 use Stripe\StripeClient;
 use Endroid\QrCode\QrCode;
@@ -60,6 +61,27 @@ class TicketController extends Controller
             ]);
         }
 
+        // Check ticket availability
+        foreach($request->tickets as $ticket) {
+            if ($ticket['quantity'] > 0) {
+                $ticketModel = $event->tickets()->find(UrlUtils::decodeId($ticket['id']));
+                
+                if (! $ticketModel) {
+                    return back()->with('error', __('messages.ticket_not_found'));
+                }
+
+                if ($ticketModel->quantity > 0) {
+                    $sold = json_decode($ticketModel->sold, true);
+                    $soldCount = $sold[$request->event_date] ?? 0;
+                    $remainingTickets = $ticketModel->quantity - $soldCount;
+
+                    if ($ticket['quantity'] > $remainingTickets) {
+                        return back()->with('error', __('messages.tickets_not_available'));
+                    }
+                }
+            }
+        }
+
         $sale = new Sale();
         $sale->fill($request->all());
         $sale->event_id = $event->id;
@@ -73,6 +95,7 @@ class TicketController extends Controller
                 $sale->saleTickets()->create([
                     'sale_id' => $sale->id,
                     'ticket_id' => UrlUtils::decodeId($ticket['id']),
+                    'quantity' => $ticket['quantity'],
                     'seats' => json_encode(array_fill(1, $ticket['quantity'], null)),
                 ]);
             }

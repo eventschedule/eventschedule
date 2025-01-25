@@ -12,6 +12,7 @@ class SaleTicket extends Model
         'sale_id',
         'ticket_id',
         'seats',
+        'quantity',
     ];
 
     protected static function booted()
