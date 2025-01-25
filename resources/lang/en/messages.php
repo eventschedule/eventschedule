@@ -366,4 +366,6 @@ return [
     'ticket_scanned_successfully' => 'Ticket Scanned Successfully!',
     'warning_ticket_used' => 'Warning: This ticket has already been used',
     'attendee' => 'Attendee',
+    'invoiceninja_connected' => 'Invoice Ninja connected successfully!',
+    'error_invoiceninja_connection' => 'Error: Failed to connect to Invoice Ninja',
 ];
