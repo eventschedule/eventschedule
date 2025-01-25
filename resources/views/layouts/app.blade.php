@@ -171,7 +171,7 @@
             Toastify({
                 text: "{{ session('message') }}",
                 duration: 3000,
-                gravity: 'bottom',
+                gravity: 'top',
                 position: 'center',
                 stopOnFocus: true,
                 style: {
@@ -182,7 +182,7 @@
             Toastify({
                 text: "{{ session('error') }}",
                 close: true,
-                gravity: 'bottom',
+                gravity: 'top',
                 position: 'center',
                 stopOnFocus: true,
                 style: {
