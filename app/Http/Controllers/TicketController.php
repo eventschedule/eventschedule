@@ -64,10 +64,10 @@ class TicketController extends Controller
                     ->paginate(50, ['*'], 'page');
 
         if (request()->ajax()) {
-            return response()->json($sales);
+            return view('ticket.sales_table', compact('sales'));
+        } else {
+            return view('ticket.sales', compact('sales', 'count'));
         }
-        
-        return view('ticket.sales', compact('sales', 'count'));
     }
 
     public function checkout(Request $request, $subdomain)
