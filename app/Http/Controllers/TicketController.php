@@ -27,6 +27,7 @@ class TicketController extends Controller
 
         $sales = Sale::with('event', 'saleTickets')
             ->where('user_id', $user->id)
+            ->where('event_date', '>=', now()->subDay()->startOfDay())
             ->whereHas('event', function($query) {
                 $query->where('starts_at', '>=', now()->subDay()->startOfDay());
             })
