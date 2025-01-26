@@ -27,6 +27,7 @@ class TicketController extends Controller
 
         $sales = Sale::with('event', 'saleTickets')
             ->where('user_id', $user->id)
+            ->where('is_deleted', false)
             ->where('event_date', '>=', now()->subDay()->startOfDay())
             ->whereHas('event', function($query) {
                 $query->where('starts_at', '>=', now()->subDay()->startOfDay());
@@ -43,6 +44,7 @@ class TicketController extends Controller
         $filter = strtolower(request()->filter);
         
         $query = Sale::with('event', 'saleTickets')
+            ->where('is_deleted', false)
             ->whereHas('event', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             });
@@ -423,6 +425,11 @@ class TicketController extends Controller
                     $sale->status = 'cancelled';
                     $sale->save();
                 }
+                break;
+
+            case 'delete':
+                $sale->is_deleted = true;
+                $sale->save();
                 break;
         }
 

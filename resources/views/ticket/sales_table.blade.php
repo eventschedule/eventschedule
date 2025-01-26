@@ -22,8 +22,7 @@
                             <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                 {{ __('messages.status') }}
                             </th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                {{ __('messages.actions') }}
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">                                
                             </th>
                         </tr>
                     </thead>
@@ -104,6 +103,14 @@
                                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left" 
                                                         role="menuitem">
                                                     {{ __('messages.cancel') }}
+                                                </button>
+                                            @endif
+                                            
+                                            @if(! in_array($sale->status, ['unpaid', 'paid']) && ! $sale->is_deleted)
+                                            <button @click="handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'delete')" 
+                                                    class="block px-4 py-2 text-sm text-red-700 hover:bg-gray-100 w-full text-left" 
+                                                    role="menuitem">
+                                                    {{ __('messages.delete') }}
                                                 </button>
                                             @endif
                                         </div>
