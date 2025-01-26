@@ -695,7 +695,7 @@
                             <img src="{{ $event->flyer_image_url }}" style="max-height:120px" class="pt-3" />
                             <a href="#"
                                 onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.delete_image', ['subdomain' => $subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id), 'image_type' => 'flyer']) }}'; }"
-                                class="hover:underline">
+                                class="hover:underline text-gray-900 dark:text-gray-100">
                                 {{ __('messages.delete_image') }}
                             </a>
                             @endif
