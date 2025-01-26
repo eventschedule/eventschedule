@@ -610,6 +610,21 @@ class RoleController extends Controller
         $role->timezone = auth()->user()->timezone;
         $role->language_code = auth()->user()->language_code;
 
+        // Header images
+        $headers = file_get_contents(base_path('storage/headers.json'));
+        $headers = json_decode($headers);
+
+        $headerOptions = [];
+        foreach ($headers as $header) {
+            $headerOptions[$header->name] = str_replace('_', ' ', $header->name);
+        }
+
+        asort($headerOptions);
+
+        $headerOptions = [
+            '' => __('messages.custom'),
+        ] + $headerOptions;
+
         // Background images
         $backgrounds = file_get_contents(base_path('storage/backgrounds.json'));
         $backgrounds = json_decode($backgrounds);
@@ -649,6 +664,7 @@ class RoleController extends Controller
             'title' => __('messages.new_' . $role->type),
             'gradients' => $gradientOptions,
             'backgrounds' => $backgroundOptions,
+            'headers' => $headerOptions,
             'fonts' => $fonts,
         ];
 
@@ -756,6 +772,22 @@ class RoleController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
+        // Header images
+        $headers = file_get_contents(base_path('storage/headers.json'));
+        $headers = json_decode($headers);
+
+        $headerOptions = [];
+        foreach ($headers as $header) {
+            $headerOptions[$header->name] = str_replace('_', ' ', $header->name);
+        }
+
+        asort($headerOptions);
+
+        $headerOptions = [
+            '' => __('messages.custom'),
+        ] + $headerOptions;
+        
+
         // Background images
         $backgrounds = file_get_contents(base_path('storage/backgrounds.json'));
         $backgrounds = json_decode($backgrounds);
@@ -796,6 +828,7 @@ class RoleController extends Controller
             'title' => __('messages.edit_' . $role->type),
             'gradients' => $gradientOptions,
             'backgrounds' => $backgroundOptions,
+            'headers' => $headerOptions,
             'fonts' => $fonts,
         ];
 
