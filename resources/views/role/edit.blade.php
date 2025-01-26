@@ -153,6 +153,17 @@
                 previewImage(this, 'profile_image_preview');
             });
 
+            $('#header_image').on('input', function() {
+                var headerImageUrl = $(this).find(':selected').val();
+                if (headerImageUrl) {
+                    headerImageUrl = "{{ asset('images/headers') }}" + '/' + headerImageUrl + '.png';
+                    console.log(headerImageUrl);
+                    $('#header_image_preview').attr('src', headerImageUrl).show();
+                } else {
+                    $('#header_image_preview').hide();
+                }
+            });
+
             $('#header_image_url').on('change', function() {
                 previewImage(this, 'header_image_preview');
                 $('#header_image_preview').show();
@@ -489,6 +500,10 @@
                                 </button>
                             </div>
 
+                            <img id="header_image_preview" src="{{ $role->header_image_url }}" alt="Header Image Preview" 
+                                 style="max-height:120px; {{ $role->header_image_url || $role->header_image ? '' : 'display:none;' }}" 
+                                 class="pt-3" />
+
                             <div id="custom_header_input" style="display:none">
                                 <input id="header_image_url" name="header_image_url" type="file" 
                                     class="mt-1 block w-full text-gray-900 dark:text-gray-100" 
@@ -498,8 +513,6 @@
                                 <p id="header_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
                                     {{ __('messages.image_size_warning') }}
                                 </p>
-
-                                <img id="header_image_preview" src="{{ $role->header_image_url }}" alt="Header Image Preview" style="max-height:120px; {{ $role->header_image_url || $role->header_image ? '' : 'display:none;' }}" class="pt-3" />
 
                                 @if ($role->header_image_url)
                                 <img src="{{ $role->header_image_url }}" style="max-height:120px" class="pt-3" />
