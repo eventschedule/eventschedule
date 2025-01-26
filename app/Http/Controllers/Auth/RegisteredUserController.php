@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use Illuminate\Auth\Events\Verified;
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Role;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -52,21 +51,6 @@ class RegisteredUserController extends Controller
             'timezone' => $request->timezone ?? 'America/New_York',
             'language_code' => $request->language_code ?? 'en',
         ]);
-
-        $roles = Role::whereEmail($user->email)
-                    ->whereNull('user_id')
-                    ->get();
-
-        foreach ($roles as $role) {
-            $role->user_id = $user->id;
-            $role->save();
-
-            if ($role->markEmailAsVerified()) {
-                event(new Verified($role));
-            }    
-
-            $user->roles()->attach($role->id, ['level' => 'owner', 'created_at' => now()]);
-        }
 
         event(new Registered($user));
 
