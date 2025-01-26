@@ -137,14 +137,14 @@ class EventController extends Controller
     
         $venues = $roles->filter(function($item) {
             return $item->isVenue();
-        })->map(function ($venue) {
-            return $venue->toData();
+        })->map(function ($item) {
+            return $item->toData();
         });
     
         $members = $roles->filter(function($item) {
             return $item->isSchedule();
-        })->map(function ($member) {
-            return $member->toData();
+        })->map(function ($item) {
+            return $item->toData();
         });
 
         $venues = array_values($venues->sortBy('name')->toArray());
