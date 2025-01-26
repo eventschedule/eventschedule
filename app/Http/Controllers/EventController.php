@@ -136,6 +136,10 @@ class EventController extends Controller
         $roles = $user->roles()->get();
     
         $venues = $roles->filter(function($item) {
+            if ($item->pivot->level == 'follower' && ! $item->accept_requests) {
+                return false;
+            }
+
             return $item->isVenue();
         })->map(function ($item) {
             return $item->toData();
@@ -227,6 +231,10 @@ class EventController extends Controller
         $roles = $user->roles()->get();
     
         $venues = $roles->filter(function($item) {
+            if ($item->pivot->level == 'follower' && ! $item->accept_requests) {
+                return false;
+            }
+
             return $item->isVenue();
         })->map(function ($item) {
             return $item->toData();
