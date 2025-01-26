@@ -18,7 +18,7 @@ class SaleTicket extends Model
     protected static function booted()
     {
         static::created(function ($saleTicket) {
-            $saleTicket->ticket->updateSold($saleTicket->sale->event_date, $saleTicket);
+            $saleTicket->ticket->updateSold($saleTicket->sale->event_date, $saleTicket->quantity);
         });
     }
 
