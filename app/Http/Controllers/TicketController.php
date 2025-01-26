@@ -72,9 +72,9 @@ class TicketController extends Controller
         }
 
         // Check ticket availability
-        foreach($request->tickets as $ticket) {
+        foreach($request->tickets as $ticketId => $quantity) {
             if ($ticket['quantity'] > 0) {
-                $ticketModel = $event->tickets()->find(UrlUtils::decodeId($ticket['id']));
+                $ticketModel = $event->tickets()->find(UrlUtils::decodeId($ticketId));
                 
                 if (! $ticketModel) {
                     return back()->with('error', __('messages.ticket_not_found'));
@@ -85,7 +85,7 @@ class TicketController extends Controller
                     $soldCount = $sold[$request->event_date] ?? 0;
                     $remainingTickets = $ticketModel->quantity - $soldCount;
 
-                    if ($ticket['quantity'] > $remainingTickets) {
+                    if ($quantity > $remainingTickets) {
                         return back()->with('error', __('messages.tickets_not_available'));
                     }
                 }
@@ -100,13 +100,13 @@ class TicketController extends Controller
         $sale->payment_method = $event->payment_method;
         $sale->save();
 
-        foreach($request->tickets as $ticket) {
-            if ($ticket['quantity'] > 0) {
+        foreach($request->tickets as $ticketId => $quantity) {
+            if ($quantity > 0) {
                 $sale->saleTickets()->create([
                     'sale_id' => $sale->id,
-                    'ticket_id' => UrlUtils::decodeId($ticket['id']),
-                    'quantity' => $ticket['quantity'],
-                    'seats' => json_encode(array_fill(1, $ticket['quantity'], null)),
+                    'ticket_id' => UrlUtils::decodeId($ticketId),
+                    'quantity' => $quantity,
+                    'seats' => json_encode(array_fill(1, $quantity, null)),
                 ]);
             }
         }
