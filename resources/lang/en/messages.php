@@ -354,7 +354,6 @@ return [
     'customer' => 'Customer',
     'transaction_reference' => 'Transaction Reference',
     'total' => 'Total',
-    'attendee_name' => 'Attendee Name',
     'number_of_attendees' => 'Number of Attendees',
     'terms_and_conditions' => 'Terms & Conditions',
     'event_support_contact' => 'Event Support Contact',
@@ -371,4 +370,5 @@ return [
     'ticket_not_found' => 'Ticket not found',
     'tickets_not_available' => 'Tickets not available for this event',
     'sold_reserved' => 'Sold/Reserved',
+    'attendee' => 'Attendee',
 ];

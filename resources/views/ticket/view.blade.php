@@ -120,7 +120,7 @@
               </defs>
             </svg>
 
-            <p class="text-[10px]">{{ __('messages.attendee_name') }}: {{ $sale->name }}</p>
+            <p class="text-[10px]">{{ __('messages.attendee') }}: {{ $sale->name }}</p>
           </div>
           <div class="flex gap-[8px] flex-row items-center">
             <svg
@@ -179,7 +179,9 @@
         <div class="grid grid-cols-2 gap-x-[18px] gap-y-[12px] mt-[20px]">
           <div>
             <p class="text-[44px] leading-[0.8]">{{ __('messages.ticket') }}</p>
-            <!-- <p class="text-[54px] leading-[0.8]">#</p> -->
+            @foreach ($sale->saleTickets as $saleTicket)
+              <p class="text-[14px] leading-[1.2] pt-[12px]">{{ $saleTicket->ticket->type ?: __('messages.ticket') }} x {{ $saleTicket->quantity }}</p>
+            @endforeach
           </div>
           <div class="justify-center flex">
             <img class="w-[82px] h-[82px]" src="{{ route('ticket.qr_code', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}" alt="QR Code" />
