@@ -59,12 +59,6 @@
                             </td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                 <div class="flex items-center gap-3">
-                                    <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" 
-                                       target="_blank" 
-                                       class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                                        {{ __('messages.view_ticket') }}                                        
-                                    </a>
-
                                     <div class="relative" x-data="{ open: false }">
                                         <button @click="open = !open" 
                                                 type="button" 
@@ -81,6 +75,13 @@
                                              role="menu" 
                                              aria-orientation="vertical">
                                             
+                                            <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" 
+                                               target="_blank" 
+                                               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                                               role="menuitem">
+                                                {{ __('messages.view_ticket') }}
+                                            </a>
+
                                             @if($sale->status === 'unpaid')
                                                 <button @click="handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_paid')" 
                                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left" 

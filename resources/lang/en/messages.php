@@ -384,4 +384,6 @@ return [
     'unauthorized' => 'Unauthorized',
     'action_completed' => 'Action completed',
     'select_action' => 'Select Action',
+    'refund' => 'Refund',
+    'mark_paid' => 'Mark Paid',
 ];
