@@ -39,16 +39,17 @@ class TicketController extends Controller
     public function sales()
     {
         $user = auth()->user();
-
-        $sales = Sale::with('event', 'saleTickets')
-            ->whereIn('status', ['paid', 'unpaid']) // TODO: remove this to show all sales
+        
+        $query = Sale::with('event', 'saleTickets')
             ->whereHas('event', function($query) use ($user) {
                 $query->where('user_id', $user->id);
-            })
-            ->orderBy('created_at', 'DESC')
-            ->get();
+            });
+            
+        $count = $query->count();
+        $sales = $query->orderBy('created_at', 'DESC')
+                    ->paginate(50, ['*'], 'page');
 
-        return view('ticket.sales', compact('sales'));
+        return view('ticket.sales', compact('sales', 'count'));
     }
 
     public function checkout(Request $request, $subdomain)
