@@ -42,7 +42,7 @@ class ExampleTest extends DuskTestCase
             // Log out
             $browser->press($name)
                     ->clickLink('Log Out')
-                    ->assertPathIs('/');
+                    ->assertPathIs('/login');
 
             // Log back in
             $browser->visit('/login')
