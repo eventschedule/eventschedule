@@ -5,7 +5,7 @@
             <div>
                 <div class="relative">
                     <x-text-input type="text" name="filter" id="filter" placeholder="{{ __('messages.filter') }}" 
-                        value="{{ request()->filter }}" />
+                        value="{{ request()->filter }}" autocomplete="off"/>
                     <button type="button" id="clear-filter" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" style="display: none;">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -45,25 +45,29 @@ filterInput.addEventListener('input', function(e) {
     clearButton.style.display = e.target.value ? 'block' : 'none';
     
     timeoutId = setTimeout(() => {
-        fetch(`${window.location.pathname}?filter=${encodeURIComponent(e.target.value)}`, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.text())
-        .then(html => {
-            const salesTable = document.getElementById('sales-table');
-            if (salesTable) {
-                salesTable.innerHTML = html;
-            }
-        });
+        updateResults(e.target.value);
     }, 500);
 });
 
-// Clear input and trigger search
+// Clear input and trigger search immediately
 clearButton.addEventListener('click', function() {
     filterInput.value = '';
     clearButton.style.display = 'none';
-    filterInput.dispatchEvent(new Event('input'));
+    updateResults(''); // Call directly without timeout
 });
+
+function updateResults(value) {
+    fetch(`${window.location.pathname}?filter=${encodeURIComponent(value)}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.text())
+    .then(html => {
+        const salesTable = document.getElementById('sales-table');
+        if (salesTable) {
+            salesTable.innerHTML = html;
+        }
+    });
+}
 </script>
