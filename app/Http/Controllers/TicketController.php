@@ -285,14 +285,33 @@ class TicketController extends Controller
     {
         $user = auth()->user();
         $event = Event::find(UrlUtils::decodeId($eventId));
-        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
+
+        if (! $event) {
+            return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
+        }
+
+        $sale = Sale::where('event_id', $event->id)
+                    ->where('secret', $secret)
+                    ->first();
+
+        if (! $sale) {
+            return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
+        }
 
         if (! $user->canEditEvent($event)) {
-            return response()->json(['error' => 'You are not authorized to scan this ticket.'], 200);
+            return response()->json(['error' => __('messages.you_are_not_authorized_to_scan_this_ticket')], 200);
         }
         
         if (Carbon::parse($sale->event_date)->format('Y-m-d') !== now()->format('Y-m-d')) {
-            return response()->json(['error' => 'This ticket is not valid for today.'], 200);
+            return response()->json(['error' => __('messages.this_ticket_is_not_valid_for_today')], 200);
+        }
+        
+        if ($sale->status == 'unpaid') {
+            return response()->json(['error' => __('messages.this_ticket_is_not_paid')], 200);
+        } else if ($sale->status == 'cancelled') {
+            return response()->json(['error' => __('messages.this_ticket_is_cancelled')], 200);
+        } else if ($sale->status == 'refunded') {
+            return response()->json(['error' => __('messages.this_ticket_is_refunded')], 200);
         }
 
         $data = new \stdClass();
