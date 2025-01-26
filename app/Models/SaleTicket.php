@@ -18,7 +18,7 @@ class SaleTicket extends Model
     protected static function booted()
     {
         static::created(function ($saleTicket) {
-            $saleTicket->ticket->updateSold($saleTicket->sale->event_date, $saleTicket->quantity());
+            $saleTicket->ticket->updateSold($saleTicket->sale->event_date, $saleTicket);
         });
     }
 
@@ -30,10 +30,5 @@ class SaleTicket extends Model
     public function ticket()
     {
         return $this->belongsTo(Ticket::class);
-    }
-
-    public function quantity()
-    {
-        return count(json_decode($this->seats, true));
     }
 }

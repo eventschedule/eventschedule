@@ -136,7 +136,7 @@ class TicketController extends Controller
                     ],
                     'unit_amount' => $saleTicket->ticket->price * 100,
                 ],
-                'quantity' => $saleTicket->quantity(),
+                'quantity' => $saleTicket->quantity,
             ];
         }
 
@@ -205,7 +205,7 @@ class TicketController extends Controller
             $lineItems[] = [
                 'product_key' => $saleTicket->ticket->type,
                 'notes' => $saleTicket->ticket->description ?? __('messages.tickets'),
-                'quantity' => $saleTicket->quantity(),
+                'quantity' => $saleTicket->quantity,
                 'cost' => $saleTicket->ticket->price,
             ];
         }
