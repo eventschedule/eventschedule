@@ -22,7 +22,9 @@
                             <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                 {{ __('messages.status') }}
                             </th>
-                            <th></th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                {{ __('messages.actions') }}
+                            </th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 bg-white">
@@ -56,9 +58,55 @@
                                 {{ __('messages.' . $sale->status) }}
                             </td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" target="_blank" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                                    {{ __('messages.view_ticket') }}                                        
-                                </a>
+                                <div class="flex items-center gap-3">
+                                    <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" 
+                                       target="_blank" 
+                                       class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                                        {{ __('messages.view_ticket') }}                                        
+                                    </a>
+
+                                    <div class="relative" x-data="{ open: false }">
+                                        <button @click="open = !open" 
+                                                type="button" 
+                                                class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                                            {{ __('messages.select_action') }}
+                                            <svg class="ml-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+
+                                        <div x-show="open" 
+                                             @click.away="open = false"
+                                             class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" 
+                                             role="menu" 
+                                             aria-orientation="vertical">
+                                            
+                                            @if($sale->status === 'unpaid')
+                                                <button @click="handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_paid')" 
+                                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left" 
+                                                        role="menuitem">
+                                                    {{ __('messages.mark_paid') }}
+                                                </button>
+                                            @endif
+
+                                            @if($sale->status === 'paid')
+                                                <button @click="handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'refund')" 
+                                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left" 
+                                                        role="menuitem">
+                                                    {{ __('messages.refund') }}
+                                                </button>
+                                            @endif
+
+                                            @if(in_array($sale->status, ['unpaid', 'paid']))
+                                                <button @click="handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'cancel')" 
+                                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left" 
+                                                        role="menuitem">
+                                                    {{ __('messages.cancel') }}
+                                                </button>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         @endforeach

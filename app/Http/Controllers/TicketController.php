@@ -393,4 +393,43 @@ class TicketController extends Controller
         return view('ticket.view', compact('event', 'sale', 'role'));
     }
 
+    public function handleAction(Request $request, $sale_id)
+    {
+        $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
+        $user = auth()->user();
+        
+        if ($user->id != $sale->event->user_id) {
+            return response()->json(['error' => __('messages.unauthorized')], 403);
+        }
+
+        switch ($request->action) {
+            case 'mark_paid':
+                if ($sale->status === 'unpaid') {
+                    $sale->status = 'paid';
+                    $sale->save();
+                }
+                break;
+            
+            case 'refund':
+                if ($sale->status === 'paid') {
+                    $sale->status = 'refunded';
+                    $sale->save();
+                }
+                break;
+            
+            case 'cancel':
+                if (in_array($sale->status, ['unpaid', 'paid'])) {
+                    $sale->status = 'cancelled';
+                    $sale->save();
+                }
+                break;
+        }
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true]);
+        }
+        
+        return back()->with('success', __('messages.action_completed'));
+    }
+
 }
