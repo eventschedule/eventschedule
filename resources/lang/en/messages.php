@@ -370,4 +370,5 @@ return [
     'error_invoiceninja_connection' => 'Error: Failed to connect to Invoice Ninja',
     'ticket_not_found' => 'Ticket not found',
     'tickets_not_available' => 'Tickets not available for this event',
+    'sold_reserved' => 'Sold/Reserved',
 ];

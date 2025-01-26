@@ -941,7 +941,7 @@
         eventName: @json($event->name ?? ''),
         tickets: @json($event->tickets ?? [new Ticket()]),
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
-        soldLabel: "{{ __('messages.sold') }}",
+        soldLabel: "{{ __('messages.sold_reserved') }}",
         isRecurring: @json($event->days_of_week ? true : false),
       }
     },
