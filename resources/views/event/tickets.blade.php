@@ -7,18 +7,25 @@
         const app = createApp({
             data() {
                 return {
-                    createAccount: false,
+                    createAccount: {{ old('create_account', false) ? 'true' : 'false' }},
                     tickets: @json($event->tickets->map(function ($ticket) { 
-                        return $ticket->toData(request()->date); 
+                        $data = $ticket->toData(request()->date); 
+                        $data['selectedQty'] = old('tickets')[$ticket->id] ?? 0;
+                        return $data;
                     })),
                     name: '{{ old('name', auth()->check() ? auth()->user()->name : '') }}',
                     email: '{{ old('email', auth()->check() ? auth()->user()->email : '') }}',
-                    password: ''
+                    password: '',
+                    password_confirmation: '',
                 };
             },
             created() {
+                console.log('tickets', this.tickets[0].selectedQty);
                 this.tickets.forEach(ticket => {
-                    ticket.selectedQty = 0;
+                    console.log('selectedQty', ticket.selectedQty);
+                    if (! ticket.selectedQty) {
+                        ticket.selectedQty = 0;
+                    }
                 });
             },
             computed: {
@@ -116,15 +123,14 @@
                     <select 
                         v-model="ticket.selectedQty"
                         class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        :name="`tickets[${index}][quantity]`"
+                        :name="`tickets[${ticket.id}]`"
                     >
                         <option value="0">0</option>
                         <template v-for="n in ticket.quantity">
-                            <option :value="n">@{{ n }}</option>
+                            <option :value="n" :selected="ticket.selectedQty === n">@{{ n }}</option>
                             </template>
                         </select>
                     </p>
-                    <input type="hidden" :value="ticket.id" :name="`tickets[${index}][id]`">
                 </div>
             </div>
         </div>
