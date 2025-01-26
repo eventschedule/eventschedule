@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Models\User;
 use App\Models\Sale;
 use App\Models\Event;
 use App\Models\SaleTicket;
@@ -13,6 +14,8 @@ use Stripe\StripeClient;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use App\Utils\InvoiceNinja;
+use App\Rules\NoFakeEmail;
+use Illuminate\Validation\Rules;
 
 class TicketController extends Controller
 {
@@ -52,6 +55,13 @@ class TicketController extends Controller
         $user = auth()->user();
 
         if (! $user && $request->create_account) {
+
+            $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class, new NoFakeEmail],
+                'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            ]);    
+
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
