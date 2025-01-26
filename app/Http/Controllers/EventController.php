@@ -238,8 +238,8 @@ class EventController extends Controller
             return $item->toData();
         });
 
-        $venues = array_values($venues->toArray());
-        $members = array_values($members->toArray());
+        $venues = array_values($venues->sortBy('name')->toArray());
+        $members = array_values($members->sortBy('name')->toArray());
     
         $currencies = file_get_contents(base_path('storage/currencies.json'));
         $currencies = json_decode($currencies);
