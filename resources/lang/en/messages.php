@@ -386,4 +386,5 @@ return [
     'select_action' => 'Select Action',
     'refund' => 'Refund',
     'mark_paid' => 'Mark Paid',
+    'manual_payment' => 'Manual Payment',
 ];

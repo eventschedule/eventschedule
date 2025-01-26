@@ -77,6 +77,7 @@
                                             
                                             <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" 
                                                target="_blank" 
+                                               @click="open = false"
                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
                                                role="menuitem">
                                                 {{ __('messages.view_ticket') }}
@@ -90,7 +91,7 @@
                                                 </button>
                                             @endif
 
-                                            @if($sale->status === 'paid')
+                                            @if($sale->status === 'paid' && $sale->payment_method != 'cash')
                                                 <button @click="handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'refund')" 
                                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left" 
                                                         role="menuitem">
