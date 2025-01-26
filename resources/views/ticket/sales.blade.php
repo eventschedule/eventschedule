@@ -57,7 +57,17 @@
                                     {{ number_format($sale->payment_amount, 2, '.', ',') }} {{ $sale->event->ticket_currency_code }}
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    {{ $sale->transaction_reference }}
+                                    @if ($sale->payment_method == 'invoiceninja')
+                                        <a href="https://app.invoicing.co/#/invoices/{{ $sale->transaction_reference }}/edit" target="_blank" class="hover:underline">
+                                            {{ $sale->transaction_reference }}
+                                        </a>
+                                    @elseif ($sale->payment_method == 'stripe')
+                                        <a href="https://dashboard.stripe.com/payments/{{ $sale->transaction_reference }}" target="_blank" class="hover:underline">
+                                            {{ $sale->transaction_reference }}
+                                        </a>
+                                    @else
+                                        {{ $sale->transaction_reference }}
+                                    @endif
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     {{ __('messages.' . $sale->status) }}
