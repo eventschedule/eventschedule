@@ -76,6 +76,22 @@
 
             function previewImage(input, previewId) {
                 const preview = document.getElementById(previewId);
+
+                if (!input || !input.files || !input.files[0]) {
+                    console.log('no file')
+                    if (preview) {
+                        preview.src = '';
+                        preview.style.display = 'none';
+                    }
+                    const warningElement = document.getElementById(previewId.split('_')[0] + '_image_size_warning');
+                    if (warningElement) {
+                        warningElement.textContent = '';
+                        warningElement.style.display = 'none';
+                    }
+                    updatePreview();
+                    return;
+                }
+
                 const file = input.files[0];
                 const reader = new FileReader();
                 var warningElement = document.getElementById(previewId.split('_')[0] + '_image_size_warning');
@@ -137,8 +153,9 @@
                 previewImage(this, 'profile_image_preview');
             });
 
-            $('#header_image').on('change', function() {
+            $('#header_image_url').on('change', function() {
                 previewImage(this, 'header_image_preview');
+                $('#header_image_preview').show();
             });
 
             $('#background_image_url').on('change', function() {
@@ -372,6 +389,7 @@
             customInput.style.display = select.value === '' ? 'block' : 'none';
         }
 
+
         </script>
 
     </x-slot>
@@ -442,7 +460,7 @@
                             <div class="color-select-container">
                                 <select id="header_image" name="header_image"
                                     class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
-                                    oninput="updateHeaderNavButtons(); toggleCustomHeaderInput();">
+                                    oninput="updatePreview(); updateHeaderNavButtons(); toggleCustomHeaderInput();">
                                     @foreach($headers as $header => $name)
                                     <option value="{{ $header }}"
                                         {{ $role->header_image == $header ? 'SELECTED' : '' }}>
@@ -481,7 +499,7 @@
                                     {{ __('messages.image_size_warning') }}
                                 </p>
 
-                                <img id="header_image_preview" src="#" alt="Header Image Preview" style="max-height:120px; display:none;" class="pt-3" />
+                                <img id="header_image_preview" src="{{ $role->header_image_url }}" alt="Header Image Preview" style="max-height:120px; {{ $role->header_image_url || $role->header_image ? '' : 'display:none;' }}" class="pt-3" />
 
                                 @if ($role->header_image_url)
                                 <img src="{{ $role->header_image_url }}" style="max-height:120px" class="pt-3" />
