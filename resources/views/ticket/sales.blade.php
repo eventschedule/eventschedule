@@ -34,7 +34,6 @@ document.getElementById('filter').addEventListener('input', function(e) {
     clearTimeout(timeoutId);
     
     timeoutId = setTimeout(() => {
-        console.log('fetching');
         fetch(`${window.location.pathname}?filter=${encodeURIComponent(e.target.value)}`, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
@@ -42,9 +41,11 @@ document.getElementById('filter').addEventListener('input', function(e) {
         })
         .then(response => response.text())
         .then(html => {
-            console.log('fetched');
-            document.getElementById('sales-table').outerHTML = html;
+            const salesTable = document.getElementById('sales-table');
+            if (salesTable) {
+                salesTable.innerHTML = html;
+            }
         });
-    }, 1000);
+    }, 500);
 });
 </script>
