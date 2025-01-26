@@ -41,8 +41,15 @@
       </p>
 
       <div
-        class="bg-[#4E81FA] p-[18px] rounded-[24px] flex flex-col justify-between w-[400px] ml-[auto] mr-[auto] text-white leading-[1.2] font-bold uppercase"
+        class="bg-[#4E81FA] p-[18px] rounded-[24px] flex flex-col justify-between w-[400px] ml-[auto] mr-[auto] text-white leading-[1.2] font-bold uppercase relative"
       >
+        @if ($sale->status !== 'paid')
+          <div class="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none">
+            <div class="text-white/30 text-[80px] font-extrabold rotate-[-45deg] whitespace-nowrap">
+              {{ strtoupper($sale->status) }}
+            </div>
+          </div>
+        @endif
         <div class="grid grid-cols-2 gap-x-[18px] gap-y-[12px]">
           <div class="flex gap-[8px] flex-row items-center">
             <svg
