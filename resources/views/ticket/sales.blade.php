@@ -70,4 +70,33 @@ function updateResults(value) {
         }
     });
 }
+
+function handleAction(saleId, action) {
+    if (!confirm('{{ __("messages.are_you_sure") }}')) {
+        return;
+    }
+
+    fetch(`/sales/action/${saleId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ action: action })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            // Refresh the table
+            updateResults(document.getElementById('filter').value);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('{{ __("messages.an_error_occurred") }}');
+    });
+}
 </script>

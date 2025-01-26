@@ -381,4 +381,7 @@ return [
     'new_venue_tooltip' => 'Various events at your venue',
     'new_curator_tooltip' => 'Various events at various venues',
     'filter' => 'Filter',
+    'unauthorized' => 'Unauthorized',
+    'action_completed' => 'Action completed',
+    'select_action' => 'Select Action',
 ];
