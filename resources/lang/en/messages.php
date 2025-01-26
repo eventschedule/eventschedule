@@ -377,4 +377,7 @@ return [
     'this_ticket_is_cancelled' => 'This ticket is cancelled',
     'this_ticket_is_refunded' => 'This ticket is refunded',
     'this_ticket_is_not_paid' => 'This ticket is not paid',
+    'new_schedule_tooltip' => 'Your events at various venues',
+    'new_venue_tooltip' => 'Various events at your venue',
+    'new_curator_tooltip' => 'Various events at various venues',
 ];

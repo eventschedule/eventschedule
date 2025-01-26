@@ -85,6 +85,7 @@
             border-radius: 4px;
             display: none;
             font-size: 12px;
+            z-index: 9999;
         }
 
         .editor-toolbar {
