@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\User;
+use App\Models\Role;
 use App\Models\Sale;
 use App\Models\Event;
 use App\Models\SaleTicket;
@@ -70,6 +71,9 @@ class TicketController extends Controller
                 'timezone' => $event->user->timezone,
                 'language_code' => $event->user->language_code,
             ]);
+
+            $role = Role::subdomain($subdomain)->firstOrFail();
+            $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
         }
 
         // Check ticket availability
