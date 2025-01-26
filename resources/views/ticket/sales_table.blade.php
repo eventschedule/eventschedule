@@ -90,7 +90,7 @@
                                                 </button>
                                             @endif
 
-                                            @if($sale->status === 'paid' && $sale->payment_method != 'cash')
+                                            @if(false && $sale->status === 'paid' && $sale->payment_method != 'cash')
                                                 <button @click="handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'refund')" 
                                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left" 
                                                         role="menuitem">
