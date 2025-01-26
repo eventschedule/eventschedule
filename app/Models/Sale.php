@@ -20,7 +20,7 @@ class Sale extends Model
         static::updated(function ($sale) {
             if ($sale->isDirty('status') && in_array($sale->status, ['cancelled', 'refunded', 'expired'])) {
                 foreach ($sale->saleTickets as $saleTicket) {
-                    $saleTicket->ticket->updateSold($sale->event_date, -$saleTicket->quantity());
+                    $saleTicket->ticket->updateSold($sale->event_date, -$saleTicket->quantity);
                 }
             }
         });
@@ -39,14 +39,14 @@ class Sale extends Model
     public function calculateTotal()
     {
         return $this->saleTickets->sum(function ($saleTicket) {
-            return $saleTicket->ticket->price * $saleTicket->quantity();
+            return $saleTicket->ticket->price * $saleTicket->quantity;
         });
     }
 
     public function quantity()
     {
         return $this->saleTickets->sum(function ($saleTicket) {
-            return $saleTicket->quantity();
+            return $saleTicket->quantity;
         });
     }
 
