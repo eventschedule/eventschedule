@@ -16,6 +16,7 @@ use Endroid\QrCode\Writer\PngWriter;
 use App\Utils\InvoiceNinja;
 use App\Rules\NoFakeEmail;
 use Illuminate\Validation\Rules;
+use Illuminate\Support\Facades\Hash;
 
 class TicketController extends Controller
 {
@@ -73,7 +74,7 @@ class TicketController extends Controller
 
         // Check ticket availability
         foreach($request->tickets as $ticketId => $quantity) {
-            if ($ticket['quantity'] > 0) {
+            if ($quantity > 0) {
                 $ticketModel = $event->tickets()->find(UrlUtils::decodeId($ticketId));
                 
                 if (! $ticketModel) {
