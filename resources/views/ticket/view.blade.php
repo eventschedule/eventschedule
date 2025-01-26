@@ -5,11 +5,11 @@
     </x-slot>
 
     <main
-      class="font-['Manrope'] text-[15px] font-normal leading-[1.75em] flex flex-col gap-[10px] flex-1 relative z-0 overflow-y-auto p-[10px] focus:outline-none"
+      class="font-['Manrope'] text-[15px] font-normal leading-[1.75em] flex flex-col gap-[10px] flex-1 relative z-0 overflow-y-auto p-[5px] sm:p-[10px] focus:outline-none"
       tabindex="0" 
     >
       <div
-        class="bg-[#4e81fa26] pt-[20px] pr-[35px] pb-[20px] pl-[35px] rounded-[24px] flex flex-col justify-between items-center w-[400px] ml-[auto] mr-[auto]"
+        class="bg-[#4e81fa26] pt-[20px] px-[15px] sm:px-[35px] pb-[20px] rounded-[24px] flex flex-col justify-between items-center w-full max-w-[400px] mx-auto"
       >
         <div
           class="uppercase font-extrabold leading-[1.2] text-center color-[#151B26] flex flex-col items-center"
@@ -41,7 +41,7 @@
       </p>
 
       <div
-        class="bg-[#4E81FA] p-[18px] rounded-[24px] flex flex-col justify-between w-[400px] ml-[auto] mr-[auto] text-white leading-[1.2] font-bold uppercase relative"
+        class="bg-[#4E81FA] p-[12px] sm:p-[18px] rounded-[24px] flex flex-col justify-between w-full max-w-[400px] mx-auto text-white leading-[1.2] font-bold uppercase relative"
       >
         @if ($sale->status !== 'paid')
           <div class="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none">
@@ -197,7 +197,7 @@
       </div>
 
       <div
-        class="bg-[#4e81fa26] p-[18px] rounded-[24px] flex flex-col justify-between w-[400px] h-[185px] ml-[auto] mr-[auto]"
+        class="bg-[#4e81fa26] p-[12px] sm:p-[18px] rounded-[24px] flex flex-col justify-between w-full max-w-[400px] h-[185px] mx-auto"
       >
         @if ($event->ticket_notes_html)
         <div class="flex flex-col gap-[14px] text-[10px] uppercase leading-[1]">
