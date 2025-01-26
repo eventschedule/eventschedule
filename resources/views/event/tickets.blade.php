@@ -64,12 +64,14 @@
             <label for="name" class="text-gray-900">{{ __('messages.name') . ' *' }}</label>
             <input type="text" name="name" id="name" class="mt-1 block w-full border-gray-300 bg-white text-gray-900" 
                 v-model="name" required autofocus autocomplete="name" />
+            <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
 
         <div class="mb-12">
             <label for="email" class="text-gray-900">{{ __('messages.email') . ' *' }}</label>
             <input type="email" name="email" id="email" class="mt-1 block w-full border-gray-300 bg-white text-gray-900" 
                 v-model="email" required autocomplete="email" />
+            <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
             @if (! auth()->check())
                 <div class="mt-6">
@@ -86,6 +88,14 @@
                         <label for="password" class="text-gray-900">{{ __('messages.password') . ' *' }}</label>
                         <input type="password" name="password" id="password" class="mt-1 block w-full border-gray-300 bg-white text-gray-900" 
                             v-model="password" required autocomplete="new-password" />
+                        <x-input-error class="mt-2" :messages="$errors->get('password')" />
+                    </div>
+
+                    <div class="mt-6" v-if="createAccount">
+                        <label for="password_confirmation" class="text-gray-900">{{ __('messages.confirm_password') . ' *' }}</label>
+                        <input type="password" name="password_confirmation" id="password_confirmation" class="mt-1 block w-full border-gray-300 bg-white text-gray-900" 
+                            v-model="password_confirmation" required autocomplete="new-password" />
+                        <x-input-error class="mt-2" :messages="$errors->get('password')" />
                     </div>
                 </div>
             @endif
