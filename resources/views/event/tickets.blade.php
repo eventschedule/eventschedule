@@ -10,7 +10,7 @@
                     createAccount: {{ old('create_account', false) ? 'true' : 'false' }},
                     tickets: @json($event->tickets->map(function ($ticket) { 
                         $data = $ticket->toData(request()->date); 
-                        $data['selectedQty'] = old('tickets')[$ticket->id] ?? 0;
+                        $data['selectedQty'] = old('tickets')[$data['id']] ?? 0;
                         return $data;
                     })),
                     name: '{{ old('name', auth()->check() ? auth()->user()->name : '') }}',
@@ -20,9 +20,7 @@
                 };
             },
             created() {
-                console.log('tickets', this.tickets[0].selectedQty);
                 this.tickets.forEach(ticket => {
-                    console.log('selectedQty', ticket.selectedQty);
                     if (! ticket.selectedQty) {
                         ticket.selectedQty = 0;
                     }
