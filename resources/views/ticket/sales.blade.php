@@ -3,8 +3,15 @@
     <div class="mt-8 flow-root">
         <div class="flex justify-between">
             <div>
-                <x-text-input type="text" name="filter" id="filter" placeholder="{{ __('messages.filter') }}" 
-                    value="{{ request()->filter }}" />
+                <div class="relative">
+                    <x-text-input type="text" name="filter" id="filter" placeholder="{{ __('messages.filter') }}" 
+                        value="{{ request()->filter }}" />
+                    <button type="button" id="clear-filter" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" style="display: none;">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
 
@@ -29,9 +36,13 @@
 
 <script>
 let timeoutId;
+const filterInput = document.getElementById('filter');
+const clearButton = document.getElementById('clear-filter');
 
-document.getElementById('filter').addEventListener('input', function(e) {
+// Show/hide clear button based on input content
+filterInput.addEventListener('input', function(e) {
     clearTimeout(timeoutId);
+    clearButton.style.display = e.target.value ? 'block' : 'none';
     
     timeoutId = setTimeout(() => {
         fetch(`${window.location.pathname}?filter=${encodeURIComponent(e.target.value)}`, {
@@ -47,5 +58,12 @@ document.getElementById('filter').addEventListener('input', function(e) {
             }
         });
     }, 500);
+});
+
+// Clear input and trigger search
+clearButton.addEventListener('click', function() {
+    filterInput.value = '';
+    clearButton.style.display = 'none';
+    filterInput.dispatchEvent(new Event('input'));
 });
 </script>
