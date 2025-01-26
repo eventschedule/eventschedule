@@ -45,7 +45,7 @@
       >
         @if ($sale->status !== 'paid')
           <div class="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none">
-            <div class="text-white/30 text-[80px] font-extrabold rotate-[-45deg] whitespace-nowrap">
+            <div class="text-white/30 text-[60px] font-extrabold rotate-[-45deg] whitespace-nowrap">
               {{ strtoupper($sale->status) }}
             </div>
           </div>
