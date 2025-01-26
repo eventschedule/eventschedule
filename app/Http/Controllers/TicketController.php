@@ -406,6 +406,7 @@ class TicketController extends Controller
             case 'mark_paid':
                 if ($sale->status === 'unpaid') {
                     $sale->status = 'paid';
+                    $sale->transaction_reference = __('messages.manual_payment');
                     $sale->save();
                 }
                 break;
