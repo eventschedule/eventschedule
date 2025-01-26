@@ -380,4 +380,5 @@ return [
     'new_schedule_tooltip' => 'Your events at various venues',
     'new_venue_tooltip' => 'Various events at your venue',
     'new_curator_tooltip' => 'Various events at various venues',
+    'filter' => 'Filter',
 ];

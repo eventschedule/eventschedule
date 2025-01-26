@@ -1,7 +1,13 @@
 <x-app-admin-layout>
 
     <div class="mt-8 flow-root">
-        <div class="flex justify-end">
+        <div class="flex justify-between">
+            <div>
+                <x-text-input type="text" name="filter" placeholder="{{ __('messages.filter') }}" 
+                    value="{{ request()->filter }}"/>
+            </div>
+
+
             <a href="{{ route('ticket.scan') }}">
                 <button type="button"
                     class="inline-flex items-center rounded-md shadow-sm bg-[#4E81FA] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#3A6BE0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]">

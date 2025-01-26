@@ -40,16 +40,33 @@ class TicketController extends Controller
     public function sales()
     {
         $user = auth()->user();
+        $filter = strtolower(request()->filter);
         
         $query = Sale::with('event', 'saleTickets')
             ->whereHas('event', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             });
             
+        if ($filter) {
+            $query->where(function($q) use ($filter) {
+                $q->where('status', 'LIKE', "%{$filter}%")
+                  ->orWhere('transaction_reference', 'LIKE', "%{$filter}%") 
+                  ->orWhere('email', 'LIKE', "%{$filter}%")
+                  ->orWhere('name', 'LIKE', "%{$filter}%")
+                  ->orWhereHas('event', function($q) use ($filter) {
+                      $q->where('name', 'LIKE', "%{$filter}%");
+                  });
+            });
+        }
+
         $count = $query->count();
         $sales = $query->orderBy('created_at', 'DESC')
                     ->paginate(50, ['*'], 'page');
 
+        if (request()->ajax()) {
+            return response()->json($sales);
+        }
+        
         return view('ticket.sales', compact('sales', 'count'));
     }
 
