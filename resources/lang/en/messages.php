@@ -387,7 +387,7 @@ return [
     'refund' => 'Refund',
     'mark_paid' => 'Mark Paid',
     'manual_payment' => 'Manual Payment',
-    'first_year_free' => 'Special offer: First year free',
+    'special_offer_first_year_free' => 'Special offer: First year free',
     '15_payment_gateways' => '15+ payment gateways',
     'mark_paid_success' => 'Successfully marked ticket as paid',
     'refund_success' => 'Successfully refunded ticket',
@@ -400,4 +400,5 @@ return [
     'expires_on' => 'Expires On',
     'change_to_free_plan' => 'Change to Free Plan',
     'plan_changed' => 'Plan changed successfully!',
+    'first_year_free' => 'First year free',
 ];
