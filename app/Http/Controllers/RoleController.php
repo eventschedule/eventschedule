@@ -607,6 +607,7 @@ class RoleController extends Controller
         $role->background_colors = ColorUtils::randomGradient();
         $role->background_image = ColorUtils::randomBackgroundImage();
         $role->background_rotation = rand(0, 359);
+        $role->header_image = ColorUtils::randomHeaderImage();
         $role->timezone = auth()->user()->timezone;
         $role->language_code = auth()->user()->language_code;
 
