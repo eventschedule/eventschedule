@@ -185,10 +185,10 @@ class RoleController extends Controller
 
         if ($slug) {
 
-
             if ($date) {                
                 $eventDate = Carbon::parse($date);
-                $events = Event::where('slug', $slug)
+                $events = Event::with(['venue', 'roles'])
+                            ->where('slug', $slug)
                             ->where(function ($query) use ($eventDate) {
                                 $query->whereDate('starts_at', $eventDate)
                                     ->orWhere(function ($query) use ($eventDate) {
@@ -200,13 +200,15 @@ class RoleController extends Controller
                             ->orderBy('starts_at')
                             ->get();
             } else {
-                $events = Event::where('slug', $slug)
+                $events = Event::with(['venue', 'roles'])
+                            ->where('slug', $slug)
                             ->where('starts_at', '>=', now()->subDay())                    
                             ->orderBy('starts_at', 'desc')
                             ->get();
 
                 if (count($events) == 0) {
-                    $events = Event::where('slug', $slug)
+                    $events = Event::with(['venue', 'roles'])
+                                ->where('slug', $slug)
                                 ->where('starts_at', '<', now())
                                 ->orderBy('starts_at', 'desc')
                                 ->get();                    
