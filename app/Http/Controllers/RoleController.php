@@ -159,7 +159,7 @@ class RoleController extends Controller
                 ->with('message', str_replace(':name', $role->name, __('messages.unfollowed_role')));
     }
 
-    public function viewGuest(Request $request, $subdomain, $otherSubdomain = '')
+    public function viewGuest(Request $request, $subdomain, $slug = '')
     {
         $user = auth()->user();
         $curatorRoles = $user ? $user->editableCurators() : collect();
@@ -183,48 +183,42 @@ class RoleController extends Controller
             $year = $request->year;
         }
 
-        if ($otherSubdomain) {
-            if ($eventRole = Role::subdomain($otherSubdomain)->first()) {
-                $eventVenueId = $role->isVenue() ? $role->id : $eventRole->id;
-                $eventRoleId = $role->isVenue() ? $eventRole->id : $role->id;
+        if ($slug) {
 
-                if ($date) {
-                    $eventDate = Carbon::parse($date);
-                    $event = Event::whereHas('roles', function ($query) use ($eventRoleId) {
-                            $query->where('role_id', $eventRoleId);
-                        })
-                        ->where('venue_id', $eventVenueId)
-                        ->where(function ($query) use ($eventDate) {
-                            $query->whereDate('starts_at', $eventDate)
-                                ->orWhere(function ($query) use ($eventDate) {
-                                    $query->whereNotNull('days_of_week')
-                                        ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1])
-                                        ->where('starts_at', '<=', $eventDate);
-                                });
-                        })
-                        ->orderBy('starts_at')
-                        ->first();
-                } else {
-                    $event = Event::whereHas('roles', function ($query) use ($eventRoleId) {
-                                $query->where('role_id', $eventRoleId);
-                        })
-                        ->where('venue_id', $eventVenueId)
-                        ->where('starts_at', '>=', now()->subDay())
-                        ->orderBy('starts_at')
-                        ->first();
 
-                    if (!$event) {
-                        $event = Event::whereHas('roles', function ($query) use ($eventRoleId) {
-                                $query->where('role_id', $eventRoleId);
-                            })    
-                            ->where('venue_id', $eventVenueId)
-                            ->where('starts_at', '<', now())
+            if ($date) {                
+                $eventDate = Carbon::parse($date);
+                $events = Event::where('slug', $slug)
+                            ->where(function ($query) use ($eventDate) {
+                                $query->whereDate('starts_at', $eventDate)
+                                    ->orWhere(function ($query) use ($eventDate) {
+                                        $query->whereNotNull('days_of_week')
+                                            ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1])
+                                            ->where('starts_at', '<=', $eventDate);
+                                    });
+                            })
+                            ->orderBy('starts_at')
+                            ->get();
+            } else {
+                $events = Event::where('slug', $slug)
+                            ->where('starts_at', '>=', now()->subDay())                    
                             ->orderBy('starts_at', 'desc')
-                            ->first();
-                    }
+                            ->get();
+
+                if (count($events) == 0) {
+                    $events = Event::where('slug', $slug)
+                                ->where('starts_at', '<', now())
+                                ->orderBy('starts_at', 'desc')
+                                ->get();                    
                 }
-            } else if ($eventId = UrlUtils::decodeId($otherSubdomain)) {
-                $event = Event::find($eventId);
+            }
+
+            $event = null;
+            foreach ($events as $each) {
+                if ($each->venue_id == $role->id || $each->isRoleAMember($subdomain)) {
+                    $event = $each;
+                    break;
+                }
             }
 
             if ($event) {

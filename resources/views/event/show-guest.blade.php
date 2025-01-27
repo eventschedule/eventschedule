@@ -92,7 +92,7 @@
             </svg>
             @if ($event->venue)
               @if ($event->venue->isClaimed())
-                <a href="{{ route('event.view_guest', ['subdomain' => $event->venue->subdomain]) }}" class="text-sm hover:underline">
+                <a href="{{ route('role.view_guest', ['subdomain' => $event->venue->subdomain]) }}" class="text-sm hover:underline">
                   {{ $event->venue->name }}
                 </a>
               @else

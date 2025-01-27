@@ -144,6 +144,7 @@ class EventRepo
             $event->user_id = auth()->user()->id;
             $event->curator_id = $curatorId;
             $event->is_accepted = $venue && $user->isMember($venue->subdomain) ? true : null;
+            $event->slug = \Str::slug($request->name);
         }
 
         $event->fill($request->all());
