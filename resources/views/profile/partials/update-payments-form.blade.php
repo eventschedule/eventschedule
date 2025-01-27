@@ -35,26 +35,29 @@
             </div>
         @endif
 
-        <h5 class="text-lg font-medium text-gray-900 dark:text-gray-100 pt-2">Invoice Ninja</h5>
+        <h5 class="text-lg font-medium text-gray-900 dark:text-gray-100 pt-2 pb-1">Invoice Ninja |  
+            <a href="https://invoiceninja.com/payments" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">
+                {{ __('messages.15_payment_gateways') }}
+            </a>
+        </h5>
 
         @if ($user->invoiceninja_api_key)
-            <div style="margin-top: 10px;">
+            <div style="margin-top: 16px;">
                 <x-text-input type="text" class="mt-1 block w-full" :value="$user->invoiceninja_company_name" readonly/>
                 <div class="text-xs pt-1">
                     <a href="#" onclick="return confirm('{{ __('messages.are_you_sure') }}') ? window.location.href='{{ route('invoiceninja.unlink') }}' : false" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.unlink_account') }}</a>
                 </div>
             </div>        
         @else
-            <div style="margin-top: 10px;">
+            <a href="https://invoiceninja.com/partner-perks/event-schedule" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">
+                {{ __('messages.first_year_free') }}
+            </a>
+
+            <div style="margin-top: 16px;">
                 <x-input-label for="invoiceninja_api_key" :value="__('messages.api_key')" />
                 <x-text-input id="invoiceninja_api_key" name="invoiceninja_api_key" type="text" class="mt-1 block w-full" 
-                    :value="old('invoiceninja_api_key', $user->invoiceninja_api_key)" />
+                    :value="old('invoiceninja_api_key', $user->invoiceninja_api_key)" autocomplete="off" />
                 <x-input-error class="mt-2" :messages="$errors->get('invoiceninja_api_key')" />
-                <div class="text-xs pt-1">
-                    <a href="https://invoiceninja.com/payments" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">
-                        {{ __('messages.learn_more') }}
-                    </a>
-                </div>
             </div>
 
             <div>
