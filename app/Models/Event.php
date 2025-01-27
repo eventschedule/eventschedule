@@ -123,10 +123,10 @@ class Event extends Model
         return false;
     }
 
-    public function isRoleAMember($subdomain)
+    public function isRoleAMember($subdomain, $includeCurators = false)
     {
-        return $this->roles->contains(function ($role) use ($subdomain) {
-            return $role->subdomain == $subdomain && $role->isSchedule();
+        return $this->roles->contains(function ($role) use ($subdomain, $includeCurators) {
+            return $role->subdomain == $subdomain && ($role->isSchedule() || ($includeCurators && $role->isCurator()));
         });
     }
 
