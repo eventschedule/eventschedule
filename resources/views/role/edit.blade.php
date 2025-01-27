@@ -506,7 +506,7 @@
                                 </button>
                             </div>
 
-                            <div id="custom_header_input" style="display:none">
+                            <div id="custom_header_input" style="display:none" class="mt-4">
                                 <input id="header_image_url" name="header_image_url" type="file" 
                                     class="mt-1 block w-full text-gray-900 dark:text-gray-100" 
                                     :value="old('header_image_url')" 
@@ -522,6 +522,7 @@
                                 alt="Header Image Preview" 
                                 style="max-height:120px; {{ $role->header_image || $role->header_image_url ? '' : 'display:none;' }}" 
                                 class="pt-3" />
+
                             @if ($role->header_image_url)
                             <a href="#" id="delete_header_image" style="display: {{ $role->header_image ? 'none' : 'block' }};"
                                 onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}'; }"
