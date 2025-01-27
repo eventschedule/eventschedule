@@ -206,6 +206,7 @@
         }
 
         function onChangeFont() {
+            /*
             var font_family = $('#font_family').find(':selected').text();
             var link = document.createElement('link');
 
@@ -217,6 +218,7 @@
             link.onload = function() {
                 updatePreview();
             };
+            */
         }
 
         function updatePreview() {
