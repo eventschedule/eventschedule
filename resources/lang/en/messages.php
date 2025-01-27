@@ -387,4 +387,6 @@ return [
     'refund' => 'Refund',
     'mark_paid' => 'Mark Paid',
     'manual_payment' => 'Manual Payment',
+    'first_year_free' => 'Special offer: First year free',
+    '15_payment_gateways' => '15+ payment gateways',
 ];
