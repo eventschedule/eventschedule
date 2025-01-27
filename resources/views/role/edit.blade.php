@@ -161,6 +161,8 @@
                     headerImageUrl = "{{ asset('images/headers') }}" + '/' + headerImageUrl + '.png';
                     console.log(headerImageUrl);
                     $('#header_image_preview').attr('src', headerImageUrl).show();
+                } else if ({{ $role->header_image_url ? 'true' : 'false' }}) {
+                    $('#header_image_preview').attr('src', '{{ $role->header_image_url }}').show();
                 } else {
                     $('#header_image_preview').hide();
                 }
