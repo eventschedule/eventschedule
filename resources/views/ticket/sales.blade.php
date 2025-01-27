@@ -92,6 +92,29 @@ function handleAction(saleId, action) {
         } else {
             // Refresh the table
             updateResults(document.getElementById('filter').value);
+
+            var message = '';
+            if (action === 'mark_paid') {
+                message = '{{ __("messages.mark_paid_success") }}';
+            } else if (action === 'refund') {
+                message = '{{ __("messages.refund_success") }}';
+            } else if (action === 'cancel') {
+                message = '{{ __("messages.cancel_success") }}';
+            } else if (action === 'delete') {
+                message = '{{ __("messages.delete_success") }}';
+            }
+
+            if (message) {
+                Toastify({
+                    text: message,
+                    duration: 3000,
+                    position: 'center',
+                    stopOnFocus: true,
+                style: {
+                        background: '#4BB543',
+                    }
+                }).showToast();
+            }
         }
     })
     .catch(error => {
