@@ -875,7 +875,7 @@ class RoleController extends Controller
             $role->save();
         }
 
-        if ($request->hasFile('header_image')) {
+        if ($request->hasFile('header_image_url')) {
             if ($role->header_image_url) {
                 $path = $role->getAttributes()['header_image_url'];
                 if (config('filesystems.default') == 'local') {
@@ -884,7 +884,7 @@ class RoleController extends Controller
                 Storage::delete($path);
             }
 
-            $file = $request->file('header_image');
+            $file = $request->file('header_image_url');
             $filename = strtolower('header_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 

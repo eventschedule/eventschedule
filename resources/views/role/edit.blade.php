@@ -502,12 +502,6 @@
                                 </button>
                             </div>
 
-                            <img id="header_image_preview" 
-                                src="{{ $role->header_image ? asset('images/headers/' . $role->header_image . '.png') : $role->header_image_url }}" 
-                                alt="Header Image Preview" 
-                                style="max-height:120px; {{ $role->header_image || $role->header_image_url ? '' : 'display:none;' }}" 
-                                class="pt-3" />
-
                             <div id="custom_header_input" style="display:none">
                                 <input id="header_image_url" name="header_image_url" type="file" 
                                     class="mt-1 block w-full text-gray-900 dark:text-gray-100" 
@@ -517,16 +511,21 @@
                                 <p id="header_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
                                     {{ __('messages.image_size_warning') }}
                                 </p>
-
-                                @if ($role->header_image_url)
-                                <img src="{{ $role->header_image_url }}" style="max-height:120px" class="pt-3" />
-                                <a href="#"
-                                    onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}'; }"
-                                    class="hover:underline text-gray-900 dark:text-gray-100">
-                                    {{ __('messages.delete_image') }}
-                                </a>
-                                @endif
                             </div>
+
+                            <img id="header_image_preview" 
+                                src="{{ $role->header_image ? asset('images/headers/' . $role->header_image . '.png') : $role->header_image_url }}" 
+                                alt="Header Image Preview" 
+                                style="max-height:120px; {{ $role->header_image || $role->header_image_url ? '' : 'display:none;' }}" 
+                                class="pt-3" />
+                            @if ($role->header_image_url)
+                            <a href="#"
+                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}'; }"
+                                class="hover:underline text-gray-900 dark:text-gray-100">
+                                {{ __('messages.delete_image') }}
+                            </a>
+                            @endif
+
                         </div>
 
                     </div>
