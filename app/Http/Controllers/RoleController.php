@@ -1262,4 +1262,19 @@ class RoleController extends Controller
 
         return response()->json($roles);
     }
+
+    public function changePlan($subdomain, $plan_type)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (auth()->user()->id != $role->user_id) {
+            return redirect()->back()->with('error', __('messages.unauthorized'));
+        }
+
+        $role->plan_type = $plan_type;
+        $role->plan_expires = null;
+        $role->save();
+
+        return redirect()->back()->with('message', __('messages.plan_changed'));
+    }
 }

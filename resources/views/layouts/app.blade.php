@@ -182,6 +182,7 @@
             Toastify({
                 text: "{{ session('error') }}",
                 close: true,
+                duration: 10000,
                 position: 'center',
                 stopOnFocus: true,
                 style: {
