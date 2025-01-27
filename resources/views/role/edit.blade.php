@@ -749,7 +749,7 @@
 
                                     @if ($role->background_image_url)
                                     <img src="{{ $role->background_image_url }}" style="max-height:120px" class="pt-3" />
-                                    <a href="#" id="delete_background_image" style="display: {{ $role->background_image ? '' : 'none' }};"
+                                    <a href="#"
                                         onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}'; } return false;"
                                         class="hover:underline text-gray-900 dark:text-gray-100">
                                         {{ __('messages.delete_image') }}
