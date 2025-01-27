@@ -611,6 +611,24 @@
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                         </div>
 
+                        <div class="mb-6">
+                            <x-input-label for="event_slug" :value="__('messages.url')" />
+                            <div class="mt-1 flex">
+                                <x-text-input type="text" 
+                                    class="block w-1/2 rounded-r-none bg-gray-100 dark:bg-gray-800" 
+                                    :value="''"
+                                    readonly />
+                                <x-text-input id="event_slug" 
+                                    name="slug" 
+                                    type="text" 
+                                    class="block w-1/2 rounded-l-none border-l-0"
+                                    :value="old('slug', $event->slug)"
+                                    placeholder="{{ __('messages.auto_generated') }}"
+                                    autocomplete="off" />
+                            </div>
+                            <x-input-error class="mt-2" :messages="$errors->get('slug')" />
+                        </div>
+
                         @if (! $role->isCurator())
                         <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                             <div class="flex items-center">
@@ -711,173 +729,173 @@
 
                     </div>
                 </div>
-                @endif
-                
-                @if ($event->user_id == $user->id)
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
-                    <div class="max-w-xl">                                                
-                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('messages.event_tickets') }}
-                        </h2>
 
-                        <div class="mb-6">
-                            <div class="flex items-center">
-                                <input id="tickets_enabled" name="tickets_enabled" type="checkbox" v-model="event.tickets_enabled" :value="1"
-                                    class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
-                                    {{ ! $role->isPro() ? 'disabled' : '' }}>
-                                <input type="hidden" name="tickets_enabled" :value="event.tickets_enabled ? 1 : 0" >
-                                <label for="tickets_enabled" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
-                                    {{ __('messages.enable_tickets') }}
-                                    @if (! $role->isPro())
-                                    <div class="text-xs pt-1">
-                                        <a href="{{ route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan']) }}" class="hover:underline text-gray-600 dark:text-gray-400" target="_blank">
-                                            {{ __('messages.requires_pro_plan') }}
-                                        </a>
-                                    </div>
-                                    @endif
-                                </label>
-                            </div>
-                        </div>
+                    @if ($event->user_id == $user->id)
+                    <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                        <div class="max-w-xl">                                                
+                            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                                {{ __('messages.event_tickets') }}
+                            </h2>
 
-                        @if ($role->isPro())
-                        <div v-show="event.tickets_enabled">
-
-                            @if ($user->stripe_completed_at || $user->invoiceninja_api_key)
-                            <div class="mb-6">
-                                <x-input-label for="payment_method" :value="__('messages.payment_method')"/>
-                                <select id="payment_method" name="payment_method" v-model="event.payment_method" required
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
-                                    <option value="cash">Cash</option>
-                                    @if ($user->stripe_completed_at)
-                                    <option value="stripe">Stripe - {{ $user->stripe_company_name }}</option>
-                                    @endif
-                                    @if ($user->invoiceninja_api_key)
-                                    <option value="invoiceninja">Invoice Ninja - {{ $user->invoiceninja_company_name }}</option>
-                                    @endif
-                                </select>
-                                <div class="text-xs pt-1">
-                                    <a href="{{ route('profile.edit') }}" class="hover:underline text-gray-600 dark:text-gray-400" target="_blank">
-                                        {{ __('messages.manage_payment_methods') }}
-                                    </a>
-                                </div>
-                            </div>
-                            @endif
-
-                            <div class="mb-6">
-                                <x-input-label for="ticket_currency_code" :value="__('messages.currency')"/>
-                                <select id="ticket_currency_code" name="ticket_currency_code" v-model="event.ticket_currency_code" required
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
-                                    @foreach ($currencies as $currency)
-                                    @if ($loop->index == 2)
-                                    <option disabled>──────────</option>
-                                    @endif
-                                    <option value="{{ $currency->value }}" {{ $event->ticket_currency_code == $currency->value ? 'selected' : '' }}>
-                                        {{ $currency->value }} - {{ $currency->label }}
-                                    </option>
-                                    @endforeach
-                                </select>
-                                @if (! $user->stripe_completed_at && ! $user->invoiceninja_api_key)
-                                <div class="text-xs pt-1">
-                                    <a href="{{ route('profile.edit') }}" class="hover:underline text-gray-600 dark:text-gray-400" target="_blank">
-                                        {{ __('messages.manage_payment_methods') }}
-                                    </a>
-                                </div>
-                                @endif
-                            </div>
-
-                            <div class="mb-6" v-show="event.payment_method == 'cash'">
-                                <x-input-label for="payment_instructions" :value="__('messages.payment_instructions')" />
-                                <textarea id="payment_instructions" name="payment_instructions" v-model="event.payment_instructions" rows="4"
-                                    class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
-                            </div>
-
-                            <div class="mb-6">
-                                <div v-for="(ticket, index) in tickets" :key="index" 
-                                     :class="{'mt-4 p-4 border rounded-lg': tickets.length > 1, 'mt-4': tickets.length === 1}">
-                                    <input type="hidden" v-bind:name="`tickets[${index}][id]`" v-model="ticket.id">
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <x-input-label :value="__('messages.price')" />
-                                            <x-text-input type="number" step="0.01" v-bind:name="`tickets[${index}][price]`" 
-                                                v-model="ticket.price" class="mt-1 block w-full" placeholder="{{ __('messages.free') }}" />
-                                        </div>
-                                        <div>
-                                            <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.quantity') }} @{{ (! isRecurring && ticket.sold && Object.values(JSON.parse(ticket.sold))[0] > 0) ? (' - ' + Object.values(JSON.parse(ticket.sold))[0] + ' ' +soldLabel) : '' }}</label>
-                                            <x-text-input type="number" v-bind:name="`tickets[${index}][quantity]`" 
-                                                v-model="ticket.quantity" class="mt-1 block w-full" placeholder="{{ __('messages.unlimited') }}" />
-                                        </div>
-                                        <div v-if="tickets.length > 1">
-                                            <x-input-label :value="__('messages.type') . ' *'" />
-                                            <x-text-input v-bind:name="`tickets[${index}][type]`" v-model="ticket.type" 
-                                                class="mt-1 block w-full" required />
-                                        </div>
-                                        <div v-if="tickets.length > 1" class="flex items-end">
-                                            <x-secondary-button @click="removeTicket(index)" type="button" class="mt-1">
-                                                {{ __('messages.remove') }}
-                                            </x-secondary-button>
-                                        </div>
-                                    </div>
-                                    <div class="mt-4">
-                                        <x-input-label :value="__('messages.description')" />
-                                        <textarea v-bind:name="`tickets[${index}][description]`" v-model="ticket.description" rows="4"
-                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
-                                    </div>
-                                </div>
-
-                                <x-secondary-button @click="addTicket" type="button" class="mt-4">
-                                    {{ __('messages.add_type') }}
-                                </x-secondary-button>
-                            </div>
-
-                            <br/>
-
-                            <div class="mb-6">
-                                <x-input-label for="ticket_notes" :value="__('messages.ticket_notes')" />
-                                <textarea id="ticket_notes" name="ticket_notes" v-model="event.ticket_notes" rows="4"
-                                    class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
-                            </div>
-
-                            <div v-if="hasLimitedPaidTickets">
-                                <div class="mb-6">
-                                    <div class="flex items-center">
-                                        <input id="expire_unpaid_tickets_checkbox" name="expire_unpaid_tickets_checkbox" type="checkbox" 
-                                            v-model="showExpireUnpaid"
-                                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
-                                            @change="toggleExpireUnpaid">
-                                        <label for="expire_unpaid_tickets_checkbox" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
-                                            {{ __('messages.expire_unpaid_tickets') }}
-                                        </label>
-                                    </div>
-                                </div>                                                        
-
-                                <div class="mb-6" v-if="showExpireUnpaid">
-                                    <x-input-label for="expire_unpaid_tickets" :value="__('messages.after_number_of_hours')" />
-                                    <x-text-input id="expire_unpaid_tickets" name="expire_unpaid_tickets" type="number" class="mt-1 block w-full"
-                                        :value="old('expire_unpaid_tickets', $event->expire_unpaid_tickets)"
-                                        v-model="event.expire_unpaid_tickets"
-                                        autocomplete="off" />
-                                    <x-input-error class="mt-2" :messages="$errors->get('expire_unpaid_tickets')" />
-                                </div>
-                                <div v-else>
-                                    <input type="hidden" name="expire_unpaid_tickets" value="0"/>
-                                </div>
-                            </div>
-
-                            @if ($user->isMember($subdomain))
                             <div class="mb-6">
                                 <div class="flex items-center">
-                                    <input id="save_default_tickets" name="save_default_tickets" type="checkbox"
-                                        class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                                    <label for="save_default_tickets" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
-                                        {{ __('messages.save_as_default') }}
+                                    <input id="tickets_enabled" name="tickets_enabled" type="checkbox" v-model="event.tickets_enabled" :value="1"
+                                        class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
+                                        {{ ! $role->isPro() ? 'disabled' : '' }}>
+                                    <input type="hidden" name="tickets_enabled" :value="event.tickets_enabled ? 1 : 0" >
+                                    <label for="tickets_enabled" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                        {{ __('messages.enable_tickets') }}
+                                        @if (! $role->isPro())
+                                        <div class="text-xs pt-1">
+                                            <a href="{{ route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan']) }}" class="hover:underline text-gray-600 dark:text-gray-400" target="_blank">
+                                                {{ __('messages.requires_pro_plan') }}
+                                            </a>
+                                        </div>
+                                        @endif
                                     </label>
                                 </div>
                             </div>
+
+                            @if ($role->isPro())
+                            <div v-show="event.tickets_enabled">
+
+                                @if ($user->stripe_completed_at || $user->invoiceninja_api_key)
+                                <div class="mb-6">
+                                    <x-input-label for="payment_method" :value="__('messages.payment_method')"/>
+                                    <select id="payment_method" name="payment_method" v-model="event.payment_method" required
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                        <option value="cash">Cash</option>
+                                        @if ($user->stripe_completed_at)
+                                        <option value="stripe">Stripe - {{ $user->stripe_company_name }}</option>
+                                        @endif
+                                        @if ($user->invoiceninja_api_key)
+                                        <option value="invoiceninja">Invoice Ninja - {{ $user->invoiceninja_company_name }}</option>
+                                        @endif
+                                    </select>
+                                    <div class="text-xs pt-1">
+                                        <a href="{{ route('profile.edit') }}" class="hover:underline text-gray-600 dark:text-gray-400" target="_blank">
+                                            {{ __('messages.manage_payment_methods') }}
+                                        </a>
+                                    </div>
+                                </div>
+                                @endif
+
+                                <div class="mb-6">
+                                    <x-input-label for="ticket_currency_code" :value="__('messages.currency')"/>
+                                    <select id="ticket_currency_code" name="ticket_currency_code" v-model="event.ticket_currency_code" required
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                        @foreach ($currencies as $currency)
+                                        @if ($loop->index == 2)
+                                        <option disabled>──────────</option>
+                                        @endif
+                                        <option value="{{ $currency->value }}" {{ $event->ticket_currency_code == $currency->value ? 'selected' : '' }}>
+                                            {{ $currency->value }} - {{ $currency->label }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                    @if (! $user->stripe_completed_at && ! $user->invoiceninja_api_key)
+                                    <div class="text-xs pt-1">
+                                        <a href="{{ route('profile.edit') }}" class="hover:underline text-gray-600 dark:text-gray-400" target="_blank">
+                                            {{ __('messages.manage_payment_methods') }}
+                                        </a>
+                                    </div>
+                                    @endif
+                                </div>
+
+                                <div class="mb-6" v-show="event.payment_method == 'cash'">
+                                    <x-input-label for="payment_instructions" :value="__('messages.payment_instructions')" />
+                                    <textarea id="payment_instructions" name="payment_instructions" v-model="event.payment_instructions" rows="4"
+                                        class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
+                                </div>
+
+                                <div class="mb-6">
+                                    <div v-for="(ticket, index) in tickets" :key="index" 
+                                        :class="{'mt-4 p-4 border rounded-lg': tickets.length > 1, 'mt-4': tickets.length === 1}">
+                                        <input type="hidden" v-bind:name="`tickets[${index}][id]`" v-model="ticket.id">
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <x-input-label :value="__('messages.price')" />
+                                                <x-text-input type="number" step="0.01" v-bind:name="`tickets[${index}][price]`" 
+                                                    v-model="ticket.price" class="mt-1 block w-full" placeholder="{{ __('messages.free') }}" />
+                                            </div>
+                                            <div>
+                                                <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.quantity') }} @{{ (! isRecurring && ticket.sold && Object.values(JSON.parse(ticket.sold))[0] > 0) ? (' - ' + Object.values(JSON.parse(ticket.sold))[0] + ' ' +soldLabel) : '' }}</label>
+                                                <x-text-input type="number" v-bind:name="`tickets[${index}][quantity]`" 
+                                                    v-model="ticket.quantity" class="mt-1 block w-full" placeholder="{{ __('messages.unlimited') }}" />
+                                            </div>
+                                            <div v-if="tickets.length > 1">
+                                                <x-input-label :value="__('messages.type') . ' *'" />
+                                                <x-text-input v-bind:name="`tickets[${index}][type]`" v-model="ticket.type" 
+                                                    class="mt-1 block w-full" required />
+                                            </div>
+                                            <div v-if="tickets.length > 1" class="flex items-end">
+                                                <x-secondary-button @click="removeTicket(index)" type="button" class="mt-1">
+                                                    {{ __('messages.remove') }}
+                                                </x-secondary-button>
+                                            </div>
+                                        </div>
+                                        <div class="mt-4">
+                                            <x-input-label :value="__('messages.description')" />
+                                            <textarea v-bind:name="`tickets[${index}][description]`" v-model="ticket.description" rows="4"
+                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <x-secondary-button @click="addTicket" type="button" class="mt-4">
+                                        {{ __('messages.add_type') }}
+                                    </x-secondary-button>
+                                </div>
+
+                                <br/>
+
+                                <div class="mb-6">
+                                    <x-input-label for="ticket_notes" :value="__('messages.ticket_notes')" />
+                                    <textarea id="ticket_notes" name="ticket_notes" v-model="event.ticket_notes" rows="4"
+                                        class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
+                                </div>
+
+                                <div v-if="hasLimitedPaidTickets">
+                                    <div class="mb-6">
+                                        <div class="flex items-center">
+                                            <input id="expire_unpaid_tickets_checkbox" name="expire_unpaid_tickets_checkbox" type="checkbox" 
+                                                v-model="showExpireUnpaid"
+                                                class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
+                                                @change="toggleExpireUnpaid">
+                                            <label for="expire_unpaid_tickets_checkbox" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                                {{ __('messages.expire_unpaid_tickets') }}
+                                            </label>
+                                        </div>
+                                    </div>                                                        
+
+                                    <div class="mb-6" v-if="showExpireUnpaid">
+                                        <x-input-label for="expire_unpaid_tickets" :value="__('messages.after_number_of_hours')" />
+                                        <x-text-input id="expire_unpaid_tickets" name="expire_unpaid_tickets" type="number" class="mt-1 block w-full"
+                                            :value="old('expire_unpaid_tickets', $event->expire_unpaid_tickets)"
+                                            v-model="event.expire_unpaid_tickets"
+                                            autocomplete="off" />
+                                        <x-input-error class="mt-2" :messages="$errors->get('expire_unpaid_tickets')" />
+                                    </div>
+                                    <div v-else>
+                                        <input type="hidden" name="expire_unpaid_tickets" value="0"/>
+                                    </div>
+                                </div>
+
+                                @if ($user->isMember($subdomain))
+                                <div class="mb-6">
+                                    <div class="flex items-center">
+                                        <input id="save_default_tickets" name="save_default_tickets" type="checkbox"
+                                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                                        <label for="save_default_tickets" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                            {{ __('messages.save_as_default') }}
+                                        </label>
+                                    </div>
+                                </div>
+                                @endif
+                            </div>
                             @endif
                         </div>
-                        @endif
                     </div>
-                </div>
+                    @endif
                 @endif
 
             </div>
