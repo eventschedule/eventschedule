@@ -611,6 +611,7 @@
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                         </div>
 
+                        <!--
                         <div class="mb-6">
                             <x-input-label for="event_slug" :value="__('messages.url')" />
                             <div class="mt-1 flex">
@@ -628,6 +629,7 @@
                             </div>
                             <x-input-error class="mt-2" :messages="$errors->get('slug')" />
                         </div>
+                        -->
 
                         @if (! $role->isCurator())
                         <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
