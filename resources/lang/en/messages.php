@@ -399,4 +399,5 @@ return [
     'free_plan' => 'Free Plan',
     'expires_on' => 'Expires On',
     'change_to_free_plan' => 'Change to Free Plan',
+    'plan_changed' => 'Plan changed successfully!',
 ];

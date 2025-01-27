@@ -35,7 +35,6 @@ Route::get('/ticket/view/{event_id}/{secret}', [TicketController::class, 'view']
 Route::middleware(['auth', 'verified'])->group(function () 
 {
     Route::get('/events', [HomeController::class, 'home'])->name('home');
-    
     Route::get('/new/{type}', [RoleController::class, 'create'])->name('new');
     Route::post('/validate_address', [RoleController::class, 'validateAddress'])->name('validate_address')->middleware('throttle:25,1440');
     Route::post('/store', [RoleController::class, 'store'])->name('role.store');
@@ -59,6 +58,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/scan', [TicketController::class, 'scan'])->name('ticket.scan');
     Route::post('/ticket/view/{event_id}/{secret}', [TicketController::class, 'scanned'])->name('ticket.scanned');
 
+    Route::get('/{subdomain}/change_plan/{plan_type}', [RoleController::class, 'changePlan'])->name('role.change_plan');
     Route::post('/{subdomain}/availability', [RoleController::class, 'availability'])->name('role.availability');
     Route::get('/{subdomain}/edit', [RoleController::class, 'edit'])->name('role.edit');
     Route::get('/{subdomain}/subscribe', [RoleController::class, 'subscribe'])->name('role.subscribe');
