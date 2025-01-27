@@ -248,6 +248,8 @@
                     {{ __('messages.followers') }}{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</option>
                 <option value="team" {{ $tab == 'team' ? 'selected' : '' }}>
                     {{ __('messages.team') }}{{ count($members) ? ' (' . count($members) . ')' : '' }}</option>
+                <option value="plan" {{ $tab == 'plan' ? 'selected' : '' }}>
+                    {{ __('messages.plan') }}</option>
             </select>
         </div>
 
@@ -270,6 +272,8 @@
                     class="whitespace-nowrap border-b-2 {{ $tab == 'followers' ? 'border-[#4E81FA] px-1 pb-4 text-sm font-medium text-[#4E81FA]' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.followers') }}{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</a>
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'team' ? 'border-[#4E81FA] px-1 pb-4 text-sm font-medium text-[#4E81FA]' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.team') }}{{ count($members) ? ' (' . count($members) . ')' : '' }}</a>
+                <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']) }}"
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'plan' ? 'border-[#4E81FA] px-1 pb-4 text-sm font-medium text-[#4E81FA]' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.plan') }}</a>
             </nav>
         </div>
 
@@ -287,6 +291,8 @@
     @include('role.show-admin-followers')
     @elseif ($tab == 'team')
     @include('role.show-admin-team')
+    @elseif ($tab == 'plan')
+    @include('role.show-admin-plan')
     @endif
 
 </x-app-admin-layout>

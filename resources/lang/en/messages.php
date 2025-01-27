@@ -393,4 +393,10 @@ return [
     'refund_success' => 'Successfully refunded ticket',
     'cancel_success' => 'Successfully cancelled ticket',
     'delete_success' => 'Successfully deleted ticket',
+    'plan' => 'Plan',
+    'curent_plan' => 'Current Plan',
+    'pro_plan' => 'Pro Plan',
+    'free_plan' => 'Free Plan',
+    'expires_on' => 'Expires On',
+    'change_to_free_plan' => 'Change to Free Plan',
 ];
