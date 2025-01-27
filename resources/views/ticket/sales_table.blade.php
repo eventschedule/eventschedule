@@ -41,7 +41,9 @@
                                 {{ number_format($sale->payment_amount, 2, '.', ',') }} {{ $sale->event->ticket_currency_code }}
                             </td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                @if ($sale->payment_method == 'invoiceninja')
+                                @if ($sale->transaction_reference == __('messages.manual_payment'))
+                                    {{ __('messages.manual_payment') }}
+                                @elseif ($sale->payment_method == 'invoiceninja')
                                     <a href="https://app.invoicing.co/#/invoices/{{ $sale->transaction_reference }}/edit" target="_blank" class="hover:underline">
                                         {{ $sale->transaction_reference }}
                                     </a>
@@ -83,7 +85,7 @@
                                             </a>
 
                                             @if($sale->status === 'unpaid')
-                                                <button @click="handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_paid')" 
+                                                <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_paid')" 
                                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left" 
                                                         role="menuitem">
                                                     {{ __('messages.mark_paid') }}
@@ -91,7 +93,7 @@
                                             @endif
 
                                             @if(false && $sale->status === 'paid' && $sale->payment_method != 'cash')
-                                                <button @click="handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'refund')" 
+                                                <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'refund')" 
                                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left" 
                                                         role="menuitem">
                                                     {{ __('messages.refund') }}
@@ -99,7 +101,7 @@
                                             @endif
 
                                             @if(in_array($sale->status, ['unpaid', 'paid']))
-                                                <button @click="handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'cancel')" 
+                                                <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'cancel')" 
                                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left" 
                                                         role="menuitem">
                                                     {{ __('messages.cancel') }}
@@ -107,7 +109,7 @@
                                             @endif
                                             
                                             @if(! in_array($sale->status, ['unpaid', 'paid']) && ! $sale->is_deleted)
-                                            <button @click="handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'delete')" 
+                                            <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'delete')" 
                                                     class="block px-4 py-2 text-sm text-red-700 hover:bg-gray-100 w-full text-left" 
                                                     role="menuitem">
                                                     {{ __('messages.delete') }}
