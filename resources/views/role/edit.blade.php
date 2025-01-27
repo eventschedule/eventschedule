@@ -78,6 +78,7 @@
 
             function previewImage(input, previewId) {
                 const preview = document.getElementById(previewId);
+                const warningElement = document.getElementById(previewId.split('_')[0] + '_image_size_warning');
 
                 if (!input || !input.files || !input.files[0]) {
                     console.log('no file')
@@ -85,7 +86,6 @@
                         preview.src = '';
                         preview.style.display = 'none';
                     }
-                    const warningElement = document.getElementById(previewId.split('_')[0] + '_image_size_warning');
                     if (warningElement) {
                         warningElement.textContent = '';
                         warningElement.style.display = 'none';
@@ -96,7 +96,6 @@
 
                 const file = input.files[0];
                 const reader = new FileReader();
-                var warningElement = document.getElementById(previewId.split('_')[0] + '_image_size_warning');
 
                 reader.onloadend = function () {
                     const img = new Image();
@@ -115,12 +114,14 @@
                             warningMessage += "{{ __('messages.image_not_square') }}";
                         }
 
-                        if (warningMessage) {
-                            warningElement.textContent = warningMessage;
-                            warningElement.style.display = 'block';
-                        } else {
-                            warningElement.textContent = '';
-                            warningElement.style.display = 'none';
+                        if (warningElement) {
+                            if (warningMessage) {
+                                warningElement.textContent = warningMessage;
+                                warningElement.style.display = 'block';
+                            } else {
+                                warningElement.textContent = '';
+                                warningElement.style.display = 'none';
+                            }
                         }
 
                         if (warningMessage == '') {
@@ -145,8 +146,10 @@
                 } else {
                     preview.src = '';
                     preview.style.display = 'none';
-                    warningElement.textContent = '';
-                    warningElement.style.display = 'none';
+                    if (warningElement) {
+                        warningElement.textContent = '';
+                        warningElement.style.display = 'none';
+                    }
                     updatePreview();
                 }
             }
@@ -738,6 +741,9 @@
                                         :value="old('background_image_url')" 
                                         oninput="updatePreview()" 
                                         accept="image/png, image/jpeg" />
+                                    <p id="background_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                                        {{ __('messages.image_size_warning') }}
+                                    </p>
 
                                     <img id="background_image_preview" src="" alt="Background Image Preview" style="max-height:120px; display:none;" class="pt-3" />
 
