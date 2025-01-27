@@ -730,7 +730,7 @@
                                     {{ __('messages.enable_tickets') }}
                                     @if (! $role->isPro())
                                     <div class="text-xs pt-1">
-                                        <a href="#" class="hover:underline text-gray-600 dark:text-gray-400" target="_blank">
+                                        <a href="{{ route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan']) }}" class="hover:underline text-gray-600 dark:text-gray-400" target="_blank">
                                             {{ __('messages.requires_pro_plan') }}
                                         </a>
                                     </div>
@@ -739,6 +739,7 @@
                             </div>
                         </div>
 
+                        @if ($role->isPro())
                         <div v-show="event.tickets_enabled">
 
                             @if ($user->stripe_completed_at || $user->invoiceninja_api_key)
@@ -874,6 +875,7 @@
                             </div>
                             @endif
                         </div>
+                        @endif
                     </div>
                 </div>
                 @endif
@@ -1238,13 +1240,21 @@
         this.isInPerson = true;
         if (preferences) {
           this.isOnline = preferences.isOnline;          
-          this.event.tickets_enabled = preferences.ticketsEnabled ?? false;
+          @if ($role->isPro())
+            this.event.tickets_enabled = preferences.ticketsEnabled ?? false;
+          @else
+            this.event.tickets_enabled = false;
+          @endif
         }
         @else
         if (preferences) {
           this.isInPerson = preferences.isInPerson;
           this.isOnline = preferences.isOnline;
-          this.event.tickets_enabled = preferences.ticketsEnabled ?? false;
+          @if ($role->isPro())
+            this.event.tickets_enabled = preferences.ticketsEnabled ?? false;
+          @else
+            this.event.tickets_enabled = false;
+          @endif
         }
         @endif
       },
