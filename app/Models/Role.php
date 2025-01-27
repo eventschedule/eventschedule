@@ -23,6 +23,7 @@ class Role extends Model implements MustVerifyEmail
         'background_colors',
         'background_color',
         'background_image',
+        'header_image',
         'accent_color',
         'font_color',
         'font_family',

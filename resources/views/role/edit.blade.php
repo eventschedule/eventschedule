@@ -65,6 +65,8 @@
             $('#language_code').val('{{ old('language_code', $role->language_code) }}');
             $('#timezone').val('{{ old('timezone', $role->timezone) }}');
             
+            $('#header_image').trigger('input');
+            
             updatePreview();
             onChangeBackground();
             onChangeCountry();
@@ -500,9 +502,11 @@
                                 </button>
                             </div>
 
-                            <img id="header_image_preview" src="{{ $role->header_image_url }}" alt="Header Image Preview" 
-                                 style="max-height:120px; {{ $role->header_image_url || $role->header_image ? '' : 'display:none;' }}" 
-                                 class="pt-3" />
+                            <img id="header_image_preview" 
+                                src="{{ $role->header_image ? asset('images/headers/' . $role->header_image . '.png') : $role->header_image_url }}" 
+                                alt="Header Image Preview" 
+                                style="max-height:120px; {{ $role->header_image || $role->header_image_url ? '' : 'display:none;' }}" 
+                                class="pt-3" />
 
                             <div id="custom_header_input" style="display:none">
                                 <input id="header_image_url" name="header_image_url" type="file" 
