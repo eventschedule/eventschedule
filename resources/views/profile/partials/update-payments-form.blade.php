@@ -50,7 +50,7 @@
             </div>        
         @else
             <a href="https://invoiceninja.com/partner-perks/event-schedule" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">
-                {{ __('messages.first_year_free') }}
+                {{ __('messages.special_offer_first_year_free') }}
             </a>
 
             <div style="margin-top: 16px;">

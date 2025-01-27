@@ -9,6 +9,10 @@
                 <span class="text-gray-600 w-32">{{ __('messages.curent_plan') }}</span>
                 <span class="font-medium text-gray-700">
                     {{ $role->plan_type == 'pro' ? __('messages.pro_plan') : __('messages.free_plan') }}
+
+                    @if ($role->plan_type == 'pro' && $role->plan_expires)
+                        - {{ __('messages.first_year_free') }}
+                    @endif
                 </span>
             </div>
 
