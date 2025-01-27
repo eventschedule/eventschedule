@@ -7,7 +7,13 @@
           <div
             class="relative before:block before:absolute before:bg-[#00000033] before:-inset-0"
           >
-            @if ($role->header_image_url)
+            
+            @if ($role->header_image)
+            <img
+              class="block max-h-72 w-full object-cover rounded-t-2xl"
+              src="{{ asset('images/headers') }}/{{ $role->header_image }}.png"
+            />
+            @elseif ($role->header_image_url)
             <img
               class="block max-h-72 w-full object-cover rounded-t-2xl"
               src="{{ $role->header_image_url }}"
