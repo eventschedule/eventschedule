@@ -17,6 +17,7 @@ class Event extends Model
         'event_password',
         'venue_id',
         'name',
+        'slug',
         'tickets_enabled',
         'ticket_currency_code',
         'ticket_notes',

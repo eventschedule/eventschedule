@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,6 +12,22 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::table('events', function (Blueprint $table) {
+            $table->string('slug')->nullable()->index();
+        });
+
+        DB::table('events')->get()->each(function ($event) {
+            DB::table('events')
+                ->where('id', $event->id)
+                ->update([
+                    'slug' => \Str::slug($event->name),
+                ]);
+        });
+
+        Schema::table('events', function (Blueprint $table) {
+            $table->string('slug')->nullable(false)->change();
+        });
+
         Schema::table('sale_tickets', function (Blueprint $table) {
             $table->integer('quantity')->default(0);
         });
@@ -29,6 +46,14 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('events', function (Blueprint $table) {
+            $table->dropIndex(['slug']);
+        });
+
+        Schema::table('events', function (Blueprint $table) {
+            $table->dropColumn('slug');
+        });
+
         Schema::table('sale_tickets', function (Blueprint $table) {
             $table->dropColumn('quantity');
         });
