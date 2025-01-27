@@ -222,51 +222,14 @@ class Event extends Model
     }
 
     public function getGuestUrl($subdomain = false, $date = null)
-    {        
-        $role = $this->role();
-        $venue = $this->venue;
-        $otherSubdomain = '';
-        $eventName = '';
-
+    {
         if (! $subdomain) {
-            if ($this->curator_id) {
-                $subdomain = $this->curator->subdomain;
-            } else if ($role) {
-                $subdomain = $role->subdomain;
-            } else if ($venue) {
-                $subdomain = $venue->subdomain;
-            }
-        }
-    
-        if ($role && $subdomain == $role->subdomain) {
-            $otherSubdomain = $venue ? $venue->subdomain : '';
-        } else if ($venue && $subdomain == $venue->subdomain) {
-            $otherSubdomain = $role ? $role->subdomain : '';
-        } else {
-            if ($role && $role->isClaimed()) {
-                $subdomain = $role->subdomain;
-                if ($venue && $venue->isClaimed()) {
-                    $otherSubdomain = $venue->subdomain;
-                } else {
-                    $otherSubdomain = UrlUtils::encodeId($this->id);
-                }
-            } else if ($venue && $venue->isClaimed()) {
-                $subdomain = $venue->subdomain;
-                $otherSubdomain = UrlUtils::encodeId($this->id);
-            } else {
-                $otherSubdomain = UrlUtils::encodeId($this->id);
-            }
-        }
-
-        if (! $otherSubdomain) {
-            $otherSubdomain = UrlUtils::encodeId($this->id);
-            $eventName = UrlUtils::cleanSlug($this->name);
+            $subdomain = $this->role() ? $this->role()->subdomain : $this->venue->subdomain;
         }
 
         $data = [
             'subdomain' => $subdomain, 
-            'other_subdomain' => $otherSubdomain, 
-            'event_name' => $eventName,
+            'slug' => $this->slug, 
             'date' => $date ? (is_string($date) ? $date : $date->format('Y-m-d')) : Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d'),
         ];
 
