@@ -159,12 +159,14 @@
                 var headerImageUrl = $(this).find(':selected').val();
                 if (headerImageUrl) {
                     headerImageUrl = "{{ asset('images/headers') }}" + '/' + headerImageUrl + '.png';
-                    console.log(headerImageUrl);
                     $('#header_image_preview').attr('src', headerImageUrl).show();
+                    $('#delete_header_image').hide();
                 } else if ({{ $role->header_image_url ? 'true' : 'false' }}) {
                     $('#header_image_preview').attr('src', '{{ $role->header_image_url }}').show();
+                    $('#delete_header_image').show();
                 } else {
                     $('#header_image_preview').hide();
+                    $('#delete_header_image').hide();
                 }
             });
 
@@ -521,7 +523,7 @@
                                 style="max-height:120px; {{ $role->header_image || $role->header_image_url ? '' : 'display:none;' }}" 
                                 class="pt-3" />
                             @if ($role->header_image_url)
-                            <a href="#"
+                            <a href="#" id="delete_header_image" style="display: {{ $role->header_image ? 'none' : 'block' }};"
                                 onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}'; }"
                                 class="hover:underline text-gray-900 dark:text-gray-100">
                                 {{ __('messages.delete_image') }}
@@ -740,7 +742,7 @@
 
                                     @if ($role->background_image_url)
                                     <img src="{{ $role->background_image_url }}" style="max-height:120px" class="pt-3" />
-                                    <a href="#"
+                                    <a href="#" id="delete_background_image" style="display: {{ $role->background_image ? '' : 'none' }};"
                                         onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}'; } return false;"
                                         class="hover:underline text-gray-900 dark:text-gray-100">
                                         {{ __('messages.delete_image') }}
