@@ -185,6 +185,7 @@ class RoleController extends Controller
 
         if ($slug) {
 
+            $event = null;
             if ($date) {                
                 $eventDate = Carbon::parse($date);
                 $events = Event::with(['venue', 'roles'])
@@ -199,29 +200,45 @@ class RoleController extends Controller
                             })
                             ->orderBy('starts_at')
                             ->get();
+
+                foreach ($events as $each) {
+                    if ($each->venue->subdomain == $subdomain || $each->isRoleAMember($subdomain, true)) {
+                        $event = $each;
+                        break;
+                    }
+                }
+                
             } else {
+
                 $events = Event::with(['venue', 'roles'])
                             ->where('slug', $slug)
                             ->where('starts_at', '>=', now()->subDay())                    
                             ->orderBy('starts_at', 'desc')
                             ->get();
-
-                if (count($events) == 0) {
+    
+                foreach ($events as $each) {
+                    if ($each->venue->subdomain == $subdomain || $each->isRoleAMember($subdomain, true)) {
+                        $event = $each;
+                        break;
+                    }
+                }
+                
+                if (! $event) {
                     $events = Event::with(['venue', 'roles'])
                                 ->where('slug', $slug)
                                 ->where('starts_at', '<', now())
                                 ->orderBy('starts_at', 'desc')
                                 ->get();                    
+    
+                    foreach ($events as $each) {
+                        if ($each->venue->subdomain == $subdomain || $each->isRoleAMember($subdomain, true)) {
+                            $event = $each;
+                            break;
+                        }
+                    }                    
                 }
             }
 
-            $event = null;
-            foreach ($events as $each) {
-                if ($each->venue_id == $role->id || $each->isRoleAMember($subdomain)) {
-                    $event = $each;
-                    break;
-                }
-            }
 
             if ($event) {
                 if (! $date && $event->days_of_week) {
