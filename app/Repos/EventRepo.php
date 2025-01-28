@@ -268,6 +268,7 @@ class EventRepo
     public function getEvent($subdomain, $slug, $date = null)
     {
         $event = null;
+        
         if ($date) {                
             $eventDate = Carbon::parse($date);
             $events = Event::with(['venue', 'roles'])
