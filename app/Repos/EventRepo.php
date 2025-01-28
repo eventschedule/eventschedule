@@ -386,6 +386,23 @@ class EventRepo
             }
         }
 
+        if ($event) {
+            return $event;
+        }
+
+        if ($eventDate) {
+            $event = Event::with(['venue', 'roles'])
+                        ->whereDate('starts_at', $eventDate)
+                        ->where(function($query) use ($subdomain) {
+                            $query->whereHas('venue', function($q) use ($subdomain) {
+                                $q->where('subdomain', $subdomain);
+                            })->orWhereHas('roles', function($q) use ($subdomain) {
+                                $q->where('subdomain', $subdomain);
+                            });
+                        })
+                        ->first();
+        }
+
         return $event;
     }
 }
