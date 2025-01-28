@@ -268,7 +268,7 @@ class EventRepo
     public function getEvent($subdomain, $slug, $date = null)
     {
         $event = null;
-        $eventDate = Carbon::parse($date);
+        $eventDate = $date ? Carbon::parse($date) : null;
             
         $subdomainRole = Role::where('subdomain', $subdomain)->first();
         $slugRole = Role::where('subdomain', $slug)->first();        
@@ -356,7 +356,6 @@ class EventRepo
                         ->first();
             
         } else {
-
             $event = Event::with(['venue', 'roles'])
                         ->where('slug', $slug)
                         ->where('starts_at', '>=', now()->subDay())                    
