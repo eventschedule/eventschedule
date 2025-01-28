@@ -264,4 +264,64 @@ class EventRepo
 
         return $event;
     }
+
+    public function getEvent($subdomain, $slug, $date = null)
+    {
+        $event = null;
+        if ($date) {                
+            $eventDate = Carbon::parse($date);
+            $events = Event::with(['venue', 'roles'])
+                        ->where('slug', $slug)
+                        ->where(function ($query) use ($eventDate) {
+                            $query->whereDate('starts_at', $eventDate)
+                                ->orWhere(function ($query) use ($eventDate) {
+                                    $query->whereNotNull('days_of_week')
+                                        ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1])
+                                        ->where('starts_at', '<=', $eventDate);
+                                });
+                        })
+                        ->orderBy('starts_at')
+                        ->get();
+
+            foreach ($events as $each) {
+                if ($each->isAtVenue($subdomain) || $each->isRoleAMember($subdomain, true)) {
+                    $event = $each;
+                    break;
+                }
+            }
+            
+        } else {
+
+            $events = Event::with(['venue', 'roles'])
+                        ->where('slug', $slug)
+                        ->where('starts_at', '>=', now()->subDay())                    
+                        ->orderBy('starts_at', 'desc')
+                        ->get();
+
+            foreach ($events as $each) {
+                if ($each->isAtVenue($subdomain) || $each->isRoleAMember($subdomain, true)) {
+                    $event = $each;
+                    break;
+                }
+            }
+            
+            if (! $event) {
+                $events = Event::with(['venue', 'roles'])
+                            ->where('slug', $slug)
+                            ->where('starts_at', '<', now())
+                            ->orderBy('starts_at', 'desc')
+                            ->get();                    
+
+                foreach ($events as $each) {
+                    if ($each->isAtVenue($subdomain) || $each->isRoleAMember($subdomain, true)) {
+                        $event = $each;
+                        break;
+                    }
+                }                    
+            }
+        }
+
+
+        return $event;
+    }
 }

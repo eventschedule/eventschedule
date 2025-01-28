@@ -8,6 +8,7 @@ use App\Http\Requests\RoleEmailVerificationRequest;
 use App\Notifications\DeletedRoleNotification;
 use Illuminate\Auth\Events\Verified;
 use Endroid\QrCode\QrCode;
+use App\Repos\EventRepo;
 use Endroid\QrCode\Writer\PngWriter;
 use App\Http\Requests\RoleCreateRequest;
 use App\Http\Requests\RoleUpdateRequest;
@@ -27,6 +28,13 @@ use Carbon\Carbon;
 
 class RoleController extends Controller
 {
+    protected $eventRepo;
+
+    public function __construct(EventRepo $eventRepo)
+    {
+        $this->eventRepo = $eventRepo;
+    }
+
     public function deleteImage(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
@@ -184,61 +192,7 @@ class RoleController extends Controller
         }
 
         if ($slug) {
-
-            $event = null;
-            if ($date) {                
-                $eventDate = Carbon::parse($date);
-                $events = Event::with(['venue', 'roles'])
-                            ->where('slug', $slug)
-                            ->where(function ($query) use ($eventDate) {
-                                $query->whereDate('starts_at', $eventDate)
-                                    ->orWhere(function ($query) use ($eventDate) {
-                                        $query->whereNotNull('days_of_week')
-                                            ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1])
-                                            ->where('starts_at', '<=', $eventDate);
-                                    });
-                            })
-                            ->orderBy('starts_at')
-                            ->get();
-
-                foreach ($events as $each) {
-                    if ($each->venue->subdomain == $subdomain || $each->isRoleAMember($subdomain, true)) {
-                        $event = $each;
-                        break;
-                    }
-                }
-                
-            } else {
-
-                $events = Event::with(['venue', 'roles'])
-                            ->where('slug', $slug)
-                            ->where('starts_at', '>=', now()->subDay())                    
-                            ->orderBy('starts_at', 'desc')
-                            ->get();
-    
-                foreach ($events as $each) {
-                    if ($each->venue->subdomain == $subdomain || $each->isRoleAMember($subdomain, true)) {
-                        $event = $each;
-                        break;
-                    }
-                }
-                
-                if (! $event) {
-                    $events = Event::with(['venue', 'roles'])
-                                ->where('slug', $slug)
-                                ->where('starts_at', '<', now())
-                                ->orderBy('starts_at', 'desc')
-                                ->get();                    
-    
-                    foreach ($events as $each) {
-                        if ($each->venue->subdomain == $subdomain || $each->isRoleAMember($subdomain, true)) {
-                            $event = $each;
-                            break;
-                        }
-                    }                    
-                }
-            }
-
+            $event = $this->eventRepo->getEvent($subdomain, $slug, $date);
 
             if ($event) {
                 if (! $date && $event->days_of_week) {
@@ -254,7 +208,7 @@ class RoleController extends Controller
                 }
             } else {
                 return redirect($role->getGuestUrl());
-            }
+            }        
         } 
 
         if ($event) {
