@@ -58,13 +58,13 @@ class ExampleTest extends DuskTestCase
                     ->type('address1', '123 Test St')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->assertPathIs('/testvenue')
+                    ->assertPathIs('/test-venue')
                     ->clickLink('Edit Venue')
-                    ->assertPathIs('/testvenue/edit')
+                    ->assertPathIs('/test-venue/edit')
                     ->type('website', 'https://google.com')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->assertPathIs('/testvenue')
+                    ->assertPathIs('/test-venue')
                     ->assertSee('google.com');
 
             // Create/edit talent
@@ -72,30 +72,30 @@ class ExampleTest extends DuskTestCase
                     ->type('name', 'Test Schedule')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->assertPathIs('/testschedule')
+                    ->assertPathIs('/test-schedule')
                     ->clickLink('Edit Schedule')
-                    ->assertPathIs('/testschedule/edit')
+                    ->assertPathIs('/test-schedule/edit')
                     ->type('website', 'https://google.com')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->assertPathIs('/testschedule')
+                    ->assertPathIs('/test-schedule')
                     ->assertSee('google.com');
 
             // Create/edit event
-            $browser->visit('/testschedule/add_event?date=' . date('Y-m-d'))
+            $browser->visit('/test-schedule/add_event?date=' . date('Y-m-d'))
                     ->select('#selected_venue')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->assertPathIs('/testschedule/schedule')
+                    ->assertPathIs('/test-schedule/schedule')
                     ->assertSee('Test Venue');
             
             // Create/edit event
-            $browser->visit('/testvenue/add_event?date=' . date('Y-m-d'))
+            $browser->visit('/test-venue/add_event?date=' . date('Y-m-d'))
                     ->select('#selected_member')
                     ->type('name', 'Venue Event')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->assertPathIs('/testvenue/schedule')
+                    ->assertPathIs('/test-venue/schedule')
                     ->assertSee('Venue Event');
         });
     }
