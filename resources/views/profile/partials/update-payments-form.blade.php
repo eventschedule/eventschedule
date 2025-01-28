@@ -35,7 +35,7 @@
             </div>
         @endif
 
-        <h5 class="text-lg font-medium text-gray-900 dark:text-gray-100 pt-2 pb-1">Invoice Ninja |  
+        <h5 class="text-lg font-medium text-gray-900 dark:text-gray-100 pt-2 pb-1">Invoice Ninja:  
             <a href="https://invoiceninja.com/payments" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">
                 {{ __('messages.15_payment_gateways') }}
             </a>

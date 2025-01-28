@@ -110,7 +110,7 @@ function handleAction(saleId, action) {
                     duration: 3000,
                     position: 'center',
                     stopOnFocus: true,
-                style: {
+                    style: {
                         background: '#4BB543',
                     }
                 }).showToast();
@@ -122,4 +122,5 @@ function handleAction(saleId, action) {
         alert('{{ __("messages.an_error_occurred") }}');
     });
 }
+
 </script>
