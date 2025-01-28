@@ -609,6 +609,13 @@
                                 v-model="eventName"
                                 required autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
+                            @if ($event->exists)
+                            <p class="mt-2 text-sm text-gray-500">
+                                <a href="{{ $event->getGuestUrl($subdomain, $isUnique ? false : null) }}" target="_blank" class="hover:underline">
+                                    {{ \App\Utils\UrlUtils::clean($event->getGuestUrl($subdomain, $isUnique ? false : null)) }}
+                                </a>
+                            </p>
+                            @endif
                         </div>
 
                         <!--

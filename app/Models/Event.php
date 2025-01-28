@@ -232,7 +232,11 @@ class Event extends Model
 
         if (! in_array($subdomain, [$venueSubdomain, $roleSubdomain])) {
             $subdomain = $roleSubdomain;
-        }        
+        }   
+        
+        if (! $subdomain) {
+            $subdomain = $roleSubdomain ? $roleSubdomain : $venueSubdomain;
+        }
 
         $slug = $this->slug;
 
@@ -249,8 +253,11 @@ class Event extends Model
         $data = [
             'subdomain' => $subdomain, 
             'slug' => $slug, 
-            'date' => $date,
         ];
+
+        if ($date) {
+            $data['date'] = $date;
+        }
 
         return route('event.view_guest', $data);
     }
