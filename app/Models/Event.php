@@ -232,9 +232,18 @@ class Event extends Model
             $subdomain = $this->role() ? $this->role()->subdomain : $this->venue->subdomain;
         }
 
+        $slug = $this->slug;
+
+        $claimedVenue = $this->venue && $this->venue->isClaimed();
+        $claimedRole = count($this->roles) == 1 && $this->role() && $this->role()->isClaimed();
+        
+        if ($claimedVenue && $claimedRole) {
+            $slug = $this->venue->subdomain == $subdomain ? $this->role()->subdomain : $this->venue->subdomain;
+        }
+        
         $data = [
             'subdomain' => $subdomain, 
-            'slug' => $this->slug, 
+            'slug' => $slug, 
             'date' => $date ? (is_string($date) ? $date : $date->format('Y-m-d')) : Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d'),
         ];
 
