@@ -144,6 +144,21 @@
         }
     }
 
+    function copyEventUrl(button) {
+        const url = '{{ $event->exists ? $event->getGuestUrl($subdomain, $isUnique ? false : null) : "" }}';
+        navigator.clipboard.writeText(url).then(() => {
+            const originalHTML = button.innerHTML;
+            button.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+            `;
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+            }, 2000);
+        });
+    }
+
     </script>
 
 </x-slot>
@@ -610,10 +625,15 @@
                                 required autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                             @if ($event->exists)
-                            <p class="mt-2 text-sm text-gray-500">
+                            <p class="text-sm text-gray-500 flex items-center gap-2">
                                 <a href="{{ $event->getGuestUrl($subdomain, $isUnique ? false : null) }}" target="_blank" class="hover:underline">
                                     {{ \App\Utils\UrlUtils::clean($event->getGuestUrl($subdomain, $isUnique ? false : null)) }}
                                 </a>
+                                <button type="button" onclick="copyEventUrl(this)" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
+                                    </svg>
+                                </button>
                             </p>
                             @endif
                         </div>

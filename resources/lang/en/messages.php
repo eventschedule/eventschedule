@@ -401,4 +401,5 @@ return [
     'change_to_free_plan' => 'Change to Free Plan',
     'plan_changed' => 'Plan changed successfully!',
     'first_year_free' => 'First year free',
+    'copy_url' => 'Copy URL',
 ];
