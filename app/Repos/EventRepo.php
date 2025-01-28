@@ -268,10 +268,10 @@ class EventRepo
     public function getEvent($subdomain, $slug, $date = null)
     {
         $event = null;
-        
+
         if ($date) {                
             $eventDate = Carbon::parse($date);
-            $events = Event::with(['venue', 'roles'])
+            $event = Event::with(['venue', 'roles'])
                         ->where('slug', $slug)
                         ->where(function ($query) use ($eventDate) {
                             $query->whereDate('starts_at', $eventDate)
@@ -281,44 +281,45 @@ class EventRepo
                                         ->where('starts_at', '<=', $eventDate);
                                 });
                         })
+                        ->where(function($query) use ($subdomain) {
+                            $query->whereHas('venue', function($q) use ($subdomain) {
+                                $q->where('subdomain', $subdomain);
+                            })->orWhereHas('roles', function($q) use ($subdomain) {
+                                $q->where('subdomain', $subdomain);
+                            });
+                        })
                         ->orderBy('starts_at')
-                        ->get();
-
-            foreach ($events as $each) {
-                if ($each->isAtVenue($subdomain) || $each->isRoleAMember($subdomain, true)) {
-                    $event = $each;
-                    break;
-                }
-            }
+                        ->first();
             
         } else {
 
-            $events = Event::with(['venue', 'roles'])
+            $event = Event::with(['venue', 'roles'])
                         ->where('slug', $slug)
                         ->where('starts_at', '>=', now()->subDay())                    
+                        ->where(function($query) use ($subdomain) {
+                            $query->whereHas('venue', function($q) use ($subdomain) {
+                                $q->where('subdomain', $subdomain);
+                            })->orWhereHas('roles', function($q) use ($subdomain) {
+                                $q->where('subdomain', $subdomain);
+                            });
+                        })
                         ->orderBy('starts_at', 'desc')
-                        ->get();
-
-            foreach ($events as $each) {
-                if ($each->isAtVenue($subdomain) || $each->isRoleAMember($subdomain, true)) {
-                    $event = $each;
-                    break;
-                }
-            }
+                        ->first();
             
             if (! $event) {
-                $events = Event::with(['venue', 'roles'])
+                $event = Event::with(['venue', 'roles'])
                             ->where('slug', $slug)
                             ->where('starts_at', '<', now())
+                            ->where(function($query) use ($subdomain) {
+                                $query->whereHas('venue', function($q) use ($subdomain) {
+                                    $q->where('subdomain', $subdomain);
+                                })->orWhereHas('roles', function($q) use ($subdomain) {
+                                    $q->where('subdomain', $subdomain);
+                                });
+                            })    
                             ->orderBy('starts_at', 'desc')
-                            ->get();                    
+                            ->first();                    
 
-                foreach ($events as $each) {
-                    if ($each->isAtVenue($subdomain) || $each->isRoleAMember($subdomain, true)) {
-                        $event = $each;
-                        break;
-                    }
-                }                    
             }
         }
 
