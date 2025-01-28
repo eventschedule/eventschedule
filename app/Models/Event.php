@@ -88,7 +88,6 @@ class Event extends Model
         return $this->belongsToMany(Role::class);
     }
 
-
     public function sales()
     {
         return $this->hasMany(Sale::class)->where('is_deleted', false);
@@ -228,23 +227,29 @@ class Event extends Model
 
     public function getGuestUrl($subdomain = false, $date = null)
     {
-        if (! $subdomain) {
-            $subdomain = $this->role() ? $this->role()->subdomain : $this->venue->subdomain;
-        }
+        $venueSubdomain = $this->venue ? $this->venue->subdomain : null;
+        $roleSubdomain = $this->role() ? $this->role()->subdomain : null;
+
+        if (! in_array($subdomain, [$venueSubdomain, $roleSubdomain])) {
+            $subdomain = $roleSubdomain;
+        }        
 
         $slug = $this->slug;
 
-        $claimedVenue = $this->venue && $this->venue->isClaimed();
-        $claimedRole = count($this->roles) == 1 && $this->role() && $this->role()->isClaimed();
-        
-        if ($claimedVenue && $claimedRole) {
-            $slug = $this->venue->subdomain == $subdomain ? $this->role()->subdomain : $this->venue->subdomain;
+        if ($venueSubdomain && $roleSubdomain) {
+            $slug = $venueSubdomain == $subdomain ? $roleSubdomain : $venueSubdomain;
         }
         
+        // TODO supoprt custom_slug
+        
+        if ($date === null) {
+            $date = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d');
+        }
+
         $data = [
             'subdomain' => $subdomain, 
             'slug' => $slug, 
-            'date' => $date ? $date : Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d'),
+            'date' => $date,
         ];
 
         return route('event.view_guest', $data);
