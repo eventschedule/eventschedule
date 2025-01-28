@@ -291,7 +291,8 @@ class EventRepo
 
             if ($role && $venue) {
                 if ($eventDate) {
-                    $event = Event::whereHas('roles', function ($query) use ($role) {
+                    $event = Event::with(['venue', 'roles'])
+                        ->whereHas('roles', function ($query) use ($role) {
                             $query->where('role_id', $role->id);
                         })
                         ->where('venue_id', $venue->id)
@@ -306,8 +307,9 @@ class EventRepo
                         ->orderBy('starts_at')
                         ->first();
                 } else {
-                    $event = Event::whereHas('roles', function ($query) use ($role) {
-                                $query->where('role_id', $role->id);
+                    $event = Event::with(['venue', 'roles'])
+                        ->whereHas('roles', function ($query) use ($role) {
+                            $query->where('role_id', $role->id);
                         })
                         ->where('venue_id', $venue->id)
                         ->where('starts_at', '>=', now()->subDay())
@@ -315,10 +317,11 @@ class EventRepo
                         ->first();
 
                     if (!$event) {
-                        $event = Event::whereHas('roles', function ($query) use ($eventRoleId) {
-                                $query->where('role_id', $eventRoleId);
+                        $event = Event::with(['venue', 'roles'])
+                            ->whereHas('roles', function ($query) use ($role) {
+                                $query->where('role_id', $role->id);
                             })    
-                            ->where('venue_id', $eventVenueId)
+                            ->where('venue_id', $venue->id)
                             ->where('starts_at', '<', now())
                             ->orderBy('starts_at', 'desc')
                             ->first();
