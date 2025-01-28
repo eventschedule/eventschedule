@@ -244,7 +244,7 @@ class Event extends Model
         $data = [
             'subdomain' => $subdomain, 
             'slug' => $slug, 
-            'date' => $date ? (is_string($date) ? $date : $date->format('Y-m-d')) : Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d'),
+            'date' => $date ? $date : Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d'),
         ];
 
         return route('event.view_guest', $data);

@@ -189,7 +189,7 @@
                             $canEdit = auth()->user() && auth()->user()->canEditEvent($each);
                             @endphp
                             <li class="relative group {{ $canEdit ? 'hover:pr-8' : '' }}">
-                                <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate) }}"
+                                <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate->format('Y-m-d')) }}"
                                     class="flex has-tooltip" data-tooltip="<b>{{ $each->name }}</b><br/>{{ $each->getVenueDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
                                     onclick="event.stopPropagation();" {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
                                     <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900">
@@ -235,7 +235,7 @@
                 class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow ring-1 ring-black ring-opacity-5">
                 @while ($currentDate->lte($endOfMonth))
                 @foreach ($eventsMap[$currentDate->format('Y-m-d')] ?? [] as $each)
-                <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate) }}" 
+                <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate->format('Y-m-d')) }}" 
                    {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}>
                     <li class="relative flex items-center space-x-6 py-6 px-4 xl:static">
                         <div class="flex-auto">
