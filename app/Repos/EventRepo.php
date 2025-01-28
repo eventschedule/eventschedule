@@ -271,7 +271,7 @@ class EventRepo
         $eventDate = Carbon::parse($date);
             
         $subdomainRole = Role::where('subdomain', $subdomain)->first();
-        $slugRole = Role::where('slug', $slug)->first();        
+        $slugRole = Role::where('subdomain', $slug)->first();        
 
         if ($subdomainRole && $slugRole) {
             $venue = null;
@@ -293,7 +293,7 @@ class EventRepo
                 $event = Event::whereHas('roles', function ($query) use ($role) {
                         $query->where('role_id', $role->id);
                     })
-                    ->where('venue_id', $eventVenueId)
+                    ->where('venue_id', $venue->id)
                     ->where(function ($query) use ($eventDate) {
                         $query->whereDate('starts_at', $eventDate)
                             ->orWhere(function ($query) use ($eventDate) {
@@ -305,10 +305,10 @@ class EventRepo
                     ->orderBy('starts_at')
                     ->first();
             } else {
-                $event = Event::whereHas('roles', function ($query) use ($eventRoleId) {
-                            $query->where('role_id', $eventRoleId);
+                $event = Event::whereHas('roles', function ($query) use ($role) {
+                            $query->where('role_id', $role->id);
                     })
-                    ->where('venue_id', $eventVenueId)
+                    ->where('venue_id', $venue->id)
                     ->where('starts_at', '>=', now()->subDay())
                     ->orderBy('starts_at')
                     ->first();
@@ -322,6 +322,10 @@ class EventRepo
                         ->orderBy('starts_at', 'desc')
                         ->first();
                 }
+            }
+
+            if ($event) {
+                return $event;
             }
         }
 
