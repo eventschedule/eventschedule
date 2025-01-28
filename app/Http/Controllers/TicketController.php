@@ -124,6 +124,11 @@ class TicketController extends Controller
         $sale->user_id = $user ? $user->id : null;
         $sale->secret = strtolower(Str::random(32));
         $sale->payment_method = $event->payment_method;
+
+        if (! $sale->event_date) {
+            $sale->event_date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d');
+        }
+
         $sale->save();
 
         foreach($request->tickets as $ticketId => $quantity) {
