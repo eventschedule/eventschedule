@@ -123,6 +123,11 @@ class Event extends Model
         return false;
     }
 
+    public function isAtVenue($subdomain)
+    {
+        return $this->venue && $this->venue->subdomain == $subdomain;
+    }
+
     public function isRoleAMember($subdomain, $includeCurators = false)
     {
         return $this->roles->contains(function ($role) use ($subdomain, $includeCurators) {
