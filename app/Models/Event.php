@@ -227,6 +227,13 @@ class Event extends Model
 
     public function getGuestUrl($subdomain = false, $date = null)
     {
+        $data = $this->getGuestUrlData($subdomain, $date);
+
+        return route('event.view_guest', $data);
+    }
+
+    public function getGuestUrlData($subdomain = false, $date = null)
+    {
         $venueSubdomain = $this->venue ? $this->venue->subdomain : null;
         $roleSubdomain = $this->role() ? $this->role()->subdomain : null;
 
@@ -259,7 +266,7 @@ class Event extends Model
             $data['date'] = $date;
         }
 
-        return route('event.view_guest', $data);
+        return $data;
     }
 
     public function getTitle()
