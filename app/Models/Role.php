@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Str;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -270,8 +271,7 @@ class Role extends Model implements MustVerifyEmail
     
     public static function cleanSubdomain($name)
     {
-        $subdomain = preg_replace('/[^a-zA-Z0-9]/', '', trim($name));
-        $subdomain = strtolower(trim($subdomain));
+        $subdomain = Str::slug($name);
 
         $reserved = [
             'home',
