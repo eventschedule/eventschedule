@@ -278,9 +278,9 @@ class EventRepo
             $role = null;
 
             if ($subdomainRole->isVenue()) {
-                $venue = $subdomainRole->venue;
+                $venue = $subdomainRole;
             } elseif ($slugRole->isVenue()) {
-                $venue = $slugRole->venue;
+                $venue = $slugRole;
             }
 
             if ($subdomainRole->isSchedule()) {
