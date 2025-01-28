@@ -72,8 +72,8 @@
 
                                         <div x-show="open" 
                                              @click.away="open = false"
-                                             x-data="{ isLastRow: $el.closest('tr').nextElementSibling === null }"
-                                             :class="isLastRow ? 'bottom-full mb-2' : 'top-full mt-2'"
+                                             x-data="{ isLastTwoRows: $el.closest('tr').nextElementSibling === null || $el.closest('tr').nextElementSibling.nextElementSibling === null }"
+                                             :class="isLastTwoRows ? 'bottom-full mb-2' : 'top-full mt-2'"
                                              class="absolute right-0 z-50 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" 
                                              role="menu" 
                                              aria-orientation="vertical">
