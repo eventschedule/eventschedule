@@ -399,4 +399,5 @@ return [
     'note_all_events_are_publicly_listed' => 'Hinweis: Alle Veranstaltungen sind öffentlich aufgeführt',
     'add_to_schedule' => 'Zum Zeitplan hinzufügen',
     'accept_requests' => 'Anfragen akzeptieren',
+    'clear' => 'Löschen',
 ];

@@ -393,4 +393,8 @@ return [
     'note_all_schedules_are_publicly_listed' => 'Nota: Todos los horarios están listados públicamente',
     'note_all_events_are_publicly_listed' => 'Nota: Todos los eventos están listados públicamente',
     'add_to_schedule' => 'Agregar al Horario',
+    'admin' => 'Administrador',
+    'member' => 'Miembro',
+    'owner' => 'Propietario',
+    'clear' => 'Limpiar',
 ];
