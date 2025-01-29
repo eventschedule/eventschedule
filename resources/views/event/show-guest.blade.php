@@ -275,7 +275,7 @@
             </p>
           </div>
           @endif
-          @if ($event->flyer_image_url)
+          @if ($event->flyer_image_url && $event->members()->count() != 1)
           <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4">
             <img src="{{ $event->flyer_image_url }}" class="block"/>
           </div>
@@ -371,6 +371,15 @@
           </div>
 
           @endforeach
+
+          @if ($event->flyer_image_url && $event->members()->count() == 1)
+          <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4">
+            <img src="{{ $event->flyer_image_url }}" class="block"/>
+          </div>
+          @endif
+
+
+
           <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6">
             @include('role/partials/calendar', ['route' => 'guest', 'tab' => ''])
           </div>
