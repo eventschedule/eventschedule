@@ -994,7 +994,20 @@
         isInPerson: false,
         isOnline: false,
         eventName: @json($event->name ?? ''),
-        tickets: @json($event->tickets ?? [new Ticket()]),
+        tickets: @json($event->tickets ?? [new Ticket()]).map(ticket => ({
+          ...ticket,
+          /*
+          price: new Intl.NumberFormat('{{ app()->getLocale() }}', {
+            style: 'currency',
+            currency: '{{ $event->ticket_currency_code ?? "USD" }}'
+          }).format(ticket.price).toString().replace(/[^\d.,]/g, '')         
+          */
+         price: new Intl.NumberFormat('{{ app()->getLocale() }}', {
+            style: 'decimal',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          }).format(ticket.price)
+        })),
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
         soldLabel: "{{ __('messages.sold_reserved') }}",
         isRecurring: @json($event->days_of_week ? true : false),
