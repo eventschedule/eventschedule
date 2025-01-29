@@ -392,4 +392,7 @@ return [
     'your_schedules' => 'I tuoi Programmi',
     'created_schedule' => 'Programma creato con successo',
     'updated_schedule' => 'Programma aggiornato con successo',
+    'edit_curator' => 'Modifica Curatore',
+    'updated_curator' => 'Curatore aggiornato con successo',
+    'deleted_curator' => 'Curatore eliminato con successo',
 ];
