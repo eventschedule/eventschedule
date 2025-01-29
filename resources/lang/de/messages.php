@@ -251,7 +251,6 @@ return [
     'claim_your_venue_curated' => ':event bei :venue wurde dem Zeitplan von :curator hinzugefügt',
     'use_existing' => 'Bestehendes verwenden',
     'search_results' => 'Suchergebnisse',
-    'clear' => 'Löschen',
     'members' => 'Mitglieder',
     'no_contact_info' => 'Keine Kontaktinformationen',
     'youtube_video_url' => 'YouTube-Video-URL',
@@ -350,7 +349,6 @@ return [
     'customer' => 'Kunde',
     'transaction_reference' => 'Transaktionsreferenz',
     'total' => 'Gesamt',
-    'attendee_name' => 'Name des Teilnehmers',
     'number_of_attendees' => 'Anzahl der Teilnehmer',
     'terms_and_conditions' => 'Allgemeine Geschäftsbedingungen',
     'event_support_contact' => 'Event-Support-Kontakt',
@@ -401,5 +399,4 @@ return [
     'note_all_events_are_publicly_listed' => 'Hinweis: Alle Veranstaltungen sind öffentlich aufgeführt',
     'add_to_schedule' => 'Zum Zeitplan hinzufügen',
     'accept_requests' => 'Anfragen akzeptieren',
-    'ck' => 'Löschen',
 ];

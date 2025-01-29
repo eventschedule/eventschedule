@@ -251,7 +251,6 @@ return [
     'claim_your_venue_curated' => ':event في :venue تم إضافته إلى جدول :curator',
     'use_existing' => 'استخدام الموجود',
     'search_results' => 'نتائج البحث',
-    'clear' => 'مسح',
     'members' => 'الأعضاء',
     'no_contact_info' => 'لا توجد معلومات اتصال',
     'youtube_video_url' => 'رابط فيديو يوتيوب',
@@ -350,7 +349,6 @@ return [
     'customer' => 'العميل',
     'transaction_reference' => 'مرجع المعاملة',
     'total' => 'الإجمالي',
-    'attendee_name' => 'اسم الحاضر',
     'number_of_attendees' => 'عدد الحضور',
     'terms_and_conditions' => 'الشروط والأحكام',
     'event_support_contact' => 'اتصال دعم الحدث',
@@ -401,6 +399,4 @@ return [
     'note_all_events_are_publicly_listed' => 'ملاحظة: جميع الفعاليات متاحة للجمهور',
     'add_to_schedule' => 'إضافة إلى الجدول الزمني',
     'accept_requests' => 'قبول الطلبات',
-    'ck' => 'مسح',
-    'attendee_name' => 'اسم الحاضر',
 ];

@@ -254,7 +254,7 @@ return [
     'claim_your_venue_curated' => ':event at :venue was added to the :curator schedule',
     'use_existing' => 'Use existing',
     'search_results' => 'Search results',
-    'ck' => 'Clear',
+    'clear' => 'Clear',
     'members' => 'Members',
     'no_contact_info' => 'No contact info',
     'youtube_video_url' => 'Youtube Video URL',
