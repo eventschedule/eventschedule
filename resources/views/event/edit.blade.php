@@ -1330,7 +1330,7 @@
         this.tickets.splice(index, 1);
       },
       toggleExpireUnpaid() {
-        if (this.event.expire_unpaid_tickets == 0) {
+        if (! this.event.expire_unpaid_tickets) {
           this.event.expire_unpaid_tickets = 24;
         } else {
           this.event.expire_unpaid_tickets = 0;
