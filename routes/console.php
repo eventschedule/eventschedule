@@ -6,4 +6,4 @@ use Illuminate\Support\Facades\Artisan;
 Schedule::call(function () {
     Artisan::call('app:release_tickets');
 //})->cron('* * * * *');
-})->hourly();
+})->hourly()->appendOutputTo(storage_path('logs/scheduler.log'));
