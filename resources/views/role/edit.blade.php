@@ -8,6 +8,11 @@
     <x-slot name="head">
 
         <style>
+        button {
+            min-width: 100px;
+            min-height: 40px;
+        }
+
         .country-select {
             width: 100%;
         }
@@ -936,8 +941,14 @@
         </div>
 
         <div class="max-w-7xl mx-auto space-y-6 mt-3">
+            @if (! $role->exists)
+            <p class="text-base dark:text-gray-400 text-gray-600 pb-2">
+                {{ __('messages.note_all_schedules_are_publicly_listed') }}
+            </p>
+            @endif
+
             <div class="flex gap-4 items-center justify-between">
-                <div class="flex items-center gap-4">
+                <div class="flex gap-4">
                     <x-primary-button>{{ __('messages.save') }}</x-primary-button>
                     <x-cancel-button></x-cancel-button>
                 </div>

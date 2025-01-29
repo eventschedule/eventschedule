@@ -402,4 +402,6 @@ return [
     'plan_changed' => 'Plan changed successfully!',
     'first_year_free' => 'First year free',
     'copy_url' => 'Copy URL',
+    'note_all_schedules_are_publicly_listed' => 'Note: All schedules are publicly listed',
+    'note_all_events_are_publicly_listed' => 'Note: All events are publicly listed',
 ];
