@@ -462,7 +462,7 @@
                   d="M16.669 15.6739C16.4501 16.8413 16.1267 17.9171 15.7104 18.8368C15.2966 19.7512 14.7849 20.5247 14.1793 21.0789C13.5708 21.6358 12.831 22 12.0001 22C17.2707 22 21.5889 17.9226 21.9724 12.75H16.9868C16.9512 13.7515 16.8445 14.7381 16.669 15.6739Z"
                 />
               </svg>
-              <a href="{{ $event->venue->website }}" class="text-sm hover:underline">
+              <a href="{{ $event->venue->website }}" class="text-sm hover:underline" target="_blank">
                 {{ App\Utils\UrlUtils::clean($event->venue->website) }}
               </a>
             </div>

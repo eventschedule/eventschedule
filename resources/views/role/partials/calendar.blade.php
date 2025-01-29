@@ -213,7 +213,7 @@
                                     </p>
                                 </a>
                                 @if ($canEdit)
-                                <a href="{{ isset($role) ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) : route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}"
+                                <a href="{{ isset($role) ? config('app.url') . route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)], false) : config('app.url') . route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($each->id)], false) }}"
                                     class="absolute right-0 top-0 hidden group-hover:inline-block text-[#4E81FA] hover:text-[#4E81FA] hover:underline"
                                     onclick="event.stopPropagation();">
                                     {{ __('messages.edit') }}
@@ -286,7 +286,7 @@
                             @if ($each->getImageUrl())
                             <img src="{{ $each->getImageUrl() }}" class="h-14 w-14 mb-4 flex-none rounded-lg object-cover">
                             @endif
-                            <a href="{{ isset($role) ? route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)]) : route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}"
+                            <a href="{{ isset($role) ? config('app.url') . route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)], false) : config('app.url') . route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($each->id)], false) }}"
                                 class="text-[#4E81FA] hover:text-[#4E81FA] hover:underline"
                                 onclick="event.stopPropagation();">
                                 {{ __('messages.edit') }}
