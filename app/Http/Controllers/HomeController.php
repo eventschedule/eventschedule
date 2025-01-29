@@ -11,8 +11,12 @@ use Mail;
 
 class HomeController extends Controller
 {
-    public function landing()
+    public function landing($slug = null)
     {
+        if ($slug && $role = Role::whereSubdomain($slug)->first()) {
+            return redirect()->route('role.view_guest', ['subdomain' => $role->subdomain]);
+        }
+
         return redirect(route('home'));
     }
 

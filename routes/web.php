@@ -103,4 +103,4 @@ if (config('app.env') == 'local') {
     });
 }
 
-Route::get('/', [HomeController::class, 'landing'])->name('landing');
+Route::get('/{slug?}', [HomeController::class, 'landing'])->name('landing');
