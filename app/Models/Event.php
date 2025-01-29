@@ -234,8 +234,8 @@ class Event extends Model
 
     public function getGuestUrlData($subdomain = false, $date = null)
     {
-        $venueSubdomain = $this->venue ? $this->venue->subdomain : null;
-        $roleSubdomain = $this->role() ? $this->role()->subdomain : null;
+        $venueSubdomain = $this->venue && $this->venue->isRegistered() ? $this->venue->subdomain : null;
+        $roleSubdomain = $this->role() && $this->role()->isRegistered() ? $this->role()->subdomain : null;
 
         if (! in_array($subdomain, [$venueSubdomain, $roleSubdomain])) {
             $subdomain = $roleSubdomain;

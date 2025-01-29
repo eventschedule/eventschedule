@@ -219,6 +219,11 @@ class Role extends Model implements MustVerifyEmail
         return $this->type == 'curator';
     }
 
+    public function isRegistered()
+    {
+        return $this->email || $this->phone;
+    }
+
     public function isClaimed()
     {
         return $this->email_verified_at != null && $this->user_id != null;
@@ -503,7 +508,7 @@ class Role extends Model implements MustVerifyEmail
 
     public function getGuestUrl()
     {
-        if (! $this->email && ! $this->phone) {
+        if (! $this->isRegistered()) {
             return '';
         }
 
