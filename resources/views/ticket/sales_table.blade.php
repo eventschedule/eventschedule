@@ -72,10 +72,10 @@
 
                                         <div x-show="open" 
                                              @click.away="open = false"
-                                             x-data="{ isLastTwoRows: $el.closest('tr').nextElementSibling === null || $el.closest('tr').nextElementSibling.nextElementSibling === null }"
-                                             :class="isLastTwoRows ? 'bottom-full mb-2' : 'top-full mt-2'"
-                                             class="absolute right-0 z-50 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" 
+                                             class="fixed right-0 z-[100] w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" 
                                              role="menu" 
+                                             x-cloak
+                                             :style="{ top: $el.previousElementSibling.getBoundingClientRect().bottom + window.scrollY + 'px', left: $el.previousElementSibling.getBoundingClientRect().left + 'px' }"
                                              aria-orientation="vertical">
                                             
                                             <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" 
