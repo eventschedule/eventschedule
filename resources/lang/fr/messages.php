@@ -392,4 +392,9 @@ return [
     'note_all_schedules_are_publicly_listed' => 'Note : Tous les programmes sont listés publiquement',
     'note_all_events_are_publicly_listed' => 'Note : Tous les événements sont listés publiquement',
     'add_to_schedule' => 'Ajouter au Programme',
+    'admin' => 'Admin',
+    'member' => 'Membre',
+    'owner' => 'Propriétaire',
+    'clear' => 'Effacer',
+    'members' => 'Membres',
 ];

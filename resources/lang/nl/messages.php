@@ -9,8 +9,8 @@ return [
     'add_event' => 'Evenement Toevoegen',
     'sign_up' => 'Aanmelden',
     'event_updated' => 'Evenement succesvol bijgewerkt',
-    'request_accepted' => 'Verzoek geaccepteerd',
-    'request_declined' => 'Verzoek afgewezen',
+    'request_accepted' => 'Gefeliciteerd! Je verzoek om op te treden bij :venue is geaccepteerd.',
+    'request_declined' => 'Helaas is je verzoek bij :venue afgewezen.',
     'venue_not_accepting_requests' => 'De locatie accepteert geen verzoeken',
     'email_associated_with_venue' => 'E-mailadres is gekoppeld aan een locatie',
     'event_created' => 'Evenement succesvol aangemaakt',
@@ -448,4 +448,5 @@ return [
     'note_all_schedules_are_publicly_listed' => 'Let op: Alle schema\'s zijn openbaar zichtbaar',
     'note_all_events_are_publicly_listed' => 'Let op: Alle evenementen zijn openbaar zichtbaar',
     'add_to_schedule' => 'Toevoegen aan Schema',
+    'clear' => 'Wissen',
 ];

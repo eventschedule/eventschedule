@@ -401,4 +401,5 @@ return [
     'new_venue' => 'מקום חדש',
     'new_curator' => 'אוצר חדש',
     'edit_curator' => 'ערוך אוצר',
+    'clear' => 'נקה',
 ];
