@@ -203,8 +203,11 @@
                                         @endif
                                         </span>
                                         @if (count($eventsMap[$currentDate->format('Y-m-d')]) == 1)
-                                            <span class="text-gray-400">
+                                            <span class="text-gray-400 text-xs">
                                                 {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}
+                                                @if ($each->duration)
+                                                    - {{ Carbon\Carbon::parse($each->localStartsAt())->addHours($each->duration)->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}    
+                                                @endif
                                             </span>
                                         @endif
                                     </p>
