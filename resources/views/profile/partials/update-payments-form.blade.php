@@ -54,9 +54,9 @@
             </a>
 
             <div style="margin-top: 16px;">
-                <x-input-label for="invoiceninja_api_key" :value="__('messages.api_key')" />
+                <x-input-label for="invoiceninja_api_key" :value="__('messages.api_key') . ' *'" />
                 <x-text-input id="invoiceninja_api_key" name="invoiceninja_api_key" type="text" class="mt-1 block w-full" 
-                    :value="old('invoiceninja_api_key', $user->invoiceninja_api_key)" autocomplete="off" />
+                    :value="old('invoiceninja_api_key', $user->invoiceninja_api_key)" autocomplete="off" required />
                 <x-input-error class="mt-2" :messages="$errors->get('invoiceninja_api_key')" />
             </div>
 
