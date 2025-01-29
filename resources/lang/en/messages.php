@@ -249,7 +249,7 @@ return [
     'search_create' => 'Search/create',
     'to' => 'to',
     'allow_everyone_to_add_events' => 'Allow everyone to add events',
-    'add_to_schedules' => 'Add to schedules',
+    'add_to_schedules' => 'Add to Schedules',
     'claim_your_role_curated' => ':event at :venue was added to the :curator schedule',
     'claim_your_venue_curated' => ':event at :venue was added to the :curator schedule',
     'use_existing' => 'Use existing',
@@ -404,4 +404,5 @@ return [
     'copy_url' => 'Copy URL',
     'note_all_schedules_are_publicly_listed' => 'Note: All schedules are publicly listed',
     'note_all_events_are_publicly_listed' => 'Note: All events are publicly listed',
+    'add_to_schedule' => 'Add to Schedule',
 ];

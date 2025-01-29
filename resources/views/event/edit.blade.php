@@ -739,7 +739,7 @@
                         
                         @if ($curators->count() > 0)
                         <div class="mb-6">
-                            <x-input-label for="curators" :value="__('messages.add_to_schedules')" />
+                            <x-input-label for="curators" :value="__(count($curators) > 1 ? 'messages.add_to_schedules' : 'messages.add_to_schedule')" />
                             @foreach($curators as $curator)
                             <div class="flex items-center mb-4 mt-1">
                                 <input type="checkbox" 
