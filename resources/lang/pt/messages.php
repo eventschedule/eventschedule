@@ -390,4 +390,7 @@ return [
     'created_schedule' => 'Agenda criada com sucesso',
     'updated_schedule' => 'Agenda atualizada com sucesso',
     'edit_schedule' => 'Editar Agenda',
+    'updated_curator' => 'Curador atualizado com sucesso',
+    'deleted_curator' => 'Curador excluído com sucesso',
+    'edit_curator' => 'Editar Curador',
 ];

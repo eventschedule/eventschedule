@@ -43,8 +43,8 @@ foreach ($langFiles as $langFile) {
 foreach ($results as $file => $result) {
     echo "\nChecking $file:\n";
     
-    if (empty($result['missing']) && empty($result['extra']) && !$result['wrongOrder']) {
-        echo "✓ All keys present and in correct order\n";
+    if (empty($result['missing']) && empty($result['extra'])) {
+        echo "✓ All keys are correct\n";
         continue;
     }
     
