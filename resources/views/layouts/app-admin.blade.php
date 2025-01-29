@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout :title="(request()->path() != '/' ? implode(' > ', array_map('ucwords', array_slice(explode('/', str_replace(['-', '_'], ' ', request()->path())), 0, 2))) : '') . ' | Event Schedule'">
 
     <x-slot name="head">
         <link rel="preconnect" href="https://rsms.me/">
