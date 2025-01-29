@@ -359,7 +359,6 @@ return [
     'event_support_contact' => 'Event Support Contact',
     'ticket' => 'Ticket',
     'notes' => 'Notes',
-    //
     'scan_ticket' => 'Scan Ticket',
     'scan_another_ticket' => 'Scan Another Ticket',
     'ticket_scanned_successfully' => 'Ticket Scanned Successfully!',
