@@ -1156,7 +1156,7 @@ class RoleController extends Controller
 
     public function unsubscribe(Request $request)
     {
-        $roles = Role::where('email', $request->email)->get();
+        $roles = Role::where('email', base64_decode($request->email))->get();
 
         foreach ($roles as $role) {
             $role->is_subscribed = false;
