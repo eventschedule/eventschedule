@@ -659,7 +659,7 @@
                         -->
 
                         @if (! $role->isCurator())
-                        <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
+                        <div class="mb-6 sm:flex sm:items-center sm:space-x-10">
                             <div class="flex items-center">
                                 <input id="one_time" name="schedule_type" type="radio" value="one_time" onchange="onChangeDateType()" {{ $event->days_of_week ? '' : 'CHECKED' }}
                                     class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
@@ -702,29 +702,6 @@
                             <x-input-error class="mt-2" :messages="$errors->get('duration')" />
                         </div>
                         
-                        @php
-                            $curators = $user->editableCurators();
-                        @endphp
-                        
-                        @if ($curators->count() > 0)
-                        <div class="mb-6">
-                            <x-input-label for="curators" :value="__('messages.add_to_schedules')" />
-                            @foreach($curators as $curator)
-                            <div class="flex items-center mb-4 mt-1">
-                                <input type="checkbox" 
-                                       id="curator_{{ $curator->encodeId() }}" 
-                                       name="curators[]" 
-                                       value="{{ $curator->encodeId() }}"
-                                       {{ (! $event->exists && $role->subdomain == $curator->subdomain) || $event->curators->contains($curator->id) ? 'checked' : '' }}
-                                       class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                                <label for="curator_{{ $curator->encodeId() }}" class="ml-2 block text-sm text-gray-900 dark:text-gray-100">
-                                    {{ $curator->name }}
-                                </label>
-                            </div>
-                            @endforeach
-                        </div>
-                        @endif
-
                         <div class="mb-6">
                         <x-input-label for="flyer_image_url" :value="__('messages.flyer_image')" />
                         <input id="flyer_image_url" name="flyer_image_url" type="file" class="mt-1 block w-full text-gray-900 dark:text-gray-100" 
@@ -755,6 +732,29 @@
                                 autocomplete="off">{{ old('description', $event->description) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
+
+                        @php
+                            $curators = $user->editableCurators();
+                        @endphp
+                        
+                        @if ($curators->count() > 0)
+                        <div class="mb-6">
+                            <x-input-label for="curators" :value="__('messages.add_to_schedules')" />
+                            @foreach($curators as $curator)
+                            <div class="flex items-center mb-4 mt-1">
+                                <input type="checkbox" 
+                                       id="curator_{{ $curator->encodeId() }}" 
+                                       name="curators[]" 
+                                       value="{{ $curator->encodeId() }}"
+                                       {{ (! $event->exists && $role->subdomain == $curator->subdomain) || $event->curators->contains($curator->id) ? 'checked' : '' }}
+                                       class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                                <label for="curator_{{ $curator->encodeId() }}" class="ml-2 block text-sm text-gray-900 dark:text-gray-100">
+                                    {{ $curator->name }}
+                                </label>
+                            </div>
+                            @endforeach
+                        </div>
+                        @endif
 
                     </div>
                 </div>
