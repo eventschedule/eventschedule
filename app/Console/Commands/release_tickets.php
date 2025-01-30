@@ -35,9 +35,9 @@ class release_tickets extends Command
             ->whereHas('event', function($query) use ($driver) {
                 $query->where('events.expire_unpaid_tickets', '>', 0);
                 if ($driver === 'sqlite') {
-                    $query->whereRaw("(strftime('%s', 'now') - strftime('%s', sales.created_at))/3600 > events.expire_unpaid_tickets");
+                    $query->whereRaw("(strftime('%s', 'now') - strftime('%s', sales.created_at))/3600 >= events.expire_unpaid_tickets");
                 } else {
-                    $query->whereRaw('TIMESTAMPDIFF(HOUR, sales.created_at, NOW()) > events.expire_unpaid_tickets');
+                    $query->whereRaw('TIMESTAMPDIFF(HOUR, sales.created_at, NOW()) >= events.expire_unpaid_tickets');
                 }
             })
             ->get();
