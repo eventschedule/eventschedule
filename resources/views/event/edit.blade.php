@@ -1285,12 +1285,25 @@
       },
       ensureOneChecked(type) {
         if (!this.isInPerson && !this.isOnline) {
-          if (type === 'in_person') {
-            this.isOnline = true;
-          } else {
-            this.isInPerson = true;
-          }
+            if (type === 'in_person') {
+                this.isOnline = true;
+            } else {
+                this.isInPerson = true;
+            }
         }
+        
+        // Clear venue if in-person is unchecked
+        if (type === 'in_person' && !this.isInPerson) {
+            this.venueType = '{{ (count($venues) > 0 ? 'use_existing' : 'search_create'); }}';
+            this.selectedVenue = '';
+            this.venueName = '';
+            this.venueEmail = '';
+            this.venueAddress1 = '';
+            this.venueCity = '';
+            this.venueState = '';
+            this.venuePostalCode = '';
+        }
+        
         this.savePreferences();
       },
       savePreferences() {
