@@ -113,7 +113,8 @@
         class="container mx-auto flex flex-row justify-between items-center py-7 px-5"
         >
         <a href="https://eventschedule.com" target="_blank">
-            <img class="h-10 w-auto" src="{{ url('images/black_logo_stacked.png') }}"/>
+            <img class="h-10 w-auto dark:hidden" src="{{ url('images/dark_logo.png') }}"/>
+            <img class="h-10 w-auto hidden dark:block" src="{{ url('images/light_logo.png') }}"/>
         </a> 
         <div class="flex flex-row gap-x-3 md:gap-x-10">
             <a
