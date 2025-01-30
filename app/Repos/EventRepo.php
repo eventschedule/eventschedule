@@ -137,7 +137,7 @@ class EventRepo
 
         if ($event) {
             if ($event->venue_id != $venueId) {
-                $event->is_accepted = null;
+                $event->is_accepted = $venue && $user->isMember($venue->subdomain) ? true : null;
             }
         } else {
             $event = new Event;       
