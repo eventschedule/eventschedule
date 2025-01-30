@@ -16,7 +16,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image:alt" content="Event Schedule">
 
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.99em%22 font-size=%2275%22>📅</text></svg>">
+    <link rel="icon" href="{{ asset('images/favicon.png') }}">
 
     <meta http-equiv="Content-Security-Policy" content="
         img-src 'self' data:;
