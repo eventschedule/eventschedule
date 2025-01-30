@@ -22,7 +22,6 @@
             />
           @endif
           <h1 class="text-[32px] mb-2">{{ $event->name }}</h1>
-          <h2 class="text-[18px]">{{ $event->description }}</h2>
         </div>
       </div>
 
