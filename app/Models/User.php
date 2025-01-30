@@ -81,7 +81,8 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(Role::class)
                     ->withTimestamps()
                     ->withPivot('level')
-                    ->where('is_deleted', false);
+                    ->where('is_deleted', false)
+                    ->orderBy('name');
     }
     
     public function countRoles()
