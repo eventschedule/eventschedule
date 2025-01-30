@@ -447,6 +447,10 @@ class TicketController extends Controller
 
     public function release()
     {
+        if (request()->get('secret') != 'kx3kX4qJuXk12kae8ox78') {
+            return response()->json(['error' => __('messages.unauthorized')], 403);
+        }
+
         \Artisan::call('app:release_tickets');
 
         return response()->json(['success' => true]);
