@@ -12,9 +12,11 @@
     <form method="post" action="{{ route('profile.update_payments') }}" enctype="multipart/form-data" class="mt-6">
         @csrf
         @method('patch')
-
+        
         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 pt-2">
-            Stripe
+            <a href="https://stripe.com" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">
+                Stripe
+            </a>
         </h2>
 
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
@@ -42,7 +44,9 @@
         @endif
 
         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 pt-8">
-            Invoice Ninja
+            <a href="https://invoiceninja.com" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">
+                Invoice Ninja
+            </a>
         </h2>
 
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
