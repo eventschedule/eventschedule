@@ -75,7 +75,7 @@
                 <x-input-error class="mt-2" :messages="$errors->get('invoiceninja_api_key')" />
             </div>
 
-            <div class="pt-2">
+            <div class="pt-4">
                 <x-input-label for="invoiceninja_api_url" :value="__('messages.api_url')" />
                 <x-text-input id="invoiceninja_api_url" name="invoiceninja_api_url" type="url" class="mt-1 block w-full" 
                     :value="old('invoiceninja_api_url', $user->invoiceninja_api_url)" placeholder="https://invoicing.co" />
