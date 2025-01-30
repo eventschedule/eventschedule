@@ -170,7 +170,6 @@ return [
     'tickets' => 'כרטיסים',
     'requires_pro_plan' => 'דורש תוכנית פרו',
     'save_as_default' => 'שמור כברירת מחדל',
-    'api_key' => 'מפתח API',
     'learn_more' => 'למד עוד',
     'api_url' => 'כתובת API',
     'payment_instructions' => 'הוראות תשלום',
