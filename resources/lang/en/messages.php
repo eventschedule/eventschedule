@@ -406,4 +406,5 @@ return [
     'invoiceninja_help' => 'Over 16 ways to get paid. Invoice clients, track payments, and more.',
     'invoiceninja_offer' => '*Special Offer: Free 1-year upgrade to Invoice Ninja Pro for first-time users!',
     'api_token' => 'API Token',
+    'qr_code_is_your_ticket' => 'This QR code is your event entry ticket',
 ];

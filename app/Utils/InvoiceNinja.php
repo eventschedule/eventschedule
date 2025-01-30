@@ -81,7 +81,7 @@ class InvoiceNinja
 
         $invoice = $this->sendRequest($url, 'POST', [            
             'client_id' => $clientId,
-            'public_notes' => '<img src="' . $qrCodeUrl . '" />',
+            'public_notes' => __('messages.qr_code_is_your_ticket') . '<br><br><img src="' . $qrCodeUrl . '" />',
             'line_items' => $lineItems,
         ]);
 
