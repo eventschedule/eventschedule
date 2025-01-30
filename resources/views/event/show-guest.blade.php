@@ -100,7 +100,7 @@
               @endif
             @else
               <p class="text-sm">{{ $event->getEventUrlDomain() }}</p>
-              @endif
+            @endif
             </div>
           @endif
           @if ($event->venue)
