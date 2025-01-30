@@ -313,8 +313,6 @@ return [
     'free' => 'Free',
     'invalid_request' => 'Invalid request',
     'email_not_verified' => 'Email not verified',
-    'payment_methods' => 'Payment Methods',
-    'update_your_payment_methods' => 'Update your payment methods to start accepting payments',
     'connect_stripe' => 'Connect Stripe',
     'stripe_connected' => 'Stripe connected successfully!',
     'failed_to_connect_stripe' => 'Failed to connect Stripe',
@@ -384,8 +382,6 @@ return [
     'refund' => 'Refund',
     'mark_paid' => 'Mark Paid',
     'manual_payment' => 'Manual Payment',
-    'special_offer_first_year_free' => 'Special offer: First year free',
-    '15_payment_gateways' => '15+ payment gateways',
     'mark_paid_success' => 'Successfully marked ticket as paid',
     'refund_success' => 'Successfully refunded ticket',
     'cancel_success' => 'Successfully cancelled ticket',
@@ -405,4 +401,9 @@ return [
     //
     'upgrade_to_pro' => 'Upgrade to Pro to add members',
     'member_already_exists' => 'Member already exists',
+    'ticket_payment_methods' => 'Ticket Payment Methods',
+    'ticket_payment_methods_help' => 'Integrate a payment processor for online ticket sales',
+    'stripe_help' => 'Accept credit cards, ACH, and more',
+    'invoiceninja_help' => 'Over 16 ways to get paid. Invoice clients, track payments, and more.',
+    'invoiceninja_offer' => '*Special Offer: Free 1-year upgrade to Invoice Ninja Pro for first-time users!'
 ];

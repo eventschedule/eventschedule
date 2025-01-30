@@ -1,22 +1,28 @@
 <section>
     <header>
         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-            {{ __('messages.payment_methods') }}
+            {{ __('messages.ticket_payment_methods') }}
         </h2>
 
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __('messages.update_your_payment_methods') }}
+            {{ __('messages.ticket_payment_methods_help') }}
         </p>
     </header>
 
-    <form method="post" action="{{ route('profile.update_payments') }}" enctype="multipart/form-data" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update_payments') }}" enctype="multipart/form-data" class="mt-6">
         @csrf
         @method('patch')
 
-        <h5 class="text-lg font-medium text-gray-900 dark:text-gray-100">Stripe</h5>
+        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 pt-2">
+            Stripe
+        </h2>
+
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            {{ __('messages.stripe_help') }}
+        </p>
 
         @if ($user->stripe_account_id)
-            <div style="margin-top: 10px;">
+            <div class="mt-4">
                 @if (! $user->stripe_completed_at)
                     <x-input-label for="stripe_account_id" :value="__('messages.account_id') . ' [' . __('messages.pending') . ']'" />
                 @endif
@@ -28,19 +34,21 @@
         @endif
 
         @if (! $user->stripe_completed_at)
-            <div class="pb-4">
+            <div class="mt-4">
                 <x-secondary-button onclick="window.location.href='{{ route('stripe.link') }}'">
                     {{ __('messages.connect_stripe') }}
                 </x-secondary-button>
             </div>
         @endif
 
-        <h5 class="text-lg font-medium text-gray-900 dark:text-gray-100 pt-2 pb-1">Invoice Ninja:  
-            <a href="https://invoiceninja.com/payments" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">
-                {{ __('messages.15_payment_gateways') }}
-            </a>
-        </h5>
+        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 pt-8">
+            Invoice Ninja
+        </h2>
 
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            {{ __('messages.invoiceninja_help') }}
+        </p>
+        
         @if ($user->invoiceninja_api_key)
             <div style="margin-top: 16px;">
                 <x-text-input type="text" class="mt-1 block w-full" :value="$user->invoiceninja_company_name" readonly/>
@@ -49,9 +57,12 @@
                 </div>
             </div>        
         @else
-            <a href="https://invoiceninja.com/partner-perks/event-schedule" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">
-                {{ __('messages.special_offer_first_year_free') }}
-            </a>
+
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                <a href="https://invoiceninja.com/partner-perks/event-schedule" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">
+                    {{ __('messages.invoiceninja_offer') }}
+                </a>  
+            </p>
 
             <div style="margin-top: 16px;">
                 <x-input-label for="invoiceninja_api_key" :value="__('messages.api_key') . ' *'" />
