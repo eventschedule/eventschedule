@@ -391,4 +391,13 @@ return [
     'member' => 'Miembro',
     'owner' => 'Propietario',
     'clear' => 'Limpiar',
+    'upgrade_to_pro' => 'Actualiza a Pro para agregar miembros',
+    'member_already_exists' => 'El miembro ya existe',
+    'ticket_payment_methods' => 'Métodos de Pago para Entradas',
+    'ticket_payment_methods_help' => 'Integra un procesador de pagos para la venta de entradas en línea',
+    'stripe_help' => 'Acepta tarjetas de crédito, ACH y más',
+    'invoiceninja_help' => 'Más de 16 formas de recibir pagos. Factura a clientes, rastrea pagos y más.',
+    'invoiceninja_offer' => '*Oferta Especial: ¡Actualización gratuita por 1 año a Invoice Ninja Pro para usuarios nuevos!',
+    'api_token' => 'Token de API',
+    'qr_code_is_your_ticket' => 'Este código QR es tu entrada para el evento',
 ];

@@ -387,4 +387,13 @@ return [
     'updated_curator' => 'Curador atualizado com sucesso',
     'deleted_curator' => 'Curador excluído com sucesso',
     'edit_curator' => 'Editar Curador',
+    'upgrade_to_pro' => 'Faça upgrade para Pro para adicionar membros',
+    'member_already_exists' => 'Membro já existe',
+    'ticket_payment_methods' => 'Métodos de Pagamento de Ingressos',
+    'ticket_payment_methods_help' => 'Integre um processador de pagamento para vendas de ingressos online',
+    'stripe_help' => 'Aceite cartões de crédito, ACH e mais',
+    'invoiceninja_help' => 'Mais de 16 formas de receber pagamentos. Fature clientes, acompanhe pagamentos e mais.',
+    'invoiceninja_offer' => '*Oferta Especial: Upgrade gratuito de 1 ano para Invoice Ninja Pro para novos usuários!',
+    'api_token' => 'Token da API',
+    'qr_code_is_your_ticket' => 'Este código QR é seu ingresso de entrada para o evento'
 ];

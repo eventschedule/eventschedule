@@ -391,4 +391,13 @@ return [
     'owner' => 'Propriétaire',
     'clear' => 'Effacer',
     'members' => 'Membres',
+    'upgrade_to_pro' => 'Passez à Pro pour ajouter des membres',
+    'member_already_exists' => 'Le membre existe déjà',
+    'ticket_payment_methods' => 'Méthodes de Paiement des Billets',
+    'ticket_payment_methods_help' => 'Intégrez un processeur de paiement pour la vente de billets en ligne',
+    'stripe_help' => 'Acceptez les cartes de crédit, ACH et plus encore',
+    'invoiceninja_help' => 'Plus de 16 façons d\'être payé. Facturez les clients, suivez les paiements et plus encore.',
+    'invoiceninja_offer' => '*Offre Spéciale : Mise à niveau gratuite d\'un an vers Invoice Ninja Pro pour les nouveaux utilisateurs !',
+    'api_token' => 'Jeton API',
+    'qr_code_is_your_ticket' => 'Ce code QR est votre billet d\'entrée à l\'événement',
 ];

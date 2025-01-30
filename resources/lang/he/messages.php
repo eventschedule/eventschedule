@@ -396,4 +396,13 @@ return [
     'new_curator' => 'אוצר חדש',
     'edit_curator' => 'ערוך אוצר',
     'clear' => 'נקה',
+    'upgrade_to_pro' => 'שדרג לפרו כדי להוסיף חברים',
+    'member_already_exists' => 'החבר כבר קיים',
+    'ticket_payment_methods' => 'אמצעי תשלום לכרטיסים',
+    'ticket_payment_methods_help' => 'שלב מעבד תשלומים למכירת כרטיסים מקוונת',
+    'stripe_help' => 'קבל כרטיסי אשראי, העברות בנקאיות ועוד',
+    'invoiceninja_help' => 'מעל 16 דרכים לקבל תשלום. הנפק חשבוניות ללקוחות, עקוב אחר תשלומים ועוד.',
+    'invoiceninja_offer' => '*הצעה מיוחדת: שדרוג חינם לשנה ל-Invoice Ninja Pro למשתמשים חדשים!',
+    'api_token' => 'מפתח API',
+    'qr_code_is_your_ticket' => 'קוד QR זה הוא כרטיס הכניסה שלך לאירוע',
 ];
