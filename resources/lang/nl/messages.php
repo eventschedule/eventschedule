@@ -440,4 +440,13 @@ return [
     'note_all_events_are_publicly_listed' => 'Let op: Alle evenementen zijn openbaar zichtbaar',
     'add_to_schedule' => 'Toevoegen aan Schema',
     'clear' => 'Wissen',
+    'upgrade_to_pro' => 'Upgrade naar Pro om leden toe te voegen',
+    'member_already_exists' => 'Lid bestaat al',
+    'ticket_payment_methods' => 'Ticket Betaalmethoden',
+    'ticket_payment_methods_help' => 'Integreer een betalingsverwerker voor online ticketverkoop',
+    'stripe_help' => 'Accepteer creditcards, ACH en meer',
+    'invoiceninja_help' => 'Meer dan 16 manieren om betaald te worden. Factureer klanten, volg betalingen en meer.',
+    'invoiceninja_offer' => '*Speciale Aanbieding: Gratis 1-jaar upgrade naar Invoice Ninja Pro voor nieuwe gebruikers!',
+    'api_token' => 'API Token',
+    'qr_code_is_your_ticket' => 'Deze QR-code is je toegangsticket voor het evenement'
 ];

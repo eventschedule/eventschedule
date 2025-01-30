@@ -394,4 +394,13 @@ return [
     'add_to_schedule' => 'إضافة إلى الجدول الزمني',
     'accept_requests' => 'قبول الطلبات',
     'clear' => 'مسح',
+    'upgrade_to_pro' => 'قم بالترقية إلى النسخة الاحترافية لإضافة أعضاء',
+    'member_already_exists' => 'العضو موجود بالفعل',
+    'ticket_payment_methods' => 'طرق دفع التذاكر',
+    'ticket_payment_methods_help' => 'دمج معالج دفع لمبيعات التذاكر عبر الإنترنت',
+    'stripe_help' => 'قبول بطاقات الائتمان و ACH والمزيد',
+    'invoiceninja_help' => 'أكثر من 16 طريقة للحصول على المدفوعات. إصدار فواتير للعملاء، تتبع المدفوعات، والمزيد.',
+    'invoiceninja_offer' => '*عرض خاص: ترقية مجانية لمدة سنة واحدة إلى Invoice Ninja Pro للمستخدمين الجدد!',
+    'api_token' => 'رمز API',
+    'qr_code_is_your_ticket' => 'رمز QR هذا هو تذكرة دخولك للفعالية',
 ];
