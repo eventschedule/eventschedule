@@ -445,4 +445,10 @@ class TicketController extends Controller
         return back()->with('success', __('messages.action_completed'));
     }
 
+    public function release()
+    {
+        \Artisan::call('app:release_tickets');
+
+        return response()->json(['success' => true]);
+    }
 }

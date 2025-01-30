@@ -28,6 +28,7 @@ Route::post('/unsubscribe', [RoleController::class, 'unsubscribe'])->name('role.
 
 Route::post('/stripe/webhook', [StripeController::class, 'webhook'])->name('stripe.webhook');
 Route::post('/invoiceninja/webhook/{secret}', [InvoiceNinjaController::class, 'webhook'])->name('invoiceninja.webhook');
+Route::get('/release_tickets', [TicketController::class, 'release'])->name('release_tickets');
 
 Route::get('/ticket/qr_code/{event_id}/{secret}', [TicketController::class, 'qrCode'])->name('ticket.qr_code');
 Route::get('/ticket/view/{event_id}/{secret}', [TicketController::class, 'view'])->name('ticket.view');
