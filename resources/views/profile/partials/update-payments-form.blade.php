@@ -13,7 +13,7 @@
         @csrf
         @method('patch')
         
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 pt-2">
+        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
             <a href="https://stripe.com" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">
                 Stripe
             </a>
