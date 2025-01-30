@@ -179,16 +179,16 @@ class EventController extends Controller
         $user = $request->user();
         $subdomain = null;
 
-        if ($event->venue && $user->isMember($event->venue->subdomain)) {
-            $subdomain = $event->venue->subdomain;
+        foreach ($event->roles as $each) {
+            if ($user->isMember($each->subdomain)) {
+                $subdomain = $each->subdomain;
+                break;
+            }
         }
 
         if (! $subdomain) {
-            foreach ($event->roles as $each) {
-                if ($user->isMember($each->subdomain)) {
-                    $subdomain = $each->subdomain;
-                    break;
-                }
+            if ($event->venue && $user->isMember($event->venue->subdomain)) {
+                $subdomain = $event->venue->subdomain;
             }
         }
 
