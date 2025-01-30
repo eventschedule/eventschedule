@@ -177,7 +177,6 @@ return [
     'tickets' => 'Biglietti',
     'requires_pro_plan' => 'Richiede un piano Pro',
     'save_as_default' => 'Salva come predefinito',
-    'api_key' => 'Chiave API',
     'learn_more' => 'Scopri di più',
     'api_url' => 'URL API',
     'payment_instructions' => 'Istruzioni di pagamento',

@@ -318,7 +318,6 @@ return [
     'tickets' => 'Entradas',
     'requires_pro_plan' => 'Requiere un plan Pro',
     'save_as_default' => 'Guardar como predeterminado',
-    'api_key' => 'Clave API',
     'learn_more' => 'Aprender más',
     'api_url' => 'URL de API',
     'payment_instructions' => 'Instrucciones de pago',

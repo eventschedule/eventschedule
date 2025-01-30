@@ -68,21 +68,21 @@
                 </a>  
             </p>
 
-            <div style="margin-top: 16px;">
-                <x-input-label for="invoiceninja_api_key" :value="__('messages.api_key') . ' *'" />
+            <div class="pt-4">
+                <x-input-label for="invoiceninja_api_key" :value="__('messages.api_token') . ' *'" />
                 <x-text-input id="invoiceninja_api_key" name="invoiceninja_api_key" type="text" class="mt-1 block w-full" 
                     :value="old('invoiceninja_api_key', $user->invoiceninja_api_key)" autocomplete="off" required />
                 <x-input-error class="mt-2" :messages="$errors->get('invoiceninja_api_key')" />
             </div>
 
-            <div>
+            <div class="pt-2">
                 <x-input-label for="invoiceninja_api_url" :value="__('messages.api_url')" />
                 <x-text-input id="invoiceninja_api_url" name="invoiceninja_api_url" type="url" class="mt-1 block w-full" 
                     :value="old('invoiceninja_api_url', $user->invoiceninja_api_url)" placeholder="https://invoicing.co" />
                 <x-input-error class="mt-2" :messages="$errors->get('invoiceninja_api_url')" />
             </div>
 
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4 pt-8">
                 <x-primary-button>{{ __('messages.save') }}</x-primary-button>
 
                 @if (session('status') === 'payments-updated')

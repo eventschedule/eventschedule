@@ -323,7 +323,6 @@ return [
     'tickets' => 'التذاكر',
     'requires_pro_plan' => 'يتطلب خطة برو',
     'save_as_default' => 'حفظ كافتراضي',
-    'api_key' => 'مفتاح API',
     'learn_more' => 'اعرف المزيد',
     'api_url' => 'رابط API',
     'payment_instructions' => 'تعليمات الدفع',

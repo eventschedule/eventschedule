@@ -175,7 +175,6 @@ return [
     'tickets' => 'Ingressos',
     'requires_pro_plan' => 'Requer um plano Pro',
     'save_as_default' => 'Salvar como padrão',
-    'api_key' => 'Chave API',
     'learn_more' => 'Saiba mais',
     'api_url' => 'URL da API',
     'payment_instructions' => 'Instruções de pagamento',

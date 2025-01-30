@@ -317,7 +317,6 @@ return [
     'tickets' => 'Billets',
     'requires_pro_plan' => 'Nécessite un plan Pro',
     'save_as_default' => 'Enregistrer par défaut',
-    'api_key' => 'Clé API',
     'learn_more' => 'En savoir plus',
     'api_url' => 'URL de l\'API',
     'payment_instructions' => 'Instructions de paiement',

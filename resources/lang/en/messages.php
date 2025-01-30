@@ -327,7 +327,6 @@ return [
     'tickets' => 'Tickets',
     'requires_pro_plan' => 'Requires a Pro plan',    
     'save_as_default' => 'Save as default',
-    'api_key' => 'API Key',
     'learn_more' => 'Learn more',
     'api_url' => 'API URL',
     'payment_instructions' => 'Payment Instructions',
@@ -405,5 +404,6 @@ return [
     'ticket_payment_methods_help' => 'Integrate a payment processor for online ticket sales',
     'stripe_help' => 'Accept credit cards, ACH, and more',
     'invoiceninja_help' => 'Over 16 ways to get paid. Invoice clients, track payments, and more.',
-    'invoiceninja_offer' => '*Special Offer: Free 1-year upgrade to Invoice Ninja Pro for first-time users!'
+    'invoiceninja_offer' => '*Special Offer: Free 1-year upgrade to Invoice Ninja Pro for first-time users!',
+    'api_token' => 'API Token',
 ];
