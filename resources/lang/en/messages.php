@@ -300,7 +300,6 @@ return [
     'custom' => 'Custom',
     'event_participants' => 'Event Participants',
     'manage' => 'Manage',
-    //
     'please_select_venue_or_participant' => 'Please select a venue or participant',
     'event_tickets' => 'Event Tickets',
     'enable_tickets' => 'Enable Tickets',
@@ -403,4 +402,7 @@ return [
     'note_all_schedules_are_publicly_listed' => 'Note: All schedules are publicly listed',
     'note_all_events_are_publicly_listed' => 'Note: All events are publicly listed',
     'add_to_schedule' => 'Add to Schedule',
+    //
+    'upgrade_to_pro' => 'Upgrade to Pro to add members',
+    'member_already_exists' => 'Member already exists',
 ];

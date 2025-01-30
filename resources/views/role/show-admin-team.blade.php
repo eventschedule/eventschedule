@@ -8,7 +8,7 @@
     </div>
     <div class="mt-6 sm:ml-16 sm:mt-0 sm:flex-none">
         <a href="{{ route('role.create_member', ['subdomain' => $role->subdomain]) }}">
-            <button type="button" {{ ! $role->email_verified_at ? 'disabled' : '' }}
+            <button type="button" {{ ! $role->email_verified_at || ! $role->isPro() ? 'disabled' : '' }}
                 class="inline-flex items-center rounded-md bg-[#4E81FA] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#3A6BE0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] {{ ! $role->email_verified_at ? 'disabled:bg-gray-400 disabled:cursor-not-allowed' : '' }}">
                 <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path

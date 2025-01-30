@@ -489,11 +489,17 @@ class RoleController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
+        if (! $role->isPro()) {
+            return redirect()->back()->with('error', __('messages.upgrade_to_pro'));
+        } elseif (! $role->email_verified_at) {
+            return redirect()->back()->with('error', __('messages.email_not_verified'));
+        }
+
         $data = $request->validated();
         $user = User::whereEmail($data['email'])->first();
 
         if ($user && $user->isMember($subdomain)) {
-            return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']));    
+            return redirect()->back()->with('error', __('messages.member_already_exists'));
         }
 
         if (! $user) {
