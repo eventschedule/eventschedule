@@ -294,7 +294,6 @@ return [
     'solid' => 'Solide',
     'background_color' => 'Hintergrundfarbe',
     'custom' => 'Benutzerdefiniert',
-    'images_from' => 'Bilder von :name',
     'event_participants' => 'Veranstaltungsteilnehmer',
     'manage' => 'Verwalten',
     'please_select_venue_or_participant' => 'Bitte wählen Sie einen Veranstaltungsort oder Teilnehmer',

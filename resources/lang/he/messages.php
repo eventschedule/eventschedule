@@ -141,7 +141,6 @@ return [
     'solid' => 'מלא',
     'background_color' => 'צבע רקע',
     'custom' => 'מותאם אישית',
-    'images_from' => 'תמונות מ-:name',
     'event_participants' => 'משתתפי האירוע',
     'manage' => 'ניהול',
     'please_select_venue_or_participant' => 'אנא בחר מקום או משתתף',

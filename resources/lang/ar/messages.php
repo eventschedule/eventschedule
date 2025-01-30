@@ -294,7 +294,6 @@ return [
     'solid' => 'صلب',
     'background_color' => 'لون الخلفية',
     'custom' => 'مخصص',
-    'images_from' => 'صور من :name',
     'event_participants' => 'مشاركون في الفعالية',
     'manage' => 'إدارة',
     'please_select_venue_or_participant' => 'يرجى اختيار مكان أو مشارك',

@@ -148,7 +148,6 @@ return [
     'solid' => 'Solido',
     'background_color' => 'Colore di sfondo',
     'custom' => 'Personalizzato',
-    'images_from' => 'Immagini da :name',
     'event_participants' => 'Partecipanti all\'evento',
     'manage' => 'Gestisci',
     'please_select_venue_or_participant' => 'Seleziona una sede o un partecipante',

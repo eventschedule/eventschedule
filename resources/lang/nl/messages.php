@@ -145,7 +145,6 @@ return [
     'solid' => 'Solide',
     'background_color' => 'Achtergrondkleur',
     'custom' => 'Aangepast',
-    'images_from' => 'Afbeeldingen van :name',
     'event_participants' => 'Evenementdeelnemers',
     'manage' => 'Beheren',
     'please_select_venue_or_participant' => 'Selecteer een locatie of deelnemer',

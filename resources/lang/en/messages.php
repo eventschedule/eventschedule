@@ -298,7 +298,6 @@ return [
     'solid' => 'Solid',
     'background_color' => 'Background Color',
     'custom' => 'Custom',
-    'images_from' => 'Images from :name',
     'event_participants' => 'Event Participants',
     'manage' => 'Manage',
     //
