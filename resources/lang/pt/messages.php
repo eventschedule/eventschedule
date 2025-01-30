@@ -146,7 +146,6 @@ return [
     'solid' => 'Sólido',
     'background_color' => 'Cor de fundo',
     'custom' => 'Personalizado',
-    'images_from' => 'Imagens de :name',
     'event_participants' => 'Participantes do evento',
     'manage' => 'Gerenciar',
     'please_select_venue_or_participant' => 'Por favor, selecione um local ou participante',

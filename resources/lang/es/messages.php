@@ -289,7 +289,6 @@ return [
     'solid' => 'Sólido',
     'background_color' => 'Color de fondo',
     'custom' => 'Personalizado',
-    'images_from' => 'Imágenes de :name',
     'event_participants' => 'Participantes del evento',
     'manage' => 'Gestionar',
     'please_select_venue_or_participant' => 'Por favor, seleccione un lugar o participante',

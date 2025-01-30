@@ -738,10 +738,6 @@
         
                                 </div>
 
-                                <div class="text-xs pt-1 text-gray-600 dark:text-gray-400 mb-6">
-                                    <a href="https://www.pexels.com" target="_blank" class="hover:underline">{{ __('messages.images_from', ['name' => 'pexels.com']) }}</a>
-                                </div>
-
                                 <div id="custom_image_input" style="display:none">
                                     <input id="background_image_url" name="background_image_url" type="file" 
                                         class="mt-1 block w-full text-gray-900 dark:text-gray-100" 
