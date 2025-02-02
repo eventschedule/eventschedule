@@ -10,6 +10,12 @@ use App\Http\Controllers\InvoiceNinjaController;
 use Illuminate\Support\Facades\Route;
 
 if (config('app.env') != 'local') {
+    Route::group(['domain' => 'eventschedule.com'], function () {
+        Route::get('{path?}', function ($path = null) {
+            return redirect('https://www.eventschedule.com/' . ($path ? $path : ''));
+        })->where('path', '.*');
+    });
+
     Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app).*'])->group(function () {
         Route::get('/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
