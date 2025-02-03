@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\SetUserLanguage;
 use App\Http\Middleware\EnsureEmailIsVerified;
+use App\Http\Middleware\HandleBotTraffic;
 use Sentry\Laravel\Integration;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             SetUserLanguage::class,
             EnsureEmailIsVerified::class,
+            HandleBotTraffic::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
