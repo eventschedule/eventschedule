@@ -18,7 +18,7 @@ class HandleBotTraffic
         if (str_contains(strtolower($request->userAgent()), 'gptbot')) {
             $path = $request->path();
             if ($request->getQueryString()) {
-                return redirect($path);
+                return redirect($path, 301);
             }
         }
 
