@@ -16,12 +16,14 @@ class VerifyEmailController extends Controller
      */
     public function __invoke(UserEmailVerificationRequest $request): RedirectResponse
     {
-        if ($request->user()->hasVerifiedEmail()) {
+        $user = $request->user();
+
+        if ($user->hasVerifiedEmail()) {
             return redirect(route('home'))
                 ->with('message', __('messages.confirmed_email'));
         }
 
-        if ($request->user()->markEmailAsVerified()) {
+        if ($user->markEmailAsVerified()) {
             $roles = Role::whereEmail($user->email)
                             ->whereNull('user_id')
                             ->get();
