@@ -7,7 +7,7 @@ use Illuminate\Auth\Events\Verified;
 use App\Http\Requests\UserEmailVerificationRequest;
 use Illuminate\Http\RedirectResponse;
 use App\Models\Role;
-use App\Models\Ticket;
+use App\Models\Sale;
 
 class VerifyEmailController extends Controller
 {
@@ -39,7 +39,7 @@ class VerifyEmailController extends Controller
                 $user->roles()->attach($role->id, ['level' => 'owner', 'created_at' => now()]);
             }
 
-            $tickets = Ticket::whereEmail($user->email)
+            $tickets = Sale::whereEmail($user->email)
                             ->whereNull('user_id')
                             ->get();
 
