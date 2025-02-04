@@ -229,6 +229,11 @@ class Event extends Model
     {
         $data = $this->getGuestUrlData($subdomain, $date);
 
+        if (! $data['subdomain']) {
+            \Log::error('No subdomain found for event ' . $this->id);
+            return '';
+        }
+
         return route('event.view_guest', $data);
     }
 
