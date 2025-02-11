@@ -9,5 +9,6 @@
     {"value": "NIS", "label": "Israeli New Shekel"},
     {"value": "NZD", "label": "New Zealand Dollar"},
     {"value": "SGD", "label": "Singapore Dollar"},
-    {"value": "ZAR", "label": "South African Rand"}
+    {"value": "ZAR", "label": "South African Rand"},
+    {"value": "BRL", "label": "Brazilian Real"}
 ]
