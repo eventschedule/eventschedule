@@ -32,7 +32,7 @@
           <a href="{{ $event->event_url }}" target="_blank">
             {{ \App\Utils\UrlUtils::clean($event->event_url) }}
           </a>
-        @else
+        @elseif ($event->venue)
           <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event->venue->bestAddress()) }}" target="_blank">
             {{ $event->venue->shortAddress() }}
         </a>
