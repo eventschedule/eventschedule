@@ -14,7 +14,7 @@
         <div
           class="uppercase font-extrabold leading-[1.2] text-center color-[#151B26] flex flex-col items-center"
         >
-          @if ($role->profile_image_url)
+          @if ($role && $role->profile_image_url)
             <img
               class="w-[109px] mb-[18px] rounded-2xl object-cover"
               src="{{ $role->profile_image_url }}"
