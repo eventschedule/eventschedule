@@ -101,13 +101,15 @@ class EventRepo
                     $role->save();
                     $role->refresh();
 
-                    $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
-
                     if ($matchingUser = User::whereEmail($role->email)->first()) {
                         $role->user_id = $matchingUser->id;
                         $role->email_verified_at = $matchingUser->email_verified_at;
                         $role->save();
                         $matchingUser->roles()->attach($role->id, ['level' => 'owner', 'created_at' => now()]);
+                    }
+
+                    if (! $matchingUser || $matchingUser->id != $user->id) { 
+                        $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
                     }
 
                     $roleIds[] = $role->id;
