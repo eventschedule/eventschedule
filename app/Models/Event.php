@@ -283,7 +283,13 @@ class Event extends Model
 
     public function getUse24HourTime()
     {
-        return $this->role() ? $this->role()->use_24_hour_time : $this->venue->use_24_hour_time;
+        if ($this->role()) {
+            return $this->role()->use_24_hour_time;
+        } else if ($this->venue) {
+            return $this->venue->use_24_hour_time;
+        }
+
+        return false;
     }
 
     public function getMetaDescription($date = null)
