@@ -2,6 +2,7 @@
     {"value": "USD", "label": "US Dollar"},
     {"value": "EUR", "label": "Euro"},
     {"value": "AUD", "label": "Australian Dollar"},
+    {"value": "BRL", "label": "Brazilian Real"},
     {"value": "GBP", "label": "British Pound"},
     {"value": "CAD", "label": "Canadian Dollar"},
     {"value": "HKD", "label": "Hong Kong Dollar"},
@@ -9,6 +10,5 @@
     {"value": "NIS", "label": "Israeli New Shekel"},
     {"value": "NZD", "label": "New Zealand Dollar"},
     {"value": "SGD", "label": "Singapore Dollar"},
-    {"value": "ZAR", "label": "South African Rand"},
-    {"value": "BRL", "label": "Brazilian Real"}
+    {"value": "ZAR", "label": "South African Rand"}
 ]
