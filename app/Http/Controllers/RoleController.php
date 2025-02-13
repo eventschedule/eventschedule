@@ -40,7 +40,7 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if (auth()->user()->id != $role->user_id) {
-            return redirect('/');
+            return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         if ($request->image_type == 'profile') {
@@ -89,7 +89,7 @@ class RoleController extends Controller
         $type = $role->type;
 
         if ($user->id != $role->user_id) {
-            return redirect('/');
+            return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         if ($role->profile_image_url) {
@@ -343,7 +343,7 @@ class RoleController extends Controller
     public function viewAdmin(Request $request, $subdomain, $tab = 'schedule')
     {
         if (! auth()->user()->isMember($subdomain)) {
-            return redirect('/');
+            return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
@@ -478,7 +478,7 @@ class RoleController extends Controller
     public function createMember(Request $request, $subdomain)
     {
         if (! auth()->user()->isMember($subdomain)) {
-            return redirect('/');
+            return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
@@ -494,7 +494,7 @@ class RoleController extends Controller
     public function storeMember(MemberAddRequest $request, $subdomain)
     {
         if (! auth()->user()->isMember($subdomain)) {
-            return redirect('/');
+            return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
@@ -543,14 +543,14 @@ class RoleController extends Controller
     public function removeMember(Request $request, $subdomain, $hash)
     {
         if (! auth()->user()->isMember($subdomain)) {
-            return redirect('/');
+            return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         $userId = UrlUtils::decodeId($hash);
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if ($userId == $role->user_id) {
-            return redirect('/');
+            return redirect()->back()->with('error', __('messages.cannot_remove_owner'));
         }
 
         $roleUser = RoleUser::where('user_id', $userId)
@@ -822,7 +822,7 @@ class RoleController extends Controller
     public function update(RoleUpdateRequest $request, $subdomain): RedirectResponse
     {
         if (! auth()->user()->isMember($subdomain)) {
-            return redirect('/');
+            return redirect()->back()->with('error', __('messages.not_authorized'));
         }        
 
         $role = Role::subdomain($subdomain)->firstOrFail();
@@ -903,7 +903,7 @@ class RoleController extends Controller
     public function updateLinks(Request $request, $subdomain): RedirectResponse
     {
         if (! auth()->user()->isMember($subdomain)) {
-            return redirect('/');
+            return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
@@ -951,7 +951,7 @@ class RoleController extends Controller
     public function removeLinks(Request $request, $subdomain): RedirectResponse
     {
         if (! auth()->user()->isMember($subdomain)) {
-            return redirect('/');
+            return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();        
@@ -1198,7 +1198,7 @@ class RoleController extends Controller
     public function resendInvite(Request $request, $subdomain, $hash)
     {
         if (! auth()->user()->isMember($subdomain)) {
-            return redirect('/');
+            return redirect()->back()->with('error', __('messages.not_authorized'));
         }
     
         $role = Role::subdomain($subdomain)->firstOrFail();
