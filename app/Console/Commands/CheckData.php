@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Role;
+use App\Models\RoleUser;
+
 class CheckData extends Command
 {
     /**
@@ -11,7 +13,7 @@ class CheckData extends Command
      *
      * @var string
      */
-    protected $signature = 'app:check-data {--fix : Attempt to fix the detected issues}';
+    protected $signature = 'app:check-data {--fix=false : Attempt to fix the detected issues}';
 
     /**
      * The console command description.
@@ -26,17 +28,28 @@ class CheckData extends Command
     public function handle()
     {
         $errors = [];
-        $shouldFix = $this->option('fix');
+        $shouldFix = $this->option('fix') == 'true';
 
         $roles = Role::with('members')->get();
 
         foreach ($roles as $role) {
             if ($role->isRegistered() && ! $role->owner()) {
-                $errors[] = 'No owner for role ' . $role->id . ': ' . $role->name;
+                $error = 'No owner for role ' . $role->id . ': ' . $role->name;
                 
-                if ($shouldFix) {
-                    // Add your fix logic here
-                    $this->info("Attempting to fix role {$role->id}");
+                if (! $shouldFix) {
+                    $errors[] = $error;
+                } else {
+                    $this->error("Attempting to fix role {$role->id}");
+
+                    $roleUser = RoleUser::where('role_id', $role->id)->first();
+
+                    if ($roleUser->user_id == $role->user_id) {
+                        $this->info('Found matching role_user: correcting...');
+                        $roleUser->level = 'owner';
+                        $roleUser->save();
+                    } else {
+                        $errors[] = $error;
+                    }
                 }
             }
         }
