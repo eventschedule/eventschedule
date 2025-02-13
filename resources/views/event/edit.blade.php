@@ -1368,7 +1368,7 @@
         return this.members.filter(member => !this.selectedMembers.some(selected => selected.id === member.id));
       },
       isFormValid() {
-        return this.selectedVenue || this.selectedMembers.length > 0;
+        return (this.selectedVenue && this.selectedVenue.name) || this.selectedMembers.length > 0;
       },
       hasLimitedPaidTickets() {
         return this.tickets.some(ticket => ticket.price > 0 && ticket.quantity > 0);
