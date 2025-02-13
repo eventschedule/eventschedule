@@ -54,7 +54,7 @@ class CheckData extends Command
             }
         }
 
-        $events = Event::with(['venue', 'roles'])->get();
+        $events = Event::with(['venue', 'roles', 'user'])->get();
 
         foreach ($events as $event) {
             if (! $event->venue && ! $event->event_url) {
@@ -64,7 +64,7 @@ class CheckData extends Command
             $data = $event->getGuestUrlData();
 
             if (! $data['subdomain']) {                
-                $error = 'No subdomain for event ' . $event->id . ': ' . $event->name . ' - ';
+                $error = 'No subdomain for event ' . $event->id . ': ' . $event->name . ' (' . $event->user->name . ') - ';
 
                 foreach ($event->roles as $role) {
                     $error .= $role->name . ' (' . $role->type . '), ';
