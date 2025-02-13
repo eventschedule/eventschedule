@@ -58,13 +58,13 @@ class CheckData extends Command
 
         foreach ($events as $event) {
             if (! $event->venue && ! $event->event_url) {
-                $errors[] = 'No venue or event_url for event ' . $event->id . ': ' . $event->name;
+                $errors[] = 'No venue or event_url for event ' . $event->id . ': ' . $event->name . ' (' . $event->user->id . ': ' . $event->user->name . ')';
             }
 
             $data = $event->getGuestUrlData();
 
             if (! $data['subdomain']) {                
-                $error = 'No subdomain for event ' . $event->id . ': ' . $event->name . ' (' . $event->user->name . ') - ';
+                $error = 'No subdomain for event ' . $event->id . ': ' . $event->name . ' (' . $event->user->id . ': ' . $event->user->name . ') - ';
 
                 foreach ($event->roles as $role) {
                     $error .= $role->name . ' (' . $role->type . '), ';
