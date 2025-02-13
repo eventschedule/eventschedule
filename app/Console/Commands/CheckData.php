@@ -58,7 +58,7 @@ class CheckData extends Command
 
         foreach ($events as $event) {
             if (! $event->venue && ! $event->event_url) {
-                $errors[] = 'No venue or event_url for event ' . $event->id . ': ' . $event->name . ' - ' . $event->getGuestUrl();
+                $errors[] = 'No venue or event_url for event ' . $event->id . ': ' . $event->name;
             }
 
             $data = $event->getGuestUrlData();
