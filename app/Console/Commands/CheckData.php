@@ -33,7 +33,7 @@ class CheckData extends Command
         $roles = Role::with('members')->where('is_deleted', false)->get();
 
         foreach ($roles as $role) {
-            if ($role->isRegistered() && ! $role->owner()) {
+            if ($role->isClaimed() && ! $role->owner()) {
                 $error = 'No owner for role ' . $role->id . ': ' . $role->name;
                 
                 if (! $shouldFix) {
@@ -69,7 +69,8 @@ class CheckData extends Command
         }
 
         if (count($errors) > 0) {
-            $this->error("Errors:\n" . implode("\n", $errors));
+            $this->error("Errors found: \n");
+            $this->info(implode("\n", $errors));
         } else {
             $this->info('No errors found');
         }
