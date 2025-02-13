@@ -39,7 +39,7 @@ class EventController extends Controller
         $event = Event::findOrFail($event_id);
 
         if (! $request->user()->canEditEvent($event)) {
-            return redirect('/');
+            return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         if ($request->image_type == 'flyer') {
@@ -66,7 +66,7 @@ class EventController extends Controller
         $event = Event::findOrFail($event_id);
 
         if (! $request->user()->canEditEvent($event)) {
-            return redirect('/');
+            return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         $event->delete();
@@ -102,7 +102,7 @@ class EventController extends Controller
         $curator = $role->isCurator() ? $role : null;
 
         if (! $role->email_verified_at) {
-            return redirect('/');
+            return redirect()->back()->with('error', __('messages.email_not_verified'));
         }
 
         $event = new Event;
@@ -223,7 +223,7 @@ class EventController extends Controller
         }
 
         if (! $role->email_verified_at) {
-            return redirect('/');
+            return redirect()->back()->with('error', __('messages.email_not_verified'));
         }
 
         $title = __('messages.edit_event');
@@ -324,7 +324,7 @@ class EventController extends Controller
     public function accept(Request $request, $subdomain, $hash)
     {
         if (! auth()->user()->isMember($subdomain)) {
-            return redirect('/');
+            return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         $user = $request->user();
@@ -352,7 +352,7 @@ class EventController extends Controller
     public function decline(Request $request, $subdomain, $hash)
     {
         if (! auth()->user()->isMember($subdomain)) {
-            return redirect('/');
+            return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         $event_id = UrlUtils::decodeId($hash);
