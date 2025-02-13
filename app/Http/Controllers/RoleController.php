@@ -118,6 +118,16 @@ class RoleController extends Controller
 
         $emails = $role->members()->pluck('email');
 
+        // Prevent orphaned events
+        if ($role->isSchedule()) {
+            $events = $role->events()->get();
+            foreach ($events as $event) {
+                if ($event->members()->count() == 1) {
+                    $event->delete();
+                }
+            }
+        }
+
         $role->delete();
         
         Notification::route('mail', $emails)->notify(new DeletedRoleNotification($role, $user));
