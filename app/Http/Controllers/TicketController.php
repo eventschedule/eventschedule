@@ -451,7 +451,7 @@ class TicketController extends Controller
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
-        \Artisan::call('app:release_tickets');
+        \Artisan::call('app:release-tickets');
 
         return response()->json(['success' => true]);
     }
