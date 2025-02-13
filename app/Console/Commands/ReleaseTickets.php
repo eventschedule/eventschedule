@@ -5,14 +5,14 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Sale;
 
-class release_tickets extends Command
+class ReleaseTickets extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'app:release_tickets';
+    protected $signature = 'app:release-tickets';
 
     /**
      * The console command description.
