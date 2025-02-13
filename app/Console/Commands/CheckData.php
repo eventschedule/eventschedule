@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Role;
 use App\Models\RoleUser;
-
+use App\Models\Event;
 class CheckData extends Command
 {
     /**
@@ -30,7 +30,7 @@ class CheckData extends Command
         $errors = [];
         $shouldFix = $this->option('fix') == 'true';
 
-        $roles = Role::with('members')->get();
+        $roles = Role::with('members')->where('is_deleted', false)->get();
 
         foreach ($roles as $role) {
             if ($role->isRegistered() && ! $role->owner()) {
@@ -51,6 +51,14 @@ class CheckData extends Command
                         $errors[] = $error;
                     }
                 }
+            }
+        }
+
+        $events = Event::with(['venue', 'roles'])->get();
+
+        foreach ($events as $event) {
+            if (! $event->venue && ! $event->event_url) {
+                $errors[] = 'No venue or event_url for event ' . $event->id . ': ' . $event->name;
             }
         }
 
