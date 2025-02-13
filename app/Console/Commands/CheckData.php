@@ -60,6 +60,12 @@ class CheckData extends Command
             if (! $event->venue && ! $event->event_url) {
                 $errors[] = 'No venue or event_url for event ' . $event->id . ': ' . $event->name;
             }
+
+            $data = $event->getGuestUrlData();
+
+            if (! $data['subdomain']) {
+                $errors[] = 'No subdomain for event ' . $event->id . ': ' . $event->name;
+            }            
         }
 
         if (count($errors) > 0) {
