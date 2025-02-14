@@ -409,4 +409,5 @@ return [
     'qr_code_is_your_ticket' => 'This QR code is your event entry ticket',
     'not_authorized' => 'You are not authorized to perform this action',
     'cannot_remove_owner' => 'You cannot remove the owner',
+    'none' => 'None',
 ];

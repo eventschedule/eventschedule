@@ -480,6 +480,12 @@
                                             <label for="use_existing_members"
                                                 class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
                                         </div>
+                                        <div v-if="Object.keys(members).length == 0" class="flex items-center">
+                                            <input id="use_existing_members" name="member_type" type="radio" value="use_existing" v-model="memberType"
+                                                class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                            <label for="use_existing_members"
+                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.none') }}</label>
+                                        </div>
                                         <div class="flex items-center">
                                             <input id="search_create_members" name="member_type" type="radio" value="search_create" v-model="memberType"
                                                 class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
@@ -495,7 +501,7 @@
                                     </div>
                                 </fieldset>
 
-                                <div v-if="memberType === 'use_existing'">
+                                <div v-if="memberType === 'use_existing' && Object.keys(members).length > 0">
                                     <select v-model="selectedMember" @change="addExistingMember" id="selected_member"
                                         class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                         <option value="" disabled selected>{{ __('messages.please_select') }}</option>
@@ -969,8 +975,8 @@
         },
         venues: @json($venues),
         members: @json($members ?? []),
-        venueType: "{{ $selectedVenue && !$selectedVenue->isClaimed() ? 'no_contact_info' : (count($venues) > 0 ? 'use_existing' : 'search_create') }}",
-        memberType: "{{ count($members) > 0 ? 'use_existing' : 'search_create' }}",
+        venueType: "{{ $selectedVenue && ! $selectedVenue->isClaimed() ? 'no_contact_info' : (count($venues) > 0 ? 'use_existing' : 'search_create') }}",
+        memberType: "{{ 'use_existing' }}",
         venueName: "{{ $selectedVenue ? $selectedVenue->name : '' }}",
         venueEmail: "{{ $selectedVenue ? $selectedVenue->email : '' }}",
         venueAddress1: "{{ $selectedVenue ? $selectedVenue->address1 : '' }}",
