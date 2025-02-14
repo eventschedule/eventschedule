@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 if (config('app.env') != 'local') {
     Route::group(['domain' => 'eventschedule.com'], function () {
         Route::get('{path?}', function ($path = null) {
-            return redirect('https://www.eventschedule.com/' . ($path ? $path : ''));
+            return redirect('https://www.eventschedule.com/' . ($path ? $path : ''))->permanent();
         })->where('path', '.*');
     });
 
