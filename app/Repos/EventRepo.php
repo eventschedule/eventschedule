@@ -151,6 +151,9 @@ class EventRepo
 
         $event->fill($request->all());
         $event->venue_id = $venueId;
+        if (! $request->event_url) {
+            $event->event_url = null;
+        }
 
         $days_of_week = '';
         $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
