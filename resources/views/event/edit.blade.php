@@ -1374,7 +1374,10 @@
         return this.members.filter(member => !this.selectedMembers.some(selected => selected.id === member.id));
       },
       isFormValid() {
-        return (this.selectedVenue && this.selectedVenue.name) || this.selectedMembers.length > 0;
+        var hasSubdomain = (this.selectedVenue && this.selectedVenue.name) || this.selectedMembers.length > 0;
+        var hasVenue = (this.selectedVenue && this.selectedVenue.name) || this.event.event_url;
+
+        return hasSubdomain && hasVenue;
       },
       hasLimitedPaidTickets() {
         return this.tickets.some(ticket => ticket.price > 0 && ticket.quantity > 0);
