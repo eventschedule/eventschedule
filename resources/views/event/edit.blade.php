@@ -223,7 +223,7 @@
                         <div v-if="isInPerson">
                             <div v-if="!selectedVenue || showVenueAddressFields" class="mb-6">
                                 <div v-if="!selectedVenue">
-                                    <fieldset>                                
+                                    <fieldset v-if="Object.keys(venues).length > 0">                                
                                         <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                                             <div v-if="Object.keys(venues).length > 0" class="flex items-center">
                                                 <input id="use_existing_venue" name="venue_type" type="radio" value="use_existing" v-model="venueType"
@@ -1313,7 +1313,7 @@
         @endif
       },
       validateForm(event) {
-        if (!this.isFormValid) {
+        if (! this.isFormValid) {
           event.preventDefault();
           alert("{{ __('messages.please_select_venue_or_participant') }}");
         }
@@ -1342,9 +1342,9 @@
       filteredMembers() {
         return this.members.filter(member => !this.selectedMembers.some(selected => selected.id === member.id));
       },
-      isFormValid() {
-        var hasSubdomain = (this.selectedVenue && this.selectedVenue.name) || this.selectedMembers.length > 0;
-        var hasVenue = (this.selectedVenue && (this.selectedVenue.name || this.selectedVenue.address1)) || this.event.event_url;
+      isFormValid() {        
+        var hasSubdomain = this.venueName || this.selectedMembers.length > 0;
+        var hasVenue = this.venueAddress1 || this.event.event_url;
 
         return hasSubdomain && hasVenue;
       },
