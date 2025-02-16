@@ -232,16 +232,10 @@
                                                     class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
                                             </div>
                                             <div class="flex items-center">
-                                                <input id="search_create_venue" name="venue_type" type="radio" value="search_create" v-model="venueType"
+                                                <input id="create_new_venue" name="venue_type" type="radio" value="create_new" v-model="venueType"
                                                     class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
-                                                <label for="search_create_venue"
-                                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.search_create') }}</label>
-                                            </div>
-                                            <div class="flex items-center">
-                                                <input id="no_contact_info_venue" name="venue_type" type="radio" value="no_contact_info" v-model="venueType"
-                                                    class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
-                                                <label for="no_contact_info_venue"
-                                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.no_contact_info') }}</label>
+                                                <label for="create_new_venue"
+                                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.create_new') }}</label>
                                             </div>
                                         </div>
                                     </fieldset>
@@ -257,6 +251,7 @@
                                         </select>
                                     </div>
 
+                                    <!--
                                     <div v-if="venueType === 'search_create'">
 
                                         <div v-if="!venueEmail" class="mb-6">
@@ -306,6 +301,7 @@
                                             </div>
                                         </div>
                                     </div>
+                                    -->
                                 </div>
 
                                 <div v-if="showAddressFields()">
@@ -487,16 +483,10 @@
                                                 class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.none') }}</label>
                                         </div>
                                         <div class="flex items-center">
-                                            <input id="search_create_members" name="member_type" type="radio" value="search_create" v-model="memberType"
+                                            <input id="create_new_members" name="member_type" type="radio" value="create_new" v-model="memberType"
                                                 class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
-                                            <label for="search_create_members"
-                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.search_create') }}</label>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <input id="no_contact_info_members" name="member_type" type="radio" value="no_contact_info" v-model="memberType"
-                                                class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
-                                            <label for="no_contact_info_members"
-                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.no_contact_info') }}</label>
+                                            <label for="create_new_members"
+                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.create_new') }}</label>
                                         </div>
                                     </div>
                                 </fieldset>
@@ -511,6 +501,7 @@
                                     </select>
                                 </div>
 
+                                <!--
                                 <div v-if="memberType === 'search_create'">
                                     <div v-if="!memberEmail" class="mb-6">
                                         <x-input-label for="member_search_email" :value="__('messages.email') . ' *'" />
@@ -584,8 +575,9 @@
 
                                     </div>
                                 </div>
+                                -->
 
-                                <div v-if="memberType === 'no_contact_info'"> 
+                                <div v-if="memberType === 'create_new'"> 
                                     <div class="mb-6">
                                         <x-input-label for="no_contact_member_name" :value="__('messages.name') . ' *'" />
                                         <div class="flex mt-1">
@@ -975,7 +967,7 @@
         },
         venues: @json($venues),
         members: @json($members ?? []),
-        venueType: "{{ $selectedVenue && ! $selectedVenue->isClaimed() ? 'no_contact_info' : (count($venues) > 0 ? 'use_existing' : 'search_create') }}",
+        venueType: "{{ count($venues) > 0 ? 'use_existing' : 'create_new' }}",
         memberType: "{{ 'use_existing' }}",
         venueName: "{{ $selectedVenue ? $selectedVenue->name : '' }}",
         venueEmail: "{{ $selectedVenue ? $selectedVenue->email : '' }}",
@@ -1098,23 +1090,17 @@
       },
       setFocusBasedOnVenueType() {
         this.$nextTick(() => {
-          if (this.venueType === 'search_create') {
-            const searchInput = document.getElementById('venue_search_email');
-            if (searchInput) {
-              searchInput.focus();
-            }
-          } else if (this.venueType === 'no_contact_info') {
-            const venueSelect = document.querySelector('input[name="venue_name"]');
-            if (venueSelect) {
-              venueSelect.focus();
+          if (this.venueType === 'create_new') {
+            const venueNameInput = document.getElementById('venue_name');
+            if (venueNameInput) {
+              venueNameInput.focus();
             }
           }
         });
       },
       showAddressFields() {
-        return (this.venueType === 'use_existing' && this.selectedVenue && !this.selectedVenue.user_id) 
-            || this.venueType === 'no_contact_info' 
-            || (this.venueType === 'search_create' && this.venueEmail);
+        return (this.venueType === 'use_existing' && this.selectedVenue && ! this.selectedVenue.user_id) 
+            || this.venueType === 'create_new';
       },
       searchMembers() {
         const emailInput = document.getElementById('member_search_email');
@@ -1268,13 +1254,8 @@
       },
       setFocusBasedOnMemberType() {
         this.$nextTick(() => {
-          if (this.memberType === 'search_create') {
-            const searchInput = document.getElementById('member_search_email');
-            if (searchInput) {
-              searchInput.focus();
-            }
-          } else if (this.memberType === 'no_contact_info') {
-            const nameInput = document.getElementById('no_contact_member_name');
+          if (this.memberType === 'create_new') {
+            const nameInput = document.getElementById('member_name');
             if (nameInput) {
               nameInput.focus();
             }
@@ -1300,7 +1281,7 @@
         
         // Clear venue if in-person is unchecked
         if (type === 'in_person' && !this.isInPerson) {
-            this.venueType = '{{ (count($venues) > 0 ? 'use_existing' : 'search_create'); }}';
+            this.venueType = '{{ (count($venues) > 0 ? 'use_existing' : 'create_new'); }}';
             this.selectedVenue = '';
             this.venueName = '';
             this.venueEmail = '';
