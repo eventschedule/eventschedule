@@ -973,8 +973,6 @@
         this.showVenueAddressFields = false;
       },
       searchVenues() {
-        console.log('Searching venues...');
-
         if (! this.venueEmail) {
           return;
         }
@@ -995,22 +993,6 @@
         .then(response => response.json())
         .then(data => {
           this.venueSearchResults = data;
-
-          /*
-          if (data.length === 0) {
-            this.venueEmail = this.venueSearchEmail;
-            this.$nextTick(() => {
-              const venueNameInput = document.getElementById('venue_name');
-              if (venueNameInput) {
-                venueNameInput.focus();
-              }
-
-              $("#venue_country").countrySelect({
-                defaultCountry: "{{ $role && $role->country_code ? $role->country_code : '' }}",
-              });
-            });
-          }
-          */
         })
         .catch(error => {
           console.error('Error searching venues:', error);
@@ -1041,14 +1023,18 @@
             || this.venueType === 'create_new';
       },
       searchMembers() {
-        const emailInput = document.getElementById('member_search_email');
+        if (! this.memberEmail) {
+          return;
+        }
+
+        const emailInput = document.getElementById('member_email');
         
         if (!emailInput.checkValidity()) {
           emailInput.reportValidity();
           return;
         }
 
-        fetch(`/search_roles?type=member&search=${encodeURIComponent(this.memberSearchEmail)}`, {
+        fetch(`/search_roles?type=member&search=${encodeURIComponent(this.memberEmail)}`, {
           headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json',
@@ -1057,36 +1043,9 @@
         .then(response => response.json())
         .then(data => {
           this.memberSearchResults = data;
-
-          if (data.length === 0) {
-            this.memberEmail = this.memberSearchEmail;
-            this.memberName = '';
-            this.memberYoutubeUrl = '';
-            this.$nextTick(() => {
-              const memberNameInput = document.getElementById('member_name');
-              if (memberNameInput) {
-                memberNameInput.focus();
-              }
-
-            });
-          }
         })
         .catch(error => {
           console.error('Error searching members:', error);
-        });
-      },
-      clearMemberSearch() {
-        this.memberEmail = "";
-        this.memberName = "";
-        this.memberYoutubeUrl = "";
-        this.memberSearchEmail = "";
-        this.memberSearchResults = [];
-        
-        this.$nextTick(() => {
-          const emailInput = document.getElementById('member_search_email');
-          if (emailInput) {
-            emailInput.focus();
-          }
         });
       },
       addMember(member) {
