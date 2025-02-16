@@ -500,7 +500,7 @@
                                         <x-input-label for="member_email" :value="__('messages.email')" />
                                         <div class="flex mt-1">
                                             <x-text-input id="member_email" name="member_email" type="email" class="mr-2 block w-full"
-                                                v-model="memberEmail" autocomplete="off" />
+                                                @blur="searchMembers" v-model="memberEmail" autocomplete="off" />
                                         </div>
                                         <p class="mt-2 text-sm text-gray-500">
                                             {{ __('messages.an_email_will_be_sent') }}
@@ -509,7 +509,6 @@
                                     </div>
 
                                     <div v-if="memberSearchResults.length" class="mb-6">
-                                        <x-input-label :value="__('messages.search_results')" />
                                         <div class="mt-2 space-y-2">
                                             <div v-for="member in memberSearchResults" :key="member.id" class="flex items-center justify-between">
                                                 <div class="flex items-center">
