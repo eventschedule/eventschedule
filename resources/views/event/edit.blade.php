@@ -302,7 +302,7 @@
                                         <x-input-label for="venue_email" :value="__('messages.email')" />
                                         <div class="flex mt-1">
                                             <x-text-input id="venue_email" name="venue_email" type="email" class="block w-full"
-                                                v-model="venueEmail" autocomplete="off" />
+                                                @blur="searchVenues" v-model="venueEmail" autocomplete="off" />
                                         </div>
                                         <p class="mt-2 text-sm text-gray-500">
                                             {{ __('messages.an_email_will_be_sent') }}
@@ -1029,14 +1029,19 @@
       },
       searchVenues() {
         console.log('Searching venues...');
-        const emailInput = document.getElementById('venue_search_email');
+
+        if (! this.venueEmail) {
+          return;
+        }
+
+        const emailInput = document.getElementById('venue_email');
         
         if (!emailInput.checkValidity()) {
           emailInput.reportValidity();
           return;
         }
 
-        fetch(`/search_roles?type=venue&search=${encodeURIComponent(this.venueSearchEmail)}`, {
+        fetch(`/search_roles?type=venue&search=${encodeURIComponent(this.venueEmail)}`, {
           headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json',
