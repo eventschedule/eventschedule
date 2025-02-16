@@ -524,8 +524,8 @@
                                                         </svg>
                                                     </a>
                                                 </div>
-                                                <x-primary-button @click="addMember(member)" type="button">
-                                                    {{ __('messages.add') }}
+                                                <x-primary-button @click="selectMember(member)" type="button">
+                                                    {{ __('messages.select') }}
                                                 </x-primary-button>
                                             </div>
                                         </div>
@@ -922,7 +922,6 @@
         venueSearchResults: [],
         selectedVenue: @json($selectedVenue ? $selectedVenue->toData() : ""),
         selectedMembers: @json($selectedMembers ?? []),
-        memberSearchEmail: "",
         memberSearchResults: [],
         selectedMember: "",
         editMemberId: "",
@@ -1047,13 +1046,15 @@
           console.error('Error searching members:', error);
         });
       },
-      addMember(member) {
+      selectMember(member) {
         if (!this.selectedMembers.some(m => m.id === member.id)) {
           this.selectedMembers.push(member);
-        }
+        }        
         this.memberSearchResults = this.memberSearchResults.filter(m => m.id !== member.id);
-        this.memberSearchEmail = "";
         this.memberSearchResults = [];
+        this.memberEmail = "";
+        this.memberName = "";
+        this.memberYoutubeUrl = "";
         this.showMemberTypeRadio = false;
       },
       removeMember(member) {
@@ -1112,7 +1113,6 @@
         this.memberEmail = "";
         this.memberName = "";
         this.memberYoutubeUrl = "";
-        this.memberSearchEmail = "";
         this.showMemberTypeRadio = false;
       },
       addExistingMember() {
@@ -1281,7 +1281,6 @@
         });
       },
       memberType() {
-        this.memberSearchEmail = "";
         this.memberSearchResults = [];
         this.memberEmail = "";
         this.memberName = "";
