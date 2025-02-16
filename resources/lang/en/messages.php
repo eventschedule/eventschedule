@@ -409,4 +409,5 @@ return [
     'not_authorized' => 'You are not authorized to perform this action',
     'cannot_remove_owner' => 'You cannot remove the owner',
     'none' => 'None',
+    'create_new' => 'Create new',
 ];
