@@ -1375,7 +1375,7 @@
       },
       isFormValid() {
         var hasSubdomain = (this.selectedVenue && this.selectedVenue.name) || this.selectedMembers.length > 0;
-        var hasVenue = (this.selectedVenue && this.selectedVenue.name) || this.event.event_url;
+        var hasVenue = (this.selectedVenue && (this.selectedVenue.name || this.selectedVenue.address1)) || this.event.event_url;
 
         return hasSubdomain && hasVenue;
       },
