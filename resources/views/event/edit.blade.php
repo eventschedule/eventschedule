@@ -301,11 +301,8 @@
                                     <div class="mb-6">
                                         <x-input-label for="venue_email" :value="__('messages.email')" />
                                         <div class="flex mt-1">
-                                            <x-text-input id="venue_email" name="venue_email" type="email" class="mr-2 block w-full"
+                                            <x-text-input id="venue_email" name="venue_email" type="email" class="block w-full"
                                                 v-model="venueEmail" autocomplete="off" />
-                                            <x-secondary-button @click="searchVenues" type="button">
-                                                {{ __('messages.search') }}
-                                            </x-secondary-button>
                                         </div>
                                         <p class="mt-2 text-sm text-gray-500">
                                             {{ __('messages.an_email_will_be_sent') }}
@@ -1031,6 +1028,7 @@
         this.showVenueAddressFields = false;
       },
       searchVenues() {
+        console.log('Searching venues...');
         const emailInput = document.getElementById('venue_search_email');
         
         if (!emailInput.checkValidity()) {
@@ -1048,6 +1046,7 @@
         .then(data => {
           this.venueSearchResults = data;
 
+          /*
           if (data.length === 0) {
             this.venueEmail = this.venueSearchEmail;
             this.$nextTick(() => {
@@ -1061,6 +1060,7 @@
               });
             });
           }
+          */
         })
         .catch(error => {
           console.error('Error searching venues:', error);
