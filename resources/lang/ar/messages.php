@@ -403,4 +403,7 @@ return [
     'invoiceninja_offer' => '*عرض خاص: ترقية مجانية لمدة سنة واحدة إلى Invoice Ninja Pro للمستخدمين الجدد!',
     'api_token' => 'رمز API',
     'qr_code_is_your_ticket' => 'رمز QR هذا هو تذكرة دخولك للفعالية',
+    'not_authorized' => 'غير مصرح لك بتنفيذ هذا الإجراء',
+    'cannot_remove_owner' => 'لا يمكنك إزالة المالك',
+    'none' => 'لا شيء',
 ];

@@ -400,4 +400,7 @@ return [
     'invoiceninja_offer' => '*Oferta Especial: ¡Actualización gratuita por 1 año a Invoice Ninja Pro para usuarios nuevos!',
     'api_token' => 'Token de API',
     'qr_code_is_your_ticket' => 'Este código QR es tu entrada para el evento',
+    'not_authorized' => 'No estás autorizado para realizar esta acción',
+    'cannot_remove_owner' => 'No puedes eliminar al propietario',
+    'none' => 'Ninguno',
 ];

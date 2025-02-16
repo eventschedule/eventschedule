@@ -359,7 +359,7 @@ return [
     'new_venue_tooltip' => 'Vari eventi nella tua sede',
     'new_curator_tooltip' => 'Vari eventi in varie sedi',
     'filter' => 'Filtro',
-    'unauthorized' => 'Non autorizzato',
+    'unauthorized' => 'Non sei autorizzato a eseguire questa azione',
     'action_completed' => 'Azione completata',
     'select_action' => 'Seleziona Azione',
     'refund' => 'Rimborso',
@@ -398,4 +398,7 @@ return [
     'invoiceninja_offer' => '*Offerta Speciale: Upgrade gratuito di 1 anno a Invoice Ninja Pro per i nuovi utenti!',
     'api_token' => 'Token API',
     'qr_code_is_your_ticket' => 'Questo codice QR è il tuo biglietto di ingresso all\'evento',
+    'not_authorized' => 'Non sei autorizzato a eseguire questa azione',
+    'cannot_remove_owner' => 'Non puoi rimuovere il proprietario',
+    'none' => 'Nessuno',
 ];

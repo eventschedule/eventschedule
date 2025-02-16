@@ -395,5 +395,8 @@ return [
     'invoiceninja_help' => 'Mais de 16 formas de receber pagamentos. Fature clientes, acompanhe pagamentos e mais.',
     'invoiceninja_offer' => '*Oferta Especial: Upgrade gratuito de 1 ano para Invoice Ninja Pro para novos usuários!',
     'api_token' => 'Token da API',
-    'qr_code_is_your_ticket' => 'Este código QR é seu ingresso de entrada para o evento'
+    'qr_code_is_your_ticket' => 'Este código QR é seu ingresso de entrada para o evento',
+    'not_authorized' => 'Você não está autorizado a realizar esta ação',
+    'cannot_remove_owner' => 'Você não pode remover o proprietário',
+    'none' => 'Nenhum'
 ];
