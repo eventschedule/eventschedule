@@ -252,7 +252,7 @@
                                                 v-model="selectedVenue">
                                                 <option value="" disabled selected>{{ __('messages.please_select') }}</option>                                
                                                 <option v-for="venue in venues" :key="venue.id" :value="venue">
-                                                    @{{ venue.name }} <template v-if="venue.email">(@{{ venue.email }})</template>
+                                                    @{{ venue.name || venue.address1 }} <template v-if="venue.email">(@{{ venue.email }})</template>
                                                 </option>
                                         </select>
                                     </div>

@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\Role;
 use App\Models\RoleUser;
 use App\Models\Event;
+
 class CheckData extends Command
 {
     /**
