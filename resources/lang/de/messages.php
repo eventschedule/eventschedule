@@ -403,4 +403,7 @@ return [
     'api_token' => 'API-Token',
     'qr_code_is_your_ticket' => 'Dieser QR-Code ist Ihr Eintrittskarte für die Veranstaltung',
     'clear' => 'Löschen',
+    'not_authorized' => 'Sie sind nicht berechtigt, diese Aktion auszuführen',
+    'cannot_remove_owner' => 'Sie können den Eigentümer nicht entfernen',
+    'none' => 'Keine',
 ];

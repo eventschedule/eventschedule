@@ -448,5 +448,8 @@ return [
     'invoiceninja_help' => 'Meer dan 16 manieren om betaald te worden. Factureer klanten, volg betalingen en meer.',
     'invoiceninja_offer' => '*Speciale Aanbieding: Gratis 1-jaar upgrade naar Invoice Ninja Pro voor nieuwe gebruikers!',
     'api_token' => 'API Token',
-    'qr_code_is_your_ticket' => 'Deze QR-code is je toegangsticket voor het evenement'
+    'qr_code_is_your_ticket' => 'Deze QR-code is je toegangsticket voor het evenement',
+    'not_authorized' => 'Je bent niet geautoriseerd om deze actie uit te voeren',
+    'cannot_remove_owner' => 'Je kunt de eigenaar niet verwijderen',
+    'none' => 'Geen'
 ];

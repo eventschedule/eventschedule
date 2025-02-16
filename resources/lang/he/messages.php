@@ -405,4 +405,7 @@ return [
     'invoiceninja_offer' => '*הצעה מיוחדת: שדרוג חינם לשנה ל-Invoice Ninja Pro למשתמשים חדשים!',
     'api_token' => 'מפתח API',
     'qr_code_is_your_ticket' => 'קוד QR זה הוא כרטיס הכניסה שלך לאירוע',
+    'not_authorized' => 'אין לך הרשאה לבצע פעולה זו',
+    'cannot_remove_owner' => 'לא ניתן להסיר את הבעלים',
+    'none' => 'אין',
 ];

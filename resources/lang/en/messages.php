@@ -397,7 +397,6 @@ return [
     'note_all_schedules_are_publicly_listed' => 'Note: All schedules are publicly listed',
     'note_all_events_are_publicly_listed' => 'Note: All events are publicly listed',
     'add_to_schedule' => 'Add to Schedule',
-    //
     'upgrade_to_pro' => 'Upgrade to Pro to add members',
     'member_already_exists' => 'Member already exists',
     'ticket_payment_methods' => 'Ticket Payment Methods',
