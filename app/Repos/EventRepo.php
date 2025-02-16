@@ -64,6 +64,7 @@ class EventRepo
                 }
             } else if ($venue && ! $venue->isClaimed()) {
                 $venue->name = $request->venue_name ?? null;
+                $venue->email = $request->venue_email ?? null;
                 $venue->address1 = $request->venue_address1;
                 $venue->address2 = $request->venue_address2;
                 $venue->city = $request->venue_city;
@@ -117,9 +118,9 @@ class EventRepo
                     $roleId = UrlUtils::decodeId($memberId);
                     $role = Role::findOrFail($roleId);
 
-                    if (!$role->isClaimed()) {
+                    if (! $role->isClaimed()) {
                         $role->name = $member['name'];
-
+                        $role->email = $member['email'];
                         $links = [];
                         if ($member['youtube_url']) {
                             $links[] = UrlUtils::getUrlDetails($member['youtube_url']);
