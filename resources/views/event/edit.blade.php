@@ -404,6 +404,13 @@
                                             <x-input-error class="mt-2" :messages="$errors->get('member_name')" />
                                         </div>
 
+                                        <div class="mb-6">  
+                                            <x-input-label for="edit_member_email" :value="__('messages.email')" />
+                                            <x-text-input v-bind:id="'edit_member_email_' + member.id" 
+                                                v-bind:name="'members[' + member.id + '][email]'" type="email" class="mr-2 block w-full" 
+                                                v-model="selectedMembers.find(m => m.id === member.id).email" @keydown.enter.prevent="editMember()" autocomplete="off" />
+                                        </div>
+
                                         <div class="mb-6">
                                             <x-input-label for="edit_member_youtube_url" :value="__('messages.youtube_video_url')" />
                                             <x-text-input v-bind:id="'edit_member_youtube_url_' + member.id" 
