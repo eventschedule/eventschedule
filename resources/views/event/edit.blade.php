@@ -1047,10 +1047,9 @@
         });
       },
       selectMember(member) {
-        if (!this.selectedMembers.some(m => m.id === member.id)) {
+        if (! this.selectedMembers.some(m => m.id === member.id)) {
           this.selectedMembers.push(member);
         }        
-        this.memberSearchResults = this.memberSearchResults.filter(m => m.id !== member.id);
         this.memberSearchResults = [];
         this.memberEmail = "";
         this.memberName = "";
@@ -1149,7 +1148,9 @@
           email: this.memberEmail,
           youtube_url: this.memberYoutubeUrl,
         };
+
         this.selectedMembers.push(newMember);
+        this.memberSearchResults = [];
         this.memberName = "";
         this.memberEmail = "";
         this.memberYoutubeUrl = "";
