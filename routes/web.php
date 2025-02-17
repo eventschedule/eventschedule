@@ -9,7 +9,7 @@ use App\Http\Controllers\TicketController;
 use App\Http\Controllers\InvoiceNinjaController;
 use Illuminate\Support\Facades\Route;
 
-if (config('app.env') != 'local') {
+if (config('app.hosted')) {
     Route::group(['domain' => 'eventschedule.com'], function () {
         Route::get('{path?}', function ($path = null) {
             return redirect('https://www.eventschedule.com/' . ($path ? $path : ''), 301);
@@ -92,22 +92,21 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/team/remove_member/{hash}', [RoleController::class, 'removeMember'])->name('role.remove_member');
     Route::get('/{subdomain}/curate_event/{hash}', [EventController::class, 'curate'])->name('event.curate');
     Route::delete('/{subdomain}/uncurate_event/{hash}', [EventController::class, 'uncurate'])->name('event.uncurate');
-    Route::get('/{subdomain}/{tab?}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|availability|requests|profile|followers|team|plan');
+    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|availability|requests|profile|followers|team|plan');
 });
 
-if (config('app.env') == 'local') {
-    Route::get('/{subdomain}/view/{slug}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
-    Route::get('/{subdomain}/view', [RoleController::class, 'viewGuest'])->name('role.view_guest');
+if (config('app.hosted')) {
+    Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app).*'])->group(function () {
+        Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');
+    });
+} else {
     Route::get('/{subdomain}/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
     Route::post('/{subdomain}/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
     Route::get('/{subdomain}/checkout/success/{sale_id}', [TicketController::class, 'success'])->name('checkout.success');
     Route::get('/{subdomain}/checkout/cancel/{sale_id}', [TicketController::class, 'cancel'])->name('checkout.cancel');
-
-} else {
-    Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app).*'])->group(function () {
-        Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');
-    });
+    Route::get('/{subdomain}', [RoleController::class, 'viewGuest'])->name('role.view_guest');
+    Route::get('/{subdomain}/{slug}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
 }
 
 Route::get('/{slug?}', [HomeController::class, 'landing'])->name('landing');

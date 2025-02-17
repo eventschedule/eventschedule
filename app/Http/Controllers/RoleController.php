@@ -756,7 +756,7 @@ class RoleController extends Controller
             ];
             return redirect(route('event.create', $data))->with('message', $message);
         } else {    
-            return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]))->with('message', $message);
+            return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))->with('message', $message);
         }
     }
 
@@ -912,7 +912,7 @@ class RoleController extends Controller
             $role->save();
         }
 
-        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain]))
+        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))
                     ->with('message', __('messages.updated_' . $role->type));
     }
 
@@ -1032,7 +1032,7 @@ class RoleController extends Controller
         $role = Role::whereSubdomain($subdomain)->firstOrFail();
 
         if ($role->hasVerifiedEmail()) {
-            return redirect()->route('role.view_admin', ['subdomain' => $role->subdomain]);
+            return redirect()->route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']);
         }
 
         if ($role->markEmailAsVerified()) {
@@ -1040,7 +1040,7 @@ class RoleController extends Controller
         }
 
         return redirect()
-                ->route('role.view_admin', ['subdomain' => $role->subdomain])
+                ->route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'])
                 ->with('message', __('messages.confirmed_email'));
     }
 
@@ -1049,13 +1049,13 @@ class RoleController extends Controller
         $role = Role::whereSubdomain($subdomain)->firstOrFail();
 
         if ($role->hasVerifiedEmail()) {
-            return redirect()->route('role.view_admin', ['subdomain' => $role->subdomain]);
+            return redirect()->route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']);
         }
 
         $role->sendEmailVerificationNotification();
 
         return redirect()
-            ->route('role.view_admin', ['subdomain' => $role->subdomain])
+            ->route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'])
             ->with('message', __('messages.sent_confirmation_email'));
     }
 

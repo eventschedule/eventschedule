@@ -40,7 +40,7 @@
               </h3>
               <a
                 href="{{ auth()->user() && auth()->user()->isMember($role->subdomain)
-                  ? config('app.url') . route('role.view_admin', ['subdomain' => $role->subdomain], false) 
+                  ? config('app.url') . route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false) 
                   : route('role.follow', ['subdomain' => $role->subdomain]) }}"
                 class="inline-flex items-center justify-center"
               >
