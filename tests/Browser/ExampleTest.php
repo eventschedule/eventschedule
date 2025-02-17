@@ -58,13 +58,13 @@ class ExampleTest extends DuskTestCase
                     ->type('address1', '123 Test St')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->assertPathIs('/test-venue')
+                    ->assertPathIs('/test-venue/schedule')
                     ->clickLink('Edit Venue')
                     ->assertPathIs('/test-venue/edit')
                     ->type('website', 'https://google.com')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->assertPathIs('/test-venue')
+                    ->assertPathIs('/test-venue/schedule')
                     ->assertSee('google.com');
 
             // Create/edit talent
@@ -72,13 +72,13 @@ class ExampleTest extends DuskTestCase
                     ->type('name', 'Test Schedule')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->assertPathIs('/test-schedule')
+                    ->assertPathIs('/test-schedule/schedule')
                     ->clickLink('Edit Schedule')
                     ->assertPathIs('/test-schedule/edit')
                     ->type('website', 'https://google.com')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->assertPathIs('/test-schedule')
+                    ->assertPathIs('/test-schedule/schedule')
                     ->assertSee('google.com');
 
             // Create/edit event
