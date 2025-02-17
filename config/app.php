@@ -27,6 +27,7 @@ return [
     */
 
     'env' => env('APP_ENV', 'production'),
+    'hosted' => (bool) env('APP_HOSTED', false),
 
     /*
     |--------------------------------------------------------------------------
