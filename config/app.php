@@ -29,6 +29,7 @@ return [
     'env' => env('APP_ENV', 'production'),
     'hosted' => (bool) env('APP_HOSTED', false),
     'cron_secret' => env('APP_CRON_SECRET', ''),
+    'sentry_js_dsn' => env('SENTRY_LARAVEL_JS_DSN', env('SENTRY_JS_DSN')),
 
     /*
     |--------------------------------------------------------------------------

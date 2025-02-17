@@ -1,5 +1,5 @@
 <x-slot name="head">
-  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="{{ asset('js/vue.global.prod.js') }}"></script>
   <script>
     window.addEventListener('DOMContentLoaded', function() {
         const { createApp, ref } = Vue;

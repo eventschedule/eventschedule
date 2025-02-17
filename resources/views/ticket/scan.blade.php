@@ -2,8 +2,8 @@
 
     <x-slot name="head">
 
-        <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-        <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+        <script src="{{ asset('js/vue.global.prod.js') }}"></script>
+        <script src="{{ asset('js/html5-qrcode.min.js') }}"></script>
 
         <style>
             #reader {

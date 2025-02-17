@@ -9,8 +9,8 @@
     <link rel="icon" href="{{ asset('images/favicon.png') }}">
     <link rel="canonical" href="{{ url()->current() }}">
 
-    @if (config('sentry.js_dsn'))
-        <script src="{{ config('sentry.js_dsn') }}" crossorigin="anonymous"></script>
+    @if (config('app.sentry_js_dsn'))
+        <script src="{{ config('app.sentry_js_dsn') }}" crossorigin="anonymous"></script>
     @endif
 
     @if (isset($meta))
