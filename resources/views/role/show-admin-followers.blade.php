@@ -28,7 +28,11 @@
     <p class="mt-1 text-sm text-gray-500">{{ __('messages.share_your_event_schedule_link') }}</p>
     <div class="mt-3">
         <a href="{{ $role->getGuestUrl() }}" target="_blank" class="hover:underline">
-            {{ $role->subdomain . '.eventschedule.com' }}
+            @if (config('app.hosted'))
+                {{ $role->subdomain . '.eventschedule.com' }}
+            @else
+                {{ config('app.url') . '/' . $role->subdomain }}
+            @endif
         </a>
     </div>
 </div>

@@ -516,7 +516,7 @@
           <h4 class="text-[#151B26] text-[24px] leading-snug font-semibold">
             {{ __('messages.create_your_own_event_schedule') }}
           </h4>
-          <a href="https://eventschedule.com" target="_blank">
+          <a href="https://www.eventschedule.com" target="_blank">
             <button
               type="button"
               name="login"

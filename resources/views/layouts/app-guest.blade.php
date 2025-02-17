@@ -112,7 +112,7 @@
         <div
         class="container mx-auto flex flex-row justify-between items-center py-7 px-5"
         >
-        <a href="https://eventschedule.com" target="_blank">
+        <a href="https://www.eventschedule.com" target="_blank">
             <x-application-logo />
         </a> 
         <div class="flex flex-row gap-x-3 md:gap-x-10">
