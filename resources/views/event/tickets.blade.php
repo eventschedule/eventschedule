@@ -7,14 +7,14 @@
         const app = createApp({
             data() {
                 return {
-                    createAccount: {{ old('create_account', false) ? 'true' : 'false' }},
+                    createAccount: @json(old('create_account', false) ? 'true' : 'false'),
                     tickets: @json($event->tickets->map(function ($ticket) { 
                         $data = $ticket->toData(request()->date); 
                         $data['selectedQty'] = old('tickets')[$data['id']] ?? 0;
                         return $data;
                     })),
-                    name: '{{ old('name', auth()->check() ? auth()->user()->name : '') }}',
-                    email: '{{ old('email', auth()->check() ? auth()->user()->email : '') }}',
+                    name: @json(old('name', auth()->check() ? auth()->user()->name : '')),
+                    email: @json(old('email', auth()->check() ? auth()->user()->email : '')),
                     password: '',
                     password_confirmation: '',
                 };
