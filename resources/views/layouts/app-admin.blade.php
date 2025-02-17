@@ -168,8 +168,13 @@
                 </div>
             </main>
 
-            <div class="mt-auto pb-8 px-8 text-sm text-gray-500">
-                {!! str_replace(':email', '<a href="mailto:contact@eventschedule.com?subject=Feedback" class="hover:underline">contact@eventschedule.com</a>', __('messages.questions_or_suggestions')) !!}
+            <div class="mt-auto pb-8 px-8 text-sm text-gray-500">                
+                @if (config('app.hosted'))                
+                    {!! str_replace(':email', '<a href="mailto:contact@eventschedule.com?subject=Feedback" class="hover:underline">contact@eventschedule.com</a>', __('messages.questions_or_suggestions')) !!}
+                @else
+                    <!-- Per the AAL license, please do not remove the link to Event Schedule -->
+                    {!! str_replace(':link', '<a href="https://www.eventschedule.com" class="hover:underline" target="_blank">eventschedule.com</a>', __('messages.powered_by_eventschedule')) !!}
+                @endif
             </div>
 
         </div>

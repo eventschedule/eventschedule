@@ -94,6 +94,10 @@ class EventController extends Controller
 
     public function create(Request $request, $subdomain)
     {
+        if (! \App\Utils\HostedUtils::isHostedOrAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
         $user = $request->user();
         $role = Role::subdomain($subdomain)->firstOrFail();
         
@@ -197,6 +201,10 @@ class EventController extends Controller
 
     public function edit(Request $request, $subdomain, $hash)
     {
+        if (! \App\Utils\HostedUtils::isHostedOrAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
         $user = $request->user();
@@ -274,6 +282,10 @@ class EventController extends Controller
 
     public function update(EventUpdateRequest $request, $subdomain, $hash)
     {
+        if (! \App\Utils\HostedUtils::isHostedOrAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
 
@@ -374,6 +386,10 @@ class EventController extends Controller
 
     public function store(EventCreateRequest $request, $subdomain)
     {
+        if (! \App\Utils\HostedUtils::isHostedOrAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
         $role = Role::subdomain($subdomain)->firstOrFail();
         $curatorId = $role->isCurator() ? $role->id : null;
         $event = $this->eventRepo->saveEvent($request, null, $curatorId);
