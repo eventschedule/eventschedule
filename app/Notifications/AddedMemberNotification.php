@@ -48,7 +48,7 @@ class AddedMemberNotification extends Notification
                     ->line(str_replace([':name', ':user'], [$this->role->name, $this->admin->name], __('messages.added_to_team_detail')))
                     ->action(
                         $newUser ? __('messages.set_new_password') : __('messages.get_started'), 
-                        $newUser ? route('password.request', ['email' => $this->user->email]) : route('role.view_admin', ['subdomain' => $this->role->subdomain]))
+                        $newUser ? route('password.request', ['email' => $this->user->email]) : route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'schedule']))
                     ->line(__('messages.thank_you_for_using'));
     }
 

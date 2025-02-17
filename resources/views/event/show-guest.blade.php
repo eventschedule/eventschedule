@@ -322,7 +322,7 @@
               @if ($each->isClaimed())
               <a
                 href="{{ auth()->user() && auth()->user()->isMember($each->subdomain)
-                  ? config('app.url') . route('role.view_admin', ['subdomain' => $each->subdomain], false) 
+                  ? config('app.url') . route('role.view_admin', ['subdomain' => $each->subdomain, 'tab' => 'schedule'], false) 
                   : route('role.follow', ['subdomain' => $each->subdomain]) }}"
                 class="inline-flex items-center justify-center"
               >

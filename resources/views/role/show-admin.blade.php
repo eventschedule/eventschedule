@@ -256,7 +256,7 @@
         <!-- Tabs at small breakpoint and up -->
         <div class="hidden sm:block">
             <nav class="-mb-px flex space-x-8">
-                <a href="{{ route('role.view_admin', ((now()->year == $year && now()->month == $month) || $tab == '') ? ['subdomain' => $role->subdomain] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'month' => $month] : ['subdomain' => $role->subdomain, 'year' => $year, 'month' => $month])) }}"
+                <a href="{{ route('role.view_admin', ((now()->year == $year && now()->month == $month) || $tab == 'schedule') ? ['subdomain' => $role->subdomain, 'tab' => 'schedule'] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'month' => $month] : ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'year' => $year, 'month' => $month])) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'schedule' ? 'border-[#4E81FA] px-1 pb-4 text-sm font-medium text-[#4E81FA]' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.schedule') }}</a>
                 @if ($role->isSchedule() && $role->members->count() > 1)
                 <a href=" {{ route('role.view_admin', ((now()->year == $year && now()->month == $month) || $tab == 'availability') ? ['subdomain' => $role->subdomain, 'tab' => 'availability'] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'tab' => 'availability', 'month' => $month] : ['subdomain' => $role->subdomain, 'tab' => 'availability', 'year' => $year, 'month' => $month])) }}"
@@ -279,7 +279,7 @@
 
     </div>
 
-    @if ($tab == 'schedule' || ! $tab)
+    @if ($tab == 'schedule')
     @include('role.show-admin-schedule')
     @elseif ($tab == 'availability')
     @include('role.show-admin-availability')
