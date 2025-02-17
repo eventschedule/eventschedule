@@ -276,7 +276,7 @@
                                         <div class="space-y-2">
                                             <div v-for="venue in venueSearchResults" :key="venue.id" class="flex items-center justify-between">
                                                 <div class="flex items-center">
-                                                    <span class="text-sm text-gray-900 dark:text-gray-100">
+                                                    <span class="text-sm text-gray-900 dark:text-gray-100 truncate">
                                                         <a :href="venue.url" target="_blank" class="hover:underline">@{{ venue.name }}</a>:
                                                         @{{ venue.address1 }}
                                                     </span>
@@ -421,7 +421,7 @@
                                     </div>
                                     <div v-show="editMemberId !== member.id" class="flex justify-between w-full">
                                         <div class="flex items-center">
-                                            <span class="text-sm text-gray-900 dark:text-gray-100">
+                                            <span class="text-sm text-gray-900 dark:text-gray-100 truncate">
                                                 <template v-if="member.url">
                                                     <a :href="member.url" target="_blank" class="hover:underline">@{{ member.name }}</a>
                                                 </template>
