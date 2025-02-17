@@ -266,9 +266,11 @@
                                             <x-text-input id="venue_email" name="venue_email" type="email" class="block w-full"
                                                 @blur="searchVenues" v-model="venueEmail" autocomplete="off" />
                                         </div>
+                                        @if (config('app.hosted'))
                                         <p class="mt-2 text-sm text-gray-500">
                                             {{ __('messages.an_email_will_be_sent') }}
                                         </p>
+                                        @endif
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
                                     </div>
 
@@ -502,9 +504,11 @@
                                             <x-text-input id="member_email" name="member_email" type="email" class="mr-2 block w-full"
                                             @keydown.enter.prevent="addMember" @blur="searchMembers" v-model="memberEmail" autocomplete="off" />
                                         </div>
+                                        @if (config('app.hosted'))
                                         <p class="mt-2 text-sm text-gray-500">
                                             {{ __('messages.an_email_will_be_sent') }}
                                         </p>
+                                        @endif
                                         <x-input-error class="mt-2" :messages="$errors->get('member_email')" />
                                     </div>
 
