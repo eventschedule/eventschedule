@@ -155,12 +155,15 @@
         class="container mx-auto flex flex-row justify-center items-center py-8 px-5"
       >
         <p class="text-[#F5F9FE] text-base text-center">
-            {!! str_replace(':link', '<a href="' . config('app.url') . '" target="_blank" class="hover:underline">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}
-            •
-            @if (($role->country_code == 'il' && $role->id != 6) || ($event && $event->venue && $event->venue->country_code == 'il' && $event->venue->id != 6))
-            {!! str_replace(':link', '<a href="https://myjewishsoulmate.com" target="_blank" class="hover:underline">My Jewish Soulmate</a>',  __('messages.supported_by')) !!}
-            @else
-            {!! str_replace([':link1', ':link2'], ['<a href="https://invoiceninja.com" target="_blank" class="hover:underline" title="Leading small-business platform to manage invoices, expenses & tasks">Invoice Ninja</a>', '<a href="https://mudeo.app" target="_blank" class="hover:underline" title="Make music together">mudeo</a>'],  __('messages.supported_by_both')) !!}
+            <!-- Per the AAL license, please do not remove the link to Event Schedule -->
+            {!! str_replace(':link', '<a href="https://www.eventschedule.com" target="_blank" class="hover:underline">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}
+            @if (config('app.hosted'))
+                •
+                @if (($role->country_code == 'il' && $role->id != 6) || ($event && $event->venue && $event->venue->country_code == 'il' && $event->venue->id != 6))
+                {!! str_replace(':link', '<a href="https://myjewishsoulmate.com" target="_blank" class="hover:underline">My Jewish Soulmate</a>',  __('messages.supported_by')) !!}
+                @else
+                {!! str_replace([':link1', ':link2'], ['<a href="https://invoiceninja.com" target="_blank" class="hover:underline" title="Leading small-business platform to manage invoices, expenses & tasks">Invoice Ninja</a>', '<a href="https://mudeo.app" target="_blank" class="hover:underline" title="Make music together">mudeo</a>'],  __('messages.supported_by_both')) !!}
+                @endif
             @endif
         </p>
       </div>
