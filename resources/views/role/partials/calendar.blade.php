@@ -64,7 +64,7 @@
                 {{ __('messages.save') }}
             </button>
             @endif
-            @elseif ($route == 'home')
+            @elseif ($route == 'home' && \App\Utils\HostedUtils::showHostedOrAdmin())
             <div style="font-family: sans-serif" class="ml-3 shadow-sm relative inline-block text-left">
                 <button type="button" 
                     onclick="onPopUpClick('calendar-pop-up-menu', event)"
