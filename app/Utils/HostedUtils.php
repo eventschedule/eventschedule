@@ -4,7 +4,8 @@ namespace App\Utils;
 
 class HostedUtils
 {
-    public static function showHostedOrAdmin() {
+    public static function isHostedOrAdmin() 
+    {
         if (config('app.hosted')) {
             return true;
         }

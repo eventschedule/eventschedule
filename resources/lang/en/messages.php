@@ -407,4 +407,5 @@ return [
     'cannot_remove_owner' => 'You cannot remove the owner',
     'none' => 'None',
     'create_new' => 'Create New',
+    'powered_by_eventschedule' => 'Powered by :link',
 ];
