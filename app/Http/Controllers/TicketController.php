@@ -447,7 +447,10 @@ class TicketController extends Controller
 
     public function release()
     {
-        if (request()->get('secret') != 'kx3kX4qJuXk12kae8ox78') {
+        $requestSecret = request()->get('secret');
+        $serverSecret = config('app.cron_secret');
+        
+        if (! $serverSecret || $requestSecret != $serverSecret) {
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 

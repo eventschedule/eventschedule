@@ -28,6 +28,7 @@ return [
 
     'env' => env('APP_ENV', 'production'),
     'hosted' => (bool) env('APP_HOSTED', false),
+    'cron_secret' => env('APP_CRON_SECRET', ''),
 
     /*
     |--------------------------------------------------------------------------
