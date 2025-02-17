@@ -16,11 +16,47 @@ GRANT ALL PRIVILEGES ON eventschedule.* TO 'eventschedule'@'localhost';
 
 ### Setup the application
 
-1. Clone the repository
-2. Run `composer install`
-3. Run `php artisan migrate`
-4. Run `php artisan serve`
-5. Run `npm run dev`
+* Clone the repository: 
+
+```
+git clone https://github.com/hillelcoren/eventschedule.git
+```
+
+* Setup the `.env` file: 
+
+```
+cp .env.example .env
+```
+
+* Generate the application key: 
+
+```
+php artisan key:generate
+```
+
+* Install the dependencies: 
+
+```
+composer install
+```
+
+* Run the migrations: 
+
+```
+php artisan migrate
+```
+
+* Build the assets: 
+
+```
+npm run dev
+```
+
+* Run the development server: 
+
+```
+php artisan serve
+```
 
 #### File permissions
 
