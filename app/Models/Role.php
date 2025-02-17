@@ -242,7 +242,7 @@ class Role extends Model implements MustVerifyEmail
             return '';
         }
 
-        if (config('filesystems.default') == 'do_spaces') {
+        if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
             return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $value;
         } else if (config('filesystems.default') == 'local') {
             return url('/storage/' . $value);
@@ -257,7 +257,7 @@ class Role extends Model implements MustVerifyEmail
             return '';
         }
 
-        if (config('filesystems.default') == 'do_spaces') {
+        if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
             return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $value;
         } else if (config('filesystems.default') == 'local') {
             return url('/storage/' . $value);
@@ -272,7 +272,7 @@ class Role extends Model implements MustVerifyEmail
             return '';
         }
 
-        if (config('filesystems.default') == 'do_spaces') {
+        if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
             return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $value;
         } else if (config('filesystems.default') == 'local') {
             return url('/storage/' . $value);
