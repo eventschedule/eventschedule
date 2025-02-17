@@ -13,37 +13,39 @@
         @csrf
         @method('patch')
         
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-            <a href="https://stripe.com" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">
-                Stripe Connect
-            </a>
-        </h2>
+        @if (config('app.hosted'))
+            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                <a href="https://stripe.com" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">
+                    Stripe Connect
+                </a>
+            </h2>
 
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __('messages.stripe_help') }}
-        </p>
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                {{ __('messages.stripe_help') }}
+            </p>
 
-        @if ($user->stripe_account_id)
-            <div class="mt-4">
-                @if (! $user->stripe_completed_at)
-                    <x-input-label for="stripe_account_id" :value="__('messages.account_id') . ' [' . __('messages.pending') . ']'" />
-                @endif
-                <x-text-input type="text" class="mt-1 block w-full" :value="$user->stripe_company_name ? $user->stripe_company_name : $user->stripe_account_id" readonly/>
-                <div class="text-xs pt-1">
-                    <a href="#" onclick="return confirm('{{ __('messages.are_you_sure') }}') ? window.location.href='{{ route('stripe.unlink') }}' : false" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.unlink_account') }}</a>
+            @if ($user->stripe_account_id)
+                <div class="mt-4">
+                    @if (! $user->stripe_completed_at)
+                        <x-input-label for="stripe_account_id" :value="__('messages.account_id') . ' [' . __('messages.pending') . ']'" />
+                    @endif
+                    <x-text-input type="text" class="mt-1 block w-full" :value="$user->stripe_company_name ? $user->stripe_company_name : $user->stripe_account_id" readonly/>
+                    <div class="text-xs pt-1">
+                        <a href="#" onclick="return confirm('{{ __('messages.are_you_sure') }}') ? window.location.href='{{ route('stripe.unlink') }}' : false" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.unlink_account') }}</a>
+                    </div>
                 </div>
-            </div>
+            @endif
+
+            @if (! $user->stripe_completed_at)
+                <div class="mt-4">
+                    <x-secondary-button onclick="window.location.href='{{ route('stripe.link') }}'">
+                        {{ __('messages.connect_stripe') }}
+                    </x-secondary-button>
+                </div>
+            @endif
         @endif
 
-        @if (! $user->stripe_completed_at)
-            <div class="mt-4">
-                <x-secondary-button onclick="window.location.href='{{ route('stripe.link') }}'">
-                    {{ __('messages.connect_stripe') }}
-                </x-secondary-button>
-            </div>
-        @endif
-
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 pt-8">
+        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 pt-4">
             <a href="https://invoiceninja.com" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">
                 Invoice Ninja
             </a>
