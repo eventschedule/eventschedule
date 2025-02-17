@@ -9,8 +9,8 @@
     <link rel="icon" href="{{ asset('images/favicon.png') }}">
     <link rel="canonical" href="{{ url()->current() }}">
 
-    @if (config('services.sentry.dsn'))
-        <script src="https://js.sentry-cdn.com/dbdc1097b55788aa2f56e31faa53a7fc.min.js" crossorigin="anonymous"></script>
+    @if (config('sentry.js_dsn'))
+        <script src="{{ config('sentry.js_dsn') }}" crossorigin="anonymous"></script>
     @endif
 
     @if (isset($meta))
@@ -19,24 +19,24 @@
         <meta name="description" content="The simple and free way to share your event schedule">
         <meta property="og:title" content="Event Schedule">
         <meta property="og:description" content="The simple and free way to share your event schedule">
-        <meta property="og:image" content="https://eventschedule.com/images/background.jpg">
+        <meta property="og:image" content="{{ config('app.url') }}/images/background.jpg">
         <meta property="og:url" content="' . request()->url() . '">
         <meta property="og:site_name" content="Event Schedule">
         <meta name="twitter:title" content="Event Schedule">
         <meta name="twitter:description" content="The simple and free way to share your event schedule">
-        <meta name="twitter:image" content="https://eventschedule.com/images/background.jpg">
+        <meta name="twitter:image" content="{{ config('app.url') }}/images/background.jpg">
         <meta name="twitter:image:alt" content="Event Schedule">
         <meta name="twitter:card" content="summary_large_image">
     @endif    
 
     <meta http-equiv="Content-Security-Policy" content="
-        img-src 'self' data: https://maps.gstatic.com https://maps.googleapis.com https://eventschedule.nyc3.cdn.digitaloceanspaces.com https://*.ytimg.com https://eventschedule.test:5173;
+        img-src 'self' data: https://maps.gstatic.com https://maps.googleapis.com https://*.ytimg.com https://eventschedule.test:5173 {{ config('app.hosted') ? 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com' : '' }};
         frame-src 'self' https://www.youtube.com https://www.googletagmanager.com;
     ">
 
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="{{ asset('js/jquery.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/toastify-js.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/toastify.min.css') }}">
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics') }}"></script>
