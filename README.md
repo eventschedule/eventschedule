@@ -4,6 +4,8 @@
 
 An app for talent, vendors, venues, and curators to set up & and promote their event schedule calendars.
 
+- [Sample Schedule](https://openmicnight.eventschedule.com)
+
 ## Steps to install
 
 ### Setup the database
