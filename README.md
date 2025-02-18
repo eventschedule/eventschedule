@@ -10,7 +10,7 @@ An app for talent, vendors, venues, and curators to set up & and promote their e
 
 - 🗓️ **Event Calendars:** Create and share event calendars effortlessly to keep your audience informed.  
 - 🎟️ **Sell Tickets Online:** Offer ticket sales directly through the platform with a seamless checkout process.  
-- 💳 **Online Payments with Invoice Ninja Integration:** Accept secure online payments via [Invoice Ninja](https://www.invoiceninja.com) integration.  
+- 💳 **Online Payments with Invoice Ninja Integration:** Accept secure online payments via [Invoice Ninja](https://www.invoiceninja.com).  
 - 🔁 **Recurring Events:** Schedule recurring events which occur on a regular basis.  
 - 📲 **QR Code Ticketing:** Generate and scan QR codes for easy and secure event check-ins.  
 - 💻 **Support for Online Events:** Use the platform to sell tickets to online events.  
