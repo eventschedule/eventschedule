@@ -7,6 +7,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\InvoiceNinjaController;
+use App\Http\Controllers\AppController;
 use Illuminate\Support\Facades\Route;
 
 if (config('app.hosted')) {
@@ -24,6 +25,8 @@ if (config('app.hosted')) {
         Route::get('/checkout/cancel/{sale_id}/{date}', [TicketController::class, 'cancel'])->name('checkout.cancel');
         Route::get('/{slug}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
     });
+} else {
+    Route::get('/update', [AppController::class, 'update'])->name('update');
 }
 
 require __DIR__.'/auth.php';

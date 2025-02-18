@@ -7,6 +7,7 @@
     "require": {
         "php": "^8.2",
         "ext-gd": "*",
+        "codedge/laravel-selfupdater": "^3.9",
         "endroid/qr-code": "^5.0",
         "ezyang/htmlpurifier": "^4.17",
         "laravel/framework": "^11.9",
@@ -66,7 +67,8 @@
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "phpstan/extension-installer": true
         }
     },
     "minimum-stability": "stable",
