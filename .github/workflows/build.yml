@@ -32,17 +32,7 @@ jobs:
           rm -f .gitattributes .gitignore phpunit.xml
           
           # Create zip file
-          zip -r release.zip .
-
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./release.zip
-          asset_name: release.zip
-          asset_content_type: application/zip
+          zip -r eventschedule.zip .
 
       - name: Create Release
         uses: marvinpinto/action-automatic-releases@v1.2.1
@@ -53,4 +43,4 @@ jobs:
           title: "Latest Release"
           automatic_release_tag: "v0.9.0"
           files: |
-            ${{ github.workspace }}/release-v0_9_0.zip
+            eventschedule.zip
