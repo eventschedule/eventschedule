@@ -23,7 +23,7 @@ An app for talent, vendors, venues, and curators to set up & and promote their e
 
 ## Installation Guide
 
-Follow these steps to set up the EventSchedule application.
+Follow these steps to set up Event Schedule:
 
 ### 1. Set Up the Database
 
