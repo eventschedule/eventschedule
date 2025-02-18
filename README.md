@@ -27,17 +27,53 @@ Follow these steps to set up Event Schedule:
 
 ### 1. Set Up the Database
 
-Run the following commands to create the database and user:
+Run the following commands to create the MySQL database and user:
 
 ```sql
 CREATE DATABASE eventschedule;
-CREATE USER 'eventschedule'@'localhost' IDENTIFIED BY 'eventschedule';
+CREATE USER 'eventschedule'@'localhost' IDENTIFIED BY 'change_me';
 GRANT ALL PRIVILEGES ON eventschedule.* TO 'eventschedule'@'localhost';
 ```
 
 ---
 
 ### 2. Set Up the Application
+
+Copy [eventschedule.zip](https://github.com/eventschedule/eventschedule/releases/latest) to your server and unzip it.
+
+---
+
+### 3. Set File Permissions
+
+Ensure correct permissions for storage and cache directories:
+
+```bash
+cd /path/to/eventschedule
+chmod -R 755 storage
+sudo chown -R www-data:www-data storage bootstrap public
+```
+
+---
+
+### 4. Set Up the Application
+
+Fill in the form with your details.
+
+---
+
+### 5. Set Up the Cron Job
+
+Add the following line to your crontab to ensure scheduled tasks run automatically:
+
+```bash
+* * * * * php /path/to/eventschedule/artisan schedule:run
+```
+
+---
+
+You're all set! 🎉 Event Schedule should now be up and running.
+
+## Developer Setup
 
 #### Clone the Repository
 
@@ -84,29 +120,3 @@ npm run dev
 ```bash
 php artisan serve
 ```
-
----
-
-### 3. Set File Permissions
-
-Ensure correct permissions for storage and cache directories:
-
-```bash
-cd /path/to/eventschedule
-chmod -R 755 storage
-sudo chown -R www-data:www-data storage bootstrap public
-```
-
----
-
-### 4. Set Up the Cron Job
-
-Add the following line to your crontab to ensure scheduled tasks run automatically:
-
-```bash
-* * * * * php /path/to/eventschedule/artisan schedule:run
-```
-
----
-
-You're all set! 🎉 Event Schedule should now be up and running.
