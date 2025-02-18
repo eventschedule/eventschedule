@@ -23,7 +23,7 @@ class UpdateApp extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(UpdaterManager $updater)
     {
         if (config('app.hosted')) {
             $this->error('Not authorized');
@@ -33,9 +33,13 @@ class UpdateApp extends Command
 
         $this->info('Updating app...');
 
-        $updater = new UpdaterManager();
-
         $versionAvailable = $updater->source()->getVersionAvailable();
+        $installedVersion = $updater->source()->getVersionInstalled();
+        
+        if ($versionAvailable == $installedVersion) {
+            $this->info('No updates available');
+            exit;
+        }
 
         $release = $updater->source()->fetch($versionAvailable);
         
