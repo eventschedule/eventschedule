@@ -413,7 +413,8 @@ return [
     'installed_version' => 'Installed Version',
     'latest_version' => 'Latest Version',
     'update' => 'Update',
-    'up_to_date' => 'You are up to date!',
+    'app_update_tip' => 'Note: if the update times out you can run \'php artisan app:update\', increase the max_execution_time in your php.ini file or manually extract :link to /tmp/eventschedule/ and try again.',
+    'up_to_date' => 'You\'re up to date!',
     'app_updated' => 'App updated successfully!',
     'no_new_version_available' => 'No new version available',
 ];

@@ -36,16 +36,18 @@
         @csrf
         @method('patch')
 
-    <div class="gap-4 pt-8">
-        @if ($version_installed != $version_available)
-            <x-primary-button>{{ __('messages.update') }}</x-primary-button>
-        @else
-            <div class="text-gray-600 dark:text-gray-400 pb-4"> 
-                {{ __('messages.up_to_date') }}
-            </div>
+    @if ($version_installed != $version_available)
+        <x-primary-button>{{ __('messages.update') }}</x-primary-button>
 
-        @endif
-    </div>
+        <div class="text-gray-600 dark:text-gray-400 pt-6"> 
+            {!! __('messages.app_update_tip', ['link' => '<a href="https://github.com/eventschedule/eventschedule/releases/download/' . $version_available . '/eventschedule.zip" class="hover:underline">eventschedule.zip</a>']) !!}
+        </div>
+    @else
+        <div class="text-gray-600 dark:text-gray-400 pb-4"> 
+            <b>{{ __('messages.up_to_date') }}</b>
+        </div>
+
+    @endif
 
     </form>
 
