@@ -27,7 +27,6 @@ if (config('app.hosted')) {
     });
 } else {
     Route::match(['get', 'post'], '/update', [AppController::class, 'update'])->name('app.update');
-    Route::get('/setup', [AppController::class, 'setup'])->name('app.setup');
 }
 
 require __DIR__.'/auth.php';
