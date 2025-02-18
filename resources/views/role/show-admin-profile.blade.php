@@ -6,7 +6,7 @@
 </div>
 @endif
 
-@if ($role->formatted_address)
+@if (config('services.google.maps') && $role->formatted_address)
 <div class="pt-5">
     <div id="map" style="height: 200px;"></div>
 </div>
