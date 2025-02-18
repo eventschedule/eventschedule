@@ -421,7 +421,7 @@ class Role extends Model implements MustVerifyEmail
             'detroit',
         ];
 
-        if (in_array($subdomain, $reserved)) {
+        if (config('app.hosted') && in_array($subdomain, $reserved)) {
             $subdomain = '';
         }
 
