@@ -24,7 +24,7 @@ return [
     |
     */
 
-    'version_installed' => env('SELF_UPDATER_VERSION_INSTALLED', 'v0.9.2'),
+    'version_installed' => env('SELF_UPDATER_VERSION_INSTALLED', 'v0.9.3'),
 
     /*
     |--------------------------------------------------------------------------
@@ -42,8 +42,8 @@ return [
     'repository_types' => [
         'github' => [
             'type'                 => 'github',
-            'repository_vendor'    => env('SELF_UPDATER_REPO_VENDOR', ''),
-            'repository_name'      => env('SELF_UPDATER_REPO_NAME', ''),
+            'repository_vendor'    => env('SELF_UPDATER_REPO_VENDOR', 'eventschedule'),
+            'repository_name'      => env('SELF_UPDATER_REPO_NAME', 'eventschedule'),
             'repository_url'       => 'https://github.com/eventschedule/eventschedule',
             'download_path'        => env('SELF_UPDATER_DOWNLOAD_PATH', '/tmp'),
             'private_access_token' => env('SELF_UPDATER_GITHUB_PRIVATE_ACCESS_TOKEN', ''),
