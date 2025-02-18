@@ -8,14 +8,14 @@ An app for talent, vendors, venues, and curators to set up & and promote their e
 
 ## Key Features
 
-- **Event Calendars:** Create and share event calendars effortlessly to keep your audience informed.
-- **Sell Tickets Online:** Offer ticket sales directly through the platform with a seamless checkout process.
-- **Online Payments with Invoice Ninja Integration:** Accept secure online payments via Invoice Ninja integration.
-- **Recurring Events:** Schedule recurring events with flexible options for daily, weekly, or custom intervals.
-- **QR Code Ticketing:** Generate and scan QR codes for easy and secure event check-ins.
-- **Support for Online Events:** Host and manage virtual events with built-in support for online platforms.
-- **Team Scheduling:** Collaborate with team members to manage availability and coordinate event schedules.
-- **Multi-Language Support:** Provide a localized experience with support for multiple languages.
+- 🗓️ **Event Calendars:** Create and share event calendars effortlessly to keep your audience informed.  
+- 🎟️ **Sell Tickets Online:** Offer ticket sales directly through the platform with a seamless checkout process.  
+- 💳 **Online Payments with Invoice Ninja Integration:** Accept secure online payments via [Invoice Ninja](https://www.invoiceninja.com) integration.  
+- 🔁 **Recurring Events:** Schedule recurring events with flexible options for daily, weekly, or custom intervals.  
+- 📲 **QR Code Ticketing:** Generate and scan QR codes for easy and secure event check-ins.  
+- 💻 **Support for Online Events:** Host and manage virtual events with built-in support for online platforms.  
+- 👥 **Team Scheduling:** Collaborate with team members to manage availability and coordinate event schedules.  
+- 🌍 **Multi-Language Support:** Provide a localized experience with support for multiple languages.
 
 <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/schedule.png?raw=true" width="100%" alt="Schedule Screenshot">
 
