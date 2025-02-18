@@ -48,6 +48,6 @@ jobs:
           draft: false
           prerelease: false
           title: "Latest Release"
-          automatic_release_tag: "v0.9.4"
+          automatic_release_tag: "v0.9.5"
           files: |
             eventschedule.zip
