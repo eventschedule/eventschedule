@@ -49,7 +49,7 @@ class User extends Authenticatable implements MustVerifyEmail
         });
 
         static::updating(function ($user) {
-            if ($user->isDirty('email')) {
+            if ($user->isDirty('email') && (config('app.hosted') || ! $user->isAdmin())) {
                 $user->email_verified_at = null;
                 $user->sendEmailVerificationNotification();
             }

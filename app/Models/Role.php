@@ -89,7 +89,7 @@ class Role extends Model implements MustVerifyEmail
         });
 
         static::updating(function ($model) {
-            if ($model->isDirty('email')) {
+            if ($model->isDirty('email') && config('app.hosted')) {
                 $model->email_verified_at = null;
                 $model->sendEmailVerificationNotification();
             }
