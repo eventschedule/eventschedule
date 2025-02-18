@@ -6,10 +6,9 @@ An app for talent, vendors, venues, and curators to set up & and promote their e
 
 - [Sample Schedule](https://openmicnight.eventschedule.com)
 
-<div style="display: flex; justify-content: space-between; margin: 20px 0;">
-    <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/schedule.png?raw=true" width="48%" alt="Schedule Screenshot">
-    <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/event.png?raw=true" width="48%" alt="Event Screenshot">
-</div>
+<img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/schedule.png?raw=true" width="100%" alt="Schedule Screenshot">
+
+<img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/event.png?raw=true" width="100%" alt="Event Screenshot">
 
 ## Steps to install
 
