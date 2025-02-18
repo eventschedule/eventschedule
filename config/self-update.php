@@ -108,7 +108,7 @@ return [
     |
     */
 
-    'download_timeout' => env('SELF_UPDATER_DOWNLOAD_TIMEOUT', 400),
+    'download_timeout' => env('SELF_UPDATER_DOWNLOAD_TIMEOUT', 600),
 
     /*
     |--------------------------------------------------------------------------
@@ -132,9 +132,9 @@ return [
 
     'notifications' => [
         'notifications' => [
-            \Codedge\Updater\Notifications\Notifications\UpdateSucceeded::class => ['mail'],
-            \Codedge\Updater\Notifications\Notifications\UpdateFailed::class    => ['mail'],
-            \Codedge\Updater\Notifications\Notifications\UpdateAvailable::class => ['mail'],
+            //\Codedge\Updater\Notifications\Notifications\UpdateSucceeded::class => ['mail'],
+            //\Codedge\Updater\Notifications\Notifications\UpdateFailed::class    => ['mail'],
+            //\Codedge\Updater\Notifications\Notifications\UpdateAvailable::class => ['mail'],
         ],
 
         /*
