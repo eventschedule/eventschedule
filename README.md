@@ -1,10 +1,3 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/eventschedule/eventschedule/blob/main/public/images/light_logo.png?raw=true">
-    <source media="(prefers-color-scheme: light)" srcset="https://github.com/eventschedule/eventschedule/blob/main/public/images/dark_logo.png?raw=true">
-  </picture>
-</p>
-
 # Event Schedule
 
 ### Schedule Events. Engage your Audience.
