@@ -679,7 +679,9 @@ class RoleController extends Controller
             $role->plan_term = 'year';
         }
 
-        if ($role->email == $user->email) {
+        if (! config('app.hosted')) {
+            $role->email_verified_at = now();
+        } else if ($role->email == $user->email) {
             $role->email_verified_at = $user->email_verified_at;
         }
 
