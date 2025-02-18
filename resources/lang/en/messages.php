@@ -414,5 +414,5 @@ return [
     'latest_version' => 'Latest Version',
     'update' => 'Update',
     'up_to_date' => 'You are up to date!',
-    'app_update_tip' => 'Note: if the update times out either increase the max_execution_time in your php.ini file or manually copy :link to the server\'s /tmp folder and try again.',
+    'app_update_tip' => 'Note: if the update times out either run \'php artisan app:update\', increase the max_execution_time in your php.ini file or manually copy :link to the server\'s /tmp folder and try again.',
 ];
