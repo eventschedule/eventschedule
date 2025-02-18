@@ -408,4 +408,11 @@ return [
     'none' => 'None',
     'create_new' => 'Create New',
     'powered_by_eventschedule' => 'Powered by :link',
+    'app_update' => 'App Update',
+    'app_update_help' => 'Update your app to the latest version',
+    'installed_version' => 'Installed Version',
+    'latest_version' => 'Latest Version',
+    'update' => 'Update',
+    'up_to_date' => 'You are up to date!',
+    'app_update_tip' => 'Note: if the update times out, you can manually copy :link to the server\'s /tmp folder and run the update again.',
 ];

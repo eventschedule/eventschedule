@@ -13,6 +13,14 @@
                 </div>
             </div>
 
+            @if (! config('app.hosted'))
+            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                <div class="max-w-xl">
+                    @include('profile.partials.update-app-form')
+                </div>
+            </div>
+            @endif
+
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                 <div class="max-w-xl">
                     @include('profile.partials.update-password-form')
