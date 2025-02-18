@@ -23,6 +23,15 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-ansi --no-interaction --no-scripts --no-progress --no-dev --optimize-autoloader
 
+      - name: Build assets
+        run: | 
+          npm install
+          npm run build
+          
+          mkdir public/build/img
+          cp public/images/flags.png public/build/img/
+          cp public/images/flags@2x.png public/build/img/
+
       - name: Create Release Build
         run: |
           # Remove unnecessary files
@@ -39,6 +48,6 @@ jobs:
           draft: false
           prerelease: false
           title: "Latest Release"
-          automatic_release_tag: "v0.9.0"
+          automatic_release_tag: "v0.9.1"
           files: |
             eventschedule.zip
