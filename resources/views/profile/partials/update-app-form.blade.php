@@ -32,6 +32,10 @@
         </div>
     @endif
 
+    <form method="post" action="{{ route('app.update') }}" enctype="multipart/form-data" class="mt-6">
+        @csrf
+        @method('patch')
+
     <div class="gap-4 pt-8">
         @if ($version_installed != $version_available)
             <x-primary-button>{{ __('messages.update') }}</x-primary-button>
@@ -47,5 +51,7 @@
 
         @endif
     </div>
+
+    </form>
 
 </section>
