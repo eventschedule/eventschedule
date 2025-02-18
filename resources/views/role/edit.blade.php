@@ -593,8 +593,10 @@
                         <div class="mb-6">
                             <div class="flex items-center space-x-4">
                                 <x-secondary-button id="view_map_button" onclick="viewMap()">{{ __('messages.view_map') }}</x-secondary-button>
+                                @if (config('services.google.backend'))
                                 <x-secondary-button id="validate_button" onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
                                 <x-secondary-button id="accept_button" onclick="acceptAddress(event)" class="hidden">{{ __('messages.accept') }}</x-secondary-button>
+                                @endif
                             </div>
                         </div>
 
