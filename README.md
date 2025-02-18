@@ -42,7 +42,7 @@ GRANT ALL PRIVILEGES ON eventschedule.* TO 'eventschedule'@'localhost';
 #### Clone the Repository
 
 ```bash
-git clone https://github.com/hillelcoren/eventschedule.git
+git clone https://github.com/eventschedule/eventschedule.git
 cd eventschedule
 ```
 
