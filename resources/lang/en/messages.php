@@ -415,4 +415,6 @@ return [
     'update' => 'Update',
     'up_to_date' => 'You are up to date!',
     'app_update_tip' => 'Note: if the update times out either run \'php artisan app:update\', increase the max_execution_time in your php.ini file or manually copy :link to the server\'s /tmp folder and try again.',
+    'app_updated' => 'App updated successfully!',
+    'no_new_version_available' => 'No new version available',
 ];

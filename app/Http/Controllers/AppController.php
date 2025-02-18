@@ -18,11 +18,13 @@ class AppController extends Controller
                 $release = $updater->source()->fetch($versionAvailable);
                 $updater->source()->update($release);    
             } else {
-                echo "No new version available.";
+                return redirect()->back()->with('error', __('messages.no_new_version_available'));
             }                
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', __('messages.app_update_tip', ['link' => '<a href="https://github.com/eventschedule/eventschedule/releases/download/' . $versionAvailable . '/eventschedule.zip" class="hover:underline">eventschedule.zip</a>']));
+            return redirect()->back()->with('error', $e->getMessage());
         }
+
+        return redirect()->back()->with('message', __('messages.app_updated'));
     }
 
     public function setup()
