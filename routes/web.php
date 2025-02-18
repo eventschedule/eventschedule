@@ -26,7 +26,7 @@ if (config('app.hosted')) {
         Route::get('/{slug}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
     });
 } else {
-    Route::get('/update', [AppController::class, 'update'])->name('app.update');
+    Route::match(['get', 'post'], '/update', [AppController::class, 'update'])->name('app.update');
     Route::get('/setup', [AppController::class, 'setup'])->name('app.setup');
 }
 
