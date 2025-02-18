@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use URL;
@@ -21,7 +22,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (env('APP_ENV') !== 'local') {
+        if (! config('app.hosted') && empty(config('app.key'))) {
+            Artisan::call('key:generate', ['--force' => true]);
+        }
+
+        if (config('app.env') !== 'local') {
             URL::forceScheme('https');
         }
 

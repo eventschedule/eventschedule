@@ -57,7 +57,11 @@ sudo chown -R www-data:www-data storage bootstrap public
 
 ### 4. Set Up the Application
 
-Fill in the form with your details.
+Copy the `.env.example` file to `.env` and then access the application at `https://your-domain.com`.
+
+```bash
+cp .env.example .env
+```
 
 ---
 
