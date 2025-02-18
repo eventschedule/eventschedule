@@ -109,4 +109,4 @@ Add the following line to your crontab to ensure scheduled tasks run automatical
 
 ---
 
-You're all set! 🎉 Your Event Schedule application should now be up and running.
+You're all set! 🎉 Event Schedule should now be up and running.
