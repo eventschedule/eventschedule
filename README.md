@@ -4,7 +4,7 @@
 
 An app for talent, vendors, venues, and curators to set up & and promote their event schedule calendars.
 
-#### Sample Schedule: [openmicnight.eventschedule.com](https://openmicnight.eventschedule.com)
+* Sample Schedule: [openmicnight.eventschedule.com](https://openmicnight.eventschedule.com)
 
 <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/schedule.png?raw=true" width="100%" alt="Schedule Screenshot">
 
