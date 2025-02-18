@@ -11,17 +11,25 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use App\Utils\InvoiceNinja;
+use Codedge\Updater\UpdaterManager;
 
 class ProfileController extends Controller
 {
     /**
      * Display the user's profile form.
      */
-    public function edit(Request $request): View
+    public function edit(Request $request, UpdaterManager $updater): View
     {
-        return view('profile.edit', [
+        $data = [
             'user' => $request->user(),
-        ]);
+        ];
+
+        if (! config('app.hosted')) {
+            $data['version_installed'] = $updater->source()->getVersionInstalled();
+            $data['version_available'] = $updater->source()->getVersionAvailable();
+        }
+
+        return view('profile.edit', $data);
     }
 
     /**

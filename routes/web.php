@@ -27,6 +27,7 @@ if (config('app.hosted')) {
     });
 } else {
     Route::get('/update', [AppController::class, 'update'])->name('update');
+    Route::get('/setup', [AppController::class, 'setup'])->name('setup');
 }
 
 require __DIR__.'/auth.php';

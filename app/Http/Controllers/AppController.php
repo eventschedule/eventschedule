@@ -8,7 +8,11 @@ class AppController extends Controller
 {
     public function update(UpdaterManager $updater)
     {
-        if($updater->source()->isNewVersionAvailable()) {
+        if (config('app.hosted')) {
+            return redirect()->back()->with('error', 'Not authorized');
+        }
+
+        if ($updater->source()->isNewVersionAvailable()) {
 
             // Get the current installed version
             echo $updater->source()->getVersionInstalled();
@@ -25,5 +29,10 @@ class AppController extends Controller
         } else {
             echo "No new version available.";
         }
+    }
+
+    public function setup()
+    {
+        return view('setup');
     }
 }
