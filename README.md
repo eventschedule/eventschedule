@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/dark_logo.png?raw=true" width="200px" alt="Event Schedule Logo">
+</p>
+
 # Event Schedule
 
 ### Schedule Events. Engage your Audience.
