@@ -32,13 +32,19 @@
         </div>
     @endif
 
-    <div class="flex items-center gap-4 pt-8">
+    <div class="gap-4 pt-8">
         @if ($version_installed != $version_available)
             <x-primary-button>{{ __('messages.update') }}</x-primary-button>
         @else
-            <span class="text-gray-600 dark:text-gray-400"> 
+            <div class="text-gray-600 dark:text-gray-400 pb-4"> 
                 {{ __('messages.up_to_date') }}
-            </span>
+            </div>
+
+            <a href=""
+                class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                
+            </a>
+
         @endif
     </div>
 
