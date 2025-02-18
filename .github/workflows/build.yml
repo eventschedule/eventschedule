@@ -15,14 +15,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup PHP
+      - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, iconv, json, mbstring, pdo
+          extensions: mbstring, intl, pdo, sqlite
+          tools: composer, npm
 
-      - name: Install Dependencies
-        run: composer install --no-dev --optimize-autoloader --no-interaction
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-ansi --no-interaction --no-scripts --no-progress --no-dev --optimize-autoloader
 
       - name: Create Release Build
         run: |
