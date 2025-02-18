@@ -31,7 +31,7 @@ class UpdateApp extends Command
         }
 
 
-        $this->info('Updating app...');
+        $this->info('Updating app, this can take a few minutes...');
 
         $versionAvailable = $updater->source()->getVersionAvailable();
         $installedVersion = $updater->source()->getVersionInstalled();
