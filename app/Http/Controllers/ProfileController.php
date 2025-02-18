@@ -26,7 +26,8 @@ class ProfileController extends Controller
 
         if (! config('app.hosted')) {
             $data['version_installed'] = $updater->source()->getVersionInstalled();
-            $data['version_available'] = $updater->source()->getVersionAvailable();            
+            //$data['version_available'] = $updater->source()->getVersionAvailable();            
+            $data['version_available'] = '...';
         }
 
         return view('profile.edit', $data);
