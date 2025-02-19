@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Codedge\Updater\UpdaterManager;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Artisan;
 class AppController extends Controller
 {
     public function update(UpdaterManager $updater)
@@ -16,8 +16,12 @@ class AppController extends Controller
         try {
             if ($updater->source()->isNewVersionAvailable()) {
                 $versionAvailable = $updater->source()->getVersionAvailable();
+                
                 $release = $updater->source()->fetch($versionAvailable);
-                $updater->source()->update($release);    
+                
+                $updater->source()->update($release);   
+                
+                Artisan::call('migrate', ['--force' => true]);
             } else {
                 return redirect()->back()->with('error', __('messages.no_new_version_available'));
             }                
