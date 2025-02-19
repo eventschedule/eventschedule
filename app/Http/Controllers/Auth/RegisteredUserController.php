@@ -54,6 +54,7 @@ class RegisteredUserController extends Controller
             $envContent = file_get_contents(base_path('.env'));
 
             $envContent = preg_replace('/APP_URL=.*/', 'APP_URL=' . preg_replace('/\/sign_up$/', '', $request->getSchemeAndHttpHost()), $envContent);                        
+            
             $envContent = preg_replace('/DB_HOST=.*/', 'DB_HOST="' . $request->database_host . '"', $envContent);
             $envContent = preg_replace('/DB_PORT=.*/', 'DB_PORT=' . $request->database_port, $envContent);
             $envContent = preg_replace('/DB_DATABASE=.*/', 'DB_DATABASE="' . $request->database_name . '"', $envContent);
@@ -62,17 +63,13 @@ class RegisteredUserController extends Controller
 
             file_put_contents(base_path('.env'), $envContent);
 
-            // Clear config cache before reloading environment
-            Artisan::call('cache:clear');
+            config(['database.connections.mysql.host' => $request->database_host]);
+            config(['database.connections.mysql.port' => $request->database_port]);
+            config(['database.connections.mysql.database' => $request->database_name]);
+            config(['database.connections.mysql.username' => $request->database_username]);
+            config(['database.connections.mysql.password' => $request->database_password]);
             
-            $envContent = preg_replace('/SESSION_DRIVER=.*/', 'SESSION_DRIVER=database', $envContent);            
-            file_put_contents(base_path('.env'), $envContent);
-
-            // Reload environment variables
-            $dotenv = Dotenv::createImmutable(base_path());
-            $dotenv->load();
-
-            Artisan::call('migrate');            
+            Artisan::call('migrate');           
         }
 
         $request->validate([
