@@ -21,7 +21,6 @@ class PasswordUpdateTest extends TestCase
             ->put('/password', [
                 'current_password' => 'password',
                 'password' => 'new-password',
-                'password_confirmation' => 'new-password',
             ]);
 
         $response
@@ -41,7 +40,6 @@ class PasswordUpdateTest extends TestCase
             ->put('/password', [
                 'current_password' => 'wrong-password',
                 'password' => 'new-password',
-                'password_confirmation' => 'new-password',
             ]);
 
         $response
