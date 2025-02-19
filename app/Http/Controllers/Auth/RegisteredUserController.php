@@ -41,7 +41,7 @@ class RegisteredUserController extends Controller
             ]);
         }
 
-        if (! config('app.hosted') && ! config('app.url') && ! app()->runningInConsole()) {
+        if (! config('app.hosted') && ! config('app.url')) {
             $request->validate([
                 'database_host' => ['required', 'string', 'max:255'],
                 'database_port' => ['required', 'string', 'max:255'],
