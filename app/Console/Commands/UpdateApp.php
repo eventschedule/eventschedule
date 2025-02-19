@@ -36,6 +36,8 @@ class UpdateApp extends Command
         $versionAvailable = $updater->source()->getVersionAvailable();
         $installedVersion = $updater->source()->getVersionInstalled();
         
+        cache()->put('version_available', $versionAvailable, 3600);
+        
         if ($versionAvailable == $installedVersion) {
             $this->info('No updates available');
             exit;
