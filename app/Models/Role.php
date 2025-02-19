@@ -549,6 +549,10 @@ class Role extends Model implements MustVerifyEmail
 
     public function isPro()
     {
+        if (! config('app.hosted')) {
+            return true;
+        }
+
         return $this->plan_expires >= now()->format('Y-m-d') && $this->plan_type == 'pro';
     }
 }
