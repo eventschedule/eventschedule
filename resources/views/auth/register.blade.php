@@ -9,6 +9,11 @@
             var language = navigator.language || navigator.userLanguage;
             var twoLetterLanguageCode = language.substring(0, 2);
             document.getElementById('language_code').value = twoLetterLanguageCode;
+
+            @if (! config('app.hosted'))
+                // Disable register button initially
+                document.querySelector('button[type="submit"]').disabled = true;
+            @endif
         });
 
         @if (! config('app.hosted'))
@@ -41,12 +46,18 @@
                 .then(data => {
                     if (data.success) {
                         document.getElementById('test-result').innerHTML = '<span class="text-green-600"><svg class="inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Connection successful!</span>';
+                        // Enable register button on successful connection
+                        document.querySelector('button[type="submit"]').disabled = false;
                     } else {
                         document.getElementById('test-result').innerHTML = '<span class="text-red-600"><svg class="inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg> ' + data.error + '</span>';
+                        // Disable register button on failed connection
+                        document.querySelector('button[type="submit"]').disabled = true;
                     }
                 })
                 .catch(error => {
                     document.getElementById('test-result').innerHTML = '<span class="text-red-600"><svg class="inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg> Error testing connection</span>';
+                    // Disable register button on error
+                    document.querySelector('button[type="submit"]').disabled = true;
                 });
             }
 
@@ -58,6 +69,10 @@
         <style>
             button {
                 min-width: 100px;
+            }
+            button:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
             }
         </style>
     </x-slot>
