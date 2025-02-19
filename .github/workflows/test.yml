@@ -31,6 +31,7 @@ jobs:
       - name: Configure SQLite database
         run: |
           touch /tmp/database.sqlite
+          sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=sqlite/' .env
           sed -i 's/DB_DATABASE=.*/DB_DATABASE=\/tmp\/database.sqlite/' .env
           sed -i 's/APP_URL=.*/APP_URL=http:\/\/127.0.0.1:8000/' .env
 

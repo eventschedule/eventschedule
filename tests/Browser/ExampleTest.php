@@ -29,7 +29,7 @@ class ExampleTest extends DuskTestCase
                     ->type('password_confirmation', $password)
                     ->check('terms')
                     ->press('REGISTER')
-                    ->assertPathIs('/verify-email');
+                    ->assertPathIs('/events');
 
             $user = User::where('email', $email)->first();
             $user->email_verified_at = now();
