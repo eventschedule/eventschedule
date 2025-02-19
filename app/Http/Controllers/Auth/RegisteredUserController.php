@@ -23,7 +23,7 @@ class RegisteredUserController extends Controller
     /**
      * Display the registration view.
      */
-    public function create(): View
+    public function create()
     {
         if (! config('app.hosted') && config('app.url')) {
             return redirect()->route('login');
