@@ -25,6 +25,10 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
+        if (! config('app.hosted') && config('app.url')) {
+            return redirect()->route('login');
+        }
+
         return view('auth.register');
     }
 
