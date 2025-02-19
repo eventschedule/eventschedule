@@ -131,16 +131,19 @@ return [
     */
 
     'notifications' => [
+        /*
         'notifications' => [
-            //\Codedge\Updater\Notifications\Notifications\UpdateSucceeded::class => ['mail'],
-            //\Codedge\Updater\Notifications\Notifications\UpdateFailed::class    => ['mail'],
-            //\Codedge\Updater\Notifications\Notifications\UpdateAvailable::class => ['mail'],
+            \Codedge\Updater\Notifications\Notifications\UpdateSucceeded::class => ['mail'],
+            \Codedge\Updater\Notifications\Notifications\UpdateFailed::class    => ['mail'],
+            \Codedge\Updater\Notifications\Notifications\UpdateAvailable::class => ['mail'],
         ],
+        */
 
         /*
          * Here you can specify the notifiable to which the notifications should be sent. The default
          * notifiable will use the variables specified in this config file.
          */
+        /*
         'notifiable' => \Codedge\Updater\Notifications\Notifiable::class,
 
         'mail' => [
@@ -154,6 +157,7 @@ return [
                 'name'    => env('SELF_UPDATER_MAIL_FROM_NAME', 'Update'),
             ],
         ],
+        */
     ],
 
     /*
