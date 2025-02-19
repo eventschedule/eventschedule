@@ -9,8 +9,6 @@ Event Schedule is an all-in-one platform to create calendars, sell tickets, mana
 - [Hosted](https://www.eventschedule.com): Our hosted version is a Software as a Service (SaaS) solution. You're up and running in under 5 minutes, with no need to worry about hosting or server infrastructure.
 - [Self-Hosted](https://github.com/eventschedule/eventschedule?tab=readme-ov-file#installation-guide): For those who prefer to manage their own hosting and server infrastructure. This version gives you full control and flexibility.
 
-All Pro features from the hosted app are included in the open-source code. We will be offering a $10 per year white-label license to remove the Event Schedule branding from client-facing parts of the app. 
-
 ## Features
 
 - 🗓️ **Event Calendars:** Create and share event calendars effortlessly to keep your audience informed.  
