@@ -417,4 +417,9 @@ return [
     'up_to_date' => 'You\'re up to date!',
     'app_updated' => 'App updated successfully!',
     'no_new_version_available' => 'No new version available',
+    'driver' => 'Driver',
+    'host' => 'Host',
+    'port' => 'Port',
+    'database' => 'Database',
+    'username' => 'Username',
 ];
