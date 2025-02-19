@@ -16,7 +16,6 @@
                     name: @json(old('name', auth()->check() ? auth()->user()->name : '')),
                     email: @json(old('email', auth()->check() ? auth()->user()->email : '')),
                     password: '',
-                    password_confirmation: '',
                 };
             },
             created() {
@@ -93,13 +92,6 @@
                         <label for="password" class="text-gray-900">{{ __('messages.password') . ' *' }}</label>
                         <input type="password" name="password" id="password" class="mt-1 block w-full border-gray-300 bg-white text-gray-900" 
                             v-model="password" required autocomplete="new-password" />
-                        <x-input-error class="mt-2" :messages="$errors->get('password')" />
-                    </div>
-
-                    <div class="mt-6" v-if="createAccount">
-                        <label for="password_confirmation" class="text-gray-900">{{ __('messages.confirm_password') . ' *' }}</label>
-                        <input type="password" name="password_confirmation" id="password_confirmation" class="mt-1 block w-full border-gray-300 bg-white text-gray-900" 
-                            v-model="password_confirmation" required autocomplete="new-password" />
                         <x-input-error class="mt-2" :messages="$errors->get('password')" />
                     </div>
                 </div>

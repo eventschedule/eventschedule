@@ -26,7 +26,6 @@ class ExampleTest extends DuskTestCase
                     ->type('name', $name)
                     ->type('email', $email)
                     ->type('password', $password)
-                    ->type('password_confirmation', $password)
                     ->check('terms')
                     ->press('REGISTER')
                     ->pause(5000)
