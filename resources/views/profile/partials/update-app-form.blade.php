@@ -26,12 +26,6 @@
 
     </div>
 
-    @if ($version_installed != $version_available)
-        <div class="text-gray-600 dark:text-gray-400 pt-4">
-            {!! __('messages.app_update_tip', ['link' => '<a href="https://github.com/eventschedule/eventschedule/releases/download/' . $version_available . '/eventschedule.zip" class="hover:underline">eventschedule.zip</a>']) !!}
-        </div>
-    @endif
-
     <form method="post" action="{{ route('app.update') }}" enctype="multipart/form-data" class="mt-6">
         @csrf
         @method('patch')
