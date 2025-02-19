@@ -17,7 +17,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function create()
     {
-        if (! config('app.hosted') && User::count() === 0) {
+        if (! config('app.hosted') && ! config('app.url')) {
             return redirect()->route('sign_up');
         }
 
