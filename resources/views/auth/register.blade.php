@@ -18,7 +18,22 @@
 
         <input type="hidden" id="timezone" name="timezone"/>
         <input type="hidden" id="language_code" name="language_code"/>
-        
+
+        @if (true ||! config('app.hosted'))
+
+            <!-- Driver -->
+            <div>
+                <x-input-label for="driver" :value="__('messages.driver')" />
+                <x-text-input id="driver" class="block mt-1 w-full" type="text" name="driver" :value="old('driver')" required
+                    autofocus autocomplete="driver" />
+                <x-input-error :messages="$errors->get('driver')" class="mt-2" />
+            </div>
+
+            </div>
+            <div class="w-full sm:max-w-sm mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
+
+        @endif
+
         <!-- Name -->
         <div>
             <x-input-label for="name" :value="__('messages.full_name')" />
