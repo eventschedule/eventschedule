@@ -10,7 +10,7 @@
             var twoLetterLanguageCode = language.substring(0, 2);
             document.getElementById('language_code').value = twoLetterLanguageCode;
 
-            @if (! config('app.hosted'))
+            @if (! config('app.hosted') && ! config('app.url'))
                 // Disable register button initially
                 document.querySelector('button[type="submit"]').disabled = true;
             @endif
