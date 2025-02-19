@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Codedge\Updater\UpdaterManager;
+use Illuminate\Http\Request;
 
 class AppController extends Controller
 {
@@ -30,5 +31,26 @@ class AppController extends Controller
     public function setup()
     {
         return view('setup');
+    }
+
+    public function testDatabase(Request $request)
+    {
+        $host = $request->input('host');
+        $port = $request->input('port');
+        $database = $request->input('database');
+        $username = $request->input('username');
+        $password = $request->input('password');
+
+        try {
+            $connection = @mysqli_connect($host, $username, $password, $database, (int)$port);
+            if (!$connection) {
+                throw new \Exception(mysqli_connect_error());
+            }
+            mysqli_close($connection);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()]);
+        }
+
+        return response()->json(['success' => true]);
     }
 }

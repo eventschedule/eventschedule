@@ -27,6 +27,7 @@ if (config('app.hosted')) {
     });
 } else {
     Route::match(['get', 'post'], '/update', [AppController::class, 'update'])->name('app.update');
+    Route::post('/test_database', [AppController::class, 'testDatabase'])->name('app.test_database');
 }
 
 require __DIR__.'/auth.php';

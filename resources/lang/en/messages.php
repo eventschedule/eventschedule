@@ -422,4 +422,5 @@ return [
     'port' => 'Port',
     'database' => 'Database',
     'username' => 'Username',
+    'test' => 'Test',
 ];

@@ -10,7 +10,53 @@
             var twoLetterLanguageCode = language.substring(0, 2);
             document.getElementById('language_code').value = twoLetterLanguageCode;
         });
+
+        @if (! config('app.hosted'))
+
+            function testConnection() {
+                var host = document.getElementById('database_host').value;
+                var port = document.getElementById('database_port').value;
+                var database = document.getElementById('database_name').value;
+                var username = document.getElementById('database_username').value;
+                var password = document.getElementById('database_password').value;
+
+                fetch('{{ route('app.test_database') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        host: host,
+                        port: port, 
+                        database: database,
+                        username: username,
+                        password: password
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Connection successful!');
+                    } else {
+                        alert('Connection failed: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert('Error testing connection: ' + error);
+                });
+            }
+
+        @endif
+
+
         </script>
+
+        <style>
+            button {
+                min-width: 100px;
+            }
+        </style>
     </x-slot>
 
     <form method="POST" action="{{ route('sign_up') }}">
@@ -23,44 +69,49 @@
 
             <!-- Host -->
             <div class="mt-4">
-                <x-input-label for="host" :value="__('messages.host')" />
-                <x-text-input id="host" class="block mt-1 w-full" type="text" name="host" :value="old('host', config('database.connections.mysql.host'))" required
+                <x-input-label for="database_host" :value="__('messages.host')" />
+                <x-text-input id="database_host" class="block mt-1 w-full" type="text" name="database_host" :value="old('database_host', config('database.connections.mysql.host'))" required
                     autocomplete="off" />
-                <x-input-error :messages="$errors->get('host')" class="mt-2" />
+                <x-input-error :messages="$errors->get('database_host')" class="mt-2" />
             </div>
 
             <!-- Port -->
             <div class="mt-4">
-                <x-input-label for="port" :value="__('messages.port')" />
-                <x-text-input id="port" class="block mt-1 w-full" type="text" name="port" :value="old('port', config('database.connections.mysql.port'))" required
+                <x-input-label for="database_port" :value="__('messages.port')" />
+                <x-text-input id="database_port" class="block mt-1 w-full" type="text" name="database_port" :value="old('database_port', config('database.connections.mysql.port'))" required
                     autocomplete="off" />
-                <x-input-error :messages="$errors->get('port')" class="mt-2" />
+                <x-input-error :messages="$errors->get('database_port')" class="mt-2" />
             </div>
 
             <!-- Database -->
             <div class="mt-4">
-                <x-input-label for="database" :value="__('messages.database')" />
-                <x-text-input id="database" class="block mt-1 w-full" type="text" name="database" :value="old('database', config('database.connections.mysql.database'))" required
+                <x-input-label for="database_name" :value="__('messages.database')" />
+                <x-text-input id="database_name" class="block mt-1 w-full" type="text" name="database_name" :value="old('database_name', config('database.connections.mysql.database'))" required
                     autocomplete="off" />
-                <x-input-error :messages="$errors->get('database')" class="mt-2" />
+                <x-input-error :messages="$errors->get('database_name')" class="mt-2" />
             </div>
 
             <!-- Username -->
             <div class="mt-4">
-                <x-input-label for="username" :value="__('messages.username')" />
-                <x-text-input id="username" class="block mt-1 w-full" type="text" name="username" :value="old('username', config('database.connections.mysql.username'))" required
+                <x-input-label for="database_username" :value="__('messages.username')" />
+                <x-text-input id="database_username" class="block mt-1 w-full" type="text" name="database_username" :value="old('database_username', config('database.connections.mysql.username'))" required
                     autocomplete="off" />
-                <x-input-error :messages="$errors->get('username')" class="mt-2" />
+                <x-input-error :messages="$errors->get('database_username')" class="mt-2" />
             </div>
 
             <!-- Password -->
             <div class="mt-4">
-                <x-input-label for="password" :value="__('messages.password')" />
-                <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" :value="old('password')" required
+                <x-input-label for="database_password" :value="__('messages.password')" />
+                <x-text-input id="database_password" class="block mt-1 w-full" type="password" name="database_password" :value="old('database_password')" required
                     autocomplete="off" />
-                <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                <x-input-error :messages="$errors->get('database_password')" class="mt-2" />
             </div>
-                        
+
+            <div class="flex items-center justify-end mt-4">
+                <x-primary-button onclick="testConnection()">
+                    {{ __('messages.test') }}
+                </x-primary-button>
+            </div>
 
             </div>
             <div class="w-full sm:max-w-sm mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
