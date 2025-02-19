@@ -116,8 +116,9 @@
             <x-application-logo />
         </a> 
         <div class="flex flex-row gap-x-3 md:gap-x-10">
+            @if (! config('app.hosted'))
             <a
-            href="{{ config('app.url') . route('login', [], false) }}"
+            href="https://app.eventschedule.com/login" target="_blank"
             class="inline-flex items-center justify-center"
             >
             <button
@@ -129,8 +130,9 @@
                 {{ __('messages.log_in') }}
             </button>
             </a>
+            @endif
             <a
-            href="{{ config('app.url') . route('sign_up', [], false) }}"
+            href="https://app.eventschedule.com/sign_up" target="_blank"
             class="inline-flex items-center justify-center"
             >
             <button
