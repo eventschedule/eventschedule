@@ -1,7 +1,5 @@
 # Event Schedule
 
-### Schedule Events. Engage your Audience.
-
 Event Schedule is an all-in-one platform to create calendars, sell tickets, manage teams, and streamline event check-ins with QR codes.
 
 * Sample Schedule: [openmicnight.eventschedule.com](https://openmicnight.eventschedule.com)
@@ -11,7 +9,7 @@ Event Schedule is an all-in-one platform to create calendars, sell tickets, mana
 - [Hosted](https://www.eventschedule.com): Our hosted version is a Software as a Service (SaaS) solution. You're up and running in under 5 minutes, with no need to worry about hosting or server infrastructure.
 - [Self-Hosted](https://github.com/eventschedule/eventschedule?tab=readme-ov-file#installation-guide): For those who prefer to manage their own hosting and server infrastructure. This version gives you full control and flexibility.
 
-All Pro features from the hosted app are included in the open-source code. We offer a $10 per year white-label license to remove the Event Schedule branding from client-facing parts of the app. For a limited time, the first year of the white-label license is free.
+All Pro features from the hosted app are included in the open-source code. We offer a $10 per year white-label license to remove the Event Schedule branding from client-facing parts of the app. 
 
 ## Features
 
