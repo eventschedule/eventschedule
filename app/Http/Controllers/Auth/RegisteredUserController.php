@@ -15,6 +15,9 @@ use Illuminate\View\View;
 use App\Rules\NoFakeEmail;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Artisan;
+use Dotenv\Dotenv;
+
+
 class RegisteredUserController extends Controller
 {
     /**
@@ -52,6 +55,7 @@ class RegisteredUserController extends Controller
 
             $envContent = preg_replace('/APP_URL=.*/', 'APP_URL=' . preg_replace('/\/sign_up$/', '', $request->getSchemeAndHttpHost()), $envContent);            
             $envContent = preg_replace('/SESSION_DRIVER=.*/', 'SESSION_DRIVER=database', $envContent);            
+
             $envContent = preg_replace('/DB_HOST=.*/', 'DB_HOST="' . $request->database_host . '"', $envContent);
             $envContent = preg_replace('/DB_PORT=.*/', 'DB_PORT=' . $request->database_port, $envContent);
             $envContent = preg_replace('/DB_DATABASE=.*/', 'DB_DATABASE="' . $request->database_name . '"', $envContent);
@@ -60,13 +64,10 @@ class RegisteredUserController extends Controller
 
             file_put_contents(base_path('.env'), $envContent);
 
-            Artisan::call('config:clear');
-            //Artisan::call('cache:clear');
+            Dotenv::createImmutable(base_path())->load();
 
-            // Run migrations
             Artisan::call('migrate');            
         }
-
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -81,6 +82,11 @@ class RegisteredUserController extends Controller
             'timezone' => $request->timezone ?? 'America/New_York',
             'language_code' => $request->language_code ?? 'en',
         ]);
+
+        if (! config('app.hosted')) {
+            $user->email_verified_at = now();
+            $user->save();
+        }
 
         event(new Registered($user));
 
