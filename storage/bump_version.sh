@@ -1,6 +1,6 @@
 #!/bin/bash
 
-current_version=$(grep "automatic_release_tag" .github/workflows/build.yml | grep -o "v0.9.[0-9]*" | cut -d "." -f3)
+current_version=$(grep "automatic_release_tag" .github/workflows/build.yml | grep -o "v1.0.[0-9]*" | cut -d "." -f3)
 new_version=$((current_version+1))
 date_today=$(date +%F)
 
