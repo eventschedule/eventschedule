@@ -190,17 +190,17 @@ class RoleController extends Controller
 
         $otherRole = null;
         $event = null;
-        $date = $request->date;
+        $date = $request->date ? date('Y-m-d', strtotime($request->date)) : null;
 
-        if ($date) {
+        if ($date && $date != '1970-01-01') {
             $dateObj = Carbon::parse($date);
             $month = $dateObj->month;
             $year = $dateObj->year;
         } else {
-            $month = $request->month;
-            $year = $request->year;
+            $month = is_numeric($request->month) ? (int) $request->month : now()->month;
+            $year = is_numeric($request->year) ? (int) $request->year : now()->year;
         }
-
+        
         if ($slug) {
             $event = $this->eventRepo->getEvent($subdomain, $slug, $date);
 
