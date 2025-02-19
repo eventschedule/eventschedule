@@ -418,7 +418,7 @@ return [
     'app_updated' => 'App updated successfully!',
     'no_new_version_available' => 'No new version available',
     'driver' => 'Driver',
-    'host' => 'Host',
+    'mysql_host' => 'MySQL Host',
     'port' => 'Port',
     'database' => 'Database',
     'username' => 'Username',

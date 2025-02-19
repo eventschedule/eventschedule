@@ -87,7 +87,7 @@
 
             <!-- Host -->
             <div class="mt-4">
-                <x-input-label for="database_host" :value="__('messages.host')" />
+                <x-input-label for="database_host" :value="__('messages.mysql_host')" />
                 <x-text-input id="database_host" class="block mt-1 w-full" type="text" name="database_host" :value="old('database_host', config('database.connections.mysql.host'))" required
                     autocomplete="off" />
                 <x-input-error :messages="$errors->get('database_host')" class="mt-2" />
