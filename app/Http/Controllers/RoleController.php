@@ -519,6 +519,11 @@ class RoleController extends Controller
             $user->password = bcrypt(Str::random(32));
             $user->timezone = $request->user()->timezone;
             $user->language_code = $request->user()->language_code;
+
+            if (! config('app.hosted')) {
+                $user->email_verified_at = now();
+            }
+
             $user->save();
         }
 
