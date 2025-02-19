@@ -66,6 +66,10 @@ class RegisteredUserController extends Controller
             $envContent = preg_replace('/DB_USERNAME=.*/', 'DB_USERNAME="' . $request->database_username . '"', $envContent);
             $envContent = preg_replace('/DB_PASSWORD=.*/', 'DB_PASSWORD="' . $request->database_password . '"', $envContent);
 
+            if ($request->report_errors) {
+                $envContent = preg_replace('/SENTRY_LARAVEL_DSN=.*/', 'SENTRY_LARAVEL_DSN="https://4d5293303b2fc59a89bcc85110f6f031@o4508274803539968.ingest.us.sentry.io/4508845950959616"', $envContent);
+            }
+
             file_put_contents(base_path('.env'), $envContent);
 
             config(['database.connections.mysql.host' => $request->database_host]);
