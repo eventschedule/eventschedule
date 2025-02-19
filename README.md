@@ -19,10 +19,21 @@ Event Schedule is an all-in-one platform to create calendars, sell tickets, mana
 - 💻 **Support for Online Events:** Use the platform to sell tickets to online events.  
 - 👥 **Team Scheduling:** Collaborate with team members to manage availability and coordinate event schedules.  
 - 🌍 **Multi-Language Support:** Provide a localized experience with support for multiple languages.
+- 🎫 **Multiple Ticket Types:** Offer different ticket tiers, such as Standard or VIP, to meet various audience needs.  
+- 🔢 **Ticket Quantity Limits:** Set a maximum number of tickets available for each event to manage capacity.  
+- ⏳ **Ticket Reservation System:** Allow attendees to reserve tickets with a configurable release time before purchase.  
+- 📅 **Calendar Integration:** Enable attendees to add events directly to Google, Apple, or Microsoft calendars. 
+- 🚀 **Automatic App Updates:** Keep the platform up to date effortlessly with one-click automatic updates.  
 
-<img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/schedule.png?raw=true" width="100%" alt="Schedule Screenshot">
+<div style="display: flex; gap: 10px;">
+    <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_1.png?raw=true" width="49%" alt="Event Schedule">
+    <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_2.png?raw=true" width="49%" alt="Ticket">
+</div>
 
-<img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/event.png?raw=true" width="100%" alt="Event Screenshot">
+<div style="display: flex; gap: 10px;">
+    <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_3.png?raw=true" width="49%" alt="Admin > Schedule">
+    <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_4.png?raw=true" width="49%" alt="Admin > Event">
+</div>
 
 ## Installation Guide
 
