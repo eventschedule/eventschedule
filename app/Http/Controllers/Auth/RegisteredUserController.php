@@ -25,7 +25,7 @@ class RegisteredUserController extends Controller
      */
     public function create()
     {
-        if (! config('app.hosted') && config('app.url') && ! app()->environment('testing')) {
+        if (! config('app.hosted') && config('app.url')) {
             return redirect()->route('login');
         }
 
