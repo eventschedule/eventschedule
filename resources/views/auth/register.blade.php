@@ -16,7 +16,7 @@
             @endif
         });
 
-        @if (! config('app.hosted') && ! app()->runningInConsole())
+        @if (! config('app.hosted'))
 
             function testConnection() {
                 var host = document.getElementById('database_host').value;
@@ -83,7 +83,7 @@
         <input type="hidden" id="timezone" name="timezone"/>
         <input type="hidden" id="language_code" name="language_code"/>
 
-        @if (! config('app.hosted') && ! app()->runningInConsole())
+        @if (! config('app.hosted') && ! config('app.url'))
 
             <!-- Host -->
             <div class="mt-4">
