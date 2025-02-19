@@ -14,7 +14,7 @@ use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 use App\Rules\NoFakeEmail;
 use Illuminate\Validation\ValidationException;
-
+use Illuminate\Support\Facades\Artisan;
 class RegisteredUserController extends Controller
 {
     /**
@@ -37,6 +37,32 @@ class RegisteredUserController extends Controller
                 'email' => __('messages.invalid_request'),
             ]);
         }
+
+        if (! config('app.hosted') && ! config('app.url')) {
+            $request->validate([
+                'database_host' => ['required', 'string', 'max:255'],
+                'database_port' => ['required', 'string', 'max:255'],
+                'database_name' => ['required', 'string', 'max:255'],
+                'database_username' => ['required', 'string', 'max:255'],
+                'database_password' => ['required', 'string', 'max:255'],
+            ]);
+
+            // Update database settings in .env file
+            $envContent = file_get_contents(base_path('.env'));
+
+            $envContent = preg_replace('/APP_URL=.*/', 'APP_URL=' . preg_replace('/\/sign_up$/', '', $request->getSchemeAndHttpHost()), $envContent);
+            $envContent = preg_replace('/DB_HOST=.*/', 'DB_HOST="' . $request->database_host . '"', $envContent);
+            $envContent = preg_replace('/DB_PORT=.*/', 'DB_PORT=' . $request->database_port, $envContent);
+            $envContent = preg_replace('/DB_DATABASE=.*/', 'DB_DATABASE="' . $request->database_name . '"', $envContent);
+            $envContent = preg_replace('/DB_USERNAME=.*/', 'DB_USERNAME="' . $request->database_username . '"', $envContent);
+            $envContent = preg_replace('/DB_PASSWORD=.*/', 'DB_PASSWORD="' . $request->database_password . '"', $envContent);
+
+            file_put_contents(base_path('.env'), $envContent);
+
+            // Run migrations
+            Artisan::call('migrate');            
+        }
+
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
