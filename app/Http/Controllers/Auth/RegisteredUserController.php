@@ -60,6 +60,9 @@ class RegisteredUserController extends Controller
 
             file_put_contents(base_path('.env'), $envContent);
 
+            Artisan::call('config:clear');
+            //Artisan::call('cache:clear');
+
             // Run migrations
             Artisan::call('migrate');            
         }
