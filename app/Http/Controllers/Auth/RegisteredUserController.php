@@ -64,7 +64,12 @@ class RegisteredUserController extends Controller
 
             file_put_contents(base_path('.env'), $envContent);
 
-            Dotenv::createImmutable(base_path())->load();
+            // Clear config cache before reloading environment
+            Artisan::call('config:clear');
+            
+            // Reload environment variables
+            $dotenv = Dotenv::createImmutable(base_path());
+            $dotenv->load();
 
             Artisan::call('migrate');            
         }
