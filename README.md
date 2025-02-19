@@ -2,7 +2,7 @@
 
 ### Schedule Events. Engage your Audience.
 
-An app for talent, vendors, venues, and curators to set up & and promote their event schedule calendars.
+Event Schedule is an all-in-one platform to create calendars, sell tickets, manage teams, and streamline event check-ins with QR codes.
 
 * Sample Schedule: [openmicnight.eventschedule.com](https://openmicnight.eventschedule.com)
 
