@@ -29,6 +29,8 @@ class ExampleTest extends DuskTestCase
                     ->type('password_confirmation', $password)
                     ->check('terms')
                     ->press('REGISTER')
+                    ->pause(5000)
+                    ->screenshot('registration_complete')
                     ->assertPathIs('/events');
 
             $user = User::where('email', $email)->first();
