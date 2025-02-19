@@ -27,7 +27,7 @@ Event Schedule is an all-in-one platform to create calendars, sell tickets, mana
 
 <div style="display: flex; gap: 10px;">
     <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_1.png?raw=true" width="49%" alt="Guest > Schedule">
-    <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_2.png?raw=true&c=1" width="49%" alt="Guest > Event">
+    <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_2a.png?raw=true" width="49%" alt="Guest > Event">
 </div>
 
 <div style="display: flex; gap: 10px;">
