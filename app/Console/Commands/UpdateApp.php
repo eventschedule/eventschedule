@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Codedge\Updater\UpdaterManager;
+use Illuminate\Support\Facades\Artisan;
 class UpdateApp extends Command
 {
     /**
@@ -37,7 +38,7 @@ class UpdateApp extends Command
         $installedVersion = $updater->source()->getVersionInstalled();
         
         cache()->put('version_available', $versionAvailable, 3600);
-        
+
         if ($versionAvailable == $installedVersion) {
             $this->info('No updates available');
             exit;
@@ -45,7 +46,9 @@ class UpdateApp extends Command
 
         $release = $updater->source()->fetch($versionAvailable);
         
-        $updater->source()->update($release);          
+        $updater->source()->update($release);    
+        
+        Artisan::call('migrate', ['--force' => true]);
 
         $this->info('App updated successfully! ' . $versionAvailable);
     }

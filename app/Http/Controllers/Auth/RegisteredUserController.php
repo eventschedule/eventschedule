@@ -74,7 +74,7 @@ class RegisteredUserController extends Controller
             config(['database.connections.mysql.username' => $request->database_username]);
             config(['database.connections.mysql.password' => $request->database_password]);
             
-            Artisan::call('migrate');           
+            Artisan::call('migrate', ['--force' => true]);      
         }
 
         $request->validate([
