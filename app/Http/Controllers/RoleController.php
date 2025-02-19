@@ -673,11 +673,9 @@ class RoleController extends Controller
         $role->user_id = $user->id;
 
         // TODO remove this
-        if (config('app.hosted')) {
-            $role->plan_expires = now()->addYear()->format('Y-m-d');
-            $role->plan_type = 'pro';
-            $role->plan_term = 'year';
-        }
+        $role->plan_expires = now()->addYear()->format('Y-m-d');
+        $role->plan_type = 'pro';
+        $role->plan_term = 'year';
 
         if (! config('app.hosted')) {
             $role->email_verified_at = now();
