@@ -31,7 +31,7 @@ class ExampleTest extends DuskTestCase
                     ->press('REGISTER')
                     ->pause(5000)
                     ->screenshot('registration_complete')
-                    ->assertPathIs('/events');
+                    ->assertPathIs('/verify-email');
 
             $user = User::where('email', $email)->first();
             $user->email_verified_at = now();
