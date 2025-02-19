@@ -53,6 +53,7 @@ class RegisteredUserController extends Controller
             // Update database settings in .env file
             $envContent = file_get_contents(base_path('.env'));
 
+            $envContent = preg_replace('/APP_ENV=.*/', 'APP_ENV=production', $envContent);
             $envContent = preg_replace('/APP_URL=.*/', 'APP_URL=' . preg_replace('/\/sign_up$/', '', $request->getSchemeAndHttpHost()), $envContent);                        
             
             $envContent = preg_replace('/DB_HOST=.*/', 'DB_HOST="' . $request->database_host . '"', $envContent);
