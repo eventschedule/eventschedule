@@ -26,9 +26,8 @@
 
     </div>
 
-    <form method="post" action="{{ route('app.update') }}" enctype="multipart/form-data" class="mt-6">
+    <form method="POST" action="{{ route('app.update') }}" enctype="multipart/form-data" class="mt-6">
         @csrf
-        @method('patch')
 
     @if ($version_installed != $version_available)
         <x-primary-button>{{ __('messages.update') }}</x-primary-button>
