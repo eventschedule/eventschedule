@@ -11,6 +11,8 @@ class RegistrationTest extends TestCase
 
     public function test_registration_redirect_to_login_page(): void
     {
+        config(['app.hosted' => false]);
+
         $response = $this->get('/sign_up');
 
         $response->assertStatus(302)->assertRedirect('/login');
