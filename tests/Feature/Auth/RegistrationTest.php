@@ -9,22 +9,46 @@ class RegistrationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_registration_screen_can_be_rendered(): void
+    public function test_registration_redirect_to_login_page(): void
     {
-        $response = $this->get('/register');
+        config(['app.hosted' => false]);
+
+        $response = $this->get('/sign_up');
+
+        $response->assertStatus(302)->assertRedirect('/login');
+    }
+
+    public function test_registration_screen_can_be_rendered_in_hosted_app(): void
+    {
+        config(['app.hosted' => true]);
+
+        $response = $this->get('/sign_up');
 
         $response->assertStatus(200);
     }
 
-    public function test_new_users_can_register(): void
+    public function test_new_users_can_register_in_hosted_app(): void
     {
-        $response = $this->post('/register', [
+        config(['app.hosted' => true]);
+
+        $this->assertDatabaseCount('users', 0);
+
+        $response = $this->post('/sign_up', [
             'name' => 'Test User',
-            'email' => 'test@example.com',
+            'email' => 'test@gmail.com',
             'password' => 'password',
         ]);
 
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('home', absolute: false))
+        ;
+
         $this->assertAuthenticated();
-        $response->assertRedirect(route('home', absolute: false));
+        $this->assertDatabaseCount('users', 1);
+        $this->assertDatabaseHas('users', [
+            'name' => 'Test User',
+            'email' => 'test@gmail.com',
+        ]);
     }
 }
