@@ -193,6 +193,17 @@ class Event extends Model
         }
     }
 
+    public function canSellTickets()
+    {
+        if (! $this->days_of_week && $this->starts_at) {
+            if (Carbon::parse($this->starts_at)->isPast()) {
+                return false;
+            }
+        }
+
+        return $this->tickets_enabled && $this->isPro();
+    }
+
     public function getImageUrl()
     {
         if ($this->flyer_image_url) {

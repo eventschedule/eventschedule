@@ -29,8 +29,8 @@
           -->
 
           <div style="font-family: sans-serif" class="mt-8 relative inline-block text-left">
-          @if ($event->tickets_enabled && $event->isPro())
-            @if (request()->get('tickets') !== 'true')            
+          @if ($event->canSellTickets())
+            @if (request()->get('tickets') !== 'true')
               <a href="{{ request()->fullUrlWithQuery(['tickets' => 'true']) }}">
                   <button type="button" 
                         class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
