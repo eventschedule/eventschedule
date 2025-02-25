@@ -61,11 +61,29 @@ class UrlUtils
             if ($parsedUrl['host'] == 'youtu.be') {
                 $videoId = ltrim($parsedUrl['path'], '/');
             } else {
-                parse_str($parsedUrl['query'], $queryParams);
-                $videoId = $queryParams['v'];
+                // Check path for video ID first
+                if (isset($parsedUrl['path'])) {
+                    $path = ltrim($parsedUrl['path'], '/');
+                    $pathParts = explode('/', $path);
+                    
+                    // Handle /watch/VIDEO_ID or /v/VIDEO_ID format
+                    if (count($pathParts) >= 2 && ($pathParts[0] === 'watch' || $pathParts[0] === 'v')) {
+                        $videoId = $pathParts[1];
+                    } else {
+                        // Fall back to query parameter
+                        if (isset($parsedUrl['query'])) {
+                            parse_str($parsedUrl['query'], $queryParams);
+                            $videoId = isset($queryParams['v']) ? $queryParams['v'] : null;
+                        } else {
+                            $videoId = null;
+                        }
+                    }
+                } else {
+                    $videoId = null;
+                }
             }
     
-            if (isset($videoId)) {
+            if (isset($videoId) && $videoId) {
                 return 'https://www.youtube.com/embed/' . $videoId;
             }
         }
