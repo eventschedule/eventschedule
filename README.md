@@ -1,6 +1,6 @@
 # Event Schedule
 
-Event Schedule is an all-in-one platform to create calendars, sell tickets, manage teams, and streamline event check-ins with QR codes.
+Event Schedule is an all-in-one platform to create calendars, sell tickets and streamline event check-ins with QR codes.
 
 * Sample Schedule: [openmicnight.eventschedule.com](https://openmicnight.eventschedule.com)
 
