@@ -31,6 +31,7 @@
                     </a>
                 </li>
 
+                @if (config('app.hosted'))
                 <li>
                     <a href="{{ route('tickets') }}"
                         class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('tickets') ? 'bg-gray-800 text-white' : '' }}">
@@ -41,6 +42,7 @@
                         {{ __('messages.tickets') }}
                     </a>
                 </li>
+                @endif
 
                 <li>
                     <a href="{{ route('sales') }}"
