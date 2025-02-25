@@ -74,7 +74,7 @@ class TicketController extends Controller
 
     public function checkout(Request $request, $subdomain)
     {
-        $event = Event::find(UrlUtils::decodeId($request->event_id));
+        $event = Event::findOrFail(UrlUtils::decodeId($request->event_id));
         $user = auth()->user();
 
         if (! $user && $request->create_account) {
@@ -100,7 +100,7 @@ class TicketController extends Controller
         // Check ticket availability
         foreach($request->tickets as $ticketId => $quantity) {
             if ($quantity > 0) {
-                $ticketModel = $event->tickets()->find(UrlUtils::decodeId($ticketId));
+                $ticketModel = $event->tickets()->findOrFail(UrlUtils::decodeId($ticketId));
                 
                 if (! $ticketModel) {
                     return back()->with('error', __('messages.ticket_not_found'));
@@ -272,7 +272,7 @@ class TicketController extends Controller
 
     public function success($subdomain, $sale_id)
     {
-        $sale = Sale::find(UrlUtils::decodeId($sale_id));
+        $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
         $event = $sale->event;
 
         $stripe = new StripeClient(config('services.stripe.key'));
@@ -293,7 +293,7 @@ class TicketController extends Controller
 
     public function cancel($subdomain, $sale_id)
     {
-        $sale = Sale::find(UrlUtils::decodeId($sale_id));
+        $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
         $sale->status = 'cancelled';
         $sale->save();
 
@@ -310,7 +310,7 @@ class TicketController extends Controller
     public function scanned($eventId, $secret)
     {
         $user = auth()->user();
-        $event = Event::find(UrlUtils::decodeId($eventId));
+        $event = Event::findOrFail(UrlUtils::decodeId($eventId));
 
         if (! $event) {
             return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
