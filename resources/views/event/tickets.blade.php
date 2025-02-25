@@ -77,7 +77,7 @@
                 v-model="email" required autocomplete="email" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
-            @if (! auth()->check())
+            @if (! auth()->check() && config('app.hosted'))
                 <div class="mt-6">
                     <div class="flex items-center">
                         <input id="create_account" name="create_account" type="checkbox" 

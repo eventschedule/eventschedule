@@ -77,7 +77,7 @@ class TicketController extends Controller
         $event = Event::findOrFail(UrlUtils::decodeId($request->event_id));
         $user = auth()->user();
 
-        if (! $user && $request->create_account) {
+        if (! $user && $request->create_account && config('app.hosted')) {
 
             $request->validate([
                 'name' => ['required', 'string', 'max:255'],
