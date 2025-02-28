@@ -555,4 +555,13 @@ class Role extends Model implements MustVerifyEmail
 
         return $this->plan_expires >= now()->format('Y-m-d') && $this->plan_type == 'pro';
     }
+
+    public function acceptEventRequests()
+    {
+        if ($this->isClaimed()) {
+            return $this->accept_requests;
+        }
+
+        return true;
+    }
 }
