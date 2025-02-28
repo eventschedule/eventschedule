@@ -415,10 +415,10 @@ return [
     'app_updated' => 'App erfolgreich aktualisiert!',
     'no_new_version_available' => 'Keine neue Version verfügbar',
     'driver' => 'Treiber',
-    'mysql_host' => 'MySQL-Host',
+    'mysql_host' => 'MySQL Host',
     'port' => 'Port',
     'database' => 'Datenbank',
     'username' => 'Benutzername',
     'test' => 'Test',
-    'report_errors' => 'Melden Sie Fehler an die Entwickler, um uns bei der Verbesserung der App zu helfen'
+    'report_errors' => 'Fehler an die Entwickler melden, um uns bei der Verbesserung der App zu helfen (optional)'
 ];

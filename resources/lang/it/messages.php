@@ -413,7 +413,7 @@ return [
     'mysql_host' => 'Host MySQL',
     'port' => 'Porta',
     'database' => 'Database',
-    'username' => 'Nome Utente',
+    'username' => 'Nome utente',
     'test' => 'Test',
-    'report_errors' => 'Segnala errori agli sviluppatori per aiutarci a migliorare l\'app',
+    'report_errors' => 'Segnala errori agli sviluppatori per aiutarci a migliorare l\'app (opzionale)',
 ];
