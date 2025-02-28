@@ -672,7 +672,7 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="description" :value="__('messages.description')" />
+                            <x-input-label for="description" :value="__('messages.event_details')" />
                             <textarea id="description" name="description"
                                 class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
                                 autocomplete="off">{{ old('description', $event->description) }}</textarea>
