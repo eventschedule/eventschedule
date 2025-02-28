@@ -268,7 +268,7 @@
             <h2
               class="text-[#151B26] text-[40px] sm:text-{52px} leading-snug font-semibold"
             >
-              {{ __('messages.about') }}
+              {{ __('messages.event_details') }}
             </h2>
             <p class="text-[#33383C] text-base">
               {!! $event->description_html !!}
