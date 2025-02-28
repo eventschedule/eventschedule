@@ -125,6 +125,7 @@
         </div>
         <div class="flex bg-gray-200 text-xs leading-6 text-gray-700 md:flex-auto">
             @php
+
             $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth()->startOfWeek(Carbon\Carbon::SUNDAY);
             $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth()->endOfWeek(Carbon\Carbon::SATURDAY);
             $currentDate = $startOfMonth->copy();
@@ -147,6 +148,15 @@
                     $checkDate->addDay();
                 }
             }
+
+            // Sort events by start time otherwise recurring events can be out of order
+            foreach ($eventsMap as $date => $events) {
+                usort($events, function($a, $b) {
+                    return strtotime(explode(' ', $a->starts_at)[1]) - strtotime(explode(' ', $b->starts_at)[1]);
+                });
+                $eventsMap[$date] = $events;
+            }
+
             @endphp
             <div class="w-full md:grid md:grid-cols-7 md:grid-rows-{{ $totalWeeks }} md:gap-px">
                 @while ($currentDate->lte($endOfMonth))
