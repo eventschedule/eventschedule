@@ -424,5 +424,4 @@ return [
     'username' => 'Username',
     'test' => 'Test',
     'report_errors' => 'Report errors to the developers to help us improve the app (optional)',
-    'event_details' => 'Event Details',
 ];

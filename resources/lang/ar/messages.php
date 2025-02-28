@@ -77,7 +77,6 @@ return [
     'preview' => 'معاينة',
     'description' => 'الوصف',
     'contact_info' => 'معلومات الاتصال',
-    'phone' => 'الهاتف',
     'website' => 'الموقع الإلكتروني',
     'address' => 'العنوان',
     'street_address' => 'عنوان الشارع',
@@ -111,7 +110,6 @@ return [
     'unscheduled' => 'غير مجدول',
     'schedule' => 'جدول',
     'role' => 'دور',
-    'remove' => 'إزالة',
     'admin' => 'مدير',
     'member' => 'عضو',
     'owner' => 'مالك',
@@ -263,7 +261,6 @@ return [
     'view_curator' => 'عرض المنظم',
     'event_name' => 'اسم الحدث',
     'following' => 'متابعة',
-    'schedule' => 'جدول',
     'schedules' => 'الجداول',
     'new_schedule' => 'جدول جديد',
     'edit_schedule' => 'تعديل الجدول',
@@ -420,5 +417,5 @@ return [
     'database' => 'قاعدة البيانات',
     'username' => 'اسم المستخدم',
     'test' => 'اختبار',
-    'report_errors' => 'الإبلاغ عن الأخطاء للمطورين للمساعدة في تحسين التطبيق'
+    'report_errors' => 'الإبلاغ عن الأخطاء للمطورين لمساعدتنا في تحسين التطبيق (اختياري)'
 ];

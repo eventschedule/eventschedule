@@ -412,6 +412,6 @@ return [
     'port' => 'Porta',
     'database' => 'Banco de dados',
     'username' => 'Nome de usuário',
-    'test' => 'Testar',
-    'report_errors' => 'Reportar erros aos desenvolvedores para nos ajudar a melhorar o aplicativo'
+    'test' => 'Teste',
+    'report_errors' => 'Reportar erros aos desenvolvedores para nos ajudar a melhorar o aplicativo (opcional)',
 ];

@@ -466,5 +466,5 @@ return [
     'database' => 'Database',
     'username' => 'Gebruikersnaam',
     'test' => 'Test',
-    'report_errors' => 'Rapporteer fouten aan de ontwikkelaars om ons te helpen de app te verbeteren'
+    'report_errors' => 'Rapporteer fouten aan de ontwikkelaars om ons te helpen de app te verbeteren (optioneel)',
 ];
