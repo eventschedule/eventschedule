@@ -1,8 +1,8 @@
 # Event Schedule
 
 <div align="center">
-  <img src="public/images/light_logo.png" alt="Event Schedule Logo" width="200" data-gh-light-mode-only>
-  <img src="public/images/dark_logo.png" alt="Event Schedule Logo" width="200" data-gh-dark-mode-only>
+  <img src="public/images/light_logo.png" alt="Event Schedule Logo" width="200" class="only-light">
+  <img src="public/images/dark_logo.png" alt="Event Schedule Logo" width="200" class="only-dark">
 </div>
 
 An all-in-one platform to create calendars, sell tickets and streamline event check-ins with QR codes
