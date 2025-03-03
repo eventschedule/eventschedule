@@ -1,6 +1,4 @@
-# Event Schedule
-
-<div align="center" style="padding: 20px;">
+<div align="center" style="margin: 50px;">
     <picture>
         <source srcset="public/images/dark_logo.png" media="(prefers-color-scheme: light)">
         <img src="public/images/light_logo.png" alt="Event Schedule Logo" width="300" media="(prefers-color-scheme: dark)">
