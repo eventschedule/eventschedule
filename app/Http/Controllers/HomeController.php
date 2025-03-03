@@ -90,10 +90,16 @@ class HomeController extends Controller
 
     public function sitemap()
     {
-        $roles = Role::whereNotNull('email')
-                    ->orWhereNotNull('phone')
-                    ->orderBy(request()->sort_order == 'id' ? 'id' : 'subdomain', request()->sort_order == 'id' ? 'desc' : 'asc')
-                    ->get();
+        $roles = Role::where(function($query) {
+                    $query->whereNotNull('email')
+                          ->whereNotNull('email_verified_at');
+                })
+                ->orWhere(function($query) {
+                    $query->whereNotNull('phone')
+                          ->whereNotNull('phone_verified_at');
+                })
+                ->orderBy(request()->sort_order == 'id' ? 'id' : 'subdomain', request()->sort_order == 'id' ? 'desc' : 'asc')
+                ->get();
 
         $content = view('sitemap', [
             'roles' => $roles,
