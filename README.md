@@ -1,11 +1,11 @@
 # Event Schedule
 
 <div align="center">
-  <img src="public/images/dark_logo.png" alt="Event Schedule Logo" width="200">
-
-  <h1>Event Schedule</h1>
-  <p>An all-in-one platform to create calendars, sell tickets and streamline event check-ins with QR codes</p>
+  <img src="public/images/light_logo.png" alt="Event Schedule Logo" width="200" data-gh-light-mode-only>
+  <img src="public/images/dark_logo.png" alt="Event Schedule Logo" width="200" data-gh-dark-mode-only>
 </div>
+
+An all-in-one platform to create calendars, sell tickets and streamline event check-ins with QR codes
 
 * Sample Schedule: [openmicnight.eventschedule.com](https://openmicnight.eventschedule.com)
 
