@@ -184,8 +184,8 @@ class RoleController extends Controller
 
         $role = Role::subdomain($subdomain)->first();
 
-        if (! $role) {
-            return redirect(config('app.url'));
+        if (! $role || ! $role->isClaimed()) {
+            return redirect(config('app.url'), );
         }
 
         $otherRole = null;
@@ -200,7 +200,7 @@ class RoleController extends Controller
             $month = is_numeric($request->month) ? (int) $request->month : now()->month;
             $year = is_numeric($request->year) ? (int) $request->year : now()->year;
         }
-        
+
         if ($slug) {
             $event = $this->eventRepo->getEvent($subdomain, $slug, $date);
 
