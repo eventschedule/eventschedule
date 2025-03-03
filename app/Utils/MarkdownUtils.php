@@ -16,7 +16,11 @@ class MarkdownUtils
 
         $markdown = strip_tags($markdown);
 
-        $converter = new CommonMarkConverter();
+        $converter = new CommonMarkConverter([
+            'renderer' => [
+                'soft_break' => '<br>'
+            ]
+        ]);
         $html = $converter->convertToHtml($markdown);
         
         $config = HTMLPurifier_Config::createDefault();
