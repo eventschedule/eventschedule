@@ -5,7 +5,9 @@
     </picture>
 </div>
 
-<p style="padding-top: 40px;">
+---
+
+<p>
     An all-in-one platform to create calendars, sell tickets and streamline event check-ins with QR codes
 </p>
 
