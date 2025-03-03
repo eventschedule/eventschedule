@@ -148,6 +148,10 @@ class EventRepo
             $event->curator_id = $curatorId;
             $event->is_accepted = $venue && $user->isMember($venue->subdomain) ? true : null;
             $event->slug = \Str::slug($request->name);
+
+            if (! $event->slug) {
+                $event->slug = strtolower(\Str::random(5));
+            }
         }
 
         $event->fill($request->all());
