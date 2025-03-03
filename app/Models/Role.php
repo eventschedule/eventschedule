@@ -233,7 +233,7 @@ class Role extends Model implements MustVerifyEmail
 
     public function isClaimed()
     {
-        return $this->email_verified_at != null && $this->user_id != null;
+        return ($this->email_verified_at != null || $this->phone_verified_at != null) && $this->user_id != null;
     }
 
     public function getHeaderImageUrlAttribute($value)

@@ -17,6 +17,7 @@ return new class extends Migration
 
         Schema::table('roles', function (Blueprint $table) {
             $table->boolean('accept_requests')->default(true)->change();
+            $table->timestamp('phone_verified_at')->nullable();
         });
     }
 
@@ -25,6 +26,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::table('roles', function (Blueprint $table) {
+            $table->dropColumn('phone_verified_at');
+        });
     }
 };
