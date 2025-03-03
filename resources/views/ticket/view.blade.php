@@ -202,7 +202,7 @@
         <div class="flex flex-col gap-[14px] text-[10px] uppercase leading-[1]">
           <div>
             <p class="mb-[8px] font-extrabold text-[#4E81FA]">{{ __('messages.notes') }}:</p>
-            <p class="font-bold text-[#151B26]">
+            <p class="font-bold text-[#151B26] custom-content">
               {!! $event->ticket_notes_html !!}
             </p>
             </div>

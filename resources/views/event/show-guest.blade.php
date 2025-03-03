@@ -270,7 +270,7 @@
             >
               {{ __('messages.event_details') }}
             </h2>
-            <p class="text-[#33383C] text-base">
+            <p class="text-[#33383C] text-base custom-content">
               {!! $event->description_html !!}
             </p>
           </div>
@@ -356,7 +356,7 @@
               </div>
             </div>
             -->
-            <p class="text-base text-[#33383C]">
+            <p class="text-base text-[#33383C] custom-content">
               {!! $each->description_html !!}
             </p>
             @if ($each->youtube_links)
