@@ -2,8 +2,8 @@
 
 <div align="center">
 <picture>
-  <source srcset="public/images/dark_logo.png" media="(prefers-color-scheme: dark)">
-  <img src="public/images/light_logo.png" alt="Event Schedule Logo" width="200" media="(prefers-color-scheme: light)">
+  <source srcset="public/images/dark_logo.png" media="(prefers-color-scheme: light)">
+  <img src="public/images/light_logo.png" alt="Event Schedule Logo" width="200" media="(prefers-color-scheme: dark)">
 </picture>
 </div>
 
