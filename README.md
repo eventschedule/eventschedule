@@ -1,6 +1,11 @@
 # Event Schedule
 
-Event Schedule is an all-in-one platform to create calendars, sell tickets and streamline event check-ins with QR codes.
+<div align="center">
+  <img src="public/images/dark_logo.png" alt="Event Schedule Logo" width="200">
+
+  <h1>Event Schedule</h1>
+  <p>An all-in-one platform to create calendars, sell tickets and streamline event check-ins with QR codes</p>
+</div>
 
 * Sample Schedule: [openmicnight.eventschedule.com](https://openmicnight.eventschedule.com)
 
