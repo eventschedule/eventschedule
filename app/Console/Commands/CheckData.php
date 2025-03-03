@@ -62,6 +62,10 @@ class CheckData extends Command
                 $errors[] = 'No venue or event_url for event ' . $event->id . ': ' . $event->name . ' (' . $event->user->id . ': ' . $event->user->name . ')';
             }
 
+            if (! $event->slug) {
+                $errors[] = 'No slug for event ' . $event->id . ': ' . $event->name . ' (' . $event->user->id . ': ' . $event->user->name . ')';
+            }
+
             $data = $event->getGuestUrlData();
 
             if (! $data['subdomain']) {                
