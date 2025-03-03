@@ -146,7 +146,7 @@
         </div>
 
         @if ($event->payment_method == 'cash' && $event->payment_instructions_html)
-            <div class="mt-8">
+            <div class="mt-8 custom-content">
                 {!! $event->payment_instructions_html !!}
             </div>
         @endif

@@ -173,12 +173,12 @@
 
         @if($role->description_html)
         <div
-          class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-12 flex flex-col gap-6 mb-6"
+          class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-10 flex flex-col gap-4 mb-6"
         >
-          <h3 class="text-[32px] font-semibold leading-10 text-[#151B26]">
+          <div class="text-[32px] font-semibold leading-10 text-[#151B26]">
             {{ __('messages.about') }}
-          </h3>
-          <div class="text-[#33383C] text-base">
+          </div>
+          <div class="text-[#33383C] text-base custom-content">
             {!! $role->description_html !!}
           </div>
         </div>
@@ -186,7 +186,7 @@
 
       @if ($role->youtube_links && $role->isSchedule())
         <div
-            class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-12 flex flex-col gap-6 mb-6"
+            class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-10 flex flex-col gap-6 mb-6"
           >
             <div class="grid grid-cols-1 md:grid-cols-{{ $role->getVideoColumns() }} gap-8">
             @foreach (json_decode($role->youtube_links) as $link)
@@ -199,14 +199,14 @@
       @endif
 
       <div 
-        class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-12 flex flex-col gap-6 mb-6"
+        class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-10 flex flex-col gap-6 mb-6"
       >          
         @include('role/partials/calendar', ['route' => 'guest', 'tab' => ''])
       </div>
 
       @if ($role->youtube_links && ! $role->isSchedule())
         <div
-            class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-12 flex flex-col gap-6 mb-6"
+            class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-10 flex flex-col gap-6 mb-6"
           >
             <div class="grid grid-cols-1 md:grid-cols-{{ $role->getVideoColumns() }} gap-8">
             @foreach (json_decode($role->youtube_links) as $link)
@@ -220,7 +220,7 @@
 
       @if ($role->social_links)
       <div 
-        class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-12 flex flex-col gap-6 mb-6"
+        class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-10 flex flex-col gap-6 mb-6"
       >
         <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] mb-6">
           {{ __('messages.social_media') }}
