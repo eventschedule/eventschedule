@@ -216,7 +216,7 @@
             <p class="mb-[8px] font-extrabold text-[#4E81FA]">
               {{ __('messages.terms_and_conditions') }}
             </p>
-            <p class="font-bold text-[#151B26]"><a href="https://www.eventschedule.com/terms" target="_blank">eventschedule.com/terms</a></p>
+            <p class="font-bold text-[#151B26]"><a href="https://www.eventschedule.com/' . (config('app.hosted') ? 'terms-of-service' : 'self-hosting-terms-of-service') . '" target="_blank">eventschedule.com/terms</a></p>
           </div>
           <div>
             <p class="mb-[8px] font-extrabold text-[#4E81FA]">
