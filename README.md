@@ -1,11 +1,13 @@
-<div align="center" style="margin: 50px;">
+<div align="center">
     <picture>
         <source srcset="public/images/dark_logo.png" media="(prefers-color-scheme: light)">
         <img src="public/images/light_logo.png" alt="Event Schedule Logo" width="300" media="(prefers-color-scheme: dark)">
     </picture>
 </div>
 
-An all-in-one platform to create calendars, sell tickets and streamline event check-ins with QR codes
+<p>
+    An all-in-one platform to create calendars, sell tickets and streamline event check-ins with QR codes
+</p>
 
 * Sample Schedule: [openmicnight.eventschedule.com](https://openmicnight.eventschedule.com)
 
