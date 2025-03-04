@@ -44,10 +44,6 @@ class GeminiUtils
         $data = json_decode($data['candidates'][0]['content']['parts'][0]['text'], true);
         $data = $data[0];
         
-        if ($data['performer_name']) {
-            $data['performer_youtube_url'] = self::getPerformerYoutubeUrl($data['performer_name']);
-        }
-
         return $data;
     }
 
@@ -75,7 +71,13 @@ class GeminiUtils
                     Note: make sure to return the text values in the same language as the message except for the event_name_en.
                     " . $details;
 
-        return self::sendRequest($prompt);
+        $data = self::sendRequest($prompt);
+
+        if (false && $data['performer_name']) {
+            $data['performer_youtube_url'] = self::getPerformerYoutubeUrl($data['performer_name']);
+        }
+
+        return $data;
     }
 
     private static function getPerformerYoutubeUrl($performerName)

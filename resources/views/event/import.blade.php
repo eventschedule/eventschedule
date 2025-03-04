@@ -48,31 +48,38 @@
                         </div>
 
                         <!-- Add preview section -->
-                        <div v-if="preview" class="mt-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-900">
-                            <h3 class="font-semibold text-lg mb-3 text-gray-900 dark:text-gray-100">{{ __('messages.preview') }}</h3>
-                            <div class="space-y-2 text-gray-700 dark:text-gray-300">
-                                <p><span class="font-medium">{{ __('messages.event_name') }}:</span> @{{ preview.parsed.event_name }}</p>
-                                <p><span class="font-medium">{{ __('messages.date_and_time') }}:</span> @{{ new Date(preview.parsed.event_date_time).toLocaleString() }}</p>
-                                <p><span class="font-medium">{{ __('messages.address') }}:</span> @{{ preview.parsed.event_address }}</p>
+                        <div v-if="preview" class="mt-4 p-6 border rounded-lg bg-gray-50 dark:bg-gray-900">
+                            <div class="space-y-4 text-gray-700 dark:text-gray-300">
+                                <div class="grid grid-cols-[120px,1fr] gap-2">
+                                    <span class="font-medium text-gray-900 dark:text-gray-100">{{ __('messages.event_name') }}:</span>
+                                    <span>@{{ preview.parsed.event_name }}</span>
+                                    
+                                    <span class="font-medium text-gray-900 dark:text-gray-100">{{ __('messages.date_and_time') }}:</span>
+                                    <span>@{{ new Date(preview.parsed.event_date_time).toLocaleString() }}</span>
+                                    
+                                    <span class="font-medium text-gray-900 dark:text-gray-100">{{ __('messages.address') }}:</span>
+                                    <span>@{{ preview.parsed.event_address }}</span>
+                                </div>
                                 
-                                <!-- Add YouTube embed -->
-                                <div v-if="preview.parsed.performer_youtube_url" class="mt-4">
-                                    <div class="aspect-w-16 aspect-h-9">
+                                <!-- YouTube embed with improved styling -->
+                                <div v-if="preview.parsed.performer_youtube_url" class="mt-6">
+                                    <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.performer_video') }}</h4>
+                                    <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
                                         <iframe 
                                             :src="getYouTubeEmbedUrl(preview.parsed.performer_youtube_url)"
                                             frameborder="0"
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                             allowfullscreen
-                                            class="w-full h-full rounded-lg">
+                                            class="w-full h-full">
                                         </iframe>
                                     </div>
                                 </div>
                             </div>
-                            <div class="mt-4 flex gap-2">
-                                <button @click="handleEdit" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md">
+                            <div class="mt-6 flex gap-3">
+                                <button @click="handleEdit" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                                     {{ __('messages.edit') }}
                                 </button>
-                                <button @click="handleSave" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                                <button @click="handleSave" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
                                     {{ __('messages.save') }}
                                 </button>
                             </div>
