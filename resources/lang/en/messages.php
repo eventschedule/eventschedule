@@ -427,5 +427,5 @@ return [
     'optional' => 'Optional',
     'i_accept_the_terms' => 'I accept the :terms',
     'import' => 'Import',
-    'import_events' => 'Import Events',
+    'import_event' => 'Import Event',
 ];
