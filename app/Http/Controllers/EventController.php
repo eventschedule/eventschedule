@@ -469,6 +469,27 @@ class EventController extends Controller
         $details = request()->input('event_details');
         $parsed = GeminiUtils::parseEvent($details);
 
+        if ($parsed['registration_url']) {
+            try {
+                $html = file_get_contents($parsed['registration_url']);
+                
+                // Look for Open Graph image meta tag
+                if (preg_match('/<meta[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']*)["\']/', $html, $matches) ||
+                    preg_match('/<meta[^>]*content=["\']([^"\']*)["\'][^>]*property=["\']og:image["\']/', $html, $matches)) {
+                    
+                    $imageUrl = $matches[1];
+                    $imageContents = file_get_contents($imageUrl);
+                    $extension = pathinfo(parse_url($imageUrl, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
+                    $filename = '/tmp/event_' . uniqid() . '.' . $extension;
+                    
+                    file_put_contents($filename, $imageContents);
+                    $parsed['social_image'] = $filename;
+                }
+            } catch (\Exception $e) {
+                \Log::error('Error fetching social image: ' . $e->getMessage());
+            }
+        }
+
         return response()->json(['message' => 'Imported event', 'parsed' => $parsed]);
     }
 
