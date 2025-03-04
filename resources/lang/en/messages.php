@@ -428,4 +428,5 @@ return [
     'i_accept_the_terms' => 'I accept the :terms',
     'import' => 'Import',
     'import_event' => 'Import Event',
+    'loading' => 'Loading',
 ];
