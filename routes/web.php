@@ -96,7 +96,8 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/team/remove_member/{hash}', [RoleController::class, 'removeMember'])->name('role.remove_member');
     Route::get('/{subdomain}/curate_event/{hash}', [EventController::class, 'curate'])->name('event.curate');
     Route::delete('/{subdomain}/uncurate_event/{hash}', [EventController::class, 'uncurate'])->name('event.uncurate');
-    Route::get('/{subdomain}/import', [EventController::class, 'import'])->name('event.import');
+    Route::get('/{subdomain}/import', [EventController::class, 'showImport'])->name('event.show_import');
+    Route::post('/{subdomain}/import', [EventController::class, 'import'])->name('event.import');
     Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|availability|requests|profile|followers|team|plan');
 });
 

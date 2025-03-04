@@ -456,10 +456,13 @@ class EventController extends Controller
         return back()->with('message', __('messages.uncurate_event'));
     }
 
-    public function import(Request $request, $subdomain)
+    public function showImport(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         return view('event.import', ['role' => $role]);
     }
+
+    
+
 }

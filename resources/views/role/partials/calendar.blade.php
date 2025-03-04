@@ -44,7 +44,7 @@
                     </button>
                 </a>
             </span>
-            <a href="{{ route('event.import', ['subdomain' => $role->subdomain]) }}">
+            <a href="{{ route('event.show_import', ['subdomain' => $role->subdomain]) }}">
                 <button type="button"
                     class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 mr-3">
                     <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
