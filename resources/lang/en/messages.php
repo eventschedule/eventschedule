@@ -426,4 +426,5 @@ return [
     'report_errors' => 'Report errors to the developers to help us improve the app (optional)',
     'optional' => 'Optional',
     'i_accept_the_terms' => 'I accept the :terms',
+    'import' => 'Import',
 ];
