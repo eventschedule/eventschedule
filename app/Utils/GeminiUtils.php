@@ -4,36 +4,16 @@ namespace App\Utils;
 
 class GeminiUtils
 {
-    public static function parseEvent($details)
+    private static function sendRequest($prompt, $model = 'gemini-2.0-flash')
     {
         $apiKey = config('services.google.gemini_key');
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" . $apiKey;
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=" . $apiKey;
         
         $data = [
             'contents' => [
                 [
                     'parts' => [
-                        ['text' => "Parse the event details from this message to the following fields:
-                                    event_name,
-                                    event_name_en,
-                                    event_description,
-                                    event_date_time (YYYY-MM-DD HH:MM format),
-                                    event_address,
-                                    event_city,
-                                    event_state,
-                                    event_postal_code,
-                                    event_country_code,
-                                    registration_url,       
-                                    venue_name,
-                                    venue_name_en,
-                                    venue_email,
-                                    venue_website,
-                                    performer_name,
-                                    performer_name_en,
-                                    performer_email,
-                                    performer_website,
-                                    Note: make sure to return the text values in the same language as the message except for the event_name_en.
-                                    " . $details]
+                        ['text' => $prompt]
                     ]
                 ]
             ],
@@ -58,9 +38,62 @@ class GeminiUtils
             throw new \Exception('Gemini API request failed with status code: ' . $httpCode);
         }
 
+        \Log::info($response);
+
         $data = json_decode($response, true);
         $data = json_decode($data['candidates'][0]['content']['parts'][0]['text'], true);
+        $data = $data[0];
         
+        if ($data['performer_name']) {
+            $data['performer_youtube_url'] = self::getPerformerYoutubeUrl($data['performer_name']);
+        }
+
         return $data;
     }
-}
+
+    public static function parseEvent($details)
+    {
+        $prompt = "Parse the event details from this message to the following fields:
+                    event_name,
+                    event_name_en,
+                    event_description,
+                    event_date_time (YYYY-MM-DD HH:MM format),
+                    event_address,
+                    event_city,
+                    event_state,
+                    event_postal_code,
+                    event_country_code,
+                    registration_url,       
+                    venue_name,
+                    venue_name_en,
+                    venue_email,
+                    venue_website,
+                    performer_name,
+                    performer_name_en,
+                    performer_email,
+                    performer_website,
+                    Note: make sure to return the text values in the same language as the message except for the event_name_en.
+                    " . $details;
+
+        return self::sendRequest($prompt);
+    }
+
+    private static function getPerformerYoutubeUrl($performerName)
+    {
+        $url = "https://www.googleapis.com/youtube/v3/search"
+            . "?key=" . config('services.google.backend')
+            . "&q=" . urlencode($performerName)
+            . "&type=video"
+            . "&order=viewCount"
+            . "&maxResults=1";
+            
+        $response = file_get_contents($url);
+        $data = json_decode($response, true);
+
+        if (isset($data['items'][0]['id']['videoId'])) {
+            return "https://www.youtube.com/watch?v=" . $data['items'][0]['id']['videoId'];
+        }
+
+        return null;
+    }
+}   

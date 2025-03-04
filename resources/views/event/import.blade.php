@@ -54,6 +54,19 @@
                                 <p><span class="font-medium">{{ __('messages.event_name') }}:</span> @{{ preview.parsed.event_name }}</p>
                                 <p><span class="font-medium">{{ __('messages.date_and_time') }}:</span> @{{ new Date(preview.parsed.event_date_time).toLocaleString() }}</p>
                                 <p><span class="font-medium">{{ __('messages.address') }}:</span> @{{ preview.parsed.event_address }}</p>
+                                
+                                <!-- Add YouTube embed -->
+                                <div v-if="preview.parsed.performer_youtube_url" class="mt-4">
+                                    <div class="aspect-w-16 aspect-h-9">
+                                        <iframe 
+                                            :src="getYouTubeEmbedUrl(preview.parsed.performer_youtube_url)"
+                                            frameborder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowfullscreen
+                                            class="w-full h-full rounded-lg">
+                                        </iframe>
+                                    </div>
+                                </div>
                             </div>
                             <div class="mt-4 flex gap-2">
                                 <button @click="handleEdit" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md">
@@ -168,7 +181,16 @@
                     } catch (error) {
                         console.error('Error saving event:', error)
                     }
-                }
+                },
+
+                getYouTubeEmbedUrl(url) {
+                    // Extract video ID from various YouTube URL formats
+                    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+                    const match = url.match(regExp);
+                    const videoId = match && match[2].length === 11 ? match[2] : null;
+                    
+                    return videoId ? `https://www.youtube.com/embed/${videoId}` : '';
+                },
             }
         }).mount('#event-import-app')
     </script>
