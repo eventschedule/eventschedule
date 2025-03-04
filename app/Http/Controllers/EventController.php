@@ -486,7 +486,7 @@ class EventController extends Controller
                     $parsed['social_image'] = $filename;
                 }
             } catch (\Exception $e) {
-                \Log::error('Error fetching social image: ' . $e->getMessage());
+                // do nothing 
             }
         }
 
