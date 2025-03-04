@@ -465,6 +465,8 @@ class EventController extends Controller
 
     public function import()
     {
+        sleep(3);
+        
         return response()->json(['message' => 'Imported event']);
     }
 
