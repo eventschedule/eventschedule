@@ -84,7 +84,7 @@ class GeminiUtils
             . "?key=" . config('services.google.backend')
             . "&q=" . urlencode($performerName)
             . "&type=video"
-            . "&order=viewCount"
+            . "&order=relevance"
             . "&maxResults=1";
             
         $response = file_get_contents($url);
