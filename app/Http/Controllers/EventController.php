@@ -17,6 +17,7 @@ use App\Models\EventRole;
 use App\Models\User;
 use App\Models\Ticket;
 use App\Utils\UrlUtils;
+use App\Utils\GeminiUtils;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Rules\NoFakeEmail;
@@ -465,9 +466,10 @@ class EventController extends Controller
 
     public function import()
     {
-        sleep(3);
-        
-        return response()->json(['message' => 'Imported event']);
+        $details = request()->input('event_details');
+        $parsed = GeminiUtils::parseEvent($details);
+
+        return response()->json(['message' => 'Imported event', 'parsed' => $parsed[0]]);
     }
 
 }

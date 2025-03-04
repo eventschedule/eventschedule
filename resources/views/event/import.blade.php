@@ -21,7 +21,7 @@
                             <x-input-label for="event_details" :value="__('messages.event_details')" />
                             <textarea id="event_details" 
                                 name="event_details" 
-                                rows="5"
+                                rows="4"
                                 v-model="eventDetails"
                                 @input="debouncedPreview"
                                 @paste="handlePaste" autofocus
