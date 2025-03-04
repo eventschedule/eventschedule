@@ -469,7 +469,7 @@ class EventController extends Controller
         $details = request()->input('event_details');
         $parsed = GeminiUtils::parseEvent($details);
 
-        return response()->json(['message' => 'Imported event', 'parsed' => $parsed[0]]);
+        return response()->json(['message' => 'Imported event', 'parsed' => $parsed]);
     }
 
 }
