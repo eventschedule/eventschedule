@@ -48,34 +48,37 @@
                         </div>
 
                         <!-- Add preview section -->
-                        <div v-if="preview" class="mt-4 p-6 border rounded-lg bg-gray-50 dark:bg-gray-900">
-                            <div class="space-y-4 text-gray-700 dark:text-gray-300">
-                                <div class="grid grid-cols-[120px,1fr] gap-2">
-                                    <span class="font-medium text-gray-900 dark:text-gray-100">{{ __('messages.event_name') }}:</span>
-                                    <span>@{{ preview.parsed.event_name }}</span>
+                        <div v-if="preview">
+                            <div class="mt-4 p-6 border rounded-lg bg-gray-50 dark:bg-gray-900">
+                                <div class="space-y-4 text-gray-700 dark:text-gray-300">
+                                    <div class="grid grid-cols-[120px,1fr] gap-2">
+                                        <span class="font-medium text-gray-900 dark:text-gray-100">{{ __('messages.event_name') }}:</span>
+                                        <span>@{{ preview.parsed.event_name }}</span>
+                                        
+                                        <span class="font-medium text-gray-900 dark:text-gray-100">{{ __('messages.date_and_time') }}:</span>
+                                        <span>@{{ new Date(preview.parsed.event_date_time).toLocaleString() }}</span>
+                                        
+                                        <span class="font-medium text-gray-900 dark:text-gray-100">{{ __('messages.address') }}:</span>
+                                        <span>@{{ preview.parsed.event_address }}</span>
+                                    </div>
                                     
-                                    <span class="font-medium text-gray-900 dark:text-gray-100">{{ __('messages.date_and_time') }}:</span>
-                                    <span>@{{ new Date(preview.parsed.event_date_time).toLocaleString() }}</span>
-                                    
-                                    <span class="font-medium text-gray-900 dark:text-gray-100">{{ __('messages.address') }}:</span>
-                                    <span>@{{ preview.parsed.event_address }}</span>
-                                </div>
-                                
-                                <!-- YouTube embed with improved styling -->
-                                <div v-if="preview.parsed.performer_youtube_url" class="mt-6">
-                                    <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.performer_video') }}</h4>
-                                    <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-                                        <iframe 
-                                            :src="getYouTubeEmbedUrl(preview.parsed.performer_youtube_url)"
-                                            frameborder="0"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                            allowfullscreen
-                                            class="w-full h-full">
-                                        </iframe>
+                                    <!-- YouTube embed with improved styling -->
+                                    <div v-if="preview.parsed.performer_youtube_url" class="mt-6">
+                                        <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.performer_video') }}</h4>
+                                        <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                                            <iframe 
+                                                :src="getYouTubeEmbedUrl(preview.parsed.performer_youtube_url)"
+                                                frameborder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowfullscreen
+                                                class="w-full h-full">
+                                            </iframe>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="mt-6 flex gap-3">
+
+                            <div class="mt-6 flex gap-3 justify-end">
                                 <button @click="handleEdit" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                                     {{ __('messages.edit') }}
                                 </button>
