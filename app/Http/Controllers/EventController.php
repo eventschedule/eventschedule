@@ -463,6 +463,9 @@ class EventController extends Controller
         return view('event.import', ['role' => $role]);
     }
 
-    
+    public function import()
+    {
+        return response()->json(['message' => 'Imported event']);
+    }
 
 }
