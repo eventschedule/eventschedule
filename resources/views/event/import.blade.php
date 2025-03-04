@@ -1,51 +1,35 @@
 <x-app-admin-layout>
-    <x-slot name="head">
-        <script src="{{ asset('js/vue.global.prod.js') }}"></script>
-    </x-slot>
+    <script src="{{ asset('js/vue.global.prod.js') }}"></script>
 
     <h2 class="pt-2 my-4 text-xl font-bold leading-7 text-gray-900 dark:text-gray-100x sm:truncate sm:text-2xl sm:tracking-tight">
         {{ __('messages.import_event') }}
     </h2>
 
-    <div id="event-import-app">
-        <form method="post" @submit.prevent="handleSubmit">
-            @csrf
-            <div class="py-5">
-                <div class="max-w-7xl mx-auto space-y-6">
-                    <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
-                        <div class="max-w-xl">
-                            <div class="mb-6">
-                                <x-input-label for="event_details" :value="__('messages.event_details')" />
-                                <textarea 
-                                    id="event_details" 
-                                    v-model="eventDetails"
-                                    @input="debouncedPreview"
-                                    @paste="handlePaste"
-                                    rows="5"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
-                                ></textarea>
-                                <x-input-error class="mt-2" :messages="$errors->get('event_details')" />
-                            </div>
+    <form method="post"
+        action="{{ route('event.import', ['subdomain' => $role->subdomain]) }}"
+        enctype="multipart/form-data">
 
-                            <!-- Loading indicator -->
-                            <div v-if="isLoading" class="mt-4 flex items-center text-gray-500">
-                                <svg class="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Processing...
-                            </div>
+        @csrf
 
-                            <!-- Preview section -->
-                            <div v-if="preview" class="mt-6">
-                                // ... existing preview code ...
-                            </div>
+        <div class="py-5">
+            <div class="max-w-7xl mx-auto space-y-6">
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                    <div class="max-w-xl">
+                    
+                        <div class="mb-6">
+                            <x-input-label for="event_details" :value="__('messages.event_details')" />
+                            <textarea id="event_details" name="event_details" rows="5"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
+                            <x-input-error class="mt-2" :messages="$errors->get('event_details')" />
                         </div>
+
                     </div>
                 </div>
             </div>
-        </form>
-    </div>
+        </div>
+
+
+    </form>
 
     <script>
         const { createApp } = Vue
@@ -63,7 +47,6 @@
                 return {
                     eventDetails: '',
                     preview: null,
-                    isLoading: false
                 }
             },
 
@@ -78,7 +61,6 @@
                         return
                     }
 
-                    this.isLoading = true
                     try {
                         const response = await fetch('{{ route("event.import", ["subdomain" => $role->subdomain]) }}', {
                             method: 'POST',
@@ -95,8 +77,6 @@
                         this.preview = data.preview
                     } catch (error) {
                         console.error('Error fetching preview:', error)
-                    } finally {
-                        this.isLoading = false
                     }
                 },
 
