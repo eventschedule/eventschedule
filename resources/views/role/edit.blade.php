@@ -235,8 +235,10 @@
             var fontFamily = $('#font_family').find(':selected').val();
             var name = $('#name').val();
 
-            if (!name) {
+            if (! name) {
                 name = "{{ __('messages.preview') }}";
+            } else if (name.length > 10) {
+                name = name.substring(0, 10) + '...';
             }
 
             $('#preview')
@@ -244,7 +246,7 @@
                 .css('font-family', fontFamily)
                 .css('background-size', 'cover')
                 .css('background-position', 'center')
-                .html('<div class="bg-[#F5F9FE] rounded-2xl px-12 py-4 flex flex-col">' + name + '</div>');
+                .html('<div class="bg-[#F5F9FE] rounded-2xl px-6 py-4 flex flex-col">' + name + '</div>');
 
             if (background == 'gradient') {
                 $('#custom_colors').toggle(backgroundColors == '');
@@ -653,7 +655,7 @@
                         {{ __('messages.schedule_style') }}
                     </h2>
 
-                    <div class="flex flex-col lg:flex-row gap-6">
+                    <div class="flex flex-col xl:flex-row xl:gap-12">
                         <div class="w-full lg:w-1/2">
                             <!--
                             <div class="mb-6">
@@ -709,7 +711,7 @@
                                 <x-input-label for="image" :value="__('messages.image')" />
                                 <div class="color-select-container">
                                     <select id="background_image" name="background_image"
-                                        class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                        class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm w-64 max-w-64"
                                         oninput="onChangeBackground(); updatePreview(); updateImageNavButtons(); toggleCustomImageInput();">
                                         @foreach($backgrounds as $background => $name)
                                         <option value="{{ $background }}"
@@ -768,7 +770,7 @@
                                     <x-input-label for="background_colors" :value="__('messages.colors')" />
                                     <div class="color-select-container">
                                         <select id="background_colors" name="background_colors" oninput="updatePreview(); updateColorNavButtons()"
-                                            class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                            class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm w-64 max-w-64">
                                             @foreach($gradients as $gradient => $name)
                                             <option value="{{ $gradient }}"
                                                 {{ $role->background_colors == $gradient || (! array_key_exists($role->background_colors, $gradients) && ! $gradient) ? 'SELECTED' : '' }}>
@@ -816,7 +818,7 @@
                                 <div class="mb-6">
                                     <x-input-label for="background_rotation" :value="__('messages.rotation')" />
                                     <x-text-input id="background_rotation" name="background_rotation" type="number"
-                                        class="mt-1 block w-1/2" oninput="updatePreview()"
+                                        class="mt-1 block w-32 max-w-32" oninput="updatePreview()"
                                         :value="old('background_rotation', $role->background_rotation)" min="0" max="360" />
                                     <x-input-error class="mt-2" :messages="$errors->get('background_rotation')" />
                                 </div>
