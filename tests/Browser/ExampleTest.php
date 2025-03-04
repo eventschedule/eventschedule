@@ -27,7 +27,7 @@ class ExampleTest extends DuskTestCase
                     ->type('email', $email)
                     ->type('password', $password)
                     ->check('terms')
-                    ->press('REGISTER')
+                    ->press('SIGN UP')
                     ->pause(5000)
                     ->screenshot('registration_complete')
                     ->assertPathIs('/verify-email');
