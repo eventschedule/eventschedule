@@ -58,9 +58,10 @@
             </a>
         </div>
 
-        <div
-            class="w-full sm:max-w-sm mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
-            {{ $slot }}
+        <div class="flex flex-col lg:flex-row lg:gap-8">
+            <div class="w-full sm:max-w-sm mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
+                {{ $slot }}
+            </div>
         </div>
 
         <div class="pt-20"></div>
