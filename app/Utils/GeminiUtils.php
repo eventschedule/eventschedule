@@ -59,7 +59,8 @@ class GeminiUtils
         }
 
         $data = json_decode($response, true);
-
-        return json_decode($data['candidates'][0]['content']['parts'][0]['text'], true);
+        $data = json_decode($data['candidates'][0]['content']['parts'][0]['text'], true);
+        
+        return $data;
     }
 }
