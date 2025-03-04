@@ -270,9 +270,9 @@
             >
               {{ __('messages.event_details') }}
             </h2>
-            <p class="text-[#33383C] text-base custom-content">
+            <div class="text-[#33383C] text-base custom-content">
               {!! $event->description_html !!}
-            </p>
+            </div>
           </div>
           @endif
           @if ($event->flyer_image_url && $event->members()->count() != 1)
@@ -356,9 +356,9 @@
               </div>
             </div>
             -->
-            <p class="text-base text-[#33383C] custom-content">
+            <div class="text-base text-[#33383C] custom-content">
               {!! $each->description_html !!}
-            </p>
+            </div>
             @if ($each->youtube_links)
               <div class="grid grid-cols-1 md:grid-cols-{{ $role->getVideoColumns() }} gap-8">
               @foreach (json_decode($each->youtube_links) as $link)
