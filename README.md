@@ -36,7 +36,7 @@
 
 <div style="display: flex; gap: 10px;">
     <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_1.png?raw=true" width="49%" alt="Guest > Schedule">
-    <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_2a.png?raw=true" width="49%" alt="Guest > Event">
+    <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_2.png?raw=true" width="49%" alt="Guest > Event">
 </div>
 
 <div style="display: flex; gap: 10px;">
@@ -85,6 +85,8 @@ Copy the `.env.example` file to `.env` and then access the application at `https
 ```bash
 cp .env.example .env
 ```
+
+<img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/setup.png?raw=true" width="100%" alt="Setup"/>
 
 ---
 
