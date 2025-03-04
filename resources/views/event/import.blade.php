@@ -139,6 +139,7 @@
                     }
 
                     this.isLoading = true
+                    this.preview = null  // Clear the preview when starting a new search
                     try {
                         console.log('Sending event details:', this.eventDetails);
                         
