@@ -116,3 +116,15 @@ if (config('app.hosted')) {
 }
 
 Route::get('/{slug?}', [HomeController::class, 'landing'])->name('landing');
+
+Route::get('/tmp/event-image/{filename?}', function ($filename = null) {
+    if (!$filename) {
+        abort(404);
+    }
+
+    $path = '/tmp/event_' . $filename;
+    if (file_exists($path)) {
+        return response()->file($path);
+    }
+    abort(404);
+})->name('event.tmp_image');

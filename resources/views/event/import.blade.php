@@ -62,6 +62,15 @@
                                         <span>@{{ preview.parsed.event_address }}</span>
                                     </div>
                                     
+                                    <!-- Social Image Preview -->
+                                    <div v-if="preview.parsed.social_image" class="mt-6">
+                                        <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                                            <img :src="getSocialImageUrl(preview.parsed.social_image)" 
+                                                 class="object-contain w-full h-full" 
+                                                 alt="Event preview image">
+                                        </div>
+                                    </div>
+
                                     <!-- YouTube embed with improved styling -->
                                     <div v-if="preview.parsed.performer_youtube_url" class="mt-6">
                                         <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
@@ -202,6 +211,12 @@
                     const videoId = match && match[2].length === 11 ? match[2] : null;
                     
                     return videoId ? `https://www.youtube.com/embed/${videoId}` : '';
+                },
+
+                getSocialImageUrl(path) {
+                    // Extract filename from /tmp/event_XXXXX.jpg path
+                    const filename = path.split('/').pop().replace('event_', '');
+                    return `{{ route('event.tmp_image', ['filename' => '']) }}/${filename}`;
                 },
 
                 handleClear() {
