@@ -82,6 +82,8 @@
                             })
                         })
 
+                        console.log('response', response);
+
                         const data = await response.json()
                         this.preview = data.preview
                     } catch (error) {
