@@ -420,5 +420,7 @@ return [
     'database' => 'Datenbank',
     'username' => 'Benutzername',
     'test' => 'Test',
-    'report_errors' => 'Fehler an die Entwickler melden, um uns bei der Verbesserung der App zu helfen (optional)'
+    'report_errors' => 'Fehler an die Entwickler melden, um uns bei der Verbesserung der App zu helfen (optional)',
+    'optional' => 'Optional',
+    'i_accept_the_terms' => 'Ich akzeptiere die :terms'
 ];

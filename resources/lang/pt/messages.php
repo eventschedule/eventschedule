@@ -41,7 +41,7 @@ return [
     'confirm_password' => 'Confirmar Senha',
     'terms_of_service' => 'Termos de Serviço',
     'privacy_policy' => 'Política de Privacidade',
-    'i_accept_the_terms_and_privacy' => 'Eu aceito os :terms e :privacy',
+    'i_accept_the_terms_and_privacy' => 'Eu aceito os :terms e a :privacy',
     'already_registered' => 'Já registrado?',
     'reset_password' => 'Redefinir Senha',
     'thanks_for_signing_up' => 'Obrigado por se inscrever! Antes de começar, verifique seu endereço de e-mail clicando no link que enviamos. Se você não recebeu o e-mail, ficaremos felizes em enviar outro.',
@@ -414,4 +414,6 @@ return [
     'username' => 'Nome de usuário',
     'test' => 'Teste',
     'report_errors' => 'Reportar erros aos desenvolvedores para nos ajudar a melhorar o aplicativo (opcional)',
+    'optional' => 'Opcional',
+    'i_accept_the_terms' => 'Eu aceito os :terms',
 ];
