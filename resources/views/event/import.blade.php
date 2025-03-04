@@ -24,7 +24,7 @@
                                 rows="5"
                                 v-model="eventDetails"
                                 @input="debouncedPreview"
-                                @paste="handlePaste"
+                                @paste="handlePaste" autofocus
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('event_details')" />
                             <div v-if="isLoading" class="mt-2 flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
@@ -33,7 +33,7 @@
                                     <div class="absolute top-0 left-0 w-4 h-4 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"></div>
                                 </div>
                                 <div class="inline-flex items-center">
-                                    <span class="animate-pulse">Processing your request</span>
+                                    <span class="animate-pulse">{{ __('messages.loading') }}</span>
                                     <span class="ml-1 inline-flex animate-[ellipsis_1.5s_steps(4,end)_infinite]">...</span>
                                 </div>
                             </div>
