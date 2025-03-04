@@ -188,6 +188,8 @@ class RoleController extends Controller
             return redirect(config('app.url'), );
         }
 
+        app()->setLocale($role->language_code);
+
         $otherRole = null;
         $event = null;
         $date = $request->date ? date('Y-m-d', strtotime($request->date)) : null;
