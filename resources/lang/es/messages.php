@@ -418,4 +418,6 @@ return [
     'username' => 'Nombre de usuario',
     'test' => 'Prueba',
     'report_errors' => 'Reportar errores a los desarrolladores para ayudarnos a mejorar la aplicación (opcional)',
+    'optional' => 'Opcional',
+    'i_accept_the_terms' => 'Acepto los :terms'
 ];

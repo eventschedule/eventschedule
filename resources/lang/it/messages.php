@@ -416,4 +416,6 @@ return [
     'username' => 'Nome utente',
     'test' => 'Test',
     'report_errors' => 'Segnala errori agli sviluppatori per aiutarci a migliorare l\'app (opzionale)',
+    'optional' => 'Opzionale',
+    'i_accept_the_terms' => 'Accetto i :terms'
 ];

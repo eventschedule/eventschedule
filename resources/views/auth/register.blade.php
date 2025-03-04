@@ -192,7 +192,7 @@
         </div>
 
         @if (! config('app.hosted'))
-        <div class="mt-6">
+        <div class="mt-4">
             <div class="relative flex items-start">
                 <div class="flex h-6 items-center">
                     <input id="report_errors" name="report_errors" type="checkbox" value="1"
@@ -207,7 +207,7 @@
         </div>
         @endif
         
-        <div class="flex items-center justify-between mt-6">
+        <div class="flex items-center justify-between mt-8">
             @if (config('app.hosted'))
             <a class="hover:underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4E81FA] dark:focus:ring-offset-gray-800"
                 href="{{ route('login') }}">
@@ -218,7 +218,7 @@
             @endif
 
             <x-primary-button class="ml-4">
-                {{ __('messages.register') }}
+                {{ __('messages.sign_up') }}
             </x-primary-button>
         </div>
     </form>
