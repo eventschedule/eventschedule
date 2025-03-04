@@ -39,6 +39,7 @@ return [
         'backend' => env('BACKEND_GOOGLE_KEY'),
         'maps' => env('MAPS_API_KEY'),
         'analytics' => env('ANALYTICS_ID'),
+        'gemini_key' => env('GEMINI_API_KEY'),
     ],
 
     'stripe' => [
