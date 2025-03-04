@@ -47,6 +47,24 @@
                             </style>
                         </div>
 
+                        <!-- Add preview section -->
+                        <div v-if="preview" class="mt-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-900">
+                            <h3 class="font-semibold text-lg mb-3 text-gray-900 dark:text-gray-100">{{ __('messages.preview') }}</h3>
+                            <div class="space-y-2 text-gray-700 dark:text-gray-300">
+                                <p><span class="font-medium">{{ __('messages.event_name') }}:</span> @{{ preview.parsed.event_name }}</p>
+                                <p><span class="font-medium">{{ __('messages.date_and_time') }}:</span> @{{ new Date(preview.parsed.event_date_time).toLocaleString() }}</p>
+                                <p><span class="font-medium">{{ __('messages.address') }}:</span> @{{ preview.parsed.event_address }}</p>
+                            </div>
+                            <div class="mt-4 flex gap-2">
+                                <button @click="handleEdit" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md">
+                                    {{ __('messages.edit') }}
+                                </button>
+                                <button @click="handleSave" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                                    {{ __('messages.save') }}
+                                </button>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -88,8 +106,7 @@
 
                     this.isLoading = true
                     try {
-                        console.log('fetching preview');
-                        console.log('{{ route("event.import", ["subdomain" => $role->subdomain]) }}');
+                        console.log('Sending event details:', this.eventDetails);
                         
                         const response = await fetch('{{ route("event.import", ["subdomain" => $role->subdomain]) }}', {
                             method: 'POST',
@@ -98,14 +115,14 @@
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
                             },
                             body: JSON.stringify({
-                                event_details: this.eventDetails
+                                event_details: this.eventDetails,
+                                preview: true  // Add this flag to indicate we want preview
                             })
                         })
 
-                        console.log('response', response);
-
                         const data = await response.json()
-                        this.preview = data.preview
+                        console.log('Preview response:', data);
+                        this.preview = data
                     } catch (error) {
                         console.error('Error fetching preview:', error)
                     } finally {
