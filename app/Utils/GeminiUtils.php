@@ -73,6 +73,16 @@ class GeminiUtils
 
         $data = self::sendRequest($prompt);
 
+        if (! $data['event_address']) {
+            if ($data['event_city']) {
+                $data['event_address'] = $data['event_city'];
+                unset($data['event_city']);
+            } else if ($data['event_state']) {
+                $data['event_address'] = $data['event_state'];
+                unset($data['event_state']);
+            }
+        }
+
         if (false && $data['performer_name']) {
             $data['performer_youtube_url'] = self::getPerformerYoutubeUrl($data['performer_name']);
         }
