@@ -89,9 +89,15 @@
                     }
                 },
 
-                handlePaste() {
-                    // For paste events, we want to execute immediately
-                    setTimeout(() => this.fetchPreview(), 0)
+                handlePaste(event) {
+                    // Prevent the debounced preview from firing
+                    event.preventDefault()
+                    // Get the pasted text
+                    const pastedText = event.clipboardData.getData('text')
+                    // Update the model manually
+                    this.eventDetails = pastedText
+                    // Call preview immediately
+                    this.fetchPreview()
                 },
 
                 handleEdit() {
