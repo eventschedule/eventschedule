@@ -429,4 +429,5 @@ return [
     'import' => 'Import',
     'import_event' => 'Import Event',
     'loading' => 'Loading',
+    'gemini_key_required' => 'Add GEMINI_API_KEY= to the .env file to import events',
 ];
