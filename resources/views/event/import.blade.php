@@ -28,9 +28,16 @@
                                         rows="4"
                                         v-model="eventDetails"
                                         @input="debouncedPreview"
-                                        @paste="handlePaste" autofocus
+                                        @paste="handlePaste" autofocus {{ config('services.google.gemini_key') ? '' : 'disabled' }}
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
                                     <x-input-error class="mt-2" :messages="$errors->get('event_details')" />
+
+                                    @if (! config('services.google.gemini_key'))
+                                        <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                            {{ __('messages.gemini_key_required') }}
+                                        </div>
+                                    @endif
+
                                     <div v-if="isLoading" class="mt-2 flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                                         <div class="relative">
                                             <div class="w-4 h-4 rounded-full bg-blue-500/30"></div>
