@@ -469,15 +469,20 @@ class EventController extends Controller
         $details = request()->input('event_details');
         $parsed = GeminiUtils::parseEvent($details);
 
-        if ($parsed['venue_name']) {
-            $venue = Role::where('name', $parsed['venue_name'])->where('type', 'venue')->first();
+        if ($parsed['venue_name'] && $parsed['venue_address']) {
+            $venue = Role::where('name', $parsed['venue_name'])
+                        ->where('address1', $parsed['venue_address'])
+                        ->where('type', 'venue')
+                        ->first();
             if ($venue) {
                 $parsed['venue_id'] = UrlUtils::encodeId($venue->id);
             }
         }
 
         if ($parsed['performer_name']) {
-            $talent = Role::where('name', $parsed['performer_name'])->where('type', 'schedule')->first();
+            $talent = Role::where('name', $parsed['performer_name'])
+                        ->where('type', 'schedule')
+                        ->first();
             if ($talent) {
                 $parsed['talent_id'] = UrlUtils::encodeId($talent->id);
             }
