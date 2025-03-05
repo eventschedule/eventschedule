@@ -39,7 +39,7 @@
                                     @endif
 
                                     <!-- Error message display -->
-                                    <div v-if="errorMessage" class="mt-2 p-3 text-sm text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded-md">
+                                    <div v-if="errorMessage" class="mt-4 p-3 text-sm text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded-md">
                                         @{{ errorMessage }}
                                     </div>
 
@@ -159,16 +159,14 @@
             methods: {
                 async fetchPreview() {
                     if (! this.eventDetails.trim()) {
-                        this.preview = null
-                        return
+                        this.preview = null;
+                        return;
                     }
 
-                    this.isLoading = true
-                    this.preview = null  // Clear the preview when starting a new search
-                    this.errorMessage = null; // Clear any previous errors
+                    this.isLoading = true;
+                    this.preview = null;
+                    this.errorMessage = null;
                     try {
-                        console.log('Sending event details:', this.eventDetails);
-                        
                         const response = await fetch('{{ route("event.import", ["subdomain" => $role->subdomain]) }}', {
                             method: 'POST',
                             headers: {
@@ -179,16 +177,45 @@
                                 event_details: this.eventDetails,
                                 preview: true
                             })
-                        })
+                        });
 
+                        // Handle HTTP error responses before trying to parse JSON
                         if (!response.ok) {
-                            const errorData = await response.json();
-                            throw new Error(errorData.message || 'Failed to fetch preview');
+                            if (response.status === 405) {
+                                throw new Error('Invalid request method');
+                            }
+                            if (response.status === 404) {
+                                throw new Error('Resource not found');
+                            }
+                            if (response.status === 403) {
+                                throw new Error('Permission denied');
+                            }
+                            if (response.status === 401) {
+                                throw new Error('Unauthorized');
+                            }
+                            if (response.status === 500) {
+                                throw new Error('Server error');
+                            }
                         }
 
-                        const data = await response.json()
-                        console.log('Preview response:', data);
-                        this.preview = data
+                        let data;
+                        try {
+                            data = await response.json();
+                        } catch (e) {
+                            throw new Error('Invalid response from server');
+                        }
+
+                        if (!response.ok) {
+                            // Handle validation errors
+                            if (data.errors) {
+                                const errorMessages = Object.values(data.errors).flat();
+                                throw new Error(errorMessages.join('\n'));
+                            }
+                            // Handle other types of errors
+                            throw new Error(data.message || data.error || 'An unexpected error occurred');
+                        }
+
+                        this.preview = data;
                         
                         // Initialize datepicker after preview is loaded
                         this.$nextTick(() => {
@@ -229,7 +256,7 @@
                 },
 
                 async handleSave() {
-                    this.errorMessage = null; // Clear any previous errors
+                    this.errorMessage = null;
                     try {
                         const response = await fetch('{{ route("event.import", ["subdomain" => $role->subdomain]) }}', {
                             method: 'POST',
@@ -240,19 +267,49 @@
                             body: JSON.stringify({
                                 event_details: this.eventDetails
                             })
-                        })
+                        });
+
+                        // Handle HTTP error responses before trying to parse JSON
+                        if (!response.ok) {
+                            if (response.status === 405) {
+                                throw new Error('Invalid request method');
+                            }
+                            if (response.status === 404) {
+                                throw new Error('Resource not found');
+                            }
+                            if (response.status === 403) {
+                                throw new Error('Permission denied');
+                            }
+                            if (response.status === 401) {
+                                throw new Error('Unauthorized');
+                            }
+                            if (response.status === 500) {
+                                throw new Error('Server error');
+                            }
+                        }
+
+                        let data;
+                        try {
+                            data = await response.json();
+                        } catch (e) {
+                            throw new Error('Invalid response from server');
+                        }
 
                         if (!response.ok) {
-                            const errorData = await response.json();
-                            throw new Error(errorData.message || 'Failed to save event');
+                            // Handle validation errors
+                            if (data.errors) {
+                                const errorMessages = Object.values(data.errors).flat();
+                                throw new Error(errorMessages.join('\n'));
+                            }
+                            // Handle other types of errors
+                            throw new Error(data.message || data.error || 'An unexpected error occurred');
                         }
 
-                        const data = await response.json()
                         if (data.success) {
-                            window.location.href = data.redirect_url
+                            window.location.href = data.redirect_url;
                         }
                     } catch (error) {
-                        console.error('Error saving event:', error)
+                        console.error('Error saving event:', error);
                         this.errorMessage = error.message || 'An error occurred while saving the event';
                     }
                 },
