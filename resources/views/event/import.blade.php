@@ -313,7 +313,7 @@
                                 venue_id: this.preview.parsed.venue_id,
                                 members: members,
                                 name: document.getElementById('name').value,
-                                starts_at: dateInput.selectedDates[0].toISOString(),
+                                starts_at: document.getElementById('starts_at').value,
                                 duration: this.preview.parsed.event_duration,
                                 description: document.getElementById('event_details').value,
                             })
