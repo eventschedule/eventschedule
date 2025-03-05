@@ -471,7 +471,15 @@ class EventController extends Controller
 
         if ($parsed['registration_url']) {
             try {
-                $html = file_get_contents($parsed['registration_url']);
+                $ch = curl_init();
+                curl_setopt_array($ch, [
+                    CURLOPT_URL => $parsed['registration_url'],
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_MAXREDIRS => 5
+                ]);
+                $html = curl_exec($ch);
+                curl_close($ch);
                 
                 // Look for Open Graph image meta tag
                 if (preg_match('/<meta[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']*)["\']/', $html, $matches) ||
