@@ -496,8 +496,9 @@ class EventController extends Controller
 
         if (! empty($parsed['event_date_time'])) {
             $eventDate = Carbon::parse($parsed['event_date_time']);
-            if ($eventDate->isPast() && $eventDate->diffInYears(now()) >= 1) {
-                $parsed['event_date_time'] = null;
+            if ($eventDate->isPast() && $eventDate->diffInMonths(now()) > 6) {
+                $eventDate->setYear(now()->year);
+                $parsed['event_date_time'] = $eventDate->format('Y-m-d H:i:s');
             }
         }
 
