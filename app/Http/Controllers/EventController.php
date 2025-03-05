@@ -464,7 +464,7 @@ class EventController extends Controller
         return view('event.import', ['role' => $role]);
     }
 
-    public function import(Request $request, $subdomain)
+    public function parse(Request $request, $subdomain)
     {
         $details = request()->input('event_details');
         $parsed = GeminiUtils::parseEvent($details);
@@ -534,4 +534,12 @@ class EventController extends Controller
         return response()->json(['message' => 'Imported event', 'parsed' => $parsed]);
     }
 
+    public function import(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $event = $this->eventRepo->saveEvent($request, null, $role->isCurator() ? $role->id : null);
+
+        return response()->json(['message' => 'Imported event', 'event' => $event]);
+    }
 }

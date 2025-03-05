@@ -167,7 +167,7 @@
                     this.preview = null;
                     this.errorMessage = null;
                     try {
-                        const response = await fetch('{{ route("event.import", ["subdomain" => $role->subdomain]) }}', {
+                        const response = await fetch('{{ route("event.parse", ["subdomain" => $role->subdomain]) }}', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
