@@ -95,12 +95,25 @@
                                     </div>
 
                                     <div class="pt-4 flex gap-3 justify-end">
-                                        <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                                            {{ __('messages.clear') }}
-                                        </button>
-                                        <button @click="handleSave" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                                            {{ __('messages.save') }}
-                                        </button>
+                                        <template v-if="savedEvent">
+                                            <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                                {{ __('messages.clear') }}
+                                            </button>
+                                            <button @click="handleEdit" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                                {{ __('messages.edit') }}
+                                            </button>
+                                            <button @click="handleView" type="button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
+                                                {{ __('messages.view') }}
+                                            </button>
+                                        </template>
+                                        <template v-else>
+                                            <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                                {{ __('messages.clear') }}
+                                            </button>
+                                            <button @click="handleSave" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                                {{ __('messages.save') }}
+                                            </button>
+                                        </template>
                                     </div>
 
                                 </div>
@@ -149,6 +162,7 @@
                     preview: null,
                     isLoading: false,
                     errorMessage: null,
+                    savedEvent: null,
                 }
             },
 
@@ -252,10 +266,15 @@
                 },
 
                 handleEdit() {
-                    this.preview = null
-                    this.$nextTick(() => {
-                        document.getElementById('event_details').focus()
-                    })
+                    if (this.savedEvent) {
+                        
+                    }
+                },
+
+                handleView() {
+                    if (this.savedEvent) {
+                        
+                    }
                 },
 
                 async handleSave() {
@@ -266,6 +285,8 @@
                         if (!dateInput.selectedDates[0]) {
                             throw new Error('{{ __("messages.date_required") }}');
                         }
+
+                        var talentId = this.preview.parsed.talent_id;
 
                         const response = await fetch('{{ route("event.import", ["subdomain" => $role->subdomain]) }}', {
                             method: 'POST',
@@ -283,7 +304,7 @@
                                 venue_email: '',
                                 venue_id: this.preview.parsed.venue_id,
                                 members: {
-                                    this.preview.parsed.talent_id: {
+                                    talentId: {
                                         name: this.preview.parsed.performer_name,
                                         email: this.preview.parsed.performer_email,
                                         youtube_url: this.preview.parsed.performer_youtube_url,
@@ -333,7 +354,7 @@
                         }
 
                         if (data.success) {
-                            window.location.href = data.redirect_url;
+                            this.savedEvent = data.event;
                         }
                     } catch (error) {
                         console.error('Error saving event:', error);

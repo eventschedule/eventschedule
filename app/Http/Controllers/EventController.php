@@ -541,7 +541,12 @@ class EventController extends Controller
 
         $event = $this->eventRepo->saveEvent($request, null, $curatorId);
 
-        
-        return response()->json(['message' => __('messages.event_imported')]);
+        return response()->json([
+            'message' => __('messages.event_imported'),
+            'event' => [
+                'hash' => UrlUtils::encodeId($event->id),
+                'slug' => $event->slug,
+            ]
+        ]);
     }
 }
