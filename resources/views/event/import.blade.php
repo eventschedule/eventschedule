@@ -223,11 +223,14 @@
                                 allowInput: true,
                                 enableTime: true,
                                 altInput: true,
-                                time_24hr: false,
-                                altFormat: "M j, Y • h:i K",
+                                time_24hr: "{{ $role && $role->use_24_hour_time ? 'true' : 'false' }}",
+                                altFormat: "{{ $role && $role->use_24_hour_time ? 'M j, Y • H:i' : 'M j, Y • h:i K' }}",
                                 dateFormat: "Y-m-d H:i:S",
                                 defaultDate: this.preview.parsed.event_date_time
                             });
+                            // Prevent keyboard input as per edit view
+                            const f = document.querySelector('.datepicker')._flatpickr;
+                            f._input.onkeydown = () => false;
                         })
                     } catch (error) {
                         console.error('Error fetching preview:', error)
@@ -258,6 +261,12 @@
                 async handleSave() {
                     this.errorMessage = null;
                     try {
+                        // Get the date value from flatpickr
+                        const dateInput = document.querySelector('.datepicker')._flatpickr;
+                        if (!dateInput.selectedDates[0]) {
+                            throw new Error('{{ __("messages.date_required") }}');
+                        }
+
                         const response = await fetch('{{ route("event.import", ["subdomain" => $role->subdomain]) }}', {
                             method: 'POST',
                             headers: {
@@ -265,7 +274,10 @@
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
                             },
                             body: JSON.stringify({
-                                event_details: this.eventDetails
+                                event_details: this.eventDetails,
+                                name: document.getElementById('name').value,
+                                starts_at: dateInput.selectedDates[0].toISOString(),
+                                venue_address1: document.getElementById('venue_address1').value
                             })
                         });
 

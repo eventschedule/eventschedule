@@ -430,4 +430,9 @@ return [
     'import_event' => 'Import Event',
     'loading' => 'Loading',
     'gemini_key_required' => 'Add GEMINI_API_KEY= to the .env file to import events',
+    'date_required' => 'Please select a date',
+    'name_required' => 'Please enter a name',
+    'venue_address1_required' => 'Please enter a venue address',
+    'event_imported' => 'Event imported successfully!',
+    'event_import_failed' => 'Event import failed',
 ];
