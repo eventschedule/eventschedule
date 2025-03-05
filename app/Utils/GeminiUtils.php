@@ -49,7 +49,7 @@ class GeminiUtils
 
     public static function parseEvent($details)
     {
-        $prompt = "Parse the event details from this message to the following fields:
+        $prompt = "Parse the event details from this message to the following fields, take your time and do the best job possible:
                     event_name,
                     event_name_en (only if the event_name is not English),
                     event_date_time (YYYY-MM-DD HH:MM format),
