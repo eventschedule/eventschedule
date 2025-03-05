@@ -51,15 +51,43 @@
                         <div v-if="preview">
                             <div class="mt-4 p-6 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm">
                                 <div class="space-y-4 text-gray-700 dark:text-gray-300">
-                                    <div class="grid grid-cols-[120px,1fr] gap-2">
-                                        <span class="font-medium text-gray-900 dark:text-gray-100">{{ __('messages.event_name') }}:</span>
-                                        <span>@{{ preview.parsed.event_name }}</span>
-                                        
-                                        <span class="font-medium text-gray-900 dark:text-gray-100">{{ __('messages.date_and_time') }}:</span>
-                                        <span>@{{ new Date(preview.parsed.event_date_time).toLocaleString() }}</span>
-                                        
-                                        <span class="font-medium text-gray-900 dark:text-gray-100">{{ __('messages.address') }}:</span>
-                                        <span>@{{ preview.parsed.event_address }}</span>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <x-input-label for="name" :value="__('messages.event_name')" />
+                                            <x-text-input id="name" 
+                                                name="name" 
+                                                type="text" 
+                                                class="mt-1 block w-full" 
+                                                :value="old('name')"
+                                                v-model="preview.parsed.event_name" 
+                                                required 
+                                                autofocus />
+                                            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+                                        </div>
+
+                                        <div>
+                                            <x-input-label for="starts_at" :value="__('messages.date_and_time')" />
+                                            <x-text-input id="starts_at" 
+                                                name="starts_at" 
+                                                type="text" 
+                                                class="datepicker mt-1 block w-full" 
+                                                :value="old('starts_at')"
+                                                required 
+                                                autocomplete="off" />
+                                            <x-input-error class="mt-2" :messages="$errors->get('starts_at')" />
+                                        </div>
+
+                                        <div>
+                                            <x-input-label for="venue_address1" :value="__('messages.address')" />
+                                            <x-text-input id="venue_address1" 
+                                                name="venue_address1" 
+                                                type="text" 
+                                                class="mt-1 block w-full" 
+                                                :value="old('venue_address1')"
+                                                v-model="preview.parsed.event_address" 
+                                                autocomplete="off" />
+                                            <x-input-error class="mt-2" :messages="$errors->get('venue_address1')" />
+                                        </div>
                                     </div>
                                     
                                     <!-- Social Image Preview -->
@@ -71,7 +99,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- YouTube embed with improved styling -->
+                                    <!-- YouTube embed -->
                                     <div v-if="preview.parsed.performer_youtube_url" class="mt-6">
                                         <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
                                             <iframe 
@@ -151,13 +179,26 @@
                             },
                             body: JSON.stringify({
                                 event_details: this.eventDetails,
-                                preview: true  // Add this flag to indicate we want preview
+                                preview: true
                             })
                         })
 
                         const data = await response.json()
                         console.log('Preview response:', data);
                         this.preview = data
+                        
+                        // Initialize datepicker after preview is loaded
+                        this.$nextTick(() => {
+                            flatpickr('.datepicker', {
+                                allowInput: true,
+                                enableTime: true,
+                                altInput: true,
+                                time_24hr: false,
+                                altFormat: "M j, Y • h:i K",
+                                dateFormat: "Y-m-d H:i:S",
+                                defaultDate: this.preview.parsed.event_date_time
+                            });
+                        })
                     } catch (error) {
                         console.error('Error fetching preview:', error)
                     } finally {
