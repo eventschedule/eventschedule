@@ -67,7 +67,11 @@ class GeminiUtils
                     performer_name_en,
                     performer_email,
                     performer_website,
-                    Note: make sure to return the text values in the same language as the message except for the event_name_en.
+                    
+                    Some notes:
+                    - Make sure to return the text values in the same language as the message except for the event_name_en
+                    - Only provide a value for event_name_en if the value for event_name is not English 
+                    - If the event_date_time is not in the message or you think it's before " . (date('Y') - 1) . ", set it to null
                     " . $details;
 
         $data = self::sendRequest($prompt);
