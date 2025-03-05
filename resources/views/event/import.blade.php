@@ -38,6 +38,11 @@
                                         </div>
                                     @endif
 
+                                    <!-- Error message display -->
+                                    <div v-if="errorMessage" class="mt-2 p-3 text-sm text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded-md">
+                                        @{{ errorMessage }}
+                                    </div>
+
                                     <div v-if="isLoading" class="mt-2 flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                                         <div class="relative">
                                             <div class="w-4 h-4 rounded-full bg-blue-500/30"></div>
@@ -143,6 +148,7 @@
                     eventDetails: '',
                     preview: null,
                     isLoading: false,
+                    errorMessage: null,
                 }
             },
 
@@ -159,6 +165,7 @@
 
                     this.isLoading = true
                     this.preview = null  // Clear the preview when starting a new search
+                    this.errorMessage = null; // Clear any previous errors
                     try {
                         console.log('Sending event details:', this.eventDetails);
                         
@@ -173,6 +180,11 @@
                                 preview: true
                             })
                         })
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Failed to fetch preview');
+                        }
 
                         const data = await response.json()
                         console.log('Preview response:', data);
@@ -192,6 +204,7 @@
                         })
                     } catch (error) {
                         console.error('Error fetching preview:', error)
+                        this.errorMessage = error.message || 'An error occurred while fetching the preview';
                     } finally {
                         this.isLoading = false
                     }
@@ -216,6 +229,7 @@
                 },
 
                 async handleSave() {
+                    this.errorMessage = null; // Clear any previous errors
                     try {
                         const response = await fetch('{{ route("event.import", ["subdomain" => $role->subdomain]) }}', {
                             method: 'POST',
@@ -228,12 +242,18 @@
                             })
                         })
 
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Failed to save event');
+                        }
+
                         const data = await response.json()
                         if (data.success) {
                             window.location.href = data.redirect_url
                         }
                     } catch (error) {
                         console.error('Error saving event:', error)
+                        this.errorMessage = error.message || 'An error occurred while saving the event';
                     }
                 },
 
