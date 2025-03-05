@@ -477,13 +477,14 @@ class EventController extends Controller
                 if (preg_match('/<meta[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']*)["\']/', $html, $matches) ||
                     preg_match('/<meta[^>]*content=["\']([^"\']*)["\'][^>]*property=["\']og:image["\']/', $html, $matches)) {
                     
-                    $imageUrl = $matches[1];
-                    $imageContents = file_get_contents($imageUrl);
-                    $extension = pathinfo(parse_url($imageUrl, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
-                    $filename = '/tmp/event_' . uniqid() . '.' . $extension;
-                    
-                    file_put_contents($filename, $imageContents);
-                    $parsed['social_image'] = $filename;
+                    if ($imageUrl = $matches[1]) {
+                        $imageContents = file_get_contents($imageUrl);
+                        $extension = pathinfo(parse_url($imageUrl, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
+                        $filename = '/tmp/event_' . uniqid() . '.' . $extension;
+                        
+                        file_put_contents($filename, $imageContents);
+                        $parsed['social_image'] = $filename;
+                    }
                 }
             } catch (\Exception $e) {
                 // do nothing 
