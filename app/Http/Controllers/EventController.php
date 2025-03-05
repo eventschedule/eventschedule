@@ -464,12 +464,16 @@ class EventController extends Controller
         return view('event.import', ['role' => $role]);
     }
 
-    public function import()
+    public function import(Request $request, $subdomain)
     {
         $details = request()->input('event_details');
         $parsed = GeminiUtils::parseEvent($details);
 
-        if ($parsed['venue_name'] && $parsed['venue_address']) {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if ($role->isVenue()) {
+            $parsed['venue_id'] = UrlUtils::encodeId($role->id);
+        } elseif ($parsed['venue_name'] && $parsed['venue_address']) {
             $venue = Role::where('name', $parsed['venue_name'])
                         ->where('address1', $parsed['venue_address'])
                         ->where('type', 'venue')
@@ -479,12 +483,21 @@ class EventController extends Controller
             }
         }
 
-        if ($parsed['performer_name']) {
+        if ($role->isSchedule()) {
+            $parsed['talent_id'] = UrlUtils::encodeId($role->id);
+        } elseif ($parsed['performer_name']) {
             $talent = Role::where('name', $parsed['performer_name'])
                         ->where('type', 'schedule')
                         ->first();
             if ($talent) {
                 $parsed['talent_id'] = UrlUtils::encodeId($talent->id);
+            }
+        }
+
+        if (! empty($parsed['event_date_time'])) {
+            $eventDate = Carbon::parse($parsed['event_date_time']);
+            if ($eventDate->isPast() && $eventDate->diffInYears(now()) >= 1) {
+                $parsed['event_date_time'] = null;
             }
         }
 
