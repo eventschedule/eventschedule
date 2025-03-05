@@ -51,7 +51,7 @@ class GeminiUtils
     {
         $prompt = "Parse the event details from this message to the following fields:
                     event_name,
-                    event_name_en,
+                    event_name_en (only if the event_name is not English),
                     event_date_time (YYYY-MM-DD HH:MM format),
                     event_address,
                     event_city,
@@ -66,13 +66,7 @@ class GeminiUtils
                     performer_name,
                     performer_name_en,
                     performer_email,
-                    performer_website,
-                    
-                    Some notes:
-                    - Make sure to return the text values in the same language as the message except for the event_name_en
-                    - Only provide a value for event_name_en if the value for event_name is not English 
-                    - If the event_date_time is not in the message or you think it's before " . (date('Y') - 1) . ", set it to null
-                    " . $details;
+                    performer_website" . $details;
 
         $data = self::sendRequest($prompt);
 
