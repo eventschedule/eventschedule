@@ -286,7 +286,15 @@
                             throw new Error('{{ __("messages.date_required") }}');
                         }
 
-                        var talentId = this.preview.parsed.talent_id;
+                        var talentId = this.preview.parsed.talent_id ?? '';
+                        var members = {};
+                        if (talentId || this.preview.parsed.performer_name) {
+                            members[talentId] = {
+                                name: this.preview.parsed.performer_name,
+                                email: this.preview.parsed.performer_email,
+                                youtube_url: this.preview.parsed.performer_youtube_url,
+                            }
+                        }
 
                         const response = await fetch('{{ route("event.import", ["subdomain" => $role->subdomain]) }}', {
                             method: 'POST',
@@ -303,13 +311,7 @@
                                 venue_country_code: this.preview.parsed.event_country_code,
                                 venue_email: '',
                                 venue_id: this.preview.parsed.venue_id,
-                                members: {
-                                    talentId: {
-                                        name: this.preview.parsed.performer_name,
-                                        email: this.preview.parsed.performer_email,
-                                        youtube_url: this.preview.parsed.performer_youtube_url,
-                                    }
-                                },
+                                members: members,
                                 name: document.getElementById('name').value,
                                 starts_at: dateInput.selectedDates[0].toISOString(),
                                 duration: this.preview.parsed.event_duration,
