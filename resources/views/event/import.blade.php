@@ -274,10 +274,25 @@
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
                             },
                             body: JSON.stringify({
-                                event_details: this.eventDetails,
+                                venue_name: this.preview.parsed.venue_name,
+                                vanue_address1: document.getElementById('venue_address1').value,
+                                venue_city: this.preview.parsed.event_city,
+                                venue_state: this.preview.parsed.event_state,
+                                venue_postal_code: this.preview.parsed.event_postal_code,
+                                venue_country_code: this.preview.parsed.event_country_code,
+                                venue_email: '',
+                                venue_id: this.preview.parsed.venue_id,
+                                members: {
+                                    this.preview.parsed.talent_id: {
+                                        name: this.preview.parsed.performer_name,
+                                        email: this.preview.parsed.performer_email,
+                                        youtube_url: this.preview.parsed.performer_youtube_url,
+                                    }
+                                },
                                 name: document.getElementById('name').value,
                                 starts_at: dateInput.selectedDates[0].toISOString(),
-                                venue_address1: document.getElementById('venue_address1').value
+                                duration: this.preview.parsed.event_duration,
+                                description: document.getElementById('event_details').value,
                             })
                         });
 

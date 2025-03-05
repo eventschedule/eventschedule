@@ -537,9 +537,11 @@ class EventController extends Controller
     public function import(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
+        $curatorId = $role->isCurator() ? $role->id : null;
 
-        $event = $this->eventRepo->saveEvent($request, null, $role->isCurator() ? $role->id : null);
+        $event = $this->eventRepo->saveEvent($request, null, $curatorId);
 
-        return response()->json(['message' => 'Imported event', 'event' => $event]);
+        
+        return response()->json(['message' => __('messages.event_imported')]);
     }
 }
