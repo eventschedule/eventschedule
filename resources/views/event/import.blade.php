@@ -286,13 +286,13 @@
                             throw new Error('{{ __("messages.date_required") }}');
                         }
 
-                        var talentId = this.preview.parsed.talent_id ?? '';
+                        var talentId = this.preview.parsed.talent_id ?? 'new_talent';
                         var members = {};
                         if (talentId || this.preview.parsed.performer_name) {
                             members[talentId] = {
                                 name: this.preview.parsed.performer_name,
                                 email: this.preview.parsed.performer_email,
-                                youtube_url: this.preview.parsed.performer_youtube_url,
+                                youtube_url: this.preview.parsed.performer_youtube_url ?? '',
                             }
                         }
 
