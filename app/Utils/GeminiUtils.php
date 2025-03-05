@@ -53,6 +53,7 @@ class GeminiUtils
                     event_name,
                     event_name_en (only if the event_name is not English),
                     event_date_time (YYYY-MM-DD HH:MM format),
+                    event_duration (in hours),
                     event_address,
                     event_city,
                     event_state,
