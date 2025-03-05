@@ -52,7 +52,6 @@ class GeminiUtils
         $prompt = "Parse the event details from this message to the following fields:
                     event_name,
                     event_name_en,
-                    event_description,
                     event_date_time (YYYY-MM-DD HH:MM format),
                     event_address,
                     event_city,
