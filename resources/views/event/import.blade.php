@@ -267,13 +267,13 @@
 
                 handleEdit() {
                     if (this.savedEvent) {
-                        window.location.href = this.savedEvent.edit_url;
+                        window.open(this.savedEvent.edit_url, '_blank');
                     }
                 },
 
                 handleView() {
                     if (this.savedEvent) {
-                        window.location.href = this.savedEvent.view_url;
+                        window.open(this.savedEvent.view_url, '_blank');
                     }
                 },
 
@@ -391,6 +391,7 @@
                 handleClear() {
                     this.eventDetails = '';
                     this.preview = null;
+                    this.savedEvent = null;
                     this.$nextTick(() => {
                         document.getElementById('event_details').focus();
                     });
