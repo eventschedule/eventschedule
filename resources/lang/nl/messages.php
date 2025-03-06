@@ -468,5 +468,15 @@ return [
     'test' => 'Test',
     'report_errors' => 'Rapporteer fouten aan de ontwikkelaars om ons te helpen de app te verbeteren (optioneel)',
     'optional' => 'Optioneel',
-    'i_accept_the_terms' => 'Ik accepteer de :terms'
+    'i_accept_the_terms' => 'Ik accepteer de :terms',
+    'import' => 'Importeren',
+    'import_event' => 'Evenement importeren',
+    'loading' => 'Laden',
+    'gemini_key_required' => 'Voeg GEMINI_API_KEY= toe aan het .env bestand om evenementen te importeren',
+    'date_required' => 'Selecteer een datum',
+    'name_required' => 'Voer een naam in',
+    'venue_address1_required' => 'Voer een locatieadres in',
+    'event_imported' => 'Evenement succesvol geïmporteerd!',
+    'event_import_failed' => 'Evenement importeren mislukt',
+    'similar_event_found' => 'Vergelijkbaar evenement gevonden'
 ];

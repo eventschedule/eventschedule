@@ -417,5 +417,15 @@ return [
     'test' => 'Test',
     'report_errors' => 'Segnala errori agli sviluppatori per aiutarci a migliorare l\'app (opzionale)',
     'optional' => 'Opzionale',
-    'i_accept_the_terms' => 'Accetto i :terms'
+    'i_accept_the_terms' => 'Accetto i :terms',
+    'import' => 'Importa',
+    'import_event' => 'Importa evento',
+    'loading' => 'Caricamento',
+    'gemini_key_required' => 'Aggiungi GEMINI_API_KEY= al file .env per importare eventi',
+    'date_required' => 'Seleziona una data',
+    'name_required' => 'Inserisci un nome',
+    'venue_address1_required' => 'Inserisci l\'indirizzo della sede',
+    'event_imported' => 'Evento importato con successo!',
+    'event_import_failed' => 'Importazione evento fallita',
+    'similar_event_found' => 'Trovato evento simile',
 ];
