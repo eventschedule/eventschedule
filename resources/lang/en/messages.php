@@ -435,4 +435,5 @@ return [
     'venue_address1_required' => 'Please enter a venue address',
     'event_imported' => 'Event imported successfully!',
     'event_import_failed' => 'Event import failed',
+    'similar_event_found' => 'Similar event found',
 ];
