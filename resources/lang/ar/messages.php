@@ -419,5 +419,15 @@ return [
     'test' => 'اختبار',
     'report_errors' => 'الإبلاغ عن الأخطاء للمطورين لمساعدتنا في تحسين التطبيق (اختياري)',
     'optional' => 'اختياري',
-    'i_accept_the_terms' => 'أوافق على :terms'
+    'i_accept_the_terms' => 'أوافق على :terms',
+    'import' => 'استيراد',
+    'import_event' => 'استيراد حدث',
+    'loading' => 'جاري التحميل',
+    'gemini_key_required' => 'أضف GEMINI_API_KEY= إلى ملف .env لاستيراد الأحداث',
+    'date_required' => 'الرجاء اختيار تاريخ',
+    'name_required' => 'الرجاء إدخال اسم',
+    'venue_address1_required' => 'الرجاء إدخال عنوان المكان',
+    'event_imported' => 'تم استيراد الحدث بنجاح!',
+    'event_import_failed' => 'فشل استيراد الحدث',
+    'similar_event_found' => 'تم العثور على حدث مشابه',
 ];

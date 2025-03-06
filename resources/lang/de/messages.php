@@ -422,5 +422,15 @@ return [
     'test' => 'Test',
     'report_errors' => 'Fehler an die Entwickler melden, um uns bei der Verbesserung der App zu helfen (optional)',
     'optional' => 'Optional',
-    'i_accept_the_terms' => 'Ich akzeptiere die :terms'
+    'i_accept_the_terms' => 'Ich akzeptiere die :terms',
+    'import' => 'Importieren',
+    'import_event' => 'Veranstaltung importieren',
+    'loading' => 'Laden',
+    'gemini_key_required' => 'Fügen Sie GEMINI_API_KEY= zur .env-Datei hinzu, um Veranstaltungen zu importieren',
+    'date_required' => 'Bitte wählen Sie ein Datum',
+    'name_required' => 'Bitte geben Sie einen Namen ein',
+    'venue_address1_required' => 'Bitte geben Sie eine Veranstaltungsadresse ein',
+    'event_imported' => 'Veranstaltung erfolgreich importiert!',
+    'event_import_failed' => 'Veranstaltungsimport fehlgeschlagen',
+    'similar_event_found' => 'Ähnliche Veranstaltung gefunden',
 ];
