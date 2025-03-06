@@ -534,9 +534,14 @@ class EventController extends Controller
         }
 
         // Check if the event is already imported
-        $eventUrl = null;
+        $eventUrl = $startAt = null;
+        if (! empty($parsed['event_date_time'])) {
+            $localDate = Carbon::parse($parsed['event_date_time'], $role->timezone);
+            $startAt = $localDate->setTimezone('UTC')->format('Y-m-d H:i:s');
+        }
+
         $event = Event::where('name', $parsed['event_name'])
-                        ->where('starts_at', $parsed['event_date_time'])
+                        ->where('starts_at', $startAt)
                         ->first();
         if ($event) {
             $eventUrl = $event->getGuestUrl();

@@ -40,7 +40,7 @@
 
                                     <!-- Show matching event if found -->
                                     <div v-if="preview && preview.event_url" class="mt-4 p-3 text-sm bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 rounded-md">
-                                        {{ __('messages.similar_event_found') }} 
+                                        {{ __('messages.similar_event_found') }} - 
                                         <a :href="preview.event_url" 
                                            target="_blank" 
                                            class="underline hover:text-yellow-600 dark:hover:text-yellow-300">
