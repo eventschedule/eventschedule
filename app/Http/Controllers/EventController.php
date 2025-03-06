@@ -533,7 +533,16 @@ class EventController extends Controller
             }
         }
 
-        return response()->json(['message' => 'Imported event', 'parsed' => $parsed]);
+        // Check if the event is already imported
+        $eventUrl = null;
+        $event = Event::where('name', $parsed['event_name'])
+                        ->where('starts_at', $parsed['event_date_time'])
+                        ->first();
+        if ($event) {
+            $eventUrl = $event->getGuestUrl();
+        }
+
+        return response()->json(['message' => 'Imported event', 'parsed' => $parsed, 'event_url' => $eventUrl]);
     }
 
     public function import(Request $request, $subdomain)
