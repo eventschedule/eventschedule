@@ -264,7 +264,7 @@
         -->
         <div>
         @if ($event->description_html)
-          <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4">
+          <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
             <h2
               class="text-[#151B26] text-[40px] sm:text-{52px} leading-snug font-semibold"
             >
@@ -356,7 +356,7 @@
               </div>
             </div>
             -->
-            <div class="text-base text-[#33383C] custom-content">
+            <div class="text-base text-[#33383C] custom-content {{ $role->isRtl() ? 'rtl' : '' }}">
               {!! \App\Utils\UrlUtils::convertUrlsToLinks($each->description_html) !!}
             </div>
             @if ($each->youtube_links)

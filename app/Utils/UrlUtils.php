@@ -136,7 +136,8 @@ class UrlUtils
         $pattern = '/\bhttps?:\/\/[^\s<>]+/i';
         $text = preg_replace_callback($pattern, function($matches) {
             $url = rtrim($matches[0], '.,!?:;'); // Remove any trailing punctuation
-            $displayUrl = preg_replace('/^https?:\/\//', '', $url); // Remove http(s):// from display text
+            $displayUrl = preg_replace('/^https?:\/\/(www\.)?/', '', $url); // Remove http(s):// and www. from display text
+            $displayUrl = rtrim($displayUrl, '/'); // Remove trailing slashes from display text
             return '<a href="' . htmlspecialchars($url, ENT_QUOTES) . '" target="_blank">' . htmlspecialchars($displayUrl, ENT_QUOTES) . '</a>';
         }, $text);
         

@@ -173,7 +173,7 @@
 
         @if($role->description_html)
         <div
-          class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-10 flex flex-col gap-4 mb-6"
+          class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-10 flex flex-col gap-4 mb-6 {{ $role->isRtl() ? 'rtl' : '' }}"
         >
           <div class="text-[32px] font-semibold leading-10 text-[#151B26]">
             {{ __('messages.about') }}
