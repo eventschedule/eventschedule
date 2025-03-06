@@ -38,7 +38,7 @@ class GeminiUtils
             throw new \Exception('Gemini API request failed with status code: ' . $httpCode);
         }
 
-        \Log::info($response);
+        //\Log::info($response);
 
         $data = json_decode($response, true);
         $data = json_decode($data['candidates'][0]['content']['parts'][0]['text'], true);
