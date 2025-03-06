@@ -53,7 +53,7 @@
                                         @{{ errorMessage }}
                                     </div>
 
-                                    <div v-if="isLoading" class="mt-2 flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+                                    <div v-if="isLoading" class="mt-4 flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                                         <div class="relative">
                                             <div class="w-4 h-4 rounded-full bg-blue-500/30"></div>
                                             <div class="absolute top-0 left-0 w-4 h-4 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"></div>
