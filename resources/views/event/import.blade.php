@@ -90,6 +90,7 @@
                                             class="mt-1 block w-full" 
                                             :value="old('venue_address1')"
                                             v-model="preview.parsed.event_address" 
+                                            v-bind:readonly="preview.parsed.venue_id"
                                             required
                                             autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_address1')" />
