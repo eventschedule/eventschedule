@@ -308,7 +308,7 @@
                             },
                             body: JSON.stringify({
                                 venue_name: parsed.venue_name,
-                                vanue_address1: document.getElementById('venue_address1').value,
+                                venue_address1: document.getElementById('venue_address1').value,
                                 venue_city: parsed.event_city,
                                 venue_state: parsed.event_state,
                                 venue_postal_code: parsed.event_postal_code,
@@ -317,6 +317,7 @@
                                 venue_id: parsed.venue_id,
                                 members: members,
                                 name: document.getElementById('name').value,
+                                event_name_en: parsed.event_name_en,
                                 starts_at: document.getElementById('starts_at').value,
                                 duration: parsed.event_duration,
                                 description: document.getElementById('event_details').value,

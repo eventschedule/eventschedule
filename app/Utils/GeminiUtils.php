@@ -49,35 +49,53 @@ class GeminiUtils
 
     public static function parseEvent($details)
     {
-        $prompt = "Parse the event details from this message to the following fields, take your time and do the best job possible:
-                    event_name,
-                    event_name_en (only if the event_name is not English),
-                    event_date_time (YYYY-MM-DD HH:MM format),
-                    event_duration (in hours),
-                    event_address,
-                    event_city,
-                    event_state,
-                    event_postal_code,
-                    event_country_code,
-                    registration_url,       
-                    venue_name,
-                    venue_name_en,
-                    venue_email,
-                    venue_website,
-                    performer_name,
-                    performer_name_en,
-                    performer_email,
-                    performer_website" . $details;
+        // Define fields and their descriptions
+        $fields = [
+            'event_name' => '',
+            'event_name_en' => 'only if the event_name is not English',
+            'event_date_time' => 'YYYY-MM-DD HH:MM format',
+            'event_duration' => 'in hours',
+            'event_address' => '',
+            'event_city' => '',
+            'event_state' => '',
+            'event_postal_code' => '',
+            'event_country_code' => '',
+            'registration_url' => '',
+            'venue_name' => '',
+            'venue_name_en' => '',
+            'venue_email' => '',
+            'venue_website' => '',
+            'performer_name' => '',
+            'performer_name_en' => '',
+            'performer_email' => '',
+            'performer_website' => ''
+        ];
+
+        // Build prompt from fields
+        $prompt = "Parse the event details from this message to the following fields, take your time and do the best job possible:\n";
+        foreach ($fields as $field => $note) {
+            $prompt .= $field . ($note ? " ({$note})" : "") . ",\n";
+        }
+        $prompt .= $details;
 
         $data = self::sendRequest($prompt);
 
-        foreach ($data as $key => $value) {
-            if (is_string($value)) {
-                $data[$key] = trim($value, '*');
+        // Process results
+        foreach ($fields as $field => $note) {
+            // Ensure all fields exist
+            if (!isset($data[$field])) {
+                $data[$field] = '';
+                continue;
+            }
+            
+            // Trim asterisks if string value
+            if (is_string($data[$field])) {
+                $data[$field] = trim($data[$field], '*');
             }
         }
 
-        if (! $data['event_address']) {
+        // Handle special case for address
+        if (!$data['event_address']) {
             if ($data['event_city']) {
                 $data['event_address'] = $data['event_city'];
                 unset($data['event_city']);
@@ -87,6 +105,7 @@ class GeminiUtils
             }
         }
 
+        // Commented out YouTube URL fetching
         if (false && $data['performer_name']) {
             $data['performer_youtube_url'] = self::getPerformerYoutubeUrl($data['performer_name']);
         }
