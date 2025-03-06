@@ -262,6 +262,10 @@ class Event extends Model
             $subdomain = $roleSubdomain ? $roleSubdomain : $venueSubdomain;
         }
 
+        if (! $subdomain) {
+            $subdomain = $this->curator ? $this->curator->subdomain : null;
+        }
+
         $slug = $this->slug;
 
         if ($venueSubdomain && $roleSubdomain) {
