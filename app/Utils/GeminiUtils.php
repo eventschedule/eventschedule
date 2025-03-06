@@ -38,11 +38,16 @@ class GeminiUtils
             throw new \Exception('Gemini API request failed with status code: ' . $httpCode);
         }
 
-        //\Log::info($response);
-
         $data = json_decode($response, true);
-        $data = json_decode($data['candidates'][0]['content']['parts'][0]['text'], true);
-        $data = $data[0];
+        $text = $data['candidates'][0]['content']['parts'][0]['text'];
+        $parsed = json_decode($text, true);
+        
+        // Handle both array and object response formats
+        if (is_array($parsed) && isset($parsed[0])) {
+            $data = $parsed[0];
+        } else {
+            $data = $parsed;
+        }
         
         return $data;
     }
