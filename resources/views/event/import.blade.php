@@ -356,6 +356,15 @@
                         }
 
                         if (data.success) {
+                            Toastify({
+                                text: '{{ __("messages.event_created") }}',
+                                duration: 3000,
+                                position: 'center',
+                                stopOnFocus: true,
+                                style: {
+                                    background: '#4BB543',
+                                }
+                            }).showToast();
                             this.savedEvent = data.event;
                         }
                     } catch (error) {
