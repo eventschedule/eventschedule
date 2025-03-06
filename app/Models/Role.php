@@ -564,4 +564,9 @@ class Role extends Model implements MustVerifyEmail
 
         return true;
     }
+
+    public function isRtl()
+    {
+        return $this->language_code == 'ar' || $this->language_code == 'he';
+    }
 }

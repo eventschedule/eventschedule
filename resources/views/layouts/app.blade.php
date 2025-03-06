@@ -77,13 +77,11 @@
     ])
 
     <style>
-        /*
-        html {
+        .rtl {
             direction: rtl;
             text-align: right;
         }
-        */
-
+        
         .tooltip {
             font-family: sans-serif !important;
             position: absolute;
