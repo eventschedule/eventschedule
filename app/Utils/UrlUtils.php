@@ -129,4 +129,13 @@ class UrlUtils
 
         return $obj;
     }    
+
+    public static function convertUrlsToLinks($text)
+    {
+        $text = preg_replace_callback('/((https?:\/\/[^\s]+)/', function($matches) {
+            return '<a href="' . $matches[1] . '" target="_blank">' . $matches[1] . '</a>';
+        }, $text);
+        
+        return $text;
+    }
 }

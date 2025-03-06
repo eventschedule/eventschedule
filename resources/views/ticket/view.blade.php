@@ -203,7 +203,7 @@
           <div>
             <p class="mb-[8px] font-extrabold text-[#4E81FA]">{{ __('messages.notes') }}:</p>
             <div class="font-bold text-[#151B26] custom-content">
-              {!! $event->ticket_notes_html !!}
+              {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->ticket_notes_html) !!}
             </div>
           </div>
         </div>

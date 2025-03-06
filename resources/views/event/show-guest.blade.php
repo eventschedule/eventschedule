@@ -271,7 +271,7 @@
               {{ __('messages.event_details') }}
             </h2>
             <div class="text-[#33383C] text-base custom-content">
-              {!! $event->description_html !!}
+              {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->description_html) !!}
             </div>
           </div>
           @endif
@@ -357,7 +357,7 @@
             </div>
             -->
             <div class="text-base text-[#33383C] custom-content">
-              {!! $each->description_html !!}
+              {!! \App\Utils\UrlUtils::convertUrlsToLinks($each->description_html) !!}
             </div>
             @if ($each->youtube_links)
               <div class="grid grid-cols-1 md:grid-cols-{{ $role->getVideoColumns() }} gap-8">
