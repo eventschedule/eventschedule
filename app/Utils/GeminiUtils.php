@@ -71,6 +71,12 @@ class GeminiUtils
 
         $data = self::sendRequest($prompt);
 
+        foreach ($data as $key => $value) {
+            if (is_string($value)) {
+                $data[$key] = trim($value, '*');
+            }
+        }
+
         if (! $data['event_address']) {
             if ($data['event_city']) {
                 $data['event_address'] = $data['event_city'];
