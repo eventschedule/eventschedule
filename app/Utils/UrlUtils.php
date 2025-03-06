@@ -132,8 +132,11 @@ class UrlUtils
 
     public static function convertUrlsToLinks($text)
     {
-        $text = preg_replace_callback('/((https?:\/\/[^\s]+)/', function($matches) {
-            return '<a href="' . $matches[1] . '" target="_blank">' . $matches[1] . '</a>';
+        // Convert URLs to links while preserving the rest of the text
+        $pattern = '/\bhttps?:\/\/[^\s<>]+/i';
+        $text = preg_replace_callback($pattern, function($matches) {
+            $url = rtrim($matches[0], '.,!?:;'); // Remove any trailing punctuation
+            return '<a href="' . htmlspecialchars($url, ENT_QUOTES) . '" target="_blank">' . htmlspecialchars($url, ENT_QUOTES) . '</a>';
         }, $text);
         
         return $text;
