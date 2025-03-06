@@ -1,7 +1,7 @@
 @if ($role->description_html)
 <div class="mt-5 overflow-hidden rounded-lg bg-white shadow-md">
     <div class="px-4 py-5 sm:p-6">
-        {!! $role->description_html !!}
+        {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->description_html) !!}
     </div>
 </div>
 @endif

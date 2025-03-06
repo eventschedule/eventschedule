@@ -179,7 +179,7 @@
             {{ __('messages.about') }}
           </div>
           <div class="text-[#33383C] text-base custom-content">
-            {!! $role->description_html !!}
+            {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->description_html) !!}
           </div>
         </div>
         @endif
