@@ -322,6 +322,9 @@
                                 description: document.getElementById('event_details').value,
                                 social_image: parsed.social_image,
                                 registration_url: parsed.registration_url,
+                                @if ($role->isCurator())
+                                    curators: ['{{ \App\Utils\UrlUtils::encodeId($role->id) }}'],
+                                @endif
                             })
                         });
 
