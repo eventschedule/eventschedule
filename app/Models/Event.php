@@ -24,6 +24,7 @@ class Event extends Model
         'payment_method',
         'payment_instructions',
         'expire_unpaid_tickets',
+        'registration_url',
     ];
 
     protected static function boot()
