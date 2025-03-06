@@ -286,13 +286,15 @@
                             throw new Error('{{ __("messages.date_required") }}');
                         }
 
-                        var talentId = this.preview.parsed.talent_id ?? 'new_talent';
+                        var parsed = this.preview.parsed;
+                        var talentId = parsed.talent_id ?? 'new_talent';
                         var members = {};
-                        if (talentId || this.preview.parsed.performer_name) {
+
+                        if (talentId || (parsed.performer_name && parsed.performer_youtube_url)) {
                             members[talentId] = {
-                                name: this.preview.parsed.performer_name,
-                                email: this.preview.parsed.performer_email,
-                                youtube_url: this.preview.parsed.performer_youtube_url ?? '',
+                                name: parsed.performer_name,
+                                email: parsed.performer_email,
+                                youtube_url: parsed.performer_youtube_url ?? '',
                             }
                         }
 
@@ -303,18 +305,18 @@
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
                             },
                             body: JSON.stringify({
-                                venue_name: this.preview.parsed.venue_name,
+                                venue_name: parsed.venue_name,
                                 vanue_address1: document.getElementById('venue_address1').value,
-                                venue_city: this.preview.parsed.event_city,
-                                venue_state: this.preview.parsed.event_state,
-                                venue_postal_code: this.preview.parsed.event_postal_code,
-                                venue_country_code: this.preview.parsed.event_country_code,
+                                venue_city: parsed.event_city,
+                                venue_state: parsed.event_state,
+                                venue_postal_code: parsed.event_postal_code,
+                                venue_country_code: parsed.event_country_code,
                                 venue_email: '',
-                                venue_id: this.preview.parsed.venue_id,
+                                venue_id: parsed.venue_id,
                                 members: members,
                                 name: document.getElementById('name').value,
                                 starts_at: document.getElementById('starts_at').value,
-                                duration: this.preview.parsed.event_duration,
+                                duration: parsed.event_duration,
                                 description: document.getElementById('event_details').value,
                             })
                         });
