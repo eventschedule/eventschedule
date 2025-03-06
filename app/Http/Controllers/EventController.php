@@ -539,6 +539,7 @@ class EventController extends Controller
     public function import(Request $request, $subdomain)
     {
         //\Log::info($request->all());
+        //return redirect()->back();
         
         $role = Role::subdomain($subdomain)->firstOrFail();
         $curatorId = $role->isCurator() ? $role->id : null;
