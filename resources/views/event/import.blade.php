@@ -292,7 +292,7 @@
                         var talentId = parsed.talent_id ?? 'new_talent';
                         var members = {};
 
-                        if (talentId || (parsed.performer_name && parsed.performer_youtube_url)) {
+                        if (parsed.talent_id || (parsed.performer_name && parsed.performer_youtube_url)) {
                             members[talentId] = {
                                 name: parsed.performer_name,
                                 email: parsed.performer_email,
