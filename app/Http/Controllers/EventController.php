@@ -545,10 +545,10 @@ class EventController extends Controller
         $event = $this->eventRepo->saveEvent($request, null, $curatorId);
 
         return response()->json([
-            'message' => __('messages.event_imported'),
+            'success' => true,
             'event' => [
-                'hash' => UrlUtils::encodeId($event->id),
-                'slug' => $event->slug,
+                'view_url' => $event->getGuestUrl($subdomain),
+                'edit_url' => route('event.edit', ['subdomain' => $subdomain, 'hash' => UrlUtils::encodeId($event->id)]),
             ]
         ]);
     }
