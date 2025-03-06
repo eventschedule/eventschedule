@@ -320,6 +320,8 @@
                                 starts_at: document.getElementById('starts_at').value,
                                 duration: parsed.event_duration,
                                 description: document.getElementById('event_details').value,
+                                social_image: parsed.social_image,
+                                registration_url: parsed.registration_url,
                             })
                         });
 
