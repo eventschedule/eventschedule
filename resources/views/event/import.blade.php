@@ -27,6 +27,7 @@
                                         name="event_details" 
                                         rows="4"
                                         v-model="eventDetails"
+                                        v-bind:readonly="savedEvent"
                                         @input="debouncedPreview"
                                         @paste="handlePaste" autofocus {{ config('services.google.gemini_key') ? '' : 'disabled' }}
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
@@ -75,6 +76,7 @@
                                             class="mt-1 block w-full" 
                                             :value="old('name')"
                                             v-model="preview.parsed.event_name" 
+                                            v-bind:readonly="savedEvent"
                                             required 
                                             autofocus />
                                         <x-input-error class="mt-2" :messages="$errors->get('name')" />
@@ -87,6 +89,7 @@
                                             type="text" 
                                             class="datepicker mt-1 block w-full" 
                                             :value="old('starts_at')"
+                                            v-bind:readonly="savedEvent"
                                             required 
                                             autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('starts_at')" />
@@ -100,7 +103,7 @@
                                             class="mt-1 block w-full" 
                                             :value="old('venue_address1')"
                                             v-model="preview.parsed.event_address" 
-                                            v-bind:readonly="preview.parsed.venue_id"
+                                            v-bind:readonly="preview.parsed.venue_id || savedEvent"
                                             required
                                             autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_address1')" />

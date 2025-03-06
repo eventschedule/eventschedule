@@ -534,6 +534,7 @@ class EventController extends Controller
         }
 
         // Check if the event is already imported
+        $eventUrl = null;
         $event = Event::where('registration_url', $parsed['registration_url'])->first();
         if ($event) {
             $eventUrl = $event->getGuestUrl();
