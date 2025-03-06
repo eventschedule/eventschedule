@@ -473,9 +473,10 @@ class EventController extends Controller
 
         if ($role->isVenue()) {
             $parsed['venue_id'] = UrlUtils::encodeId($role->id);
-        } elseif ($parsed['venue_name'] && $parsed['venue_address']) {
+            $parsed['event_address'] = $role->address1;
+        } elseif ($parsed['venue_name'] && $parsed['event_address']) {
             $venue = Role::where('name', $parsed['venue_name'])
-                        ->where('address1', $parsed['venue_address'])
+                        ->where('address1', $parsed['event_address'])
                         ->where('type', 'venue')
                         ->first();
             if ($venue) {
