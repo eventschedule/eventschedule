@@ -267,13 +267,13 @@
 
                 handleEdit() {
                     if (this.savedEvent) {
-                        
+                        window.location.href = this.savedEvent.edit_url;
                     }
                 },
 
                 handleView() {
                     if (this.savedEvent) {
-                        
+                        window.location.href = this.savedEvent.view_url;
                     }
                 },
 
