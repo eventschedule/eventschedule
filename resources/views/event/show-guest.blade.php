@@ -387,7 +387,7 @@
         @endif
       </div>
 
-      <div class="flex flex-col gap-6">
+      <div class="flex flex-col gap-6 {{ $role->isRtl() ? 'rtl' : '' }}">
         @if ($event->venue && $event->venue->name)
         <div class="p-6 rounded-xl flex flex-col gap-6" style="background-color: {{ $otherRole->accent_color ?? '#4E81FA' }}; font-family: {{ $event->venue->font_family }}, sans-serif;">
           <h4 class="text-white text-[24px] leading-snug font-semibold">
@@ -488,7 +488,7 @@
         @endif
 
         @if ($event->tickets_enabled && $event->isPro())
-        <div class="p-6 rounded-xl flex flex-col gap-6 bg-[#F5F9FE]">
+        <div class="p-6 rounded-xl flex flex-col gap-6 bg-[#F5F9FE] {{ $role->isRtl() ? 'rtl' : '' }}">
           <h4 class="text-[#151B26] text-[24px] leading-snug font-semibold">
             {{ __('messages.add_to_calendar') }}
           </h4>
@@ -512,7 +512,7 @@
         </div>
         @endif
 
-        <div class="p-6 rounded-xl flex flex-col gap-6 bg-[#F5F9FE]">
+        <div class="p-6 rounded-xl flex flex-col gap-6 bg-[#F5F9FE] {{ $role->isRtl() ? 'rtl' : '' }}">
           <h4 class="text-[#151B26] text-[24px] leading-snug font-semibold">
             {{ __('messages.create_your_own_event_schedule') }}
           </h4>
