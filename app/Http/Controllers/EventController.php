@@ -545,6 +545,11 @@ class EventController extends Controller
         
         $event = $this->eventRepo->saveEvent($request, null, $curatorId);
 
+        if ($request->event_name_en) {
+            $event->slug = \Str::slug($request->event_name_en);
+            $event->save();
+        }
+
         return response()->json([
             'success' => true,
             'event' => [
