@@ -171,16 +171,16 @@ class Role extends Model implements MustVerifyEmail
     {
         $str = '';
 
-        if ($this->address1) {
-            $str .= $this->address1;
+        if ($this->translatedAddress1()) {
+            $str .= $this->translatedAddress1();
         }
 
-        if ($this->city) {
+        if ($this->translatedCity()) {
             if ($str) {
                 $str .= ', ';
             }
 
-            $str .= $this->city;
+            $str .= $this->translatedCity();
         }
 
         return $str;
@@ -190,20 +190,20 @@ class Role extends Model implements MustVerifyEmail
     {
         $str = '';
 
-        if ($this->address1) {
-            $str .= $this->address1 . ', ';
+        if ($this->translatedAddress1()) {
+            $str .= $this->translatedAddress1() . ', ';
         }
 
-        if ($this->address2) {
-            $str .= $this->address2 . ', ';
+        if ($this->translatedAddress2()) {
+            $str .= $this->translatedAddress2() . ', ';
         }
 
-        if ($this->city) {
-            $str .= $this->city . ', ';
+        if ($this->translatedCity()) {
+            $str .= $this->translatedCity() . ', ';
         }
 
-        if ($this->state) {
-            $str .= $this->state . ', ';
+        if ($this->translatedState()) {
+            $str .= $this->translatedState() . ', ';
         }
 
         if ($this->postal_code) {

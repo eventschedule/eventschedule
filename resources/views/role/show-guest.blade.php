@@ -34,7 +34,7 @@
             @endif
             <div class="flex justify-between items-center mb-4">
               <h3 class="text-[32px] font-semibold leading-10 text-[#151B26]">
-                {{ $role->name }}
+                {{ $role->translatedName() }}
               </h3>
               <a
                 href="{{ auth()->user() && auth()->user()->isMember($role->subdomain)
@@ -169,7 +169,7 @@
           </div>
         </div>
 
-        @if($role->description_html)
+        @if($role->translatedDescription())
         <div
           class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-10 flex flex-col gap-4 mb-6 {{ $role->isRtl() ? 'rtl' : '' }}"
         >
@@ -177,7 +177,7 @@
             {{ __('messages.about') }}
           </div>
           <div class="text-[#33383C] text-base custom-content">
-            {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->description_html) !!}
+            {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
           </div>
         </div>
         @endif
