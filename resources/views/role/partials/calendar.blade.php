@@ -211,7 +211,7 @@
                             @php
                             $canEdit = auth()->user() && auth()->user()->canEditEvent($each);
                             @endphp
-                            <li class="relative group {{ $canEdit ? ($role->isRtl() ? 'hover:pl-8' : 'hover:pr-8') : '' }} hover:break-all break-words">
+                            <li class="relative group {{ $canEdit ? ($role->isRtl() ? 'hover:pl-8 hover:break-all' : 'hover:pr-8 hover:break-all') : '' }} break-words">
                                 <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate->format('Y-m-d')) }}"
                                     class="flex has-tooltip" data-tooltip="<b>{{ $each->translatedName() }}</b><br/>{{ $each->getVenueDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
                                     onclick="event.stopPropagation();" {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
