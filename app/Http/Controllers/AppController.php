@@ -57,4 +57,18 @@ class AppController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    public function translateData()
+    {
+        $requestSecret = request()->get('secret');
+        $serverSecret = config('app.cron_secret');
+        
+        if (! $serverSecret || $requestSecret != $serverSecret) {
+            return response()->json(['error' => __('messages.unauthorized')], 403);
+        }
+
+        \Artisan::call('app:translate-data');
+
+        return response()->json(['success' => true]);        
+    }
 }
