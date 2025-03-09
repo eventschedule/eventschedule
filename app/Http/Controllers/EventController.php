@@ -505,7 +505,7 @@ class EventController extends Controller
 
         if ($request->has('image')) {
             $file = $request->file('image');
-            $filename = '/tmp/event_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $filename = '/tmp/event_' . strtolower(Str::random(32)) . '.' . $file->getClientOriginalExtension();
             move_uploaded_file($file->getPathname(), $filename);
             $parsed['social_image'] = $filename;
         } else if ($parsed['registration_url']) {
@@ -527,7 +527,7 @@ class EventController extends Controller
                     if ($imageUrl = $matches[1]) {
                         $imageContents = file_get_contents($imageUrl);
                         $extension = pathinfo(parse_url($imageUrl, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
-                        $filename = '/tmp/event_' . uniqid() . '.' . $extension;
+                        $filename = '/tmp/event_' . strtolower(Str::random(32)) . '.' . $extension;
                         
                         file_put_contents($filename, $imageContents);
                         $parsed['social_image'] = $filename;
