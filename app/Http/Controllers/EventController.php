@@ -553,8 +553,8 @@ class EventController extends Controller
         
         $event = $this->eventRepo->saveEvent($request, null, $curatorId);
 
-        if ($request->event_name_en) {
-            $event->slug = \Str::slug($request->event_name_en);
+        if ($request->name_en) {
+            $event->slug = \Str::slug($request->name_en);
             $event->save();
         }
 

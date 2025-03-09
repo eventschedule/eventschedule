@@ -31,6 +31,7 @@ class EventRepo
             if (! $venue) {
                 $venue = new Role;
                 $venue->name = $request->venue_name ?? null;
+                $venue->name_en = $request->venue_name_en ?? null;
                 $venue->email = $request->venue_email ?? null;
                 $venue->subdomain = Role::generateSubdomain($request->venue_email ? $request->venue_name : null);
                 $venue->type = 'venue';
