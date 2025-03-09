@@ -194,8 +194,8 @@ class RoleController extends Controller
             return redirect(config('app.url'), );
         }
 
-        if ($request->translation_id) {
-            $translation = EventRole::where('id', $request->translation_id)->firstOrFail();
+        if ($request->tid) {
+            $translation = EventRole::where('id', UrlUtils::decodeId($request->tid))->firstOrFail();
             app()->setLocale($translation->role->language_code);            
         } else if ($request->lang) {
             app()->setLocale($request->lang);
