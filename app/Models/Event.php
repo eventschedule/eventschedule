@@ -90,7 +90,7 @@ class Event extends Model
     public function roles()
     {
         return $this->belongsToMany(Role::class)
-                    ->withPivot('name_translated', 'description_html_translated');
+                    ->withPivot('id', 'name_translated', 'description_html_translated');
     }
 
     public function curatorBySubdomain($subdomain)
