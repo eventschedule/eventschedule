@@ -523,10 +523,10 @@ class Role extends Model implements MustVerifyEmail
 
     public function getDisplayName()
     {
-        if ($this->name) {
-            return $this->name;
+        if ($this->translatedName()) {
+            return $this->translatedName();
         } else {
-            return $this->address1;
+            return $this->translatedAddress1();
         }
     }
 
