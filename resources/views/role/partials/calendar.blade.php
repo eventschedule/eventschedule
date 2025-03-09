@@ -221,7 +221,7 @@
                             @endphp
 
                             <li class="relative group {{ $canEdit ? ($role->isRtl() ? 'hover:pl-8 hover:break-all' : 'hover:pr-8 hover:break-all') : '' }} break-words">
-                                <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate->format('Y-m-d')) }}{{ $translationId ? '&translation_id=' . $translationId : '' }}"
+                                <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate->format('Y-m-d')) }}{{ $translationId ? '&tid=' . \App\Utils\UrlUtils::encodeId($translationId) : '' }}"
                                     class="flex has-tooltip" data-tooltip="<b>{{ $eventName }}</b><br/>{{ $each->getVenueDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
                                     onclick="event.stopPropagation();" {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
                                     <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900 {{ $role->isRtl() ? 'rtl' : '' }}">
@@ -284,7 +284,7 @@
                 }                          
                 @endphp                
 
-                <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate->format('Y-m-d')) }}{{ $translationId ? '&translation_id=' . $translationId : '' }}" 
+                <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate->format('Y-m-d')) }}{{ $translationId ? '&tid=' . \App\Utils\UrlUtils::encodeId($translationId) : '' }}" 
                    {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}>
                     <li class="relative flex items-center space-x-6 py-6 px-4 xl:static">
                         <div class="flex-auto">
