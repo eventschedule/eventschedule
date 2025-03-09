@@ -503,7 +503,12 @@ class EventController extends Controller
             }
         }
 
-        if ($parsed['registration_url']) {
+        if ($request->has('image')) {
+            $file = $request->file('image');
+            $filename = '/tmp/event_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            move_uploaded_file($file->getPathname(), $filename);
+            $parsed['social_image'] = $filename;
+        } else if ($parsed['registration_url']) {
             try {
                 $ch = curl_init();
                 curl_setopt_array($ch, [
