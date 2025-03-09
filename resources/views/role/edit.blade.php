@@ -456,6 +456,15 @@
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                         </div>
 
+                        @if($role->isCurator())
+                        <div class="mb-6">
+                            <x-input-label for="city" :value="__('messages.city')" />
+                            <x-text-input id="city" name="city" type="text" class="mt-1 block w-full"
+                                :value="old('city', $role->city)" autocomplete="off" />
+                            <x-input-error class="mt-2" :messages="$errors->get('city')" />
+                        </div>
+                        @endif
+
                         <div class="mb-6">
                             <x-input-label for="description" :value="__('messages.description')" />
                             <textarea id="description" name="description"
