@@ -99,6 +99,31 @@ class Role extends Model implements MustVerifyEmail
                 $model->email_verified_at = null;
                 $model->sendEmailVerificationNotification();
             }
+
+            if ($model->isDirty('name')) {
+                $model->name_en = null;
+            }
+
+            if ($model->isDirty('description')) {
+                $model->description_en = null;
+                $model->description_html_en = null;
+            }
+
+            if ($model->isDirty('address1')) {
+                $model->address1_en = null;
+            }
+
+            if ($model->isDirty('address2')) {
+                $model->address2_en = null;
+            }
+
+            if ($model->isDirty('city')) {
+                $model->city_en = null;
+            }
+
+            if ($model->isDirty('state')) {
+                $model->state_en = null;
+            }
         });
 
     }

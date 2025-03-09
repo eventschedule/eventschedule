@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\EventRole;
 use Illuminate\Database\Eloquent\Model;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
@@ -57,6 +58,28 @@ class Event extends Model
                     $sale->event_date = Carbon::parse($model->starts_at)->format('Y-m-d');
                     $sale->save();
                 });    
+            }
+
+            if ($model->isDirty('name')) {
+                $model->name_en = null;
+
+                $eventRoles = EventRole::where('event_id', $model->id)->get();
+                foreach ($eventRoles as $eventRole) {
+                    $eventRole->name_translated = null;
+                    $eventRole->save();
+                }
+            }
+
+            if ($model->isDirty('description')) {
+                $model->description_en = null;
+                $model->description_html_en = null;
+
+                $eventRoles = EventRole::where('event_id', $model->id)->get();
+                foreach ($eventRoles as $eventRole) {
+                    $eventRole->description_translated = null;
+                    $eventRole->description_html_translated = null;
+                    $eventRole->save();
+                }                
             }
         });
 
