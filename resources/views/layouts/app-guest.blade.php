@@ -115,21 +115,25 @@
         <a href="https://www.eventschedule.com" target="_blank">
             <x-application-logo />
         </a> 
-        <div class="flex flex-row gap-x-3 md:gap-x-10">
-            @if (! config('app.hosted'))
-            <a
-            href="https://app.eventschedule.com/login" target="_blank"
-            class="inline-flex items-center justify-center"
-            >
-            <button
-                type="button"
-                name="login"
-                style="color: {{ $otherRole && $otherRole->accent_color ? $otherRole->accent_color : ($role && $role->accent_color ? $role->accent_color : '#4E81FA') }}"
-                class="text-base duration-300 hover:opacity-90 disabled:cursor-not-allowed"
-            >
-                {{ __('messages.log_in') }}
-            </button>
-            </a>
+        <div class="flex flex-row items-center gap-x-3 md:gap-x-12">
+            @if ($role->language_code != 'en')
+                <div class="flex items-center space-x-2">
+                    @if (! request()->lang)
+                        <span>{{ strtoupper($role->language_code) }}</span>
+                    @else
+                        <a href="{{ request()->url() }}" class="hover:underline">
+                            {{ strtoupper($role->language_code) }}
+                        </a>
+                    @endif
+                    <span class="text-gray-400">|</span>
+                    @if (request()->lang == 'en')
+                        <span>EN</span>
+                    @else
+                        <a href="{{ request()->url() }}?lang=en" class="hover:underline">
+                            EN
+                        </a>
+                    @endif
+                </div>
             @endif
             <a
             href="https://app.eventschedule.com/sign_up" target="_blank"

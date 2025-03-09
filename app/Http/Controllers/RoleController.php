@@ -188,8 +188,8 @@ class RoleController extends Controller
             return redirect(config('app.url'), );
         }
 
-        if ($request->language_code) {
-            app()->setLocale($request->language_code);
+        if ($request->lang) {
+            app()->setLocale($request->lang);
         } else {
             app()->setLocale($role->language_code);
         }
