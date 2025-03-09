@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        /*
         Schema::table('roles', function (Blueprint $table) {
             $table->dropColumn('description_en');
             $table->dropColumn('description_html_en');
@@ -43,11 +44,7 @@ return new class extends Migration
             $table->dropColumn('description_translated');
             $table->dropColumn('description_html_translated');
         });
-
-        Schema::table('event_role', function (Blueprint $table) {
-            $table->dropColumn('description_translated');
-            $table->dropColumn('description_html_translated');
-        });
+        */
 
         Schema::table('event_role', function (Blueprint $table) {
             $table->text('description_translated')->nullable();
