@@ -13,10 +13,12 @@ class Event extends Model
         'starts_at',
         'duration',
         'description',
+        'description_en',
         'event_url',
         'event_password',
         'venue_id',
         'name',
+        'name_en',
         'slug',
         'tickets_enabled',
         'ticket_currency_code',
@@ -33,6 +35,7 @@ class Event extends Model
 
         static::saving(function ($model) {
             $model->description_html = MarkdownUtils::convertToHtml($model->description);
+            $model->description_html_en = MarkdownUtils::convertToHtml($model->description_en);
             $model->ticket_notes_html = MarkdownUtils::convertToHtml($model->ticket_notes);
             $model->payment_instructions_html = MarkdownUtils::convertToHtml($model->payment_instructions);
 
