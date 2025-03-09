@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Models\Role;
+use App\Utils\GeminiUtils;
 
 class TranslateData extends Command
 {
@@ -18,13 +20,60 @@ class TranslateData extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Translate non-English data to English';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        //
+        $this->info('Starting translation of roles...');
+
+        // Get all roles that don't have English translations
+        $roles = Role::whereNull('name_en')
+            ->orWhereNull('description_en')
+            ->orWhereNull('address1_en')
+            ->orWhereNull('address2_en')
+            ->orWhereNull('city_en')
+            ->orWhereNull('state_en')
+            ->get();
+
+        $bar = $this->output->createProgressBar(count($roles));
+        $bar->start();
+
+        foreach ($roles as $role) {
+            try {
+                if ($role->name && !$role->name_en) {
+                    $role->name_en = GeminiUtils::translate($role->name, $role->language_code, 'en');
+                }
+
+                if ($role->description && !$role->description_en) {
+                    $role->description_en = GeminiUtils::translate($role->description, $role->language_code, 'en');
+                }
+
+                if ($role->address1 && !$role->address1_en) {
+                    $role->address1_en = GeminiUtils::translate($role->address1, $role->language_code, 'en');
+                }
+
+                if ($role->city && !$role->city_en) {
+                    $role->city_en = GeminiUtils::translate($role->city, $role->language_code, 'en');
+                }
+
+                if ($role->state && !$role->state_en) {
+                    $role->state_en = GeminiUtils::translate($role->state, $role->language_code, 'en');
+                }
+
+                $role->save();
+                $bar->advance();
+
+                // Add a small delay to avoid hitting rate limits
+                usleep(100000); // 100ms delay
+            } catch (\Exception $e) {
+                $this->error("\nError translating role {$role->id}: " . $e->getMessage());
+            }
+        }
+
+        $bar->finish();
+        $this->info("\nTranslation completed!");
     }
 }
