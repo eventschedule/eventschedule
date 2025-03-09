@@ -31,23 +31,6 @@ class TranslateData extends Command
             return;
         }
 
-        // TODO remove this 
-        $roles = Role::all();
-        foreach ($roles as $role) {
-            $role->name_en = null;
-            $role->description_en = null;
-            $role->address1_en = null;
-            $role->city_en = null;
-            $role->state_en = null;
-            $role->save();
-        }
-        $events = Event::all();
-        foreach ($events as $event) {
-            $event->name_en = null;
-            $event->description_en = null;
-            $event->save();
-        }    
-
         $this->translateRoles();
         $this->translateEvents();
         $this->translateCuratorEvents();
