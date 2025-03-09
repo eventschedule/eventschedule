@@ -308,6 +308,7 @@
                         if (parsed.talent_id || (parsed.performer_name && parsed.performer_youtube_url)) {
                             members[talentId] = {
                                 name: parsed.performer_name,
+                                name_en: parsed.performer_name_en,
                                 email: parsed.performer_email,
                                 youtube_url: parsed.performer_youtube_url ?? '',
                             }
@@ -321,19 +322,24 @@
                             },
                             body: JSON.stringify({
                                 venue_name: parsed.venue_name,
+                                venue_name_en: parsed.venue_name_en,
                                 venue_address1: document.getElementById('venue_address1').value,
+                                venue_address1_en: parsed.venue_address1_en,
                                 venue_city: parsed.event_city,
+                                venue_city_en: parsed.event_city_en,
                                 venue_state: parsed.event_state,
+                                venue_state_en: parsed.event_state_en,
                                 venue_postal_code: parsed.event_postal_code,
                                 venue_country_code: parsed.event_country_code,
                                 venue_email: '',
                                 venue_id: parsed.venue_id,
                                 members: members,
                                 name: document.getElementById('name').value,
-                                event_name_en: parsed.event_name_en,
+                                name_en: parsed.event_name_en,
                                 starts_at: document.getElementById('starts_at').value,
                                 duration: parsed.event_duration,
                                 description: document.getElementById('event_details').value,
+                                description_en: parsed.event_details_en,
                                 social_image: parsed.social_image,
                                 registration_url: parsed.registration_url,
                                 @if ($role->isCurator())
