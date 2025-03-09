@@ -75,7 +75,7 @@ class TranslateData extends Command
                 $bar->advance();
 
                 // Add a small delay to avoid hitting rate limits
-                usleep(100000); // 100ms delay
+                sleep(rand(1, 3)); // Random 1-3 second delay
             } catch (\Exception $e) {
                 $this->error("\nError translating role {$role->id}: " . $e->getMessage());
             }
