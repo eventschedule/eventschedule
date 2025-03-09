@@ -2,6 +2,8 @@
 
 namespace App\Utils;
 
+use App\Utils\UrlUtils;
+
 class GeminiUtils
 {
     private static function sendRequest($prompt, $model = 'gemini-2.0-flash')
@@ -112,6 +114,11 @@ class GeminiUtils
                 $data['event_address'] = $data['event_state'];
                 unset($data['event_state']);
             }
+        }
+
+        // Check if the registration url is a redirect, in which case get the final url
+        if ($data['registration_url']) {
+            $data['registration_url'] = UrlUtils::getRedirectUrl($data['registration_url']);
         }
 
         // Commented out YouTube URL fetching
