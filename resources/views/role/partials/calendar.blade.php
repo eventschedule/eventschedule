@@ -210,7 +210,9 @@
                             @foreach ($eventsMap[$currentDate->format('Y-m-d')] ?? [] as $each)
                             @php
                             $canEdit = auth()->user() && auth()->user()->canEditEvent($each);
+                            $curator = $each->curatorBySubdomain($subdomain);
                             @endphp
+
                             <li class="relative group {{ $canEdit ? ($role->isRtl() ? 'hover:pl-8 hover:break-all' : 'hover:pr-8 hover:break-all') : '' }} break-words">
                                 <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate->format('Y-m-d')) }}"
                                     class="flex has-tooltip" data-tooltip="<b>{{ $each->translatedName() }}</b><br/>{{ $each->getVenueDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
@@ -220,7 +222,11 @@
                                         @if (isset($subdomain) && $each->isRoleAMember($subdomain))
                                             {{ $each->getVenueDisplayName() }}
                                         @else
-                                            {{ $each->translatedName() }}
+                                            @if ($curator && $curator->pivot->name_translated && ! session()->has('translate'))
+                                                {{ $curator->pivot->name_translated }}
+                                            @else
+                                                {{ $each->translatedName() }}
+                                            @endif
                                         @endif
                                         </span>
                                         @if (count($eventsMap[$currentDate->format('Y-m-d')]) == 1)

@@ -89,7 +89,15 @@ class Event extends Model
 
     public function roles()
     {
-        return $this->belongsToMany(Role::class);
+        return $this->belongsToMany(Role::class)
+                    ->withPivot('name_translated', 'description_html_translated');
+    }
+
+    public function curatorBySubdomain($subdomain)
+    {
+        return $this->roles->first(function($role) use ($subdomain) {
+            return $role->subdomain == $subdomain && $role->isCurator();
+        });
     }
 
     public function sales()
