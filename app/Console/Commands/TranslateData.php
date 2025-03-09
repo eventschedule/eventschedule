@@ -33,8 +33,8 @@ class TranslateData extends Command
 
         $events = Event::all();
         foreach ($events as $event) {
-            $event->name_en = '';
-            $event->description_en = '';
+            $event->name_en = null;
+            $event->description_en = null;
             $event->save();
         }
 
