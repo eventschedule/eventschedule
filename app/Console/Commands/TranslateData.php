@@ -31,6 +31,13 @@ class TranslateData extends Command
             return;
         }
 
+        $events = Event::all();
+        foreach ($events as $event) {
+            $event->name_en = '';
+            $event->description_en = '';
+            $event->save();
+        }
+
         $this->translateRoles();
         $this->translateEvents();
         $this->translateCuratorEvents();
