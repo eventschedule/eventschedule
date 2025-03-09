@@ -157,12 +157,8 @@ class TranslateData extends Command
                             $query->where('type', 'curator');
                         })
                         ->where(function($query) {
-                            $query->whereNotNull('name')
-                                ->whereNull('name_translated');
-                        })
-                        ->orWhere(function($query) {
-                            $query->whereNotNull('description')
-                                ->whereNull('description_translated');
+                            $query->whereNull('name_translated')
+                                  ->orWhereNull('description_translated');
                         })
                         ->get();
 
@@ -172,11 +168,11 @@ class TranslateData extends Command
         foreach ($eventRoles as $eventRole) {
             try {
                 if ($eventRole->event->name && !$eventRole->name_translated) {
-                    $eventRole->name_translated = GeminiUtils::translate($eventRole->event->name, null, $eventRole->role->language_code);
+                    $eventRole->name_translated = GeminiUtils::translate($eventRole->event->name, null, $eventRole->role->language_code) ?? '';
                 }
 
                 if ($eventRole->event->description && !$eventRole->description_translated) {
-                    $eventRole->description_translated = GeminiUtils::translate($eventRole->event->description, null, $eventRole->role->language_code);
+                    $eventRole->description_translated = GeminiUtils::translate($eventRole->event->description, null, $eventRole->role->language_code) ?? '';
                 }
 
                 $eventRole->save();
