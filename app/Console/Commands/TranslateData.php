@@ -172,11 +172,11 @@ class TranslateData extends Command
         foreach ($eventRoles as $eventRole) {
             try {
                 if ($eventRole->name && !$eventRole->name_translated) {
-                    $eventRole->name_translated = GeminiUtils::translate($eventRole->name, null, 'en');
+                    $eventRole->name_translated = GeminiUtils::translate($eventRole->name, null, $eventRole->role->language_code);
                 }
 
                 if ($eventRole->description && !$eventRole->description_translated) {
-                    $eventRole->description_translated = GeminiUtils::translate($eventRole->description, null, 'en');
+                    $eventRole->description_translated = GeminiUtils::translate($eventRole->description, null, $eventRole->role->language_code);
                 }
 
                 $eventRole->save();
