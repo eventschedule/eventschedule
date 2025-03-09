@@ -480,4 +480,30 @@ class Event extends Model
             return $this->role();
         }
     }
+
+    public function translatedName()
+    {
+        if (! $this->name_en) {
+            return $this->name;
+        }
+
+        if (session()->has('translate') || request()->lang == 'en') {
+            return $this->name_en;
+        }
+
+        return $this->name;
+    }
+
+    public function translatedDescription()
+    {
+        if (! $this->description_html_en) {
+            return $this->description_html;
+        }
+
+        if (session()->has('translate') || request()->lang == 'en') {
+            return $this->description_html_en;
+        }
+
+        return $this->description_html;
+    }
 }

@@ -10,31 +10,31 @@
     <x-slot name="meta">
         @if ($event && $event->exists) 
             @if ($event->description_html)
-            <meta name="description" content="{{ trim(strip_tags($event->description_html)) }}">
+            <meta name="description" content="{{ trim(strip_tags($event->translatedDescription())) }}">
             @elseif ($event->role() && $event->role()->description_html)
-            <meta name="description" content="{{ trim(strip_tags($event->role()->description_html)) }}">
+            <meta name="description" content="{{ trim(strip_tags($event->role()->translatedDescription())) }}">
             @endif
-            <meta property="og:title" content="{{ $event->name }}">
+            <meta property="og:title" content="{{ $event->translatedName() }}">
             <meta property="og:description" content="{{ $event->getMetaDescription($date) }}">
             <meta property="og:image" content="{{ $event->getImageUrl() }}">
             <meta property="og:url" content="{{ request()->url() }}">
             <meta property="og:site_name" content="Event Schedule">
-            <meta name="twitter:title" content="{{ $event->name }}">
+            <meta name="twitter:title" content="{{ $event->translatedName() }}">
             <meta name="twitter:description" content="{{ $event->getMetaDescription($date) }}">
             <meta name="twitter:image" content="{{ $event->getImageUrl() }}">
-            <meta name="twitter:image:alt" content="{{ $event->name }}">
+            <meta name="twitter:image:alt" content="{{ $event->translatedName() }}">
             <meta name="twitter:card" content="summary_large_image">
         @elseif ($role->exists)
-            <meta name="description" content="{{ trim(strip_tags($role->description_html)) }}">
-            <meta property="og:title" content="{{ $role->name }}">
-            <meta property="og:description" content="{{ trim(strip_tags($role->description_html)) }}">
+            <meta name="description" content="{{ trim(strip_tags($role->translatedDescription())) }}">
+            <meta property="og:title" content="{{ $role->translatedName() }}">
+            <meta property="og:description" content="{{ trim(strip_tags($role->translatedDescription())) }}">
             <meta property="og:image" content="{{ $role->profile_image_url }}">
             <meta property="og:url" content="{{ request()->url() }}">
             <meta property="og:site_name" content="Event Schedule">
-            <meta name="twitter:title" content="{{ $role->name }}">
-            <meta name="twitter:description" content="{{ trim(strip_tags($role->description_html)) }}">
+            <meta name="twitter:title" content="{{ $role->translatedName() }}">
+            <meta name="twitter:description" content="{{ trim(strip_tags($role->translatedDescription())) }}">
             <meta name="twitter:image" content="{{ $role->profile_image_url }}">
-            <meta name="twitter:image:alt" content="{{ $role->name }}">
+            <meta name="twitter:image:alt" content="{{ $role->translatedName() }}">
             <meta name="twitter:card" content="summary_large_image">
         @endif
     </x-slot>
