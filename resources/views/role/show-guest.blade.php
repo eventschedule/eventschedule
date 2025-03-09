@@ -36,7 +36,22 @@
               <h3 class="text-[32px] font-semibold leading-10 text-[#151B26]">
                 {{ $role->translatedName() }}
               </h3>
+              <div class="flex flex-row gap-4">
+              @if ($role->isCurator() && $role->is_open)
               <a
+                href="{{ route('role.follow', ['subdomain' => $role->subdomain], ['add_event' => true]) }}"
+                class="inline-flex items-center justify-center"
+              >
+              <button
+                  type="button"
+                  style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
+                  class="inline-flex items-center rounded-md px-8 py-4 hover:opacity-90 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                >
+                  {{ __('messages.add_event') }}
+                </button>
+              </a>
+              @endif
+                <a
                 href="{{ auth()->user() && auth()->user()->isMember($role->subdomain)
                   ? config('app.url') . route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false) 
                   : route('role.follow', ['subdomain' => $role->subdomain]) }}"
@@ -49,7 +64,8 @@
                 >
                   {{ auth()->user() && auth()->user()->isMember($role->subdomain) ? __('messages.manage') : __('messages.follow') }}
                 </button>
-              </a>
+                </a>
+              </div>
             </div>
             <!--
             <div class="flex gap-3 justify-start flex-col sm:flex-row mb-6">
