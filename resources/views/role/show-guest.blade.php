@@ -18,11 +18,9 @@
               class="block max-h-72 w-full object-cover rounded-t-2xl"
               src="{{ $role->header_image_url }}"
             />
-            @else
-            <div class="h-72 w-full bg-[#ccc] rounded-t-2xl"></div>
             @endif
           </div>
-          <div class="px-6 lg:px-16 pb-12 relative z-10">
+          <div class="px-6 lg:px-16 pb-6 relative z-10">
             @if ($role->profile_image_url)
             <div class="rounded-2xl w-[196px] h-[196px] -mt-[96px] -ml-2 mb-8 bg-[#F5F9FE] flex items-center justify-center">
               <img
