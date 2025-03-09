@@ -35,11 +35,26 @@ class TranslateData extends Command
         $this->info('Starting translation of roles...');
 
         // Get all roles that don't have English translations
-        $roles = Role::whereNull('name_en')
-            ->orWhereNull('description_en')
-            ->orWhereNull('address1_en')
-            ->orWhereNull('city_en')
-            ->orWhereNull('state_en')
+        $roles = Role::where(function($query) {
+                $query->whereNotNull('name')
+                      ->whereNull('name_en');
+            })
+            ->orWhere(function($query) {
+                $query->whereNotNull('description')
+                      ->whereNull('description_en');
+            })
+            ->orWhere(function($query) {
+                $query->whereNotNull('address1')
+                      ->whereNull('address1_en');
+            })
+            ->orWhere(function($query) {
+                $query->whereNotNull('city')
+                      ->whereNull('city_en');
+            })
+            ->orWhere(function($query) {
+                $query->whereNotNull('state')
+                      ->whereNull('state_en');
+            })
             ->get();
 
         $bar = $this->output->createProgressBar(count($roles));
@@ -82,7 +97,7 @@ class TranslateData extends Command
         }
 
         $bar->finish();
-        $this->info("\nTranslation completed!");
+        $this->info("\nTranslation completed!\n");
     }
 
     public function translateEvents()
@@ -90,8 +105,14 @@ class TranslateData extends Command
         $this->info('Starting translation of events...');
 
         // Get all events that don't have English translations
-        $events = Event::whereNull('name_en')
-            ->orWhereNull('description_en')
+        $events = Event::where(function($query) {
+                $query->whereNotNull('name')
+                      ->whereNull('name_en');
+            })
+            ->orWhere(function($query) {
+                $query->whereNotNull('description')
+                      ->whereNull('description_en');
+            })
             ->get();
 
         $bar = $this->output->createProgressBar(count($events));
@@ -118,6 +139,6 @@ class TranslateData extends Command
         }
 
         $bar->finish();
-        $this->info("\nTranslation completed!");
+        $this->info("\nTranslation completed!\n");
     }
 }
