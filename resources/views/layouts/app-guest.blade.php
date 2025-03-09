@@ -118,15 +118,15 @@
         <div class="flex flex-row items-center gap-x-3 md:gap-x-12">
             @if ($role->language_code != 'en')
                 <div class="flex items-center space-x-2">
-                    @if (! request()->lang)
+                    @if (! session()->has('translate'))
                         <span>{{ strtoupper($role->language_code) }}</span>
                     @else
-                        <a href="{{ request()->url() }}" class="hover:underline">
+                        <a href="{{ request()->url() }}?lang={{ $role->language_code }}" class="hover:underline">
                             {{ strtoupper($role->language_code) }}
                         </a>
                     @endif
                     <span class="text-gray-400">|</span>
-                    @if (request()->lang == 'en')
+                    @if (session()->has('translate'))
                         <span>EN</span>
                     @else
                         <a href="{{ request()->url() }}?lang=en" class="hover:underline">
