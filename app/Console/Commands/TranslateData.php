@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Role;
 use App\Models\Event;
+use App\Models\EventRole;
 use App\Utils\GeminiUtils;
 
 class TranslateData extends Command
@@ -29,7 +30,7 @@ class TranslateData extends Command
 
         $this->translateEvents();
 
-        $this->translateEventRoles();
+        $this->translateCuratorEvents();
     }
 
     public function translateRoles()
@@ -142,11 +143,14 @@ class TranslateData extends Command
         $this->info("\nTranslation completed!\n");
     }
 
-    public function translateEventRoles()
+    public function translateCuratorEvents()
     {
-        $this->info('Starting translation of event roles...');
+        $this->info('Starting translation of curator events...');
 
         $eventRoles = EventRole::with('role')
+                        ->whereHas('role', function($query) {
+                            $query->where('type', 'curator');
+                        })
                         ->where(function($query) {
                             $query->whereNotNull('name')
                                 ->whereNull('name_translated');
