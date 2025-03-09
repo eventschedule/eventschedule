@@ -436,4 +436,5 @@ return [
     'event_imported' => 'Event imported successfully!',
     'event_import_failed' => 'Event import failed',
     'similar_event_found' => 'Similar event found',
+    'drag_drop_image' => 'Drag and drop image',
 ];
