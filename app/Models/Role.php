@@ -29,17 +29,23 @@ class Role extends Model implements MustVerifyEmail
         'font_color',
         'font_family',
         'name',
+        'name_en',
         'phone',
         'email',
         'website',
         'address1',
+        'address1_en',
         'address2',
+        'address2_en',
         'city',
+        'city_en',
         'state',
+        'state_en',
         'postal_code',
         'country_code',
         'language_code',
         'description',
+        'description_en',
         'accept_requests',
         'use_24_hour_time',
         'timezone',
@@ -62,7 +68,7 @@ class Role extends Model implements MustVerifyEmail
             }
 
             $model->description_html = MarkdownUtils::convertToHtml($model->description);
-
+            $model->description_html_en = MarkdownUtils::convertToHtml($model->description_en);
             if ($model->accent_color == '#ffffff') {
                 $model->accent_color = '#000000';
             }
