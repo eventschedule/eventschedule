@@ -434,5 +434,7 @@ return [
     'venue_address1_required' => 'אנא הזן כתובת מקום',
     'event_imported' => 'אירוע ניבא בהצלחה!',
     'event_import_failed' => 'יבא אירוע נכשל',
-    'similar_event_found' => 'אירוע דומה נמצא',
+    'similar_event_found' => 'נמצא אירוע דומה',
+    'drag_drop_image' => 'גרור ושחרר תמונה',
+    'uploading' => 'מעלה',
 ];

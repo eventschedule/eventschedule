@@ -428,4 +428,6 @@ return [
     'event_imported' => 'Evento importato con successo!',
     'event_import_failed' => 'Importazione evento fallita',
     'similar_event_found' => 'Trovato evento simile',
+    'drag_drop_image' => 'Trascina e rilascia l\'immagine',
+    'uploading' => 'Caricamento',
 ];

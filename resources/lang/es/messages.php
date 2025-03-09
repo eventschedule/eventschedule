@@ -429,5 +429,7 @@ return [
     'venue_address1_required' => 'Por favor ingrese una dirección del lugar',
     'event_imported' => '¡Evento importado exitosamente!',
     'event_import_failed' => 'Falló la importación del evento',
-    'similar_event_found' => 'Se encontró un evento similar',
+    'similar_event_found' => 'Evento similar encontrado',
+    'drag_drop_image' => 'Arrastra y suelta la imagen',
+    'uploading' => 'Subiendo',
 ];
