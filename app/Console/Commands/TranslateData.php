@@ -28,6 +28,8 @@ class TranslateData extends Command
         $this->translateRoles();
 
         $this->translateEvents();
+
+        $this->translateEventRoles();
     }
 
     public function translateRoles()
@@ -89,7 +91,6 @@ class TranslateData extends Command
                 $role->save();
                 $bar->advance();
 
-                // Add a small delay to avoid hitting rate limits
                 sleep(rand(1, 3)); // Random 1-3 second delay
             } catch (\Exception $e) {
                 $this->error("\nError translating role {$role->id}: " . $e->getMessage());
@@ -131,8 +132,7 @@ class TranslateData extends Command
                 $event->save();
                 $bar->advance();
 
-                // Add a small delay to avoid hitting rate limits
-                usleep(100000); // 100ms delay
+                sleep(rand(1, 3)); // Random 1-3 second delay
             } catch (\Exception $e) {
                 $this->error("\nError translating event {$event->id}: " . $e->getMessage());
             }
@@ -141,4 +141,44 @@ class TranslateData extends Command
         $bar->finish();
         $this->info("\nTranslation completed!\n");
     }
+
+    public function translateEventRoles()
+    {
+        $this->info('Starting translation of event roles...');
+
+        $eventRoles = EventRole::where(function($query) {
+                            $query->whereNotNull('name')
+                                ->whereNull('name_en');
+                        })
+                        ->orWhere(function($query) {
+                            $query->whereNotNull('description')
+                                ->whereNull('description_en');
+                        })
+                        ->get();
+
+        $bar = $this->output->createProgressBar(count($eventRoles));
+        $bar->start();  
+
+        foreach ($eventRoles as $eventRole) {
+            try {
+                if ($eventRole->name && !$eventRole->name_en) {
+                    $eventRole->name_en = GeminiUtils::translate($eventRole->name, null, 'en');
+                }
+
+                if ($eventRole->description && !$eventRole->description_en) {
+                    $eventRole->description_en = GeminiUtils::translate($eventRole->description, null, 'en');
+                }
+
+                $eventRole->save();
+                $bar->advance();
+
+                sleep(rand(1, 3)); // Random 1-3 second delay
+            } catch (\Exception $e) {
+                $this->error("\nError translating event role {$eventRole->id}: " . $e->getMessage());
+            }
+        }
+
+        $bar->finish();
+        $this->info("\nTranslation completed!\n");
+    }   
 }
