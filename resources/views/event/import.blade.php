@@ -405,7 +405,6 @@
                                 starts_at: document.getElementById('starts_at').value,
                                 duration: parsed.event_duration,
                                 description: document.getElementById('event_details').value,
-                                description_en: parsed.event_details_en,
                                 social_image: parsed.social_image,
                                 registration_url: parsed.registration_url,
                                 @if ($role->isCurator())
