@@ -10,7 +10,7 @@
           <h2
             class="text-white text-[40px] sm:text-{52px} leading-snug font-semibold"
           >
-            {{ $event->name }}
+            {{ $event->translatedName() }}
           </h2>
           <!--
           <a
@@ -263,7 +263,7 @@
         </div>
         -->
         <div>
-        @if ($event->description_html)
+        @if ($event->translatedDescription())
           <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
             <h2
               class="text-[#151B26] text-[40px] sm:text-{52px} leading-snug font-semibold"
@@ -271,7 +271,7 @@
               {{ __('messages.event_details') }}
             </h2>
             <div class="text-[#33383C] text-base custom-content">
-              {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->description_html) !!}
+              {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->translatedDescription()) !!}
             </div>
           </div>
           @endif
@@ -315,7 +315,7 @@
                 />
                 @endif
                 <h3 class="text-[28px] font-semibold leading-10 text-[#151B26]">
-                  {{ $each->name }}
+                  {{ $each->translatedName() }}
                 </h3>
                 @endif
               </div>
@@ -391,7 +391,7 @@
         @if ($event->venue && $event->venue->name)
         <div class="p-6 rounded-xl flex flex-col gap-6" style="background-color: {{ $otherRole->accent_color ?? '#4E81FA' }}; font-family: {{ $event->venue->font_family }}, sans-serif;">
           <h4 class="text-white text-[24px] leading-snug font-semibold">
-            {{ $event->venue->name }}
+            {{ $event->venue->translatedName() }}
           </h4>
           <div class="flex flex-col gap-4">
             @if ($event->venue->phone)
