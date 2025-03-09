@@ -31,10 +31,25 @@ class TranslateData extends Command
             return;
         }
 
+        // TODO remove this 
+        $roles = Role::all();
+        foreach ($roles as $role) {
+            $role->name_en = null;
+            $role->description_en = null;
+            $role->address1_en = null;
+            $role->city_en = null;
+            $role->state_en = null;
+            $role->save();
+        }
+        $events = Event::all();
+        foreach ($events as $event) {
+            $event->name_en = null;
+            $event->description_en = null;
+            $event->save();
+        }    
+
         $this->translateRoles();
-
         $this->translateEvents();
-
         $this->translateCuratorEvents();
     }
 
@@ -69,6 +84,18 @@ class TranslateData extends Command
         $bar->start();
 
         foreach ($roles as $role) {
+            if ($role->language_code == 'en') {
+                $role->name_en = '';
+                $role->description_en = '';
+                $role->address1_en = '';
+                $role->address2_en = '';
+                $role->city_en = '';
+                $role->state_en = '';
+                $role->save();
+
+                continue;
+            }
+
             try {
                 if ($role->name && !$role->name_en) {
                     $role->name_en = GeminiUtils::translate($role->name, $role->language_code, 'en');
@@ -97,7 +124,7 @@ class TranslateData extends Command
                 $role->save();
                 $bar->advance();
 
-                sleep(rand(1, 3)); // Random 1-3 second delay
+                //sleep(rand(1, 3)); // Random 1-3 second delay
             } catch (\Exception $e) {
                 $this->error("\nError translating role {$role->id}: " . $e->getMessage());
             }
@@ -112,20 +139,29 @@ class TranslateData extends Command
         $this->info('Starting translation of events...');
 
         // Get all events that don't have English translations
-        $events = Event::where(function($query) {
-                $query->whereNotNull('name')
-                      ->whereNull('name_en');
-            })
-            ->orWhere(function($query) {
-                $query->whereNotNull('description')
-                      ->whereNull('description_en');
-            })
-            ->get();
+        $events = Event::with('roles')
+        ->where(function($query) {
+            $query->whereNotNull('name')
+                ->whereNull('name_en');
+        })
+        ->orWhere(function($query) {
+            $query->whereNotNull('description')
+                ->whereNull('description_en');
+        })
+        ->get();
 
         $bar = $this->output->createProgressBar(count($events));
         $bar->start();
 
         foreach ($events as $event) {
+            if ($event->getLanguageCode() == 'en') {
+                $event->name_en = '';
+                $event->description_en = '';
+                $event->save();
+
+                continue;
+            }
+
             try {
                 if ($event->name && !$event->name_en) {
                     $event->name_en = GeminiUtils::translate($event->name, null, 'en');
@@ -138,7 +174,7 @@ class TranslateData extends Command
                 $event->save();
                 $bar->advance();
 
-                sleep(rand(1, 3)); // Random 1-3 second delay
+                //sleep(rand(1, 3)); // Random 1-3 second delay
             } catch (\Exception $e) {
                 $this->error("\nError translating event {$event->id}: " . $e->getMessage());
             }
@@ -170,23 +206,25 @@ class TranslateData extends Command
                 $eventRole->name_translated = '';
                 $eventRole->description_translated = '';
                 $eventRole->save();
-            } else {
-                try {
-                    if ($eventRole->event->name && !$eventRole->name_translated) {
-                        $eventRole->name_translated = GeminiUtils::translate($eventRole->event->name, $eventRole->event->getLanguageCode(), $eventRole->role->language_code) ?? '';
-                    }
 
-                    if ($eventRole->event->description && !$eventRole->description_translated) {
-                        $eventRole->description_translated = GeminiUtils::translate($eventRole->event->description, $eventRole->event->getLanguageCode(), $eventRole->role->language_code) ?? '';
-                    }
+                continue;
+            } 
 
-                    $eventRole->save();
-                    $bar->advance();
-
-                    sleep(rand(1, 3)); // Random 1-3 second delay
-                } catch (\Exception $e) {
-                    $this->error("\nError translating event role {$eventRole->id}: " . $e->getMessage());
+            try {
+                if ($eventRole->event->name && !$eventRole->name_translated) {
+                    $eventRole->name_translated = GeminiUtils::translate($eventRole->event->name, $eventRole->event->getLanguageCode(), $eventRole->role->language_code) ?? '';
                 }
+
+                if ($eventRole->event->description && !$eventRole->description_translated) {
+                    $eventRole->description_translated = GeminiUtils::translate($eventRole->event->description, $eventRole->event->getLanguageCode(), $eventRole->role->language_code) ?? '';
+                }
+
+                $eventRole->save();
+                $bar->advance();
+
+                //sleep(rand(1, 3)); // Random 1-3 second delay
+            } catch (\Exception $e) {
+                $this->error("\nError translating event role {$eventRole->id}: " . $e->getMessage());
             }
         }
 
