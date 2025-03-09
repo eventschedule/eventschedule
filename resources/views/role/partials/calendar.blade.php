@@ -211,11 +211,18 @@
                             @php
                             $canEdit = auth()->user() && auth()->user()->canEditEvent($each);
                             $curator = $each->curatorBySubdomain($subdomain);
+                            $translationId = null;
+                            if ($curator && $curator->pivot->name_translated && ! session()->has('translate')) {
+                                $eventName = $curator->pivot->name_translated;
+                                $translationId = $curator->pivot->id;
+                            } else {
+                                $eventName = $each->translatedName();
+                            }                          
                             @endphp
 
                             <li class="relative group {{ $canEdit ? ($role->isRtl() ? 'hover:pl-8 hover:break-all' : 'hover:pr-8 hover:break-all') : '' }} break-words">
-                                <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate->format('Y-m-d')) }}"
-                                    class="flex has-tooltip" data-tooltip="<b>{{ $each->translatedName() }}</b><br/>{{ $each->getVenueDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
+                                <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate->format('Y-m-d')) }}{{ $translationId ? '&translation_id=' . $translationId : '' }}"
+                                    class="flex has-tooltip" data-tooltip="<b>{{ $eventName }}</b><br/>{{ $each->getVenueDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
                                     onclick="event.stopPropagation();" {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
                                     <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900 {{ $role->isRtl() ? 'rtl' : '' }}">
                                         <span class="{{ count($eventsMap[$currentDate->format('Y-m-d')]) == 1 ? 'line-clamp-2' : 'line-clamp-1' }} hover:underline">
@@ -225,7 +232,7 @@
                                             @if ($curator && $curator->pivot->name_translated && ! session()->has('translate'))
                                                 {{ $curator->pivot->name_translated }}
                                             @else
-                                                {{ $each->translatedName() }}
+                                                {{ $eventName }}
                                             @endif
                                         @endif
                                         </span>
@@ -264,12 +271,25 @@
                 class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow ring-1 ring-black ring-opacity-5">
                 @while ($currentDate->lte($endOfMonth))
                 @foreach ($eventsMap[$currentDate->format('Y-m-d')] ?? [] as $each)
-                <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate->format('Y-m-d')) }}" 
+
+                @php
+                $canEdit = auth()->user() && auth()->user()->canEditEvent($each);
+                $curator = $each->curatorBySubdomain($subdomain);
+                $translationId = null;
+                if ($curator && $curator->pivot->name_translated && ! session()->has('translate')) {
+                    $eventName = $curator->pivot->name_translated;
+                    $translationId = $curator->pivot->id;
+                } else {
+                    $eventName = $each->translatedName();
+                }                          
+                @endphp                
+
+                <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate->format('Y-m-d')) }}{{ $translationId ? '&translation_id=' . $translationId : '' }}" 
                    {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}>
                     <li class="relative flex items-center space-x-6 py-6 px-4 xl:static">
                         <div class="flex-auto">
                             <h3 class="pr-16 font-semibold text-gray-900">
-                                {{ $each->translatedName() }}
+                                {{ $eventName }}
                             </h3>
                             <dl class="mt-2 flex flex-col text-gray-500 xl:flex-row">
                                 <div class="flex items-start space-x-3">
@@ -305,7 +325,7 @@
                                 </div>
                             </dl>
                         </div>
-                        @if (auth()->user() && auth()->user()->canEditEvent($each))                        
+                        @if ($canEdit)
                         <div class="absolute right-4 text-right">
                             @if ($each->getImageUrl())
                             <img src="{{ $each->getImageUrl() }}" class="h-14 w-14 mb-4 flex-none rounded-lg object-cover">
