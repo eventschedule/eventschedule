@@ -215,7 +215,7 @@
                                 <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate->format('Y-m-d')) }}"
                                     class="flex has-tooltip" data-tooltip="<b>{{ $each->translatedName() }}</b><br/>{{ $each->getVenueDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
                                     onclick="event.stopPropagation();" {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
-                                    <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900">
+                                    <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900 {{ $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
                                         <span class="{{ count($eventsMap[$currentDate->format('Y-m-d')]) == 1 ? 'line-clamp-2' : 'line-clamp-1' }} hover:underline">
                                         @if (isset($subdomain) && $each->isRoleAMember($subdomain))
                                             {{ $each->getVenueDisplayName() }}
@@ -262,7 +262,7 @@
                    {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}>
                     <li class="relative flex items-center space-x-6 py-6 px-4 xl:static">
                         <div class="flex-auto">
-                            <h3 class="pr-10 font-semibold text-gray-900 xl:pr-0">
+                            <h3 class="pr-10 font-semibold text-gray-900">
                                 {{ $each->translatedName() }}
                             </h3>
                             <dl class="mt-2 flex flex-col text-gray-500 xl:flex-row">
@@ -278,7 +278,7 @@
                                     </dt>
                                     <dd>
                                         <time datetime="{{ $currentDate->format('Y-m-d') }}">
-                                            {{ $currentDate->format($each->getUse24HourTime() ? 'M jS, Y • H:i' : 'M jS, Y • g:i A') }}
+                                            {{ $currentDate->format('M jS') }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}
                                         </time>
                                     </dd>
                                 </div>
