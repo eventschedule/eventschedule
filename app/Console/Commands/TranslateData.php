@@ -152,7 +152,7 @@ class TranslateData extends Command
     {
         $this->info('Starting translation of curator events...');
 
-        $eventRoles = EventRole::with('role')
+        $eventRoles = EventRole::with('role', 'event')
                         ->whereHas('role', function($query) {
                             $query->where('type', 'curator');
                         })
@@ -171,12 +171,12 @@ class TranslateData extends Command
 
         foreach ($eventRoles as $eventRole) {
             try {
-                if ($eventRole->name && !$eventRole->name_translated) {
-                    $eventRole->name_translated = GeminiUtils::translate($eventRole->name, null, $eventRole->role->language_code);
+                if ($eventRole->event->name && !$eventRole->name_translated) {
+                    $eventRole->name_translated = GeminiUtils::translate($eventRole->event->name, null, $eventRole->role->language_code);
                 }
 
-                if ($eventRole->description && !$eventRole->description_translated) {
-                    $eventRole->description_translated = GeminiUtils::translate($eventRole->description, null, $eventRole->role->language_code);
+                if ($eventRole->event->description && !$eventRole->description_translated) {
+                    $eventRole->description_translated = GeminiUtils::translate($eventRole->event->description, null, $eventRole->role->language_code);
                 }
 
                 $eventRole->save();

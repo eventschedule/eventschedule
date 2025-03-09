@@ -19,4 +19,9 @@ class EventRole extends Pivot
     {
         return $this->belongsTo(Role::class);
     }
+
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
+    }
 }
