@@ -229,6 +229,23 @@ class Event extends Model
         return null;
     }
 
+    public function getLanguageCode()
+    {
+        $lang = 'en';
+
+        if ($this->venue && $this->venue->language_code) {
+            $lang = $this->venue->language_code;
+        }
+
+        foreach ($this->roles as $role) {
+            if ($role->language_code) {
+                $lang = $role->language_code;
+            }
+        }
+
+        return $lang;
+    }
+
     public function getVenueDisplayName()
     {
         if ($this->venue) {

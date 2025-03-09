@@ -165,22 +165,28 @@ class TranslateData extends Command
         $bar = $this->output->createProgressBar(count($eventRoles));
         $bar->start();  
 
-        foreach ($eventRoles as $eventRole) {
-            try {
-                if ($eventRole->event->name && !$eventRole->name_translated) {
-                    $eventRole->name_translated = GeminiUtils::translate($eventRole->event->name, null, $eventRole->role->language_code) ?? '';
-                }
-
-                if ($eventRole->event->description && !$eventRole->description_translated) {
-                    $eventRole->description_translated = GeminiUtils::translate($eventRole->event->description, null, $eventRole->role->language_code) ?? '';
-                }
-
+        foreach ($eventRoles as $eventRole) {        
+            if ($eventRole->event->getLanguageCode() == $eventRole->role->language_code) {
+                $eventRole->name_translated = '';
+                $eventRole->description_translated = '';
                 $eventRole->save();
-                $bar->advance();
+            } else {
+                try {
+                    if ($eventRole->event->name && !$eventRole->name_translated) {
+                        $eventRole->name_translated = GeminiUtils::translate($eventRole->event->name, $eventRole->event->getLanguageCode(), $eventRole->role->language_code) ?? '';
+                    }
 
-                sleep(rand(1, 3)); // Random 1-3 second delay
-            } catch (\Exception $e) {
-                $this->error("\nError translating event role {$eventRole->id}: " . $e->getMessage());
+                    if ($eventRole->event->description && !$eventRole->description_translated) {
+                        $eventRole->description_translated = GeminiUtils::translate($eventRole->event->description, $eventRole->event->getLanguageCode(), $eventRole->role->language_code) ?? '';
+                    }
+
+                    $eventRole->save();
+                    $bar->advance();
+
+                    sleep(rand(1, 3)); // Random 1-3 second delay
+                } catch (\Exception $e) {
+                    $this->error("\nError translating event role {$eventRole->id}: " . $e->getMessage());
+                }
             }
         }
 
