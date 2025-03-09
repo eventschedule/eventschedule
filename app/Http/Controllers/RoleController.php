@@ -316,6 +316,10 @@ class RoleController extends Controller
         $fonts = array_unique($fonts);
         */
 
+        if (config('app.hosted') && env('APP_REDIRECT_SUBDOMAIN')) {
+            return redirect(env('APP_REDIRECT_SUBDOMAIN_URL'), 302);
+        }
+
         $response = response()
             ->view($view, compact(
             'subdomain',
