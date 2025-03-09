@@ -107,7 +107,7 @@ class TranslateData extends Command
                 $role->save();
                 $bar->advance();
 
-                sleep(rand(3, 10));
+                sleep(rand(8, 16));
             } catch (\Exception $e) {
                 $this->error("\nError translating role {$role->id}: " . $e->getMessage());
             }
@@ -157,7 +157,7 @@ class TranslateData extends Command
                 $event->save();
                 $bar->advance();
 
-                sleep(rand(3, 10));
+                sleep(rand(8, 16));
             } catch (\Exception $e) {
                 $this->error("\nError translating event {$event->id}: " . $e->getMessage());
             }
@@ -205,7 +205,7 @@ class TranslateData extends Command
                 $eventRole->save();
                 $bar->advance();
 
-                sleep(rand(3, 10));
+                sleep(rand(8, 16));
             } catch (\Exception $e) {
                 $this->error("\nError translating event role {$eventRole->id}: " . $e->getMessage());
             }
