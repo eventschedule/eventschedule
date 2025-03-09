@@ -104,6 +104,7 @@
                                             :value="old('venue_address1')"
                                             v-model="preview.parsed.event_address" 
                                             v-bind:readonly="preview.parsed.venue_id || savedEvent"
+                                            placeholder="{{ $role->isCurator() ? $role->city : '' }}"
                                             required
                                             autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_address1')" />
@@ -323,7 +324,7 @@
                             body: JSON.stringify({
                                 venue_name: parsed.venue_name,
                                 venue_name_en: parsed.venue_name_en,
-                                venue_address1: document.getElementById('venue_address1').value,
+                                venue_address1: document.getElementById('venue_address1').value || "{{ $role->isCurator() ? $role->city : '' }}",
                                 venue_address1_en: parsed.venue_address1_en,
                                 venue_city: parsed.event_city,
                                 venue_city_en: parsed.event_city_en,
