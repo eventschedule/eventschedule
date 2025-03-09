@@ -36,7 +36,7 @@ class EventRepo
                 $venue->subdomain = Role::generateSubdomain($request->venue_email ? $request->venue_name : null);
                 $venue->type = 'venue';
                 $venue->timezone = $user->timezone;
-                $venue->language_code = $user->language_code;
+                $venue->language_code = $request->venue_language_code ? $request->venue_language_code : $user->language_code;
                 $venue->name = $request->venue_name ?? null;
                 $venue->address1 = $request->venue_address1;
                 $venue->address2 = $request->venue_address2;
@@ -89,7 +89,7 @@ class EventRepo
                     $role->subdomain = Role::generateSubdomain($role->email ? $role->email : null);
                     $role->type = $request->role_type ? $request->role_type : 'schedule';
                     $role->timezone = $user->timezone;
-                    $role->language_code = $user->language_code;
+                    $role->language_code = $request->language_code ? $request->language_code : $user->language_code;
                     $role->background_colors = ColorUtils::randomGradient();
                     $role->background_rotation = rand(0, 359);
                     $role->font_color = '#ffffff';

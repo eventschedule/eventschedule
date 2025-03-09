@@ -312,6 +312,7 @@
                                 name_en: parsed.performer_name_en,
                                 email: parsed.performer_email,
                                 youtube_url: parsed.performer_youtube_url ?? '',
+                                language_code: '{{ $role->language_code }}',
                             }
                         }
 
@@ -334,6 +335,7 @@
                                 venue_country_code: parsed.event_country_code,
                                 venue_email: '',
                                 venue_id: parsed.venue_id,
+                                venue_language_code: '{{ $role->language_code }}',
                                 members: members,
                                 name: document.getElementById('name').value,
                                 name_en: parsed.event_name_en,
