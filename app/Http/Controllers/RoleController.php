@@ -184,6 +184,7 @@ class RoleController extends Controller
 
     public function viewGuest(Request $request, $subdomain, $slug = '')
     {
+        $translation = null;
         $user = auth()->user();
         $curatorRoles = $user ? $user->editableCurators() : collect();
 
@@ -193,7 +194,10 @@ class RoleController extends Controller
             return redirect(config('app.url'), );
         }
 
-        if ($request->lang) {
+        if ($request->translation_id) {
+            $translation = EventRole::where('id', $request->translation_id)->firstOrFail();
+            app()->setLocale($translation->role->language_code);            
+        } else if ($request->lang) {
             app()->setLocale($request->lang);
 
             if ($request->lang == 'en') {
@@ -354,6 +358,7 @@ class RoleController extends Controller
             'date',
             'curatorRoles',
             'fonts',
+            'translation',
         ));
 
 

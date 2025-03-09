@@ -10,7 +10,7 @@
           <h2
             class="text-white text-[40px] sm:text-{52px} leading-snug font-semibold"
           >
-            {{ $event->translatedName() }}
+            {{ $translation ? $translation->name_translated : $event->translatedName() }}
           </h2>
           <!--
           <a
@@ -263,15 +263,15 @@
         </div>
         -->
         <div>
-        @if ($event->translatedDescription())
-          <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
+        @if ($translation ? $translation->description_translated : $event->translatedDescription())
+          <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4 {{ $role->isRtl() || ($translation && $translation->role->isRtl()) ? 'rtl' : '' }}">
             <h2
               class="text-[#151B26] text-[40px] sm:text-{52px} leading-snug font-semibold"
             >
               {{ __('messages.event_details') }}
             </h2>
             <div class="text-[#33383C] text-base custom-content">
-              {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->translatedDescription()) !!}
+              {!! \App\Utils\UrlUtils::convertUrlsToLinks($translation ? $translation->description_translated : $event->translatedDescription()) !!}
             </div>
           </div>
           @endif
