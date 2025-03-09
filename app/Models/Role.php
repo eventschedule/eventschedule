@@ -573,6 +573,10 @@ class Role extends Model implements MustVerifyEmail
 
     public function isRtl()
     {
+        if (session()->has('translate') || request()->lang == 'en') {
+            return false;
+        }
+
         return $this->language_code == 'ar' || $this->language_code == 'he';
     }
 
