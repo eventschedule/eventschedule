@@ -217,7 +217,7 @@
                                 $translationId = $curator->pivot->id;
                             } else {
                                 $eventName = $each->translatedName();
-                            }                          
+                            }                       
                             @endphp
 
                             <li class="relative group {{ $canEdit ? ($role->isRtl() ? 'hover:pl-8 hover:break-all' : 'hover:pr-8 hover:break-all') : '' }} break-words">
