@@ -426,4 +426,6 @@ return [
     'event_imported' => 'Evento importado com sucesso!',
     'event_import_failed' => 'Falha ao importar evento',
     'similar_event_found' => 'Evento similar encontrado',
+    'drag_drop_image' => 'Arraste e solte a imagem',
+    'uploading' => 'Carregando',
 ];

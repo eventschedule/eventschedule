@@ -433,4 +433,6 @@ return [
     'event_imported' => 'Veranstaltung erfolgreich importiert!',
     'event_import_failed' => 'Veranstaltungsimport fehlgeschlagen',
     'similar_event_found' => 'Ähnliche Veranstaltung gefunden',
+    'drag_drop_image' => 'Bild hierher ziehen',
+    'uploading' => 'Wird hochgeladen',
 ];

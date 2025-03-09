@@ -478,5 +478,7 @@ return [
     'venue_address1_required' => 'Voer een locatieadres in',
     'event_imported' => 'Evenement succesvol geïmporteerd!',
     'event_import_failed' => 'Evenement importeren mislukt',
-    'similar_event_found' => 'Vergelijkbaar evenement gevonden'
+    'similar_event_found' => 'Vergelijkbaar evenement gevonden',
+    'drag_drop_image' => 'Sleep en plaats afbeelding',
+    'uploading' => 'Uploaden',
 ];

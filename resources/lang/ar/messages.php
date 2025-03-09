@@ -429,5 +429,7 @@ return [
     'venue_address1_required' => 'الرجاء إدخال عنوان المكان',
     'event_imported' => 'تم استيراد الحدث بنجاح!',
     'event_import_failed' => 'فشل استيراد الحدث',
-    'similar_event_found' => 'تم العثور على حدث مشابه',
+    'similar_event_found' => 'تم العثور على حدث مماثل',
+    'drag_drop_image' => 'اسحب وأفلت الصورة',
+    'uploading' => 'جاري التحميل',
 ];
