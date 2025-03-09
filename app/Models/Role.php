@@ -575,4 +575,83 @@ class Role extends Model implements MustVerifyEmail
     {
         return $this->language_code == 'ar' || $this->language_code == 'he';
     }
+
+    public function translatedName()
+    {
+        if (! $this->name_en) {
+            return $this->name;
+        }
+
+        if (session()->has('translate') || request()->lang == 'en') {
+            return $this->name_en;
+        }
+
+        return $this->name;
+    }
+
+    public function translatedDescription()
+    {
+        if (! $this->description_html_en) {
+            return $this->description_html;
+        }
+
+        if (session()->has('translate') || request()->lang == 'en') {
+            return $this->description_html_en;
+        }
+
+        return $this->description_html;
+    }   
+
+    public function translatedAddress1()
+    {
+        if (! $this->address1_en) {
+            return $this->address1;
+        }
+        
+        if (session()->has('translate') || request()->lang == 'en') {
+            return $this->address1_en;
+        }
+
+        return $this->address1;
+    }   
+
+    public function translatedAddress2()
+    {
+        if (! $this->address2_en) {
+            return $this->address2;
+        }
+
+        if (session()->has('translate') || request()->lang == 'en') {
+            return $this->address2_en;
+        }
+
+        return $this->address2;
+    }
+
+    public function translatedCity()
+    {
+        if (! $this->city_en) {
+            return $this->city;
+        }
+     
+        if (session()->has('translate') || request()->lang == 'en') {   
+            return $this->city_en;
+        }
+
+        return $this->city;
+    }
+    
+    public function translatedState()
+    {
+        if (! $this->state_en) {
+            return $this->state;
+        }
+        
+        if (session()->has('translate') || request()->lang == 'en') {
+            return $this->state_en;
+        }
+
+        return $this->state;
+    }
+    
 }
