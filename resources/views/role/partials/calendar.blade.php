@@ -210,7 +210,7 @@
                             @foreach ($eventsMap[$currentDate->format('Y-m-d')] ?? [] as $each)
                             @php
                             $canEdit = auth()->user() && auth()->user()->canEditEvent($each);
-                            $curator = $each->curatorBySubdomain($subdomain);
+                            $curator = isset($subdomain) ? $each->curatorBySubdomain($subdomain) : null;
                             $translationId = null;
                             if ($curator && $curator->pivot->name_translated && ! session()->has('translate')) {
                                 $eventName = $curator->pivot->name_translated;
@@ -220,11 +220,11 @@
                             }                       
                             @endphp
 
-                            <li class="relative group {{ $canEdit ? ($role->isRtl() ? 'hover:pl-8 hover:break-all' : 'hover:pr-8 hover:break-all') : '' }} break-words">
+                            <li class="relative group {{ $canEdit ? ((isset($role) && $role->isRtl()) ? 'hover:pl-8 hover:break-all' : 'hover:pr-8 hover:break-all') : '' }} break-words">
                                 <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate->format('Y-m-d')) }}{{ $translationId ? '&tid=' . \App\Utils\UrlUtils::encodeId($translationId) : '' }}"
                                     class="flex has-tooltip" data-tooltip="<b>{{ $eventName }}</b><br/>{{ $each->getVenueDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
                                     onclick="event.stopPropagation();" {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
-                                    <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900 {{ $role->isRtl() ? 'rtl' : '' }}">
+                                    <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900 {{ (isset($role) && $role->isRtl()) ? 'rtl' : '' }}">
                                         <span class="{{ count($eventsMap[$currentDate->format('Y-m-d')]) == 1 ? 'line-clamp-2' : 'line-clamp-1' }} hover:underline">
                                         @if (isset($subdomain) && $each->isRoleAMember($subdomain))
                                             {{ $each->getVenueDisplayName() }}
@@ -245,7 +245,7 @@
                                 </a>
                                 @if ($canEdit)
                                 <a href="{{ isset($role) ? config('app.url') . route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)], false) : config('app.url') . route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($each->id)], false) }}"
-                                    class="absolute {{ $role->isRtl() ? 'left-0' : 'right-0' }} top-0 hidden group-hover:inline-block text-[#4E81FA] hover:text-[#4E81FA] hover:underline"
+                                    class="absolute {{ (isset($role) && $role->isRtl()) ? 'left-0' : 'right-0' }} top-0 hidden group-hover:inline-block text-[#4E81FA] hover:text-[#4E81FA] hover:underline"
                                     onclick="event.stopPropagation();">
                                     {{ __('messages.edit') }}
                                 </a>
@@ -274,7 +274,7 @@
 
                 @php
                 $canEdit = auth()->user() && auth()->user()->canEditEvent($each);
-                $curator = $each->curatorBySubdomain($subdomain);
+                $curator = isset($subdomain) ? $each->curatorBySubdomain($subdomain) : null;
                 $translationId = null;
                 if ($curator && $curator->pivot->name_translated && ! session()->has('translate')) {
                     $eventName = $curator->pivot->name_translated;

@@ -100,6 +100,18 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse');    
     Route::post('/{subdomain}/import', [EventController::class, 'import'])->name('event.import');    
     Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|availability|requests|profile|followers|team|plan');
+
+    Route::get('/tmp/event-image/{filename?}', function ($filename = null) {
+        if (!$filename) {
+            abort(404);
+        }
+    
+        $path = '/tmp/event_' . $filename;
+        if (file_exists($path)) {
+            return response()->file($path);
+        }
+        abort(404);
+    })->name('event.tmp_image');
 });
 
 if (config('app.hosted')) {
@@ -118,14 +130,4 @@ if (config('app.hosted')) {
 
 Route::get('/{slug?}', [HomeController::class, 'landing'])->name('landing');
 
-Route::get('/tmp/event-image/{filename?}', function ($filename = null) {
-    if (!$filename) {
-        abort(404);
-    }
 
-    $path = '/tmp/event_' . $filename;
-    if (file_exists($path)) {
-        return response()->file($path);
-    }
-    abort(404);
-})->name('event.tmp_image');
