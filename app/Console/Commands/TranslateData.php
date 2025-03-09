@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Role;
+use App\Models\Event;
 use App\Utils\GeminiUtils;
 
 class TranslateData extends Command
@@ -22,10 +23,14 @@ class TranslateData extends Command
      */
     protected $description = 'Translate non-English data to English';
 
-    /**
-     * Execute the console command.
-     */
     public function handle()
+    {
+        $this->translateRoles();
+
+        $this->translateEvents();
+    }
+
+    public function translateRoles()
     {
         $this->info('Starting translation of roles...');
 
@@ -33,7 +38,6 @@ class TranslateData extends Command
         $roles = Role::whereNull('name_en')
             ->orWhereNull('description_en')
             ->orWhereNull('address1_en')
-            ->orWhereNull('address2_en')
             ->orWhereNull('city_en')
             ->orWhereNull('state_en')
             ->get();
@@ -55,6 +59,10 @@ class TranslateData extends Command
                     $role->address1_en = GeminiUtils::translate($role->address1, $role->language_code, 'en');
                 }
 
+                if ($role->address2 && !$role->address2_en) {
+                    $role->address2_en = GeminiUtils::translate($role->address2, $role->language_code, 'en');
+                }
+
                 if ($role->city && !$role->city_en) {
                     $role->city_en = GeminiUtils::translate($role->city, $role->language_code, 'en');
                 }
@@ -70,6 +78,42 @@ class TranslateData extends Command
                 usleep(100000); // 100ms delay
             } catch (\Exception $e) {
                 $this->error("\nError translating role {$role->id}: " . $e->getMessage());
+            }
+        }
+
+        $bar->finish();
+        $this->info("\nTranslation completed!");
+    }
+
+    public function translateEvents()
+    {
+        $this->info('Starting translation of events...');
+
+        // Get all events that don't have English translations
+        $events = Event::whereNull('name_en')
+            ->orWhereNull('description_en')
+            ->get();
+
+        $bar = $this->output->createProgressBar(count($events));
+        $bar->start();
+
+        foreach ($events as $event) {
+            try {
+                if ($event->name && !$event->name_en) {
+                    $event->name_en = GeminiUtils::translate($event->name, null, 'en');
+                }
+
+                if ($event->description && !$event->description_en) {
+                    $event->description_en = GeminiUtils::translate($event->description, null, 'en');
+                }
+
+                $event->save();
+                $bar->advance();
+
+                // Add a small delay to avoid hitting rate limits
+                usleep(100000); // 100ms delay
+            } catch (\Exception $e) {
+                $this->error("\nError translating event {$event->id}: " . $e->getMessage());
             }
         }
 
