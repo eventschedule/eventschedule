@@ -553,11 +553,6 @@ class EventController extends Controller
         
         $event = $this->eventRepo->saveEvent($request, null, $curatorId);
 
-        if ($request->name_en) {
-            $event->slug = \Str::slug($request->name_en);
-            $event->save();
-        }
-
         if ($request->social_image) {
             $file = new \Illuminate\Http\UploadedFile($request->social_image, basename($request->social_image));
             $filename = strtolower('flyer_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
