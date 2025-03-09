@@ -147,11 +147,11 @@ class TranslateData extends Command
 
             try {
                 if ($event->name && !$event->name_en) {
-                    $event->name_en = GeminiUtils::translate($event->name, null, 'en');
+                    $event->name_en = GeminiUtils::translate($event->name, $event->getLanguageCode(), 'en');
                 }
 
                 if ($event->description && !$event->description_en) {
-                    $event->description_en = GeminiUtils::translate($event->description, null, 'en');
+                    $event->description_en = GeminiUtils::translate($event->description, $event->getLanguageCode(), 'en');
                 }
 
                 $event->save();
