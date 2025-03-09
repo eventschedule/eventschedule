@@ -37,6 +37,11 @@ class TranslateData extends Command
     {
         $this->info('Starting translation of roles...');
 
+        if (! config('services.google.gemini_key')) {
+            $this->info('No Gemini API key found, skipping...');
+            return;
+        }
+
         // Get all roles that don't have English translations
         $roles = Role::where(function($query) {
                 $query->whereNotNull('name')
