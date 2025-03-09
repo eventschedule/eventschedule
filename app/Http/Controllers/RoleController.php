@@ -190,6 +190,14 @@ class RoleController extends Controller
 
         if ($request->lang) {
             app()->setLocale($request->lang);
+
+            if ($request->lang == 'en') {
+                session()->put('translate', true);
+            } else {
+                session()->forget('translate');
+            }
+        } else if (session()->has('translate')) {
+            app()->setLocale('en');
         } else {
             app()->setLocale($role->language_code);
         }
