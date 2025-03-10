@@ -68,6 +68,7 @@ class TranslateData extends Command
                 $query->whereNotNull('state')
                       ->whereNull('state_en');
             })
+            ->orderBy('id', 'asc')
             ->get();
 
         $bar = $this->output->createProgressBar(count($roles));
@@ -138,6 +139,7 @@ class TranslateData extends Command
             $query->whereNotNull('description')
                 ->whereNull('description_en');
         })
+        ->orderBy('id', 'asc')
         ->get();
 
         $bar = $this->output->createProgressBar(count($events));
@@ -190,6 +192,7 @@ class TranslateData extends Command
                             $query->whereNull('name_translated')
                                   ->orWhereNull('description_translated');
                         })
+                        ->orderBy('id', 'asc')
                         ->get();
 
         $bar = $this->output->createProgressBar(count($eventRoles));
