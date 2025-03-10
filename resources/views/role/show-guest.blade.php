@@ -32,11 +32,11 @@
             @else
             <div style="height: 42px;"></div>
             @endif
-            <div class="flex justify-between items-center mb-4">
-              <h3 class="text-[32px] font-semibold leading-10 text-[#151B26]">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+              <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] mb-4 sm:mb-0">
                 {{ $role->translatedName() }}
               </h3>
-              <div class="flex flex-row gap-4">
+              <div class="flex flex-row gap-4 w-full sm:w-auto justify-center sm:justify-start mt-4 lg:mt-0">
               @if ($role->isCurator() && $role->is_open)
               <a
                 href="{{ route('role.follow', ['subdomain' => $role->subdomain], ['add_event' => true]) }}"

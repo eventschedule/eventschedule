@@ -137,7 +137,7 @@
             @endif
             <a
             href="https://app.eventschedule.com/sign_up" target="_blank"
-            class="inline-flex items-center justify-center"
+            class="hidden md:inline-flex items-center justify-center"
             >
             <button
                 type="button"

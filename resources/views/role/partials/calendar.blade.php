@@ -291,7 +291,7 @@
                             <h3 class="pr-16 font-semibold text-gray-900">
                                 {{ $eventName }}
                             </h3>
-                            <dl class="mt-2 flex flex-col text-gray-500 xl:flex-row">
+                            <dl class="pr-16 mt-2 flex flex-col text-gray-500 xl:flex-row">
                                 <div class="flex items-start space-x-3">
                                     <dt class="mt-0.5">
                                         <span class="sr-only">Date</span>
@@ -325,18 +325,18 @@
                                 </div>
                             </dl>
                         </div>
-                        @if ($canEdit)
-                        <div class="absolute right-4 text-right">
+                        <div class="absolute right-4 text-right top-6">
                             @if ($each->getImageUrl())
-                            <img src="{{ $each->getImageUrl() }}" class="h-14 w-14 mb-4 flex-none rounded-lg object-cover">
+                            <img src="{{ $each->getImageUrl() }}" class="h-16 w-16 flex-none rounded-lg object-cover mb-2">
                             @endif
+                            @if ($canEdit)
                             <a href="{{ isset($role) ? config('app.url') . route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)], false) : config('app.url') . route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($each->id)], false) }}"
                                 class="text-[#4E81FA] hover:text-[#4E81FA] hover:underline"
                                 onclick="event.stopPropagation();">
                                 {{ __('messages.edit') }}
                             </a>
+                            @endif
                         </div>
-                        @endif
                     </li>
                 </a>
                 @endforeach
