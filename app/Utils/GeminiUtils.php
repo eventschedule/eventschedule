@@ -152,12 +152,23 @@ class GeminiUtils
         $prompt = "Translate this text from {$from} to {$to}. Return only the translation as a JSON string:\n{$text}";
         
         $response = self::sendRequest($prompt);
-        \Log::info("Translation response: " . json_encode($response));
         
-        if (is_array($response) && isset($response['translation'])) {
-            return $response['translation'];
+        $value = null;
+
+        if (is_array($response)) {
+            if (isset($response['translation'])) {
+                $value = $response['translation'];
+            }
+            if (isset($response['en'])) {
+                $value = $response['en']; 
+            }
         }
 
-        return $response;
+        if (! is_string($value)) {
+            \Log::info("Error: translation response: " . json_encode($response));
+            $value = null;
+        }
+
+        return $value;
     }
 }   
