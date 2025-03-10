@@ -31,9 +31,16 @@ class TranslateData extends Command
             return;
         }
 
-        $this->translateRoles();
+        $events = Event::all();
+        foreach ($events as $event) {
+            $event->name_en = null;
+            $event->description_en = null;
+            $event->save();
+        }
+
+        //$this->translateRoles();
         $this->translateEvents();
-        $this->translateCuratorEvents();
+        //$this->translateCuratorEvents();
     }
 
     public function translateRoles()
@@ -137,21 +144,25 @@ class TranslateData extends Command
         $bar->start();
 
         foreach ($events as $event) {
+            $this->info("\nTranslating event {$event->id}...");
             if ($event->getLanguageCode() == 'en') {
                 $event->name_en = '';
                 $event->description_en = '';
                 $event->save();
 
+                $this->info("Skipping event {$event->id} as it is already in English");
                 continue;
             }
 
             try {
                 if ($event->name && !$event->name_en) {
                     $event->name_en = GeminiUtils::translate($event->name, $event->getLanguageCode(), 'en');
+                    $this->info("Translated event {$event->id} name to {$event->name_en}");
                 }
 
                 if ($event->description && !$event->description_en) {
                     $event->description_en = GeminiUtils::translate($event->description, $event->getLanguageCode(), 'en');
+                    $this->info("Translated event {$event->id} description to {$event->description_en}");
                 }
 
                 $event->save();
