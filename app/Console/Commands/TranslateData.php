@@ -156,7 +156,7 @@ class TranslateData extends Command
                 continue;
             }
 
-            try {
+            //try {
                 if ($event->name && !$event->name_en) {
                     $event->name_en = GeminiUtils::translate($event->name, $event->getLanguageCode(), 'en');
                     $this->info("Translated event {$event->id} name to {$event->name_en}");
@@ -171,9 +171,9 @@ class TranslateData extends Command
                 $bar->advance();
 
                 sleep(rand(12, 18));
-            } catch (\Exception $e) {
-                $this->error("\nError translating event {$event->id}: " . $e->getMessage());
-            }
+            //} catch (\Exception $e) {
+            //    $this->error("\nError translating event {$event->id}: " . $e->getMessage());
+            //}
         }
 
         $bar->finish();
