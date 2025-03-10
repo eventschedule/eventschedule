@@ -1,9 +1,9 @@
 {
-    "name": "laravel/laravel",
+    "name": "eventschedule/eventschedule",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
-    "license": "MIT",
+    "description": "The open-source platform to create calendars, sell tickets and streamline event check-ins with QR codes",
+    "keywords": ["event", "schedule", "calendar", "ticket", "booking", "event schedule", "event calendar", "event booking", "event ticket", "event booking system", "event calendar system", "event ticket system"],
+    "license": "AAL",
     "require": {
         "php": "^8.2",
         "ext-gd": "*",
