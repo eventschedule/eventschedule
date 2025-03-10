@@ -290,6 +290,7 @@ class EventRepo
             
         $subdomainRole = Role::where('subdomain', $subdomain)->first();
         $slugRole = Role::where('subdomain', $slug)->first();        
+        $timezone = auth()->user() ? auth()->user()->timezone : $subdomainRole->timezone;
 
         if ($subdomainRole && $slugRole) {
             $venue = null;
@@ -315,7 +316,10 @@ class EventRepo
                         })
                         ->where('venue_id', $venue->id)
                         ->where(function ($query) use ($eventDate) {
-                            $query->whereDate('starts_at', $eventDate)
+                            $query->whereBetween('starts_at', [
+                                $eventDate->copy()->startOfDay()->setTimezone($timezone), 
+                                $eventDate->copy()->endOfDay()->setTimezone($timezone),
+                            ])
                                 ->orWhere(function ($query) use ($eventDate) {
                                     $query->whereNotNull('days_of_week')
                                         ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1])
@@ -355,8 +359,12 @@ class EventRepo
         if ($eventDate) {                
             $event = Event::with(['venue', 'roles'])
                         ->where('slug', $slug)
-                        ->where(function ($query) use ($eventDate) {
-                            $query->whereDate('starts_at', $eventDate)
+                        ->where(function ($query) use ($eventDate, $timezone) {
+                            // Convert local date to UTC range for comparison
+                            $startOfDay = $eventDate->copy()->startOfDay()->setTimezone($timezone);
+                            $endOfDay = $eventDate->copy()->endOfDay()->setTimezone($timezone);
+                            
+                            $query->whereBetween('starts_at', [$startOfDay, $endOfDay])
                                 ->orWhere(function ($query) use ($eventDate) {
                                     $query->whereNotNull('days_of_week')
                                         ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDate->dayOfWeek + 1])
@@ -410,7 +418,13 @@ class EventRepo
 
         if ($eventDate) {
             $event = Event::with(['venue', 'roles'])
-                        ->whereDate('starts_at', $eventDate)
+                        ->where(function ($query) use ($eventDate, $timezone) {
+                            // Convert local date to UTC range for comparison
+                            $startOfDay = $eventDate->copy()->startOfDay()->setTimezone($timezone);
+                            $endOfDay = $eventDate->copy()->endOfDay()->setTimezone($timezone);
+                            
+                            $query->whereBetween('starts_at', [$startOfDay, $endOfDay]);
+                        })
                         ->where(function($query) use ($subdomain) {
                             $query->whereHas('venue', function($q) use ($subdomain) {
                                 $q->where('subdomain', $subdomain);
