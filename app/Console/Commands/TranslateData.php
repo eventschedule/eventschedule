@@ -31,16 +31,9 @@ class TranslateData extends Command
             return;
         }
 
-        $events = Event::all();
-        foreach ($events as $event) {
-            $event->name_en = null;
-            $event->description_en = null;
-            $event->save();
-        }
-
-        //$this->translateRoles();
+        $this->translateRoles();
         $this->translateEvents();
-        //$this->translateCuratorEvents();
+        $this->translateCuratorEvents();
     }
 
     public function translateRoles()
@@ -87,7 +80,7 @@ class TranslateData extends Command
                 continue;
             }
 
-            try {
+            //try {
                 if ($role->name && !$role->name_en) {
                     $role->name_en = GeminiUtils::translate($role->name, $role->language_code, 'en');
                 }
@@ -116,9 +109,9 @@ class TranslateData extends Command
                 $bar->advance();
 
                 sleep(rand(12, 18));
-            } catch (\Exception $e) {
-                $this->error("\nError translating role {$role->id}: " . $e->getMessage());
-            }
+            //} catch (\Exception $e) {
+            //    $this->error("\nError translating role {$role->id}: " . $e->getMessage());
+            //}
         }
 
         $bar->finish();
@@ -207,7 +200,7 @@ class TranslateData extends Command
                 continue;
             } 
 
-            try {
+            //try {
                 if ($eventRole->event->name && !$eventRole->name_translated) {
                     $eventRole->name_translated = GeminiUtils::translate($eventRole->event->name, $eventRole->event->getLanguageCode(), $eventRole->role->language_code) ?? '';
                 }
@@ -220,9 +213,9 @@ class TranslateData extends Command
                 $bar->advance();
 
                 sleep(rand(12, 18));
-            } catch (\Exception $e) {
-                $this->error("\nError translating event role {$eventRole->id}: " . $e->getMessage());
-            }
+            //} catch (\Exception $e) {
+            //    $this->error("\nError translating event role {$eventRole->id}: " . $e->getMessage());
+            //}
         }
 
         $bar->finish();
