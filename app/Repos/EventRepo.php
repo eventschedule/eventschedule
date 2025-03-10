@@ -287,7 +287,7 @@ class EventRepo
     {
         $event = null;
         $eventDate = $date ? Carbon::parse($date) : null;
-            
+        
         $subdomainRole = Role::where('subdomain', $subdomain)->first();
         $slugRole = Role::where('subdomain', $slug)->first();        
         $timezone = auth()->user() ? auth()->user()->timezone : $subdomainRole->timezone;
@@ -317,8 +317,8 @@ class EventRepo
                         ->where('venue_id', $venue->id)
                         ->where(function ($query) use ($eventDate, $timezone) {
                             $query->whereBetween('starts_at', [
-                                $eventDate->copy()->startOfDay()->setTimezone($timezone), 
-                                $eventDate->copy()->endOfDay()->setTimezone($timezone),
+                                $eventDate->copy()->setTimezone($timezone)->startOfDay()->setTimezone('UTC'),
+                                $eventDate->copy()->setTimezone($timezone)->endOfDay()->setTimezone('UTC'),                                                        
                             ])
                                 ->orWhere(function ($query) use ($eventDate) {
                                     $query->whereNotNull('days_of_week')
@@ -361,8 +361,8 @@ class EventRepo
                         ->where('slug', $slug)
                         ->where(function ($query) use ($eventDate, $timezone) {
                             // Convert local date to UTC range for comparison
-                            $startOfDay = $eventDate->copy()->startOfDay()->setTimezone($timezone);
-                            $endOfDay = $eventDate->copy()->endOfDay()->setTimezone($timezone);
+                            $startOfDay = $eventDate->copy()->setTimezone($timezone)->startOfDay()->setTimezone('UTC');
+                            $endOfDay = $eventDate->copy()->setTimezone($timezone)->endOfDay()->setTimezone('UTC');
                             
                             $query->whereBetween('starts_at', [$startOfDay, $endOfDay])
                                 ->orWhere(function ($query) use ($eventDate) {
@@ -420,8 +420,8 @@ class EventRepo
             $event = Event::with(['venue', 'roles'])
                         ->where(function ($query) use ($eventDate, $timezone) {
                             // Convert local date to UTC range for comparison
-                            $startOfDay = $eventDate->copy()->startOfDay()->setTimezone($timezone);
-                            $endOfDay = $eventDate->copy()->endOfDay()->setTimezone($timezone);
+                            $startOfDay = $eventDate->copy()->setTimezone($timezone)->startOfDay()->setTimezone('UTC');
+                            $endOfDay = $eventDate->copy()->setTimezone($timezone)->endOfDay()->setTimezone('UTC');
                             
                             $query->whereBetween('starts_at', [$startOfDay, $endOfDay]);
                         })
