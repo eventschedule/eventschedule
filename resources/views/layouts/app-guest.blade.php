@@ -117,7 +117,7 @@
         </a> 
         <div class="flex flex-row items-center gap-x-3 md:gap-x-12">
             @if ($role->language_code != 'en')
-                <div class="flex items-center space-x-2 text-gray-900 dark:text-gray-100">
+                <div class="flex items-center space-x-2 text-gray-900 dark:text-gray-100" translate="no">
                     @if (! session()->has('translate'))
                         <span>{{ strtoupper($role->language_code) }}</span>
                     @else
