@@ -2,7 +2,7 @@
     "name": "eventschedule/eventschedule",
     "type": "project",
     "description": "The open-source platform to create calendars, sell tickets and streamline event check-ins with QR codes",
-    "keywords": ["event", "schedule", "calendar", "ticket", "booking", "event schedule", "event calendar", "event booking", "event ticket", "event booking system", "event calendar system", "event ticket system"],
+    "keywords": ["event", "schedule", "tickets"],
     "license": "AAL",
     "require": {
         "php": "^8.2",
