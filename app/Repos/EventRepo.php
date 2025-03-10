@@ -315,7 +315,7 @@ class EventRepo
                             $query->where('role_id', $role->id);
                         })
                         ->where('venue_id', $venue->id)
-                        ->where(function ($query) use ($eventDate) {
+                        ->where(function ($query) use ($eventDate, $timezone) {
                             $query->whereBetween('starts_at', [
                                 $eventDate->copy()->startOfDay()->setTimezone($timezone), 
                                 $eventDate->copy()->endOfDay()->setTimezone($timezone),
