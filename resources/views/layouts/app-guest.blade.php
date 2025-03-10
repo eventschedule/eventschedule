@@ -110,7 +110,7 @@
     @if (! request()->embed)
     <header class="bg-[#f9fafb] dark:bg-[#151B26]">
         <div
-        class="container mx-auto flex flex-row justify-between items-center py-7 px-5"
+        class="container mx-auto flex flex-row justify-between items-center py-7 pr-5"
         >
         <a href="https://www.eventschedule.com" target="_blank">
             <x-application-logo />
