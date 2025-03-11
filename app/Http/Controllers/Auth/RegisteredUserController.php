@@ -45,10 +45,6 @@ class RegisteredUserController extends Controller
             ]);
         }
 
-        if (! config('app.hosted') && User::count() > 0) {
-            return redirect()->route('login');
-        }
-
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => array_merge(
@@ -93,6 +89,10 @@ class RegisteredUserController extends Controller
             
             Artisan::call('migrate', ['--force' => true]);      
         }        
+
+        if (! config('app.hosted') && User::count() > 0) {
+            return redirect()->route('login');
+        }
 
         $user = User::create([
             'name' => $request->name,
