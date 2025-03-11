@@ -60,7 +60,6 @@ class AppController extends Controller
 
     public function translateData()
     {
-        return;
         $requestSecret = request()->get('secret');
         $serverSecret = config('app.cron_secret');
         
