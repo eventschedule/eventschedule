@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\Event;
 use App\Models\EventRole;
 use App\Utils\GeminiUtils;
+use App\Utils\UrlUtils;
 
 class Translate extends Command
 {
@@ -15,7 +16,7 @@ class Translate extends Command
      *
      * @var string
      */
-    protected $signature = 'app:translate {--role_id= : Translate only a specific role by ID} {--event_id= : Translate only a specific event by ID}';
+    protected $signature = 'app:translate {--role_id= : Translate only a specific role by ID} {--event_id= : Translate only a specific event by ID} {--event_slug= : Translate only a specific event by slug}';
 
     /**
      * The console command description.
@@ -33,6 +34,30 @@ class Translate extends Command
 
         $roleId = $this->option('role_id');
         $eventId = $this->option('event_id');
+        $eventSlug = $this->option('event_slug');
+
+        // Decode IDs if they are encoded strings
+        if ($roleId && !is_numeric($roleId)) {
+            $roleId = UrlUtils::decodeId($roleId);
+            $this->info("Decoded role ID: $roleId");
+        }
+
+        if ($eventId && !is_numeric($eventId)) {
+            $eventId = UrlUtils::decodeId($eventId);
+            $this->info("Decoded event ID: $eventId");
+        }
+
+        // Resolve event_slug to event_id if provided
+        if ($eventSlug && !$eventId) {
+            $event = Event::where('slug', $eventSlug)->first();
+            if ($event) {
+                $eventId = $event->id;
+                $this->info("Resolved event slug '$eventSlug' to event ID: $eventId");
+            } else {
+                $this->error("No event found with slug: $eventSlug");
+                return;
+            }
+        }
 
         if ($roleId) {
             $this->translateRoles($roleId);
