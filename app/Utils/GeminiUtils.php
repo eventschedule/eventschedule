@@ -153,7 +153,7 @@ class GeminiUtils
         
         $response = self::sendRequest($prompt);
         \Log::info("Translation response: " . json_encode($response));
-            
+        
         $value = null;
 
         if (is_array($response)) {
@@ -170,13 +170,9 @@ class GeminiUtils
         }
 
         $value = json_decode('"' . $value . '"');
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            \Log::info("Error decoding unicode: " . json_last_error_msg());
-            $value = null;
-        }
-
+        
         // Then check if we have a valid string
-        if (! is_string($value)) {
+        if (! $value) {
             \Log::info("Error: translation response: " . json_encode($response));
             $value = null;
         }
