@@ -278,11 +278,13 @@ class Translate extends Command
         $query = EventRole::with('role', 'event')
                     ->whereHas('role', function($query) {
                         $query->where('type', 'curator');
-                    })
+                    });
+                    /*
                     ->where(function($query) {
                         $query->whereNull('name_translated')
                               ->orWhereNull('description_translated');
                     });
+                    */
         
         if ($eventId) {
             $query->whereHas('event', function($query) use ($eventId) {
@@ -302,19 +304,6 @@ class Translate extends Command
             $this->info("Found " . count($eventRoles) . " curator events needing translation");
             $this->info("SQL Query: " . $query->toSql());
             $this->info("Query Bindings: " . json_encode($query->getBindings()));
-            
-            // Dump the first few records to inspect
-            if (count($eventRoles) > 0) {
-                $this->info("Sample records that matched the query:");
-                foreach ($eventRoles->take(3) as $index => $er) {
-                    $this->info("Record #{$index}:");
-                    $this->info("  ID: {$er->id}");
-                    $this->info("  Event ID: {$er->event_id}");
-                    $this->info("  Role ID: {$er->role_id}");
-                    $this->info("  name_translated: " . ($er->name_translated === null ? 'NULL' : "'{$er->name_translated}'"));
-                    $this->info("  description_translated: " . ($er->description_translated === null ? 'NULL' : "'{$er->description_translated}'"));
-                }
-            }
         }
 
         $bar = $this->output->createProgressBar(count($eventRoles));
