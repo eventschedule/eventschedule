@@ -278,13 +278,11 @@ class Translate extends Command
         $query = EventRole::with('role', 'event')
                     ->whereHas('role', function($query) {
                         $query->where('type', 'curator');
-                    });
-                    /*
+                    })
                     ->where(function($query) {
                         $query->whereNull('name_translated')
                               ->orWhereNull('description_translated');
                     });
-                    */
         
         if ($eventId) {
             $query->whereHas('event', function($query) use ($eventId) {

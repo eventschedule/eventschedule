@@ -152,7 +152,6 @@ class GeminiUtils
         $prompt = "Translate this text from {$from} to {$to}. Return only the translation as a JSON string:\n{$text}";
         
         $response = self::sendRequest($prompt);
-        \Log::info("Translation response: " . json_encode($response));
 
         $value = null;
 
@@ -174,7 +173,7 @@ class GeminiUtils
         }
         
         // Then check if we have a valid string
-        if (! $value) {
+        if (! $value || ! is_string($value)) {
             \Log::info("Error: translation response: " . json_encode($response) . " => " . $value);
             $value = null;
         }
