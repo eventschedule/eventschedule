@@ -16,7 +16,7 @@ class Translate extends Command
      *
      * @var string
      */
-    protected $signature = 'app:translate {--role_id= : Translate only a specific role by ID} {--event_id= : Translate only a specific event by ID} {--event_slug= : Translate only a specific event by slug}';
+    protected $signature = 'app:translate {--role_id= : Translate only a specific role by ID} {--event_id= : Translate only a specific event by ID} {--event_slug= : Translate only a specific event by slug} {--debug : Enable debug mode with verbose logging}';
 
     /**
      * The console command description.
@@ -35,6 +35,11 @@ class Translate extends Command
         $roleId = $this->option('role_id');
         $eventId = $this->option('event_id');
         $eventSlug = $this->option('event_slug');
+        $debug = $this->option('debug');
+
+        if ($debug) {
+            $this->info('Debug mode enabled - verbose logging will be shown');
+        }
 
         // Decode IDs if they are encoded strings
         if ($roleId && !is_numeric($roleId)) {
@@ -75,6 +80,7 @@ class Translate extends Command
     public function translateRoles($roleId = null)
     {
         $this->info('Starting translation of roles...');
+        $debug = $this->option('debug');
 
         // Get all roles that don't have English translations
         $query = Role::where(function($query) {
@@ -109,6 +115,10 @@ class Translate extends Command
         $bar->start();
 
         foreach ($roles as $role) {
+            if ($debug) {
+                $this->info("\nProcessing role ID: {$role->id}, Name: {$role->name}, Language: {$role->language_code}");
+            }
+            
             if ($role->language_code == 'en') {
                 $role->name_en = '';
                 $role->description_en = '';
@@ -118,16 +128,25 @@ class Translate extends Command
                 $role->state_en = '';
                 $role->save();
 
+                if ($debug) {
+                    $this->info("Skipping translation for English role ID: {$role->id}");
+                }
                 continue;
             }
 
             //try {
                 if ($role->name && !$role->name_en) {
                     $role->name_en = GeminiUtils::translate($role->name, $role->language_code, 'en');
+                    if ($debug) {
+                        $this->info("Translated name: '{$role->name}' → '{$role->name_en}'");
+                    }
                 }
 
                 if ($role->description && !$role->description_en) {
                     $role->description_en = GeminiUtils::translate($role->description, $role->language_code, 'en');
+                    if ($debug) {
+                        $this->info("Translated description from {$role->language_code} to English");
+                    }
                 }
 
                 if ($role->address1 && !$role->address1_en) {
@@ -147,6 +166,10 @@ class Translate extends Command
                 }
 
                 $role->save();
+                if ($debug) {
+                    $this->info("Saved translations for role ID: {$role->id}");
+                }
+                
                 $bar->advance();
 
                 sleep(rand(12, 18));
@@ -162,6 +185,7 @@ class Translate extends Command
     public function translateEvents($eventId = null)
     {
         $this->info('Starting translation of events...');
+        $debug = $this->option('debug');
 
         // Get all events that don't have English translations
         $query = Event::with('roles')
@@ -185,24 +209,40 @@ class Translate extends Command
         $bar->start();
 
         foreach ($events as $event) {
-            $this->info("\nTranslating event {$event->id}...");
+            if ($debug) {
+                $this->info("\nProcessing event ID: {$event->id}, Name: {$event->name}, Language: {$event->getLanguageCode()}");
+            } else {
+                $this->info("\nTranslating event {$event->id}...");
+            }
+            
             if ($event->getLanguageCode() == 'en') {
                 $event->name_en = '';
                 $event->description_en = '';
                 $event->save();
 
-                $this->info("Skipping event {$event->id} as it is already in English");
+                if ($debug) {
+                    $this->info("Skipping translation for English event ID: {$event->id}");
+                } else {
+                    $this->info("Skipping event {$event->id} as it is already in English");
+                }
                 continue;
             }
 
             //try {
                 if ($event->name && !$event->name_en) {
                     $event->name_en = GeminiUtils::translate($event->name, $event->getLanguageCode(), 'en');
-                    $this->info("Translated event {$event->id} name to {$event->name_en}");
+                    if ($debug) {
+                        $this->info("Translated name: '{$event->name}' → '{$event->name_en}'");
+                    } else {
+                        $this->info("Translated event {$event->id} name to {$event->name_en}");
+                    }
                 }
 
                 if ($event->description && !$event->description_en) {
                     $event->description_en = GeminiUtils::translate($event->description, $event->getLanguageCode(), 'en');
+                    if ($debug) {
+                        $this->info("Translated description from {$event->language_code} to English");
+                    }
                     $this->info("Translated event {$event->id} description to {$event->description_en}");
                 }
 
@@ -222,6 +262,7 @@ class Translate extends Command
     public function translateCuratorEvents($eventId = null, $roleId = null)
     {
         $this->info('Starting translation of curator events...');
+        $debug = $this->option('debug');
 
         $query = EventRole::with('role', 'event')
                     ->whereHas('role', function($query) {
@@ -250,17 +291,29 @@ class Translate extends Command
         $bar->start();  
 
         foreach ($eventRoles as $eventRole) {        
+            if ($debug) {
+                $this->info("\nProcessing event role ID: {$eventRole->id}, Event ID: {$eventRole->event_id}, Role ID: {$eventRole->role_id}");
+                $this->info("Event language: {$eventRole->event->getLanguageCode()}, Role language: {$eventRole->role->language_code}");
+            }
+            
             if ($eventRole->event->getLanguageCode() == $eventRole->role->language_code) {
                 $eventRole->name_translated = '';
                 $eventRole->description_translated = '';
                 $eventRole->save();
 
+                if ($debug) {
+                    $this->info("Skipping translation as languages match: {$eventRole->event->getLanguageCode()}");
+                }
                 continue;
             } 
 
             //try {
                 if ($eventRole->event->name && !$eventRole->name_translated) {
                     $eventRole->name_translated = GeminiUtils::translate($eventRole->event->name, $eventRole->event->getLanguageCode(), $eventRole->role->language_code) ?? '';
+                    if ($debug) {
+                        $this->info("Translated event name from {$eventRole->event->getLanguageCode()} to {$eventRole->role->language_code}");
+                        $this->info("Original: '{$eventRole->event->name}' → Translated: '{$eventRole->name_translated}'");
+                    }
                 }
 
                 if ($eventRole->event->description && !$eventRole->description_translated) {
