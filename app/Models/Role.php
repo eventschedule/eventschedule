@@ -607,80 +607,67 @@ class Role extends Model implements MustVerifyEmail
 
     public function translatedName()
     {
-        if (! $this->name_en) {
-            return $this->name;
+        $value = $this->name;
+
+        if ($this->name_en && (session()->has('translate') || request()->lang == 'en')) {
+            $value = $this->name_en;
         }
 
-        if (session()->has('translate') || request()->lang == 'en') {
-            return $this->name_en;
-        }
-
-        return $this->name;
+        return $value;
     }
 
     public function translatedDescription()
     {
-        if (! $this->description_html_en) {
-            return $this->description_html;
+        $value = $this->description_html;
+
+        if ($this->description_html_en && (session()->has('translate') || request()->lang == 'en')) {
+            $value = $this->description_html_en;
         }
 
-        if (session()->has('translate') || request()->lang == 'en') {
-            return $this->description_html_en;
-        }
-
-        return $this->description_html;
+        return $value;
     }   
 
     public function translatedAddress1()
     {
-        if (! $this->address1_en) {
-            return $this->address1;
-        }
-        
-        if (session()->has('translate') || request()->lang == 'en') {
-            return $this->address1_en;
+        $value = $this->address1;
+
+        if ($this->address1_en && (session()->has('translate') || request()->lang == 'en')) {
+            $value = $this->address1_en;
         }
 
-        return $this->address1;
+        return $value;
     }   
 
     public function translatedAddress2()
     {
-        if (! $this->address2_en) {
-            return $this->address2;
+        $value = $this->address2;
+
+        if ($this->address2_en && (session()->has('translate') || request()->lang == 'en')) {
+            $value = $this->address2_en;
         }
 
-        if (session()->has('translate') || request()->lang == 'en') {
-            return $this->address2_en;
-        }
-
-        return $this->address2;
+        return $value;
     }
 
     public function translatedCity()
     {
-        if (! $this->city_en) {
-            return $this->city;
-        }
-     
-        if (session()->has('translate') || request()->lang == 'en') {   
-            return $this->city_en;
+        $value = $this->city;
+
+        if ($this->city_en && (session()->has('translate') || request()->lang == 'en')) {
+            $value = $this->city_en;
         }
 
-        return $this->city;
+        return $value;
     }
     
     public function translatedState()
     {
-        if (! $this->state_en) {
-            return $this->state;
-        }
-        
-        if (session()->has('translate') || request()->lang == 'en') {
-            return $this->state_en;
+        $value = $this->state;
+
+        if ($this->state_en && (session()->has('translate') || request()->lang == 'en')) {
+            $value = $this->state_en;
         }
 
-        return $this->state;
+        return $value;
     }
-    
 }
