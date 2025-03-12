@@ -153,7 +153,7 @@ class GeminiUtils
         
         $response = self::sendRequest($prompt);
         \Log::info("Translation response: " . json_encode($response));
-        
+
         $value = null;
 
         if (is_array($response)) {
@@ -173,7 +173,7 @@ class GeminiUtils
         
         // Then check if we have a valid string
         if (! $value) {
-            \Log::info("Error: translation response: " . json_encode($response));
+            \Log::info("Error: translation response: " . json_encode($response) . " => " . $value);
             $value = null;
         }
 
