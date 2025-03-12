@@ -29,6 +29,7 @@
 - 💻 **Support for Online Events:** Use the platform to sell tickets to online events.  
 - 👥 **Team Scheduling:** Collaborate with team members to manage availability and coordinate event schedules.  
 - 🌍 **Multi-Language Support:** Provide a localized experience with support for multiple languages.
+- 🤖 **AI Translation:** Automatically translate your entire schedule into multiple languages using AI.
 - 🎫 **Multiple Ticket Types:** Offer different ticket tiers, such as Standard or VIP, to meet various audience needs.  
 - 🔢 **Ticket Quantity Limits:** Set a maximum number of tickets available for each event to manage capacity.  
 - ⏳ **Ticket Reservation System:** Allow attendees to reserve tickets with a configurable release time before purchase.  
