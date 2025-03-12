@@ -164,6 +164,10 @@ class GeminiUtils
                 $value = $response['en']; 
             }
         }
+        
+        if (is_array($value)) {
+            $value = implode(' ', array_filter($value, 'trim'));
+        }
 
         if (! is_string($value)) {
             \Log::info("Error: translation response: " . json_encode($response));
