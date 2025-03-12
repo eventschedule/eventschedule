@@ -140,60 +140,56 @@ class Translate extends Command
                 continue;
             }
 
-            //try {
-                if ($role->name && !$role->name_en) {
-                    $role->name_en = GeminiUtils::translate($role->name, $role->language_code, 'en');
-                    if ($debug) {
-                        $this->info("Translated name from {$role->language_code} to en: '{$role->name}' → '{$role->name_en}'");
-                    }
-                }
-
-                if ($role->description && !$role->description_en) {
-                    $role->description_en = GeminiUtils::translate($role->description, $role->language_code, 'en');
-                    if ($debug) {
-                        $this->info("Translated description from {$role->language_code} to en");
-                    }
-                }
-
-                if ($role->address1 && !$role->address1_en) {
-                    $role->address1_en = GeminiUtils::translate($role->address1, $role->language_code, 'en');
-                    if ($debug) {
-                        $this->info("Translated address1 from {$role->language_code} to en: '{$role->address1}' → '{$role->address1_en}'");
-                    }
-                }
-
-                if ($role->address2 && !$role->address2_en) {
-                    $role->address2_en = GeminiUtils::translate($role->address2, $role->language_code, 'en');
-                    if ($debug) {
-                        $this->info("Translated address2 from {$role->language_code} to en: '{$role->address2}' → '{$role->address2_en}'");
-                    }
-                }
-
-                if ($role->city && !$role->city_en) {
-                    $role->city_en = GeminiUtils::translate($role->city, $role->language_code, 'en');
-                    if ($debug) {
-                        $this->info("Translated city from {$role->language_code} to en: '{$role->city}' → '{$role->city_en}'");
-                    }
-                }
-
-                if ($role->state && !$role->state_en) {
-                    $role->state_en = GeminiUtils::translate($role->state, $role->language_code, 'en');
-                    if ($debug) {
-                        $this->info("Translated state from {$role->language_code} to en: '{$role->state}' → '{$role->state_en}'");
-                    }
-                }
-
-                $role->save();
+            if ($role->name && !$role->name_en) {
+                $role->name_en = GeminiUtils::translate($role->name, $role->language_code, 'en');
                 if ($debug) {
-                    $this->info("Saved translations for role ID: {$role->id}");
+                    $this->info("Translated name from {$role->language_code} to en: '{$role->name}' → '{$role->name_en}'");
                 }
-                
-                $bar->advance();
+            }
 
-                sleep(rand(12, 18));
-            //} catch (\Exception $e) {
-            //    $this->error("\nError translating role {$role->id}: " . $e->getMessage());
-            //}
+            if ($role->description && !$role->description_en) {
+                $role->description_en = GeminiUtils::translate($role->description, $role->language_code, 'en');
+                if ($debug) {
+                    $this->info("Translated description from {$role->language_code} to en: '{$role->description}' → '{$role->description_en}'");
+                }
+            }
+
+            if ($role->address1 && !$role->address1_en) {
+                $role->address1_en = GeminiUtils::translate($role->address1, $role->language_code, 'en');
+                if ($debug) {
+                    $this->info("Translated address1 from {$role->language_code} to en: '{$role->address1}' → '{$role->address1_en}'");
+                }
+            }
+
+            if ($role->address2 && !$role->address2_en) {
+                $role->address2_en = GeminiUtils::translate($role->address2, $role->language_code, 'en');
+                if ($debug) {
+                    $this->info("Translated address2 from {$role->language_code} to en: '{$role->address2}' → '{$role->address2_en}'");
+                }
+            }
+
+            if ($role->city && !$role->city_en) {
+                $role->city_en = GeminiUtils::translate($role->city, $role->language_code, 'en');
+                if ($debug) {
+                    $this->info("Translated city from {$role->language_code} to en: '{$role->city}' → '{$role->city_en}'");
+                }
+            }
+
+            if ($role->state && !$role->state_en) {
+                $role->state_en = GeminiUtils::translate($role->state, $role->language_code, 'en');
+                if ($debug) {
+                    $this->info("Translated state from {$role->language_code} to en: '{$role->state}' → '{$role->state_en}'");
+                }
+            }
+
+            $role->save();
+            if ($debug) {
+                $this->info("Saved translations for role ID: {$role->id}");
+            }
+            
+            $bar->advance();
+
+            sleep(rand(12, 18));
         }
 
         $bar->finish();
@@ -250,29 +246,24 @@ class Translate extends Command
                 continue;
             }
 
-            //try {
-                if ($event->name && !$event->name_en) {
-                    $event->name_en = GeminiUtils::translate($event->name, $event->getLanguageCode(), 'en');
-                    if ($debug) {
-                        $this->info("Translated name from {$event->getLanguageCode()} to en: '{$event->name}' → '{$event->name_en}'");
-                    }
+            if ($event->name && !$event->name_en) {
+                $event->name_en = GeminiUtils::translate($event->name, $event->getLanguageCode(), 'en');
+                if ($debug) {
+                    $this->info("Translated name from {$event->getLanguageCode()} to en: '{$event->name}' → '{$event->name_en}'");
                 }
+            }
 
-                if ($event->description && !$event->description_en) {
-                    $event->description_en = GeminiUtils::translate($event->description, $event->getLanguageCode(), 'en');
-                    if ($debug) {
-                        $this->info("Translated description from {$event->getLanguageCode()} to en");
-                    }
-                    $this->info("Translated event {$event->id} description from {$event->getLanguageCode()} to en: '{$event->description_en}'");
+            if ($event->description && !$event->description_en) {
+                $event->description_en = GeminiUtils::translate($event->description, $event->getLanguageCode(), 'en');
+                if ($debug) {                    
+                    $this->info("Translated description from {$event->getLanguageCode()} to en: '{$event->description}' → '{$event->description_en}'");
                 }
+            }                
 
-                $event->save();
-                $bar->advance();
+            $event->save();
+            $bar->advance();
 
-                sleep(rand(12, 18));
-            //} catch (\Exception $e) {
-            //    $this->error("\nError translating event {$event->id}: " . $e->getMessage());
-            //}
+            sleep(rand(12, 18));
         }
 
         $bar->finish();
@@ -346,34 +337,30 @@ class Translate extends Command
                 continue;
             } 
 
-            //try {
-                if ($eventRole->event->name && !$eventRole->name_translated) {
-                    $fromLang = $eventRole->event->getLanguageCode();
-                    $toLang = $eventRole->role->language_code;
-                    $eventRole->name_translated = GeminiUtils::translate($eventRole->event->name, $fromLang, $toLang) ?? '';
-                    if ($debug) {
-                        $this->info("Translated event name from {$fromLang} to {$toLang}");
-                        $this->info("Original: '{$eventRole->event->name}' → Translated: '{$eventRole->name_translated}'");
-                    }
+            if ($eventRole->event->name && !$eventRole->name_translated) {
+                $fromLang = $eventRole->event->getLanguageCode();
+                $toLang = $eventRole->role->language_code;
+                $eventRole->name_translated = GeminiUtils::translate($eventRole->event->name, $fromLang, $toLang) ?? '';
+                if ($debug) {
+                    $this->info("Translated event name from {$fromLang} to {$toLang}");
+                    $this->info("Original: '{$eventRole->event->name}' → Translated: '{$eventRole->name_translated}'");
                 }
+            }
 
-                if ($eventRole->event->description && !$eventRole->description_translated) {
-                    $fromLang = $eventRole->event->getLanguageCode();
-                    $toLang = $eventRole->role->language_code;
-                    $eventRole->description_translated = GeminiUtils::translate($eventRole->event->description, $fromLang, $toLang) ?? '';
-                    if ($debug) {
-                        $this->info("Translated event description from {$fromLang} to {$toLang}");
-                        $this->info("Original length: " . strlen($eventRole->event->description) . ", Translated length: " . strlen($eventRole->description_translated));
-                    }
+            if ($eventRole->event->description && !$eventRole->description_translated) {
+                $fromLang = $eventRole->event->getLanguageCode();
+                $toLang = $eventRole->role->language_code;
+                $eventRole->description_translated = GeminiUtils::translate($eventRole->event->description, $fromLang, $toLang) ?? '';
+                if ($debug) {
+                    $this->info("Translated event description from {$fromLang} to {$toLang}");
+                    $this->info("Original length: " . strlen($eventRole->event->description) . ", Translated length: " . strlen($eventRole->description_translated));
                 }
+            }
 
-                $eventRole->save();
-                $bar->advance();
+            $eventRole->save();
+            $bar->advance();
 
-                sleep(rand(12, 18));
-            //} catch (\Exception $e) {
-            //    $this->error("\nError translating event role {$eventRole->id}: " . $e->getMessage());
-            //}
+            sleep(rand(12, 18));
         }
 
         $bar->finish();
