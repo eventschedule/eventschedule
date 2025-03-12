@@ -169,7 +169,9 @@ class GeminiUtils
             $value = implode(' ', array_filter($value, 'trim'));
         }
 
-        $value = json_decode('"' . $value . '"');
+        if (! $value) {
+            $value = json_decode('"' . $response . '"');
+        }
         
         // Then check if we have a valid string
         if (! $value) {
