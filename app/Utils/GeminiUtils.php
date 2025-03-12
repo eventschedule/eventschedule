@@ -168,13 +168,10 @@ class GeminiUtils
             $value = implode(' ', array_filter($value, 'trim'));
         }
 
-        // First try to decode any unicode escape sequences
-        if (is_string($value)) {
-            $value = json_decode('"' . $value . '"');
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                \Log::info("Error decoding unicode: " . json_last_error_msg());
-                $value = null;
-            }
+        $value = json_decode('"' . $value . '"');
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            \Log::info("Error decoding unicode: " . json_last_error_msg());
+            $value = null;
         }
 
         // Then check if we have a valid string
@@ -182,7 +179,7 @@ class GeminiUtils
             \Log::info("Error: translation response: " . json_encode($response));
             $value = null;
         }
-        
+
         return $value;
     }
 }   
