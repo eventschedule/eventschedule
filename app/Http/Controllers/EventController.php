@@ -484,6 +484,12 @@ class EventController extends Controller
             }
         }
 
+        if ($role->isCurator()) {
+            if (! $parsed['event_country_code']) {
+                $parsed['event_country_code'] = $role->country_code;
+            }
+        }
+
         if ($role->isSchedule()) {
             $parsed['talent_id'] = UrlUtils::encodeId($role->id);
         } elseif ($parsed['performer_name']) {
