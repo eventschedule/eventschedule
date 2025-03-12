@@ -15,7 +15,7 @@ class Translate extends Command
      *
      * @var string
      */
-    protected $signature = 'app:translate';
+    protected $signature = 'app:translate {--role_id= : Translate only a specific role by ID} {--event_id= : Translate only a specific event by ID}';
 
     /**
      * The console command description.
@@ -31,17 +31,27 @@ class Translate extends Command
             return;
         }
 
-        $this->translateRoles();
-        $this->translateEvents();
-        $this->translateCuratorEvents();
+        $roleId = $this->option('role_id');
+        $eventId = $this->option('event_id');
+
+        if ($roleId) {
+            $this->translateRoles($roleId);
+        } else if ($eventId) {
+            $this->translateEvents($eventId);
+            $this->translateCuratorEvents($eventId);
+        } else {
+            $this->translateRoles();
+            $this->translateEvents();
+            $this->translateCuratorEvents();
+        }
     }
 
-    public function translateRoles()
+    public function translateRoles($roleId = null)
     {
         $this->info('Starting translation of roles...');
 
         // Get all roles that don't have English translations
-        $roles = Role::where(function($query) {
+        $query = Role::where(function($query) {
                 $query->whereNotNull('name')
                       ->whereNull('name_en');
             })
@@ -60,9 +70,14 @@ class Translate extends Command
             ->orWhere(function($query) {
                 $query->whereNotNull('state')
                       ->whereNull('state_en');
-            })
-            ->orderBy('id', 'asc')
-            ->get();
+            });
+        
+        if ($roleId) {
+            $query->where('id', $roleId);
+            $this->info("Filtering for role ID: $roleId");
+        }
+        
+        $roles = $query->orderBy('id', 'asc')->get();
 
         $bar = $this->output->createProgressBar(count($roles));
         $bar->start();
@@ -118,12 +133,12 @@ class Translate extends Command
         $this->info("\nTranslation completed!\n");
     }
 
-    public function translateEvents()
+    public function translateEvents($eventId = null)
     {
         $this->info('Starting translation of events...');
 
         // Get all events that don't have English translations
-        $events = Event::with('roles')
+        $query = Event::with('roles')
         ->where(function($query) {
             $query->whereNotNull('name')
                 ->whereNull('name_en');
@@ -131,9 +146,14 @@ class Translate extends Command
         ->orWhere(function($query) {
             $query->whereNotNull('description')
                 ->whereNull('description_en');
-        })
-        ->orderBy('id', 'asc')
-        ->get();
+        });
+        
+        if ($eventId) {
+            $query->where('id', $eventId);
+            $this->info("Filtering for event ID: $eventId");
+        }
+        
+        $events = $query->orderBy('id', 'asc')->get();
 
         $bar = $this->output->createProgressBar(count($events));
         $bar->start();
@@ -173,20 +193,27 @@ class Translate extends Command
         $this->info("\nTranslation completed!\n");
     }
 
-    public function translateCuratorEvents()
+    public function translateCuratorEvents($eventId = null)
     {
         $this->info('Starting translation of curator events...');
 
-        $eventRoles = EventRole::with('role', 'event')
-                        ->whereHas('role', function($query) {
-                            $query->where('type', 'curator');
-                        })
-                        ->where(function($query) {
-                            $query->whereNull('name_translated')
-                                  ->orWhereNull('description_translated');
-                        })
-                        ->orderBy('id', 'asc')
-                        ->get();
+        $query = EventRole::with('role', 'event')
+                    ->whereHas('role', function($query) {
+                        $query->where('type', 'curator');
+                    })
+                    ->where(function($query) {
+                        $query->whereNull('name_translated')
+                              ->orWhereNull('description_translated');
+                    });
+        
+        if ($eventId) {
+            $query->whereHas('event', function($query) use ($eventId) {
+                $query->where('id', $eventId);
+            });
+            $this->info("Filtering for event ID: $eventId");
+        }
+        
+        $eventRoles = $query->orderBy('id', 'asc')->get();
 
         $bar = $this->output->createProgressBar(count($eventRoles));
         $bar->start();  
