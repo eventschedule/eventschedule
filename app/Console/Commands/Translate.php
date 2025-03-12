@@ -61,6 +61,7 @@ class Translate extends Command
 
         if ($roleId) {
             $this->translateRoles($roleId);
+            $this->translateCuratorEvents(null, $roleId);
         } else if ($eventId) {
             $this->translateEvents($eventId);
             $this->translateCuratorEvents($eventId);
@@ -218,7 +219,7 @@ class Translate extends Command
         $this->info("\nTranslation completed!\n");
     }
 
-    public function translateCuratorEvents($eventId = null)
+    public function translateCuratorEvents($eventId = null, $roleId = null)
     {
         $this->info('Starting translation of curator events...');
 
@@ -236,6 +237,11 @@ class Translate extends Command
                 $query->where('id', $eventId);
             });
             $this->info("Filtering for event ID: $eventId");
+        }
+        
+        if ($roleId) {
+            $query->where('role_id', $roleId);
+            $this->info("Filtering for role ID: $roleId");
         }
         
         $eventRoles = $query->orderBy('id', 'asc')->get();
