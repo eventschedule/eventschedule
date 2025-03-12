@@ -8,14 +8,14 @@ use App\Models\Event;
 use App\Models\EventRole;
 use App\Utils\GeminiUtils;
 
-class TranslateData extends Command
+class Translate extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'app:translate-data';
+    protected $signature = 'app:translate';
 
     /**
      * The console command description.
