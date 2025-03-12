@@ -132,6 +132,10 @@
                                         </template>
                                     </div>
 
+                                    @if (config('app.debug'))
+                                        <pre v-if="preview">@{{ JSON.stringify(preview.parsed, null, 2) }}</pre>
+                                    @endif
+
                                 </div>
                             </div>
 

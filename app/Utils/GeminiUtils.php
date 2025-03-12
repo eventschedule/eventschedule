@@ -78,7 +78,7 @@ class GeminiUtils
             'performer_name' => '',
             'performer_name_en' => 'English translation, only if the performer name is not English',
             'performer_email' => '',
-            'performer_website' => ''
+            'performer_website' => '',
         ];
 
         // Build prompt from fields
@@ -105,7 +105,7 @@ class GeminiUtils
         }
 
         // Handle special case for address
-        if (!$data['event_address']) {
+        if (! $data['event_address']) {
             if ($data['event_city']) {
                 $data['event_address'] = $data['event_city'];
                 unset($data['event_city']);
