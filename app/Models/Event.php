@@ -532,27 +532,25 @@ class Event extends Model
 
     public function translatedName()
     {
-        if (! $this->name_en) {
-            return $this->name;
+        $value = $this->name;
+
+        if ($this->name_en && (session()->has('translate') || request()->lang == 'en')) {
+            $value = $this->name_en;
         }
 
-        if (session()->has('translate') || request()->lang == 'en') {
-            return $this->name_en;
-        }
+        $value = str_ireplace('fuck', 'F@#%', $value);
 
-        return $this->name;
+        return $value;
     }
 
     public function translatedDescription()
     {
-        if (! $this->description_html_en) {
-            return $this->description_html;
+        $value = $this->description_html;
+
+        if ($this->description_html_en && (session()->has('translate') || request()->lang == 'en')) {
+            $value = $this->description_html_en;
         }
 
-        if (session()->has('translate') || request()->lang == 'en') {
-            return $this->description_html_en;
-        }
-
-        return $this->description_html;
+        return $value;
     }
 }
