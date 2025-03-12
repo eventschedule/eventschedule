@@ -148,8 +148,8 @@
                                     </div>
 
                                     <!-- JSON preview with border matching textarea -->
-                                    <div v-if="preview && showAllFields" class="mt-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm overflow-auto">
-                                        <pre class="p-4 text-xs text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-900">@{{ JSON.stringify(preview.parsed, null, 2) }}</pre>
+                                    <div v-if="preview && showAllFields" class="mt-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm overflow-auto bg-gray-50 dark:bg-gray-900">
+                                        <pre class="p-4 text-xs text-gray-800 dark:text-gray-200">@{{ JSON.stringify(preview.parsed, null, 2) }}</pre>
                                     </div>
 
                                 </div>
