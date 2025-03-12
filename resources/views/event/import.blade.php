@@ -110,31 +110,47 @@
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_address1')" />
                                     </div>
 
-                                    <div class="pt-4 flex gap-3 justify-end">
-                                        <template v-if="savedEvent">
-                                            <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                                                {{ __('messages.clear') }}
-                                            </button>
-                                            <button @click="handleEdit" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                                                {{ __('messages.edit') }}
-                                            </button>
-                                            <button @click="handleView" type="button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
-                                                {{ __('messages.view') }}
-                                            </button>
-                                        </template>
-                                        <template v-else>
-                                            <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                                                {{ __('messages.clear') }}
-                                            </button>
-                                            <button @click="handleSave" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                                                {{ __('messages.save') }}
-                                            </button>
-                                        </template>
+                                    <div class="pt-4 flex items-center justify-between">
+                                        <!-- Show all fields checkbox (moved to the left) -->
+                                        <div v-if="preview" class="flex items-center">
+                                            <input type="checkbox" 
+                                                   id="show_all_fields" 
+                                                   v-model="showAllFields" 
+                                                   @change="saveShowAllFieldsPreference"
+                                                   class="rounded border-gray-300 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                                            <label for="show_all_fields" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                                {{ __('messages.show_all_fields') }}
+                                            </label>
+                                        </div>
+                                        
+                                        <!-- Buttons (now on the right) -->
+                                        <div class="flex gap-3">
+                                            <template v-if="savedEvent">
+                                                <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                                    {{ __('messages.clear') }}
+                                                </button>
+                                                <button @click="handleEdit" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                                    {{ __('messages.edit') }}
+                                                </button>
+                                                <button @click="handleView" type="button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
+                                                    {{ __('messages.view') }}
+                                                </button>
+                                            </template>
+                                            <template v-else>
+                                                <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                                    {{ __('messages.clear') }}
+                                                </button>
+                                                <button @click="handleSave" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                                    {{ __('messages.save') }}
+                                                </button>
+                                            </template>
+                                        </div>
                                     </div>
 
-                                    @if (config('app.debug'))
-                                        <pre v-if="preview">@{{ JSON.stringify(preview.parsed, null, 2) }}</pre>
-                                    @endif
+                                    <!-- JSON preview with border matching textarea -->
+                                    <div v-if="preview && showAllFields" class="mt-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm overflow-auto">
+                                        <pre class="p-4 text-xs text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-900">@{{ JSON.stringify(preview.parsed, null, 2) }}</pre>
+                                    </div>
 
                                 </div>
                             </div>
@@ -246,11 +262,13 @@
                     errorMessage: null,
                     savedEvent: null,
                     isDragging: false,
+                    showAllFields: false,
                 }
             },
 
             created() {
                 this.debouncedPreview = debounce(this.fetchPreview, 500)
+                this.loadShowAllFieldsPreference()
             },
 
             methods: {
@@ -551,6 +569,17 @@
                 removeImage() {
                     if (this.preview && this.preview.parsed) {
                         this.preview.parsed.social_image = null
+                    }
+                },
+
+                saveShowAllFieldsPreference() {
+                    localStorage.setItem('event_import_show_all_fields', this.showAllFields)
+                },
+
+                loadShowAllFieldsPreference() {
+                    const savedPreference = localStorage.getItem('event_import_show_all_fields')
+                    if (savedPreference !== null) {
+                        this.showAllFields = savedPreference === 'true'
                     }
                 },
             }

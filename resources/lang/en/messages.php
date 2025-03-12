@@ -438,4 +438,5 @@ return [
     'similar_event_found' => 'Similar event found',
     'drag_drop_image' => 'Drag and drop image',
     'uploading' => 'Uploading',
+    'show_all_fields' => 'Show all fields',
 ];
