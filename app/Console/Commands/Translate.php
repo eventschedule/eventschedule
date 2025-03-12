@@ -111,6 +111,12 @@ class Translate extends Command
         
         $roles = $query->orderBy('id', 'asc')->get();
 
+        if ($debug) {
+            $this->info("Found " . count($roles) . " roles needing translation");
+            $this->info("SQL Query: " . $query->toSql());
+            $this->info("Query Bindings: " . json_encode($query->getBindings()));
+        }
+
         $bar = $this->output->createProgressBar(count($roles));
         $bar->start();
 
@@ -205,6 +211,12 @@ class Translate extends Command
         
         $events = $query->orderBy('id', 'asc')->get();
 
+        if ($debug) {
+            $this->info("Found " . count($events) . " events needing translation");
+            $this->info("SQL Query: " . $query->toSql());
+            $this->info("Query Bindings: " . json_encode($query->getBindings()));
+        }
+
         $bar = $this->output->createProgressBar(count($events));
         $bar->start();
 
@@ -286,6 +298,25 @@ class Translate extends Command
         }
         
         $eventRoles = $query->orderBy('id', 'asc')->get();
+
+        if ($debug) {
+            $this->info("Found " . count($eventRoles) . " curator events needing translation");
+            $this->info("SQL Query: " . $query->toSql());
+            $this->info("Query Bindings: " . json_encode($query->getBindings()));
+            
+            // Dump the first few records to inspect
+            if (count($eventRoles) > 0) {
+                $this->info("Sample records that matched the query:");
+                foreach ($eventRoles->take(3) as $index => $er) {
+                    $this->info("Record #{$index}:");
+                    $this->info("  ID: {$er->id}");
+                    $this->info("  Event ID: {$er->event_id}");
+                    $this->info("  Role ID: {$er->role_id}");
+                    $this->info("  name_translated: " . ($er->name_translated === null ? 'NULL' : "'{$er->name_translated}'"));
+                    $this->info("  description_translated: " . ($er->description_translated === null ? 'NULL' : "'{$er->description_translated}'"));
+                }
+            }
+        }
 
         $bar = $this->output->createProgressBar(count($eventRoles));
         $bar->start();  
