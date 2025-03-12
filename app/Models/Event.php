@@ -254,15 +254,16 @@ class Event extends Model
 
     public function getLanguageCode()
     {
-        $lang = 'en';
-
         if ($this->venue && $this->venue->language_code) {
-            $lang = $this->venue->language_code;
+            return $this->venue->language_code;
         }
 
+        $lang = 'en';
+
         foreach ($this->roles as $role) {
-            if ($role->language_code) {
+            if ($role->isSchedule() && $role->language_code) {
                 $lang = $role->language_code;
+                break;
             }
         }
 
