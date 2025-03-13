@@ -54,11 +54,15 @@ class RegisteredUserController extends Controller
                 'database_password' => ['required', 'string', 'max:255'],
             ]);
 
+            $baseUrl = $request->getSchemeAndHttpHost();
+            $basePath = $request->getBaseUrl(); // Detects "/public" if present
+            $url = rtrim($baseUrl . $basePath, '/');
+
             // Update database settings in .env file
             $envContent = file_get_contents(base_path('.env'));
 
             $envContent = preg_replace('/APP_ENV=.*/', 'APP_ENV=production', $envContent);
-            $envContent = preg_replace('/APP_URL=.*/', 'APP_URL=' . preg_replace('/\/sign_up$/', '', $request->getSchemeAndHttpHost()), $envContent);                        
+            $envContent = preg_replace('/APP_URL=.*/', 'APP_URL=' . $url, $envContent);                        
             
             $envContent = preg_replace('/DB_HOST=.*/', 'DB_HOST="' . $request->database_host . '"', $envContent);
             $envContent = preg_replace('/DB_PORT=.*/', 'DB_PORT=' . $request->database_port, $envContent);
