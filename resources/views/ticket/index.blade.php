@@ -33,13 +33,13 @@
                                     </a>
                                 </td>
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
-                                    @if ($sale->event->venue && $sale->event->venue->getGuestUrl())
+                                    @if ($sale->event->venue && $sale->event->venue->isClaimed())
                                         <a href="{{ $sale->event->venue->getGuestUrl() }}"   
                                             target="_blank" class="hover:underline">
-                                            {{ $sale->event->venue->name }}
+                                            {{ $sale->event->venue->getDisplayName(false) }}
                                         </a>
                                     @else
-                                        {{ $sale->event->getVenueDisplayName() }}
+                                        {{ $sale->event->getVenueDisplayName(false) }}
                                     @endif
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">

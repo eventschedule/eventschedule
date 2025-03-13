@@ -270,10 +270,10 @@ class Event extends Model
         return $lang;
     }
 
-    public function getVenueDisplayName()
+    public function getVenueDisplayName($translate = true)
     {
         if ($this->venue) {
-            return $this->venue->getDisplayName();
+            return $this->venue->getDisplayName($translate);
         }
 
         return $this->getEventUrlDomain();
