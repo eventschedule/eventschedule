@@ -45,15 +45,6 @@ class RegisteredUserController extends Controller
             ]);
         }
 
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => array_merge(
-                ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
-                config('app.hosted') ? [new NoFakeEmail] : []
-            ),
-            'password' => ['required', Rules\Password::defaults()],
-        ]);
-
         if (! config('app.hosted') && ! config('app.url')) {
             $request->validate([
                 'database_host' => ['required', 'string', 'max:255'],
@@ -93,6 +84,15 @@ class RegisteredUserController extends Controller
         if (! config('app.hosted') && User::count() > 0) {
             return redirect()->route('login');
         }
+
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => array_merge(
+                ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
+                config('app.hosted') ? [new NoFakeEmail] : []
+            ),
+            'password' => ['required', Rules\Password::defaults()],
+        ]);
 
         $user = User::create([
             'name' => $request->name,
