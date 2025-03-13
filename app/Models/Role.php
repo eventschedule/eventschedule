@@ -546,18 +546,26 @@ class Role extends Model implements MustVerifyEmail
 
     }
 
-    public function getDisplayName()
+    public function getDisplayName($translate = true)
     {
-        if ($this->translatedName()) {
-            return $this->translatedName();
+        if ($translate) {
+            if ($this->translatedName()) {
+                return $this->translatedName();
+            } else {
+                return $this->translatedAddress1();
+            }
         } else {
-            return $this->translatedAddress1();
+            if ($this->name) {
+                return $this->name;
+            } else {
+                return $this->address1;
+            }
         }
     }
 
     public function getGuestUrl()
     {
-        if (! $this->isRegistered()) {
+        if (! $this->isClaimed()) {
             return '';
         }
 

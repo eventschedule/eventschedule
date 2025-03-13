@@ -29,11 +29,11 @@
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
                                     @if ($role->isClaimed())
                                     <a href="{{ $role->getGuestUrl() }}"
-                                        target="_blank" class="hover:underline">{{ $role->name }}
+                                        target="_blank" class="hover:underline">{{ $role->getDisplayName(false) }}
                                     </a>
                                     @else
                                     <p class="text-sm text-gray-500">
-                                        {{ $role->getDisplayName() }}
+                                        {{ $role->getDisplayName(false) }}
                                     </p>
                                     @endif
                                 </td>
