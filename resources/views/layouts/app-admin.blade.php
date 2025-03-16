@@ -174,7 +174,9 @@
                     {!! str_replace(':email', '<a href="mailto:contact@eventschedule.com?subject=Feedback" class="hover:underline">contact@eventschedule.com</a>', __('messages.questions_or_suggestions')) !!}
                 @else
                     <!-- Per the AAL license, please do not remove the link to Event Schedule -->
-                    {!! str_replace(':link', '<a href="https://www.eventschedule.com" class="hover:underline" target="_blank">eventschedule.com</a>', __('messages.powered_by_eventschedule')) !!}
+                    {!! str_replace(':link', '<a href="https://www.eventschedule.com" class="hover:underline" target="_blank">eventschedule.com</a>', __('messages.powered_by_eventschedule')) !!} 
+                    - 
+                    <a href="https://github.com/eventschedule/eventschedule" target="_blank" class="hover:underline">{{ config('self-update.version_installed') }}</a>
                 @endif
             </div>
 
