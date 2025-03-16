@@ -439,4 +439,5 @@ return [
     'drag_drop_image' => 'Drag and drop image',
     'uploading' => 'Uploading',
     'show_all_fields' => 'Show all fields',
+    'invalid_image_type' => 'Invalid image type',
 ];
