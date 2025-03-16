@@ -104,7 +104,7 @@ class HomeController extends Controller
                 ->get();
 
         $events = Event::with(['venue', 'roles'])
-            ->orderBy('starts_at', 'desc')
+            ->orderBy(request()->has('events') ? 'id' : 'starts_at', 'desc')
             ->get();
 
         $content = view('sitemap', [
