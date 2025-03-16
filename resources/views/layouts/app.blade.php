@@ -8,8 +8,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <link rel="icon" href="{{ asset('images/favicon.png') }}">
-    <link rel="canonical" href="{{ url()->current() }}">
-
+    <link rel="sitemap" type="application/xml" href="{{ url('sitemap.xml') }}">    
+    
     @if (config('app.sentry_js_dsn'))
         <script src="{{ config('app.sentry_js_dsn') }}" crossorigin="anonymous"></script>
     @endif
@@ -17,6 +17,7 @@
     @if (isset($meta))
         {{ $meta }}
     @else
+        <link rel="canonical" href="{{ url()->current() }}">
         <meta name="description" content="The simple and free way to share your event schedule">
         <meta property="og:title" content="Event Schedule">
         <meta property="og:description" content="The simple and free way to share your event schedule">

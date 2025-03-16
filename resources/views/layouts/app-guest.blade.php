@@ -9,6 +9,7 @@
 
     <x-slot name="meta">
         @if ($event && $event->exists) 
+            <link rel="canonical" href="{{ $event->getGuestUrl() }}">
             @if ($event->description_html)
             <meta name="description" content="{{ trim(strip_tags($event->translatedDescription())) }}">
             @elseif ($event->role() && $event->role()->description_html)
@@ -25,6 +26,7 @@
             <meta name="twitter:image:alt" content="{{ $event->translatedName() }}">
             <meta name="twitter:card" content="summary_large_image">
         @elseif ($role->exists)
+            <link rel="canonical" href="{{ $role->getGuestUrl() }}">
             <meta name="description" content="{{ trim(strip_tags($role->translatedDescription())) }}">
             <meta property="og:title" content="{{ $role->translatedName() }}">
             <meta property="og:description" content="{{ trim(strip_tags($role->translatedDescription())) }}">
