@@ -5,7 +5,6 @@ namespace App\Http\Requests;
 use App\Models\Role;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Rules\NoFakeEmail;
 
 class EventCreateRequest extends FormRequest
 {
