@@ -91,18 +91,25 @@ class HomeController extends Controller
     public function sitemap()
     {
         $roles = Role::where(function($query) {
-                    $query->whereNotNull('email')
+                    $query->where(function($q) {
+                        $q->whereNotNull('email')
                           ->whereNotNull('email_verified_at');
+                    })->orWhere(function($q) {
+                        $q->whereNotNull('phone')
+                          ->whereNotNull('phone_verified_at'); 
+                    });
                 })
-                ->orWhere(function($query) {
-                    $query->whereNotNull('phone')
-                          ->whereNotNull('phone_verified_at');
-                })
-                ->orderBy(request()->sort_order == 'id' ? 'id' : 'subdomain', request()->sort_order == 'id' ? 'desc' : 'asc')
+                ->where('is_deleted', false)
+                ->orderBy(request()->has('roles') ? 'id' : 'subdomain', request()->has('roles') ? 'desc' : 'asc')
                 ->get();
 
+        $events = Event::with(['venue', 'roles'])
+            ->orderBy('starts_at', 'desc')
+            ->get();
+
         $content = view('sitemap', [
-            'roles' => $roles,
+            'roles' => ! request()->has('events') ? $roles : [],
+            'events' => ! request()->has('roles') ? $events : [],
             'lastmod' => now()->toIso8601String()
         ]);
         

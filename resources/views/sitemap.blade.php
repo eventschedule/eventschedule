@@ -14,4 +14,12 @@
             <priority>0.8</priority>
         </url>
     @endforeach
+    @foreach($events as $event)
+        <url>
+            <loc>{{ url($event->getSeoUrl()) }}</loc>
+            <lastmod>{{ $event->updated_at->toIso8601String() }}</lastmod>
+            <changefreq>daily</changefreq>
+            <priority>0.8</priority>
+        </url>
+    @endforeach
 </urlset>
