@@ -289,6 +289,13 @@ class Event extends Model
         return '';
     }
 
+    public function getSeoUrl()
+    {
+        $data = $this->getGuestUrlData();
+        
+        return route('event.view_guest', ['subdomain' => $data['subdomain'], 'slug' => $this->hashedId()]);
+    }
+    
     public function getGuestUrl($subdomain = false, $date = null)
     {
         $data = $this->getGuestUrlData($subdomain, $date);

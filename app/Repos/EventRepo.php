@@ -291,7 +291,18 @@ class EventRepo
         $subdomainRole = Role::where('subdomain', $subdomain)->first();
         $slugRole = Role::where('subdomain', $slug)->first();        
         $timezone = auth()->user() ? auth()->user()->timezone : $subdomainRole->timezone;
+        $eventId = UrlUtils::decodeId($slug);
 
+        if ($subdomainRole && $eventId) {
+            $event = Event::with(['venue', 'roles'])
+                ->where('id', $eventId)
+                ->first();
+
+            if ($event) {
+                return $event;
+            }
+        }
+        
         if ($subdomainRole && $slugRole) {
             $venue = null;
             $role = null;
