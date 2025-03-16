@@ -20,7 +20,6 @@ use App\Utils\UrlUtils;
 use App\Utils\GeminiUtils;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
-use App\Rules\NoFakeEmail;
 use App\Repos\EventRepo;
 use App\Http\Requests\EventCreateRequest;
 use App\Http\Requests\EventUpdateRequest;
