@@ -494,6 +494,9 @@ class EventController extends Controller
         } elseif ($parsed['performer_name']) {
             $talent = Role::where('name', $parsed['performer_name'])
                         ->where('type', 'schedule')
+                        ->whereHas('users', function($query) {
+                            $query->where('user_id', auth()->user()->id);
+                        })
                         ->first();
             if ($talent) {
                 $parsed['talent_id'] = UrlUtils::encodeId($talent->id);

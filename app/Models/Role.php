@@ -143,12 +143,19 @@ class Role extends Model implements MustVerifyEmail
         return $this->belongsToMany(Event::class);
     }
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class)
+                    ->withTimestamps()
+                    ->withPivot('level', 'dates_unavailable')
+                    ->orderBy('name');
+    }
     public function owner()
     {
         return $this->members()
                     ->where('level', '=', 'owner')
                     ->first();
-    }    
+    }
 
     public function members()
     {
