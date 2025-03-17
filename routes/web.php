@@ -103,6 +103,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::post('/{subdomain}/import', [EventController::class, 'import'])->name('event.import');    
     Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|availability|requests|profile|followers|team|plan');
 
+    Route::post('/{subdomain}/upload_image', [EventController::class, 'uploadImage'])->name('event.upload_image');
     Route::get('/tmp/event-image/{filename?}', function ($filename = null) {
         if (!$filename) {
             abort(404);
