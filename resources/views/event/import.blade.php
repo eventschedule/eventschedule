@@ -149,7 +149,7 @@
                                     <svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                     </svg>
-                                    {{ __('messages.error') }}
+                                    {{ __('messages.error') }}: @{{ saveErrors[idx] }}
                                 </span>
                             </h3>
                             
@@ -609,7 +609,7 @@
                         console.error('Error saving event:', error);
                         this.errorMessage = error.message;
                         // Set error state for this event
-                        this.saveErrors[idx] = true;
+                        this.saveErrors[idx] = error.message || 'An error occurred while saving the event';
                     }
                 },
 
@@ -803,7 +803,7 @@
                         console.error('Error curating event:', error);
                         this.errorMessage = error.message || '{{ __("messages.error_curating_event") }}';
                         // Set error state for this event
-                        this.saveErrors[idx] = true;
+                        this.saveErrors[idx] = error.message || '{{ __("messages.error_curating_event") }}';
                     }
                 },
 
