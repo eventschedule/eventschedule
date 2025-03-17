@@ -271,15 +271,6 @@
                                             </template>
                                         </div>
                                     </div>
-                                    
-                                    <!-- Placeholder for saved events with no image -->
-                                    <div v-else class="aspect-w-16 aspect-h-9 rounded-lg border-2 border-dashed flex items-center justify-center bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600">
-                                        <div class="text-center">
-                                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                                                {{ __('messages.no_image') }}
-                                            </p>
-                                        </div>
-                                    </div>
 
                                     <!-- Hidden file input -->
                                     <input type="file" 
