@@ -118,6 +118,9 @@ class GeminiUtils
             if (! empty($item['registration_url'])) {
                 $data[$key]['registration_url'] = UrlUtils::getRedirectUrl($item['registration_url']);
                 $data[$key]['social_image'] = UrlUtils::getSocialImage($data[$key]['registration_url']);
+
+                \Log::info("Registration URL: " . $data[$key]['registration_url']);
+                \Log::info("Social Image: " . $data[$key]['social_image']);
             }
         }
 
