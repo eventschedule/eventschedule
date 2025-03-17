@@ -487,12 +487,12 @@
                         
                         const parsed = this.preview.parsed[idx];
                         
-                        // Get the date input element
-                        const dateElementId = `starts_at_${idx}`;
-                        const dateElement = document.getElementById(dateElementId);
+                        // Find the date input by looking for inputs with the datepicker class that contains the index
+                        const dateInputs = document.querySelectorAll('input[class*="datepicker_"]');
+                        const dateElement = Array.from(dateInputs)[idx]; // Get the one at the current index
                         
                         if (!dateElement) {
-                            console.error(`Date element with ID ${dateElementId} not found`);
+                            console.error(`Date element at index ${idx} not found`);
                             throw new Error('Date field not found');
                         }
                         
