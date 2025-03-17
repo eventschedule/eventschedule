@@ -216,6 +216,12 @@
                                         <button @click="handleSave(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
                                             {{ __('messages.save') }}
                                         </button>
+                                        <button v-if="isCurator && preview.parsed[idx].event_url" 
+                                                @click="handleCurate(idx)" 
+                                                type="button" 
+                                                class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
+                                            {{ __('messages.curate') }}
+                                        </button>
                                     </template>
                                 </div>
                             </div>
@@ -342,6 +348,7 @@
                     savedEventData: [], // Will store the response data for saved events
                     isDragging: false,
                     showAllFields: false,
+                    isCurator: {{ $role->isCurator() ? 'true' : 'false' }},
                 }
             },
 
@@ -724,6 +731,54 @@
                                 background: '#4BB543',
                             }
                         }).showToast();
+                    }
+                },
+
+                async handleCurate(idx) {
+                    if (!this.preview?.parsed?.[idx]?.event_url) {
+                        return;
+                    }
+
+                    try {
+                        const eventUrl = this.preview.parsed[idx].event_url;
+                        // Extract the hash from either /view/{hash} or /edit/{hash} format
+                        const matches = eventUrl.match(/\/(view|edit)\/([^\/]+)$/);
+                        if (!matches || !matches[2]) {
+                            throw new Error('{{ __("messages.invalid_event_url") }}');
+                        }
+                        const hash = matches[2];
+                        
+                        const url = @json(route('event.curate', ['subdomain' => $role->subdomain, 'hash' => '--hash--'])).replace('--hash--', hash);
+                        const response = await fetch(url, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.savedEvents[idx] = true;
+                            this.savedEventData[idx] = {
+                                view_url: this.preview.parsed[idx].event_url,
+                                edit_url: this.preview.parsed[idx].event_url.replace('/view/', '/edit/')
+                            };
+                            
+                            Toastify({
+                                text: '{{ __("messages.curate_event") }}',
+                                duration: 3000,
+                                position: 'center',
+                                stopOnFocus: true,
+                                style: {
+                                    background: '#4BB543',
+                                }
+                            }).showToast();
+                        }
+                    } catch (error) {
+                        console.error('Error curating event:', error);
+                        this.errorMessage = error.message || '{{ __("messages.error_curating_event") }}';
                     }
                 },
             }

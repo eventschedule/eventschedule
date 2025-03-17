@@ -442,6 +442,13 @@ class EventController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         $role->events()->attach($event->id);
     
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('messages.curate_event')
+            ]);
+        }
+
         return back()->with('message', __('messages.curate_event'));
     }
 
