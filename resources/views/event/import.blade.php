@@ -39,16 +39,6 @@
                                         </div>
                                     @endif
 
-                                    <!-- Show matching event if found -->
-                                    <div v-if="preview && preview.event_url" class="mt-4 p-3 text-sm bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 rounded-md">
-                                        {{ __('messages.similar_event_found') }} - 
-                                        <a :href="preview.event_url" 
-                                           target="_blank" 
-                                           class="underline hover:text-yellow-600 dark:hover:text-yellow-300">
-                                            {{ __('messages.view_event') }}
-                                        </a>
-                                    </div>
-
                                     <!-- Error message display -->
                                     <div v-if="errorMessage" class="mt-4 p-3 text-sm text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded-md">
                                         @{{ errorMessage }}
@@ -210,6 +200,16 @@
                         <div class="grid md:grid-cols-2 gap-6">
                             <!-- Left column: Form fields -->
                             <div class="space-y-4">
+                                <!-- Show matching event if found for this specific event -->
+                                <div v-if="preview.parsed[idx].event_url" class="p-3 text-sm bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 rounded-md">
+                                    {{ __('messages.similar_event_found') }} - 
+                                    <a :href="preview.parsed[idx].event_url" 
+                                       target="_blank" 
+                                       class="underline hover:text-yellow-600 dark:hover:text-yellow-300">
+                                        {{ __('messages.view_event') }}
+                                    </a>
+                                </div>
+                                
                                 <div>
                                     <x-input-label for="name_@{{ idx }}" :value="__('messages.event_name')" />
                                     <x-text-input id="name_@{{ idx }}" 
