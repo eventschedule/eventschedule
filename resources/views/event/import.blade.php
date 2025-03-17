@@ -77,28 +77,11 @@
                             </div>
 
                             <!-- Right column: Image -->
-                            <div v-if="preview" class="hidden lg:block">
+                            <div v-if="preview" class="hidden">
                                 <div class="relative">
-                                    <!-- Image preview -->
-                                    <div v-if="preview.parsed.social_image" 
-                                         class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-                                        <img :src="getSocialImageUrl(preview.parsed.social_image)" 
-                                             class="object-contain w-full h-full" 
-                                             alt="Event preview image">
-                                        
-                                        <!-- Remove image button -->
-                                        <button @click="removeImage" 
-                                                type="button"
-                                                class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
-                                    </div>
 
                                     <!-- Drop zone -->
-                                    <div v-else
-                                         @dragover.prevent="dragOver"
+                                    <div @dragover.prevent="dragOver"
                                          @dragleave.prevent="dragLeave"
                                          @drop.prevent="handleDrop"
                                          @click="$refs.fileInput.click()"
@@ -137,24 +120,6 @@
                             </div>
                         </div>
 
-                        <!-- Mobile image preview -->
-                        <div v-if="preview && preview.parsed.social_image" class="lg:hidden mt-6">
-                            <div class="relative">
-                                <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-                                    <img :src="getSocialImageUrl(preview.parsed.social_image)" 
-                                         class="object-contain w-full h-full" 
-                                         alt="Event preview image">
-                                    <!-- Remove image button -->
-                                    <button @click="removeImage" 
-                                            type="button"
-                                            class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
