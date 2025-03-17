@@ -492,12 +492,19 @@ class EventController extends Controller
         if ($role->isSchedule()) {
             $parsed['talent_id'] = UrlUtils::encodeId($role->id);
         } elseif ($parsed['performer_name']) {
+            $followerRoleIds = Role::whereHas('users', function($query) use ($role) {
+                $query->where('level', 'owner')
+                      ->whereHas('roles', function($q) use ($role) {
+                          $q->where('roles.id', $role->id)
+                            ->where('role_user.level', 'follower'); 
+                      });
+            })->pluck('id')->toArray();
+
             $talent = Role::where('name', $parsed['performer_name'])
                         ->where('type', 'schedule')
-                        ->whereHas('users', function($query) {
-                            $query->where('user_id', auth()->user()->id);
-                        })
+                        ->whereIn('id', $followerRoleIds)
                         ->first();
+
             if ($talent) {
                 $parsed['talent_id'] = UrlUtils::encodeId($talent->id);
             }
