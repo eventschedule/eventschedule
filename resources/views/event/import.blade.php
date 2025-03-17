@@ -168,15 +168,17 @@
                                 </div>
 
                                 <div>
-                                    <x-input-label for="starts_at_@{{ idx }}" :value="__('messages.date_and_time')" />
-                                    <x-text-input id="starts_at_@{{ idx }}" 
-                                        name="starts_at_@{{ idx }}" 
-                                        type="text" 
-                                        class="mt-1 block w-full datepicker_@{{ idx }}" 
-                                        v-bind:readonly="savedEvents[idx]"
-                                        v-bind:value="preview.parsed[idx].event_date_time"
-                                        required 
-                                        autocomplete="off" />
+                                    <label for="starts_at_@{{ idx }}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">
+                                        {{ __('messages.date_and_time') }}
+                                    </label>
+                                    <input id="starts_at_@{{ idx }}" 
+                                           name="starts_at_@{{ idx }}" 
+                                           type="text" 
+                                           class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm datepicker_@{{ idx }}"
+                                           v-bind:readonly="savedEvents[idx]"
+                                           v-bind:value="preview.parsed[idx].event_date_time"
+                                           required 
+                                           autocomplete="off" />
                                 </div>
 
                                 <div>
@@ -296,6 +298,37 @@
     </form>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize flatpickr for any existing datepickers on page load
+            initializeFlatpickr();
+        });
+
+        // Function to initialize flatpickr on datepicker elements
+        function initializeFlatpickr() {
+            // Select all elements with datepicker_X class
+            document.querySelectorAll('[class*="datepicker_"]').forEach(element => {
+                // Destroy existing flatpickr instance if it exists
+                if (element._flatpickr) {
+                    element._flatpickr.destroy();
+                }
+                
+                // Create new flatpickr instance
+                var f = flatpickr(element, {
+                    allowInput: true,
+                    enableTime: true,
+                    altInput: true,
+                    time_24hr: "{{ $role && $role->use_24_hour_time ? 'true' : 'false' }}",
+                    altFormat: "{{ $role && $role->use_24_hour_time ? 'M j, Y • H:i' : 'M j, Y • h:i K' }}",
+                    dateFormat: "Y-m-d H:i:S",
+                });
+                
+                // Prevent keyboard input as per edit view
+                if (f && f._input) {
+                    f._input.onkeydown = () => false;
+                }
+            });
+        }
+
         const { createApp } = Vue
 
         function debounce(fn, delay) {
@@ -328,43 +361,12 @@
             
             updated() {
                 this.$nextTick(() => {
-                    this.initializeDatepickers();
+                    // Call the global function to initialize flatpickr
+                    initializeFlatpickr();
                 });
             },
 
             methods: {
-                initializeDatepickers() {
-                    if (!this.preview || !this.preview.parsed) return;
-                    
-                    this.preview.parsed.forEach((event, idx) => {
-                        const selector = `.datepicker_${idx}`;
-                        const element = document.querySelector(selector);
-                        
-                        if (element) {
-                            // Destroy existing flatpickr instance if it exists
-                            if (element._flatpickr) {
-                                element._flatpickr.destroy();
-                            }
-                            
-                            flatpickr(selector, {
-                                allowInput: true,
-                                enableTime: true,
-                                altInput: true,
-                                time_24hr: "{{ $role && $role->use_24_hour_time ? 'true' : 'false' }}",
-                                altFormat: "{{ $role && $role->use_24_hour_time ? 'M j, Y • H:i' : 'M j, Y • h:i K' }}",
-                                dateFormat: "Y-m-d H:i:S",
-                                defaultDate: event.event_date_time
-                            });
-                            
-                            // Prevent keyboard input as per edit view
-                            const f = element._flatpickr;
-                            if (f && f._input) {
-                                f._input.onkeydown = () => false;
-                            }
-                        }
-                    });
-                },
-
                 async fetchPreview() {
                     if (! this.eventDetails.trim()) {
                         this.preview = null;
@@ -442,7 +444,7 @@
                         
                         // Initialize datepickers after preview is loaded
                         this.$nextTick(() => {
-                            this.initializeDatepickers();
+                            initializeFlatpickr();
                         });
                     } catch (error) {
                         console.error('Error fetching preview:', error)
@@ -478,16 +480,37 @@
                 async handleSave(idx) {
                     this.errorMessage = null;
                     try {
-                        // Get the date value from flatpickr
-                        const dateInput = document.querySelector(`.datepicker_${idx}`)._flatpickr;
-                        if (!dateInput.selectedDates[0]) {
-                            throw new Error('{{ __("messages.date_required") }}');
+                        console.log("Saving event with index:", idx);
+                        
+                        // Get data directly from the Vue model
+                        if (!this.preview || !this.preview.parsed || !this.preview.parsed[idx]) {
+                            throw new Error('Event data not found');
                         }
-
-                        var parsed = this.preview.parsed[idx];
-                        var talentId = parsed.talent_id ?? 'new_talent';
+                        
+                        const parsed = this.preview.parsed[idx];
+                        
+                        // Get date value - first try to get it from flatpickr if available
+                        let dateValue = parsed.event_date_time;
+                        
+                        // Try to get the flatpickr instance for additional formatting if needed
+                        const dateElement = document.querySelector(`.datepicker_${idx}`);
+                        if (dateElement && dateElement._flatpickr && dateElement._flatpickr.selectedDates[0]) {
+                            dateValue = dateElement._flatpickr.formatDate(dateElement._flatpickr.selectedDates[0], "Y-m-d H:i:S");
+                            console.log("Using flatpickr formatted date:", dateValue);
+                        } else {
+                            console.log("Using model date value:", dateValue);
+                        }
+                        
+                        if (!dateValue) {
+                            throw new Error('Date and time are required');
+                        }
+                        
+                        // Get other values from the model
+                        const eventName = parsed.event_name || '';
+                        const venueAddress = parsed.venue_address1 || '';
+                        const talentId = parsed.talent_id ?? 'new_talent';
+                        
                         var members = {};
-
                         if (parsed.talent_id || (parsed.performer_name && parsed.performer_youtube_url)) {
                             members[talentId] = {
                                 name: parsed.performer_name,
@@ -507,7 +530,7 @@
                             body: JSON.stringify({
                                 venue_name: parsed.venue_name,
                                 venue_name_en: parsed.venue_name_en,
-                                venue_address1: document.getElementById(`venue_address1_${idx}`).value || "{{ $role->isCurator() ? $role->city : '' }}",
+                                venue_address1: parsed.venue_address1 || "{{ $role->isCurator() ? $role->city : '' }}",
                                 venue_address1_en: parsed.venue_address1_en,
                                 venue_city: parsed.event_city,
                                 venue_city_en: parsed.event_city_en,
@@ -518,11 +541,11 @@
                                 venue_id: parsed.venue_id,
                                 venue_language_code: '{{ $role->language_code }}',
                                 members: members,
-                                name: document.getElementById(`name_${idx}`).value,
+                                name: parsed.event_name,
                                 name_en: parsed.event_name_en,
-                                starts_at: document.getElementById(`starts_at_${idx}`).value,
+                                starts_at: dateValue,
                                 duration: parsed.event_duration,
-                                description: document.getElementById('event_details').value,
+                                description: this.eventDetails,
                                 social_image: parsed.social_image,
                                 registration_url: parsed.registration_url,
                                 @if ($role->isCurator())
@@ -718,7 +741,7 @@
                         
                         // Re-initialize datepickers after removing an event
                         this.$nextTick(() => {
-                            this.initializeDatepickers();
+                            initializeFlatpickr();
                         });
                         
                         // Show success message
