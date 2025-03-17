@@ -470,111 +470,86 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if ($role->isVenue()) {
-            $parsed['venue_id'] = UrlUtils::encodeId($role->id);
-            $parsed['event_address'] = $role->address1;
-        } elseif ($parsed['venue_name'] && $parsed['event_address']) {
-            $venue = Role::where(function($query) use ($parsed) {
-                        $query->where('name', $parsed['venue_name'])
-                              ->when(! empty($parsed['venue_name_en']), function($q) use ($parsed) {
-                                  $q->orWhere('name_en', $parsed['venue_name_en']); 
-                              });
-                    })
-                    ->where(function($query) use ($parsed) {
-                        $query->where('address1', $parsed['event_address'])
-                              ->when(! empty($parsed['event_address_en']), function($q) use ($parsed) {
-                                  $q->orWhere('address1_en', $parsed['event_address_en']);
-                              });
-                    })
-                    ->where('type', 'venue')
-                    ->orderBy('id')
-                    ->first();
+        foreach ($parsed as $key => $item) {
 
-            if ($venue) {
-                $parsed['venue_id'] = UrlUtils::encodeId($venue->id);
-            }
-        }
+            if ($role->isVenue()) {
+                $parsed[$key]['venue_id'] = UrlUtils::encodeId($role->id);
+                $parsed[$key]['event_address'] = $role->address1;
+            } elseif (! empty($item['venue_name']) && ! empty($item['event_address'])) {
+                $venue = Role::where(function($query) use ($item) {
+                            $query->where('name', $item['venue_name'])
+                                ->when(! empty($item['venue_name_en']), function($q) use ($item) {
+                                    $q->orWhere('name_en', $item['venue_name_en']); 
+                                });
+                        })
+                        ->where(function($query) use ($item) {
+                            $query->where('address1', $item['event_address'])
+                                ->when(! empty($item['event_address_en']), function($q) use ($item) {
+                                    $q->orWhere('address1_en', $item['event_address_en']);
+                                });
+                        })
+                        ->where('type', 'venue')
+                        ->orderBy('id')
+                        ->first();
 
-        if ($role->isCurator()) {
-            if (! $parsed['event_country_code']) {
-                $parsed['event_country_code'] = $role->country_code;
-            }
-        }
-
-        if ($role->isSchedule()) {
-            $parsed['talent_id'] = UrlUtils::encodeId($role->id);
-        } elseif ($parsed['performer_name']) {
-            $followerRoleIds = Role::whereHas('users', function($query) use ($role) {
-                $query->where('level', 'owner')
-                      ->whereHas('roles', function($q) use ($role) {
-                          $q->where('roles.id', $role->id)
-                            ->where('role_user.level', 'follower'); 
-                      });
-            })->orderBy('id')->pluck('id')->toArray();
-
-            $talent = Role::where(function($query) use ($parsed) {
-                        $query->where('name', $parsed['performer_name'])
-                              ->when(! empty($parsed['performer_name_en']), function($q) use ($parsed) {
-                                  $q->orWhere('name_en', $parsed['performer_name_en']);
-                              });
-                    })
-                    ->where('type', 'schedule')
-                    ->whereIn('id', $followerRoleIds)
-                    ->orderBy('id')
-                    ->first();
-            if ($talent) {
-                $parsed['talent_id'] = UrlUtils::encodeId($talent->id);
-            }
-        }
-
-        if (! empty($parsed['event_date_time'])) {
-            $eventDate = Carbon::parse($parsed['event_date_time']);
-            if ($eventDate->isPast() && $eventDate->diffInMonths(now()) > 6) {
-                $eventDate->setYear(now()->year);
-                $parsed['event_date_time'] = $eventDate->format('Y-m-d H:i:s');
-            }
-        }
-
-        if ($request->has('image')) {
-            $file = $request->file('image');
-            $filename = '/tmp/event_' . strtolower(Str::random(32)) . '.' . $file->getClientOriginalExtension();
-            move_uploaded_file($file->getPathname(), $filename);
-            $parsed['social_image'] = $filename;
-        } else if ($parsed['registration_url']) {
-            try {
-                $ch = curl_init();
-                curl_setopt_array($ch, [
-                    CURLOPT_URL => $parsed['registration_url'],
-                    CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_FOLLOWLOCATION => true,
-                    CURLOPT_MAXREDIRS => 5
-                ]);
-                $html = curl_exec($ch);
-                curl_close($ch);
-                
-                // Look for Open Graph image meta tag
-                if (preg_match('/<meta[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']*)["\']/', $html, $matches) ||
-                    preg_match('/<meta[^>]*content=["\']([^"\']*)["\'][^>]*property=["\']og:image["\']/', $html, $matches)) {
-                    
-                    if ($imageUrl = $matches[1]) {
-                        $imageContents = file_get_contents($imageUrl);
-                        $extension = pathinfo(parse_url($imageUrl, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
-                        $filename = '/tmp/event_' . strtolower(Str::random(32)) . '.' . $extension;
-                        
-                        file_put_contents($filename, $imageContents);
-                        $parsed['social_image'] = $filename;
-                    }
+                if ($venue) {
+                    $parsed[$key]['venue_id'] = UrlUtils::encodeId($venue->id);
                 }
-            } catch (\Exception $e) {
-                // do nothing 
             }
-        }
 
-        // Check if the event is already imported
-        $eventUrl = null;
-        $event = Event::where('registration_url', $parsed['registration_url'])->first();
-        if ($event) {
-            $eventUrl = $event->getGuestUrl();
+            if ($role->isCurator()) {
+                if (empty($item['event_country_code'])) {
+                    $parsed[$key]['event_country_code'] = $role->country_code;
+                }
+            }
+
+            if ($role->isSchedule()) {
+                $parsed[$key]['talent_id'] = UrlUtils::encodeId($role->id);
+            } elseif (! empty($item['performer_name'])) {
+                $followerRoleIds = Role::whereHas('users', function($query) use ($role) {
+                    $query->where('level', 'owner')
+                        ->whereHas('roles', function($q) use ($role) {
+                            $q->where('roles.id', $role->id)
+                                ->where('role_user.level', 'follower'); 
+                        });
+                })->orderBy('id')->pluck('id')->toArray();
+
+                $talent = Role::where(function($query) use ($item) {
+                            $query->where('name', $item['performer_name'])
+                                ->when(! empty($item['performer_name_en']), function($q) use ($item) {
+                                    $q->orWhere('name_en', $item['performer_name_en']);
+                                });
+                        })
+                        ->where('type', 'schedule')
+                        ->whereIn('id', $followerRoleIds)
+                        ->orderBy('id')
+                        ->first();
+                if ($talent) {
+                    $parsed[$key]['talent_id'] = UrlUtils::encodeId($talent->id);
+                }
+            }
+
+            if (! empty($item['event_date_time'])) {
+                $eventDate = Carbon::parse($item['event_date_time']);
+                if ($eventDate->isPast() && $eventDate->diffInMonths(now()) > 6) {
+                    $eventDate->setYear(now()->year);
+                    $parsed[$key]['event_date_time'] = $eventDate->format('Y-m-d H:i:s');
+                }
+            }
+
+            if ($request->has('image')) {
+                $file = $request->file('image');
+                $filename = '/tmp/event_' . strtolower(Str::random(32)) . '.' . $file->getClientOriginalExtension();
+                move_uploaded_file($file->getPathname(), $filename);
+                $parsed[$key]['social_image'] = $filename;
+            }
+
+            // Check if the event is already imported
+            $eventUrl = null;
+            $event = Event::where('registration_url', $item['registration_url'])->first();
+            if ($event) {
+                $eventUrl = $event->getGuestUrl();
+            }
         }
 
         return response()->json(['message' => 'Imported event', 'parsed' => $parsed, 'event_url' => $eventUrl]);

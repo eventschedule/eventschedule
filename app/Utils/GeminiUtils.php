@@ -46,11 +46,13 @@ class GeminiUtils
         
         // Handle both array and object response formats
         if (is_array($parsed) && isset($parsed[0])) {
-            $data = $parsed[0];
-        } else {
             $data = $parsed;
+        } else {
+            $data = [$parsed];
         }
-        
+
+        //\Log::info("Parsed data: " . json_encode($data));
+
         return $data;
     }
 
@@ -90,40 +92,66 @@ class GeminiUtils
 
         $data = self::sendRequest($prompt);
 
-        // Process results
-        foreach ($fields as $field => $note) {
-            // Ensure all fields exist
-            if (!isset($data[$field])) {
-                $data[$field] = '';
-                continue;
-            }
-            
-            // Trim asterisks if string value
-            if (is_string($data[$field])) {
-                $data[$field] = trim($data[$field], '*');
-            }
-        }
+        foreach ($data as $key => $item) {
 
-        // Handle special case for address
-        if (! $data['event_address']) {
-            if ($data['event_city']) {
-                $data['event_address'] = $data['event_city'];
-                unset($data['event_city']);
-            } else if ($data['event_state']) {
-                $data['event_address'] = $data['event_state'];
-                unset($data['event_state']);
+            foreach ($fields as $field => $note) {
+                // Ensure all fields exist
+                if (! isset($item[$field])) {
+                    $data[$key][$field] = '';
+                } elseif (is_string($item[$field])) {
+                    $data[$key][$field] = trim($item[$field], '*');
+                }
             }
-        }
 
-        // Check if the registration url is a redirect, in which case get the final url
-        if ($data['registration_url']) {
-            $data['registration_url'] = UrlUtils::getRedirectUrl($data['registration_url']);
+            // Handle special case for address
+            if (empty($item['event_address'])) {
+                if (! empty($item['event_city'])) {
+                    $data[$key]['event_address'] = $item['event_city'];
+                    unset($data[$key]['event_city']);
+                } else if (! empty($item['event_state'])) {
+                    $data[$key]['event_address'] = $item['event_state'];
+                    unset($data[$key]['event_state']);
+                }
+            }
+
+            // Check if the registration url is a redirect, in which case get the final url
+            if (! empty($item['registration_url'])) {
+                $data[$key]['registration_url'] = UrlUtils::getRedirectUrl($item['registration_url']);
+
+                try {
+                    $ch = curl_init();
+                    curl_setopt_array($ch, [
+                        CURLOPT_URL => $item['registration_url'],
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_FOLLOWLOCATION => true,
+                        CURLOPT_MAXREDIRS => 5
+                    ]);
+                    $html = curl_exec($ch);
+                    curl_close($ch);
+                    
+                    // Look for Open Graph image meta tag
+                    if (preg_match('/<meta[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']*)["\']/', $html, $matches) ||
+                        preg_match('/<meta[^>]*content=["\']([^"\']*)["\'][^>]*property=["\']og:image["\']/', $html, $matches)) {
+                        
+                        if ($imageUrl = $matches[1]) {
+                            $imageContents = file_get_contents($imageUrl);
+                            $extension = pathinfo(parse_url($imageUrl, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
+                            $filename = '/tmp/event_' . strtolower(\Str::random(32)) . '.' . $extension;
+                            
+                            file_put_contents($filename, $imageContents);
+                            $data[$key]['social_image'] = $filename;
+                        }
+                    }
+                } catch (\Exception $e) {
+                    // do nothing 
+                }    
+            }
         }
 
         // Commented out YouTube URL fetching
-        if (false && $data['performer_name']) {
-            $data['performer_youtube_url'] = self::getPerformerYoutubeUrl($data['performer_name']);
-        }
+        // if ($data['performer_name']) {
+        //     $data['performer_youtube_url'] = self::getPerformerYoutubeUrl($data['performer_name']);
+        // }
 
         return $data;
     }
@@ -152,6 +180,7 @@ class GeminiUtils
         $prompt = "Translate this text from {$from} to {$to}. Return only the translation as a JSON string:\n{$text}";
         
         $response = self::sendRequest($prompt);
+        $response = $response[0];
 
         $value = null;
 
