@@ -54,6 +54,17 @@
                                         @{{ errorMessage }}
                                     </div>
 
+                                    <!-- Multiple events detected message -->
+                                    <div v-if="preview && preview.parsed && preview.parsed.length > 0" 
+                                         class="mt-4 p-3 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-md">
+                                        <span v-if="preview.parsed.length > 1">
+                                            {{ __('messages.multiple_events_detected', ['count' => '']) }} @{{ preview.parsed.length }}
+                                        </span>
+                                        <span v-else>
+                                            {{ __('messages.event_detected') }}
+                                        </span>
+                                    </div>
+
                                     <div v-if="isLoading" class="mt-4 flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                                         <div class="relative">
                                             <div class="w-4 h-4 rounded-full bg-blue-500/30"></div>
@@ -66,92 +77,23 @@
                                     </div>
                                 </div>
 
-                                <!-- Form fields -->
-                                <div v-if="preview" class="space-y-4">
-                                    <div>
-                                        <x-input-label for="name" :value="__('messages.event_name')" />
-                                        <x-text-input id="name" 
-                                            name="name" 
-                                            type="text" 
-                                            class="mt-1 block w-full" 
-                                            :value="old('name')"
-                                            v-model="preview.parsed.event_name" 
-                                            v-bind:readonly="savedEvent"
-                                            required 
-                                            autofocus />
-                                        <x-input-error class="mt-2" :messages="$errors->get('name')" />
-                                    </div>
+                                <!-- Show all fields checkbox -->
+                                <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="flex items-center mb-4">
+                                    <input type="checkbox" 
+                                           id="show_all_fields" 
+                                           v-model="showAllFields" 
+                                           @change="saveShowAllFieldsPreference"
+                                           class="rounded border-gray-300 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                                    <label for="show_all_fields" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                        {{ __('messages.show_all_fields') }}
+                                    </label>
+                                </div>
 
-                                    <div>
-                                        <x-input-label for="starts_at" :value="__('messages.date_and_time')" />
-                                        <x-text-input id="starts_at" 
-                                            name="starts_at" 
-                                            type="text" 
-                                            class="datepicker mt-1 block w-full" 
-                                            :value="old('starts_at')"
-                                            v-bind:readonly="savedEvent"
-                                            required 
-                                            autocomplete="off" />
-                                        <x-input-error class="mt-2" :messages="$errors->get('starts_at')" />
-                                    </div>
-
-                                    <div>
-                                        <x-input-label for="venue_address1" :value="__('messages.address')" />
-                                        <x-text-input id="venue_address1" 
-                                            name="venue_address1" 
-                                            type="text" 
-                                            class="mt-1 block w-full" 
-                                            :value="old('venue_address1')"
-                                            v-model="preview.parsed.event_address" 
-                                            v-bind:readonly="preview.parsed.venue_id || savedEvent"
-                                            placeholder="{{ $role->isCurator() ? $role->city : '' }}"
-                                            required
-                                            autocomplete="off" />
-                                        <x-input-error class="mt-2" :messages="$errors->get('venue_address1')" />
-                                    </div>
-
-                                    <div class="pt-4 flex items-center justify-between">
-                                        <!-- Show all fields checkbox (moved to the left) -->
-                                        <div v-if="preview" class="flex items-center">
-                                            <input type="checkbox" 
-                                                   id="show_all_fields" 
-                                                   v-model="showAllFields" 
-                                                   @change="saveShowAllFieldsPreference"
-                                                   class="rounded border-gray-300 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
-                                            <label for="show_all_fields" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                                {{ __('messages.show_all_fields') }}
-                                            </label>
-                                        </div>
-                                        
-                                        <!-- Buttons (now on the right) -->
-                                        <div class="flex gap-3">
-                                            <template v-if="savedEvent">
-                                                <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                                                    {{ __('messages.clear') }}
-                                                </button>
-                                                <button @click="handleEdit" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                                                    {{ __('messages.edit') }}
-                                                </button>
-                                                <button @click="handleView" type="button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
-                                                    {{ __('messages.view') }}
-                                                </button>
-                                            </template>
-                                            <template v-else>
-                                                <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                                                    {{ __('messages.clear') }}
-                                                </button>
-                                                <button @click="handleSave" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                                                    {{ __('messages.save') }}
-                                                </button>
-                                            </template>
-                                        </div>
-                                    </div>
-
-                                    <!-- JSON preview with border matching textarea -->
-                                    <div v-if="preview && showAllFields" class="mt-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm overflow-auto bg-gray-50 dark:bg-gray-900">
-                                        <pre class="p-4 text-xs text-gray-800 dark:text-gray-200">@{{ JSON.stringify(preview.parsed, null, 2) }}</pre>
-                                    </div>
-
+                                <!-- Clear button -->
+                                <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="mb-6">
+                                    <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                        {{ __('messages.clear') }}
+                                    </button>
                                 </div>
                             </div>
 
@@ -216,6 +158,210 @@
                             </div>
                         </div>
 
+                        <!-- Debug info - remove in production -->
+                        <div v-if="preview" class="mb-4 p-3 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 rounded-md">
+                            <p>Preview data received: @{{ typeof preview }}</p>
+                            <p>Parsed events: @{{ preview.parsed ? preview.parsed.length : 'none' }}</p>
+                            <p v-if="preview.parsed">First event: @{{ JSON.stringify(preview.parsed[0]) }}</p>
+                        </div>
+
+                        <!-- Events cards -->
+                        <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="space-y-8 mt-6">
+                            <div v-for="(event, idx) in preview.parsed" :key="idx" 
+                                 :class="['border rounded-lg overflow-hidden shadow-md', 
+                                          savedEvents[idx] ? 'border-green-500 dark:border-green-600' : 'border-gray-300 dark:border-gray-600']">
+                                
+                                <!-- Card header -->
+                                <div :class="['px-4 py-3 flex justify-between items-center', 
+                                             savedEvents[idx] ? 'bg-green-50 dark:bg-green-900/30' : 'bg-gray-50 dark:bg-gray-800']">
+                                    <h3 class="font-medium text-lg">
+                                        {{ __('messages.event') }} #@{{ idx + 1 }}: @{{ event.event_name }}
+                                        <span v-if="savedEvents[idx]" class="ml-2 text-sm text-green-600 dark:text-green-400">
+                                            <svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                            {{ __('messages.saved') }}
+                                        </span>
+                                    </h3>
+                                    
+                                    <div class="flex gap-2">
+                                        <template v-if="savedEvents[idx]">
+                                            <button @click="handleEdit(idx)" type="button" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                                {{ __('messages.edit') }}
+                                            </button>
+                                            <button @click="handleView(idx)" type="button" class="px-3 py-1 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
+                                                {{ __('messages.view') }}
+                                            </button>
+                                        </template>
+                                        <template v-else>
+                                            <button @click="handleSave(idx)" type="button" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                                {{ __('messages.save') }}
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+                                
+                                <!-- Card body -->
+                                <div class="p-4 grid md:grid-cols-2 gap-6">
+                                    <!-- Left column: Form fields -->
+                                    <div class="space-y-4">
+                                        <div>
+                                            <x-input-label for="name_@{{ idx }}" :value="__('messages.event_name')" />
+                                            <x-text-input id="name_@{{ idx }}" 
+                                                name="name_@{{ idx }}" 
+                                                type="text" 
+                                                class="mt-1 block w-full" 
+                                                v-bind:value="preview.parsed[idx].event_name"
+                                                v-bind:readonly="savedEvents[idx]"
+                                                required />
+                                        </div>
+
+                                        <div>
+                                            <x-input-label for="starts_at_@{{ idx }}" :value="__('messages.date_and_time')" />
+                                            <x-text-input id="starts_at_@{{ idx }}" 
+                                                name="starts_at_@{{ idx }}" 
+                                                type="text" 
+                                                class="mt-1 block w-full datepicker_@{{ idx }}" 
+                                                v-bind:readonly="savedEvents[idx]"
+                                                v-bind:value="preview.parsed[idx].event_date_time"
+                                                required 
+                                                autocomplete="off" />
+                                        </div>
+
+                                        <div>
+                                            <x-input-label for="venue_name_@{{ idx }}" :value="__('messages.venue')" />
+                                            <x-text-input id="venue_name_@{{ idx }}" 
+                                                name="venue_name_@{{ idx }}" 
+                                                type="text" 
+                                                class="mt-1 block w-full" 
+                                                v-bind:value="preview.parsed[idx].venue_name"
+                                                v-bind:readonly="preview.parsed[idx].venue_id || savedEvents[idx]"
+                                                required />
+                                        </div>
+
+                                        <div>
+                                            <x-input-label for="venue_address1_@{{ idx }}" :value="__('messages.address')" />
+                                            <x-text-input id="venue_address1_@{{ idx }}" 
+                                                name="venue_address1_@{{ idx }}" 
+                                                type="text" 
+                                                class="mt-1 block w-full" 
+                                                v-bind:value="preview.parsed[idx].event_address"
+                                                v-bind:readonly="preview.parsed[idx].venue_id || savedEvents[idx]"
+                                                placeholder="{{ $role->isCurator() ? $role->city : '' }}"
+                                                required
+                                                autocomplete="off" />
+                                        </div>
+
+                                        <div v-if="preview.parsed[idx].performer_name">
+                                            <x-input-label for="performer_name_@{{ idx }}" :value="__('messages.performer')" />
+                                            <x-text-input id="performer_name_@{{ idx }}" 
+                                                name="performer_name_@{{ idx }}" 
+                                                type="text" 
+                                                class="mt-1 block w-full" 
+                                                v-bind:value="preview.parsed[idx].performer_name"
+                                                v-bind:readonly="savedEvents[idx]"
+                                                required />
+                                        </div>
+
+                                        <!-- JSON preview with border matching textarea -->
+                                        <div v-if="showAllFields" class="mt-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm overflow-auto bg-gray-50 dark:bg-gray-900">
+                                            <pre class="p-4 text-xs text-gray-800 dark:text-gray-200">@{{ JSON.stringify(preview.parsed[idx], null, 2) }}</pre>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Right column: Image -->
+                                    <div>
+                                        <div class="relative">
+                                            <!-- Image preview -->
+                                            <div v-if="preview.parsed[idx].social_image" 
+                                                 class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                                                <img v-bind:src="getSocialImageUrl(preview.parsed[idx].social_image)" 
+                                                     class="object-contain w-full h-full" 
+                                                     alt="Event preview image">
+                                                
+                                                <!-- Remove image button -->
+                                                <button @click="removeImage(idx)" 
+                                                        type="button"
+                                                        v-bind:disabled="savedEvents[idx]"
+                                                        class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+
+                                            <!-- Drop zone -->
+                                            <div v-else-if="!savedEvents[idx]"
+                                                 @dragover.prevent="dragOver"
+                                                 @dragleave.prevent="dragLeave"
+                                                 @drop.prevent="(e) => handleDrop(e, idx)"
+                                                 @click="() => openFileSelector(idx)"
+                                                 v-bind:class="['aspect-w-16 aspect-h-9 rounded-lg border-2 border-dashed flex items-center justify-center cursor-pointer', 
+                                                          isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-300 dark:border-gray-600']">
+                                                <div class="text-center py-10">
+                                                    <!-- Show loading spinner when uploading -->
+                                                    <template v-if="isUploadingImage === idx">
+                                                        <div class="relative mx-auto w-12 h-12">
+                                                            <div class="w-12 h-12 rounded-full bg-blue-500/30"></div>
+                                                            <div class="absolute top-0 left-0 w-12 h-12 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"></div>
+                                                        </div>
+                                                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                                            {{ __('messages.uploading') }}...
+                                                        </p>
+                                                    </template>
+                                                    <!-- Default upload icon and text -->
+                                                    <template v-else>
+                                                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                        </svg>
+                                                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                                            {{ __('messages.drag_drop_image') }}
+                                                        </p>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Placeholder for saved events with no image -->
+                                            <div v-else class="aspect-w-16 aspect-h-9 rounded-lg border-2 border-dashed flex items-center justify-center bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                                                <div class="text-center">
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                                        {{ __('messages.no_image') }}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Hidden file input -->
+                                            <input type="file" 
+                                                   v-bind:ref="'fileInput_' + idx"
+                                                   @change="(e) => handleFileSelect(e, idx)"
+                                                   accept="image/*"
+                                                   class="hidden">
+                                        </div>
+                                        
+                                        <!-- Registration URL if available -->
+                                        <div v-if="preview.parsed[idx].registration_url" class="mt-4">
+                                            <x-input-label for="registration_url_@{{ idx }}" :value="__('messages.registration_url')" />
+                                            <div class="mt-1 flex">
+                                                <x-text-input id="registration_url_@{{ idx }}" 
+                                                    name="registration_url_@{{ idx }}" 
+                                                    type="text" 
+                                                    class="block w-full rounded-r-none" 
+                                                    v-bind:value="preview.parsed[idx].registration_url"
+                                                    v-bind:readonly="savedEvents[idx]" />
+                                                <a v-bind:href="preview.parsed[idx].registration_url" 
+                                                   target="_blank" 
+                                                   class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-700 border border-l-0 border-gray-300 dark:border-gray-600 rounded-r-md text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                                    </svg>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Mobile image preview -->
                         <div v-if="preview && preview.parsed.social_image" class="lg:hidden mt-6">
                             <div class="relative">
@@ -258,9 +404,10 @@
                     eventDetails: '',
                     preview: null,
                     isLoading: false,
-                    isUploadingImage: false,
+                    isUploadingImage: null, // Will store the index of the event being uploaded
                     errorMessage: null,
-                    savedEvent: null,
+                    savedEvents: [],
+                    savedEventData: [], // Will store the response data for saved events
                     isDragging: false,
                     showAllFields: false,
                 }
@@ -270,8 +417,46 @@
                 this.debouncedPreview = debounce(this.fetchPreview, 500)
                 this.loadShowAllFieldsPreference()
             },
+            
+            updated() {
+                this.$nextTick(() => {
+                    this.initializeDatepickers();
+                });
+            },
 
             methods: {
+                initializeDatepickers() {
+                    if (!this.preview || !this.preview.parsed) return;
+                    
+                    this.preview.parsed.forEach((event, idx) => {
+                        const selector = `.datepicker_${idx}`;
+                        const element = document.querySelector(selector);
+                        
+                        if (element) {
+                            // Destroy existing flatpickr instance if it exists
+                            if (element._flatpickr) {
+                                element._flatpickr.destroy();
+                            }
+                            
+                            flatpickr(selector, {
+                                allowInput: true,
+                                enableTime: true,
+                                altInput: true,
+                                time_24hr: "{{ $role && $role->use_24_hour_time ? 'true' : 'false' }}",
+                                altFormat: "{{ $role && $role->use_24_hour_time ? 'M j, Y • H:i' : 'M j, Y • h:i K' }}",
+                                dateFormat: "Y-m-d H:i:S",
+                                defaultDate: event.event_date_time
+                            });
+                            
+                            // Prevent keyboard input as per edit view
+                            const f = element._flatpickr;
+                            if (f && f._input) {
+                                f._input.onkeydown = () => false;
+                            }
+                        }
+                    });
+                },
+
                 async fetchPreview() {
                     if (! this.eventDetails.trim()) {
                         this.preview = null;
@@ -281,6 +466,9 @@
                     this.isLoading = true;
                     this.preview = null;
                     this.errorMessage = null;
+                    this.savedEvents = [];
+                    this.savedEventData = [];
+                    
                     try {
                         const response = await fetch('{{ route("event.parse", ["subdomain" => $role->subdomain]) }}', {
                             method: 'POST',
@@ -330,23 +518,24 @@
                             throw new Error(data.message || data.error || 'An unexpected error occurred');
                         }
 
+                        // Ensure preview.parsed is always an array
+                        if (data && data.parsed && !Array.isArray(data.parsed)) {
+                            data.parsed = [data.parsed];
+                        }
+
                         this.preview = data;
+                        console.log('Preview data:', this.preview);
                         
-                        // Initialize datepicker after preview is loaded
+                        // Initialize array to track saved events
+                        if (Array.isArray(this.preview.parsed)) {
+                            this.savedEvents = new Array(this.preview.parsed.length).fill(false);
+                            this.savedEventData = new Array(this.preview.parsed.length).fill(null);
+                        }
+                        
+                        // Initialize datepickers after preview is loaded
                         this.$nextTick(() => {
-                            flatpickr('.datepicker', {
-                                allowInput: true,
-                                enableTime: true,
-                                altInput: true,
-                                time_24hr: "{{ $role && $role->use_24_hour_time ? 'true' : 'false' }}",
-                                altFormat: "{{ $role && $role->use_24_hour_time ? 'M j, Y • H:i' : 'M j, Y • h:i K' }}",
-                                dateFormat: "Y-m-d H:i:S",
-                                defaultDate: this.preview.parsed.event_date_time
-                            });
-                            // Prevent keyboard input as per edit view
-                            const f = document.querySelector('.datepicker')._flatpickr;
-                            f._input.onkeydown = () => false;
-                        })
+                            this.initializeDatepickers();
+                        });
                     } catch (error) {
                         console.error('Error fetching preview:', error)
                         this.errorMessage = error.message || 'An error occurred while fetching the preview';
@@ -354,7 +543,7 @@
                         this.isLoading = false
                     }
                 },
-
+                
                 handlePaste(event) {
                     // Prevent the debounced preview from firing
                     event.preventDefault()
@@ -366,28 +555,28 @@
                     this.fetchPreview()
                 },
 
-                handleEdit() {
-                    if (this.savedEvent) {
-                        window.open(this.savedEvent.edit_url, '_blank');
+                handleEdit(idx) {
+                    if (this.savedEvents[idx] && this.savedEventData[idx]) {
+                        window.open(this.savedEventData[idx].edit_url, '_blank');
                     }
                 },
 
-                handleView() {
-                    if (this.savedEvent) {
-                        window.open(this.savedEvent.view_url, '_blank');
+                handleView(idx) {
+                    if (this.savedEvents[idx] && this.savedEventData[idx]) {
+                        window.open(this.savedEventData[idx].view_url, '_blank');
                     }
                 },
 
-                async handleSave() {
+                async handleSave(idx) {
                     this.errorMessage = null;
                     try {
                         // Get the date value from flatpickr
-                        const dateInput = document.querySelector('.datepicker')._flatpickr;
+                        const dateInput = document.querySelector(`.datepicker_${idx}`)._flatpickr;
                         if (!dateInput.selectedDates[0]) {
                             throw new Error('{{ __("messages.date_required") }}');
                         }
 
-                        var parsed = this.preview.parsed;
+                        var parsed = this.preview.parsed[idx];
                         var talentId = parsed.talent_id ?? 'new_talent';
                         var members = {};
 
@@ -410,7 +599,7 @@
                             body: JSON.stringify({
                                 venue_name: parsed.venue_name,
                                 venue_name_en: parsed.venue_name_en,
-                                venue_address1: document.getElementById('venue_address1').value || "{{ $role->isCurator() ? $role->city : '' }}",
+                                venue_address1: document.getElementById(`venue_address1_${idx}`).value || "{{ $role->isCurator() ? $role->city : '' }}",
                                 venue_address1_en: parsed.venue_address1_en,
                                 venue_city: parsed.event_city,
                                 venue_city_en: parsed.event_city_en,
@@ -418,13 +607,12 @@
                                 venue_state_en: parsed.event_state_en,
                                 venue_postal_code: parsed.event_postal_code,
                                 venue_country_code: parsed.event_country_code,
-                                venue_email: '',
                                 venue_id: parsed.venue_id,
                                 venue_language_code: '{{ $role->language_code }}',
                                 members: members,
-                                name: document.getElementById('name').value,
+                                name: document.getElementById(`name_${idx}`).value,
                                 name_en: parsed.event_name_en,
-                                starts_at: document.getElementById('starts_at').value,
+                                starts_at: document.getElementById(`starts_at_${idx}`).value,
                                 duration: parsed.event_duration,
                                 description: document.getElementById('event_details').value,
                                 social_image: parsed.social_image,
@@ -472,6 +660,11 @@
                         }
 
                         if (data.success) {
+                            // Mark current event as saved
+                            this.$set(this.savedEvents, idx, true);
+                            this.$set(this.savedEventData, idx, data.event);
+                            
+                            // Show success message
                             Toastify({
                                 text: '{{ __("messages.event_created") }}',
                                 duration: 3000,
@@ -481,7 +674,6 @@
                                     background: '#4BB543',
                                 }
                             }).showToast();
-                            this.savedEvent = data.event;
                         }
                     } catch (error) {
                         console.error('Error saving event:', error);
@@ -507,7 +699,8 @@
                 handleClear() {
                     this.eventDetails = '';
                     this.preview = null;
-                    this.savedEvent = null;
+                    this.savedEvents = [];
+                    this.savedEventData = [];
                     this.$nextTick(() => {
                         document.getElementById('event_details').focus();
                     });
@@ -521,54 +714,73 @@
                     this.isDragging = false
                 },
 
-                async handleDrop(e) {
+                async handleDrop(e, idx) {
                     this.isDragging = false
                     const files = e.dataTransfer.files
                     if (files.length > 0) {
-                        await this.uploadImage(files[0])
+                        await this.uploadImage(files[0], idx)
                     }
                 },
 
-                async handleFileSelect(e) {
+                openFileSelector(idx) {
+                    const fileInput = this.$refs[`fileInput_${idx}`];
+                    if (fileInput) {
+                        if (Array.isArray(fileInput)) {
+                            fileInput[0].click();
+                        } else {
+                            fileInput.click();
+                        }
+                    }
+                },
+
+                async handleFileSelect(e, idx) {
                     const files = e.target.files
                     if (files.length > 0) {
-                        await this.uploadImage(files[0])
+                        await this.uploadImage(files[0], idx)
                     }
                 },
 
-                async uploadImage(file) {
+                async uploadImage(file, idx) {
                     if (!file.type.startsWith('image/')) {
                         this.errorMessage = '{{ __("messages.invalid_image_type") }}'
                         return
                     }
 
-                    this.isUploadingImage = true
-                    const formData = new FormData()
-                    formData.append('image', file)
-                    formData.append('event_details', this.eventDetails)
-
+                    this.isUploadingImage = idx;
+                    
                     try {
-                        const response = await fetch('{{ route("event.parse", ["subdomain" => $role->subdomain]) }}', {
+                        // Create a FormData object to send the file
+                        const formData = new FormData();
+                        formData.append('image', file);
+                        
+                        // Upload the image to get a temporary URL
+                        const response = await fetch('', {
                             method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
                             },
                             body: formData
-                        })
-
-                        const data = await response.json()
-                        this.preview = data
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success && data.path) {
+                            // Update the social_image property for the specific event
+                            this.$set(this.preview.parsed[idx], 'social_image', data.path);
+                        } else {
+                            throw new Error(data.message || '{{ __("messages.error_uploading_image") }}');
+                        }
                     } catch (error) {
-                        console.error('Error uploading image:', error)
-                        this.errorMessage = '{{ __("messages.error_uploading_image") }}'
+                        console.error('Error uploading image:', error);
+                        this.errorMessage = error.message || '{{ __("messages.error_uploading_image") }}';
                     } finally {
-                        this.isUploadingImage = false
+                        this.isUploadingImage = null;
                     }
                 },
 
-                removeImage() {
-                    if (this.preview && this.preview.parsed) {
-                        this.preview.parsed.social_image = null
+                removeImage(idx) {
+                    if (this.preview && this.preview.parsed && this.preview.parsed[idx]) {
+                        this.$set(this.preview.parsed[idx], 'social_image', null);
                     }
                 },
 
