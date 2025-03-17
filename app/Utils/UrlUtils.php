@@ -156,21 +156,56 @@ class UrlUtils
             CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             CURLOPT_HTTPHEADER => [
                 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language: en-US,en;q=0.5'
-            ]
+                'Accept-Language: en-US,en;q=0.5',
+                'Cookie: ' // Empty cookie to prevent login redirects
+            ],
+            CURLOPT_HEADER => true, // Get headers to check redirects
+            CURLOPT_NOBODY => true  // HEAD request only
         ]);
 
         $response = curl_exec($ch);
+        
+        // Get all redirect URLs from headers
+        $redirectUrls = [];
+        $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        $headers = substr($response, 0, $headerSize);
+        
+        foreach (explode("\n", $headers) as $header) {
+            if (stripos($header, 'Location:') === 0) {
+                $redirectUrl = trim(substr($header, 9));
+                $redirectUrls[] = $redirectUrl;
+            }
+        }
+
         $finalUrl = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         
         curl_close($ch);
 
-        if ($httpCode !== 200) {
-            return $url; // Return original URL if we can't follow redirects
+        // First check if we have any valid redirect URLs
+        if (!empty($redirectUrls)) {
+            // For Facebook URLs, try to get the most complete URL
+            if (strpos($url, 'facebook.com') !== false) {
+                foreach ($redirectUrls as $redirectUrl) {
+                    if (strpos($redirectUrl, 'facebook.com') !== false && 
+                        (strpos($redirectUrl, 'photo.php') !== false || 
+                         strpos($redirectUrl, 'share') !== false)) {
+                        return $redirectUrl;
+                    }
+                }
+            }
+            
+            // For other sites, return the last redirect URL
+            return end($redirectUrls);
         }
 
-        return $finalUrl;
+        // If no redirects but request was successful, return the final URL
+        if ($httpCode >= 200 && $httpCode < 400) {
+            return $finalUrl;
+        }
+
+        // If all else fails, return original URL
+        return $url;
     }
 
     public static function getSocialImage($url)
