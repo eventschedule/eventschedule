@@ -74,6 +74,26 @@
                                         {{ __('messages.clear') }}
                                     </button>
                                 </div>
+
+                                <!-- Add buttons at the bottom of the left column -->
+                                <div class="mt-6 flex justify-end gap-2">
+                                    <template v-if="savedEvents[idx]">
+                                        <button @click="handleEdit(idx)" type="button" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                            {{ __('messages.edit') }}
+                                        </button>
+                                        <button @click="handleView(idx)" type="button" class="px-3 py-1 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
+                                            {{ __('messages.view') }}
+                                        </button>
+                                    </template>
+                                    <template v-else>
+                                        <button @click="handleRemoveEvent(idx)" type="button" class="px-3 py-1 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
+                                            {{ __('messages.remove') }}
+                                        </button>
+                                        <button @click="handleSave(idx)" type="button" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                            {{ __('messages.save') }}
+                                        </button>
+                                    </template>
+                                </div>
                             </div>
 
                             <!-- Right column: Image -->
@@ -126,8 +146,8 @@
                 <!-- Events cards - Moved outside the main div -->
                 <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="space-y-6">
                     <div v-for="(event, idx) in preview.parsed" :key="idx" 
-                         :class="['p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg', 
-                                  savedEvents[idx] ? 'border-2 border-green-500 dark:border-green-600' : 'border border-gray-300 dark:border-gray-600']">
+                         :class="['p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg', 
+                                  savedEvents[idx] ? 'border-2 border-green-500 dark:border-green-600' : '']">
                         
                         <!-- Card header -->
                         <div :class="['px-4 py-3 -m-4 sm:-m-8 mb-4 sm:mb-8 flex justify-between items-center rounded-t-lg', 
@@ -140,25 +160,6 @@
                                     {{ __('messages.saved') }}
                                 </span>
                             </h3>
-                            
-                            <div class="flex gap-2">
-                                <template v-if="savedEvents[idx]">
-                                    <button @click="handleEdit(idx)" type="button" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                                        {{ __('messages.edit') }}
-                                    </button>
-                                    <button @click="handleView(idx)" type="button" class="px-3 py-1 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
-                                        {{ __('messages.view') }}
-                                    </button>
-                                </template>
-                                <template v-else>
-                                    <button @click="handleRemoveEvent(idx)" type="button" class="px-3 py-1 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
-                                        {{ __('messages.remove') }}
-                                    </button>
-                                    <button @click="handleSave(idx)" type="button" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                                        {{ __('messages.save') }}
-                                    </button>
-                                </template>
-                            </div>
                         </div>
                         
                         <!-- Card body -->
@@ -306,26 +307,6 @@
                                            @change="(e) => handleFileSelect(e, idx)"
                                            accept="image/*"
                                            class="hidden">
-                                </div>
-                                
-                                <!-- Registration URL if available -->
-                                <div v-if="preview.parsed[idx].registration_url" class="mt-4">
-                                    <x-input-label for="registration_url_@{{ idx }}" :value="__('messages.registration_url')" />
-                                    <div class="mt-1 flex">
-                                        <x-text-input id="registration_url_@{{ idx }}" 
-                                            name="registration_url_@{{ idx }}" 
-                                            type="text" 
-                                            class="block w-full rounded-r-none" 
-                                            v-bind:value="preview.parsed[idx].registration_url"
-                                            v-bind:readonly="savedEvents[idx]" />
-                                        <a v-bind:href="preview.parsed[idx].registration_url" 
-                                           target="_blank" 
-                                           class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-700 border border-l-0 border-gray-300 dark:border-gray-600 rounded-r-md text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                                            </svg>
-                                        </a>
-                                    </div>
                                 </div>
                             </div>
                         </div>
