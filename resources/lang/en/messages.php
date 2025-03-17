@@ -442,4 +442,5 @@ return [
     'invalid_image_type' => 'Invalid image type',
     'multiple_events_detected' => 'Multiple events detected',
     'registration_url' => 'Registration URL',
+    'talent' => 'Talent',
 ];
