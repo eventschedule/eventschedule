@@ -556,6 +556,7 @@ class EventController extends Controller
             $event = Event::where('registration_url', $item['registration_url'])->first();
             if ($event) {
                 $parsed[$key]['event_url'] = $event->getGuestUrl();
+                $parsed[$key]['event_id'] = UrlUtils::encodeId($event->id);
             }
         }
 
