@@ -57,19 +57,19 @@
                                 </div>
 
                                 <!-- Show all fields checkbox -->
-                                <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="flex items-center mb-4">
-                                    <input type="checkbox" 
-                                           id="show_all_fields" 
-                                           v-model="showAllFields" 
-                                           @change="saveShowAllFieldsPreference"
-                                           class="rounded border-gray-300 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
-                                    <label for="show_all_fields" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                        {{ __('messages.show_all_fields') }}
-                                    </label>
-                                </div>
-
-                                <!-- Clear button -->
-                                <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="mb-6">
+                                <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" 
+                                               id="show_all_fields" 
+                                               v-model="showAllFields" 
+                                               @change="saveShowAllFieldsPreference"
+                                               class="rounded border-gray-300 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                                        <label for="show_all_fields" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                            {{ __('messages.show_all_fields') }}
+                                        </label>
+                                    </div>
+                                    
+                                    <!-- Clear button - now right aligned -->
                                     <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                                         {{ __('messages.clear') }}
                                     </button>
@@ -200,18 +200,18 @@
                                 <!-- Add buttons at the bottom of the left column -->
                                 <div class="mt-6 flex justify-end gap-2">
                                     <template v-if="savedEvents[idx]">
-                                        <button @click="handleEdit(idx)" type="button" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                        <button @click="handleEdit(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
                                             {{ __('messages.edit') }}
                                         </button>
-                                        <button @click="handleView(idx)" type="button" class="px-3 py-1 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
+                                        <button @click="handleView(idx)" type="button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
                                             {{ __('messages.view') }}
                                         </button>
                                     </template>
                                     <template v-else>
-                                        <button @click="handleRemoveEvent(idx)" type="button" class="px-3 py-1 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
+                                        <button @click="handleRemoveEvent(idx)" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                                             {{ __('messages.remove') }}
                                         </button>
-                                        <button @click="handleSave(idx)" type="button" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                        <button @click="handleSave(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
                                             {{ __('messages.save') }}
                                         </button>
                                     </template>
