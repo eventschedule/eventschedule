@@ -115,36 +115,9 @@ class GeminiUtils
             }
 
             // Check if the registration url is a redirect, in which case get the final url
-            if (false && ! empty($item['registration_url'])) {
+            if (! empty($item['registration_url'])) {
                 $data[$key]['registration_url'] = UrlUtils::getRedirectUrl($item['registration_url']);
-
-                try {
-                    $ch = curl_init();
-                    curl_setopt_array($ch, [
-                        CURLOPT_URL => $item['registration_url'],
-                        CURLOPT_RETURNTRANSFER => true,
-                        CURLOPT_FOLLOWLOCATION => true,
-                        CURLOPT_MAXREDIRS => 5
-                    ]);
-                    $html = curl_exec($ch);
-                    curl_close($ch);
-                    
-                    // Look for Open Graph image meta tag
-                    if (preg_match('/<meta[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']*)["\']/', $html, $matches) ||
-                        preg_match('/<meta[^>]*content=["\']([^"\']*)["\'][^>]*property=["\']og:image["\']/', $html, $matches)) {
-                        
-                        if ($imageUrl = $matches[1]) {
-                            $imageContents = file_get_contents($imageUrl);
-                            $extension = pathinfo(parse_url($imageUrl, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
-                            $filename = '/tmp/event_' . strtolower(\Str::random(32)) . '.' . $extension;
-                            
-                            file_put_contents($filename, $imageContents);
-                            $data[$key]['social_image'] = $filename;
-                        }
-                    }
-                } catch (\Exception $e) {
-                    // do nothing 
-                }    
+                $data[$key]['social_image'] = UrlUtils::getSocialImage($data[$key]['registration_url']);
             }
         }
 
