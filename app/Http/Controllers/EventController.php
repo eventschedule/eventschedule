@@ -548,11 +548,11 @@ class EventController extends Controller
             $eventUrl = null;
             $event = Event::where('registration_url', $item['registration_url'])->first();
             if ($event) {
-                $eventUrl = $event->getGuestUrl();
+                $parsed[$key]['event_url'] = $event->getGuestUrl();
             }
         }
 
-        return response()->json(['message' => 'Imported event', 'parsed' => $parsed, 'event_url' => $eventUrl]);
+        return response()->json(['message' => 'Imported event', 'parsed' => $parsed]);
     }
 
     public function import(Request $request, $subdomain)
