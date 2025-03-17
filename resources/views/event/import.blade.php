@@ -179,6 +179,9 @@
                                             <button @click="handleSave(idx)" type="button" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
                                                 {{ __('messages.save') }}
                                             </button>
+                                            <button @click="handleRemoveEvent(idx)" type="button" class="px-3 py-1 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors">
+                                                {{ __('messages.remove') }}
+                                            </button>
                                         </template>
                                     </div>
                                 </div>
@@ -774,6 +777,37 @@
                     const savedPreference = localStorage.getItem('event_import_show_all_fields')
                     if (savedPreference !== null) {
                         this.showAllFields = savedPreference === 'true'
+                    }
+                },
+
+                handleRemoveEvent(idx) {
+                    if (confirm('{{ __("messages.confirm_remove_event") }}')) {
+                        // Remove the event from the parsed array
+                        this.preview.parsed.splice(idx, 1);
+                        // Remove the corresponding entry in savedEvents array
+                        this.savedEvents.splice(idx, 1);
+                        this.savedEventData.splice(idx, 1);
+                        
+                        // If no events left, clear the preview
+                        if (this.preview.parsed.length === 0) {
+                            this.preview = null;
+                        }
+                        
+                        // Re-initialize datepickers after removing an event
+                        this.$nextTick(() => {
+                            this.initializeDatepickers();
+                        });
+                        
+                        // Show success message
+                        Toastify({
+                            text: '{{ __("messages.event_removed") }}',
+                            duration: 3000,
+                            position: 'center',
+                            stopOnFocus: true,
+                            style: {
+                                background: '#4BB543',
+                            }
+                        }).showToast();
                     }
                 },
             }
