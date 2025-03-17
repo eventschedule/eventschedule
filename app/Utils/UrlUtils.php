@@ -180,7 +180,7 @@ class UrlUtils
         try {
             $ch = curl_init();
             curl_setopt_array($ch, [
-                CURLOPT_URL => $item['registration_url'],
+                CURLOPT_URL => $url,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_MAXREDIRS => 5
