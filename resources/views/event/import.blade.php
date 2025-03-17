@@ -151,9 +151,6 @@
                                     </svg>
                                     {{ __('messages.error') }}
                                 </span>
-                                <span v-else>
-                                    @{{ preview.parsed[idx].event_name || __('messages.event') }}
-                                </span>
                             </h3>
                             
                             <div class="flex space-x-2">
