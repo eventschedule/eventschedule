@@ -845,7 +845,7 @@
                             await new Promise(resolve => setTimeout(resolve, 500));
                         } catch (error) {
                             errorCount++;
-                            console.error(`Error processing event ${idx}:`, error);
+                            console.error('Error processing event ' + idx + ':', error);
                         }
                     }
                     
