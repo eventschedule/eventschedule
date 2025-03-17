@@ -74,26 +74,6 @@
                                         {{ __('messages.clear') }}
                                     </button>
                                 </div>
-
-                                <!-- Add buttons at the bottom of the left column -->
-                                <div class="mt-6 flex justify-end gap-2">
-                                    <template v-if="savedEvents[idx]">
-                                        <button @click="handleEdit(idx)" type="button" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                                            {{ __('messages.edit') }}
-                                        </button>
-                                        <button @click="handleView(idx)" type="button" class="px-3 py-1 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
-                                            {{ __('messages.view') }}
-                                        </button>
-                                    </template>
-                                    <template v-else>
-                                        <button @click="handleRemoveEvent(idx)" type="button" class="px-3 py-1 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
-                                            {{ __('messages.remove') }}
-                                        </button>
-                                        <button @click="handleSave(idx)" type="button" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                                            {{ __('messages.save') }}
-                                        </button>
-                                    </template>
-                                </div>
                             </div>
 
                             <!-- Right column: Image -->
@@ -237,6 +217,26 @@
                                 <!-- JSON preview with border matching textarea -->
                                 <div v-if="showAllFields" class="mt-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm overflow-auto bg-gray-50 dark:bg-gray-900">
                                     <pre class="p-4 text-xs text-gray-800 dark:text-gray-200">@{{ JSON.stringify(preview.parsed[idx], null, 2) }}</pre>
+                                </div>
+                                
+                                <!-- Add buttons at the bottom of the left column -->
+                                <div class="mt-6 flex justify-end gap-2">
+                                    <template v-if="savedEvents[idx]">
+                                        <button @click="handleEdit(idx)" type="button" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                            {{ __('messages.edit') }}
+                                        </button>
+                                        <button @click="handleView(idx)" type="button" class="px-3 py-1 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
+                                            {{ __('messages.view') }}
+                                        </button>
+                                    </template>
+                                    <template v-else>
+                                        <button @click="handleRemoveEvent(idx)" type="button" class="px-3 py-1 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
+                                            {{ __('messages.remove') }}
+                                        </button>
+                                        <button @click="handleSave(idx)" type="button" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                            {{ __('messages.save') }}
+                                        </button>
+                                    </template>
                                 </div>
                             </div>
                             
