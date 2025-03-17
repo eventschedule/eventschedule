@@ -69,10 +69,15 @@
                                         </label>
                                     </div>
                                     
-                                    <!-- Clear button - now right aligned -->
-                                    <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                                        {{ __('messages.clear') }}
-                                    </button>
+                                    <!-- Action buttons - now includes Save All -->
+                                    <div class="flex gap-2">
+                                        <button @click="handleSaveAll" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                            {{ __('messages.save_all') }}
+                                        </button>
+                                        <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                            {{ __('messages.clear') }}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -774,6 +779,45 @@
                         console.error('Error curating event:', error);
                         this.errorMessage = error.message || '{{ __("messages.error_curating_event") }}';
                     }
+                },
+
+                async handleSaveAll() {
+                    // Check if there are any events to save
+                    if (!this.preview?.parsed || this.preview.parsed.length === 0) {
+                        return;
+                    }
+                    
+                    // Loop through all events
+                    for (let idx = 0; idx < this.preview.parsed.length; idx++) {
+                        // Skip already saved events
+                        if (this.savedEvents[idx]) {
+                            continue;
+                        }
+                        
+                        // If event has a curate button and is not already curated, curate it
+                        if (this.isCurator && 
+                            this.preview.parsed[idx].event_url && 
+                            !this.preview.parsed[idx].is_curated) {
+                            await this.handleCurate(idx);
+                        } else {
+                            // Otherwise save it normally
+                            await this.handleSave(idx);
+                        }
+                        
+                        // Add a small delay between saves to prevent overwhelming the server
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
+                    
+                    // Show success message after all events are processed
+                    Toastify({
+                        text: '{{ __("messages.all_events_processed") }}',
+                        duration: 3000,
+                        position: 'center',
+                        stopOnFocus: true,
+                        style: {
+                            background: '#4BB543',
+                        }
+                    }).showToast();
                 },
             }
         }).mount('#event-import-app')
