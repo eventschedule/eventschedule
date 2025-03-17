@@ -503,6 +503,7 @@ class EventController extends Controller
             $talent = Role::where('name', $parsed['performer_name'])
                         ->where('type', 'schedule')
                         ->whereIn('id', $followerRoleIds)
+                        ->orderBy('id')
                         ->first();
 
             if ($talent) {
