@@ -447,4 +447,7 @@ return [
     'event_removed' => 'Event successfully removed!',
     'save_all' => 'Save All',
     'all_events_processed' => 'All events processed successfully!',
+    'error' => 'Error',
+    'events_processed_with_errors' => 'Events processed with errors: {success} success, {errors} errors',
+    'error_curating_event' => 'Error curating event',
 ];

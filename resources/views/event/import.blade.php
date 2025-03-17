@@ -136,7 +136,8 @@
                         
                         <!-- Card header -->
                         <div :class="['px-4 py-3 -m-4 sm:-m-8 mb-4 sm:mb-8 flex justify-between items-center rounded-t-lg', 
-                                     savedEvents[idx] ? 'bg-green-50 dark:bg-green-900/30' : 'bg-gray-50 dark:bg-gray-800']">
+                                     savedEvents[idx] ? 'bg-green-50 dark:bg-green-900/30' : 
+                                     saveErrors[idx] ? 'bg-red-50 dark:bg-red-900/30' : 'bg-gray-50 dark:bg-gray-800']">
                             <h3 class="font-medium text-lg">
                                 <span v-if="savedEvents[idx]" class="ml-2 text-sm text-green-600 dark:text-green-400">
                                     <svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -144,7 +145,20 @@
                                     </svg>
                                     {{ __('messages.saved') }}
                                 </span>
+                                <span v-else-if="saveErrors[idx]" class="ml-2 text-sm text-red-600 dark:text-red-400">
+                                    <svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                    {{ __('messages.error') }}
+                                </span>
+                                <span v-else>
+                                    @{{ preview.parsed[idx].event_name || __('messages.event') }}
+                                </span>
                             </h3>
+                            
+                            <div class="flex space-x-2">
+                                <!-- Existing buttons -->
+                            </div>
                         </div>
                         
                         <!-- Card body -->
@@ -351,6 +365,7 @@
                     errorMessage: null,
                     savedEvents: [],
                     savedEventData: [], // Will store the response data for saved events
+                    saveErrors: [], // New array to track save errors
                     isDragging: false,
                     showAllFields: false,
                     isCurator: {{ $role->isCurator() ? 'true' : 'false' }},
@@ -381,6 +396,7 @@
                     this.errorMessage = null;
                     this.savedEvents = [];
                     this.savedEventData = [];
+                    this.saveErrors = [];
                     
                     try {
                         const response = await fetch('{{ route("event.parse", ["subdomain" => $role->subdomain]) }}', {
@@ -439,10 +455,11 @@
                         this.preview = data;
                         console.log('Preview data:', this.preview);
                         
-                        // Initialize array to track saved events
+                        // Initialize arrays to track saved events and errors
                         if (Array.isArray(this.preview.parsed)) {
                             this.savedEvents = new Array(this.preview.parsed.length).fill(false);
                             this.savedEventData = new Array(this.preview.parsed.length).fill(null);
+                            this.saveErrors = new Array(this.preview.parsed.length).fill(false);
                         }
                         
                         // Initialize datepickers after preview is loaded
@@ -482,6 +499,9 @@
 
                 async handleSave(idx) {
                     this.errorMessage = null;
+                    // Reset error state for this event
+                    this.saveErrors[idx] = false;
+                    
                     try {
                         // Get data from the Vue model
                         if (!this.preview?.parsed?.[idx]) {
@@ -591,6 +611,8 @@
                     } catch (error) {
                         console.error('Error saving event:', error);
                         this.errorMessage = error.message;
+                        // Set error state for this event
+                        this.saveErrors[idx] = true;
                     }
                 },
 
@@ -740,6 +762,9 @@
                 },
 
                 async handleCurate(idx) {
+                    // Reset error state for this event
+                    this.saveErrors[idx] = false;
+                    
                     if (!this.preview?.parsed?.[idx]?.event_url) {
                         return;
                     }
@@ -762,7 +787,7 @@
                             this.savedEvents[idx] = true;
                             this.savedEventData[idx] = {
                                 view_url: data.event_url || this.preview.parsed[idx].event_url,
-                                is_curated: true // Flag to indicate this is a curated event
+                                is_curated: true
                             };
                             
                             Toastify({
@@ -774,10 +799,14 @@
                                     background: '#4BB543',
                                 }
                             }).showToast();
+                        } else {
+                            throw new Error(data.message || '{{ __("messages.error_curating_event") }}');
                         }
                     } catch (error) {
                         console.error('Error curating event:', error);
                         this.errorMessage = error.message || '{{ __("messages.error_curating_event") }}';
+                        // Set error state for this event
+                        this.saveErrors[idx] = true;
                     }
                 },
 
@@ -787,6 +816,9 @@
                         return;
                     }
                     
+                    let successCount = 0;
+                    let errorCount = 0;
+                    
                     // Loop through all events
                     for (let idx = 0; idx < this.preview.parsed.length; idx++) {
                         // Skip already saved events
@@ -794,30 +826,54 @@
                             continue;
                         }
                         
-                        // If event has a curate button and is not already curated, curate it
-                        if (this.isCurator && 
-                            this.preview.parsed[idx].event_url && 
-                            !this.preview.parsed[idx].is_curated) {
-                            await this.handleCurate(idx);
-                        } else {
-                            // Otherwise save it normally
-                            await this.handleSave(idx);
+                        try {
+                            // If event has a curate button and is not already curated, curate it
+                            if (this.isCurator && 
+                                this.preview.parsed[idx].event_url && 
+                                !this.preview.parsed[idx].is_curated) {
+                                await this.handleCurate(idx);
+                            } else {
+                                // Otherwise save it normally
+                                await this.handleSave(idx);
+                            }
+                            
+                            // Check if the operation was successful
+                            if (this.savedEvents[idx]) {
+                                successCount++;
+                            } else if (this.saveErrors[idx]) {
+                                errorCount++;
+                            }
+                            
+                            // Add a small delay between saves to prevent overwhelming the server
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                        } catch (error) {
+                            errorCount++;
+                            console.error(`Error processing event ${idx}:`, error);
                         }
-                        
-                        // Add a small delay between saves to prevent overwhelming the server
-                        await new Promise(resolve => setTimeout(resolve, 500));
                     }
                     
-                    // Show success message after all events are processed
-                    Toastify({
-                        text: '{{ __("messages.all_events_processed") }}',
-                        duration: 3000,
-                        position: 'center',
-                        stopOnFocus: true,
-                        style: {
-                            background: '#4BB543',
-                        }
-                    }).showToast();
+                    // Show appropriate message after all events are processed
+                    if (errorCount === 0) {
+                        Toastify({
+                            text: '{{ __("messages.all_events_processed") }}',
+                            duration: 3000,
+                            position: 'center',
+                            stopOnFocus: true,
+                            style: {
+                                background: '#4BB543',
+                            }
+                        }).showToast();
+                    } else {
+                        Toastify({
+                            text: `{{ __("messages.events_processed_with_errors") }}`.replace('{success}', successCount).replace('{errors}', errorCount),
+                            duration: 3000,
+                            position: 'center',
+                            stopOnFocus: true,
+                            style: {
+                                background: errorCount > 0 && successCount === 0 ? '#FF0000' : '#FF9800',
+                            }
+                        }).showToast();
+                    }
                 },
             }
         }).mount('#event-import-app')
