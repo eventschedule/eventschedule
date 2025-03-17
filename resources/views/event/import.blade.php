@@ -739,15 +739,9 @@
                         return;
                     }
 
+                    const hash = this.preview.parsed[idx].event_id;
+
                     try {
-                        const eventUrl = this.preview.parsed[idx].event_url;
-                        // Extract the hash from either /view/{hash} or /edit/{hash} format
-                        const matches = eventUrl.match(/\/(view|edit)\/([^\/]+)$/);
-                        if (!matches || !matches[2]) {
-                            throw new Error('{{ __("messages.invalid_event_url") }}');
-                        }
-                        const hash = matches[2];
-                        
                         const url = @json(route('event.curate', ['subdomain' => $role->subdomain, 'hash' => '--hash--'])).replace('--hash--', hash);
                         const response = await fetch(url, {
                             method: 'GET',
