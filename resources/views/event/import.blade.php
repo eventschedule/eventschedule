@@ -560,8 +560,21 @@
                         }
                         
                         const data = await response.json();
+                        
+                        // Store the response data in savedEventData array
                         this.savedEvents[idx] = true;
-                        this.savedEventData[idx] = data;
+                        this.savedEventData[idx] = data.event; // Store the event object with view_url and edit_url
+                        
+                        // Show success message
+                        Toastify({
+                            text: '{{ __("messages.event_created") }}',
+                            duration: 3000,
+                            position: 'center',
+                            stopOnFocus: true,
+                            style: {
+                                background: '#4BB543',
+                            }
+                        }).showToast();
                         
                     } catch (error) {
                         console.error('Error saving event:', error);
