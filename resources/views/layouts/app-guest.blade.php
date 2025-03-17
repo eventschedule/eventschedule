@@ -8,8 +8,17 @@
     @endphp
 
     <x-slot name="meta">
+        @if ($role->language_code != 'en')
+            <link rel="alternate" hreflang="en" href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}">
+            <link rel="alternate" hreflang="{{ $role->language_code }}" href="{{ request()->fullUrlWithQuery(['lang' => $role->language_code]) }}">
+        @endif
+
         @if ($event && $event->exists) 
-            <link rel="canonical" href="{{ $event->getGuestUrl() }}">
+            @if ($role->language_code != 'en')
+                <link rel="canonical" href="{{ $event->getGuestUrl() }}&{{ 'lang=' . (request()->lang ?? (session()->has('translate') ? 'en' : $role->language_code)) }}">
+            @else
+                <link rel="canonical" href="{{ $event->getGuestUrl() }}">
+            @endif
             @if ($event->description_html)
             <meta name="description" content="{{ trim(strip_tags($event->translatedDescription())) }}">
             @elseif ($event->role() && $event->role()->description_html)
@@ -26,7 +35,11 @@
             <meta name="twitter:image:alt" content="{{ $event->translatedName() }}">
             <meta name="twitter:card" content="summary_large_image">
         @elseif ($role->exists)
-            <link rel="canonical" href="{{ $role->getGuestUrl() }}">
+            @if ($role->language_code != 'en')
+                <link rel="canonical" href="{{ $role->getGuestUrl() }}?{{ 'lang=' . (request()->lang ?? (session()->has('translate') ? 'en' : $role->language_code)) }}">
+            @else
+                <link rel="canonical" href="{{ $role->getGuestUrl() }}">
+            @endif
             <meta name="description" content="{{ trim(strip_tags($role->translatedDescription())) }}">
             <meta property="og:title" content="{{ $role->translatedName() }}">
             <meta property="og:description" content="{{ trim(strip_tags($role->translatedDescription())) }}">
