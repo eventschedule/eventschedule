@@ -498,7 +498,7 @@ class EventController extends Controller
                           $q->where('roles.id', $role->id)
                             ->where('role_user.level', 'follower'); 
                       });
-            })->pluck('id')->toArray();
+            })->orderBy('id')->pluck('id')->toArray();
 
             $talent = Role::where('name', $parsed['performer_name'])
                         ->where('type', 'schedule')
