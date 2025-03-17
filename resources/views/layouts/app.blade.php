@@ -8,7 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <link rel="icon" href="{{ asset('images/favicon.png') }}">
-    <link rel="sitemap" type="application/xml" href="{{ url('sitemap.xml') }}">    
+    <link rel="sitemap" type="application/xml" href="{{ config('app.url') . route('sitemap', [], false) }}">    
     
     @if (config('app.sentry_js_dsn'))
         <script src="{{ config('app.sentry_js_dsn') }}" crossorigin="anonymous"></script>
