@@ -174,6 +174,8 @@ class UrlUtils
             $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
             $headers = substr($response, 0, $headerSize);
             $html = substr($response, $headerSize);
+
+            \Log::info("HTML: " . $html);
             
             $redirectUrls = [];
             foreach (explode("\n", $headers) as $header) {
