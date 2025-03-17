@@ -116,8 +116,9 @@ class GeminiUtils
 
             // Check if the registration url is a redirect, in which case get the final url
             if (! empty($item['registration_url'])) {
-                $data[$key]['registration_url'] = UrlUtils::getRedirectUrl($item['registration_url']);
-                $data[$key]['social_image'] = UrlUtils::getSocialImage($data[$key]['registration_url']);
+                $links = UrlUtils::getUrlRedirectAndImage($item['registration_url']);
+                $data[$key]['registration_url'] = $links['redirect_url'];
+                $data[$key]['social_image'] = $links['image_path'];
 
                 \Log::info("Registration URL: " . $data[$key]['registration_url']);
                 \Log::info("Social Image: " . $data[$key]['social_image']);

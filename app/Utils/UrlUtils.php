@@ -144,101 +144,90 @@ class UrlUtils
         return $text;
     }
 
-    public static function getRedirectUrl($url)
+    public static function getUrlRedirectAndImage($url)
     {
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_CONNECTTIMEOUT => 30,
-            CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            CURLOPT_HTTPHEADER => [
-                'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language: en-US,en;q=0.5',
-                'Cookie: ' // Empty cookie to prevent login redirects
-            ],
-            CURLOPT_HEADER => true, // Get headers to check redirects
-            CURLOPT_NOBODY => true  // HEAD request only
-        ]);
+        $result = [
+            'redirect_url' => $url,
+            'image_path' => null
+        ];
 
-        $response = curl_exec($ch);
-        
-        // Get all redirect URLs from headers
-        $redirectUrls = [];
-        $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-        $headers = substr($response, 0, $headerSize);
-        
-        foreach (explode("\n", $headers) as $header) {
-            if (stripos($header, 'Location:') === 0) {
-                $redirectUrl = trim(substr($header, 9));
-                $redirectUrls[] = $redirectUrl;
+        try {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_CONNECTTIMEOUT => 30,
+                CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                CURLOPT_HTTPHEADER => [
+                    'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language: en-US,en;q=0.5',
+                    'Cookie: ' // Empty cookie to prevent login redirects
+                ],
+                CURLOPT_HEADER => true, // Get headers to check redirects
+            ]);
+
+            $response = curl_exec($ch);
+            
+            // Process redirect URL
+            $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+            $headers = substr($response, 0, $headerSize);
+            $html = substr($response, $headerSize);
+            
+            $redirectUrls = [];
+            foreach (explode("\n", $headers) as $header) {
+                if (stripos($header, 'Location:') === 0) {
+                    $redirectUrl = trim(substr($header, 9));
+                    $redirectUrls[] = $redirectUrl;
+                }
             }
-        }
 
-        $finalUrl = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        
-        curl_close($ch);
+            $finalUrl = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            
+            curl_close($ch);
 
-        // First check if we have any valid redirect URLs
-        if (!empty($redirectUrls)) {
-            // For Facebook URLs, try to get the most complete URL
-            if (strpos($url, 'facebook.com') !== false) {
-                foreach ($redirectUrls as $redirectUrl) {
-                    if (strpos($redirectUrl, 'facebook.com') !== false && 
-                        (strpos($redirectUrl, 'photo.php') !== false || 
-                         strpos($redirectUrl, 'share') !== false)) {
-                        return $redirectUrl;
+            // Determine redirect URL
+            if (!empty($redirectUrls)) {
+                // For Facebook URLs, try to get the most complete URL
+                if (strpos($url, 'facebook.com') !== false) {
+                    foreach ($redirectUrls as $redirectUrl) {
+                        if (strpos($redirectUrl, 'facebook.com') !== false && 
+                            (strpos($redirectUrl, 'photo.php') !== false || 
+                             strpos($redirectUrl, 'share') !== false)) {
+                            $result['redirect_url'] = $redirectUrl;
+                            break;
+                        }
+                    }
+                } else {
+                    // For other sites, use the last redirect URL
+                    $result['redirect_url'] = end($redirectUrls);
+                }
+            } elseif ($httpCode >= 200 && $httpCode < 400) {
+                $result['redirect_url'] = $finalUrl;
+            }
+
+            // Process social image
+            if ($httpCode >= 200 && $httpCode < 400 && !empty($html)) {
+                // Look for Open Graph image meta tag
+                if (preg_match('/<meta[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']*)["\']/', $html, $matches) ||
+                    preg_match('/<meta[^>]*content=["\']([^"\']*)["\'][^>]*property=["\']og:image["\']/', $html, $matches)) {
+                    
+                    if ($imageUrl = $matches[1]) {
+                        $imageContents = file_get_contents($imageUrl);
+                        $extension = pathinfo(parse_url($imageUrl, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
+                        $filename = '/tmp/event_' . strtolower(\Str::random(32)) . '.' . $extension;
+                        
+                        file_put_contents($filename, $imageContents);
+                        $result['image_path'] = $filename;
                     }
                 }
             }
-            
-            // For other sites, return the last redirect URL
-            return end($redirectUrls);
-        }
-
-        // If no redirects but request was successful, return the final URL
-        if ($httpCode >= 200 && $httpCode < 400) {
-            return $finalUrl;
-        }
-
-        // If all else fails, return original URL
-        return $url;
-    }
-
-    public static function getSocialImage($url)
-    {
-        $filename = null;
-
-        try {
-            $ch = curl_init();
-            curl_setopt_array($ch, [
-                CURLOPT_URL => $url,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_MAXREDIRS => 5
-            ]);
-            $html = curl_exec($ch);
-            curl_close($ch);
-            
-            // Look for Open Graph image meta tag
-            if (preg_match('/<meta[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']*)["\']/', $html, $matches) ||
-                preg_match('/<meta[^>]*content=["\']([^"\']*)["\'][^>]*property=["\']og:image["\']/', $html, $matches)) {
-                
-                if ($imageUrl = $matches[1]) {
-                    $imageContents = file_get_contents($imageUrl);
-                    $extension = pathinfo(parse_url($imageUrl, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
-                    $filename = '/tmp/event_' . strtolower(\Str::random(32)) . '.' . $extension;
-                    
-                    file_put_contents($filename, $imageContents);
-                }
-            }
         } catch (\Exception $e) {
-            // do nothing 
-        }    
+            // do nothing, return default values
+        }
 
-        return $filename;
+        return $result;
     }
 }
