@@ -190,7 +190,7 @@
                                     <input id="starts_at_@{{ idx }}" 
                                            name="starts_at_@{{ idx }}" 
                                            type="text" 
-                                           class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm datepicker_@{{ idx }}"
+                                           :class="'mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm datepicker_' + idx"
                                            v-bind:readonly="savedEvents[idx]"
                                            v-bind:value="preview.parsed[idx].event_date_time"
                                            required 
@@ -507,17 +507,13 @@
                         
                         const parsed = this.preview.parsed[idx];
                         
-                        // Find the date input by looking for inputs with the datepicker class that contains the index
-                        const dateInputs = document.querySelectorAll('input[class*="datepicker_"]');
-                        const dateElement = Array.from(dateInputs)[idx]; // Get the one at the current index
-                        
-                        if (!dateElement) {
-                            console.error(`Date element at index ${idx} not found`);
-                            throw new Error('Date field not found');
-                        }
-                        
-                        // Get the date value directly from the input
-                        let dateValue = dateElement.value;
+                        let dateValue = null; // Declare dateValue variable here                        
+                        let dateElement = document.querySelector(`.datepicker_${idx}`);
+
+                        console.log('Date element:', dateElement);
+                        dateValue = dateElement.value;
+
+                        console.log('Date value from element:', dateValue);
                         
                         // Ensure the date has seconds
                         if (dateValue && dateValue.length === 16) { // Format: "YYYY-MM-DD HH:MM"
