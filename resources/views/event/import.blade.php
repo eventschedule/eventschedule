@@ -57,8 +57,8 @@
                                 </div>
 
                                 <!-- Show all fields checkbox -->
-                                <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="flex items-center justify-between mb-4">
-                                    <div class="flex items-center">
+                                <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                                    <div class="flex items-center mb-3 sm:mb-0">
                                         <input type="checkbox" 
                                                id="show_all_fields" 
                                                v-model="showAllFields" 
@@ -70,7 +70,7 @@
                                     </div>
                                     
                                     <!-- Action buttons - now includes Save All -->
-                                    <div class="flex gap-2">
+                                    <div class="flex gap-2 self-end sm:self-auto">
                                         <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                                             {{ __('messages.clear') }}
                                         </button>
@@ -211,10 +211,8 @@
                                 </div>
 
                                 <!-- JSON preview with border matching textarea -->
-                                <div v-if="showAllFields" class="mt-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm overflow-hidden bg-gray-50 dark:bg-gray-900 max-w-full">
-                                    <div class="overflow-x-auto">
-                                        <pre class="p-4 text-xs text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words max-w-[calc(100vw-3rem)]">@{{ JSON.stringify(preview.parsed[idx], null, 2) }}</pre>
-                                    </div>
+                                <div v-if="showAllFields" class="mt-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm overflow-auto bg-gray-50 dark:bg-gray-900">
+                                    <pre class="p-4 text-xs text-gray-800 dark:text-gray-200">@{{ JSON.stringify(preview.parsed[idx], null, 2) }}</pre>
                                 </div>
                                 
                                 <!-- Add buttons at the bottom of the left column -->
