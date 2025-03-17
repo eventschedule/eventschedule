@@ -144,7 +144,7 @@ class UrlUtils
         return $text;
     }
 
-    public static function getUrlRedirectAndImage($url)
+    public static function getUrlMetadata($url)
     {
         $result = [
             'redirect_url' => $url,
