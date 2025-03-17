@@ -443,4 +443,6 @@ return [
     'multiple_events_detected' => 'Multiple events detected',
     'registration_url' => 'Registration URL',
     'talent' => 'Talent',
+    'confirm_remove_event' => 'Are you sure you want to remove this event?',
+    'event_removed' => 'Event successfully removed!',
 ];
