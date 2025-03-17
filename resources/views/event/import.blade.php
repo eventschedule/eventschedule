@@ -802,6 +802,13 @@
                         return;
                     }
                     
+                    // Prevent multiple clicks by disabling the button
+                    const saveAllButton = event.target;
+                    if (saveAllButton) {
+                        saveAllButton.disabled = true;
+                        saveAllButton.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                    
                     let successCount = 0;
                     let errorCount = 0;
                     let skippedCount = 0;
@@ -810,11 +817,12 @@
                     for (let idx = 0; idx < this.preview.parsed.length; idx++) {
                         // Skip already saved events
                         if (this.savedEvents[idx]) {
+                            skippedCount++;
                             continue;
                         }
                         
-                        // Skip events that have a matching one (indicated by event_url)
-                        if (this.preview.parsed[idx].event_url) {
+                        // Skip events that have a matching one (indicated by event_url) but aren't curated yet
+                        if (this.preview.parsed[idx].event_url && !this.isCurator) {
                             skippedCount++;
                             continue;
                         }
@@ -866,6 +874,12 @@
                                         skippedCount > 0 && successCount === 0 ? '#FF9800' : '#4BB543',
                         }
                     }).showToast();
+                    
+                    // Re-enable the button after processing is complete
+                    if (saveAllButton) {
+                        saveAllButton.disabled = false;
+                        saveAllButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
                 },
             }
         }).mount('#event-import-app')
