@@ -115,7 +115,7 @@ class GeminiUtils
             }
 
             // Check if the registration url is a redirect, in which case get the final url
-            if (! empty($item['registration_url'])) {
+            if (false && ! empty($item['registration_url'])) {
                 $data[$key]['registration_url'] = UrlUtils::getRedirectUrl($item['registration_url']);
 
                 try {
