@@ -662,7 +662,7 @@
                         formData.append('image', file);
                         
                         // Upload the image to get a temporary URL
-                        const response = await fetch('', {
+                        const response = await fetch('{{ route("event.upload_image", ["subdomain" => $role->subdomain]) }}', {
                             method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
