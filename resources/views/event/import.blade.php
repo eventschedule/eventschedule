@@ -241,11 +241,11 @@
                             </div>
                             
                             <!-- Right column: Image -->
-                            <div>
-                                <div class="relative">
+                            <div class="flex flex-col">
+                                <div class="relative h-full flex flex-col">
                                     <!-- Image preview -->
                                     <div v-if="preview.parsed[idx].social_image" 
-                                         class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                                         class="flex-grow rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
                                         <img v-bind:src="getSocialImageUrl(preview.parsed[idx].social_image)" 
                                              class="object-contain w-full h-full" 
                                              alt="Event preview image">
@@ -267,7 +267,7 @@
                                          @dragleave.prevent="dragLeave"
                                          @drop.prevent="(e) => handleDrop(e, idx)"
                                          @click="() => openFileSelector(idx)"
-                                         v-bind:class="['aspect-w-16 aspect-h-9 rounded-lg border-2 border-dashed flex items-center justify-center cursor-pointer', 
+                                         v-bind:class="['flex-grow flex items-center justify-center rounded-lg border-2 border-dashed cursor-pointer', 
                                                   isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-300 dark:border-gray-600']">
                                         <div class="text-center py-10">
                                             <!-- Show loading spinner when uploading -->
