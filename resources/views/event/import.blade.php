@@ -312,7 +312,7 @@
                     element._flatpickr.destroy();
                 }
                 
-                // Create new flatpickr instance
+                // Create new flatpickr instance with EXACT same configuration as edit.blade.php
                 var f = flatpickr(element, {
                     allowInput: true,
                     enableTime: true,
@@ -480,37 +480,38 @@
                 async handleSave(idx) {
                     this.errorMessage = null;
                     try {
-                        console.log("Saving event with index:", idx);
-                        
-                        // Get data directly from the Vue model
-                        if (!this.preview || !this.preview.parsed || !this.preview.parsed[idx]) {
+                        // Get data from the Vue model
+                        if (!this.preview?.parsed?.[idx]) {
                             throw new Error('Event data not found');
                         }
                         
                         const parsed = this.preview.parsed[idx];
                         
-                        // Get date value - first try to get it from flatpickr if available
-                        let dateValue = parsed.event_date_time;
+                        // Get the date input element
+                        const dateElementId = `starts_at_${idx}`;
+                        const dateElement = document.getElementById(dateElementId);
                         
-                        // Try to get the flatpickr instance for additional formatting if needed
-                        const dateElement = document.querySelector(`.datepicker_${idx}`);
-                        if (dateElement && dateElement._flatpickr && dateElement._flatpickr.selectedDates[0]) {
-                            dateValue = dateElement._flatpickr.formatDate(dateElement._flatpickr.selectedDates[0], "Y-m-d H:i:S");
-                            console.log("Using flatpickr formatted date:", dateValue);
-                        } else {
-                            console.log("Using model date value:", dateValue);
+                        if (!dateElement) {
+                            console.error(`Date element with ID ${dateElementId} not found`);
+                            throw new Error('Date field not found');
+                        }
+                        
+                        // Get the date value directly from the input
+                        let dateValue = dateElement.value;
+                        
+                        // Ensure the date has seconds
+                        if (dateValue && dateValue.length === 16) { // Format: "YYYY-MM-DD HH:MM"
+                            dateValue += ":00"; // Add seconds
                         }
                         
                         if (!dateValue) {
                             throw new Error('Date and time are required');
                         }
                         
-                        // Get other values from the model
-                        const eventName = parsed.event_name || '';
-                        const venueAddress = parsed.venue_address1 || '';
+                        // Prepare members data
+                        const members = {};
                         const talentId = parsed.talent_id ?? 'new_talent';
                         
-                        var members = {};
                         if (parsed.talent_id || (parsed.performer_name && parsed.performer_youtube_url)) {
                             members[talentId] = {
                                 name: parsed.performer_name,
@@ -518,9 +519,19 @@
                                 email: parsed.performer_email,
                                 youtube_url: parsed.performer_youtube_url ?? '',
                                 language_code: '{{ $role->language_code }}',
-                            }
+                            };
                         }
-
+                        
+                        // Get venue address from input if it exists
+                        const venueAddressElement = document.getElementById(`venue_address1_${idx}`);
+                        const venueAddress = venueAddressElement ? venueAddressElement.value : 
+                                            (parsed.venue_address1 || "{{ $role->isCurator() ? $role->city : '' }}");
+                        
+                        // Get event name from input if it exists
+                        const nameElement = document.getElementById(`name_${idx}`);
+                        const eventName = nameElement ? nameElement.value : parsed.event_name;
+                        
+                        // Send request to server
                         const response = await fetch('{{ route("event.import", ["subdomain" => $role->subdomain]) }}', {
                             method: 'POST',
                             headers: {
@@ -530,7 +541,7 @@
                             body: JSON.stringify({
                                 venue_name: parsed.venue_name,
                                 venue_name_en: parsed.venue_name_en,
-                                venue_address1: parsed.venue_address1 || "{{ $role->isCurator() ? $role->city : '' }}",
+                                venue_address1: venueAddress,
                                 venue_address1_en: parsed.venue_address1_en,
                                 venue_city: parsed.event_city,
                                 venue_city_en: parsed.event_city_en,
@@ -541,7 +552,7 @@
                                 venue_id: parsed.venue_id,
                                 venue_language_code: '{{ $role->language_code }}',
                                 members: members,
-                                name: parsed.event_name,
+                                name: eventName,
                                 name_en: parsed.event_name_en,
                                 starts_at: dateValue,
                                 duration: parsed.event_duration,
@@ -553,62 +564,20 @@
                                 @endif
                             })
                         });
-
-                        // Handle HTTP error responses before trying to parse JSON
+                        
+                        // Handle response
                         if (!response.ok) {
-                            if (response.status === 405) {
-                                throw new Error('Invalid request method');
-                            }
-                            if (response.status === 404) {
-                                throw new Error('Resource not found');
-                            }
-                            if (response.status === 403) {
-                                throw new Error('Permission denied');
-                            }
-                            if (response.status === 401) {
-                                throw new Error('Unauthorized');
-                            }
-                            if (response.status === 500) {
-                                throw new Error('Server error');
-                            }
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Failed to save event');
                         }
-
-                        let data;
-                        try {
-                            data = await response.json();
-                        } catch (e) {
-                            throw new Error('Invalid response from server');
-                        }
-
-                        if (!response.ok) {
-                            // Handle validation errors
-                            if (data.errors) {
-                                const errorMessages = Object.values(data.errors).flat();
-                                throw new Error(errorMessages.join('\n'));
-                            }
-                            // Handle other types of errors
-                            throw new Error(data.message || data.error || 'An unexpected error occurred');
-                        }
-
-                        if (data.success) {
-                            // Mark current event as saved
-                            this.$set(this.savedEvents, idx, true);
-                            this.$set(this.savedEventData, idx, data.event);
-                            
-                            // Show success message
-                            Toastify({
-                                text: '{{ __("messages.event_created") }}',
-                                duration: 3000,
-                                position: 'center',
-                                stopOnFocus: true,
-                                style: {
-                                    background: '#4BB543',
-                                }
-                            }).showToast();
-                        }
+                        
+                        const data = await response.json();
+                        this.savedEvents[idx] = true;
+                        this.savedEventData[idx] = data;
+                        
                     } catch (error) {
                         console.error('Error saving event:', error);
-                        this.errorMessage = error.message || 'An error occurred while saving the event';
+                        this.errorMessage = error.message;
                     }
                 },
 
