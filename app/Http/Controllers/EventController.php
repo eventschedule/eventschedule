@@ -445,7 +445,8 @@ class EventController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => __('messages.curate_event')
+                'message' => __('messages.curate_event'),
+                'event_url' => $event->getGuestUrl($subdomain),
             ]);
         }
 

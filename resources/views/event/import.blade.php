@@ -202,7 +202,7 @@
                                 <!-- Add buttons at the bottom of the left column -->
                                 <div class="mt-6 flex justify-end gap-2">
                                     <template v-if="savedEvents[idx]">
-                                        <button @click="handleEdit(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                        <button v-if="!savedEventData[idx]?.is_curated" @click="handleEdit(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
                                             {{ __('messages.edit') }}
                                         </button>
                                         <button @click="handleView(idx)" type="button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
@@ -756,8 +756,8 @@
                         if (data.success) {
                             this.savedEvents[idx] = true;
                             this.savedEventData[idx] = {
-                                view_url: this.preview.parsed[idx].event_url,
-                                edit_url: this.preview.parsed[idx].event_url.replace('/view/', '/edit/')
+                                view_url: data.event_url || this.preview.parsed[idx].event_url,
+                                is_curated: true // Flag to indicate this is a curated event
                             };
                             
                             Toastify({
