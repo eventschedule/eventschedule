@@ -174,8 +174,6 @@ class UrlUtils
             $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
             $headers = substr($response, 0, $headerSize);
             $html = substr($response, $headerSize);
-
-            \Log::info("HTML: " . $html);
             
             $redirectUrls = [];
             foreach (explode("\n", $headers) as $header) {
@@ -192,20 +190,7 @@ class UrlUtils
 
             // Determine redirect URL
             if (!empty($redirectUrls)) {
-                // For Facebook URLs, try to get the most complete URL
-                if (strpos($url, 'facebook.com') !== false) {
-                    foreach ($redirectUrls as $redirectUrl) {
-                        if (strpos($redirectUrl, 'facebook.com') !== false && 
-                            (strpos($redirectUrl, 'photo.php') !== false || 
-                             strpos($redirectUrl, 'share') !== false)) {
-                            $result['redirect_url'] = $redirectUrl;
-                            break;
-                        }
-                    }
-                } else {
-                    // For other sites, use the last redirect URL
-                    $result['redirect_url'] = end($redirectUrls);
-                }
+                $result['redirect_url'] = end($redirectUrls);
             } elseif ($httpCode >= 200 && $httpCode < 400) {
                 $result['redirect_url'] = $finalUrl;
             }
