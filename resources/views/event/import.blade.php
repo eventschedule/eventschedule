@@ -211,8 +211,10 @@
                                 </div>
 
                                 <!-- JSON preview with border matching textarea -->
-                                <div v-if="showAllFields" class="mt-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm overflow-auto bg-gray-50 dark:bg-gray-900">
-                                    <pre class="p-4 text-xs text-gray-800 dark:text-gray-200">@{{ JSON.stringify(preview.parsed[idx], null, 2) }}</pre>
+                                <div v-if="showAllFields" class="mt-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm overflow-hidden bg-gray-50 dark:bg-gray-900 max-w-full">
+                                    <div class="overflow-x-auto">
+                                        <pre class="p-4 text-xs text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words max-w-[calc(100vw-3rem)]">@{{ JSON.stringify(preview.parsed[idx], null, 2) }}</pre>
+                                    </div>
                                 </div>
                                 
                                 <!-- Add buttons at the bottom of the left column -->
