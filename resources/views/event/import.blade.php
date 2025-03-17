@@ -804,11 +804,18 @@
                     
                     let successCount = 0;
                     let errorCount = 0;
+                    let skippedCount = 0;
                     
                     // Loop through all events
                     for (let idx = 0; idx < this.preview.parsed.length; idx++) {
                         // Skip already saved events
                         if (this.savedEvents[idx]) {
+                            continue;
+                        }
+                        
+                        // Skip events that have a matching one (indicated by event_url)
+                        if (this.preview.parsed[idx].event_url) {
+                            skippedCount++;
                             continue;
                         }
                         
@@ -839,27 +846,26 @@
                     }
                     
                     // Show appropriate message after all events are processed
-                    if (errorCount === 0) {
-                        Toastify({
-                            text: '{{ __("messages.all_events_processed") }}',
-                            duration: 3000,
-                            position: 'center',
-                            stopOnFocus: true,
-                            style: {
-                                background: '#4BB543',
-                            }
-                        }).showToast();
+                    let message = '';
+                    if (errorCount === 0 && skippedCount === 0) {
+                        message = '{{ __("messages.all_events_processed") }}';
                     } else {
-                        Toastify({
-                            text: `{{ __("messages.events_processed_with_errors") }}`.replace('{success}', successCount).replace('{errors}', errorCount),
-                            duration: 3000,
-                            position: 'center',
-                            stopOnFocus: true,
-                            style: {
-                                background: errorCount > 0 && successCount === 0 ? '#FF0000' : '#FF9800',
-                            }
-                        }).showToast();
+                        message = `{{ __("messages.events_processed_with_errors") }}`.replace('{success}', successCount).replace('{errors}', errorCount);
+                        if (skippedCount > 0) {
+                            message += ` ({{ __("messages.events_skipped") }}`.replace('{skipped}', skippedCount) + ')';
+                        }
                     }
+                    
+                    Toastify({
+                        text: message,
+                        duration: 3000,
+                        position: 'center',
+                        stopOnFocus: true,
+                        style: {
+                            background: errorCount > 0 && successCount === 0 ? '#FF0000' : 
+                                        skippedCount > 0 && successCount === 0 ? '#FF9800' : '#4BB543',
+                        }
+                    }).showToast();
                 },
             }
         }).mount('#event-import-app')
