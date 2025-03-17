@@ -445,4 +445,6 @@ return [
     'talent' => 'Talent',
     'confirm_remove_event' => 'Are you sure you want to remove this event?',
     'event_removed' => 'Event successfully removed!',
+    'save_all' => 'Save All',
+    'all_events_processed' => 'All events processed successfully!',
 ];
