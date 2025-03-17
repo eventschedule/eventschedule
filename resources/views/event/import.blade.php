@@ -450,7 +450,6 @@
                         }
 
                         this.preview = data;
-                        console.log('Preview data:', this.preview);
                         
                         // Initialize arrays to track saved events and errors
                         if (Array.isArray(this.preview.parsed)) {
@@ -509,11 +508,7 @@
                         
                         let dateValue = null; // Declare dateValue variable here                        
                         let dateElement = document.querySelector(`.datepicker_${idx}`);
-
-                        console.log('Date element:', dateElement);
                         dateValue = dateElement.value;
-
-                        console.log('Date value from element:', dateValue);
                         
                         // Ensure the date has seconds
                         if (dateValue && dateValue.length === 16) { // Format: "YYYY-MM-DD HH:MM"
