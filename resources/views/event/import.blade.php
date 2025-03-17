@@ -157,7 +157,7 @@
                                 <div :class="['px-4 py-3 flex justify-between items-center', 
                                              savedEvents[idx] ? 'bg-green-50 dark:bg-green-900/30' : 'bg-gray-50 dark:bg-gray-800']">
                                     <h3 class="font-medium text-lg">
-                                        {{ __('messages.event') }} #@{{ idx + 1 }}: @{{ event.event_name }}
+                                        @{{ event.event_name }}
                                         <span v-if="savedEvents[idx]" class="ml-2 text-sm text-green-600 dark:text-green-400">
                                             <svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -176,11 +176,11 @@
                                             </button>
                                         </template>
                                         <template v-else>
+                                            <button @click="handleRemoveEvent(idx)" type="button" class="px-3 py-1 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
+                                                {{ __('messages.remove') }}
+                                            </button>
                                             <button @click="handleSave(idx)" type="button" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
                                                 {{ __('messages.save') }}
-                                            </button>
-                                            <button @click="handleRemoveEvent(idx)" type="button" class="px-3 py-1 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors">
-                                                {{ __('messages.remove') }}
                                             </button>
                                         </template>
                                     </div>
