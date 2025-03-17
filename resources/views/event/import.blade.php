@@ -54,17 +54,6 @@
                                         @{{ errorMessage }}
                                     </div>
 
-                                    <!-- Multiple events detected message -->
-                                    <div v-if="preview && preview.parsed && preview.parsed.length > 0" 
-                                         class="mt-4 p-3 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-md">
-                                        <span v-if="preview.parsed.length > 1">
-                                            {{ __('messages.multiple_events_detected', ['count' => '']) }} @{{ preview.parsed.length }}
-                                        </span>
-                                        <span v-else>
-                                            {{ __('messages.event_detected') }}
-                                        </span>
-                                    </div>
-
                                     <div v-if="isLoading" class="mt-4 flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                                         <div class="relative">
                                             <div class="w-4 h-4 rounded-full bg-blue-500/30"></div>
@@ -158,13 +147,6 @@
                             </div>
                         </div>
 
-                        <!-- Debug info - remove in production -->
-                        <div v-if="preview" class="mb-4 p-3 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 rounded-md">
-                            <p>Preview data received: @{{ typeof preview }}</p>
-                            <p>Parsed events: @{{ preview.parsed ? preview.parsed.length : 'none' }}</p>
-                            <p v-if="preview.parsed">First event: @{{ JSON.stringify(preview.parsed[0]) }}</p>
-                        </div>
-
                         <!-- Events cards -->
                         <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="space-y-8 mt-6">
                             <div v-for="(event, idx) in preview.parsed" :key="idx" 
@@ -253,7 +235,7 @@
                                         </div>
 
                                         <div v-if="preview.parsed[idx].performer_name">
-                                            <x-input-label for="performer_name_@{{ idx }}" :value="__('messages.performer')" />
+                                            <x-input-label for="performer_name_@{{ idx }}" :value="__('messages.talent')" />
                                             <x-text-input id="performer_name_@{{ idx }}" 
                                                 name="performer_name_@{{ idx }}" 
                                                 type="text" 
