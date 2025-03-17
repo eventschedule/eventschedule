@@ -135,9 +135,8 @@
                                   savedEvents[idx] ? 'border-2 border-green-500 dark:border-green-600' : '']">
                         
                         <!-- Card header -->
-                        <div :class="['px-4 py-3 -m-4 sm:-m-8 mb-4 sm:mb-8 flex justify-between items-center rounded-t-lg', 
-                                     savedEvents[idx] ? 'bg-green-50 dark:bg-green-900/30' : 
-                                     saveErrors[idx] ? 'bg-red-50 dark:bg-red-900/30' : 'bg-gray-50 dark:bg-gray-800']">
+                        <div v-if="savedEvents[idx] || saveErrors[idx]" :class="['px-4 py-3 -m-4 sm:-m-8 mb-4 sm:mb-8 flex justify-between items-center rounded-t-lg', 
+                                     savedEvents[idx] ? 'bg-green-50 dark:bg-green-900/30' : 'bg-red-50 dark:bg-red-900/30']">
                             <h3 class="font-medium text-lg">
                                 <span v-if="savedEvents[idx]" class="ml-2 text-sm text-green-600 dark:text-green-400">
                                     <svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,11 +150,7 @@
                                     </svg>
                                     {{ __('messages.error') }}: @{{ saveErrors[idx] }}
                                 </span>
-                            </h3>
-                            
-                            <div class="flex space-x-2">
-                                <!-- Existing buttons -->
-                            </div>
+                            </h3>                            
                         </div>
                         
                         <!-- Card body -->
@@ -210,11 +205,6 @@
                                         autocomplete="off" />
                                 </div>
 
-                                <!-- JSON preview with border matching textarea -->
-                                <div v-if="showAllFields" class="mt-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm overflow-auto bg-gray-50 dark:bg-gray-900">
-                                    <pre class="p-4 text-xs text-gray-800 dark:text-gray-200">@{{ JSON.stringify(preview.parsed[idx], null, 2) }}</pre>
-                                </div>
-                                
                                 <!-- Add buttons at the bottom of the left column -->
                                 <div class="mt-6 flex justify-end gap-2">
                                     <template v-if="savedEvents[idx]">
@@ -240,6 +230,14 @@
                                         </button>
                                     </template>
                                 </div>
+
+
+                                <!-- JSON preview with border matching textarea -->
+                                <div v-if="showAllFields" class="mt-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm overflow-auto bg-gray-50 dark:bg-gray-900">
+                                    <pre class="p-4 text-xs text-gray-800 dark:text-gray-200">@{{ JSON.stringify(preview.parsed[idx], null, 2) }}</pre>
+                                </div>
+                                
+
                             </div>
                             
                             <!-- Right column: Image -->
