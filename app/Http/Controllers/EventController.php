@@ -557,6 +557,7 @@ class EventController extends Controller
             if ($event) {
                 $parsed[$key]['event_url'] = $event->getGuestUrl();
                 $parsed[$key]['event_id'] = UrlUtils::encodeId($event->id);
+                $parsed[$key]['is_curated'] = $role->isCurator() && $event->roles->contains($role->id);
             }
         }
 
