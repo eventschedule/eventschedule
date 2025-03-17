@@ -522,14 +522,11 @@
                             };
                         }
                         
-                        // Get venue address from input if it exists
-                        const venueAddressElement = document.getElementById(`venue_address1_${idx}`);
-                        const venueAddress = venueAddressElement ? venueAddressElement.value : 
-                                            (parsed.venue_address1 || "{{ $role->isCurator() ? $role->city : '' }}");
-                        
-                        // Get event name from input if it exists
-                        const nameElement = document.getElementById(`name_${idx}`);
-                        const eventName = nameElement ? nameElement.value : parsed.event_name;
+                        // Get venue address from VueJS model
+                        const venueAddress = parsed.event_address || "{{ $role->isCurator() ? $role->city : '' }}";
+
+                        // Get event name from VueJS model 
+                        const eventName = parsed.event_name;
                         
                         // Send request to server
                         const response = await fetch('{{ route("event.import", ["subdomain" => $role->subdomain]) }}', {
