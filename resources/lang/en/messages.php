@@ -450,4 +450,5 @@ return [
     'error' => 'Error',
     'events_processed_with_errors' => 'Events processed with errors: {success} success, {errors} errors',
     'error_curating_event' => 'Error curating event',
+    'events_skipped' => 'Events skipped',
 ];
