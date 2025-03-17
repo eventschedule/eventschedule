@@ -180,17 +180,6 @@
                                 </div>
 
                                 <div>
-                                    <x-input-label for="venue_name_@{{ idx }}" :value="__('messages.venue')" />
-                                    <x-text-input id="venue_name_@{{ idx }}" 
-                                        name="venue_name_@{{ idx }}" 
-                                        type="text" 
-                                        class="mt-1 block w-full" 
-                                        v-bind:value="preview.parsed[idx].venue_name"
-                                        v-bind:readonly="preview.parsed[idx].venue_id || savedEvents[idx]"
-                                        required />
-                                </div>
-
-                                <div>
                                     <x-input-label for="venue_address1_@{{ idx }}" :value="__('messages.address')" />
                                     <x-text-input id="venue_address1_@{{ idx }}" 
                                         name="venue_address1_@{{ idx }}" 
@@ -201,17 +190,6 @@
                                         placeholder="{{ $role->isCurator() ? $role->city : '' }}"
                                         required
                                         autocomplete="off" />
-                                </div>
-
-                                <div v-if="preview.parsed[idx].performer_name">
-                                    <x-input-label for="performer_name_@{{ idx }}" :value="__('messages.talent')" />
-                                    <x-text-input id="performer_name_@{{ idx }}" 
-                                        name="performer_name_@{{ idx }}" 
-                                        type="text" 
-                                        class="mt-1 block w-full" 
-                                        v-bind:value="preview.parsed[idx].performer_name"
-                                        v-bind:readonly="savedEvents[idx]"
-                                        required />
                                 </div>
 
                                 <!-- JSON preview with border matching textarea -->
