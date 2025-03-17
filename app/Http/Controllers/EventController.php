@@ -474,10 +474,22 @@ class EventController extends Controller
             $parsed['venue_id'] = UrlUtils::encodeId($role->id);
             $parsed['event_address'] = $role->address1;
         } elseif ($parsed['venue_name'] && $parsed['event_address']) {
-            $venue = Role::where('name', $parsed['venue_name'])
-                        ->where('address1', $parsed['event_address'])
-                        ->where('type', 'venue')
-                        ->first();
+            $venue = Role::where(function($query) use ($parsed) {
+                        $query->where('name', $parsed['venue_name'])
+                              ->when(! empty($parsed['venue_name_en']), function($q) use ($parsed) {
+                                  $q->orWhere('name_en', $parsed['venue_name_en']); 
+                              });
+                    })
+                    ->where(function($query) use ($parsed) {
+                        $query->where('address1', $parsed['event_address'])
+                              ->when(! empty($parsed['event_address_en']), function($q) use ($parsed) {
+                                  $q->orWhere('address1_en', $parsed['event_address_en']);
+                              });
+                    })
+                    ->where('type', 'venue')
+                    ->orderBy('id')
+                    ->first();
+
             if ($venue) {
                 $parsed['venue_id'] = UrlUtils::encodeId($venue->id);
             }
@@ -500,12 +512,16 @@ class EventController extends Controller
                       });
             })->orderBy('id')->pluck('id')->toArray();
 
-            $talent = Role::where('name', $parsed['performer_name'])
-                        ->where('type', 'schedule')
-                        ->whereIn('id', $followerRoleIds)
-                        ->orderBy('id')
-                        ->first();
-
+            $talent = Role::where(function($query) use ($parsed) {
+                        $query->where('name', $parsed['performer_name'])
+                              ->when(! empty($parsed['performer_name_en']), function($q) use ($parsed) {
+                                  $q->orWhere('name_en', $parsed['performer_name_en']);
+                              });
+                    })
+                    ->where('type', 'schedule')
+                    ->whereIn('id', $followerRoleIds)
+                    ->orderBy('id')
+                    ->first();
             if ($talent) {
                 $parsed['talent_id'] = UrlUtils::encodeId($talent->id);
             }
