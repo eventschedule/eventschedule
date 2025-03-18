@@ -104,14 +104,8 @@
         }
 
         .custom-content pre,
-        .custom-content code,
-        .custom-content pre code {
-            white-space: normal !important;
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
-            word-break: break-word !important;
-            display: block !important;
-            max-width: 100% !important;
+        .custom-content code {
+            white-space: pre-wrap;
         }
 
     </style>
