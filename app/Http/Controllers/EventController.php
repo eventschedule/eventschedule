@@ -597,8 +597,9 @@ class EventController extends Controller
     public function uploadImage(Request $request, $subdomain)
     {
         $file = $request->file('image');
-        $filename = strtolower('flyer_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-        $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+        $filename = '/tmp/event_' . strtolower(Str::random(32)) . '.' . $file->getClientOriginalExtension();
+        move_uploaded_file($file->getPathname(), $filename);
+
         return response()->json(['success' => true, 'filename' => $filename]);
     }
 }
