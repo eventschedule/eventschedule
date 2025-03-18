@@ -172,10 +172,10 @@
                                 
                                 <div>
                                     <x-input-label for="name_@{{ idx }}" :value="__('messages.event_name')" />
-                                    <x-text-input id="name_@{{ idx }}" 
+                                    <input id="name_@{{ idx }}" 
                                         name="name_@{{ idx }}" 
                                         type="text" 
-                                        class="mt-1 block w-full" 
+                                        :class="'mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm event_name_' + idx" 
                                         v-bind:value="preview.parsed[idx].event_name"
                                         v-bind:readonly="savedEvents[idx]"
                                         required />
@@ -183,10 +183,10 @@
 
                                 <div>
                                     <x-input-label for="venue_address1_@{{ idx }}" :value="__('messages.address')" />
-                                    <x-text-input id="venue_address1_@{{ idx }}" 
+                                    <input id="venue_address1_@{{ idx }}" 
                                         name="venue_address1_@{{ idx }}" 
                                         type="text" 
-                                        class="mt-1 block w-full" 
+                                        :class="'mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm venue_address1_' + idx" 
                                         v-bind:value="preview.parsed[idx].event_address"
                                         v-bind:readonly="preview.parsed[idx].venue_id || savedEvents[idx]"
                                         placeholder="{{ $role->isCurator() ? $role->city : '' }}"
@@ -534,12 +534,14 @@
                             };
                         }
                         
-                        // Get venue address from VueJS model
-                        const venueAddress = parsed.event_address || "{{ $role->isCurator() ? $role->city : '' }}";
+                        // Get venue address from text field or fallback to parsed value
+                        const addressElement = document.querySelector(`.venue_address1_${idx}`);
+                        const venueAddress = addressElement?.value || parsed.event_address || "{{ $role->isCurator() ? $role->city : '' }}";
 
-                        // Get event name from VueJS model 
-                        const eventName = parsed.event_name;
-                        
+                        // Get event name from text field or fallback to parsed value
+                        const nameElement = document.querySelector(`.event_name_${idx}`);
+                        const eventName = nameElement?.value || parsed.event_name;
+
                         // Send request to server
                         const response = await fetch('{{ route("event.import", ["subdomain" => $role->subdomain]) }}', {
                             method: 'POST',
