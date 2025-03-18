@@ -690,7 +690,7 @@
                         
                         if (data.success && data.path) {
                             // Update the social_image property for the specific event
-                            this.$set(this.preview.parsed[idx], 'social_image', data.path);
+                            this.preview.parsed[idx].social_image = data.path;
                         } else {
                             throw new Error(data.message || '{{ __("messages.error_uploading_image") }}');
                         }
@@ -704,7 +704,7 @@
 
                 removeImage(idx) {
                     if (this.preview && this.preview.parsed && this.preview.parsed[idx]) {
-                        this.$set(this.preview.parsed[idx], 'social_image', null);
+                        this.preview.parsed[idx].social_image = null;
                     }
                 },
 
