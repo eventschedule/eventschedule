@@ -688,9 +688,9 @@
                         
                         const data = await response.json();
                         
-                        if (data.success && data.path) {
+                        if (data.success && data.filename) {
                             // Update the social_image property for the specific event
-                            this.preview.parsed[idx].social_image = data.path;
+                            this.preview.parsed[idx].social_image = data.filename;
                         } else {
                             throw new Error(data.message || '{{ __("messages.error_uploading_image") }}');
                         }
