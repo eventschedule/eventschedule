@@ -56,8 +56,8 @@
                                     </div>
                                 </div>
 
-                                <!-- Show all fields checkbox -->
                                 <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                                    @if (auth()->user()->isAdmin())
                                     <div class="flex items-center mb-3 sm:mb-0">
                                         <input type="checkbox" 
                                                id="show_all_fields" 
@@ -68,7 +68,10 @@
                                             {{ __('messages.show_all_fields') }}
                                         </label>
                                     </div>
-                                    
+                                    @else
+                                    <div></div>
+                                    @endif
+
                                     <!-- Action buttons - now includes Save All -->
                                     <div class="flex gap-2 self-end sm:self-auto">
                                         <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
@@ -179,6 +182,19 @@
                                 </div>
 
                                 <div>
+                                    <x-input-label for="venue_address1_@{{ idx }}" :value="__('messages.address')" />
+                                    <x-text-input id="venue_address1_@{{ idx }}" 
+                                        name="venue_address1_@{{ idx }}" 
+                                        type="text" 
+                                        class="mt-1 block w-full" 
+                                        v-bind:value="preview.parsed[idx].event_address"
+                                        v-bind:readonly="preview.parsed[idx].venue_id || savedEvents[idx]"
+                                        placeholder="{{ $role->isCurator() ? $role->city : '' }}"
+                                        required
+                                        autocomplete="off" />
+                                </div>
+
+                                <div>
                                     <label for="starts_at_@{{ idx }}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">
                                         {{ __('messages.date_and_time') }}
                                     </label>
@@ -190,19 +206,6 @@
                                            v-bind:value="preview.parsed[idx].event_date_time"
                                            required 
                                            autocomplete="off" />
-                                </div>
-
-                                <div>
-                                    <x-input-label for="venue_address1_@{{ idx }}" :value="__('messages.address')" />
-                                    <x-text-input id="venue_address1_@{{ idx }}" 
-                                        name="venue_address1_@{{ idx }}" 
-                                        type="text" 
-                                        class="mt-1 block w-full" 
-                                        v-bind:value="preview.parsed[idx].event_address"
-                                        v-bind:readonly="preview.parsed[idx].venue_id || savedEvents[idx]"
-                                        placeholder="{{ $role->isCurator() ? $role->city : '' }}"
-                                        required
-                                        autocomplete="off" />
                                 </div>
 
                                 <!-- Add buttons at the bottom of the left column -->
