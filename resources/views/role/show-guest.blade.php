@@ -32,11 +32,11 @@
             @else
             <div style="height: 42px;"></div>
             @endif
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
-              <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] mb-4 sm:mb-0">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5">
+              <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] mb-4 mt-1 sm:mb-0 text-center sm:text-left w-full sm:w-auto">
                 {{ $role->translatedName() }}
               </h3>
-              <div class="flex flex-row gap-4 w-full sm:w-auto justify-center sm:justify-start mt-4 lg:mt-0">
+              <div class="flex flex-row gap-4 w-full sm:w-auto justify-center sm:justify-start mt-5 lg:mt-0">
               @if ($role->isCurator() && $role->is_open)
               <a
                 href="{{ route('role.follow', ['subdomain' => $role->subdomain], ['add_event' => true]) }}"
@@ -55,7 +55,7 @@
                 href="{{ auth()->user() && auth()->user()->isMember($role->subdomain)
                   ? config('app.url') . route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false) 
                   : route('role.follow', ['subdomain' => $role->subdomain]) }}"
-                class="inline-flex items-center justify-center"
+                class="inline-flex items-center justify-center sm:inline-flex {{ $role->isCurator() && $role->is_open ? 'hidden' : '' }}"
               >
                 <button
                   type="button"
