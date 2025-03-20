@@ -136,7 +136,7 @@
                     @if (! session()->has('translate'))
                         <span>{{ strtoupper($role->language_code) }}</span>
                     @else
-                        <a href="{{ request()->url() }}?lang={{ $role->language_code }}" class="hover:underline">
+                        <a href="{{ request()->url() }}?lang={{ $role->language_code }}" class="text-gray-900 dark:text-gray-100 hover:underline">
                             {{ strtoupper($role->language_code) }}
                         </a>
                     @endif
@@ -144,12 +144,13 @@
                     @if (session()->has('translate'))
                         <span>EN</span>
                     @else
-                        <a href="{{ request()->url() }}?lang=en" class="hover:underline">
+                        <a href="{{ request()->url() }}?lang=en" class="text-gray-900 dark:text-gray-100 hover:underline">
                             EN
                         </a>
                     @endif
                 </div>
             @endif
+            <!--
             <a
             href="https://app.eventschedule.com/sign_up" target="_blank"
             class="hidden md:inline-flex items-center justify-center"
@@ -163,6 +164,7 @@
                 {{ __('messages.sign_up') }}
             </button>
             </a>
+            -->
         </div>
         </div>
     </header>
