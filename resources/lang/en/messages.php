@@ -452,4 +452,5 @@ return [
     'error_curating_event' => 'Error curating event',
     'events_skipped' => 'Events skipped',
     'error_uploading_image' => 'Error uploading image',
+    'or_paste_from_clipboard' => 'or paste from clipboard (Ctrl+V)',
 ];
