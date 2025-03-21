@@ -84,48 +84,6 @@
                                 </div>
                             </div>
 
-                            <!-- Right column: Image -->
-                            <div v-if="preview" class="hidden">
-                                <div class="relative">
-
-                                    <!-- Drop zone -->
-                                    <div @dragover.prevent="dragOver"
-                                         @dragleave.prevent="dragLeave"
-                                         @drop.prevent="handleDrop"
-                                         @click="$refs.fileInput.click()"
-                                         :class="['aspect-w-16 aspect-h-9 rounded-lg border-2 border-dashed flex items-center justify-center cursor-pointer', 
-                                                  isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-300 dark:border-gray-600']">
-                                        <div class="text-center py-20">
-                                            <!-- Show loading spinner when uploading -->
-                                            <template v-if="isUploadingImage">
-                                                <div class="relative mx-auto w-12 h-12">
-                                                    <div class="w-12 h-12 rounded-full bg-blue-500/30"></div>
-                                                    <div class="absolute top-0 left-0 w-12 h-12 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"></div>
-                                                </div>
-                                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                                    {{ __('messages.uploading') }}...
-                                                </p>
-                                            </template>
-                                            <!-- Default upload icon and text -->
-                                            <template v-else>
-                                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                                </svg>
-                                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                                    {{ __('messages.drag_drop_image') }}
-                                                </p>
-                                            </template>
-                                        </div>
-                                    </div>
-
-                                    <!-- Hidden file input -->
-                                    <input type="file" 
-                                           ref="fileInput"
-                                           @change="handleFileSelect"
-                                           accept="image/*"
-                                           class="hidden">
-                                </div>
-                            </div>
                         </div>
 
                     </div>
@@ -291,6 +249,9 @@
                                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                                     {{ __('messages.drag_drop_image') }}
                                                 </p>
+                                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                                                    {{ __('messages.or_paste_from_clipboard') }}
+                                                </p>
                                             </template>
                                         </div>
                                     </div>
@@ -373,8 +334,16 @@
             created() {
                 this.debouncedPreview = debounce(this.fetchPreview, 500)
                 this.loadShowAllFieldsPreference()
+                
+                // Add clipboard paste event listener
+                document.addEventListener('paste', this.handleClipboardPaste)
             },
             
+            beforeUnmount() {
+                // Clean up event listener when component is destroyed
+                document.removeEventListener('paste', this.handleClipboardPaste)
+            },
+
             updated() {
                 this.$nextTick(() => {
                     // Call the global function to initialize flatpickr
@@ -882,6 +851,49 @@
                     if (saveAllButton) {
                         saveAllButton.disabled = false;
                         saveAllButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+                },
+
+                async handleClipboardPaste(e) {
+                    // Check if we have any events to paste to
+                    if (!this.preview?.parsed || this.preview.parsed.length === 0) {
+                        return;
+                    }
+                    
+                    // Find the first event that doesn't have an image and isn't saved
+                    const idx = this.preview.parsed.findIndex((event, i) => 
+                        !event.social_image && !this.savedEvents[i]);
+                    
+                    if (idx === -1) {
+                        return; // No eligible events found
+                    }
+                    
+                    // Check if clipboard has image data
+                    if (e.clipboardData && e.clipboardData.items) {
+                        const items = e.clipboardData.items;
+                        
+                        for (let i = 0; i < items.length; i++) {
+                            if (items[i].type.indexOf('image') !== -1) {
+                                const file = items[i].getAsFile();
+                                if (file) {
+                                    e.preventDefault(); // Prevent default paste behavior
+                                    await this.uploadImage(file, idx);
+                                    
+                                    // Show success message
+                                    Toastify({
+                                        text: '{{ __("messages.image_pasted") || "Image pasted successfully" }}',
+                                        duration: 3000,
+                                        position: 'center',
+                                        stopOnFocus: true,
+                                        style: {
+                                            background: '#4BB543',
+                                        }
+                                    }).showToast();
+                                    
+                                    break;
+                                }
+                            }
+                        }
                     }
                 },
             }
