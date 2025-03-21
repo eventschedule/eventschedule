@@ -25,7 +25,7 @@
                                     <x-input-label for="event_details" :value="__('messages.event_details')" />
                                     <textarea id="event_details" 
                                         name="event_details" 
-                                        rows="4"
+                                        rows="5"
                                         v-model="eventDetails"
                                         v-bind:readonly="savedEvent"
                                         @input="debouncedPreview"
@@ -86,9 +86,8 @@
 
                             <!-- Right column: Image drop zone for event details -->
                             <div class="mb-4 lg:mb-0">
-                                <x-input-label :value="__('messages.event_details_image')" />
                                 <div v-if="detailsImage"
-                                     class="mt-1 relative h-[200px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                                     class="mt-1 relative h-[140px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
                                     <img :src="getDetailsImageUrl()"
                                          class="object-contain w-full h-full"
                                          alt="Event details image">
@@ -109,7 +108,7 @@
                                      @dragleave.prevent="dragLeaveDetails"
                                      @drop.prevent="handleDetailsImageDrop"
                                      @click="openDetailsFileSelector"
-                                     v-bind:class="['mt-1 h-[200px] flex items-center justify-center rounded-lg border-2 border-dashed cursor-pointer', 
+                                     v-bind:class="['mt-6 h-[140px] flex items-center justify-center rounded-lg border-2 border-dashed cursor-pointer', 
                                               isDraggingDetails ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-300 dark:border-gray-600']">
                                     <div class="text-center py-10">
                                         <!-- Show loading spinner when uploading -->
