@@ -6,23 +6,37 @@ use App\Utils\UrlUtils;
 
 class GeminiUtils
 {
-    private static function sendRequest($prompt, $model = 'gemini-2.0-flash')
+    private static function sendRequest($prompt, $imageData = null)
     {
         $apiKey = config('services.google.gemini_key');
+        $model = 'gemini-2.0-flash';
         $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=" . $apiKey;
         
         $data = [
             'contents' => [
                 [
-                    'parts' => [
-                        ['text' => $prompt]
-                    ]
+                    'parts' => []
                 ]
             ],
             'generationConfig' => [
                 'response_mime_type' => 'application/json'
             ]
         ];
+
+        // Add image data if provided
+        if ($imageData) {
+            $data['contents'][0]['parts'][] = [
+                'inline_data' => [
+                    'mime_type' => 'image/jpeg',
+                    'data' => base64_encode($imageData)
+                ]
+            ];
+        }
+
+        // Add text prompt
+        if ($prompt) {
+            $data['contents'][0]['parts'][] = ['text' => $prompt];
+        }
 
         $ch = curl_init($url);
         curl_setopt_array($ch, [
@@ -37,10 +51,21 @@ class GeminiUtils
         curl_close($ch);
 
         if ($httpCode !== 200) {
+            \Log::error("Gemini API error response: " . $response);
             throw new \Exception('Gemini API request failed with status code: ' . $httpCode);
         }
 
         $data = json_decode($response, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            \Log::error("Failed to parse Gemini API response: " . $response);
+            throw new \Exception('Invalid JSON response from Gemini API');
+        }
+
+        if (!isset($data['candidates'][0]['content']['parts'][0]['text'])) {
+            \Log::error("Unexpected Gemini API response structure: " . json_encode($data));
+            throw new \Exception('Unexpected response structure from Gemini API');
+        }
+
         $text = $data['candidates'][0]['content']['parts'][0]['text'];
         $parsed = json_decode($text, true);
         
@@ -56,7 +81,7 @@ class GeminiUtils
         return $data;
     }
 
-    public static function parseEvent($details)
+    public static function parseEvent($details, $imageData = null)
     {
         // Define fields and their descriptions
         $fields = [
@@ -84,13 +109,14 @@ class GeminiUtils
         ];
 
         // Build prompt from fields
-        $prompt = "Parse the event details from this message to the following fields, take your time and do the best job possible:\n";
+        $prompt = "Parse the event details from this " . ($imageData ? "image and " : "") . "message to the following fields, take your time and do the best job possible:\n";
         foreach ($fields as $field => $note) {
             $prompt .= $field . ($note ? " ({$note})" : "") . ",\n";
         }
         $prompt .= $details;
 
-        $data = self::sendRequest($prompt);
+        // Use gemini-1.5-flash for both text and image inputs
+        $data = self::sendRequest($prompt, $imageData);
 
         foreach ($data as $key => $item) {
 
