@@ -474,7 +474,15 @@ class EventController extends Controller
     public function parse(Request $request, $subdomain)
     {
         $details = request()->input('event_details');
-        $parsed = GeminiUtils::parseEvent($details);
+        $imageData = null;
+
+        // Handle image data if provided
+        if ($request->hasFile('details_image')) {
+            $file = $request->file('details_image');
+            $imageData = file_get_contents($file->getPathname());
+        }
+
+        $parsed = GeminiUtils::parseEvent($details, $imageData);
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 

@@ -84,6 +84,66 @@
                                 </div>
                             </div>
 
+                            <!-- Right column: Image drop zone for event details -->
+                            <div class="mb-4 lg:mb-0">
+                                <x-input-label :value="__('messages.event_details_image')" />
+                                <div v-if="detailsImage"
+                                     class="mt-1 relative h-[200px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                                    <img :src="getDetailsImageUrl()"
+                                         class="object-contain w-full h-full"
+                                         alt="Event details image">
+                                    
+                                    <!-- Remove image button -->
+                                    <button @click="removeDetailsImage()"
+                                            type="button"
+                                            class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <!-- Drop zone -->
+                                <div v-else
+                                     @dragover.prevent="dragOverDetails"
+                                     @dragleave.prevent="dragLeaveDetails"
+                                     @drop.prevent="handleDetailsImageDrop"
+                                     @click="openDetailsFileSelector"
+                                     v-bind:class="['mt-1 h-[200px] flex items-center justify-center rounded-lg border-2 border-dashed cursor-pointer', 
+                                              isDraggingDetails ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-300 dark:border-gray-600']">
+                                    <div class="text-center py-10">
+                                        <!-- Show loading spinner when uploading -->
+                                        <template v-if="isUploadingDetailsImage">
+                                            <div class="relative mx-auto w-12 h-12">
+                                                <div class="w-12 h-12 rounded-full bg-blue-500/30"></div>
+                                                <div class="absolute top-0 left-0 w-12 h-12 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"></div>
+                                            </div>
+                                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                                {{ __('messages.uploading') }}...
+                                            </p>
+                                        </template>
+                                        <!-- Default upload icon and text -->
+                                        <template v-else>
+                                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                                {{ __('messages.drag_drop_image') }}
+                                            </p>
+                                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                                                {{ __('messages.or_paste_from_clipboard') }}
+                                            </p>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <!-- Hidden file input -->
+                                <input type="file"
+                                       ref="detailsFileInput"
+                                       @change="handleDetailsFileSelect"
+                                       accept="image/*"
+                                       class="hidden">
+                            </div>
                         </div>
 
                     </div>
@@ -320,14 +380,17 @@
                     eventDetails: '',
                     preview: null,
                     isLoading: false,
-                    isUploadingImage: null, // Will store the index of the event being uploaded
+                    isUploadingImage: null,
+                    isUploadingDetailsImage: false,
                     errorMessage: null,
                     savedEvents: [],
-                    savedEventData: [], // Will store the response data for saved events
-                    saveErrors: [], // New array to track save errors
+                    savedEventData: [],
+                    saveErrors: [],
                     isDragging: false,
+                    isDraggingDetails: false,
                     showAllFields: false,
                     isCurator: {{ $role->isCurator() ? 'true' : 'false' }},
+                    detailsImage: null,
                 }
             },
 
@@ -353,7 +416,7 @@
 
             methods: {
                 async fetchPreview() {
-                    if (! this.eventDetails.trim()) {
+                    if (!this.eventDetails.trim() && !this.detailsImage) {
                         this.preview = null;
                         return;
                     }
@@ -366,16 +429,18 @@
                     this.saveErrors = [];
                     
                     try {
+                        const formData = new FormData();
+                        formData.append('event_details', this.eventDetails);
+                        if (this.detailsImage) {
+                            formData.append('details_image', this.detailsImage);
+                        }
+
                         const response = await fetch('{{ route("event.parse", ["subdomain" => $role->subdomain]) }}', {
                             method: 'POST',
                             headers: {
-                                'Content-Type': 'application/json',
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
                             },
-                            body: JSON.stringify({
-                                event_details: this.eventDetails,
-                                preview: true
-                            })
+                            body: formData
                         });
 
                         // Handle HTTP error responses before trying to parse JSON
@@ -591,6 +656,7 @@
 
                 handleClear() {
                     this.eventDetails = '';
+                    this.detailsImage = null;
                     this.preview = null;
                     this.savedEvents = [];
                     this.savedEventData = [];
@@ -895,6 +961,60 @@
                             }
                         }
                     }
+                },
+
+                dragOverDetails(e) {
+                    this.isDraggingDetails = true;
+                },
+
+                dragLeaveDetails(e) {
+                    this.isDraggingDetails = false;
+                },
+
+                openDetailsFileSelector() {
+                    this.$refs.detailsFileInput.click();
+                },
+
+                async handleDetailsFileSelect(e) {
+                    const files = e.target.files;
+                    if (files.length > 0) {
+                        await this.uploadDetailsImage(files[0]);
+                    }
+                },
+
+                async handleDetailsImageDrop(e) {
+                    this.isDraggingDetails = false;
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        await this.uploadDetailsImage(files[0]);
+                    }
+                },
+
+                async uploadDetailsImage(file) {
+                    if (!file.type.startsWith('image/')) {
+                        this.errorMessage = '{{ __("messages.invalid_image_type") }}';
+                        return;
+                    }
+
+                    this.isUploadingDetailsImage = true;
+                    try {
+                        this.detailsImage = file;
+                        await this.fetchPreview();
+                    } catch (error) {
+                        console.error('Error uploading details image:', error);
+                        this.errorMessage = error.message || '{{ __("messages.error_uploading_image") }}';
+                    } finally {
+                        this.isUploadingDetailsImage = false;
+                    }
+                },
+
+                removeDetailsImage() {
+                    this.detailsImage = null;
+                    this.fetchPreview();
+                },
+
+                getDetailsImageUrl() {
+                    return this.detailsImage ? URL.createObjectURL(this.detailsImage) : '';
                 },
             }
         }).mount('#event-import-app')
