@@ -858,8 +858,8 @@
                             continue;
                         }
                         
-                        // Skip events that have a matching one (indicated by event_url) but aren't curated yet
-                        if (this.preview.parsed[idx].event_url && !this.isCurator) {
+                        // Skip events that have a matching one (indicated by event_url)
+                        if (this.preview.parsed[idx].event_url) {
                             skippedCount++;
                             continue;
                         }
