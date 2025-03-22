@@ -947,34 +947,12 @@
                                         if (idx !== -1) {
                                             await this.uploadImage(file, idx);
                                             
-                                            // Show success message
-                                            Toastify({
-                                                text: '{{ __("messages.image_pasted") || "Image pasted successfully" }}',
-                                                duration: 3000,
-                                                position: 'center',
-                                                stopOnFocus: true,
-                                                style: {
-                                                    background: '#4BB543',
-                                                }
-                                            }).showToast();
-                                            
                                             break;
                                         }
                                     } else {
                                         // No events yet, so paste to the details image
                                         await this.uploadDetailsImage(file);
-                                        
-                                        // Show success message
-                                        Toastify({
-                                            text: '{{ __("messages.image_pasted") || "Image pasted successfully" }}',
-                                            duration: 3000,
-                                            position: 'center',
-                                            stopOnFocus: true,
-                                            style: {
-                                                background: '#4BB543',
-                                            }
-                                        }).showToast();
-                                        
+                                                                                
                                         break;
                                     }
                                 }
