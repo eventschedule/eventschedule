@@ -920,17 +920,10 @@
                 },
 
                 async handleClipboardPaste(e) {
-                    // Check if we have any events to paste to
-                    if (!this.preview?.parsed || this.preview.parsed.length === 0) {
+                    // First check if we're pasting into the event details textarea
+                    if (document.activeElement === document.getElementById('event_details')) {
+                        // Let the normal paste event handle this
                         return;
-                    }
-                    
-                    // Find the first event that doesn't have an image and isn't saved
-                    const idx = this.preview.parsed.findIndex((event, i) => 
-                        !event.social_image && !this.savedEvents[i]);
-                    
-                    if (idx === -1) {
-                        return; // No eligible events found
                     }
                     
                     // Check if clipboard has image data
@@ -942,20 +935,46 @@
                                 const file = items[i].getAsFile();
                                 if (file) {
                                     e.preventDefault(); // Prevent default paste behavior
-                                    await this.uploadImage(file, idx);
                                     
-                                    // Show success message
-                                    Toastify({
-                                        text: '{{ __("messages.image_pasted") || "Image pasted successfully" }}',
-                                        duration: 3000,
-                                        position: 'center',
-                                        stopOnFocus: true,
-                                        style: {
-                                            background: '#4BB543',
+                                    // Check if we have any events to paste to
+                                    if (this.preview?.parsed && this.preview.parsed.length > 0) {
+                                        // Find the first event that doesn't have an image and isn't saved
+                                        const idx = this.preview.parsed.findIndex((event, i) => 
+                                            !event.social_image && !this.savedEvents[i]);
+                                        
+                                        if (idx !== -1) {
+                                            await this.uploadImage(file, idx);
+                                            
+                                            // Show success message
+                                            Toastify({
+                                                text: '{{ __("messages.image_pasted") || "Image pasted successfully" }}',
+                                                duration: 3000,
+                                                position: 'center',
+                                                stopOnFocus: true,
+                                                style: {
+                                                    background: '#4BB543',
+                                                }
+                                            }).showToast();
+                                            
+                                            break;
                                         }
-                                    }).showToast();
-                                    
-                                    break;
+                                    } else {
+                                        // No events yet, so paste to the details image
+                                        await this.uploadDetailsImage(file);
+                                        
+                                        // Show success message
+                                        Toastify({
+                                            text: '{{ __("messages.image_pasted") || "Image pasted successfully" }}',
+                                            duration: 3000,
+                                            position: 'center',
+                                            stopOnFocus: true,
+                                            style: {
+                                                background: '#4BB543',
+                                            }
+                                        }).showToast();
+                                        
+                                        break;
+                                    }
                                 }
                             }
                         }
