@@ -133,10 +133,6 @@
                                             <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
                                                 {{ __('messages.or_paste_from_clipboard') }}
                                             </p>
-                                            <!-- Debug info -->
-                                            <p class="mt-1 text-xs text-red-500">
-                                                detailsImage: @{{ detailsImage ? 'exists' : 'null' }}
-                                            </p>
                                         </template>
                                     </div>
                                 </div>
