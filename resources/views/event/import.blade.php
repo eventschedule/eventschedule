@@ -13,7 +13,7 @@
         @csrf
 
         <div class="py-5">
-            <div class="max-w-7xl mx-auto space-y-6">
+            <div class="max-w-7xl mx-auto space-y-6 ">
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-none">
                         <!-- Main desktop grid -->
@@ -85,9 +85,9 @@
                             </div>
 
                             <!-- Right column: Image drop zone for event details -->
-                            <div class="mt-6 mb-4 lg:mb-0">
+                            <div class="mb-4 lg:mb-0">
                                 <div v-if="detailsImage"
-                                     class="relative h-[140px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                                     class="relative h-full rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
                                     <img v-if="detailsImageUrl" :src="detailsImageUrl" class="object-contain w-full h-full" alt="Event details image">
                                     <div v-else class="flex items-center justify-center h-full text-gray-500">
                                         <span>Image preview not available</span>
@@ -109,7 +109,7 @@
                                      @dragleave.prevent="dragLeaveDetails"
                                      @drop.prevent="handleDetailsImageDrop"
                                      @click="openDetailsFileSelector"
-                                     v-bind:class="['h-[140px] flex items-center justify-center rounded-lg border-2 border-dashed cursor-pointer', 
+                                     v-bind:class="['h-full flex items-center justify-center rounded-lg border-2 border-dashed cursor-pointer', 
                                               isDraggingDetails ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-300 dark:border-gray-600']">
                                     <div class="text-center py-10">
                                         <!-- Show loading spinner when uploading -->
