@@ -559,7 +559,7 @@
                         const members = {};
                         const talentId = parsed.talent_id ?? 'new_talent';
                         
-                        if (parsed.talent_id || (parsed.performer_name && parsed.performer_youtube_url)) {
+                        if (parsed.talent_id || parsed.performer_name) {
                             members[talentId] = {
                                 name: parsed.performer_name,
                                 name_en: parsed.performer_name_en,
