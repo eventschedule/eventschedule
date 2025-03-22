@@ -558,11 +558,9 @@ class EventController extends Controller
                     $parsed[$key]['event_date_time'] = null;
                     continue;
                 }
-                /*
                 if ($eventDate->isPast() || $eventDate->diffInMonths(now()) > 2) {
                     $parsed[$key]['event_date_time'] = null;
                 }
-                */
             }
 
             if ($request->has('image')) {
