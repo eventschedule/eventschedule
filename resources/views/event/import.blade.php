@@ -13,7 +13,7 @@
         @csrf
 
         <div class="py-5">
-            <div class="max-w-7xl mx-auto space-y-6 ">
+            <div class="max-w-7xl mx-auto space-y-6">
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-none">
                         <!-- Main desktop grid -->
@@ -21,7 +21,7 @@
                             <!-- Left column: Textarea and Form -->
                             <div>
                                 <!-- Textarea section -->
-                                <div class="mb-4">
+                                <div class="lg:mb-0 mb-4">
                                     <x-input-label for="event_details" :value="__('messages.event_details')" />
                                     <textarea id="event_details" 
                                         name="event_details" 
@@ -56,7 +56,7 @@
                                     </div>
                                 </div>
 
-                                <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                                <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 mt-4">
                                     @if (auth()->user()->isAdmin())
                                     <div class="flex items-center mb-3 sm:mb-0">
                                         <input type="checkbox" 
