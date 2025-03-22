@@ -88,9 +88,10 @@
                             <div class="mt-6 mb-4 lg:mb-0">
                                 <div v-if="detailsImage"
                                      class="relative h-[140px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-                                    <img :src="getDetailsImageUrl()"
-                                         class="object-contain w-full h-full"
-                                         alt="Event details image">
+                                    <img v-if="detailsImageUrl" :src="detailsImageUrl" class="object-contain w-full h-full" alt="Event details image">
+                                    <div v-else class="flex items-center justify-center h-full text-gray-500">
+                                        <span>Image preview not available</span>
+                                    </div>
                                     
                                     <!-- Remove image button -->
                                     <button @click="removeDetailsImage()"
@@ -131,6 +132,10 @@
                                             </p>
                                             <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
                                                 {{ __('messages.or_paste_from_clipboard') }}
+                                            </p>
+                                            <!-- Debug info -->
+                                            <p class="mt-1 text-xs text-red-500">
+                                                detailsImage: @{{ detailsImage ? 'exists' : 'null' }}
                                             </p>
                                         </template>
                                     </div>
@@ -390,6 +395,7 @@
                     showAllFields: false,
                     isCurator: {{ $role->isCurator() ? 'true' : 'false' }},
                     detailsImage: null,
+                    detailsImageUrl: null,
                 }
             },
 
@@ -1015,8 +1021,17 @@
                     }
 
                     this.isUploadingDetailsImage = true;
+                    
                     try {
                         this.detailsImage = file;
+                        
+                        // Use FileReader to create a data URL instead of a blob URL
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.detailsImageUrl = e.target.result; // This will be a data URL
+                        };
+                        reader.readAsDataURL(file);
+                        
                         await this.fetchPreview();
                     } catch (error) {
                         console.error('Error uploading details image:', error);
@@ -1027,12 +1042,22 @@
                 },
 
                 removeDetailsImage() {
+                    // No need to revoke anything with data URLs
                     this.detailsImage = null;
+                    this.detailsImageUrl = null;
                     this.fetchPreview();
                 },
 
                 getDetailsImageUrl() {
-                    return this.detailsImage ? URL.createObjectURL(this.detailsImage) : '';
+                    if (!this.detailsImage) return '';
+                    
+                    try {
+                        // Create a new URL object each time to avoid caching issues
+                        return URL.createObjectURL(this.detailsImage);
+                    } catch (e) {
+                        console.error('Error creating object URL:', e);
+                        return '';
+                    }
                 },
             }
         }).mount('#event-import-app')
