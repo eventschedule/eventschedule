@@ -546,7 +546,12 @@ class EventController extends Controller
             }
 
             if (! empty($item['event_date_time'])) {
-                $eventDate = Carbon::parse($item['event_date_time']);
+                try {
+                    $eventDate = Carbon::parse($item['event_date_time']);
+                } catch (\Exception $e) {
+                    $parsed[$key]['event_date_time'] = null;
+                    continue;
+                }
                 if ($eventDate->isPast() || $eventDate->diffInMonths(now()) > 2) {
                     $parsed[$key]['event_date_time'] = null;
                 }
