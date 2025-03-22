@@ -480,6 +480,9 @@ class EventController extends Controller
         if ($request->hasFile('details_image')) {
             $file = $request->file('details_image');
             $imageData = file_get_contents($file->getPathname());
+            
+            $filename = '/tmp/event_' . strtolower(\Str::random(32)) . '.' . $file->getClientOriginalExtension();
+            move_uploaded_file($file->getPathname(), $filename);
         }
 
         $parsed = GeminiUtils::parseEvent($details, $imageData);
@@ -487,6 +490,9 @@ class EventController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         foreach ($parsed as $key => $item) {
+            if ($imageData && empty($parsed[$key]['social_image'])) {
+                $parsed[$key]['social_image'] = $filename;
+            }
 
             if ($role->isVenue()) {
                 $parsed[$key]['venue_id'] = UrlUtils::encodeId($role->id);
