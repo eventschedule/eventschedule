@@ -609,7 +609,7 @@
                                 name_en: parsed.event_name_en,
                                 starts_at: dateValue,
                                 duration: parsed.event_duration,
-                                description: this.eventDetails,
+                                description: this.eventDetails ? this.eventDetails : parsed.event_details,
                                 social_image: parsed.social_image,
                                 registration_url: parsed.registration_url,
                                 @if ($role->isCurator())
