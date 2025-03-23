@@ -636,7 +636,6 @@ class EventController extends Controller
             $file = new \Illuminate\Http\UploadedFile($request->social_image, basename($request->social_image));
             $filename = strtolower('flyer_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
-            unlink($request->social_image);
 
             $event->flyer_image_url = $filename;
             $event->save();
