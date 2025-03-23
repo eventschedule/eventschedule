@@ -557,14 +557,23 @@
                         
                         // Prepare members data
                         const members = {};
-                        const talentId = parsed.talent_id ?? 'new_talent';
                         
-                        if (parsed.talent_id || parsed.performer_name) {
-                            members[talentId] = {
+                        if (parsed.performers && parsed.performers.length > 0) {
+                            parsed.performers.forEach((performer, index) => {
+                                members[`new_talent_${index}`] = {
+                                    name: performer.name,
+                                    name_en: performer.name_en || '',
+                                    email: performer.email || '',
+                                    website: performer.website || '',
+                                    language_code: '{{ $role->language_code }}',
+                                };
+                            });
+                        } else if (parsed.talent_id) {
+                            members[parsed.talent_id] = {
                                 name: parsed.performer_name,
-                                name_en: parsed.performer_name_en,
-                                email: parsed.performer_email,
-                                youtube_url: parsed.performer_youtube_url ?? '',
+                                name_en: parsed.performer_name_en || '',
+                                email: parsed.performer_email || '',
+                                youtube_url: parsed.performer_youtube_url || '',
                                 language_code: '{{ $role->language_code }}',
                             };
                         }
