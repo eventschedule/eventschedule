@@ -89,6 +89,7 @@ class GeminiUtils
             'event_name_en' => 'only if the event_name is not English',
             'event_date_time' => 'YYYY-MM-DD HH:MM',
             'event_duration' => 'in hours',
+            'event_details' => '',
             'event_address' => 'Just the street address, do not include the city or state',
             'event_address_en' => 'English translation, only if the event address is not English',
             'event_city' => '',
