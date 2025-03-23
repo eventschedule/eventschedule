@@ -126,7 +126,8 @@ class GeminiUtils
             $prompt .= "\nThe date is either {$thisMonth} or {$nextMonth}";
         }
 
-        $prompt .= "\nIf there is no time, use 8pm as the default time";
+        $prompt .= "\nIf there is no time, use 8pm as the default time.";
+        $prompt .= "\nIf there are multiple performers create multiple events.";
 
         // Use gemini-1.5-flash for both text and image inputs
         $data = self::sendRequest($prompt, $imageData);
