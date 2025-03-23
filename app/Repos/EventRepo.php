@@ -95,7 +95,7 @@ class EventRepo
                     $role->font_color = '#ffffff';
 
                     $links = [];
-                    if ($member['youtube_url']) {
+                    if (! empty($member['youtube_url'])) {
                         $links[] = UrlUtils::getUrlDetails($member['youtube_url']);
                     }
                     $role->youtube_links = json_encode($links);
@@ -122,8 +122,9 @@ class EventRepo
                     if (! $role->isClaimed()) {
                         $role->name = $member['name'];
                         $role->email = $member['email'];
+                        
                         $links = [];
-                        if ($member['youtube_url']) {
+                        if (! empty($member['youtube_url'])) {
                             $links[] = UrlUtils::getUrlDetails($member['youtube_url']);
                         }
                         $role->youtube_links = json_encode($links);    

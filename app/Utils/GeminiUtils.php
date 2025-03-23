@@ -154,7 +154,57 @@ class GeminiUtils
                 }
             }
 
-            // Check if the registration url is a redirect, in which case get the final url
+            // Convert performer data to array format
+            if (!empty($item['performer_name'])) {
+                $data[$key]['performers'] = [[
+                    'name' => $item['performer_name'],
+                    'name_en' => $item['performer_name_en'] ?? '',
+                    'email' => $item['performer_email'] ?? '',
+                    'website' => $item['performer_website'] ?? '',
+                ]];
+                
+                // Remove old single performer fields
+                unset($data[$key]['performer_name']);
+                unset($data[$key]['performer_name_en']);
+                unset($data[$key]['performer_email']);
+                unset($data[$key]['performer_website']);
+            }
+        }
+
+        // Combine events with same time and address
+        $combinedData = [];
+        foreach ($data as $event) {
+            $key = $event['event_date_time'] . '|' . $event['event_address'];
+            
+            if (isset($combinedData[$key])) {
+                // Add performer to existing event if not already present
+                if (!empty($event['performers'])) {
+                    foreach ($event['performers'] as $performer) {
+                        $exists = false;
+                        foreach ($combinedData[$key]['performers'] as $existingPerformer) {
+                            if ($existingPerformer['name'] === $performer['name']) {
+                                $exists = true;
+                                break;
+                            }
+                        }
+                        if (!$exists) {
+                            $combinedData[$key]['performers'][] = $performer;
+                        }
+                    }
+                }
+            } else {
+                // Initialize performers array if not set
+                if (!isset($event['performers'])) {
+                    $event['performers'] = [];
+                }
+                $combinedData[$key] = $event;
+            }
+        }
+
+        $data = array_values($combinedData);
+
+        foreach ($data as $key => $item) {
+            // Check if the registration url is a redirect
             if (! empty($item['registration_url'])) {
                 $links = UrlUtils::getUrlMetadata($item['registration_url']);
                 $data[$key]['registration_url'] = $links['redirect_url'];
