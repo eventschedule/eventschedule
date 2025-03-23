@@ -623,12 +623,11 @@ class RoleController extends Controller
         $role->font_family = 'Roboto';
         $role->font_color = '#ffffff';
         $role->accent_color = '#007BFF';
-        $role->background = 'gradient';
+        $role->background = 'image';
         $role->background_color = '#888888';
         $role->background_colors = ColorUtils::randomGradient();
         $role->background_image = ColorUtils::randomBackgroundImage();
         $role->background_rotation = rand(0, 359);
-        $role->header_image = ColorUtils::randomHeaderImage();
         $role->timezone = auth()->user()->timezone;
         $role->language_code = auth()->user()->language_code;
 
