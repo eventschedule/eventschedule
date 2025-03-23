@@ -490,7 +490,7 @@ class EventController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         foreach ($parsed as $key => $item) {
-            if ($imageData && empty($parsed[$key]['social_image'])) {
+            if ($imageData && empty($parsed[$key]['social_image']) && count($parsed) == 1) {
                 $parsed[$key]['social_image'] = $filename;
             }
 
@@ -561,13 +561,6 @@ class EventController extends Controller
                 if ($eventDate->isPast() || $eventDate->diffInMonths(now()) > 2) {
                     $parsed[$key]['event_date_time'] = null;
                 }
-            }
-
-            if ($request->has('image')) {
-                $file = $request->file('image');
-                $filename = '/tmp/event_' . strtolower(Str::random(32)) . '.' . $file->getClientOriginalExtension();
-                move_uploaded_file($file->getPathname(), $filename);
-                $parsed[$key]['social_image'] = $filename;
             }
 
             // Check if the event is already imported
