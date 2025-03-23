@@ -141,6 +141,10 @@ class GeminiUtils
                 } elseif (is_string($item[$field])) {
                     $data[$key][$field] = trim($item[$field], '*');
                 }
+
+                if ($data[$key][$field] == strtoupper($data[$key][$field])) {
+                    $data[$key][$field] = $item[$field] = ucwords(strtolower($data[$key][$field]));
+                }
             }
 
             // Handle special case for address
