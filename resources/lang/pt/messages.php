@@ -440,4 +440,7 @@ return [
     'error' => 'Erro',
     'events_processed_with_errors' => 'Eventos processados com erros: {success} sucessos, {errors} erros',
     'error_curating_event' => 'Erro ao curar evento',
+    'events_skipped' => 'Eventos ignorados',
+    'error_uploading_image' => 'Erro ao carregar imagem',
+    'or_paste_from_clipboard' => 'ou colar da área de transferência (Ctrl+V)',
 ];

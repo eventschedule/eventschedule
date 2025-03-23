@@ -444,4 +444,7 @@ return [
     'error' => 'خطأ',
     'events_processed_with_errors' => 'تمت معالجة الأحداث مع أخطاء: {success} نجاح، {errors} أخطاء',
     'error_curating_event' => 'خطأ في تنظيم الحدث',
+    'events_skipped' => 'تم تخطي الأحداث',
+    'error_uploading_image' => 'خطأ في تحميل الصورة',
+    'or_paste_from_clipboard' => 'أو الصق من الحافظة (Ctrl+V)',
 ];
