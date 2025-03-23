@@ -667,9 +667,11 @@
                 handleClear() {
                     this.eventDetails = '';
                     this.detailsImage = null;
+                    this.detailsImageUrl = null;
                     this.preview = null;
                     this.savedEvents = [];
                     this.savedEventData = [];
+                    this.errorMessage = null;
                     this.$nextTick(() => {
                         document.getElementById('event_details').focus();
                     });
