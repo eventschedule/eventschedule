@@ -442,4 +442,7 @@ return [
     'error' => 'Errore',
     'events_processed_with_errors' => 'Eventi elaborati con errori: {success} successi, {errors} errori',
     'error_curating_event' => 'Errore durante la curatela dell\'evento',
+    'events_skipped' => 'Eventi saltati',
+    'error_uploading_image' => 'Errore durante il caricamento dell\'immagine',
+    'or_paste_from_clipboard' => 'o incolla dagli appunti (Ctrl+V)',
 ];

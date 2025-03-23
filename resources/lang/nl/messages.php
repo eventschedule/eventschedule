@@ -493,4 +493,7 @@ return [
     'error' => 'Fout',
     'events_processed_with_errors' => 'Evenementen verwerkt met fouten: {success} succesvol, {errors} fouten',
     'error_curating_event' => 'Fout bij het cureren van evenement',
+    'events_skipped' => 'Evenementen overgeslagen',
+    'error_uploading_image' => 'Fout bij uploaden afbeelding',
+    'or_paste_from_clipboard' => 'of plak vanaf klembord (Ctrl+V)',
 ];

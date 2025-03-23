@@ -447,4 +447,7 @@ return [
     'error' => 'Fehler',
     'events_processed_with_errors' => 'Veranstaltungen mit Fehlern verarbeitet: {success} erfolgreich, {errors} Fehler',
     'error_curating_event' => 'Fehler beim Kuratieren der Veranstaltung',
+    'events_skipped' => 'Übersprungene Ereignisse',
+    'error_uploading_image' => 'Fehler beim Hochladen des Bildes',
+    'or_paste_from_clipboard' => 'oder aus der Zwischenablage einfügen (Strg+V)',
 ];

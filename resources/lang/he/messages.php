@@ -449,4 +449,7 @@ return [
     'error' => 'שגיאה',
     'events_processed_with_errors' => 'אירועים עובדו עם שגיאות: {success} הצלחות, {errors} שגיאות',
     'error_curating_event' => 'שגיאה באוצרות האירוע',
+    'events_skipped' => 'אירועים שדולגו',
+    'error_uploading_image' => 'שגיאה בהעלאת התמונה',
+    'or_paste_from_clipboard' => 'או הדבק מהלוח (Ctrl+V)',
 ];

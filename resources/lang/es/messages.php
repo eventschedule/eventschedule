@@ -444,4 +444,7 @@ return [
     'error' => 'Error',
     'events_processed_with_errors' => 'Eventos procesados con errores: {success} exitosos, {errors} errores',
     'error_curating_event' => 'Error al curar el evento',
+    'events_skipped' => 'Eventos omitidos',
+    'error_uploading_image' => 'Error al subir la imagen',
+    'or_paste_from_clipboard' => 'o pegar desde el portapapeles (Ctrl+V)',
 ];
