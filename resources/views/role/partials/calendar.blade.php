@@ -121,7 +121,7 @@
             @endif
         </div>
     </header>
-    <div class="{{ $tab == 'availability' ? '' : 'hidden' }} shadow-sm ring-1 ring-black ring-opacity-5 md:flex md:flex-auto md:flex-col {{ $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
+    <div class="{{ $tab == 'availability' ? '' : 'hidden' }} shadow-sm ring-1 ring-black ring-opacity-5 md:flex md:flex-auto md:flex-col {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
         <div class="{{ $tab == 'availability' ? 'hidden md:block' : '' }}"> 
             <div
                 class="grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center text-xs font-semibold leading-6 text-gray-700 md:flex-none">
