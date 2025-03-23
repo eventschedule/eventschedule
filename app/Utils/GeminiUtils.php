@@ -115,6 +115,19 @@ class GeminiUtils
         }
         $prompt .= $details;
 
+        $now = now();
+        $thisMonth = $now->format('M Y');
+        
+        if ($now->format('n') == 12) {
+            $nextMonth = $now->copy()->addMonth()->format('M Y'); 
+            $prompt .= "\nThe date is either {$thisMonth} or {$nextMonth}";
+        } else {
+            $nextMonth = $now->copy()->addMonth()->format('M Y');
+            $prompt .= "\nThe date is either {$thisMonth} or {$nextMonth}";
+        }
+
+        $prompt .= "\nIf there is no time, use 8pm as the default time";
+
         // Use gemini-1.5-flash for both text and image inputs
         $data = self::sendRequest($prompt, $imageData);
 
