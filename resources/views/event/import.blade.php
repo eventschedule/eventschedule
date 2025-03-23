@@ -1030,6 +1030,7 @@
                     // No need to revoke anything with data URLs
                     this.detailsImage = null;
                     this.detailsImageUrl = null;
+                    this.errorMessage = null; // Clear any error messages when removing the image
                     this.fetchPreview();
                 },
 
