@@ -528,24 +528,27 @@ class EventController extends Controller
             if ($role->isSchedule()) {
                 $parsed[$key]['talent_id'] = UrlUtils::encodeId($role->id);
             } elseif (! empty($item['performer_name'])) {
-                $followerRoleIds = Role::whereHas('users', function($query) use ($role) {
-                    $query->where('level', 'owner')
-                        ->whereHas('roles', function($q) use ($role) {
-                            $q->where('roles.id', $role->id)
-                                ->where('role_user.level', 'follower'); 
-                        });
-                })->orderBy('id')->pluck('id')->toArray();
+                $followerRoleIds = Role::where('is_deleted', false)
+                    ->whereHas('users', function($query) use ($role) {
+                        $query->where('level', 'owner')
+                            ->whereHas('roles', function($q) use ($role) {
+                                $q->where('roles.id', $role->id)
+                                    ->where('role_user.level', 'follower'); 
+                            });
+                    })->orderBy('id')->pluck('id')->toArray();
 
-                $talent = Role::where(function($query) use ($item) {
-                            $query->where('name', $item['performer_name'])
-                                ->when(! empty($item['performer_name_en']), function($q) use ($item) {
-                                    $q->orWhere('name_en', $item['performer_name_en']);
-                                });
-                        })
-                        ->where('type', 'schedule')
-                        ->whereIn('id', $followerRoleIds)
-                        ->orderBy('id')
-                        ->first();
+                $talent = Role::where('is_deleted', false)
+                    ->where(function($query) use ($item) {
+                        $query->where('name', $item['performer_name'])
+                            ->when(! empty($item['performer_name_en']), function($q) use ($item) {
+                                $q->orWhere('name_en', $item['performer_name_en']);
+                            });
+                    })
+                    ->where('type', 'schedule')
+                    ->whereIn('id', $followerRoleIds)
+                    ->orderBy('id')
+                    ->first();
+
                 if ($talent) {
                     $parsed[$key]['talent_id'] = UrlUtils::encodeId($talent->id);
                 }
