@@ -24,6 +24,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'timezone',
         'language_code',
         'stripe_account_id',
+        'api_key',
     ];
 
     /**
@@ -38,6 +39,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'invoiceninja_api_key',
         'invoiceninja_api_url',
         'invoiceninja_webhook_secret',
+        'api_key',
     ];
 
     protected static function boot()

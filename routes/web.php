@@ -8,6 +8,7 @@ use App\Http\Controllers\StripeController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\InvoiceNinjaController;
 use App\Http\Controllers\AppController;
+use App\Http\Controllers\Api\ApiSettingsController;
 use Illuminate\Support\Facades\Route;
 
 if (config('app.hosted')) {
@@ -115,6 +116,13 @@ Route::middleware(['auth', 'verified'])->group(function ()
         }
         abort(404);
     })->name('event.tmp_image');
+
+    Route::get('/api/documentation', function () {
+        return view('api.documentation');
+    })->name('api.documentation');
+
+    Route::patch('/api-settings', [ApiSettingsController::class, 'update'])->name('api-settings.update');
+    Route::post('/api-settings/show-key', [ApiSettingsController::class, 'showApiKey'])->name('api-settings.show-key');
 });
 
 if (config('app.hosted')) {
