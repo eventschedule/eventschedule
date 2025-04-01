@@ -18,7 +18,7 @@
                                 <p>All API requests must include your API key in the <code>X-API-Key</code> header.</p>
                             </div>
                             <div class="mt-4 lg:mt-0">
-                                <div class="bg-gray-800 rounded-lg p-4 text-white font-mono text-sm">
+                                <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                     <div class="flex items-center justify-between">
                                         <span>Request Headers</span>
                                         <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
@@ -41,7 +41,7 @@
                                 </ul>
                             </div>
                             <div class="mt-4 lg:mt-0">
-                                <div class="bg-gray-800 rounded-lg p-4 text-white font-mono text-sm">
+                                <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                     <div class="flex items-center justify-between">
                                         <span>Example Response</span>
                                         <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
@@ -77,7 +77,7 @@
                                 <code>/api/schedules?page=2&per_page=50</code>
                             </div>
                             <div class="mt-4 lg:mt-0">
-                                <div class="bg-gray-800 rounded-lg p-4 text-white font-mono text-sm">
+                                <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                     <div class="flex items-center justify-between">
                                         <span>Pagination Metadata</span>
                                         <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
@@ -112,7 +112,7 @@
                                     <p class="mt-4">Returns a paginated list of all schedules you have access to.</p>
                                 </div>
                                 <div class="p-4">
-                                    <div class="bg-gray-800 rounded-lg p-4 text-white font-mono text-sm">
+                                    <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                         <div class="flex items-center justify-between">
                                             <span>Response</span>
                                             <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
@@ -157,7 +157,7 @@
                                     <p class="mt-4">Returns a paginated list of all events for the specified schedule.</p>
                                 </div>
                                 <div class="p-4">
-                                    <div class="bg-gray-800 rounded-lg p-4 text-white font-mono text-sm">
+                                    <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                         <div class="flex items-center justify-between">
                                             <span>Response</span>
                                             <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
@@ -204,7 +204,7 @@
                                     <p class="mt-4">Create a new event using either JSON data or a flyer image.</p>
                                     
                                     <h4 class="font-medium mt-4">Option 1: JSON Request</h4>
-                                    <div class="bg-gray-800 rounded-lg p-4 text-white font-mono text-sm mt-2">
+                                    <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm mt-2">
                                         <div class="flex items-center justify-between">
                                             <span>Request Body</span>
                                             <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
@@ -226,7 +226,7 @@
                                     </ul>
                                 </div>
                                 <div class="p-4">
-                                    <div class="bg-gray-800 rounded-lg p-4 text-white font-mono text-sm">
+                                    <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                         <div class="flex items-center justify-between">
                                             <span>Response</span>
                                             <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
@@ -291,7 +291,7 @@
                                 </div>
                             </div>
                             <div class="mt-4 lg:mt-0">
-                                <div class="bg-gray-800 rounded-lg p-4 text-white font-mono text-sm">
+                                <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
                                     <div class="flex items-center justify-between">
                                         <span>Error Response</span>
                                         <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
