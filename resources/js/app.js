@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 'preview', 'guide'
             ],
             minHeight: "200px",
+            spellChecker: true,
+            nativeSpellcheck: true,
+            status: false,
         });
     });
 });
