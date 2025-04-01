@@ -11,23 +11,28 @@ class ApiSettingsController extends Controller
     public function update(Request $request)
     {
         $user = auth()->user();
+        $enableApi = $request->boolean('enable_api');
         
-        // Generate new API key if enabled
-        if ($request->boolean('enable_api')) {
+        // Only generate new key if:
+        // 1. API was disabled and is now being enabled
+        // 2. API was enabled and is now being disabled (set to null)
+        if ($enableApi && !$user->api_key) {
+            // Generate new key when enabling
             $user->api_key = Str::random(32);
-        } else {
+            $showNewKey = true;
+        } elseif (!$enableApi && $user->api_key) {
+            // Remove key when disabling
             $user->api_key = null;
+            $showNewKey = false;
+        } else {
+            // No change to key if just saving with same state
+            $showNewKey = false;
         }
         
         $user->save();
         
-        // Always show the new key when it's generated
-        if ($user->api_key) {
-            return back()
-                ->with('success', 'API settings updated successfully')
-                ->with('show_new_api_key', true);
-        }
-        
-        return back()->with('success', 'API settings updated successfully');
+        return back()
+            ->with('success', 'API settings updated successfully')
+            ->with('show_new_api_key', $showNewKey);
     }
 } 

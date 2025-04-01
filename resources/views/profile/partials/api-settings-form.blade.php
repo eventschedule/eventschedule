@@ -34,11 +34,35 @@
                 <label class="block font-medium text-sm text-gray-700">
                     {{ __('API Key') }}
                 </label>
-                <div class="mt-1">
+                <div class="mt-1 relative">
                     <input type="text" id="api_key" 
-                           value="{{ session('show_new_api_key') ? auth()->user()->api_key : str_repeat('*', 28) . substr(auth()->user()->api_key, -4) }}" 
-                           class="block w-full border-gray-300 rounded-md shadow-sm" 
+                           value="{{ session('show_new_api_key') ? auth()->user()->api_key : substr(auth()->user()->api_key, 0, 6) . str_repeat('•', 26) }}" 
+                           class="block w-full border-gray-300 rounded-md shadow-sm {{ session('show_new_api_key') ? 'rounded-r-none pr-12' : '' }} font-mono" 
                            readonly>
+                    @if(session('show_new_api_key'))
+                        <div class="absolute inset-y-0 right-0 flex items-center">
+                            <div class="h-full w-px bg-gray-300"></div>
+                            <button type="button" 
+                                    onclick="copyApiKey()" 
+                                    class="px-3 border border-l-0 border-gray-300 bg-gray-50 hover:bg-gray-100 rounded-r-md flex items-center justify-center group h-full"
+                                    title="{{ __('Copy to clipboard') }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" 
+                                     class="h-5 w-5 text-gray-500 group-hover:text-gray-600" 
+                                     fill="none" 
+                                     viewBox="0 0 24 24" 
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round" 
+                                          stroke-linejoin="round" 
+                                          stroke-width="2" 
+                                          d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                </svg>
+                                <span id="copy-feedback" 
+                                      class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 transition-opacity">
+                                    {{ __('Copied!') }}
+                                </span>
+                            </button>
+                        </div>
+                    @endif
                 </div>
                 @if(session('show_new_api_key'))
                     <p class="mt-2 text-sm text-gray-600">
@@ -58,4 +82,19 @@
             @endif
         </div>
     </form>
-</section> 
+</section>
+
+<script>
+function copyApiKey() {
+    const apiKeyInput = document.getElementById('api_key');
+    apiKeyInput.select();
+    document.execCommand('copy');
+    
+    const feedback = document.getElementById('copy-feedback');
+    feedback.classList.remove('opacity-0');
+    
+    setTimeout(() => {
+        feedback.classList.add('opacity-0');
+    }, 2000);
+}
+</script> 
