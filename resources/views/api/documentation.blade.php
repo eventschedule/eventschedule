@@ -29,6 +29,73 @@
                         </div>
                     </div>
 
+                    <!-- Response Format -->
+                    <div class="mt-8">
+                        <h2 class="text-2xl font-semibold mb-4">Response Format</h2>
+                        <div class="lg:grid lg:grid-cols-2 lg:gap-8">
+                            <div class="prose dark:prose-invert">
+                                <p>All API responses follow a consistent format with two main properties:</p>
+                                <ul class="mt-2">
+                                    <li><code>data</code>: Contains the response payload (array for lists, object for single items)</li>
+                                    <li><code>meta</code>: Contains metadata about the response, including pagination information</li>
+                                </ul>
+                            </div>
+                            <div class="mt-4 lg:mt-0">
+                                <div class="bg-gray-800 rounded-lg p-4 text-white font-mono text-sm">
+                                    <div class="flex items-center justify-between">
+                                        <span>Example Response</span>
+                                        <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                    </div>
+                                    <pre class="mt-2"><code>{
+    "data": [...],
+    "meta": {
+        "current_page": 1,
+        "from": 1,
+        "last_page": 5,
+        "per_page": 100,
+        "to": 100,
+        "total": 450,
+        "path": "/api/schedules"
+    }
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="mt-8">
+                        <h2 class="text-2xl font-semibold mb-4">Pagination</h2>
+                        <div class="lg:grid lg:grid-cols-2 lg:gap-8">
+                            <div class="prose dark:prose-invert">
+                                <p>List endpoints support pagination through query parameters:</p>
+                                <ul class="mt-2">
+                                    <li><code>per_page</code>: Number of items per page (default: 100, max: 1000)</li>
+                                    <li><code>page</code>: Page number to retrieve</li>
+                                </ul>
+                                <p class="mt-4">Example request:</p>
+                                <code>/api/schedules?page=2&per_page=50</code>
+                            </div>
+                            <div class="mt-4 lg:mt-0">
+                                <div class="bg-gray-800 rounded-lg p-4 text-white font-mono text-sm">
+                                    <div class="flex items-center justify-between">
+                                        <span>Pagination Metadata</span>
+                                        <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                    </div>
+                                    <pre class="mt-2"><code>"meta": {
+    "current_page": 2,
+    "from": 51,
+    "last_page": 5,
+    "per_page": 50,
+    "to": 100,
+    "total": 250,
+    "path": "/api/schedules"
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- List Schedules Endpoint -->
                     <div class="mt-12">
                         <h2 class="text-2xl font-semibold mb-6">Endpoints</h2>
@@ -42,7 +109,7 @@
                                         <span class="bg-blue-600 text-white px-2 py-1 rounded text-sm">GET</span>
                                         <code class="text-sm">/api/schedules</code>
                                     </div>
-                                    <p class="mt-4">Returns a list of all schedules you have access to.</p>
+                                    <p class="mt-4">Returns a paginated list of all schedules you have access to.</p>
                                 </div>
                                 <div class="p-4">
                                     <div class="bg-gray-800 rounded-lg p-4 text-white font-mono text-sm">
@@ -51,14 +118,23 @@
                                             <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
                                         </div>
                                         <pre class="mt-2 overflow-x-auto"><code>{
-    "schedules": [
+    "data": [
         {
             "id": "123",
             "name": "My Schedule",
             "type": "schedule",
             "description": "Schedule description"
         }
-    ]
+    ],
+    "meta": {
+        "current_page": 1,
+        "from": 1,
+        "last_page": 1,
+        "per_page": 100,
+        "to": 1,
+        "total": 1,
+        "path": "/api/schedules"
+    }
 }</code></pre>
                                     </div>
                                 </div>
@@ -78,7 +154,7 @@
                                         <span class="bg-blue-600 text-white px-2 py-1 rounded text-sm">GET</span>
                                         <code class="text-sm">/api/schedules/{schedule_id}/events</code>
                                     </div>
-                                    <p class="mt-4">Returns all events for the specified schedule.</p>
+                                    <p class="mt-4">Returns a paginated list of all events for the specified schedule.</p>
                                 </div>
                                 <div class="p-4">
                                     <div class="bg-gray-800 rounded-lg p-4 text-white font-mono text-sm">
@@ -87,7 +163,7 @@
                                             <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
                                         </div>
                                         <pre class="mt-2 overflow-x-auto"><code>{
-    "events": [
+    "data": [
         {
             "id": "456",
             "title": "Event Name",
@@ -96,7 +172,16 @@
             "end_time": "2024-04-01T22:00:00Z",
             "location": "Event location"
         }
-    ]
+    ],
+    "meta": {
+        "current_page": 1,
+        "from": 1,
+        "last_page": 1,
+        "per_page": 100,
+        "to": 1,
+        "total": 1,
+        "path": "/api/schedules/123/events"
+    }
 }</code></pre>
                                     </div>
                                 </div>
@@ -147,14 +232,16 @@
                                             <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
                                         </div>
                                         <pre class="mt-2 overflow-x-auto"><code>{
-    "message": "Event created successfully",
-    "event": {
+    "data": {
         "id": "456",
         "title": "Event Name",
         "description": "Event description",
         "start_time": "2024-04-01T19:00:00Z",
         "end_time": "2024-04-01T22:00:00Z",
         "location": "Event location"
+    },
+    "meta": {
+        "message": "Event created successfully"
     }
 }</code></pre>
                                     </div>
@@ -210,7 +297,10 @@
                                         <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
                                     </div>
                                     <pre class="mt-2"><code>{
-    "error": "Error message here"
+    "data": null,
+    "meta": {
+        "error": "Error message here"
+    }
 }</code></pre>
                                 </div>
                             </div>

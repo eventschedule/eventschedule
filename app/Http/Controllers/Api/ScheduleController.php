@@ -13,30 +13,40 @@ use Google\Cloud\Vision\V1\ImageAnnotatorClient;
 class ScheduleController extends Controller
 {
     protected $eventRepo;
+    protected const MAX_PER_PAGE = 1000;
+    protected const DEFAULT_PER_PAGE = 100;
 
     public function __construct(EventRepo $eventRepo)
     {
         $this->eventRepo = $eventRepo;
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $perPage = min(
+            (int) $request->input('per_page', self::DEFAULT_PER_PAGE),
+            self::MAX_PER_PAGE
+        );
+
         $schedules = Role::where('user_id', auth()->id())
                         ->where('type', 'schedule')
-                        ->get();
+                        ->paginate($perPage);
+
         return response()->json([
-            'schedules' => $schedules->map(function($schedule) {
-                return [
-                    'id' => $schedule->id,
-                    'name' => $schedule->name,
-                    'type' => $schedule->type,
-                    'description' => $schedule->description,
-                ];
-            })
+            'data' => $schedules->items(),
+            'meta' => [
+                'current_page' => $schedules->currentPage(),
+                'from' => $schedules->firstItem(),
+                'last_page' => $schedules->lastPage(),
+                'per_page' => $schedules->perPage(),
+                'to' => $schedules->lastItem(),
+                'total' => $schedules->total(),
+                'path' => $request->url(),
+            ]
         ]);
     }
 
-    public function events($scheduleId)
+    public function events(Request $request, $scheduleId)
     {
         $schedule = Role::findOrFail($scheduleId);
         
@@ -44,12 +54,17 @@ class ScheduleController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
+        $perPage = min(
+            (int) $request->input('per_page', self::DEFAULT_PER_PAGE),
+            self::MAX_PER_PAGE
+        );
+
         $events = Event::whereHas('roles', function($query) use ($scheduleId) {
             $query->where('role_id', $scheduleId);
-        })->get();
+        })->paginate($perPage);
 
         return response()->json([
-            'events' => $events->map(function($event) {
+            'data' => $events->map(function($event) {
                 return [
                     'id' => $event->id,
                     'title' => $event->name,
@@ -58,7 +73,16 @@ class ScheduleController extends Controller
                     'end_time' => $event->ends_at,
                     'location' => $event->location,
                 ];
-            })
+            })->values(),
+            'meta' => [
+                'current_page' => $events->currentPage(),
+                'from' => $events->firstItem(),
+                'last_page' => $events->lastPage(),
+                'per_page' => $events->perPage(),
+                'to' => $events->lastItem(),
+                'total' => $events->total(),
+                'path' => $request->url(),
+            ]
         ]);
     }
 
@@ -97,14 +121,16 @@ class ScheduleController extends Controller
         $event = $this->eventRepo->saveEvent($request, null, null);
 
         return response()->json([
-            'message' => 'Event created successfully',
-            'event' => [
+            'data' => [
                 'id' => $event->id,
                 'title' => $event->name,
                 'description' => $event->description,
                 'start_time' => $event->starts_at,
                 'end_time' => $event->ends_at,
                 'location' => $event->location,
+            ],
+            'meta' => [
+                'message' => 'Event created successfully'
             ]
         ], 201);
     }
