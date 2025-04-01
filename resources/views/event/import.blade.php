@@ -50,7 +50,9 @@
                                             <div class="absolute top-0 left-0 w-4 h-4 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"></div>
                                         </div>
                                         <div class="inline-flex items-center">
-                                            <span class="animate-pulse">{{ __('messages.loading') }}</span>
+                                            <span class="animate-pulse">
+                                                {{ __('messages.loading') }}
+                                            </span>
                                             <span class="ml-1 inline-flex animate-[ellipsis_1.5s_steps(4,end)_infinite]">...</span>
                                         </div>
                                     </div>
@@ -392,6 +394,7 @@
                     isCurator: {{ $role->isCurator() ? 'true' : 'false' }},
                     detailsImage: null,
                     detailsImageUrl: null,
+                    currentRequestId: null,
                 }
             },
 
@@ -429,6 +432,13 @@
                     this.savedEventData = [];
                     this.saveErrors = [];
                     
+                    // Create a unique request ID to track the latest request
+                    const requestId = Date.now();
+                    this.currentRequestId = requestId;
+                    
+                    // Don't clear preview immediately - we'll only update it if this is still the latest request
+                    // when the response comes back
+                    
                     try {
                         const formData = new FormData();
                         formData.append('event_details', this.eventDetails);
@@ -443,6 +453,11 @@
                             },
                             body: formData
                         });
+
+                        // If this is no longer the latest request, ignore the response
+                        if (this.currentRequestId !== requestId) {
+                            return;
+                        }
 
                         // Handle HTTP error responses before trying to parse JSON
                         if (!response.ok) {
@@ -485,6 +500,7 @@
                             data.parsed = [data.parsed];
                         }
 
+                        // Now that we have valid data and this is still the latest request, update the preview
                         this.preview = data;
                         
                         // Initialize arrays to track saved events and errors
@@ -499,10 +515,16 @@
                             initializeFlatpickr();
                         });
                     } catch (error) {
-                        console.error('Error fetching preview:', error)
-                        this.errorMessage = error.message || 'An error occurred while fetching the preview';
+                        // Only show error if this is still the latest request
+                        if (this.currentRequestId === requestId) {
+                            console.error('Error fetching preview:', error)
+                            this.errorMessage = error.message || 'An error occurred while fetching the preview';
+                        }
                     } finally {
-                        this.isLoading = false
+                        // Only update loading state if this is still the latest request
+                        if (this.currentRequestId === requestId) {
+                            this.isLoading = false;
+                        }
                     }
                 },
                 
