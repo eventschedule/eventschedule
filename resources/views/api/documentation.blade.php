@@ -1,5 +1,34 @@
 <x-app-admin-layout>
     <div class="py-12">
+        <script>
+            function copyCode(button) {
+                const pre = button.closest('div').querySelector('pre');
+                const code = pre.textContent;
+                
+                navigator.clipboard.writeText(code).then(() => {
+                    const originalText = button.textContent;
+                    button.textContent = 'Copied!';
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                    }, 2000);
+                });
+            }
+
+            function toggleCurl(button) {
+                const content = button.nextElementSibling;
+                const arrow = button.querySelector('svg');
+                
+                content.classList.toggle('hidden');
+                arrow.style.transform = content.classList.contains('hidden') ? '' : 'rotate(-180deg)';
+                
+                const text = button.innerHTML;
+                button.innerHTML = text.replace(
+                    content.classList.contains('hidden') ? 'Hide' : 'Show',
+                    content.classList.contains('hidden') ? 'Show' : 'Hide'
+                );
+            }
+        </script>
+
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
@@ -16,6 +45,23 @@
                         <div class="lg:grid lg:grid-cols-2 lg:gap-8">
                             <div class="prose dark:prose-invert">
                                 <p>All API requests must include your API key in the <code>X-API-Key</code> header.</p>
+                                <button onclick="toggleCurl(this)" 
+                                        class="mt-2 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
+                                    <svg class="w-4 h-4 mr-1 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                    Show cURL example
+                                </button>
+                                <div class="hidden mt-2">
+                                    <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
+                                        <div class="flex items-center justify-between">
+                                            <span>cURL</span>
+                                            <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                        </div>
+                                        <pre class="mt-2 overflow-x-auto"><code>curl -X GET "https://your-domain.eventschedule.com/api/schedules" \
+     -H "X-API-Key: your_api_key_here"</code></pre>
+                                    </div>
+                                </div>
                             </div>
                             <div class="mt-4 lg:mt-0">
                                 <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
@@ -23,7 +69,7 @@
                                         <span>Request Headers</span>
                                         <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
                                     </div>
-                                    <pre class="mt-2"><code>X-API-Key: your_api_key_here</code></pre>
+                                    <pre class="mt-2 overflow-x-auto"><code>X-API-Key: your_api_key_here</code></pre>
                                 </div>
                             </div>
                         </div>
@@ -46,7 +92,7 @@
                                         <span>Example Response</span>
                                         <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
                                     </div>
-                                    <pre class="mt-2"><code>{
+                                    <pre class="mt-2 overflow-x-auto"><code>{
     "data": [...],
     "meta": {
         "current_page": 1,
@@ -82,7 +128,7 @@
                                         <span>Pagination Metadata</span>
                                         <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
                                     </div>
-                                    <pre class="mt-2"><code>"meta": {
+                                    <pre class="mt-2 overflow-x-auto"><code>"meta": {
     "current_page": 2,
     "from": 51,
     "last_page": 5,
@@ -110,6 +156,23 @@
                                         <code class="text-sm">/api/schedules</code>
                                     </div>
                                     <p class="mt-4">Returns a paginated list of all schedules you have access to.</p>
+                                    <button onclick="toggleCurl(this)" 
+                                            class="mt-2 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
+                                        <svg class="w-4 h-4 mr-1 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                        Show cURL example
+                                    </button>
+                                    <div class="hidden mt-2">
+                                        <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
+                                            <div class="flex items-center justify-between">
+                                                <span>cURL</span>
+                                                <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                            </div>
+                                            <pre class="mt-2 overflow-x-auto"><code>curl -X GET "https://your-domain.eventschedule.com/api/schedules?page=1&per_page=100" \
+     -H "X-API-Key: your_api_key_here"</code></pre>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="p-4">
                                     <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
@@ -155,6 +218,23 @@
                                         <code class="text-sm">/api/schedules/{schedule_id}/events</code>
                                     </div>
                                     <p class="mt-4">Returns a paginated list of all events for the specified schedule.</p>
+                                    <button onclick="toggleCurl(this)" 
+                                            class="mt-2 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
+                                        <svg class="w-4 h-4 mr-1 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                        Show cURL example
+                                    </button>
+                                    <div class="hidden mt-2">
+                                        <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
+                                            <div class="flex items-center justify-between">
+                                                <span>cURL</span>
+                                                <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                            </div>
+                                            <pre class="mt-2 overflow-x-auto"><code>curl -X GET "https://your-domain.eventschedule.com/api/schedules/123/events" \
+     -H "X-API-Key: your_api_key_here"</code></pre>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="p-4">
                                     <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
@@ -204,26 +284,51 @@
                                     <p class="mt-4">Create a new event using either JSON data or a flyer image.</p>
                                     
                                     <h4 class="font-medium mt-4">Option 1: JSON Request</h4>
-                                    <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm mt-2">
-                                        <div class="flex items-center justify-between">
-                                            <span>Request Body</span>
-                                            <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                    <button onclick="toggleCurl(this)" 
+                                            class="mt-2 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
+                                        <svg class="w-4 h-4 mr-1 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                        Show cURL example
+                                    </button>
+                                    <div class="hidden mt-2">
+                                        <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
+                                            <div class="flex items-center justify-between">
+                                                <span>cURL</span>
+                                                <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                            </div>
+                                            <pre class="mt-2 overflow-x-auto"><code>curl -X POST "https://your-domain.eventschedule.com/api/schedules/123/events" \
+     -H "X-API-Key: your_api_key_here" \
+     -H "Content-Type: application/json" \
+     -d '{
+         "name": "Event Name",
+         "description": "Event description",
+         "starts_at": "2024-04-01T19:00:00Z",
+         "ends_at": "2024-04-01T22:00:00Z",
+         "location": "Event location"
+     }'</code></pre>
                                         </div>
-                                        <pre class="mt-2"><code>{
-    "name": "Event Name",
-    "description": "Event description",
-    "starts_at": "2024-04-01T19:00:00Z",
-    "ends_at": "2024-04-01T22:00:00Z",
-    "location": "Event location"
-}</code></pre>
                                     </div>
 
                                     <h4 class="font-medium mt-4">Option 2: Flyer Upload</h4>
-                                    <ul class="mt-2 list-disc list-inside">
-                                        <li>Send as <code>multipart/form-data</code></li>
-                                        <li>Include flyer image in <code>flyer</code> field</li>
-                                        <li>Event details will be extracted automatically</li>
-                                    </ul>
+                                    <button onclick="toggleCurl(this)" 
+                                            class="mt-2 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
+                                        <svg class="w-4 h-4 mr-1 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                        Show cURL example
+                                    </button>
+                                    <div class="hidden mt-2">
+                                        <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
+                                            <div class="flex items-center justify-between">
+                                                <span>cURL</span>
+                                                <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                            </div>
+                                            <pre class="mt-2 overflow-x-auto"><code>curl -X POST "https://your-domain.eventschedule.com/api/schedules/123/events" \
+     -H "X-API-Key: your_api_key_here" \
+     -F "flyer=@/path/to/your/flyer.jpg"</code></pre>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="p-4">
                                     <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
@@ -310,21 +415,4 @@
             </div>
         </div>
     </div>
-
-    @push('scripts')
-    <script>
-        function copyCode(button) {
-            const pre = button.closest('div').querySelector('pre');
-            const code = pre.textContent;
-            
-            navigator.clipboard.writeText(code).then(() => {
-                const originalText = button.textContent;
-                button.textContent = 'Copied!';
-                setTimeout(() => {
-                    button.textContent = originalText;
-                }, 2000);
-            });
-        }
-    </script>
-    @endpush
 </x-app-admin-layout> 
