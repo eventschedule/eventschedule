@@ -3,6 +3,7 @@
 namespace App\Utils;
 
 use App\Utils\UrlUtils;
+use Carbon\Carbon;
 
 class GeminiUtils
 {
@@ -116,15 +117,17 @@ class GeminiUtils
         }
         $prompt .= $details;
 
-        $now = now();
+        $now = Carbon::now(auth()->user() ? auth()->user()->timezone : 'UTC');
         $thisMonth = $now->format('M Y');
         
+        $prompt .= "\nThe date today is {$now->format('M d, Y')}.";
+
         if ($now->format('n') == 12) {
             $nextMonth = $now->copy()->addMonth()->format('M Y'); 
-            $prompt .= "\nThe date is either {$thisMonth} or {$nextMonth}";
+            $prompt .= "\nThe event date is either {$thisMonth} or {$nextMonth}.";
         } else {
             $nextMonth = $now->copy()->addMonth()->format('M Y');
-            $prompt .= "\nThe date is either {$thisMonth} or {$nextMonth}";
+            $prompt .= "\nThe event date is either {$thisMonth} or {$nextMonth}.";
         }
 
         $prompt .= "\nIf there is no time, use 8pm as the default time.";
