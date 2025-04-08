@@ -8,17 +8,17 @@ use App\Repos\EventRepo;
 
 class ApiEventController extends Controller
 {
-    protected $eventRepo;
-
     protected const MAX_PER_PAGE = 1000;
     protected const DEFAULT_PER_PAGE = 100;
+
+    protected $eventRepo;
 
     public function __construct(EventRepo $eventRepo)
     {
         $this->eventRepo = $eventRepo;
     }
 
-    public function events(Request $request, $scheduleId)
+    public function index(Request $request, $scheduleId)
     {
         $schedule = Role::findOrFail($scheduleId);
         
@@ -58,7 +58,7 @@ class ApiEventController extends Controller
         ], 200, [], JSON_PRETTY_PRINT);
     }
 
-    public function storeEvent(Request $request, $scheduleId)
+    public function store(Request $request, $scheduleId)
     {
         $schedule = Role::findOrFail($scheduleId);
         

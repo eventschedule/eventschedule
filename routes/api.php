@@ -9,8 +9,9 @@ use App\Http\Middleware\ApiAuthentication;
 Route::middleware([ApiAuthentication::class])->prefix('api')->group(function () {
     Route::get('/schedules', [ApiScheduleController::class, 'index']);
     Route::post('/schedules', [ApiScheduleController::class, 'store']);
-    Route::put('/schedules/{schedule}', [ApiScheduleController::class, 'update']);
+    Route::put('/schedules/{schedule_id}', [ApiScheduleController::class, 'update']);
     
-    Route::get('/schedules/{schedule}/events', [ApiEventController::class, 'events']);
-    Route::post('/schedules/{schedule}/events', [ApiEventController::class, 'storeEvent']);
+    Route::get('/events', [ApiEventController::class, 'index']);
+    Route::post('/events', [ApiEventController::class, 'store']);
+    Route::put('/events/{event_id}', [ApiEventController::class, 'update']);
 }); 
