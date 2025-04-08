@@ -597,11 +597,11 @@ class Role extends Model implements MustVerifyEmail
     {
         $data = new \stdClass;
         $data->id = UrlUtils::encodeId($this->id);
+        $data->url = $this->getGuestUrl();
         $data->type = $this->type;
         $data->name = $this->name;
         $data->email = $this->email;
         $data->website = $this->website;
-        $data->subdomain = $this->subdomain;
         $data->description = $this->description;
 
         if ($this->isVenue()) {
