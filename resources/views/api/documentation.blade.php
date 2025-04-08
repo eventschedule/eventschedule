@@ -2,14 +2,42 @@
     <div class="py-12">
         <script>
             function copyCode(button) {
-                const pre = button.closest('div').querySelector('pre');
-                const code = pre.textContent;
+                // Find the closest parent div that contains both the button and the pre element
+                const container = button.closest('.bg-gray-800, .bg-gray-950');
+                
+                if (!container) {
+                    console.error('Could not find container for code block');
+                    button.textContent = 'Copy failed!';
+                    setTimeout(() => {
+                        button.textContent = 'Copy';
+                    }, 2000);
+                    return;
+                }
+                
+                const codeBlock = container.querySelector('pre');
+                
+                if (!codeBlock) {
+                    console.error('Could not find code block to copy');
+                    button.textContent = 'Copy failed!';
+                    setTimeout(() => {
+                        button.textContent = 'Copy';
+                    }, 2000);
+                    return;
+                }
+                
+                const code = codeBlock.textContent;
                 
                 navigator.clipboard.writeText(code).then(() => {
                     const originalText = button.textContent;
                     button.textContent = 'Copied!';
                     setTimeout(() => {
                         button.textContent = originalText;
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                    button.textContent = 'Copy failed!';
+                    setTimeout(() => {
+                        button.textContent = 'Copy';
                     }, 2000);
                 });
             }
