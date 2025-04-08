@@ -3,7 +3,6 @@
   <main>
     <div
       class="bg-center bg-cover relative before:bg-[#1B212B80] before:absolute before:inset-0 before:z-0"
-      style="background-image: url(./images/yoga.jpeg)"
     >
       <div class="container mx-auto pt-[100px] pb-10 px-5 relative z-10">
         <div class="flex flex-col sm:flex-row justify-between mb-10 py-[7px]">
