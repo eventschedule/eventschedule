@@ -28,12 +28,12 @@ class ScheduleController extends Controller
             self::MAX_PER_PAGE
         );
 
-        $schedules = Role::where('user_id', auth()->id())
-                        ->where('type', 'talent')
-                        ->paginate($perPage);
+        $schedules = Role::where('user_id', auth()->id())->paginate($perPage);
 
         return response()->json([
-            'data' => $schedules->items(),
+            'data' => collect($schedules->items())->map(function($schedule) {
+                return $schedule->toData();
+            })->values(),
             'meta' => [
                 'current_page' => $schedules->currentPage(),
                 'from' => $schedules->firstItem(),
