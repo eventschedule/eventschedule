@@ -44,7 +44,7 @@
             <meta property="og:title" content="{{ $role->translatedName() }}">
             <meta property="og:description" content="{{ trim(strip_tags($role->translatedDescription())) }}">
             <meta property="og:image" content="{{ $role->profile_image_url }}">
-            <meta property="og:url" content="{{ request()->url() }}">
+            <meta property="og:url" content="{{ str_replace('http://', 'https://', request()->url()) }}">
             <meta property="og:site_name" content="Event Schedule">
             <meta name="twitter:title" content="{{ $role->translatedName() }}">
             <meta name="twitter:description" content="{{ trim(strip_tags($role->translatedDescription())) }}">
