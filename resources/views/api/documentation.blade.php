@@ -86,7 +86,7 @@
                                             <span>cURL</span>
                                             <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
                                         </div>
-                                        <pre class="mt-2 overflow-x-auto"><code>curl -X GET "https://your-domain.eventschedule.com/api/schedules" \
+                                        <pre class="mt-2 overflow-x-auto"><code>curl -X GET "{{ config('app.url') }}/api/schedules" \
      -H "X-API-Key: your_api_key_here"</code></pre>
                                     </div>
                                 </div>
@@ -197,7 +197,7 @@
                                                 <span>cURL</span>
                                                 <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
                                             </div>
-                                            <pre class="mt-2 overflow-x-auto"><code>curl -X GET "https://your-domain.eventschedule.com/api/schedules?page=1&per_page=100" \
+                                            <pre class="mt-2 overflow-x-auto"><code>curl -X GET "{{ config('app.url') }}/api/schedules?page=1&per_page=100" \
      -H "X-API-Key: your_api_key_here"</code></pre>
                                         </div>
                                     </div>
@@ -259,7 +259,7 @@
                                                 <span>cURL</span>
                                                 <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
                                             </div>
-                                            <pre class="mt-2 overflow-x-auto"><code>curl -X GET "https://your-domain.eventschedule.com/api/schedules/123/events" \
+                                            <pre class="mt-2 overflow-x-auto"><code>curl -X GET "{{ config('app.url') }}/api/schedules/123/events" \
      -H "X-API-Key: your_api_key_here"</code></pre>
                                         </div>
                                     </div>
@@ -325,7 +325,7 @@
                                                 <span>cURL</span>
                                                 <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
                                             </div>
-                                            <pre class="mt-2 overflow-x-auto"><code>curl -X POST "https://your-domain.eventschedule.com/api/schedules/123/events" \
+                                            <pre class="mt-2 overflow-x-auto"><code>curl -X POST "{{ config('app.url') }}/api/schedules/123/events" \
      -H "X-API-Key: your_api_key_here" \
      -H "Content-Type: application/json" \
      -d '{
@@ -352,7 +352,7 @@
                                                 <span>cURL</span>
                                                 <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
                                             </div>
-                                            <pre class="mt-2 overflow-x-auto"><code>curl -X POST "https://your-domain.eventschedule.com/api/schedules/123/events" \
+                                            <pre class="mt-2 overflow-x-auto"><code>curl -X POST "{{ config('app.url') }}/api/schedules/123/events" \
      -H "X-API-Key: your_api_key_here" \
      -F "flyer=@/path/to/your/flyer.jpg"</code></pre>
                                         </div>
