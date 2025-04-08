@@ -102,7 +102,7 @@ class EventController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         
         $venue = $role->isVenue() ? $role : null;
-        $schedule = $role->isSchedule() ? $role : null;
+        $schedule = $role->isTalent() ? $role : null;
         $curator = $role->isCurator() ? $role : null;
 
         if (! $role->email_verified_at) {
@@ -150,7 +150,7 @@ class EventController extends Controller
         });
     
         $members = $roles->filter(function($item) {
-            return $item->isSchedule();
+            return $item->isTalent();
         })->map(function ($item) {
             return $item->toData();
         });
@@ -225,7 +225,7 @@ class EventController extends Controller
         $venue = $event->venue;
         $selectedMembers = [];
         foreach ($event->roles as $each) {
-            if ($each->isSchedule()) {
+            if ($each->isTalent()) {
                 $selectedMembers[] = $each->toData();
             }
         }
@@ -249,7 +249,7 @@ class EventController extends Controller
         });
     
         $members = $roles->filter(function($item) {
-            return $item->isSchedule();
+            return $item->isTalent();
         })->map(function ($item) {
             return $item->toData();
         });
@@ -525,7 +525,7 @@ class EventController extends Controller
                 }
             }
 
-            if ($role->isSchedule()) {
+            if ($role->isTalent()) {
                 $parsed[$key]['talent_id'] = UrlUtils::encodeId($role->id);
             } elseif (! empty($item['performer_name'])) {
                 $followerRoleIds = Role::where('is_deleted', false)
@@ -544,7 +544,7 @@ class EventController extends Controller
                                 $q->orWhere('name_en', $item['performer_name_en']);
                             });
                     })
-                    ->where('type', 'schedule')
+                    ->where('type', 'talent')
                     ->whereIn('id', $followerRoleIds)
                     ->orderBy('id')
                     ->first();
@@ -599,7 +599,7 @@ class EventController extends Controller
                 if (! empty($item['performer_name']) && empty($parsed[$key]['event_url'])) {
                     $similarByPerformer = (clone $query)
                         ->whereHas('roles', function($q) use ($item) {
-                            $q->where('type', 'schedule')
+                            $q->where('type', 'talent')
                               ->where('name', 'like', '%' . $item['performer_name'] . '%')
                               ->when(!empty($item['performer_name_en']), function($q) use ($item) {
                                   $q->orWhere('name', 'like', '%' . $item['performer_name_en'] . '%');

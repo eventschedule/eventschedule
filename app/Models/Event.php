@@ -131,14 +131,14 @@ class Event extends Model
     public function members()
     {
         return $this->roles->filter(function($role) {
-            return $role->isSchedule();
+            return $role->isTalent();
         });
     }
 
     public function role()
     {
         return $this->roles->first(function($role) {
-            return $role->isSchedule();
+            return $role->isTalent();
         });
     }
 
@@ -165,7 +165,7 @@ class Event extends Model
     public function isRoleAMember($subdomain, $includeCurators = false)
     {
         return $this->roles->contains(function ($role) use ($subdomain, $includeCurators) {
-            return $role->subdomain == $subdomain && ($role->isSchedule() || ($includeCurators && $role->isCurator()));
+            return $role->subdomain == $subdomain && ($role->isTalent() || ($includeCurators && $role->isCurator()));
         });
     }
 
@@ -261,7 +261,7 @@ class Event extends Model
         $lang = 'en';
 
         foreach ($this->roles as $role) {
-            if ($role->isSchedule() && $role->language_code) {
+            if ($role->isTalent() && $role->language_code) {
                 $lang = $role->language_code;
                 break;
             }

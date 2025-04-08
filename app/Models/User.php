@@ -112,7 +112,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function schedules()
     {
-        return $this->member()->type('schedule');
+        return $this->member()->type('talent');
     }
 
     public function curators()
@@ -158,7 +158,7 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         foreach ($event->roles as $role) {
-            if ($role->isSchedule() && $this->isMember($role->subdomain)) {
+            if ($role->isTalent() && $this->isMember($role->subdomain)) {
                 return true;
             }
         }
