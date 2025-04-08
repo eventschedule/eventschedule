@@ -29,7 +29,7 @@ class ScheduleController extends Controller
         );
 
         $schedules = Role::where('user_id', auth()->id())
-                        ->where('type', 'schedule')
+                        ->where('type', 'talent')
                         ->paginate($perPage);
 
         return response()->json([
@@ -101,7 +101,7 @@ class ScheduleController extends Controller
                     'email' => $schedule->email
                 ]
             ],
-            'role_type' => 'schedule'
+            'role_type' => 'talent'
         ];
 
         if ($request->hasFile('flyer')) {

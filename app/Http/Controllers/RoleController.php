@@ -119,7 +119,7 @@ class RoleController extends Controller
         $emails = $role->members()->pluck('email');
 
         // Prevent orphaned events
-        if ($role->isSchedule()) {
+        if ($role->isTalent()) {
             $events = $role->events()->get();
             foreach ($events as $event) {
                 if ($event->members()->count() == 1) {
@@ -331,7 +331,7 @@ class RoleController extends Controller
         if ($event) {
             $fonts[] = $event->venue->font_family;
             foreach ($event->roles as $each) {
-                if ($each->isClaimed() && $each->isSchedule()) {
+                if ($each->isClaimed() && $each->isTalent()) {
                     $fonts[] = $each->font_family;
                 }
             }
@@ -1110,7 +1110,7 @@ class RoleController extends Controller
         
         if ($user->schedules()->count() == 0) {
             session(['pending_venue' => $subdomain]);
-            $redirectUrl = $mainDomain . route('new', ['type' => 'schedule'], false);
+            $redirectUrl = $mainDomain . route('new', ['type' => 'talent'], false);
             return redirect($redirectUrl);
         }
 
@@ -1268,7 +1268,7 @@ class RoleController extends Controller
         $type = $request->type;
         $search = $request->search;
 
-        $roles = Role::whereIn('type', $type == 'venue' ? ['venue'] : ['schedule'])
+        $roles = Role::whereIn('type', $type == 'venue' ? ['venue'] : ['talent'])
             ->where(function($query) use ($search) {
                 $query->where('email', '=', $search);
                   //->orWhere('phone', '=', $search)

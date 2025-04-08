@@ -41,7 +41,7 @@ class AppServiceProvider extends ServiceProvider
             $allRoles = app('userRoles');
             $view->with([
                 'schedules' => $allRoles
-                    ->where('type', 'schedule')
+                    ->where('type', 'talent')
                     ->whereIn('pivot.level', ['owner', 'admin']),
                 'venues' => $allRoles
                     ->where('type', 'venue')

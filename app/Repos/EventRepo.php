@@ -87,7 +87,7 @@ class EventRepo
                     $role->name = $member['name'];
                     $role->email = isset($member['email']) && $member['email'] !== '' ? $member['email'] : null;
                     $role->subdomain = Role::generateSubdomain($role->email ? $role->email : null);
-                    $role->type = $request->role_type ? $request->role_type : 'schedule';
+                    $role->type = $request->role_type ? $request->role_type : 'talent';
                     $role->timezone = $user->timezone;
                     $role->language_code = $request->language_code ? $request->language_code : $user->language_code;
                     $role->background_colors = ColorUtils::randomGradient();
@@ -314,9 +314,9 @@ class EventRepo
                 $venue = $slugRole;
             }
 
-            if ($subdomainRole->isSchedule()) {
+            if ($subdomainRole->isTalent()) {
                 $role = $subdomainRole;
-            } elseif ($slugRole->isSchedule()) {
+            } elseif ($slugRole->isTalent()) {
                 $role = $slugRole;
             }
 

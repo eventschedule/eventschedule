@@ -254,9 +254,9 @@ class Role extends Model implements MustVerifyEmail
         return $this->type == 'venue';
     }
 
-    public function isSchedule()
+    public function isTalent()
     {
-        return $this->type == 'schedule';
+        return $this->type == 'talent';
     }
 
     public function isCurator()
