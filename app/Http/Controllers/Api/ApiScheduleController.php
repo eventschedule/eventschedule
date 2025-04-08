@@ -35,4 +35,9 @@ class ApiScheduleController extends Controller
             ]
         ], 200, [], JSON_PRETTY_PRINT);
     }
+
+    public function store(Request $request)
+    {
+        //
+    }    
 } 
