@@ -9,8 +9,8 @@
 
     <x-slot name="meta">
         @if ($role->language_code != 'en')
-            <link rel="alternate" hreflang="en" href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}">
-            <link rel="alternate" hreflang="{{ $role->language_code }}" href="{{ request()->fullUrlWithQuery(['lang' => $role->language_code]) }}">
+            <link rel="alternate" hreflang="en" href="{{ str_replace('http://', 'https://', request()->fullUrlWithQuery(['lang' => 'en'])) }}">
+            <link rel="alternate" hreflang="{{ $role->language_code }}" href="{{ str_replace('http://', 'https://', request()->fullUrlWithQuery(['lang' => $role->language_code])) }}">
         @endif
 
         @if ($event && $event->exists) 
@@ -27,7 +27,7 @@
             <meta property="og:title" content="{{ $event->translatedName() }}">
             <meta property="og:description" content="{{ $event->getMetaDescription($date) }}">
             <meta property="og:image" content="{{ $event->getImageUrl() }}">
-            <meta property="og:url" content="{{ request()->url() }}">
+            <meta property="og:url" content="{{ str_replace('http://', 'https://', request()->url()) }}">
             <meta property="og:site_name" content="Event Schedule">
             <meta name="twitter:title" content="{{ $event->translatedName() }}">
             <meta name="twitter:description" content="{{ $event->getMetaDescription($date) }}">
@@ -136,7 +136,7 @@
                     @if (! session()->has('translate'))
                         <span>{{ strtoupper($role->language_code) }}</span>
                     @else
-                        <a href="{{ request()->url() }}?lang={{ $role->language_code }}" class="text-gray-900 dark:text-gray-100 hover:underline">
+                        <a href="{{ str_replace('http://', 'https://', request()->url()) }}?lang={{ $role->language_code }}" class="text-gray-900 dark:text-gray-100 hover:underline">
                             {{ strtoupper($role->language_code) }}
                         </a>
                     @endif
@@ -144,7 +144,7 @@
                     @if (session()->has('translate'))
                         <span>EN</span>
                     @else
-                        <a href="{{ request()->url() }}?lang=en" class="text-gray-900 dark:text-gray-100 hover:underline">
+                        <a href="{{ str_replace('http://', 'https://', request()->url()) }}?lang=en" class="text-gray-900 dark:text-gray-100 hover:underline">
                             EN
                         </a>
                     @endif
