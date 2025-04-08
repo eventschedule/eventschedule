@@ -13,13 +13,11 @@
                 </div>
             </div>
 
-            <!--
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                 <div class="max-w-xl">
                     @include('profile.partials.api-settings-form')
                 </div>
             </div>
-            -->
 
             @if (! config('app.hosted'))
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
