@@ -31,7 +31,8 @@ if (config('app.hosted')) {
     Route::post('/test_database', [AppController::class, 'testDatabase'])->name('app.test_database');
 }
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
+require __DIR__ . '/api.php';
 
 Route::get('/sitemap.xml', [HomeController::class, 'sitemap'])->name('sitemap');
 Route::get('/unsubscribe', [RoleController::class, 'showUnsubscribe'])->name('role.show_unsubscribe');
