@@ -16,15 +16,14 @@ class ApiAuthentication
             return response()->json(['error' => 'API key is required'], 401);
         }
 
-        $user = User::where('api_key', $apiKey)
-                    ->where('api_enabled', true)
-                    ->first();
+        $user = User::where('api_key', $apiKey)->first();
 
         if (!$user) {
             return response()->json(['error' => 'Invalid API key'], 401);
         }
 
         auth()->login($user);
+        
         return $next($request);
     }
 } 
