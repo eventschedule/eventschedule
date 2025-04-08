@@ -593,6 +593,28 @@ class Role extends Model implements MustVerifyEmail
         return $data;
     }
 
+    public function toJson($options = 0)
+    {
+        $data = new \stdClass;
+        $data->id = UrlUtils::encodeId($this->id);
+        $data->type = $this->type;
+        $data->name = $this->name;
+        $data->email = $this->email;
+        $data->website = $this->website;
+        $data->subdomain = $this->subdomain;
+        $data->description = $this->description;
+
+        if ($this->isVenue()) {
+            $data->address1 = $this->address1;
+            $data->city = $this->city;
+            $data->state = $this->state;
+            $data->postal_code = $this->postal_code;
+            $data->country_code = $this->country_code;
+        }
+                
+        return $data;
+    }
+
     public function isPro()
     {
         if (! config('app.hosted')) {

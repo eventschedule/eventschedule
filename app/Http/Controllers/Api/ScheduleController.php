@@ -32,7 +32,7 @@ class ScheduleController extends Controller
 
         return response()->json([
             'data' => collect($schedules->items())->map(function($schedule) {
-                return $schedule->toData();
+                return $schedule->toJson();
             })->values(),
             'meta' => [
                 'current_page' => $schedules->currentPage(),
@@ -43,7 +43,7 @@ class ScheduleController extends Controller
                 'total' => $schedules->total(),
                 'path' => $request->url(),
             ]
-        ]);
+        ], 200, [], JSON_PRETTY_PRINT);
     }
 
     public function events(Request $request, $scheduleId)
@@ -83,7 +83,7 @@ class ScheduleController extends Controller
                 'total' => $events->total(),
                 'path' => $request->url(),
             ]
-        ]);
+        ], 200, [], JSON_PRETTY_PRINT);
     }
 
     public function storeEvent(Request $request, $scheduleId)
@@ -132,7 +132,7 @@ class ScheduleController extends Controller
             'meta' => [
                 'message' => 'Event created successfully'
             ]
-        ], 201);
+        ], 201, [], JSON_PRETTY_PRINT);
     }
 
     private function extractEventDetails($text)
