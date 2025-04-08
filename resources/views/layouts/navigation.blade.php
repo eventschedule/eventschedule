@@ -61,7 +61,7 @@
     
         @if ($schedules->isNotEmpty())
         <li>
-            <div class="text-xs font-semibold leading-6 text-gray-400">{{ __('messages.your_schedules') }}</div>
+            <div class="text-xs font-semibold leading-6 text-gray-400">{{ __('messages.talent_schedules') }}</div>
 
             <ul role="list" class="-mx-2 mt-2 space-y-1">
 
@@ -83,7 +83,7 @@
 
         @if ($venues->isNotEmpty())
         <li>
-            <div class="text-xs font-semibold leading-6 text-gray-400">{{ __('messages.your_venues') }}</div>
+            <div class="text-xs font-semibold leading-6 text-gray-400">{{ __('messages.venue_schedules') }}</div>
 
             <ul role="list" class="-mx-2 mt-2 space-y-1">
 
@@ -104,7 +104,7 @@
 
         @if ($curators->isNotEmpty())
         <li>
-            <div class="text-xs font-semibold leading-6 text-gray-400">{{ __('messages.your_curators') }}</div>
+            <div class="text-xs font-semibold leading-6 text-gray-400">{{ __('messages.curator_schedules') }}</div>
 
             <ul role="list" class="-mx-2 mt-2 space-y-1">
 
