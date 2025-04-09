@@ -36,7 +36,9 @@ class ApiEventController extends Controller
             self::MAX_PER_PAGE
         );
 
-        $events = Event::where('user_id', auth()->id())->paginate($perPage);
+        $events = Event::with(['roles', 'venue'])
+                    ->where('user_id', auth()->id())
+                    ->paginate($perPage);
 
         /*
         $events = Event::whereHas('roles', function($query) use ($scheduleId) {

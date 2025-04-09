@@ -558,6 +558,7 @@ class Event extends Model
     {
         $data = new \stdClass;
         $data->id = UrlUtils::encodeId($this->id);
+        $data->url = $this->getGuestUrl();
         $data->name = $this->name;
         $data->description = $this->description;
         $data->starts_at = $this->starts_at;
