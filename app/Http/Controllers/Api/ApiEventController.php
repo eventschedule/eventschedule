@@ -59,49 +59,24 @@ class ApiEventController extends Controller
         ], 200, [], JSON_PRETTY_PRINT);
     }
 
-    public function store(Request $request, $scheduleId)
+    public function store(Request $request, $subdomain)
     {
-        $schedule = Role::findOrFail($scheduleId);
-        
-        if ($schedule->user_id !== auth()->id()) {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $curatorId = $role->isCurator() ? $role->id : null;
+                        
+        if ($role->user_id !== auth()->id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $eventData = [
-            'members' => [
-                'new_1' => [
-                    'name' => $schedule->name,
-                    'email' => $schedule->email
-                ]
-            ],
-            'role_type' => 'talent'
-        ];
-
-        if ($request->hasFile('flyer')) {
-            $eventData['flyer_image_url'] = $request->file('flyer');
-        } else {
-            $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'description' => 'required|string',
-                'starts_at' => 'required|date',
-                'ends_at' => 'required|date|after:starts_at',
-                'location' => 'required|string',
-            ]);
-
-            $eventData = array_merge($eventData, $validated);
-        }
-
-        $event = $this->eventRepo->saveEvent($request, null, null);
-
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'starts_at' => 'required|date',            
+        ]);
+        
+        $event = $this->eventRepo->saveEvent($request, null, $curatorId);
+                
         return response()->json([
-            'data' => [
-                'id' => $event->id,
-                'title' => $event->name,
-                'description' => $event->description,
-                'start_time' => $event->starts_at,
-                'end_time' => $event->ends_at,
-                'location' => $event->location,
-            ],
+            'data' => $event->toApiData(),
             'meta' => [
                 'message' => 'Event created successfully'
             ]
