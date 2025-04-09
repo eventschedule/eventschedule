@@ -593,7 +593,7 @@ class Role extends Model implements MustVerifyEmail
         return $data;
     }
 
-    public function toJson($options = 0)
+    public function toApiData()
     {
         $data = new \stdClass;
         $data->id = UrlUtils::encodeId($this->id);
