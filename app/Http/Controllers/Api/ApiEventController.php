@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Models\Role;
 use App\Repos\EventRepo;
 use Illuminate\Http\Request;
-
+use App\Utils\UrlUtils;
 
 class ApiEventController extends Controller
 {
@@ -62,6 +63,14 @@ class ApiEventController extends Controller
     public function store(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
+        $encodedRoleId = UrlUtils::encodeId($role->id);
+        
+        if ($role->isVenue()) {
+            $request->merge(['venue_id' => $encodedRoleId]);
+        } else if ($role->isTalent()) {
+            $request->merge(['members' => [$encodedRoleId => ['name' => $role->name]]]);
+        }   
+
         $curatorId = $role->isCurator() ? $role->id : null;
                         
         if ($role->user_id !== auth()->id()) {
@@ -70,7 +79,10 @@ class ApiEventController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'starts_at' => 'required|date',            
+            'starts_at' => 'required|date',
+            'venue_id' => 'required_without_all:venue_address1,event_url',
+            'venue_address1' => 'required_without_all:venue_id,event_url',
+            'event_url' => 'required_without_all:venue_id,venue_address1'
         ]);
         
         $event = $this->eventRepo->saveEvent($request, null, $curatorId);
