@@ -107,16 +107,4 @@ class ApiEventController extends Controller
             ]
         ], 201, [], JSON_PRETTY_PRINT);
     }
-
-    private function extractEventDetails($text)
-    {
-        // This is a placeholder - implement actual text parsing logic
-        return [
-            'title' => 'Event Title',
-            'description' => 'Event Description',
-            'start_time' => now(),
-            'end_time' => now()->addHours(2),
-            'location' => 'Event Location',
-        ];
-    }
 }
