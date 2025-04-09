@@ -22,7 +22,7 @@ class ApiScheduleController extends Controller
 
         return response()->json([
             'data' => collect($schedules->items())->map(function($schedule) {
-                return $schedule->toJson();
+                return $schedule->toApiData();
             })->values(),
             'meta' => [
                 'current_page' => $schedules->currentPage(),
@@ -34,10 +34,5 @@ class ApiScheduleController extends Controller
                 'path' => $request->url(),
             ]
         ], 200, [], JSON_PRETTY_PRINT);
-    }
-
-    public function store(Request $request)
-    {
-        //
     }    
 } 

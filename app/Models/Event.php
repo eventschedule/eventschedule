@@ -553,4 +553,17 @@ class Event extends Model
 
         return $value;
     }
+
+    public function toApiData()
+    {
+        $data = new \stdClass;
+        $data->id = UrlUtils::encodeId($this->id);
+        $data->name = $this->name;
+        $data->description = $this->description;
+        $data->starts_at = $this->starts_at;
+        $data->duration = $this->duration;
+        $data->venue_id = UrlUtils::encodeId($this->venue_id);
+        
+        return $data;
+    }
 }

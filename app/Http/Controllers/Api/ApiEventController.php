@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Repos\EventRepo;
+use Illuminate\Http\Request;
+
 
 class ApiEventController extends Controller
 {
@@ -18,33 +20,32 @@ class ApiEventController extends Controller
         $this->eventRepo = $eventRepo;
     }
 
-    public function index(Request $request, $scheduleId)
+    public function index(Request $request)
     {
+        /*
         $schedule = Role::findOrFail($scheduleId);
         
         if ($schedule->user_id !== auth()->id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
+        */
 
         $perPage = min(
             (int) $request->input('per_page', self::DEFAULT_PER_PAGE),
             self::MAX_PER_PAGE
         );
 
+        $events = Event::where('user_id', auth()->id())->paginate($perPage);
+
+        /*
         $events = Event::whereHas('roles', function($query) use ($scheduleId) {
             $query->where('role_id', $scheduleId);
         })->paginate($perPage);
+        */
 
         return response()->json([
             'data' => $events->map(function($event) {
-                return [
-                    'id' => $event->id,
-                    'title' => $event->name,
-                    'description' => $event->description,
-                    'start_time' => $event->starts_at,
-                    'end_time' => $event->ends_at,
-                    'location' => $event->location,
-                ];
+                return $event->toApiData();
             })->values(),
             'meta' => [
                 'current_page' => $events->currentPage(),
