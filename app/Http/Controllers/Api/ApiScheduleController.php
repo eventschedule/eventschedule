@@ -18,7 +18,17 @@ class ApiScheduleController extends Controller
             self::MAX_PER_PAGE
         );
 
-        $schedules = Role::where('user_id', auth()->id())->paginate($perPage);
+        $schedules = Role::where('user_id', auth()->id());
+        
+        if ($request->has('name')) {
+            $schedules->where('name', 'like', '%' . $request->name . '%');
+        }
+
+        if ($request->has('type')) {
+            $schedules->where('type', $request->type);
+        }
+
+        $schedules = $schedules->paginate($perPage);
 
         return response()->json([
             'data' => collect($schedules->items())->map(function($schedule) {
