@@ -81,7 +81,7 @@ class ApiEventController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'starts_at' => 'required|date',
+            'starts_at' => 'required|date_format:Y-m-d H:i:s',
             'venue_id' => 'required_without_all:venue_address1,event_url',
             'venue_address1' => 'required_without_all:venue_id,event_url',
             'event_url' => 'required_without_all:venue_id,venue_address1'

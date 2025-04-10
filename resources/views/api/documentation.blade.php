@@ -327,6 +327,7 @@
                                             </div>
                                             <pre class="mt-2 overflow-x-auto"><code>curl -X POST "{{ config('app.url') }}/api/schedules/123/events" \
      -H "X-API-Key: your_api_key_here" \
+     -H "X-Requested-With: XMLHttpRequest" \
      -H "Content-Type: application/json" \
      -d '{
          "name": "Event Name",
@@ -354,6 +355,7 @@
                                             </div>
                                             <pre class="mt-2 overflow-x-auto"><code>curl -X POST "{{ config('app.url') }}/api/schedules/123/events" \
      -H "X-API-Key: your_api_key_here" \
+     -H "X-Requested-With: XMLHttpRequest" \
      -F "flyer=@/path/to/your/flyer.jpg"</code></pre>
                                         </div>
                                     </div>
