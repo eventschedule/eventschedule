@@ -97,7 +97,9 @@ class ApiEventController extends Controller
                         ->whereIn('level', ['owner', 'follower'])
                         ->orderBy('id')->pluck('role_id')->toArray();
 
-        if ($request->has('venue_address1') && $request->has('venue_name')) {
+        if ($role->isVenue()) {
+            $request->merge(['venue_id' => $encodedRoleId]);
+        } else if ($request->has('venue_address1') && $request->has('venue_name')) {
             $venue = Role::where('name', $request->venue_name)
                 ->where('address1', $request->venue_address1)
                 ->where('type', 'venue')
@@ -111,7 +113,9 @@ class ApiEventController extends Controller
             }
         }
 
-        if ($request->has('members')) {
+        if ($role->isTalent()) {
+            $request->merge(['members' => [$encodedRoleId => ['name' => $role->name]]]);
+        } else if ($request->has('members')) {
 
             $processedMembers = [];
             foreach ($request->members as $memberId => $memberData) {
