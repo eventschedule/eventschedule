@@ -285,7 +285,7 @@
             "url": "{{ config('app.url') }}/venue-name/event-slug",
             "name": "Event Name",
             "description": "Event description",
-            "starts_at": "2024-04-01T19:00:00Z",
+            "starts_at": "{{ now()->format('Y-m-d') }} 19:00:00",
             "duration": 3,
             "venue_id": "123"
         }
@@ -341,9 +341,16 @@
      -d '{
          "name": "Event Name",
          "description": "Event description",
-         "starts_at": "2024-04-01T19:00:00Z",
-         "ends_at": "2024-04-01T22:00:00Z",
-         "location": "Event location"
+         "starts_at": "{{ now()->format('Y-m-d') }} 19:00:00",
+         "duration": 2,
+         "venue_id": "123",
+         "members": [
+            {
+                "name": "John Doe",
+                "email": "john@example.com",
+                "youtube_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+            }
+         ]
      }'</code></pre>
                                         </div>
                                     </div>
@@ -381,7 +388,7 @@
         "url": "{{ config('app.url') }}/venue-name/event-slug",
         "name": "Event Name",
         "description": "Event description",
-        "starts_at": "2024-04-01T19:00:00Z",
+        "starts_at": "{{ now()->format('Y-m-d') }} 19:00:00",
         "duration": 3,
         "venue_id": "123"
     },
