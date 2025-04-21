@@ -33,7 +33,7 @@ class EventRepo
                 $venue->name = $request->venue_name ?? null;
                 $venue->name_en = $request->venue_name_en ?? null;
                 $venue->email = $request->venue_email ?? null;
-                $venue->subdomain = Role::generateSubdomain($request->venue_email ? $request->venue_name : null);
+                $venue->subdomain = Role::generateSubdomain($request->venue_name);
                 $venue->type = 'venue';
                 $venue->timezone = $user->timezone;
                 $venue->language_code = $request->venue_language_code ? $request->venue_language_code : $user->language_code;
@@ -85,7 +85,7 @@ class EventRepo
                     $role = new Role;
                     $role->name = $member['name'];
                     $role->email = isset($member['email']) && $member['email'] !== '' ? $member['email'] : null;
-                    $role->subdomain = Role::generateSubdomain($role->email ? $role->email : null);
+                    $role->subdomain = Role::generateSubdomain($member['name']);
                     $role->type = $request->role_type ? $request->role_type : 'talent';
                     $role->timezone = $user->timezone;
                     $role->language_code = $request->language_code ? $request->language_code : $user->language_code;
