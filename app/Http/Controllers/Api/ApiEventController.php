@@ -95,7 +95,7 @@ class ApiEventController extends Controller
 
         $roleIds = RoleUser::where('user_id', auth()->user()->id)
                         ->whereIn('level', ['owner', 'follower'])
-                        ->orderBy('id')->pluck('id')->toArray();
+                        ->orderBy('id')->pluck('role_id')->toArray();
 
         if ($request->has('venue_address1') && $request->has('venue_name')) {
             $venue = Role::where('name', $request->venue_name)

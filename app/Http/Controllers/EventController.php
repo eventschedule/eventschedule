@@ -532,7 +532,7 @@ class EventController extends Controller
 
                 $followerRoleIds = RoleUser::where('user_id', auth()->user()->id)
                 ->whereIn('level', ['owner', 'follower'])
-                ->orderBy('id')->pluck('id')->toArray();
+                ->orderBy('id')->pluck('role_id')->toArray();
 
                 $talent = Role::where('is_deleted', false)
                     ->where(function($query) use ($item) {
