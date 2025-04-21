@@ -93,11 +93,17 @@ class ApiEventController extends Controller
             'members' => 'array',
         ]);
 
+        $roleIds = RoleUser::where('user_id', auth()->user()->id)
+                        ->whereIn('level', ['owner', 'follower'])
+                        ->orderBy('id')->pluck('id')->toArray();
+
         if ($request->has('venue_address1') && $request->has('venue_name')) {
             $venue = Role::where('name', $request->venue_name)
                 ->where('address1', $request->venue_address1)
                 ->where('type', 'venue')
                 ->where('is_deleted', false)
+                ->whereIn('id', $roleIds)
+                ->orderBy('id')
                 ->first();
 
             if ($venue) {
@@ -106,10 +112,6 @@ class ApiEventController extends Controller
         }
 
         if ($request->has('members')) {
-
-            $followerRoleIds = RoleUser::where('user_id', auth()->user()->id)
-                ->whereIn('level', ['owner', 'follower'])
-                ->orderBy('id')->pluck('id')->toArray();
 
             $processedMembers = [];
             foreach ($request->members as $memberId => $memberData) {
@@ -124,7 +126,7 @@ class ApiEventController extends Controller
                             });
                     })
                     ->where('type', 'talent')
-                    ->whereIn('id', $followerRoleIds)
+                    ->whereIn('id', $roleIds)
                     ->orderBy('id')
                     ->first();
 
