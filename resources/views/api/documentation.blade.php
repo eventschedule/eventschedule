@@ -320,7 +320,6 @@
                                     </div>
                                     <p class="mt-4">Create a new event using either JSON data or a flyer image.</p>
                                     
-                                    <h4 class="font-medium mt-4">Option 1: JSON Request</h4>
                                     <button onclick="toggleCurl(this)" 
                                             class="mt-2 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
                                         <svg class="w-4 h-4 mr-1 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
@@ -354,27 +353,6 @@
      }'</code></pre>
                                         </div>
                                     </div>
-
-                                    <h4 class="font-medium mt-4">Option 2: Flyer Upload</h4>
-                                    <button onclick="toggleCurl(this)" 
-                                            class="mt-2 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
-                                        <svg class="w-4 h-4 mr-1 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                        </svg>
-                                        Show cURL example
-                                    </button>
-                                    <div class="hidden mt-2">
-                                        <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
-                                            <div class="flex items-center justify-between">
-                                                <span>cURL</span>
-                                                <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
-                                            </div>
-                                            <pre class="mt-2 overflow-x-auto"><code>curl -X POST "{{ config('app.url') }}/api/events/{subdomain}" \
-     -H "X-API-Key: your_api_key_here" \
-     -H "X-Requested-With: XMLHttpRequest" \
-     -F "flyer=@/path/to/your/flyer.jpg"</code></pre>
-                                        </div>
-                                    </div>
                                 </div>
                                 <div class="p-4">
                                     <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
@@ -390,7 +368,13 @@
         "description": "Event description",
         "starts_at": "{{ now()->format('Y-m-d') }} 19:00:00",
         "duration": 3,
-        "venue_id": "123"
+        "venue_id": "123",
+        "members": {
+            "123": {
+                "name": "John Doe",
+                "email": "john@example.com"
+            }
+        }
     },
     "meta": {
         "message": "Event created successfully"

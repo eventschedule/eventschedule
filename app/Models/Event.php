@@ -569,7 +569,13 @@ class Event extends Model
         $data->starts_at = $this->starts_at;
         $data->duration = $this->duration;
         $data->venue_id = UrlUtils::encodeId($this->venue_id);
-        
+        $data->members = $this->members()->mapWithKeys(function ($member) {
+            return [UrlUtils::encodeId($member->id) => [
+                'name' => $member->name,
+                'email' => $member->email,
+            ]];
+        });
+
         return $data;
     }
 }
