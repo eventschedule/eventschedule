@@ -325,7 +325,7 @@
                                         <svg class="w-4 h-4 mr-1 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                                         </svg>
-                                        Show cURL example
+                                        Show cURL example (JSON)
                                     </button>
                                     <div class="hidden mt-2">
                                         <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
@@ -352,6 +352,35 @@
             }
          ]
      }'</code></pre>
+                                        </div>
+                                    </div>
+                                    
+                                    <button onclick="toggleCurl(this)" 
+                                            class="mt-4 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
+                                        <svg class="w-4 h-4 mr-1 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                        Show cURL example (Flyer Image)
+                                    </button>
+                                    <div class="hidden mt-2">
+                                        <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
+                                            <div class="flex items-center justify-between">
+                                                <span>cURL</span>
+                                                <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                            </div>
+                                            <pre class="mt-2 overflow-x-auto"><code>curl -X POST "{{ config('app.url') }}/api/events/{subdomain}" \
+    -H "X-API-Key: your_api_key_here" \
+    -H "X-Requested-With: XMLHttpRequest" \
+    -F "flyer_image=@/path/to/your/flyer.jpg" \
+    -F "name=Event Name" \
+    -F "description=Event description" \
+    -F "starts_at=2025-04-14 19:00:00" \
+    -F "duration=2" \
+    -F "venue_name=Carnegie Hall" \
+    -F "venue_address1=111 Main st" \
+    -F "members[0][name]=John Doe" \
+    -F "members[0][email]=john@example.com" \
+    -F "members[0][youtube_url]=https://www.youtube.com/watch?v=RbXXUHABGRU"</code></pre>
                                         </div>
                                     </div>
                                 </div>
