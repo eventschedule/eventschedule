@@ -443,4 +443,11 @@ return [
     'events_skipped' => 'تم تخطي الأحداث',
     'error_uploading_image' => 'خطأ في تحميل الصورة',
     'or_paste_from_clipboard' => 'أو الصق من الحافظة (Ctrl+V)',
+    'new_talent' => 'موهبة جديدة',
+    'talent_details' => 'تفاصيل الموهبة',
+    'edit_talent' => 'تعديل الموهبة',
+    'view_talent' => 'عرض الموهبة',
+    'talent_schedules' => 'جداول المواهب',
+    'venue_schedules' => 'جداول المكان',
+    'curator_schedules' => 'جداول المنسق',
 ];

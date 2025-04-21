@@ -446,4 +446,11 @@ return [
     'events_skipped' => 'Übersprungene Ereignisse',
     'error_uploading_image' => 'Fehler beim Hochladen des Bildes',
     'or_paste_from_clipboard' => 'oder aus der Zwischenablage einfügen (Strg+V)',
+    'new_talent' => 'Neues Talent',
+    'talent_details' => 'Talent Details',
+    'edit_talent' => 'Talent bearbeiten',
+    'view_talent' => 'Talent anzeigen',
+    'talent_schedules' => 'Talent Zeitpläne',
+    'venue_schedules' => 'Veranstaltungsort Zeitpläne',
+    'curator_schedules' => 'Kurator Zeitpläne',
 ];

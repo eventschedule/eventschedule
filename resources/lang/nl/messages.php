@@ -492,4 +492,11 @@ return [
     'events_skipped' => 'Evenementen overgeslagen',
     'error_uploading_image' => 'Fout bij uploaden afbeelding',
     'or_paste_from_clipboard' => 'of plak vanaf klembord (Ctrl+V)',
+    'new_talent' => 'Nieuw talent',
+    'talent_details' => 'Talent details',
+    'edit_talent' => 'Talent bewerken',
+    'view_talent' => 'Talent bekijken',
+    'talent_schedules' => 'Talent roosters',
+    'venue_schedules' => 'Locatie roosters',
+    'curator_schedules' => 'Curator roosters',
 ];

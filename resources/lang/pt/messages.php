@@ -439,4 +439,11 @@ return [
     'events_skipped' => 'Eventos ignorados',
     'error_uploading_image' => 'Erro ao carregar imagem',
     'or_paste_from_clipboard' => 'ou colar da área de transferência (Ctrl+V)',
+    'new_talent' => 'Novo talento',
+    'talent_details' => 'Detalhes do talento',
+    'edit_talent' => 'Editar talento',
+    'view_talent' => 'Ver talento',
+    'talent_schedules' => 'Horários do talento',
+    'venue_schedules' => 'Horários do local',
+    'curator_schedules' => 'Horários do curador',
 ];

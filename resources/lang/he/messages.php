@@ -448,4 +448,11 @@ return [
     'events_skipped' => 'אירועים שדולגו',
     'error_uploading_image' => 'שגיאה בהעלאת התמונה',
     'or_paste_from_clipboard' => 'או הדבק מהלוח (Ctrl+V)',
+    'new_talent' => 'כישרון חדש',
+    'talent_details' => 'פרטי כישרון',
+    'edit_talent' => 'ערוך כישרון',
+    'view_talent' => 'צפה בכישרון',
+    'talent_schedules' => 'לוחות זמנים של כישרון',
+    'venue_schedules' => 'לוחות זמנים של מקום',
+    'curator_schedules' => 'לוחות זמנים של אוצר',
 ];
