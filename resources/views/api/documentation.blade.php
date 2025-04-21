@@ -212,9 +212,17 @@
     "data": [
         {
             "id": "123",
-            "name": "My Schedule",
-            "type": "schedule",
-            "description": "Schedule description"
+            "url": "{{ config('app.url') }}/venue-name",
+            "type": "venue",
+            "name": "My Venue",
+            "email": "venue@example.com",
+            "website": "https://example.com",
+            "description": "Venue description",
+            "address1": "123 Main St",
+            "city": "New York",
+            "state": "NY",
+            "postal_code": "10001",
+            "country_code": "US"
         }
     ],
     "meta": {
@@ -274,11 +282,12 @@
     "data": [
         {
             "id": "456",
-            "title": "Event Name",
+            "url": "{{ config('app.url') }}/venue-name/event-slug",
+            "name": "Event Name",
             "description": "Event description",
-            "start_time": "2024-04-01T19:00:00Z",
-            "end_time": "2024-04-01T22:00:00Z",
-            "location": "Event location"
+            "starts_at": "2024-04-01T19:00:00Z",
+            "duration": 3,
+            "venue_id": "123"
         }
     ],
     "meta": {
@@ -369,11 +378,12 @@
                                         <pre class="mt-2 overflow-x-auto"><code>{
     "data": {
         "id": "456",
-        "title": "Event Name",
+        "url": "{{ config('app.url') }}/venue-name/event-slug",
+        "name": "Event Name",
         "description": "Event description",
-        "start_time": "2024-04-01T19:00:00Z",
-        "end_time": "2024-04-01T22:00:00Z",
-        "location": "Event location"
+        "starts_at": "2024-04-01T19:00:00Z",
+        "duration": 3,
+        "venue_id": "123"
     },
     "meta": {
         "message": "Event created successfully"
