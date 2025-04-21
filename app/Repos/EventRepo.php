@@ -214,7 +214,7 @@ class EventRepo
             }
         }
         
-        if ($request->hasFile('flyer_image_url')) {
+        if ($request->hasFile('flyer_image')) {
             if ($event->flyer_image_url) {
                 $path = $event->getAttributes()['flyer_image_url'];
                 if (config('filesystems.default') == 'local') {
@@ -223,7 +223,7 @@ class EventRepo
                 Storage::delete($path);
             }
 
-            $file = $request->file('flyer_image_url');
+            $file = $request->file('flyer_image');
             $filename = strtolower('flyer_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
