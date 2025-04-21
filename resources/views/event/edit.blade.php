@@ -649,10 +649,10 @@
                         </div>
                         
                         <div class="mb-6">
-                        <x-input-label for="flyer_image_url" :value="__('messages.flyer_image')" />
-                        <input id="flyer_image_url" name="flyer_image_url" type="file" class="mt-1 block w-full text-gray-900 dark:text-gray-100" 
+                        <x-input-label for="flyer_image" :value="__('messages.flyer_image')" />
+                        <input id="flyer_image" name="flyer_image" type="file" class="mt-1 block w-full text-gray-900 dark:text-gray-100" 
                                 accept="image/png, image/jpeg" onchange="previewImage(this);" />
-                            <x-input-error class="mt-2" :messages="$errors->get('flyer_image_url')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('flyer_image')" />
                             <p id="image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
                                 {{ __('messages.image_size_warning') }}
                             </p>
