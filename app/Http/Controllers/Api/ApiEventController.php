@@ -88,8 +88,48 @@ class ApiEventController extends Controller
             'starts_at' => 'required|date_format:Y-m-d H:i:s',
             'venue_id' => 'required_without_all:venue_address1,event_url',
             'venue_address1' => 'required_without_all:venue_id,event_url',
-            'event_url' => 'required_without_all:venue_id,venue_address1'
+            'event_url' => 'required_without_all:venue_id,venue_address1',
+            'members' => 'array'
         ]);
+
+        if ($request->has('members')) {
+
+            $followerRoleIds = Role::where('is_deleted', false)
+            ->whereHas('users', function($query) use ($role) {
+                $query->where('user_id', auth()->user()->id)
+                    ->where('level', 'owner')
+                    ->whereHas('roles', function($q) use ($role) {
+                        $q->where('roles.id', $role->id)
+                            ->where('role_user.level', 'follower'); 
+                    });
+            })->orderBy('id')->pluck('id')->toArray();
+
+            $processedMembers = [];
+            foreach ($request->members as $memberId => $memberData) {
+
+                $talent = Role::where('is_deleted', false)
+                    ->where(function($query) use ($memberData) {
+                        $query->when(isset($memberData['name']), function($q) use ($memberData) {
+                                $q->where('name', $memberData['name']);
+                            })
+                            ->when(isset($memberData['email']), function($q) use ($memberData) {
+                                $q->orWhere('email', $memberData['email']); 
+                            });
+                    })
+                    ->where('type', 'talent')
+                    ->whereIn('id', $followerRoleIds)
+                    ->orderBy('id')
+                    ->first();
+
+                if ($talent) {
+                    $processedMembers[$memberId] = $memberData;
+                } else {
+                    $processedMembers[] = $memberData;
+                }
+            }
+
+            $request->merge(['members' => $processedMembers]);
+        }
         
         $event = $this->eventRepo->saveEvent($request, null, $curatorId);
                 
