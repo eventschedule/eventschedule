@@ -13,6 +13,7 @@ use App\Utils\ColorUtils;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Role;
+use App\Models\RoleUser;
 use App\Models\EventRole;
 use App\Models\User;
 use App\Models\Ticket;
@@ -528,15 +529,10 @@ class EventController extends Controller
             if ($role->isTalent()) {
                 $parsed[$key]['talent_id'] = UrlUtils::encodeId($role->id);
             } elseif (! empty($item['performer_name'])) {
-                $followerRoleIds = Role::where('is_deleted', false)
-                    ->whereHas('users', function($query) use ($role) {
-                        $query->where('user_id', auth()->user()->id)
-                            ->where('level', 'owner')
-                            ->whereHas('roles', function($q) use ($role) {
-                                $q->where('roles.id', $role->id)
-                                    ->where('role_user.level', 'follower'); 
-                            });
-                    })->orderBy('id')->pluck('id')->toArray();
+
+                $followerRoleIds = RoleUser::where('user_id', auth()->user()->id)
+                ->whereIn('level', ['owner', 'follower'])
+                ->orderBy('id')->pluck('id')->toArray();
 
                 $talent = Role::where('is_deleted', false)
                     ->where(function($query) use ($item) {

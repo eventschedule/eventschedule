@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Role;
+use App\Models\RoleUser;
 use App\Repos\EventRepo;
 use Illuminate\Http\Request;
 use App\Utils\UrlUtils;
@@ -89,20 +90,26 @@ class ApiEventController extends Controller
             'venue_id' => 'required_without_all:venue_address1,event_url',
             'venue_address1' => 'required_without_all:venue_id,event_url',
             'event_url' => 'required_without_all:venue_id,venue_address1',
-            'members' => 'array'
+            'members' => 'array',
         ]);
+
+        if ($request->has('venue_address1') && $request->has('venue_name')) {
+            $venue = Role::where('name', $request->venue_name)
+                ->where('address1', $request->venue_address1)
+                ->where('type', 'venue')
+                ->where('is_deleted', false)
+                ->first();
+
+            if ($venue) {
+                $request->merge(['venue_id' => UrlUtils::encodeId($venue->id)]);    
+            }
+        }
 
         if ($request->has('members')) {
 
-            $followerRoleIds = Role::where('is_deleted', false)
-            ->whereHas('users', function($query) use ($role) {
-                $query->where('user_id', auth()->user()->id)
-                    ->where('level', 'owner')
-                    ->whereHas('roles', function($q) use ($role) {
-                        $q->where('roles.id', $role->id)
-                            ->where('role_user.level', 'follower'); 
-                    });
-            })->orderBy('id')->pluck('id')->toArray();
+            $followerRoleIds = RoleUser::where('user_id', auth()->user()->id)
+                ->whereIn('level', ['owner', 'follower'])
+                ->orderBy('id')->pluck('id')->toArray();
 
             $processedMembers = [];
             foreach ($request->members as $memberId => $memberData) {
@@ -122,7 +129,7 @@ class ApiEventController extends Controller
                     ->first();
 
                 if ($talent) {
-                    $processedMembers[$memberId] = $memberData;
+                    $processedMembers[UrlUtils::encodeId($talent->id)] = $memberData;
                 } else {
                     $processedMembers[] = $memberData;
                 }
@@ -130,7 +137,7 @@ class ApiEventController extends Controller
 
             $request->merge(['members' => $processedMembers]);
         }
-        
+
         $event = $this->eventRepo->saveEvent($request, null, $curatorId);
                 
         return response()->json([

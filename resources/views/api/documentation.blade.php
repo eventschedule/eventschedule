@@ -342,7 +342,8 @@
          "description": "Event description",
          "starts_at": "{{ now()->format('Y-m-d') }} 19:00:00",
          "duration": 2,
-         "venue_id": "123",
+         "venue_name": "Carnegie Hall",
+         "venue_address1": "123 Main St",
          "members": [
             {
                 "name": "John Doe",
@@ -367,8 +368,9 @@
         "name": "Event Name",
         "description": "Event description",
         "starts_at": "{{ now()->format('Y-m-d') }} 19:00:00",
-        "duration": 3,
-        "venue_id": "123",
+        "duration": 2,
+        "venue_name": "Carnegie Hall",
+        "venue_address1": "123 Main St",
         "members": {
             "123": {
                 "name": "John Doe",
