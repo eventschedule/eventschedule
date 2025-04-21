@@ -74,7 +74,11 @@ class ApiEventController extends Controller
         }   
 
         $curatorId = $role->isCurator() ? $role->id : null;
-                        
+            
+        if (! $role->isPro()) {
+            return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
+        }
+
         if ($role->user_id !== auth()->id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
