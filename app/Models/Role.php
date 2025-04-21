@@ -596,6 +596,11 @@ class Role extends Model implements MustVerifyEmail
     public function toApiData()
     {
         $data = new \stdClass;
+
+        if (! $this->isPro()) {
+            return $data;
+        }
+
         $data->id = UrlUtils::encodeId($this->id);
         $data->url = $this->getGuestUrl();
         $data->type = $this->type;

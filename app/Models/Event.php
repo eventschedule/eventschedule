@@ -557,6 +557,11 @@ class Event extends Model
     public function toApiData()
     {
         $data = new \stdClass;
+
+        if (! $this->isPro()) {
+            return $data;
+        }
+
         $data->id = UrlUtils::encodeId($this->id);
         $data->url = $this->getGuestUrl();
         $data->name = $this->name;
