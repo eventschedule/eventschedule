@@ -303,8 +303,8 @@ class Event extends Model
 
     public function getGuestUrlData($subdomain = false, $date = null)
     {
-        $venueSubdomain = $this->venue && $this->venue->isRegistered() ? $this->venue->subdomain : null;
-        $roleSubdomain = $this->role() && $this->role()->isRegistered() ? $this->role()->subdomain : null;
+        $venueSubdomain = $this->venue && $this->venue->isClaimed() ? $this->venue->subdomain : null;
+        $roleSubdomain = $this->role() && $this->role()->isClaimed() ? $this->role()->subdomain : null;
 
         if (! in_array($subdomain, [$venueSubdomain, $roleSubdomain])) {
             $subdomain = $roleSubdomain;
@@ -569,7 +569,7 @@ class Event extends Model
         $data->starts_at = $this->starts_at;
         $data->duration = $this->duration;
         $data->venue_id = UrlUtils::encodeId($this->venue_id);
-        
+
         $data->members = $this->members()->mapWithKeys(function ($member) {
             return [UrlUtils::encodeId($member->id) => [
                 'name' => $member->name,
