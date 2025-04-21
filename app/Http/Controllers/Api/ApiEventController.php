@@ -144,6 +144,10 @@ class ApiEventController extends Controller
             $request->merge(['members' => $processedMembers]);
         }
 
+        if ($role->isCurator()) {
+            $request->merge(['curators' => [$encodedRoleId]]);
+        }
+
         $event = $this->eventRepo->saveEvent($request, null, $curatorId);
                 
         return response()->json([
