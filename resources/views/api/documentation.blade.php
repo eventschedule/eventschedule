@@ -245,15 +245,15 @@
                     <div class="mt-8">
                         <div class="border dark:border-gray-700 rounded-lg overflow-hidden">
                             <div class="bg-gray-100 dark:bg-gray-900 px-4 py-2 border-b dark:border-gray-700">
-                                <h3 class="text-xl font-medium">List Events for a Schedule</h3>
+                                <h3 class="text-xl font-medium">List Events</h3>
                             </div>
                             <div class="lg:grid lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x dark:divide-gray-700">
                                 <div class="p-4 prose dark:prose-invert">
                                     <div class="flex items-center space-x-2">
                                         <span class="bg-blue-600 text-white px-2 py-1 rounded text-sm">GET</span>
-                                        <code class="text-sm">/api/schedules/{schedule_id}/events</code>
+                                        <code class="text-sm">/api/events</code>
                                     </div>
-                                    <p class="mt-4">Returns a paginated list of all events for the specified schedule.</p>
+                                    <p class="mt-4">Returns a paginated list of all events.</p>
                                     <button onclick="toggleCurl(this)" 
                                             class="mt-2 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
                                         <svg class="w-4 h-4 mr-1 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
@@ -267,7 +267,7 @@
                                                 <span>cURL</span>
                                                 <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
                                             </div>
-                                            <pre class="mt-2 overflow-x-auto"><code>curl -X GET "{{ config('app.url') }}/api/schedules/123/events" \
+                                            <pre class="mt-2 overflow-x-auto"><code>curl -X GET "{{ config('app.url') }}/api/events" \
      -H "X-API-Key: your_api_key_here"</code></pre>
                                         </div>
                                     </div>
@@ -316,7 +316,7 @@
                                 <div class="p-4 prose dark:prose-invert">
                                     <div class="flex items-center space-x-2">
                                         <span class="bg-green-600 text-white px-2 py-1 rounded text-sm">POST</span>
-                                        <code class="text-sm">/api/schedules/{schedule_id}/events</code>
+                                        <code class="text-sm">/api/events/{subdomain}</code>
                                     </div>
                                     <p class="mt-4">Create a new event using either JSON data or a flyer image.</p>
                                     
@@ -334,7 +334,7 @@
                                                 <span>cURL</span>
                                                 <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
                                             </div>
-                                            <pre class="mt-2 overflow-x-auto"><code>curl -X POST "{{ config('app.url') }}/api/schedules/123/events" \
+                                            <pre class="mt-2 overflow-x-auto"><code>curl -X POST "{{ config('app.url') }}/api/events/{subdomain}" \
      -H "X-API-Key: your_api_key_here" \
      -H "X-Requested-With: XMLHttpRequest" \
      -H "Content-Type: application/json" \
@@ -369,7 +369,7 @@
                                                 <span>cURL</span>
                                                 <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
                                             </div>
-                                            <pre class="mt-2 overflow-x-auto"><code>curl -X POST "{{ config('app.url') }}/api/schedules/123/events" \
+                                            <pre class="mt-2 overflow-x-auto"><code>curl -X POST "{{ config('app.url') }}/api/events/{subdomain}" \
      -H "X-API-Key: your_api_key_here" \
      -H "X-Requested-With: XMLHttpRequest" \
      -F "flyer=@/path/to/your/flyer.jpg"</code></pre>
