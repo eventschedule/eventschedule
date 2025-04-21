@@ -441,4 +441,11 @@ return [
     'events_skipped' => 'Eventi saltati',
     'error_uploading_image' => 'Errore durante il caricamento dell\'immagine',
     'or_paste_from_clipboard' => 'o incolla dagli appunti (Ctrl+V)',
+    'new_talent' => 'Nuovo talento',
+    'talent_details' => 'Dettagli talento',
+    'edit_talent' => 'Modifica talento',
+    'view_talent' => 'Visualizza talento',
+    'talent_schedules' => 'Programmi talento',
+    'venue_schedules' => 'Programmi sede',
+    'curator_schedules' => 'Programmi curatore',
 ];

@@ -443,4 +443,11 @@ return [
     'events_skipped' => 'Événements ignorés',
     'error_uploading_image' => 'Erreur lors du téléchargement de l\'image',
     'or_paste_from_clipboard' => 'ou coller depuis le presse-papiers (Ctrl+V)',
+    'new_talent' => 'Nouveau talent',
+    'talent_details' => 'Détails du talent',
+    'edit_talent' => 'Modifier le talent',
+    'view_talent' => 'Voir le talent',
+    'talent_schedules' => 'Horaires du talent',
+    'venue_schedules' => 'Horaires du lieu',
+    'curator_schedules' => 'Horaires du conservateur',
 ];

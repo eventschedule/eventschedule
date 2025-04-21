@@ -443,4 +443,11 @@ return [
     'events_skipped' => 'Eventos omitidos',
     'error_uploading_image' => 'Error al subir la imagen',
     'or_paste_from_clipboard' => 'o pegar desde el portapapeles (Ctrl+V)',
+    'new_talent' => 'Nuevo talento',
+    'talent_details' => 'Detalles del talento',
+    'edit_talent' => 'Editar talento',
+    'view_talent' => 'Ver talento',
+    'talent_schedules' => 'Horarios del talento',
+    'venue_schedules' => 'Horarios del lugar',
+    'curator_schedules' => 'Horarios del curador',
 ];
