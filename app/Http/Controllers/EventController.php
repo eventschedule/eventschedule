@@ -530,7 +530,8 @@ class EventController extends Controller
             } elseif (! empty($item['performer_name'])) {
                 $followerRoleIds = Role::where('is_deleted', false)
                     ->whereHas('users', function($query) use ($role) {
-                        $query->where('level', 'owner')
+                        $query->where('user_id', auth()->user()->id)
+                            ->where('level', 'owner')
                             ->whereHas('roles', function($q) use ($role) {
                                 $q->where('roles.id', $role->id)
                                     ->where('role_user.level', 'follower'); 
