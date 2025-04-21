@@ -81,8 +81,7 @@ class EventRepo
 
         if ($request->members) {
             foreach ($request->members as $memberId => $member) {
-                if (strpos($memberId, 'new_') === 0) {
-
+                if (! $memberId || strpos($memberId, 'new_') === 0) {
                     $role = new Role;
                     $role->name = $member['name'];
                     $role->email = isset($member['email']) && $member['email'] !== '' ? $member['email'] : null;
