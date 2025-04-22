@@ -34,6 +34,7 @@
 - 🔢 **Ticket Quantity Limits:** Set a maximum number of tickets available for each event to manage capacity.  
 - ⏳ **Ticket Reservation System:** Allow attendees to reserve tickets with a configurable release time before purchase.  
 - 📅 **Calendar Integration:** Enable attendees to add events directly to Google, Apple, or Microsoft calendars. 
+- 🔌 **REST API:** Access and manage your events programmatically through a REST API.
 - 🚀 **Automatic App Updates:** Keep the platform up to date effortlessly with one-click automatic updates.  
 
 <div style="display: flex; gap: 10px;">
