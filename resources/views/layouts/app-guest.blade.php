@@ -122,7 +122,7 @@
         {{ isset($head) ? $head : '' }}
     </x-slot>
     
-    @if (! request()->embed)
+    @if (! request()->embed && $role->showBranding())
     <header class="bg-[#f9fafb] dark:bg-[#151B26]">
         <div
         class="container mx-auto flex flex-row justify-between items-center py-7 pr-5"
@@ -172,7 +172,7 @@
 
     {{ $slot }}
 
-    @if (! request()->embed)
+    @if (! request()->embed && $role->showBranding())
     <footer class="bg-[#151B26]">
       <div
         class="container mx-auto flex flex-row justify-center items-center py-8 px-5"
