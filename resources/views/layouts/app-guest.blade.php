@@ -122,6 +122,26 @@
         {{ isset($head) ? $head : '' }}
     </x-slot>
     
+    @if ($role->language_code != 'en')
+        <div class="fixed top-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-md px-4 py-2 flex items-center space-x-2 z-50" translate="no">
+            @if (! session()->has('translate'))
+                <span class="font-medium text-primary-600 dark:text-primary-400">{{ strtoupper($role->language_code) }}</span>
+            @else
+                <a href="{{ str_replace('http://', 'https://', request()->url()) }}?lang={{ $role->language_code }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
+                    {{ strtoupper($role->language_code) }}
+                </a>
+            @endif
+            <span class="text-gray-300 dark:text-gray-600">|</span>
+            @if (session()->has('translate'))
+                <span class="font-medium text-primary-600 dark:text-primary-400">EN</span>
+            @else
+                <a href="{{ str_replace('http://', 'https://', request()->url()) }}?lang=en" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
+                    EN
+                </a>
+            @endif
+        </div>
+    @endif
+
     @if (! request()->embed && $role->showBranding())
     <header class="bg-[#f9fafb] dark:bg-[#151B26]">
         <div
@@ -131,25 +151,7 @@
             <x-application-logo />
         </a> 
         <div class="flex flex-row items-center gap-x-3 md:gap-x-12">
-            @if ($role->language_code != 'en')
-                <div class="flex items-center space-x-2 text-gray-900 dark:text-gray-100" translate="no">
-                    @if (! session()->has('translate'))
-                        <span>{{ strtoupper($role->language_code) }}</span>
-                    @else
-                        <a href="{{ str_replace('http://', 'https://', request()->url()) }}?lang={{ $role->language_code }}" class="text-gray-900 dark:text-gray-100 hover:underline">
-                            {{ strtoupper($role->language_code) }}
-                        </a>
-                    @endif
-                    <span class="text-gray-400 dark:text-gray-500">|</span>
-                    @if (session()->has('translate'))
-                        <span>EN</span>
-                    @else
-                        <a href="{{ str_replace('http://', 'https://', request()->url()) }}?lang=en" class="text-gray-900 dark:text-gray-100 hover:underline">
-                            EN
-                        </a>
-                    @endif
-                </div>
-            @endif
+
             <!--
             <a
             href="https://app.eventschedule.com/sign_up" target="_blank"
