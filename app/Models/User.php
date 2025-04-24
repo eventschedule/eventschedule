@@ -158,7 +158,7 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         foreach ($event->roles as $role) {
-            if ($role->isTalent() && $this->isMember($role->subdomain)) {
+            if ($this->isMember($role->subdomain)) {
                 return true;
             }
         }
