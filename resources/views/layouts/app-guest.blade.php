@@ -151,7 +151,7 @@
                 </div>
             </div>
         </header>
-    @elseif (! request()->embed && $role->language_code != 'en' && ! isset($event))
+    @elseif (! request()->embed && $role->language_code != 'en' && ! ($event && $event->exists))
         <div class="container mx-auto flex justify-end pr-5 pt-4">
             <div class="flex items-center rounded-full bg-gray-100 dark:bg-gray-800 p-1 text-sm shadow-md z-50" translate="no">
                 @if(session()->has('translate'))
