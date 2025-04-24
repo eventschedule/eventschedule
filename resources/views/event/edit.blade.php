@@ -876,12 +876,14 @@
             </div>
         </div>
     
-        <div class="max-w-7xl mx-auto space-y-6 pt-8">
-            @if (! $event->exists)
+        <div class="max-w-7xl mx-auto space-y-6 pt-4">
             <p class="text-base dark:text-gray-400 text-gray-600 pb-2">
-                {{ __('messages.note_all_events_are_publicly_listed') }}
+                @if ($event->exists)
+                    {{ __('messages.event_created_by', ['user' => $event->user->name]) }}
+                @else
+                    {{ __('messages.note_all_events_are_publicly_listed') }}
+                @endif
             </p>
-            @endif
 
             <div class="flex gap-4 items-center justify-between">
                 <div class="flex gap-4">
