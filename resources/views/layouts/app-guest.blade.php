@@ -122,54 +122,57 @@
         {{ isset($head) ? $head : '' }}
     </x-slot>
     
-    @if ($role->language_code != 'en')
-        <div class="fixed top-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-md px-4 py-2 flex items-center space-x-2 z-50" translate="no">
-            @if (! session()->has('translate'))
-                <span class="font-medium text-primary-600 dark:text-primary-400">{{ strtoupper($role->language_code) }}</span>
-            @else
-                <a href="{{ str_replace('http://', 'https://', request()->url()) }}?lang={{ $role->language_code }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
-                    {{ strtoupper($role->language_code) }}
-                </a>
-            @endif
-            <span class="text-gray-300 dark:text-gray-600">|</span>
-            @if (session()->has('translate'))
-                <span class="font-medium text-primary-600 dark:text-primary-400">EN</span>
-            @else
-                <a href="{{ str_replace('http://', 'https://', request()->url()) }}?lang=en" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
-                    EN
-                </a>
-            @endif
-        </div>
-    @endif
-
     @if (! request()->embed && $role->showBranding())
-    <header class="bg-[#f9fafb] dark:bg-[#151B26]">
-        <div
-        class="container mx-auto flex flex-row justify-between items-center py-7 pr-5"
-        >
-        <a href="https://www.eventschedule.com" target="_blank">
-            <x-application-logo />
-        </a> 
-        <div class="flex flex-row items-center gap-x-3 md:gap-x-12">
-
-            <!--
-            <a
-            href="https://app.eventschedule.com/sign_up" target="_blank"
-            class="hidden md:inline-flex items-center justify-center"
+        <header class="bg-[#f9fafb] dark:bg-[#151B26]">
+            <div
+            class="container mx-auto flex flex-row justify-between items-center py-7 pr-5"
             >
-            <button
-                type="button"
-                name="sign-up"
-                style="background-color: {{ $otherRole && $otherRole->accent_color ? $otherRole->accent_color : ($role && $role->accent_color ? $role->accent_color : '#4E81FA') }}"
-                class="inline-flex items-center rounded-md px-5 py-3 hover:opacity-90 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-            >
-                {{ __('messages.sign_up') }}
-            </button>
-            </a>
-            -->
-        </div>
-        </div>
-    </header>
+                <a href="https://www.eventschedule.com" target="_blank">
+                    <x-application-logo />
+                </a> 
+                <div class="flex flex-row items-center gap-x-3 md:gap-x-12">
+                    @if ($role->language_code != 'en')
+                        <div class="flex items-center space-x-2 text-gray-900 dark:text-gray-100" translate="no">
+                            @if (! session()->has('translate'))
+                                <span>{{ strtoupper($role->language_code) }}</span>
+                            @else
+                                <a href="{{ request()->url() }}?lang={{ $role->language_code }}" class="text-gray-900 dark:text-gray-100 hover:underline">
+                                    {{ strtoupper($role->language_code) }}
+                                </a>
+                            @endif
+                            <span class="text-gray-400 dark:text-gray-500">|</span>
+                            @if (session()->has('translate'))
+                                <span>EN</span>
+                            @else
+                                <a href="{{ request()->url() }}?lang=en" class="text-gray-900 dark:text-gray-100 hover:underline">
+                                    EN
+                                </a>
+                            @endif
+                        </div>
+                    @endif            
+                </div>
+            </div>
+        </header>
+    @elseif (! request()->embed && $role->language_code != 'en')
+        <div class="container mx-auto flex justify-end pr-5">
+            <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-bl-lg rounded-br-lg shadow-md px-4 py-2.5 flex items-center space-x-3 z-50" translate="no">
+                @if (! session()->has('translate'))
+                    <span class="font-semibold text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-2 py-1 rounded">{{ strtoupper($role->language_code) }}</span>
+                @else
+                    <a href="{{ str_replace('http://', 'https://', request()->url()) }}?lang={{ $role->language_code }}" class="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors">
+                        {{ strtoupper($role->language_code) }}
+                    </a>
+                @endif
+                <span class="text-gray-300 dark:text-gray-600">|</span>
+                @if (session()->has('translate'))
+                    <span class="font-semibold text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-2 py-1 rounded">EN</span>
+                @else
+                    <a href="{{ str_replace('http://', 'https://', request()->url()) }}?lang=en" class="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors">
+                        EN
+                    </a>
+                @endif
+            </div>
+        </div>    
     @endif
 
     {{ $slot }}
