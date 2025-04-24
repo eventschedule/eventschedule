@@ -450,4 +450,5 @@ return [
     'talent_schedules' => 'جداول المواهب',
     'venue_schedules' => 'جداول المكان',
     'curator_schedules' => 'جداول المنسق',
+    'event_created_by' => 'تم إنشاء الحدث بواسطة :user',
 ];
