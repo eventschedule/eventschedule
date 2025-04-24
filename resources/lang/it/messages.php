@@ -448,4 +448,5 @@ return [
     'talent_schedules' => 'Programmi talento',
     'venue_schedules' => 'Programmi sede',
     'curator_schedules' => 'Programmi curatore',
+    'event_created_by' => 'Evento creato da :user',
 ];

@@ -453,4 +453,5 @@ return [
     'talent_schedules' => 'Talent Zeitpläne',
     'venue_schedules' => 'Veranstaltungsort Zeitpläne',
     'curator_schedules' => 'Kurator Zeitpläne',
+    'event_created_by' => 'Veranstaltung erstellt von :user',
 ];

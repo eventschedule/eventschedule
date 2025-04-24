@@ -499,4 +499,5 @@ return [
     'talent_schedules' => 'Talent roosters',
     'venue_schedules' => 'Locatie roosters',
     'curator_schedules' => 'Curator roosters',
+    'event_created_by' => 'Evenement aangemaakt door :user',
 ];

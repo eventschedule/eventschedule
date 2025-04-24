@@ -450,4 +450,5 @@ return [
     'talent_schedules' => 'Horarios del talento',
     'venue_schedules' => 'Horarios del lugar',
     'curator_schedules' => 'Horarios del curador',
+    'event_created_by' => 'Evento creado por :user',
 ];
