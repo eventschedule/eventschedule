@@ -456,4 +456,5 @@ return [
     'talent_schedules' => 'Talent Schedules',
     'venue_schedules' => 'Venue Schedules',
     'curator_schedules' => 'Curator Schedules',
+    'event_created_by' => 'Event created by :user',
 ];
