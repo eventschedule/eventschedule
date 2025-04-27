@@ -198,7 +198,7 @@
         </div>
         @endif
 
-      @if ($role->youtube_links && $role->isTalent())
+      @if ($role->youtube_links && $role->youtube_links != '[]' && $role->isTalent())
         <div
             class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-10 flex flex-col gap-6 mb-6"
           >
@@ -218,7 +218,7 @@
         @include('role/partials/calendar', ['route' => 'guest', 'tab' => ''])
       </div>
 
-      @if ($role->youtube_links && ! $role->isTalent())
+      @if ($role->youtube_links && $role->youtube_links != '[]' && ! $role->isTalent())
         <div
             class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-10 flex flex-col gap-6 mb-6"
           >
