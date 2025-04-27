@@ -264,10 +264,17 @@
             $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth();
             $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth();
             $currentDate = $startOfMonth->copy();
+            $hasPastEvents = false;
+            $today = now()->startOfDay();
             @endphp
 
             @if (count($events))
-            <ol
+            <div class="mb-4 text-center">
+                <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden">
+                    {{ __('messages.show_past_events') }}
+                </button>
+            </div>
+            <ol id="mobileEventsList"
                 class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow ring-1 ring-black ring-opacity-5">
                 @while ($currentDate->lte($endOfMonth))
                 @foreach ($eventsMap[$currentDate->format('Y-m-d')] ?? [] as $each)
@@ -281,12 +288,16 @@
                     $translationId = $curator->pivot->id;
                 } else {
                     $eventName = $each->translatedName();
-                }                          
+                }
+                $isPastEvent = $currentDate->copy()->endOfDay()->lt($today);
+                if ($isPastEvent) {
+                    $hasPastEvents = true;
+                }
                 @endphp                
 
                 <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate->format('Y-m-d')) }}{{ $translationId ? '&tid=' . \App\Utils\UrlUtils::encodeId($translationId) : '' }}" 
                    {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}>
-                    <li class="relative flex items-center space-x-6 py-6 px-4 xl:static">
+                    <li class="relative flex items-center space-x-6 py-6 px-4 xl:static event-item {{ $isPastEvent ? 'past-event hidden' : '' }}">
                         <div class="flex-auto">
                             <h3 class="pr-16 font-semibold text-gray-900">
                                 {{ $eventName }}
@@ -343,6 +354,24 @@
                 @php $currentDate->addDay(); @endphp
                 @endwhile
             </ol>
+            
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const showPastEventsBtn = document.getElementById('showPastEventsBtn');
+                    const pastEvents = document.querySelectorAll('.past-event');
+                    
+                    if (pastEvents.length > 0) {
+                        showPastEventsBtn.classList.remove('hidden');
+                        
+                        showPastEventsBtn.addEventListener('click', function() {
+                            pastEvents.forEach(event => {
+                                event.classList.remove('hidden');
+                            });
+                            showPastEventsBtn.classList.add('hidden');
+                        });
+                    }
+                });
+            </script>
             @elseif ($tab != 'availability')
             <div class="p-10 max-w-5xl mx-auto px-4">
                 <div class="flex justify-center items-center pb-6 w-full">
