@@ -457,4 +457,5 @@ return [
     'venue_schedules' => 'Venue Schedules',
     'curator_schedules' => 'Curator Schedules',
     'event_created_by' => 'Event created by :user',
+    'show_past_events' => 'Show Past Events',
 ];
