@@ -454,4 +454,5 @@ return [
     'venue_schedules' => 'Veranstaltungsort Zeitpläne',
     'curator_schedules' => 'Kurator Zeitpläne',
     'event_created_by' => 'Veranstaltung erstellt von :user',
+    'show_past_events' => 'Vergangene Events anzeigen',
 ];

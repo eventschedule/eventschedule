@@ -451,4 +451,5 @@ return [
     'venue_schedules' => 'Horaires du lieu',
     'curator_schedules' => 'Horaires du conservateur',
     'event_created_by' => 'Événement créé par :user',
+    'show_past_events' => 'Afficher les événements passés',
 ];

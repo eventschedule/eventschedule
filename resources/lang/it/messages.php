@@ -449,4 +449,5 @@ return [
     'venue_schedules' => 'Programmi sede',
     'curator_schedules' => 'Programmi curatore',
     'event_created_by' => 'Evento creato da :user',
+    'show_past_events' => 'Mostra eventi passati',
 ];

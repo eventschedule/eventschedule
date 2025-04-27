@@ -456,4 +456,5 @@ return [
     'venue_schedules' => 'לוחות זמנים של מקום',
     'curator_schedules' => 'לוחות זמנים של אוצר',
     'event_created_by' => 'אירוע נוצר על ידי :user',
+    'show_past_events' => 'הצג אירועים קודמים',
 ];
