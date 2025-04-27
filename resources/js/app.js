@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
             toolbar: [
                 'bold', 'italic', 'heading', '|',
                 'quote', 'unordered-list', 'ordered-list', '|',
-                'link', '|',
+                //'link', '|',
                 'preview', 'guide'
             ],
             minHeight: "200px",
