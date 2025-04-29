@@ -80,7 +80,7 @@ class ApiEventController extends Controller
             return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
         }
 
-        if ($role->user_id !== auth()->id()) {
+        if (! auth()->user()->isMember($subdomain)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
