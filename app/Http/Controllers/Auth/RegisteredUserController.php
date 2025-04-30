@@ -96,7 +96,7 @@ class RegisteredUserController extends Controller
                 ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
                 config('app.hosted') ? [new NoFakeEmail] : []
             ),
-            'password' => ['required', Rules\Password::defaults()],
+            'password' => ['required', 'string', 'min:8'],
         ]);
 
         $user = User::create([
