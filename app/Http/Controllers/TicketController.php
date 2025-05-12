@@ -185,6 +185,7 @@ class TicketController extends Controller
         $data = [
             'sale_id' => UrlUtils::encodeId($sale->id), 
             'subdomain' => $subdomain, 
+            'date' => $sale->event_date,
         ];
         
         $session = $stripe->checkout->sessions->create(
