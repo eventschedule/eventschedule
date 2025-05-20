@@ -289,7 +289,7 @@ class TicketController extends Controller
         $sale->transaction_reference = $session->payment_intent;
         $sale->save();
 
-        return redirect($event->getGuestUrl($subdomain, $sale->event_date));
+        return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
     }
 
     public function cancel($subdomain, $sale_id)
