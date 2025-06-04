@@ -112,8 +112,6 @@ class EventRepo
                     if (! $matchingUser || $matchingUser->id != $user->id) { 
                         $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
                     }
-
-                    $roleIds[] = $role->id;
                 } else {
                     $roleId = UrlUtils::decodeId($memberId);
                     $role = Role::findOrFail($roleId);
@@ -130,10 +128,10 @@ class EventRepo
 
                         $role->save();
                     }
-
-                    $roles[] = $role;
-                    $roleIds[] = $role->id;
                 }
+
+                $roles[] = $role;
+                $roleIds[] = $role->id;
             }
         }
 
