@@ -1,4 +1,41 @@
 <div class="flex h-full flex-col pt-1">
+@php
+    $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth()->startOfWeek(Carbon\Carbon::SUNDAY);
+    $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth()->endOfWeek(Carbon\Carbon::SATURDAY);
+    $currentDate = $startOfMonth->copy();
+    $totalDays = $endOfMonth->diffInDays($startOfMonth) + 1;
+    $totalWeeks = ceil($totalDays / 7);
+    $unavailable = [];
+
+    // Always initialize as arrays
+    $eventGroupIds = [];
+    $eventCategoryIds = [];
+
+    // Create events map
+    $eventsMap = [];
+    foreach ($events as $event) {
+        $checkDate = $startOfMonth->copy();
+        // Collect group_id and category
+        if (isset($event->group_id)) {
+            $eventGroupIds[] = $event->group_id;
+        }
+        if (isset($event->category_id)) {
+            $eventCategoryIds[] = $event->category_id;
+        }
+        while ($checkDate->lte($endOfMonth)) {
+            if ($event->matchesDate($checkDate)) {
+                $dateStr = $checkDate->format('Y-m-d');
+                if (!isset($eventsMap[$dateStr])) {
+                    $eventsMap[$dateStr] = [];
+                }
+                $eventsMap[$dateStr][] = $event;
+            }
+            $checkDate->addDay();
+        }
+    }
+    $uniqueGroupIds = array_unique($eventGroupIds);
+    $uniqueCategoryIds = array_unique($eventCategoryIds);
+@endphp
     <header class="py-4">
         <div class="w-full">
             <div class="md:flex md:flex-row md:items-center w-full mb-4">
@@ -32,7 +69,7 @@
                     </div>
                 </div>
                 <div class="hidden md:flex md:flex-row md:items-center md:justify-end md:w-auto md:gap-0">
-                    @if(isset($role) && $role->groups && $role->groups->count())
+                    @if(isset($role) && $role->groups && $role->groups->count() && count($uniqueGroupIds ?? []) > 1)
                         <select name="group" id="group" class="border-gray-300 rounded-md shadow-sm h-9 md:w-auto md:ml-4" onchange="this.form.submit()">
                             <option value="">{{ __('messages.all_groups') }}</option>
                             @foreach($role->groups as $group)
@@ -40,12 +77,14 @@
                             @endforeach
                         </select>
                     @endif
-                    <select name="category" id="category" class="border-gray-300 rounded-md shadow-sm h-9 md:w-auto md:ml-4" onchange="this.form.submit()">
-                        <option value="">{{ __('messages.all_categories') }}</option>
-                        @foreach(config('app.event_categories', []) as $catKey => $catName)
-                            <option value="{{ $catKey }}" {{ request('category') == $catKey ? 'selected' : '' }}>{{ $catName }}</option>
-                        @endforeach
-                    </select>
+                    @if(count($uniqueCategoryIds ?? []) > 1)
+                        <select name="category" id="category" class="border-gray-300 rounded-md shadow-sm h-9 md:w-auto md:ml-4" onchange="this.form.submit()">
+                            <option value="">{{ __('messages.all_categories') }}</option>
+                            @foreach(config('app.event_categories', []) as $catKey => $catName)
+                                <option value="{{ $catKey }}" {{ request('category') == $catKey ? 'selected' : '' }}>{{ $catName }}</option>
+                            @endforeach
+                        </select>
+                    @endif
                     <div class="flex flex-row items-center bg-white rounded-md shadow-sm md:ml-4">
                         <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}"
                             class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50"
@@ -73,7 +112,7 @@
                 </div>
             </div>
             <div class="md:hidden flex flex-col gap-4 w-full">
-                @if(isset($role) && $role->groups && $role->groups->count())
+                @if(isset($role) && $role->groups && $role->groups->count() && count($uniqueGroupIds ?? []) > 1)
                     <select name="group" id="group" class="border-gray-300 rounded-md shadow-sm h-9 w-full mt-4" onchange="this.form.submit()">
                         <option value="">{{ __('messages.all_groups') }}</option>
                         @foreach($role->groups as $group)
@@ -81,12 +120,14 @@
                         @endforeach
                     </select>
                 @endif
-                <select name="category" id="category" class="border-gray-300 rounded-md shadow-sm h-9 w-full mt-4" onchange="this.form.submit()">
-                    <option value="">{{ __('messages.all_categories') }}</option>
-                    @foreach(config('app.event_categories', []) as $catKey => $catName)
-                        <option value="{{ $catKey }}" {{ request('category') == $catKey ? 'selected' : '' }}>{{ $catName }}</option>
-                    @endforeach
-                </select>
+                @if(count($uniqueCategoryIds ?? []) > 1)
+                    <select name="category" id="category" class="border-gray-300 rounded-md shadow-sm h-9 w-full mt-4" onchange="this.form.submit()">
+                        <option value="">{{ __('messages.all_categories') }}</option>
+                        @foreach(config('app.event_categories', []) as $catKey => $catName)
+                            <option value="{{ $catKey }}" {{ request('category') == $catKey ? 'selected' : '' }}>{{ $catName }}</option>
+                        @endforeach
+                    </select>
+                @endif
             </div>
         </div>
     </header>
@@ -102,40 +143,6 @@
             </div>
         </div>
         <div class="flex bg-gray-200 text-xs leading-6 text-gray-700 md:flex-auto">
-            @php
-
-            $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth()->startOfWeek(Carbon\Carbon::SUNDAY);
-            $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth()->endOfWeek(Carbon\Carbon::SATURDAY);
-            $currentDate = $startOfMonth->copy();
-            $totalDays = $endOfMonth->diffInDays($startOfMonth) + 1;
-            $totalWeeks = ceil($totalDays / 7);
-            $unavailable = [];
-
-            // Create events map
-            $eventsMap = [];
-            foreach ($events as $event) {
-                $checkDate = $startOfMonth->copy();
-                while ($checkDate->lte($endOfMonth)) {
-                    if ($event->matchesDate($checkDate)) {
-                        $dateStr = $checkDate->format('Y-m-d');
-                        if (!isset($eventsMap[$dateStr])) {
-                            $eventsMap[$dateStr] = [];
-                        }
-                        $eventsMap[$dateStr][] = $event;
-                    }
-                    $checkDate->addDay();
-                }
-            }
-
-            // Sort events by start time otherwise recurring events can be out of order
-            foreach ($eventsMap as $date => $events) {
-                usort($events, function($a, $b) {
-                    return strtotime(explode(' ', $a->starts_at)[1]) - strtotime(explode(' ', $b->starts_at)[1]);
-                });
-                $eventsMap[$date] = $events;
-            }
-
-            @endphp
             <div class="w-full md:grid md:grid-cols-7 md:grid-rows-{{ $totalWeeks }} md:gap-px">
                 @while ($currentDate->lte($endOfMonth))
                 @if ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at)
