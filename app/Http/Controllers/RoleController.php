@@ -282,9 +282,6 @@ class RoleController extends Controller
         $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
         $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
-        $selectedCategory = $request->input('category');
-        $selectedGroup = $request->input('group');
-
         if ($role->isCurator()) {
             $events = Event::with(['roles', 'venue'])
                 ->where(function ($query) use ($startOfMonth, $endOfMonth) {
@@ -295,12 +292,6 @@ class RoleController extends Controller
                     $query->select('event_id')
                         ->from('event_role')
                         ->where('role_id', $role->id);
-                })
-                ->when($selectedCategory, function ($query, $selectedCategory) {
-                    $query->where('category_id', $selectedCategory);
-                })
-                ->when($selectedGroup, function ($query, $selectedGroup) {
-                    $query->where('group_id', $selectedGroup);
                 })
                 ->orderBy('starts_at')
                 ->get();
@@ -320,12 +311,6 @@ class RoleController extends Controller
                                 ->where('is_accepted', true);
                         });
                     }
-                })
-                ->when($selectedCategory, function ($query, $selectedCategory) {
-                    $query->where('category_id', $selectedCategory);
-                })
-                ->when($selectedGroup, function ($query, $selectedGroup) {
-                    $query->where('group_id', $selectedGroup);
                 })
                 ->orderBy('starts_at')
                 ->get();
