@@ -127,4 +127,14 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'event_categories' => [
+        1 => 'Music',
+        2 => 'Art',
+        3 => 'Sports',
+        4 => 'Theatre',
+        5 => 'Workshop',
+        6 => 'Networking',
+        7 => 'Other',
+    ],
+
 ];

@@ -282,8 +282,10 @@ class RoleController extends Controller
         $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
         $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
+        $selectedCategory = $request->input('category');
+        $selectedGroup = $request->input('group');
+
         if ($role->isCurator()) {
-            // TODO this may not be needed
             $events = Event::with(['roles', 'venue'])
                 ->where(function ($query) use ($startOfMonth, $endOfMonth) {
                     $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
@@ -293,6 +295,12 @@ class RoleController extends Controller
                     $query->select('event_id')
                         ->from('event_role')
                         ->where('role_id', $role->id);
+                })
+                ->when($selectedCategory, function ($query, $selectedCategory) {
+                    $query->where('category_id', $selectedCategory);
+                })
+                ->when($selectedGroup, function ($query, $selectedGroup) {
+                    $query->where('group_id', $selectedGroup);
                 })
                 ->orderBy('starts_at')
                 ->get();
@@ -312,6 +320,12 @@ class RoleController extends Controller
                                 ->where('is_accepted', true);
                         });
                     }
+                })
+                ->when($selectedCategory, function ($query, $selectedCategory) {
+                    $query->where('category_id', $selectedCategory);
+                })
+                ->when($selectedGroup, function ($query, $selectedGroup) {
+                    $query->where('group_id', $selectedGroup);
                 })
                 ->orderBy('starts_at')
                 ->get();
@@ -724,6 +738,18 @@ class RoleController extends Controller
 
         $role->save();
 
+        // Save groups
+        if ($request->has('groups')) {
+            foreach ($request->input('groups', []) as $groupData) {
+                if (!empty($groupData['name'])) {
+                    $role->groups()->create([
+                        'name' => $groupData['name'],
+                        'slug' => $groupData['slug'] ?? null,
+                    ]);
+                }
+            }
+        }
+
         $user->roles()->attach($role->id, ['created_at' => now(), 'level' => 'owner']);
 
         if ($request->hasFile('profile_image')) {
@@ -803,7 +829,7 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        $role = Role::with('groups')->subdomain($subdomain)->firstOrFail();
 
         // Header images
         $headers = file_get_contents(base_path('storage/headers.json'));
@@ -894,6 +920,35 @@ class RoleController extends Controller
         }
 
         $role->save();
+
+        // Sync groups
+        $existingGroupIds = $role->groups()->pluck('id')->toArray();
+        $submittedGroups = $request->input('groups', []);
+        $submittedIds = [];
+        foreach ($submittedGroups as $key => $groupData) {
+            if (isset($groupData['name']) && $groupData['name']) {
+                if (is_numeric($key) && in_array($key, $existingGroupIds)) {
+                    // Update existing
+                    $role->groups()->where('id', $key)->update([
+                        'name' => $groupData['name'],
+                        'slug' => $groupData['slug'] ?? null,
+                    ]);
+                    $submittedIds[] = $key;
+                } else {
+                    // New group
+                    $newGroup = $role->groups()->create([
+                        'name' => $groupData['name'],
+                        'slug' => $groupData['slug'] ?? null,
+                    ]);
+                    $submittedIds[] = $newGroup->id;
+                }
+            }
+        }
+        // Delete removed groups
+        $toDelete = array_diff($existingGroupIds, $submittedIds);
+        if (!empty($toDelete)) {
+            $role->groups()->whereIn('id', $toDelete)->delete();
+        }
 
         if ($request->hasFile('profile_image')) {
             if ($role->profile_image_url) {

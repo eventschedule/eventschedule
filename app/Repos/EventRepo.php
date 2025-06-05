@@ -159,6 +159,8 @@ class EventRepo
         }
 
         $event->fill($request->all());
+        $event->category_id = $request->input('category_id');
+        $event->group_id = $request->input('group_id');
         $event->venue_id = $venueId;
         if (! $request->event_url) {
             $event->event_url = null;

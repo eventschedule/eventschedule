@@ -15,13 +15,14 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('name_en')->nullable();
-            $table->string('slug');
+            $table->string('slug')->nullable();
             $table->foreignId('role_id')->constrained()->onDelete('cascade');
             $table->unique(['slug', 'role_id']);
+            $table->timestamps();
         });
 
         Schema::table('events', function (Blueprint $table) {
-            $table->string('category_id')->nullable();
+            $table->unsignedInteger('category_id')->nullable();
             $table->foreignId('group_id')->nullable()->constrained()->onDelete('set null');
         });
     }
