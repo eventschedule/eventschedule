@@ -1,4 +1,4 @@
-<div class="flex h-full flex-col pt-1">
+<div class="flex h-full flex-col pt-1" id="calendar-app">
 @php
     $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth()->startOfWeek(Carbon\Carbon::SUNDAY);
     $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth()->endOfWeek(Carbon\Carbon::SATURDAY);
@@ -35,6 +35,27 @@
     }
     $uniqueGroupIds = array_unique($eventGroupIds);
     $uniqueCategoryIds = array_unique($eventCategoryIds);
+
+    // Prepare data for Vue
+    $eventsForVue = [];
+    foreach ($events as $event) {
+        $eventsForVue[] = [
+            'id' => $event->id,
+            'group_id' => $event->group_id,
+            'category_id' => $event->category_id,
+            'name' => $event->translatedName(),
+            'venue_name' => $event->getVenueDisplayName(),
+            'starts_at' => $event->starts_at,
+            'days_of_week' => $event->days_of_week,
+            'local_starts_at' => $event->localStartsAt(),
+            'guest_url' => $event->getGuestUrl(isset($subdomain) ? $subdomain : '', ''),
+            'image_url' => $event->getImageUrl(),
+            'can_edit' => auth()->user() && auth()->user()->canEditEvent($event),
+            'edit_url' => auth()->user() && auth()->user()->canEditEvent($event) 
+                ? (isset($role) ? config('app.url') . route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)], false) : config('app.url') . route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($event->id)], false))
+                : null,
+        ];
+    }
 @endphp
     <header class="py-4">
         <div class="w-full">
@@ -70,18 +91,18 @@
                 </div>
                 <div class="hidden md:flex md:flex-row md:items-center md:justify-end md:w-auto md:gap-0">
                     @if(isset($role) && $role->groups && $role->groups->count() && count($uniqueGroupIds ?? []) > 1)
-                        <select name="group" id="group" class="border-gray-300 rounded-md shadow-sm h-9 md:w-auto md:ml-4" onchange="this.form.submit()">
+                        <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 md:w-auto md:ml-4">
                             <option value="">{{ __('messages.all_groups') }}</option>
                             @foreach($role->groups as $group)
-                                <option value="{{ $group->id }}" {{ request('group') == $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
+                                <option value="{{ $group->id }}">{{ $group->name }}</option>
                             @endforeach
                         </select>
                     @endif
                     @if(count($uniqueCategoryIds ?? []) > 1)
-                        <select name="category" id="category" class="border-gray-300 rounded-md shadow-sm h-9 md:w-auto md:ml-4" onchange="this.form.submit()">
+                        <select v-model="selectedCategory" class="border-gray-300 rounded-md shadow-sm h-9 md:w-auto md:ml-4">
                             <option value="">{{ __('messages.all_categories') }}</option>
                             @foreach(config('app.event_categories', []) as $catKey => $catName)
-                                <option value="{{ $catKey }}" {{ request('category') == $catKey ? 'selected' : '' }}>{{ $catName }}</option>
+                                <option value="{{ $catKey }}">{{ $catName }}</option>
                             @endforeach
                         </select>
                     @endif
@@ -113,18 +134,18 @@
             </div>
             <div class="md:hidden flex flex-col gap-4 w-full">
                 @if(isset($role) && $role->groups && $role->groups->count() && count($uniqueGroupIds ?? []) > 1)
-                    <select name="group" id="group" class="border-gray-300 rounded-md shadow-sm h-9 w-full mt-4" onchange="this.form.submit()">
+                    <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 w-full mt-4">
                         <option value="">{{ __('messages.all_groups') }}</option>
                         @foreach($role->groups as $group)
-                            <option value="{{ $group->id }}" {{ request('group') == $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
+                            <option value="{{ $group->id }}">{{ $group->name }}</option>
                         @endforeach
                     </select>
                 @endif
                 @if(count($uniqueCategoryIds ?? []) > 1)
-                    <select name="category" id="category" class="border-gray-300 rounded-md shadow-sm h-9 w-full mt-4" onchange="this.form.submit()">
+                    <select v-model="selectedCategory" class="border-gray-300 rounded-md shadow-sm h-9 w-full mt-4">
                         <option value="">{{ __('messages.all_categories') }}</option>
                         @foreach(config('app.event_categories', []) as $catKey => $catName)
-                            <option value="{{ $catKey }}" {{ request('category') == $catKey ? 'selected' : '' }}>{{ $catName }}</option>
+                            <option value="{{ $catKey }}">{{ $catName }}</option>
                         @endforeach
                     </select>
                 @endif
@@ -183,51 +204,27 @@
                         @endif
                         </div>
                         <ol class="mt-4 divide-y divide-gray-100 text-sm leading-6 md:col-span-7 xl:col-span-8">
-                            @foreach ($eventsMap[$currentDate->format('Y-m-d')] ?? [] as $each)
-                            @php
-                            $canEdit = auth()->user() && auth()->user()->canEditEvent($each);
-                            $curator = isset($subdomain) ? $each->curatorBySubdomain($subdomain) : null;
-                            $translationId = null;
-                            if ($curator && $curator->pivot->name_translated && ! session()->has('translate')) {
-                                $eventName = $curator->pivot->name_translated;
-                                $translationId = $curator->pivot->id;
-                            } else {
-                                $eventName = $each->translatedName();
-                            }                       
-                            @endphp
-
-                            <li class="relative group {{ $canEdit ? ((isset($role) && $role->isRtl()) ? 'hover:pl-8 hover:break-all' : 'hover:pr-8 hover:break-all') : '' }} break-words">
-                                <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate->format('Y-m-d')) }}{{ $translationId ? '&tid=' . \App\Utils\UrlUtils::encodeId($translationId) : '' }}"
-                                    class="flex has-tooltip" data-tooltip="<b>{{ $eventName }}</b><br/>{{ $each->getVenueDisplayName() }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}"
-                                    onclick="event.stopPropagation();" {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
+                            <li v-for="event in getEventsForDate('{{ $currentDate->format('Y-m-d') }}')" :key="event.id" 
+                                class="relative group hover:pr-8 hover:break-all break-words" v-show="isEventVisible(event)">
+                                <a :href="getEventUrl(event, '{{ $currentDate->format('Y-m-d') }}')"
+                                    class="flex has-tooltip" 
+                                    :data-tooltip="getEventTooltip(event)"
+                                    @click.stop {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
                                     <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900 {{ (isset($role) && $role->isRtl()) ? 'rtl' : '' }}">
-                                        <span class="{{ count($eventsMap[$currentDate->format('Y-m-d')]) == 1 ? 'line-clamp-2' : 'line-clamp-1' }} hover:underline">
-                                        @if (isset($subdomain) && $each->isRoleAMember($subdomain))
-                                            {{ $each->getVenueDisplayName() }}
-                                        @else
-                                            @if ($curator && $curator->pivot->name_translated && ! session()->has('translate'))
-                                                {{ $curator->pivot->name_translated }}
-                                            @else
-                                                {{ $eventName }}
-                                            @endif
-                                        @endif
+                                        <span :class="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'" 
+                                              class="hover:underline" v-text="getEventDisplayName(event)">
                                         </span>
-                                        @if (count($eventsMap[$currentDate->format('Y-m-d')]) == 1)
-                                            <span class="text-gray-400">
-                                                {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}
-                                            </span>
-                                        @endif
+                                        <span v-if="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1" 
+                                              class="text-gray-400" v-text="getEventTime(event)">
+                                        </span>
                                     </p>
                                 </a>
-                                @if ($canEdit)
-                                <a href="{{ isset($role) ? config('app.url') . route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)], false) : config('app.url') . route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($each->id)], false) }}"
+                                <a v-if="event.can_edit" :href="event.edit_url"
                                     class="absolute {{ (isset($role) && $role->isRtl()) ? 'left-0' : 'right-0' }} top-0 hidden group-hover:inline-block text-[#4E81FA] hover:text-[#4E81FA] hover:underline"
-                                    onclick="event.stopPropagation();">
+                                    @click.stop>
                                     {{ __('messages.edit') }}
                                 </a>
-                                @endif
                             </li>
-                            @endforeach
                         </ol>
                     </div>
                     @php $currentDate->addDay(); @endphp
@@ -244,120 +241,219 @@
             $today = now()->startOfDay();
             @endphp
 
-            @if (count($events))
-            <div class="mb-4 text-center">
-                <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden">
-                    {{ __('messages.show_past_events') }}
-                </button>
+            <div v-if="filteredEvents.length">
+                <div class="mb-4 text-center">
+                    <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden">
+                        {{ __('messages.show_past_events') }}
+                    </button>
+                </div>
+                <ol id="mobileEventsList"
+                    class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow ring-1 ring-black ring-opacity-5">
+                    @while ($currentDate->lte($endOfMonth))
+                    <template v-for="event in getEventsForDate('{{ $currentDate->format('Y-m-d') }}')" :key="'mobile-' + event.id">
+                        <a v-if="isEventVisible(event)" :href="getEventUrl(event, '{{ $currentDate->format('Y-m-d') }}')" 
+                           {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}>
+                            <li class="relative flex items-center space-x-6 py-6 px-4 xl:static event-item"
+                                :class="isPastEvent('{{ $currentDate->format('Y-m-d') }}') ? 'past-event hidden' : ''">
+                                <div class="flex-auto">
+                                    <h3 class="pr-16 font-semibold text-gray-900" v-text="event.name">
+                                    </h3>
+                                    <dl class="pr-16 mt-2 flex flex-col text-gray-500 xl:flex-row">
+                                        <div class="flex items-start space-x-3">
+                                            <dt class="mt-0.5">
+                                                <span class="sr-only">Date</span>
+                                                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"
+                                                    aria-hidden="true">
+                                                    <path fill-rule="evenodd"
+                                                        d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                            </dt>
+                                            <dd>
+                                                <time :datetime="'{{ $currentDate->format('Y-m-d') }}'">
+                                                    {{ $currentDate->format('M jS') }} • <span v-text="getEventTime(event)"></span>
+                                                </time>
+                                            </dd>
+                                        </div>
+                                        <div
+                                            class="mt-2 flex items-start space-x-3 xl:ml-3.5 xl:mt-0 xl:border-l xl:border-gray-400 xl:border-opacity-50 xl:pl-3.5">
+                                            <dt class="mt-0.5">
+                                                <span class="sr-only">Location</span>
+                                                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"
+                                                    aria-hidden="true">
+                                                    <path fill-rule="evenodd"
+                                                        d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                            </dt>
+                                            <dd v-text="event.venue_name">
+                                            </dd>
+                                        </div>
+                                    </dl>
+                                </div>
+                                <div class="absolute right-4 text-right top-6">
+                                    <img v-if="event.image_url" :src="event.image_url" class="h-16 w-16 flex-none rounded-lg object-cover mb-2">
+                                    <a v-if="event.can_edit" :href="event.edit_url"
+                                        class="text-[#4E81FA] hover:text-[#4E81FA] hover:underline"
+                                        @click.stop>
+                                        {{ __('messages.edit') }}
+                                    </a>
+                                </div>
+                            </li>
+                        </a>
+                    </template>
+                    @php $currentDate->addDay(); @endphp
+                    @endwhile
+                </ol>
             </div>
-            <ol id="mobileEventsList"
-                class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow ring-1 ring-black ring-opacity-5">
-                @while ($currentDate->lte($endOfMonth))
-                @foreach ($eventsMap[$currentDate->format('Y-m-d')] ?? [] as $each)
-
-                @php
-                $canEdit = auth()->user() && auth()->user()->canEditEvent($each);
-                $curator = isset($subdomain) ? $each->curatorBySubdomain($subdomain) : null;
-                $translationId = null;
-                if ($curator && $curator->pivot->name_translated && ! session()->has('translate')) {
-                    $eventName = $curator->pivot->name_translated;
-                    $translationId = $curator->pivot->id;
-                } else {
-                    $eventName = $each->translatedName();
-                }
-                $isPastEvent = $currentDate->copy()->endOfDay()->lt($today);
-                if ($isPastEvent) {
-                    $hasPastEvents = true;
-                }
-                @endphp                
-
-                <a href="{{ $each->getGuestUrl(isset($subdomain) ? $subdomain : '', $currentDate->format('Y-m-d')) }}{{ $translationId ? '&tid=' . \App\Utils\UrlUtils::encodeId($translationId) : '' }}" 
-                   {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}>
-                    <li class="relative flex items-center space-x-6 py-6 px-4 xl:static event-item {{ $isPastEvent ? 'past-event hidden' : '' }}">
-                        <div class="flex-auto">
-                            <h3 class="pr-16 font-semibold text-gray-900">
-                                {{ $eventName }}
-                            </h3>
-                            <dl class="pr-16 mt-2 flex flex-col text-gray-500 xl:flex-row">
-                                <div class="flex items-start space-x-3">
-                                    <dt class="mt-0.5">
-                                        <span class="sr-only">Date</span>
-                                        <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"
-                                            aria-hidden="true">
-                                            <path fill-rule="evenodd"
-                                                d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z"
-                                                clip-rule="evenodd" />
-                                        </svg>
-                                    </dt>
-                                    <dd>
-                                        <time datetime="{{ $currentDate->format('Y-m-d') }}">
-                                            {{ $currentDate->format('M jS') }} • {{ Carbon\Carbon::parse($each->localStartsAt())->format(isset($role) && $role->use_24_hour_time ? 'H:i' : 'g:i A') }}
-                                        </time>
-                                    </dd>
-                                </div>
-                                <div
-                                    class="mt-2 flex items-start space-x-3 xl:ml-3.5 xl:mt-0 xl:border-l xl:border-gray-400 xl:border-opacity-50 xl:pl-3.5">
-                                    <dt class="mt-0.5">
-                                        <span class="sr-only">Location</span>
-                                        <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"
-                                            aria-hidden="true">
-                                            <path fill-rule="evenodd"
-                                                d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z"
-                                                clip-rule="evenodd" />
-                                        </svg>
-                                    </dt>
-                                    <dd>
-                                        {{ $each->getVenueDisplayName() }}
-                                    </dd>
-                                </div>
-                            </dl>
-                        </div>
-                        <div class="absolute right-4 text-right top-6">
-                            @if ($each->getImageUrl())
-                            <img src="{{ $each->getImageUrl() }}" class="h-16 w-16 flex-none rounded-lg object-cover mb-2">
-                            @endif
-                            @if ($canEdit)
-                            <a href="{{ isset($role) ? config('app.url') . route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($each->id)], false) : config('app.url') . route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($each->id)], false) }}"
-                                class="text-[#4E81FA] hover:text-[#4E81FA] hover:underline"
-                                onclick="event.stopPropagation();">
-                                {{ __('messages.edit') }}
-                            </a>
-                            @endif
-                        </div>
-                    </li>
-                </a>
-                @endforeach
-                @php $currentDate->addDay(); @endphp
-                @endwhile
-            </ol>
-            
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const showPastEventsBtn = document.getElementById('showPastEventsBtn');
-                    const pastEvents = document.querySelectorAll('.past-event');
-                    
-                    if (pastEvents.length > 0) {
-                        showPastEventsBtn.classList.remove('hidden');
-                        
-                        showPastEventsBtn.addEventListener('click', function() {
-                            pastEvents.forEach(event => {
-                                event.classList.remove('hidden');
-                            });
-                            showPastEventsBtn.classList.add('hidden');
-                        });
-                    }
-                });
-            </script>
-            @elseif ($tab != 'availability')
-            <div class="p-10 max-w-5xl mx-auto px-4">
+            <div v-else-if="{{ $tab != 'availability' ? 'true' : 'false' }}" class="p-10 max-w-5xl mx-auto px-4">
                 <div class="flex justify-center items-center pb-6 w-full">
                     <div class="text-2xl text-center">
                         {{ __('messages.no_scheduled_events') }}
                     </div>
                 </div>
             </div>
-            @endif
         </div>
     </div>
 
 <div id="tooltip" class="tooltip"></div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script>
+const { createApp } = Vue;
+
+createApp({
+    data() {
+        return {
+            selectedGroup: '',
+            selectedCategory: '',
+            allEvents: @json($eventsForVue),
+            startOfMonth: '{{ $startOfMonth->format('Y-m-d') }}',
+            endOfMonth: '{{ $endOfMonth->format('Y-m-d') }}',
+            use24Hour: {{ isset($role) && $role->use_24_hour_time ? 'true' : 'false' }},
+            subdomain: '{{ isset($subdomain) ? $subdomain : '' }}',
+            route: '{{ $route }}',
+            embed: {{ isset($embed) && $embed ? 'true' : 'false' }},
+            isRtl: {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'true' : 'false' }}
+        }
+    },
+    computed: {
+        filteredEvents() {
+            return this.allEvents.filter(event => {
+                if (this.selectedGroup && event.group_id != this.selectedGroup) {
+                    return false;
+                }
+                if (this.selectedCategory && event.category_id != this.selectedCategory) {
+                    return false;
+                }
+                return true;
+            });
+        }
+    },
+    methods: {
+        getEventsForDate(dateStr) {
+            return this.filteredEvents.filter(event => {
+                return this.eventMatchesDate(event, dateStr);
+            });
+        },
+        eventMatchesDate(event, dateStr) {
+            // Convert dateStr to Date object for comparison
+            const checkDate = new Date(dateStr + 'T00:00:00');
+            
+            if (event.starts_at) {
+                const eventDate = new Date(event.starts_at);
+                return eventDate.toDateString() === checkDate.toDateString();
+            } else if (event.days_of_week) {
+                const dayOfWeek = checkDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+                return event.days_of_week[dayOfWeek] === '1';
+            }
+            return false;
+        },
+        isEventVisible(event) {
+            if (this.selectedGroup && event.group_id != this.selectedGroup) {
+                return false;
+            }
+            if (this.selectedCategory && event.category_id != this.selectedCategory) {
+                return false;
+            }
+            return true;
+        },
+        getEventUrl(event, date) {
+            return event.guest_url + (date ? '?date=' + date : '');
+        },
+        getEventTooltip(event) {
+            const time = this.getEventTime(event);
+            return `<b>${event.name}</b><br/>${event.venue_name} • ${time}`;
+        },
+        getEventDisplayName(event) {
+            if (this.subdomain && this.isRoleAMember(event)) {
+                return event.venue_name;
+            }
+            return event.name;
+        },
+        getEventTime(event) {
+            if (!event.local_starts_at) return '';
+            const date = new Date(event.local_starts_at);
+            if (this.use24Hour) {
+                return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+            } else {
+                return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            }
+        },
+        isRoleAMember(event) {
+            // This would need to be determined server-side and passed to the frontend
+            // For now, return false as a placeholder
+            return false;
+        },
+        isPastEvent(dateStr) {
+            const eventDate = new Date(dateStr + 'T23:59:59');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return eventDate < today;
+        },
+        initTooltips() {
+            // Reinitialize tooltips after Vue updates
+            this.$nextTick(() => {
+                const tooltipElements = document.querySelectorAll('.has-tooltip');
+                tooltipElements.forEach(el => {
+                    el.addEventListener('mouseenter', this.showTooltip);
+                    el.addEventListener('mouseleave', this.hideTooltip);
+                });
+            });
+        },
+        showTooltip(e) {
+            const tooltip = document.getElementById('tooltip');
+            const tooltipText = e.currentTarget.dataset.tooltip;
+            tooltip.innerHTML = tooltipText;
+            tooltip.style.display = 'block';
+            tooltip.style.left = e.pageX + 10 + 'px';
+            tooltip.style.top = e.pageY + 10 + 'px';
+        },
+        hideTooltip() {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.style.display = 'none';
+        }
+    },
+    mounted() {
+        // Initialize tooltip functionality
+        this.initTooltips();
+        
+        // Handle past events button
+        this.$nextTick(() => {
+            const showPastEventsBtn = document.getElementById('showPastEventsBtn');
+            const pastEvents = document.querySelectorAll('.past-event');
+            
+            if (pastEvents.length > 0) {
+                showPastEventsBtn?.classList.remove('hidden');
+                
+                showPastEventsBtn?.addEventListener('click', function() {
+                    pastEvents.forEach(event => {
+                        event.classList.remove('hidden');
+                    });
+                    showPastEventsBtn.classList.add('hidden');
+                });
+            }
+        });
+    }
+}).mount('#calendar-app');
+</script>
