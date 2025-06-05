@@ -584,9 +584,8 @@
                             @endif
                         </div>
 
-                        <!--
-                        <div class="mb-6">
-                            <x-input-label for="event_slug" :value="__('messages.url')" />
+<!--
+                        <x-input-label for="event_slug" :value="__('messages.url')" />
                             <div class="mt-1 flex">
                                 <x-text-input type="text" 
                                     class="block w-1/2 rounded-r-none bg-gray-100 dark:bg-gray-800" 
@@ -597,12 +596,33 @@
                                     type="text" 
                                     class="block w-1/2 rounded-l-none border-l-0"
                                     :value="old('slug', $event->slug)"
-                                    placeholder="{{ __('messages.auto_generated') }}"
-                                    autocomplete="off" />
+                                    placeholder="{{ __('messages.auto_generated') }}"                                    autocomplete="off" />
                             </div>
                             <x-input-error class="mt-2" :messages="$errors->get('slug')" />
+-->
+
+                        <div class="mb-6">
+                            <x-input-label for="category_id" :value="__('messages.category')" />
+                            <select id="category_id" name="category_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                <option value="">{{ __('messages.please_select') }}</option>
+                                @foreach(config('app.event_categories', []) as $id => $label)
+                                    <option value="{{ $id }}" {{ old('category_id', $event->category_id) == $id ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('category_id')" />
                         </div>
-                        -->
+                        @if($role->groups && count($role->groups))
+                        <div class="mb-6">
+                            <x-input-label for="group_id" :value="__('messages.group')" />
+                            <select id="group_id" name="group_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                <option value="">{{ __('messages.please_select') }}</option>
+                                @foreach($role->groups as $group)
+                                    <option value="{{ $group->id }}" {{ old('group_id', $event->group_id) == $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('group_id')" />
+                        </div>
+                        @endif
 
                         @if (! $role->isCurator())
                         <div class="mb-6 sm:flex sm:items-center sm:space-x-10">

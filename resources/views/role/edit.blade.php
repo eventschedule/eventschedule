@@ -943,9 +943,37 @@
                         </div>
                         -->
 
+                        
                     </div>
                 </div>
 
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="address">
+                    <div class="max-w-xl">
+
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                            {{ __('messages.groups') }}
+                        </h2>
+
+                        <div class="mb-6">
+                            <x-input-label for="groups" :value="__('messages.groups')" />
+                            <div id="groups-list">
+                                @php $groups = $role->groups ?? []; @endphp
+                                <div id="group-items">
+                                    @foreach(old('groups', $groups) as $i => $group)
+                                        <div class="flex items-center mb-2">
+                                            <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][name]" type="text" class="mr-2 block w-full" :value="is_object($group) ? $group->name : $group['name'] ?? ''" placeholder="Group name" />
+                                            <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][slug]" type="text" class="mr-2 block w-1/3" :value="is_object($group) ? $group->slug : $group['slug'] ?? ''" placeholder="Slug" />
+                                            <button type="button" class="text-red-600" onclick="this.parentElement.remove()">&times;</button>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <button type="button" class="mt-2 px-3 py-1 bg-blue-500 text-white rounded" onclick="addGroupField()">+ {{ __('messages.add_group') }}</button>
+                            </div>
+                            <x-input-error class="mt-2" :messages="$errors->get('groups')" />
+                        </div>
+
+                    </div>
+                </div>
 
             </div>
         </div>
@@ -975,3 +1003,16 @@
     </form>
 
 </x-app-admin-layout>
+
+<script>
+function addGroupField() {
+    const container = document.getElementById('group-items');
+    const idx = container.children.length;
+    const div = document.createElement('div');
+    div.className = 'flex items-center mb-2';
+    div.innerHTML = `<input name="groups[new_${idx}][name]" type="text" class="mr-2 block w-full" placeholder="Group name" />
+        <input name="groups[new_${idx}][slug]" type="text" class="mr-2 block w-1/3" placeholder="Slug" />
+        <button type="button" class="text-red-600" onclick="this.parentElement.remove()">&times;</button>`;
+    container.appendChild(div);
+}
+</script>

@@ -28,6 +28,8 @@ class Event extends Model
         'payment_instructions',
         'expire_unpaid_tickets',
         'registration_url',
+        'category_id',
+        'group_id',
     ];
 
     protected static function boot()
