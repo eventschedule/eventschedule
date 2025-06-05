@@ -91,7 +91,16 @@
             </svg>
             @if ($event->venue && $event->venue->translatedName())
               @if ($event->venue->isClaimed())
-                <a href="{{ route('role.view_guest', ['subdomain' => $event->venue->subdomain]) }}" class="text-sm hover:underline">
+                @php
+                  $venueUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
+                  $queryParams = [];
+                  if (request('category')) $queryParams['category'] = request('category');
+                  if (request('group')) $queryParams['group'] = request('group');
+                  if (!empty($queryParams)) {
+                    $venueUrl .= '?' . http_build_query($queryParams);
+                  }
+                @endphp
+                <a href="{{ $venueUrl }}" class="text-sm hover:underline">
                   {{ $event->venue->translatedName() }}
                 </a>
               @else
@@ -242,8 +251,17 @@
               <div class="flex gap-3 flex-row items-center">
                 @if ($each->isClaimed())                
                 @if ($each->profile_image_url)
+                @php
+                  $memberUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
+                  $queryParams = [];
+                  if (request('category')) $queryParams['category'] = request('category');
+                  if (request('group')) $queryParams['group'] = request('group');
+                  if (!empty($queryParams)) {
+                    $memberUrl .= '?' . http_build_query($queryParams);
+                  }
+                @endphp
                 <a
-                  href="{{ route('role.view_guest', ['subdomain' => $each->subdomain]) }}"                  
+                  href="{{ $memberUrl }}"                  
                 >                
                   <img
                     src="{{ $each->profile_image_url }}"
@@ -252,7 +270,7 @@
                 </a>
                 @endif
                 <a
-                  href="{{ route('role.view_guest', ['subdomain' => $each->subdomain]) }}"
+                  href="{{ $memberUrl }}"
                   class="text-base text-[#151B26] hover:underline cursor-pointer duration-300"
                 >                
                   <h3 class="text-[28px] font-semibold leading-10 text-[#151B26]">
@@ -331,7 +349,7 @@
           @endif
 
           <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6">
-            @include('role/partials/calendar', ['route' => 'guest', 'tab' => ''])
+            @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'group' => request('group')])
           </div>
         </div>
         @endif

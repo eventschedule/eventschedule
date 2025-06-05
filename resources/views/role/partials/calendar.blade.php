@@ -511,8 +511,8 @@ const { createApp } = Vue;
 createApp({
     data() {
         return {
-            selectedGroup: '',
-            selectedCategory: '',
+            selectedGroup: '{{ $group ?? "" }}',
+            selectedCategory: '{{ $category ?? "" }}',
             allEvents: @json($eventsForVue),
             startOfMonth: '{{ $startOfMonth->format('Y-m-d') }}',
             endOfMonth: '{{ $endOfMonth->format('Y-m-d') }}',
@@ -565,7 +565,27 @@ createApp({
             return true;
         },
         getEventUrl(event, date) {
-            return event.guest_url + (date ? '?date=' + date : '');
+            let url = event.guest_url;
+            let queryParams = [];
+            
+            if (date) {
+                queryParams.push('date=' + date);
+            }
+            
+            // Preserve current filter values
+            if (this.selectedCategory) {
+                queryParams.push('category=' + this.selectedCategory);
+            }
+            
+            if (this.selectedGroup) {
+                queryParams.push('group=' + this.selectedGroup);
+            }
+            
+            if (queryParams.length > 0) {
+                url += '?' + queryParams.join('&');
+            }
+            
+            return url;
         },
         getEventTooltip(event) {
             const time = this.getEventTime(event);
