@@ -226,7 +226,7 @@
                     @endif
                 </div>
             </div>
-            <div class="md:hidden flex flex-col gap-4 w-full">
+            <div class="md:hidden flex flex-col gap-2 w-full">
                 @if(isset($role) && $role->groups && $role->groups->count() > 1)
                     <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 w-full mt-4">
                         <option value="">{{ __('messages.all_schedules') }}</option>
