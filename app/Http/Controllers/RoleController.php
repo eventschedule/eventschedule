@@ -24,6 +24,7 @@ use App\Models\RoleUser;
 use App\Models\EventRole;
 use App\Utils\UrlUtils;
 use App\Utils\ColorUtils;
+use App\Utils\GeminiUtils;
 use Carbon\Carbon;
 
 class RoleController extends Controller
@@ -740,12 +741,38 @@ class RoleController extends Controller
 
         // Save groups
         if ($request->has('groups')) {
-            foreach ($request->input('groups', []) as $groupData) {
+            $groupsData = $request->input('groups', []);
+            $groupNames = [];
+            
+            // Collect all group names for translation if needed
+            foreach ($groupsData as $groupData) {
                 if (!empty($groupData['name'])) {
-                    $role->groups()->create([
+                    $groupNames[] = $groupData['name'];
+                }
+            }
+            
+            // Translate names if role is not in English
+            $translations = [];
+            if (!empty($groupNames) && $role->language_code !== 'en') {
+                $translations = GeminiUtils::translateGroupNames($groupNames, $role->language_code);
+            }
+            
+            // Create groups with translations
+            foreach ($groupsData as $groupData) {
+                if (!empty($groupData['name'])) {
+                    $groupCreateData = [
                         'name' => $groupData['name'],
                         'slug' => Str::slug($groupData['name']),
-                    ]);
+                    ];
+                    
+                    // Add English translation if available
+                    if (isset($translations[$groupData['name']])) {
+                        $groupCreateData['name_en'] = $translations[$groupData['name']];
+                        // Use English name for slug if translation is available
+                        $groupCreateData['slug'] = Str::slug($translations[$groupData['name']]);
+                    }
+                    
+                    $role->groups()->create($groupCreateData);
                 }
             }
         }
@@ -925,22 +952,54 @@ class RoleController extends Controller
         $existingGroupIds = $role->groups()->pluck('id')->toArray();
         $submittedGroups = $request->input('groups', []);
         $submittedIds = [];
+        
+        // Collect new group names for translation
+        $newGroupNames = [];
+        foreach ($submittedGroups as $key => $groupData) {
+            if (isset($groupData['name']) && $groupData['name'] && !is_numeric($key)) {
+                $newGroupNames[] = $groupData['name'];
+            }
+        }
+        
+        // Translate new group names if role is not in English
+        $translations = [];
+        if (!empty($newGroupNames) && $role->language_code !== 'en') {
+            $translations = GeminiUtils::translateGroupNames($newGroupNames, $role->language_code);
+        }
 
         foreach ($submittedGroups as $key => $groupData) {
             if (isset($groupData['name']) && $groupData['name']) {
                 if (is_numeric($key) && in_array($key, $existingGroupIds)) {
                     // Update existing
-                    $role->groups()->where('id', $key)->update([
+                    $updateData = [
                         'name' => $groupData['name'],
-                        'slug' => $groupData['slug'] ?? null,
-                    ]);
+                        'slug' => $groupData['slug'] ?? Str::slug($groupData['name']),
+                    ];
+                    
+                    // Add English translation if available
+                    if (isset($translations[$groupData['name']])) {
+                        $updateData['name_en'] = $translations[$groupData['name']];
+                        // Use English name for slug if translation is available
+                        $updateData['slug'] = Str::slug($translations[$groupData['name']]);
+                    }
+                    
+                    $role->groups()->where('id', $key)->update($updateData);
                     $submittedIds[] = $key;
                 } else {
                     // New group
-                    $newGroup = $role->groups()->create([
+                    $createData = [
                         'name' => $groupData['name'],
                         'slug' => Str::slug($groupData['name']),
-                    ]);
+                    ];
+                    
+                    // Add English translation if available
+                    if (isset($translations[$groupData['name']])) {
+                        $createData['name_en'] = $translations[$groupData['name']];
+                        // Use English name for slug if translation is available
+                        $createData['slug'] = Str::slug($translations[$groupData['name']]);
+                    }
+                    
+                    $newGroup = $role->groups()->create($createData);
                     $submittedIds[] = $newGroup->id;
                 }
             }

@@ -14,4 +14,15 @@ class Group extends Model
     {
         return $this->belongsTo(\App\Models\Role::class);
     }
+
+    public function translatedName()
+    {
+        $value = $this->name;
+
+        if ($this->name_en && (session()->has('translate') || request()->lang == 'en')) {
+            $value = $this->name_en;
+        }
+
+        return $value;
+    }
 }

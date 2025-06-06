@@ -94,7 +94,7 @@
                         <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 md:w-auto md:ml-4">
                             <option value="">{{ __('messages.all_schedules') }}</option>
                             @foreach($role->groups as $group)
-                                <option value="{{ $group->id }}">{{ $group->name }}</option>
+                                <option value="{{ $group->id }}">{{ $group->translatedName() }}</option>
                             @endforeach
                         </select>
                     @endif
@@ -231,7 +231,7 @@
                     <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 w-full mt-4">
                         <option value="">{{ __('messages.all_schedules') }}</option>
                         @foreach($role->groups as $group)
-                            <option value="{{ $group->id }}">{{ $group->name }}</option>
+                            <option value="{{ $group->id }}">{{ $group->translatedName() }}</option>
                         @endforeach
                     </select>
                 @endif

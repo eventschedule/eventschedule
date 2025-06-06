@@ -607,7 +607,7 @@
                             <select id="group_id" name="group_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                 <option value="">{{ __('messages.please_select') }}</option>
                                 @foreach($role->groups as $group)
-                                    <option value="{{ $group->id }}" {{ old('group_id', $event->group_id) == $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
+                                    <option value="{{ $group->id }}" {{ old('group_id', $event->group_id) == $group->id ? 'selected' : '' }}>{{ $group->translatedName() }}</option>
                                 @endforeach
                             </select>
                             <x-input-error class="mt-2" :messages="$errors->get('group_id')" />
