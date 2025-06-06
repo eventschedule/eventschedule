@@ -6,6 +6,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\SetUserLanguage;
 use App\Http\Middleware\EnsureEmailIsVerified;
 use App\Http\Middleware\HandleBotTraffic;
+use App\Http\Middleware\SecurityHeaders;
 use Sentry\Laravel\Integration;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -20,6 +21,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'stripe/webhook',
             'invoiceninja/webhook/*',
         ]);
+        
+        $middleware->append(SecurityHeaders::class);
         
         $middleware->web(append: [
             SetUserLanguage::class,
