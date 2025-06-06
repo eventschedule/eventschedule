@@ -37,6 +37,7 @@ return [
     'remember_me' => 'Se souvenir de moi',
     'log_in' => 'Se connecter',
     'name' => 'Nom',
+    'english_name' => 'Nom en Anglais',
     'confirm_password' => 'Confirmer le Mot de Passe',
     'terms_of_service' => 'Conditions d\'Utilisation',
     'privacy_policy' => 'Politique de Confidentialité',

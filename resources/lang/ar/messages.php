@@ -37,6 +37,7 @@ return [
     'remember_me' => 'تذكرني',
     'log_in' => 'تسجيل الدخول',
     'name' => 'الاسم',
+    'english_name' => 'الاسم بالإنجليزية',
     'confirm_password' => 'تأكيد كلمة المرور',
     'terms_of_service' => 'شروط الخدمة',
     'privacy_policy' => 'سياسة الخصوصية',

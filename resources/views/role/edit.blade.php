@@ -984,6 +984,12 @@
                                                 <x-input-label for="group_name_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.name')" />
                                                 <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][name]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->name : $group['name'] ?? ''" />
                                             </div>
+                                            @if($role->language_code !== 'en' || auth()->user()->language_code !== 'en')
+                                            <div class="mb-4">
+                                                <x-input-label for="group_name_en_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.english_name')" />
+                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][name_en]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->name_en : $group['name_en'] ?? ''" />
+                                            </div>
+                                            @endif
                                             @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
                                             <div class="mb-4" id="group-url-display-{{ is_object($group) ? $group->id : $i }}">
                                                 <p class="text-sm text-gray-500 flex items-center gap-2">
@@ -1074,6 +1080,12 @@ function addGroupField() {
             <label for="group_name_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.name') }}</label>
             <input name="groups[new_${idx}][name]" type="text" id="group_name_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
         </div>
+        @if($role->language_code !== 'en' || auth()->user()->language_code !== 'en')
+        <div class="mb-4">
+            <label for="group_name_en_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.english_name') }}</label>
+            <input name="groups[new_${idx}][name_en]" type="text" id="group_name_en_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+        </div>
+        @endif
         <div class="flex gap-4 items-center">
             <button type="button" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150" onclick="this.parentElement.parentElement.remove()">
                 {{ __('messages.remove') }}

@@ -956,7 +956,7 @@ class RoleController extends Controller
         // Collect new group names for translation
         $newGroupNames = [];
         foreach ($submittedGroups as $key => $groupData) {
-            if (isset($groupData['name']) && $groupData['name'] && !is_numeric($key)) {
+            if (isset($groupData['name']) && $groupData['name'] && !is_numeric($key) && empty($groupData['name_en'])) {
                 $newGroupNames[] = $groupData['name'];
             }
         }
@@ -976,8 +976,10 @@ class RoleController extends Controller
                         'slug' => $groupData['slug'] ?? Str::slug($groupData['name']),
                     ];
                     
-                    // Add English translation if available
-                    if (isset($translations[$groupData['name']])) {
+                    // Preserve manually entered English name or add automatic translation
+                    if (isset($groupData['name_en'])) {
+                        $updateData['name_en'] = $groupData['name_en'];
+                    } elseif (isset($translations[$groupData['name']])) {
                         $updateData['name_en'] = $translations[$groupData['name']];
                         // Use English name for slug if translation is available
                         $updateData['slug'] = Str::slug($translations[$groupData['name']]);
