@@ -511,7 +511,7 @@ const { createApp } = Vue;
 createApp({
     data() {
         return {
-            selectedGroup: '{{ isset($selectedGroup) ? $selectedGroup->id : ($group ?? "") }}',
+            selectedGroup: '{{ isset($selectedGroup) ? $selectedGroup->id : "" }}',
             selectedCategory: '{{ $category ?? "" }}',
             allEvents: @json($eventsForVue),
             startOfMonth: '{{ $startOfMonth->format('Y-m-d') }}',
