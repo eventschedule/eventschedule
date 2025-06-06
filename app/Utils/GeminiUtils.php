@@ -281,4 +281,36 @@ class GeminiUtils
 
         return $value;
     }
+
+    /**
+     * Batch translate group names to English using Gemini API
+     */
+    public static function translateGroupNames($groupNames, $fromLanguage = 'auto')
+    {
+        if (empty($groupNames)) {
+            return [];
+        }
+
+        // Create a single prompt for batch translation
+        $prompt = "Translate these group names from {$fromLanguage} to English. Return a JSON object where each key is the original name and the value is the English translation:\n";
+        $prompt .= json_encode($groupNames);
+
+        try {
+            $response = self::sendRequest($prompt);
+            
+            // sendRequest returns an array, get the first item
+            if (!empty($response) && is_array($response)) {
+                $translations = $response[0];
+                
+                if (is_array($translations)) {
+                    return $translations;
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error('Group name translation failed: ' . $e->getMessage());
+        }
+
+        // Fallback: return empty translations if API fails
+        return [];
+    }
 }   
