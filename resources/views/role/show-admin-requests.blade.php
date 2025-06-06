@@ -20,39 +20,33 @@
 <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 pt-5">
     @foreach($requests as $event)
     <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow">
-        @if ($role->isVenue())
-        <a href="{{ $event->role()->getGuestUrl() }}" target="_blank" class="hover:underline">
+        <a href="{{ $event->getGuestUrl() }}" target="_blank" class="hover:underline">
             <div class="flex flex-1 flex-col p-8">
-                @if ($event->role()->profile_image_url)
-                <img class="mx-auto rounded-2xl h-32 w-32 flex-shrink-0 object-cover" src="{{ $event->role()->profile_image_url }}"
-                    alt="Profile Image">
+                @if ($role->isVenue() || $role->isCurator())
+                    @if ($event->role() && $event->role()->profile_image_url)
+                    <img class="mx-auto rounded-2xl h-32 w-32 flex-shrink-0 object-cover" src="{{ $event->role()->profile_image_url }}"
+                        alt="Profile Image">
+                    @endif
+                    <h3 class="mt-6 text-sm font-medium text-gray-900">{{ $event->role() ? $event->role()->name : $event->translatedName() }}</h3>
+                @else
+                    @if ($event->venue && $event->venue->profile_image_url)
+                    <img class="mx-auto rounded-2xl h-32 w-32 flex-shrink-0 object-cover" src="{{ $event->venue->profile_image_url }}"
+                        alt="Profile Image">
+                    @endif
+                    <h3 class="mt-6 text-sm font-medium text-gray-900">{{ $event->venue ? $event->venue->name : $event->translatedName() }}</h3>
                 @endif
-                <h3 class="mt-6 text-sm font-medium text-gray-900">{{ $event->role()->name }}</h3>
                 @if ($event->starts_at)
                 <p class="text-sm text-gray-500">{{ $event->localStartsAt(true) }}</p>
                 @endif
                 <dl class="mt-1 flex flex-grow flex-col justify-between">
-                    <dd class="text-sm text-gray-500 line-clamp-3">{{ $event->role()->description }}</dd>
+                    @if ($role->isVenue() || $role->isCurator())
+                        <dd class="text-sm text-gray-500 line-clamp-3">{{ $event->role() ? $event->role()->description : '' }}</dd>
+                    @else
+                        <dd class="text-sm text-gray-500 line-clamp-3">{{ $event->venue ? $event->venue->description : '' }}</dd>
+                    @endif
                 </dl>
             </div>
         </a>
-        @else
-        <a href="{{ $event->venue->getGuestUrl() }}" target="_blank" class="hover:underline">
-            <div class="flex flex-1 flex-col p-8">
-                @if ($event->venue->profile_image_url)
-                <img class="mx-auto rounded-2xl h-32 w-32 flex-shrink-0 object-cover" src="{{ $event->venue->profile_image_url }}"
-                    alt="Profile Image">
-                @endif
-                <h3 class="mt-6 text-sm font-medium text-gray-900">{{ $event->venue->name }}</h3>
-                @if ($event->starts_at)
-                <p class="text-sm text-gray-500">{{ $event->localStartsAt(true) }}</p>
-                @endif
-                <dl class="mt-1 flex flex-grow flex-col justify-between">
-                    <dd class="text-sm text-gray-500 line-clamp-3">{{ $event->venue->description }}</dd>
-                </dl>
-            </div>
-        </a>
-        @endif
         <div>
             <div class="-mt-px flex divide-x divide-gray-200">
                 <div class="flex w-0 flex-1 cursor-pointer"
