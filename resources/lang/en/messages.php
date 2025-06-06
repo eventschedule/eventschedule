@@ -37,6 +37,7 @@ return [
     'remember_me' => 'Remember me',
     'log_in' => 'Log in',
     'name' => 'Name',
+    'english_name' => 'English Name',
     'confirm_password' => 'Confirm Password',
     'terms_of_service' => 'Terms of Service',
     'privacy_policy' => 'Privacy Policy',

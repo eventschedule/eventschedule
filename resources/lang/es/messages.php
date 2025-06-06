@@ -37,6 +37,7 @@ return [
     'remember_me' => 'Recuérdame',
     'log_in' => 'Iniciar sesión',
     'name' => 'Nombre',
+    'english_name' => 'Nombre en Inglés',
     'confirm_password' => 'Confirmar Contraseña',
     'terms_of_service' => 'Términos de Servicio',
     'privacy_policy' => 'Política de Privacidad',
