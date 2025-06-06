@@ -9,6 +9,7 @@ use App\Models\RoleUser;
 use App\Repos\EventRepo;
 use Illuminate\Http\Request;
 use App\Utils\UrlUtils;
+use Illuminate\Support\Str;
 
 class ApiEventController extends Controller
 {
@@ -65,7 +66,7 @@ class ApiEventController extends Controller
 
     public function store(Request $request, $subdomain)
     {
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        $role = Role::with('groups')->subdomain($subdomain)->firstOrFail();
         $encodedRoleId = UrlUtils::encodeId($role->id);
         
         if ($role->isVenue()) {
@@ -91,7 +92,41 @@ class ApiEventController extends Controller
             'venue_address1' => 'required_without_all:venue_id,event_url',
             'event_url' => 'required_without_all:venue_id,venue_address1',
             'members' => 'array',
+            'schedule' => 'nullable|string|max:255',
+            'category' => 'nullable|string|max:255',
+            'category_id' => 'nullable|integer',
         ]);
+
+        // Handle group name to group_id conversion
+        if ($request->has('schedule')) {
+            $groupSlug = $request->schdule;
+            $group = $role->groups()->where('slug', $groupSlug)->first();
+            if ($group) {
+                $request->merge(['group_id' => $group->id]);
+            } else {
+                return response()->json(['error' => 'Schedule not found: ' . $request->schedule], 422);
+            }
+        }
+
+        // Handle category name to category_id conversion
+        if ($request->has('category_name') && !$request->has('category_id')) {
+            $categorySlug = Str::slug($request->category_name);
+            $categories = config('app.event_categories', []);
+            $categoryId = null;
+            
+            foreach ($categories as $id => $name) {
+                if (Str::slug($name) === $categorySlug) {
+                    $categoryId = $id;
+                    break;
+                }
+            }
+            
+            if ($categoryId) {
+                $request->merge(['category_id' => $categoryId]);
+            } else {
+                return response()->json(['error' => 'Category not found: ' . $request->category_name], 422);
+            }
+        }
 
         $roleIds = RoleUser::where('user_id', auth()->user()->id)
                         ->whereIn('level', ['owner', 'follower'])
