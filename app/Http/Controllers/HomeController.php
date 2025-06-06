@@ -90,7 +90,8 @@ class HomeController extends Controller
 
     public function sitemap()
     {
-        $roles = Role::where(function($query) {
+        $roles = Role::with('groups')
+                ->where(function($query) {
                     $query->where(function($q) {
                         $q->whereNotNull('email')
                           ->whereNotNull('email_verified_at');

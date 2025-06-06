@@ -13,6 +13,16 @@
             <changefreq>daily</changefreq>
             <priority>0.8</priority>
         </url>
+        @foreach($role->groups as $group)
+            @if($group->slug)
+                <url>
+                    <loc>{{ url($role->getGuestUrl() . '/' . $group->slug) }}</loc>
+                    <lastmod>{{ $group->updated_at->toIso8601String() }}</lastmod>
+                    <changefreq>daily</changefreq>
+                    <priority>0.7</priority>
+                </url>
+            @endif
+        @endforeach
     @endforeach
     @foreach($events as $event)
         <url>
