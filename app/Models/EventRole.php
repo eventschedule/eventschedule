@@ -13,6 +13,7 @@ class EventRole extends Pivot
     protected $fillable = [
         'event_id',
         'role_id',
+        'is_accepted',
     ];
 
     public function role()
