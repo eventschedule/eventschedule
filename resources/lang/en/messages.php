@@ -460,4 +460,5 @@ return [
     'show_past_events' => 'Show Past Events',
     'category' => 'Category',
     'all_categories' => 'All Categories',
+    'subschedules' => 'Subschedules',
 ];
