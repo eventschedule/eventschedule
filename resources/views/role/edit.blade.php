@@ -951,23 +951,34 @@
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('messages.groups') }}
+                            {{ __('messages.subschedules') }}
                         </h2>
 
                         <div class="mb-6">
-                            <x-input-label for="groups" :value="__('messages.groups')" />
                             <div id="groups-list">
                                 @php $groups = $role->groups ?? []; @endphp
                                 <div id="group-items">
                                     @foreach(old('groups', $groups) as $i => $group)
-                                        <div class="flex items-center mb-2">
-                                            <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][name]" type="text" class="mr-2 block w-full" :value="is_object($group) ? $group->name : $group['name'] ?? ''" placeholder="Group name" />
-                                            <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][slug]" type="text" class="mr-2 block w-1/3" :value="is_object($group) ? $group->slug : $group['slug'] ?? ''" placeholder="Slug" />
-                                            <button type="button" class="text-red-600" onclick="this.parentElement.remove()">&times;</button>
+                                        <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                            <div class="mb-4">
+                                                <x-input-label for="group_name_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.name')" />
+                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][name]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->name : $group['name'] ?? ''" />
+                                            </div>
+                                            @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
+                                            <div class="mb-4">
+                                                <x-input-label for="group_slug_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.slug')" />
+                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][slug]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->slug : $group['slug'] ?? ''" />
+                                            </div>
+                                            @endif
+                                            <x-secondary-button onclick="this.parentElement.remove()" type="button">
+                                                {{ __('messages.remove') }}
+                                            </x-secondary-button>
                                         </div>
                                     @endforeach
                                 </div>
-                                <button type="button" class="mt-2 px-3 py-1 bg-blue-500 text-white rounded" onclick="addGroupField()">+ {{ __('messages.add_group') }}</button>
+                                <x-secondary-button type="button" onclick="addGroupField()">
+                                    {{ __('messages.add') }}
+                                </x-secondary-button>
                             </div>
                             <x-input-error class="mt-2" :messages="$errors->get('groups')" />
                         </div>
@@ -1009,10 +1020,16 @@ function addGroupField() {
     const container = document.getElementById('group-items');
     const idx = container.children.length;
     const div = document.createElement('div');
-    div.className = 'flex items-center mb-2';
-    div.innerHTML = `<input name="groups[new_${idx}][name]" type="text" class="mr-2 block w-full" placeholder="Group name" />
-        <input name="groups[new_${idx}][slug]" type="text" class="mr-2 block w-1/3" placeholder="Slug" />
-        <button type="button" class="text-red-600" onclick="this.parentElement.remove()">&times;</button>`;
+    div.className = 'mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg';
+    div.innerHTML = `
+        <div class="mb-4">
+            <label for="group_name_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.name') }}</label>
+            <input name="groups[new_${idx}][name]" type="text" id="group_name_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+        </div>
+        <button type="button" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150" onclick="this.parentElement.remove()">
+            {{ __('messages.remove') }}
+        </button>
+    `;
     container.appendChild(div);
 }
 </script>
