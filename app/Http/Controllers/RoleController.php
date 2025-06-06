@@ -765,10 +765,12 @@ class RoleController extends Controller
                         'slug' => Str::slug($groupData['name']),
                     ];
                     
-                    // Add English translation if available
-                    if (isset($translations[$groupData['name']])) {
+                    // Preserve manually entered English name or add automatic translation
+                    if (isset($groupData['name_en'])) {
+                        $groupCreateData['name_en'] = $groupData['name_en'];
+                        $groupCreateData['slug'] = Str::slug($groupData['name_en']);
+                    } elseif (isset($translations[$groupData['name']])) {   
                         $groupCreateData['name_en'] = $translations[$groupData['name']];
-                        // Use English name for slug if translation is available
                         $groupCreateData['slug'] = Str::slug($translations[$groupData['name']]);
                     }
                     
@@ -994,10 +996,12 @@ class RoleController extends Controller
                         'slug' => Str::slug($groupData['name']),
                     ];
                     
-                    // Add English translation if available
-                    if (isset($translations[$groupData['name']])) {
+                    // Preserve manually entered English name or add automatic translation
+                    if (isset($groupData['name_en'])) {
+                        $createData['name_en'] = $groupData['name_en'];
+                        $createData['slug'] = Str::slug($groupData['name_en']);
+                    } elseif (isset($translations[$groupData['name']])) {
                         $createData['name_en'] = $translations[$groupData['name']];
-                        // Use English name for slug if translation is available
                         $createData['slug'] = Str::slug($translations[$groupData['name']]);
                     }
                     
