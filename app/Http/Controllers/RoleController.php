@@ -264,6 +264,17 @@ class RoleController extends Controller
             }        
         }
 
+        // Also check for schedule parameter in query string
+        if (!$selectedGroup && $request->has('schedule')) {
+            $scheduleSlug = $request->input('schedule');
+            if ($role->groups) {
+                $group = $role->groups->where('slug', $scheduleSlug)->first();
+                if ($group) {
+                    $selectedGroup = $group;
+                }
+            }
+        }
+
         if ($event) {
             if ($event->venue) {
                 if ($event->venue->subdomain == $subdomain) {

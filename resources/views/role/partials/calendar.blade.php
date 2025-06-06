@@ -106,7 +106,7 @@
                         <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 md:w-auto md:ml-4">
                             <option value="">{{ __('messages.all_schedules') }}</option>
                             @foreach($role->groups as $group)
-                                <option value="{{ $group->id }}">{{ $group->translatedName() }}</option>
+                                <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
                             @endforeach
                         </select>
                     @endif
@@ -243,7 +243,7 @@
                     <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 w-full mt-4">
                         <option value="">{{ __('messages.all_schedules') }}</option>
                         @foreach($role->groups as $group)
-                            <option value="{{ $group->id }}">{{ $group->translatedName() }}</option>
+                            <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
                         @endforeach
                     </select>
                 @endif
@@ -523,7 +523,7 @@ const { createApp } = Vue;
 createApp({
     data() {
         return {
-            selectedGroup: '{{ isset($selectedGroup) ? $selectedGroup->id : "" }}',
+            selectedGroup: '{{ isset($selectedGroup) ? $selectedGroup->slug : "" }}',
             selectedCategory: '{{ $category ?? "" }}',
             allEvents: @json($eventsForVue),
             groups: @json($groupsForVue),
@@ -539,8 +539,12 @@ createApp({
     computed: {
         filteredEvents() {
             return this.allEvents.filter(event => {
-                if (this.selectedGroup && event.group_id != this.selectedGroup) {
-                    return false;
+                if (this.selectedGroup) {
+                    // Find the group by slug to get its ID for filtering
+                    const selectedGroupObj = this.groups.find(group => group.slug === this.selectedGroup);
+                    if (selectedGroupObj && event.group_id != selectedGroupObj.id) {
+                        return false;
+                    }
                 }
                 if (this.selectedCategory && event.category_id != this.selectedCategory) {
                     return false;
@@ -550,9 +554,9 @@ createApp({
         }
     },
     watch: {
-        selectedGroup(newGroupId) {
+        selectedGroup(newGroupSlug) {
             if (this.route === 'guest' && !this.embed) {
-                this.updateUrlWithGroup(newGroupId);
+                this.updateUrlWithGroup(newGroupSlug);
             }
         }
     },
@@ -576,8 +580,12 @@ createApp({
             return false;
         },
         isEventVisible(event) {
-            if (this.selectedGroup && event.group_id != this.selectedGroup) {
-                return false;
+            if (this.selectedGroup) {
+                // Find the group by slug to get its ID for filtering
+                const selectedGroupObj = this.groups.find(group => group.slug === this.selectedGroup);
+                if (selectedGroupObj && event.group_id != selectedGroupObj.id) {
+                    return false;
+                }
             }
             if (this.selectedCategory && event.category_id != this.selectedCategory) {
                 return false;
@@ -598,7 +606,7 @@ createApp({
             }
             
             if (this.selectedGroup) {
-                queryParams.push('group=' + this.selectedGroup);
+                queryParams.push('schedule=' + this.selectedGroup);
             }
             
             if (queryParams.length > 0) {
@@ -659,8 +667,8 @@ createApp({
             const tooltip = document.getElementById('tooltip');
             tooltip.style.display = 'none';
         },
-        updateUrlWithGroup(newGroupId) {
-            if (!newGroupId) {
+        updateUrlWithGroup(newGroupSlug) {
+            if (!newGroupSlug) {
                 // If no group selected, redirect to base guest URL
                 const baseUrl = `/${this.subdomain}`;
                 const currentUrl = new URL(window.location);
@@ -676,14 +684,10 @@ createApp({
                 return;
             }
             
-            // Find the selected group to get its slug
-            const selectedGroup = this.groups.find(group => group.id == newGroupId);
-            if (!selectedGroup) return;
-            
             // Build new URL with group slug
             const currentUrl = new URL(window.location);
             const params = new URLSearchParams(currentUrl.search);
-            let newUrl = `/${this.subdomain}/${selectedGroup.slug}`;
+            let newUrl = `/${this.subdomain}/${newGroupSlug}`;
             
             // Keep year and month parameters if they exist
             if (params.get('year') && params.get('month')) {

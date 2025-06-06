@@ -95,7 +95,7 @@
                   $venueUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
                   $queryParams = [];
                   if (request('category')) $queryParams['category'] = request('category');
-                  if (request('group')) $queryParams['group'] = request('group');
+                  if (request('schedule')) $queryParams['schedule'] = request('schedule');
                   if (!empty($queryParams)) {
                     $venueUrl .= '?' . http_build_query($queryParams);
                   }
@@ -254,7 +254,7 @@
                   $memberUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
                   $queryParams = [];
                   if (request('category')) $queryParams['category'] = request('category');
-                  if (request('group')) $queryParams['group'] = request('group');
+                  if (request('schedule')) $queryParams['schedule'] = request('schedule');
                   if (!empty($queryParams)) {
                     $memberUrl .= '?' . http_build_query($queryParams);
                   }
@@ -349,7 +349,7 @@
           @endif
 
           <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6">
-            @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'group' => request('group')])
+            @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule')])
           </div>
         </div>
         @endif
