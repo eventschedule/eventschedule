@@ -56,6 +56,18 @@
                 : null,
         ];
     }
+
+    // Prepare groups data for Vue
+    $groupsForVue = [];
+    if (isset($role) && $role->groups) {
+        foreach ($role->groups as $group) {
+            $groupsForVue[] = [
+                'id' => $group->id,
+                'slug' => $group->slug,
+                'name' => $group->translatedName()
+            ];
+        }
+    }
 @endphp
     <header class="py-4">
         <div class="w-full">
@@ -514,6 +526,7 @@ createApp({
             selectedGroup: '{{ isset($selectedGroup) ? $selectedGroup->id : "" }}',
             selectedCategory: '{{ $category ?? "" }}',
             allEvents: @json($eventsForVue),
+            groups: @json($groupsForVue),
             startOfMonth: '{{ $startOfMonth->format('Y-m-d') }}',
             endOfMonth: '{{ $endOfMonth->format('Y-m-d') }}',
             use24Hour: {{ isset($role) && $role->use_24_hour_time ? 'true' : 'false' }},
@@ -534,6 +547,13 @@ createApp({
                 }
                 return true;
             });
+        }
+    },
+    watch: {
+        selectedGroup(newGroupId) {
+            if (this.route === 'guest' && !this.embed) {
+                this.updateUrlWithGroup(newGroupId);
+            }
         }
     },
     methods: {
@@ -638,6 +658,40 @@ createApp({
         hideTooltip() {
             const tooltip = document.getElementById('tooltip');
             tooltip.style.display = 'none';
+        },
+        updateUrlWithGroup(newGroupId) {
+            if (!newGroupId) {
+                // If no group selected, redirect to base guest URL
+                const baseUrl = `/${this.subdomain}`;
+                const currentUrl = new URL(window.location);
+                const params = new URLSearchParams(currentUrl.search);
+                
+                // Keep year and month if they exist
+                let newUrl = baseUrl;
+                if (params.get('year') && params.get('month')) {
+                    newUrl += `?year=${params.get('year')}&month=${params.get('month')}`;
+                }
+                
+                window.history.pushState({}, '', newUrl);
+                return;
+            }
+            
+            // Find the selected group to get its slug
+            const selectedGroup = this.groups.find(group => group.id == newGroupId);
+            if (!selectedGroup) return;
+            
+            // Build new URL with group slug
+            const currentUrl = new URL(window.location);
+            const params = new URLSearchParams(currentUrl.search);
+            let newUrl = `/${this.subdomain}/${selectedGroup.slug}`;
+            
+            // Keep year and month parameters if they exist
+            if (params.get('year') && params.get('month')) {
+                newUrl += `?year=${params.get('year')}&month=${params.get('month')}`;
+            }
+            
+            // Update the URL without page reload
+            window.history.pushState({}, '', newUrl);
         }
     },
     mounted() {

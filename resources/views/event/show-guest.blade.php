@@ -250,7 +250,6 @@
             >
               <div class="flex gap-3 flex-row items-center">
                 @if ($each->isClaimed())                
-                @if ($each->profile_image_url)
                 @php
                   $memberUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
                   $queryParams = [];
@@ -260,6 +259,7 @@
                     $memberUrl .= '?' . http_build_query($queryParams);
                   }
                 @endphp
+                @if ($each->profile_image_url)
                 <a
                   href="{{ $memberUrl }}"                  
                 >                
