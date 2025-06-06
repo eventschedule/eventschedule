@@ -544,7 +544,6 @@
                             @endif
 
                         </div>
-
                     </div>
                 </div>
 
@@ -860,12 +859,33 @@
                         </h2>
                         
                         @if ($role->exists)
-                        <div class="mb-6">
+                        <div class="mb-6" id="url-display">
+                            <x-input-label :value="__('messages.schedule_url')" />
+                            <p class="text-sm text-gray-500 flex items-center gap-2 mt-1">
+                                <a href="{{ $role->getGuestUrl() }}" target="_blank" class="hover:underline">
+                                    {{ \App\Utils\UrlUtils::clean($role->getGuestUrl()) }}
+                                </a>
+                                <button type="button" onclick="copyRoleUrl(this)" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
+                                    </svg>
+                                </button>
+                                <button type="button" onclick="toggleSubdomainEdit()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 ml-2" title="{{ __('messages.edit_url') }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                    </svg>
+                                </button>
+                            </p>
+                        </div>
+                        <div class="mb-6 hidden" id="subdomain-edit">
                             <x-input-label for="new_subdomain" :value="__('messages.subdomain')" />
                             <x-text-input id="new_subdomain" name="new_subdomain" type="text" class="mt-1 block w-full"
                                 :value="old('new_subdomain', $role->subdomain)" required minlength="4" maxlength="50"
                                 pattern="[a-z0-9-]+" oninput="this.value = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '')" />
                             <x-input-error class="mt-2" :messages="$errors->get('new_subdomain')" />
+                            <button type="button" onclick="toggleSubdomainEdit()" class="mt-2 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                                {{ __('messages.cancel') }}
+                            </button>
                         </div>
                         @endif
 
@@ -965,14 +985,42 @@
                                                 <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][name]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->name : $group['name'] ?? ''" />
                                             </div>
                                             @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
-                                            <div class="mb-4">
+                                            <div class="mb-4" id="group-url-display-{{ is_object($group) ? $group->id : $i }}">
+                                                <p class="text-sm text-gray-500 flex items-center gap-2">
+                                                    <a href="{{ $role->getGuestUrl() }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" target="_blank" class="hover:underline">
+                                                        {{ \App\Utils\UrlUtils::clean($role->getGuestUrl()) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}
+                                                    </a>
+                                                    <button type="button" onclick="copyGroupUrl(this, '{{ $role->getGuestUrl() }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}')" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
+                                                        </svg>
+                                                    </button>
+                                                </p>
+                                            </div>
+                                            <div class="mb-4 {{ (is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])) ? 'hidden' : '' }}" id="group-slug-edit-{{ is_object($group) ? $group->id : $i }}">
                                                 <x-input-label for="group_slug_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.slug')" />
                                                 <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][slug]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->slug : $group['slug'] ?? ''" />
                                             </div>
+                                            <div class="flex gap-4 items-center">
+                                                <x-secondary-button type="button" onclick="toggleGroupSlugEdit('{{ is_object($group) ? $group->id : $i }}')" id="edit-button-{{ is_object($group) ? $group->id : $i }}">
+                                                    {{ __('messages.edit') }}
+                                                </x-secondary-button>
+                                                @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
+                                                <x-secondary-button type="button" onclick="toggleGroupSlugEdit('{{ is_object($group) ? $group->id : $i }}')" class="hidden" id="cancel-button-{{ is_object($group) ? $group->id : $i }}">
+                                                    {{ __('messages.cancel') }}
+                                                </x-secondary-button>
+                                                @endif
+                                                <x-secondary-button onclick="this.parentElement.parentElement.remove()" type="button">
+                                                    {{ __('messages.remove') }}
+                                                </x-secondary-button>
+                                            </div>
+                                            @else
+                                            <div class="flex gap-4 items-center">
+                                                <x-secondary-button onclick="this.parentElement.parentElement.remove()" type="button">
+                                                    {{ __('messages.remove') }}
+                                                </x-secondary-button>
+                                            </div>
                                             @endif
-                                            <x-secondary-button onclick="this.parentElement.remove()" type="button">
-                                                {{ __('messages.remove') }}
-                                            </x-secondary-button>
                                         </div>
                                     @endforeach
                                 </div>
@@ -1026,10 +1074,83 @@ function addGroupField() {
             <label for="group_name_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.name') }}</label>
             <input name="groups[new_${idx}][name]" type="text" id="group_name_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
         </div>
-        <button type="button" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150" onclick="this.parentElement.remove()">
-            {{ __('messages.remove') }}
-        </button>
+        <div class="flex gap-4 items-center">
+            <button type="button" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150" onclick="this.parentElement.parentElement.remove()">
+                {{ __('messages.remove') }}
+            </button>
+        </div>
     `;
     container.appendChild(div);
+}
+
+function copyRoleUrl(button) {
+    const url = '{{ $role->exists ? $role->getGuestUrl() : "" }}';
+    navigator.clipboard.writeText(url).then(() => {
+        const originalHTML = button.innerHTML;
+        button.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+        `;
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+        }, 2000);
+    });
+}
+
+function toggleSubdomainEdit() {
+    const urlDisplay = document.getElementById('url-display');
+    const subdomainEdit = document.getElementById('subdomain-edit');
+    
+    if (urlDisplay.classList.contains('hidden')) {
+        urlDisplay.classList.remove('hidden');
+        subdomainEdit.classList.add('hidden');
+    } else {
+        urlDisplay.classList.add('hidden');
+        subdomainEdit.classList.remove('hidden');
+        document.getElementById('new_subdomain').focus();
+    }
+}
+
+function copyGroupUrl(button, url) {
+    navigator.clipboard.writeText(url).then(() => {
+        const originalHTML = button.innerHTML;
+        button.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+        `;
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+        }, 2000);
+    });
+}
+
+function toggleGroupSlugEdit(groupId) {
+    const urlDisplay = document.getElementById(`group-url-display-${groupId}`);
+    const slugEdit = document.getElementById(`group-slug-edit-${groupId}`);
+    const cancelButton = document.getElementById(`cancel-button-${groupId}`);
+    const editButton = document.getElementById(`edit-button-${groupId}`);
+    
+    if (urlDisplay.classList.contains('hidden')) {
+        urlDisplay.classList.remove('hidden');
+        slugEdit.classList.add('hidden');
+        if (cancelButton) {
+            cancelButton.classList.add('hidden');
+        }
+        if (editButton) {
+            editButton.classList.remove('hidden');
+        }
+    } else {
+        urlDisplay.classList.add('hidden');
+        slugEdit.classList.remove('hidden');
+        if (cancelButton) {
+            cancelButton.classList.remove('hidden');
+        }
+        if (editButton) {
+            editButton.classList.add('hidden');
+        }
+        document.getElementById(`group_slug_${groupId}`).focus();
+    }
 }
 </script>

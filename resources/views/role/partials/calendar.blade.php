@@ -90,7 +90,7 @@
                     </div>
                 </div>
                 <div class="hidden md:flex md:flex-row md:items-center md:justify-end md:w-auto md:gap-0">
-                    @if(isset($role) && $role->groups && $role->groups->count() && count($uniqueGroupIds ?? []) > 1)
+                    @if(isset($role) && $role->groups && $role->groups->count() > 1)
                         <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 md:w-auto md:ml-4">
                             <option value="">{{ __('messages.all_groups') }}</option>
                             @foreach($role->groups as $group)
@@ -227,7 +227,7 @@
                 </div>
             </div>
             <div class="md:hidden flex flex-col gap-4 w-full">
-                @if(isset($role) && $role->groups && $role->groups->count() && count($uniqueGroupIds ?? []) > 1)
+                @if(isset($role) && $role->groups && $role->groups->count() > 1)
                     <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 w-full mt-4">
                         <option value="">{{ __('messages.all_groups') }}</option>
                         @foreach($role->groups as $group)
@@ -511,7 +511,7 @@ const { createApp } = Vue;
 createApp({
     data() {
         return {
-            selectedGroup: '{{ $group ?? "" }}',
+            selectedGroup: '{{ isset($selectedGroup) ? $selectedGroup->id : ($group ?? "") }}',
             selectedCategory: '{{ $category ?? "" }}',
             allEvents: @json($eventsForVue),
             startOfMonth: '{{ $startOfMonth->format('Y-m-d') }}',
