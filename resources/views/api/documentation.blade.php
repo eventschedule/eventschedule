@@ -320,6 +320,20 @@
                                     </div>
                                     <p class="mt-4">Create a new event using either JSON data or a flyer image.</p>
                                     
+                                    <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                        <h4 class="font-medium text-blue-900 dark:text-blue-100 mb-2">Schedule & Category Support</h4>
+                                        <p class="text-sm text-blue-800 dark:text-blue-200">
+                                            You can specify schedules and categories by ID or name:
+                                        </p>
+                                        <ul class="text-sm text-blue-800 dark:text-blue-200 mt-2 space-y-1">
+                                            <li><strong>schedule</strong>: Assigns event to a specific subschedule</li>
+                                            <li><strong>category</strong> or <strong>category_id</strong>: Sets event category</li>
+                                        </ul>
+                                        <p class="text-sm text-blue-800 dark:text-blue-200 mt-2">
+                                            When using names, the API will automatically find matching schedules by slug and categories by name.
+                                        </p>
+                                    </div>
+                                    
                                     <button onclick="toggleCurl(this)" 
                                             class="mt-2 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
                                         <svg class="w-4 h-4 mr-1 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
@@ -344,6 +358,8 @@
          "duration": 2,
          "venue_name": "Carnegie Hall",
          "venue_address1": "123 Main St",
+         "schedule": "main-schedule",
+         "category": "music",
          "members": [
             {
                 "name": "John Doe",
@@ -378,6 +394,8 @@
     -F "duration=2" \
     -F "venue_name=Carnegie Hall" \
     -F "venue_address1=111 Main st" \
+    -F "schedule=main-schedule" \
+    -F "category=music" \
     -F "members[0][name]=John Doe" \
     -F "members[0][email]=john@example.com" \
     -F "members[0][youtube_url]=https://www.youtube.com/watch?v=RbXXUHABGRU"</code></pre>
@@ -400,6 +418,8 @@
         "duration": 2,
         "venue_name": "Carnegie Hall",
         "venue_address1": "123 Main St",
+        "schedule": "main-schedule",
+        "category": "music",
         "members": {
             "123": {
                 "name": "John Doe",
