@@ -92,7 +92,7 @@
                 <div class="hidden md:flex md:flex-row md:items-center md:justify-end md:w-auto md:gap-0">
                     @if(isset($role) && $role->groups && $role->groups->count() > 1)
                         <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 md:w-auto md:ml-4">
-                            <option value="">{{ __('messages.all_groups') }}</option>
+                            <option value="">{{ __('messages.all_schedules') }}</option>
                             @foreach($role->groups as $group)
                                 <option value="{{ $group->id }}">{{ $group->name }}</option>
                             @endforeach
@@ -229,7 +229,7 @@
             <div class="md:hidden flex flex-col gap-4 w-full">
                 @if(isset($role) && $role->groups && $role->groups->count() > 1)
                     <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 w-full mt-4">
-                        <option value="">{{ __('messages.all_groups') }}</option>
+                        <option value="">{{ __('messages.all_schedules') }}</option>
                         @foreach($role->groups as $group)
                             <option value="{{ $group->id }}">{{ $group->name }}</option>
                         @endforeach
