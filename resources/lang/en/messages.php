@@ -461,4 +461,5 @@ return [
     'category' => 'Category',
     'all_categories' => 'All Categories',
     'subschedules' => 'Subschedules',
+    'slug' => 'Slug',
 ];
