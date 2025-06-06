@@ -99,7 +99,7 @@ class ApiEventController extends Controller
 
         // Handle group name to group_id conversion
         if ($request->has('schedule')) {
-            $groupSlug = $request->schdule;
+            $groupSlug = $request->schedule;
             $group = $role->groups()->where('slug', $groupSlug)->first();
             if ($group) {
                 $request->merge(['group_id' => $group->id]);
