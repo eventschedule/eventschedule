@@ -729,7 +729,7 @@ class RoleController extends Controller
                 if (!empty($groupData['name'])) {
                     $role->groups()->create([
                         'name' => $groupData['name'],
-                        'slug' => $groupData['slug'] ?? null,
+                        'slug' => Str::slug($groupData['name']),
                     ]);
                 }
             }
@@ -910,6 +910,7 @@ class RoleController extends Controller
         $existingGroupIds = $role->groups()->pluck('id')->toArray();
         $submittedGroups = $request->input('groups', []);
         $submittedIds = [];
+
         foreach ($submittedGroups as $key => $groupData) {
             if (isset($groupData['name']) && $groupData['name']) {
                 if (is_numeric($key) && in_array($key, $existingGroupIds)) {
@@ -923,12 +924,13 @@ class RoleController extends Controller
                     // New group
                     $newGroup = $role->groups()->create([
                         'name' => $groupData['name'],
-                        'slug' => $groupData['slug'] ?? null,
+                        'slug' => Str::slug($groupData['name']),
                     ]);
                     $submittedIds[] = $newGroup->id;
                 }
             }
         }
+        
         // Delete removed groups
         $toDelete = array_diff($existingGroupIds, $submittedIds);
         if (!empty($toDelete)) {
