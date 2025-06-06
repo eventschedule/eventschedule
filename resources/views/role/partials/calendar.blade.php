@@ -403,7 +403,7 @@
                         </div>
                         <ol class="mt-4 divide-y divide-gray-100 text-sm leading-6 md:col-span-7 xl:col-span-8">
                             <li v-for="event in getEventsForDate('{{ $currentDate->format('Y-m-d') }}')" :key="event.id" 
-                                class="relative group hover:pr-8 hover:break-all break-words" v-show="isEventVisible(event)">
+                                class="relative group {{ (isset($role) && $role->isRtl()) ? 'hover:pl-8' : 'hover:pr-8' }} hover:break-all break-words" v-show="isEventVisible(event)">
                                 <a :href="getEventUrl(event, '{{ $currentDate->format('Y-m-d') }}')"
                                     class="flex has-tooltip" 
                                     :data-tooltip="getEventTooltip(event)"
