@@ -115,7 +115,7 @@ class Event extends Model
     public function roles()
     {
         return $this->belongsToMany(Role::class)
-                    ->withPivot('id', 'name_translated', 'description_html_translated');
+                    ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted');
     }
 
     public function curatorBySubdomain($subdomain)

@@ -317,10 +317,11 @@ class RoleController extends Controller
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
-                        ->where('role_id', $role->id);
-                });
-                        
-            $events = $events->orderBy('starts_at')->get();
+                        ->where('role_id', $role->id)
+                        ->where('is_accepted', true);
+                })
+                ->orderBy('starts_at')
+                ->get();
         } else {
             $events = Event::with(['roles', 'venue'])
                 ->where(function ($query) use ($startOfMonth, $endOfMonth) {
@@ -455,10 +456,11 @@ class RoleController extends Controller
                         ->whereIn('id', function ($query) use ($role) {
                             $query->select('event_id')
                                 ->from('event_role')
-                                ->where('role_id', $role->id);
+                                ->where('role_id', $role->id)
+                                ->where('is_accepted', true);
                         })
                         ->orderBy('starts_at')
-                        ->get();   
+                        ->get();
                 } else {
                     $events = Event::with(['roles', 'venue'])
                         ->where(function ($query) use ($role) {
