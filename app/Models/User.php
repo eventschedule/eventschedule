@@ -25,6 +25,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'language_code',
         'stripe_account_id',
         'api_key',
+        'api_last_used_at',
+        'invoiceninja_api_key',
+        'invoiceninja_api_url',
+        'invoiceninja_webhook_secret',
     ];
 
     /**
@@ -72,6 +76,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'api_last_used_at' => 'datetime',
             'password' => 'hashed',
         ];
     }

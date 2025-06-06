@@ -59,22 +59,38 @@ class RegisteredUserController extends Controller
             $url = rtrim($baseUrl . $basePath, '/');
 
             // Update database settings in .env file
-            $envContent = file_get_contents(base_path('.env'));
+            $envPath = base_path('.env');
+            $envContent = file_get_contents($envPath);
+
+            // Sanitize input values to prevent injection
+            $sanitizedHost = addslashes($request->database_host);
+            $sanitizedPort = (int) $request->database_port;
+            $sanitizedName = addslashes($request->database_name);
+            $sanitizedUsername = addslashes($request->database_username);
+            $sanitizedPassword = addslashes($request->database_password);
+            $sanitizedUrl = addslashes($url);
 
             $envContent = preg_replace('/APP_ENV=.*/', 'APP_ENV=production', $envContent);
-            $envContent = preg_replace('/APP_URL=.*/', 'APP_URL=' . $url, $envContent);                        
+            $envContent = preg_replace('/APP_URL=.*/', 'APP_URL="' . $sanitizedUrl . '"', $envContent);                        
             
-            $envContent = preg_replace('/DB_HOST=.*/', 'DB_HOST="' . $request->database_host . '"', $envContent);
-            $envContent = preg_replace('/DB_PORT=.*/', 'DB_PORT=' . $request->database_port, $envContent);
-            $envContent = preg_replace('/DB_DATABASE=.*/', 'DB_DATABASE="' . $request->database_name . '"', $envContent);
-            $envContent = preg_replace('/DB_USERNAME=.*/', 'DB_USERNAME="' . $request->database_username . '"', $envContent);
-            $envContent = preg_replace('/DB_PASSWORD=.*/', 'DB_PASSWORD="' . $request->database_password . '"', $envContent);
+            $envContent = preg_replace('/DB_HOST=.*/', 'DB_HOST="' . $sanitizedHost . '"', $envContent);
+            $envContent = preg_replace('/DB_PORT=.*/', 'DB_PORT=' . $sanitizedPort, $envContent);
+            $envContent = preg_replace('/DB_DATABASE=.*/', 'DB_DATABASE="' . $sanitizedName . '"', $envContent);
+            $envContent = preg_replace('/DB_USERNAME=.*/', 'DB_USERNAME="' . $sanitizedUsername . '"', $envContent);
+            $envContent = preg_replace('/DB_PASSWORD=.*/', 'DB_PASSWORD="' . $sanitizedPassword . '"', $envContent);
 
-            if ($request->report_errors) {
-                $envContent = preg_replace('/SENTRY_LARAVEL_DSN=.*/', 'SENTRY_LARAVEL_DSN="https://4d5293303b2fc59a89bcc85110f6f031@o4508274803539968.ingest.us.sentry.io/4508845950959616"', $envContent);
+            // Write to temporary file first, then move to prevent corruption
+            $tempFile = $envPath . '.tmp';
+            if (file_put_contents($tempFile, $envContent) === false) {
+                throw new \Exception('Failed to write configuration file');
+            }
+            
+            if (!rename($tempFile, $envPath)) {
+                unlink($tempFile);
+                throw new \Exception('Failed to update configuration file');
             }
 
-            file_put_contents(base_path('.env'), $envContent);
+            file_put_contents($envPath, $envContent);
 
             config(['database.connections.mysql.host' => $request->database_host]);
             config(['database.connections.mysql.port' => $request->database_port]);

@@ -37,14 +37,14 @@ Route::get('/sitemap.xml', [HomeController::class, 'sitemap'])->name('sitemap');
 Route::get('/unsubscribe', [RoleController::class, 'showUnsubscribe'])->name('role.show_unsubscribe');
 Route::post('/unsubscribe', [RoleController::class, 'unsubscribe'])->name('role.unsubscribe')->middleware('throttle:2,2');
 
-Route::post('/stripe/webhook', [StripeController::class, 'webhook'])->name('stripe.webhook');
-Route::post('/invoiceninja/webhook/{secret}', [InvoiceNinjaController::class, 'webhook'])->name('invoiceninja.webhook');
+Route::post('/stripe/webhook', [StripeController::class, 'webhook'])->name('stripe.webhook')->middleware('throttle:60,1');
+Route::post('/invoiceninja/webhook/{secret}', [InvoiceNinjaController::class, 'webhook'])->name('invoiceninja.webhook')->middleware('throttle:60,1');
 
-Route::get('/release_tickets', [TicketController::class, 'release'])->name('release_tickets');
-Route::get('/translate_data', [AppController::class, 'translateData'])->name('translate_data');
+Route::get('/release_tickets', [TicketController::class, 'release'])->name('release_tickets')->middleware('throttle:5,1');
+Route::get('/translate_data', [AppController::class, 'translateData'])->name('translate_data')->middleware('throttle:5,1');
 
-Route::get('/ticket/qr_code/{event_id}/{secret}', [TicketController::class, 'qrCode'])->name('ticket.qr_code');
-Route::get('/ticket/view/{event_id}/{secret}', [TicketController::class, 'view'])->name('ticket.view');
+Route::get('/ticket/qr_code/{event_id}/{secret}', [TicketController::class, 'qrCode'])->name('ticket.qr_code')->middleware('throttle:100,1');
+Route::get('/ticket/view/{event_id}/{secret}', [TicketController::class, 'view'])->name('ticket.view')->middleware('throttle:100,1');
 
 Route::middleware(['auth', 'verified'])->group(function () 
 {
@@ -109,10 +109,30 @@ Route::middleware(['auth', 'verified'])->group(function ()
         if (!$filename) {
             abort(404);
         }
+        
+        // Prevent path traversal attacks
+        $filename = basename($filename);
+        
+        // Only allow alphanumeric characters, hyphens, underscores, and dots
+        if (!preg_match('/^[a-zA-Z0-9._-]+$/', $filename)) {
+            abort(404);
+        }
+        
+        // Ensure filename starts with 'event_' prefix for security
+        if (!str_starts_with($filename, 'event_')) {
+            abort(404);
+        }
     
-        $path = '/tmp/event_' . $filename;
-        if (file_exists($path)) {
-            return response()->file($path);
+        $path = '/tmp/' . $filename;
+        
+        // Verify the resolved path is still within /tmp directory
+        $realPath = realpath($path);
+        if (!$realPath || !str_starts_with($realPath, '/tmp/')) {
+            abort(404);
+        }
+        
+        if (file_exists($realPath)) {
+            return response()->file($realPath);
         }
         abort(404);
     })->name('event.tmp_image');

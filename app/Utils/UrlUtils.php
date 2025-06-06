@@ -104,13 +104,38 @@ class UrlUtils
         return $previous;
     }
 
-    public static function getUrlDetails($url)
+    public static function getUrlInfo($url)
     {
+        // Validate and sanitize URL
+        if (!self::isUrlSafe($url)) {
+            return null;
+        }
+        
         $title = '';
         $thumbnail_url = '';
         $lookup_url = 'https://noembed.com/embed?dataType=json&url=' . urlencode($url);
 
-        if ($response = @file_get_contents($lookup_url)) {
+        // Use cURL instead of file_get_contents for better security control
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $lookup_url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_MAXREDIRS => 3,
+            CURLOPT_USERAGENT => 'EventSchedule/1.0',
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+            CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+            CURLOPT_FOLLOWLOCATION => true,
+        ]);
+        
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($response && $httpCode >= 200 && $httpCode < 300) {
             $json = json_decode($response);
 
             if (property_exists($json, 'title')) {
@@ -128,7 +153,53 @@ class UrlUtils
         $obj->thumbnail_url = $thumbnail_url;
 
         return $obj;
-    }    
+    }
+
+    /**
+     * Validate if URL is safe to make requests to
+     */
+    private static function isUrlSafe($url)
+    {
+        // Parse URL
+        $parsedUrl = parse_url($url);
+        
+        if (!$parsedUrl || !isset($parsedUrl['scheme']) || !isset($parsedUrl['host'])) {
+            return false;
+        }
+
+        // Only allow HTTP and HTTPS
+        if (!in_array($parsedUrl['scheme'], ['http', 'https'])) {
+            return false;
+        }
+
+        $host = $parsedUrl['host'];
+        
+        // Block private IP ranges and localhost
+        if (filter_var($host, FILTER_VALIDATE_IP)) {
+            return !filter_var($host, FILTER_VALIDATE_IP, 
+                FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
+        }
+        
+        // Block common internal hostnames
+        $blockedHosts = [
+            'localhost', '127.0.0.1', '::1',
+            'metadata.google.internal',
+            'instance-data', 'metadata.aws.amazon.com'
+        ];
+        
+        if (in_array(strtolower($host), $blockedHosts)) {
+            return false;
+        }
+
+        // Resolve hostname to IP to check for private ranges
+        $ip = gethostbyname($host);
+        if ($ip !== $host && filter_var($ip, FILTER_VALIDATE_IP)) {
+            return !filter_var($ip, FILTER_VALIDATE_IP, 
+                FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
+        }
+
+        return true;
+    }
 
     public static function convertUrlsToLinks($text)
     {
@@ -151,24 +222,39 @@ class UrlUtils
             'image_path' => null
         ];
 
+        // Validate URL for security
+        if (!self::isUrlSafe($url)) {
+            return $result;
+        }
+
         try {
             $ch = curl_init($url);
             curl_setopt_array($ch, [
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 30,
-                CURLOPT_CONNECTTIMEOUT => 30,
-                CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                CURLOPT_MAXREDIRS => 3, // Reduced from 10
+                CURLOPT_TIMEOUT => 15, // Reduced from 30
+                CURLOPT_CONNECTTIMEOUT => 10, // Reduced from 30
+                CURLOPT_USERAGENT => 'EventSchedule/1.0', // Don't impersonate browsers
                 CURLOPT_HTTPHEADER => [
                     'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
                     'Accept-Language: en-US,en;q=0.5',
-                    'Cookie: ' // Empty cookie to prevent login redirects
                 ],
-                CURLOPT_HEADER => true, // Get headers to check redirects
+                CURLOPT_HEADER => true,
+                // Security settings
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+                CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+                CURLOPT_MAXFILESIZE => 10485760, // 10MB limit
             ]);
 
             $response = curl_exec($ch);
+            
+            if ($response === false) {
+                curl_close($ch);
+                return $result;
+            }
             
             // Process redirect URL
             $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
@@ -179,7 +265,10 @@ class UrlUtils
             foreach (explode("\n", $headers) as $header) {
                 if (stripos($header, 'Location:') === 0) {
                     $redirectUrl = trim(substr($header, 9));
-                    $redirectUrls[] = $redirectUrl;
+                    // Validate redirect URL too
+                    if (self::isUrlSafe($redirectUrl)) {
+                        $redirectUrls[] = $redirectUrl;
+                    }
                 }
             }
 
@@ -191,7 +280,7 @@ class UrlUtils
             // Determine redirect URL
             if (!empty($redirectUrls)) {
                 $result['redirect_url'] = end($redirectUrls);
-            } elseif ($httpCode >= 200 && $httpCode < 400) {
+            } elseif ($httpCode >= 200 && $httpCode < 400 && self::isUrlSafe($finalUrl)) {
                 $result['redirect_url'] = $finalUrl;
             }
 
@@ -202,19 +291,75 @@ class UrlUtils
                     preg_match('/<meta[^>]*content=["\']([^"\']*)["\'][^>]*property=["\']og:image["\']/', $html, $matches)) {
                     
                     if ($imageUrl = $matches[1]) {
-                        $imageContents = file_get_contents($imageUrl);
-                        $extension = pathinfo(parse_url($imageUrl, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
-                        $filename = '/tmp/event_' . strtolower(\Str::random(32)) . '.' . $extension;
-                        
-                        file_put_contents($filename, $imageContents);
-                        $result['image_path'] = $filename;
+                        // Validate image URL
+                        if (self::isUrlSafe($imageUrl)) {
+                            // Use secure method to download image
+                            $imageContents = self::downloadImageSecurely($imageUrl);
+                            if ($imageContents !== false) {
+                                $extension = pathinfo(parse_url($imageUrl, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
+                                // Validate extension
+                                $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                                if (in_array(strtolower($extension), $allowedExtensions)) {
+                                    $filename = '/tmp/event_' . strtolower(\Str::random(32)) . '.' . $extension;
+                                    
+                                    if (file_put_contents($filename, $imageContents) !== false) {
+                                        $result['image_path'] = $filename;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
         } catch (\Exception $e) {
-            // do nothing, return default values
+            // Log error but don't expose it
+            \Log::warning('URL metadata fetch failed: ' . $e->getMessage());
         }
 
         return $result;
+    }
+
+    /**
+     * Securely download image with size and type validation
+     */
+    private static function downloadImageSecurely($imageUrl)
+    {
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $imageUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_MAXREDIRS => 2,
+            CURLOPT_USERAGENT => 'EventSchedule/1.0',
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+            CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+            CURLOPT_MAXFILESIZE => 5242880, // 5MB limit for images
+        ]);
+
+        $imageData = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+        curl_close($ch);
+
+        if ($imageData === false || $httpCode !== 200) {
+            return false;
+        }
+
+        // Validate content type
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!in_array($contentType, $allowedTypes)) {
+            return false;
+        }
+
+        // Validate actual image data
+        $imageInfo = getimagesizefromstring($imageData);
+        if ($imageInfo === false) {
+            return false;
+        }
+
+        return $imageData;
     }
 }
