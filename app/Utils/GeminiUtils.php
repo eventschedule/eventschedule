@@ -230,21 +230,7 @@ class GeminiUtils
 
     private static function getPerformerYoutubeUrl($performerName)
     {
-        $url = "https://www.googleapis.com/youtube/v3/search"
-            . "?key=" . config('services.google.backend')
-            . "&q=" . urlencode($performerName)
-            . "&type=video"
-            . "&order=relevance"
-            . "&maxResults=1";
-            
-        $response = file_get_contents($url);
-        $data = json_decode($response, true);
-
-        if (isset($data['items'][0]['id']['videoId'])) {
-            return "https://www.youtube.com/watch?v=" . $data['items'][0]['id']['videoId'];
-        }
-
-        return null;
+        return self::searchYouTube($performerName);
     }
 
     public static function translate($text, $from = 'auto', $to = 'en')
@@ -312,5 +298,60 @@ class GeminiUtils
 
         // Fallback: return empty translations if API fails
         return [];
+    }
+
+    public static function searchYouTube($performerName)
+    {
+        // Validate performer name input
+        if (empty($performerName) || strlen($performerName) > 100) {
+            return null;
+        }
+        
+        // Validate API key
+        $apiKey = config('services.google.backend');
+        if (!$apiKey) {
+            return null;
+        }
+        
+        $url = "https://www.googleapis.com/youtube/v3/search"
+            . "?key=" . $apiKey
+            . "&q=" . urlencode($performerName)
+            . "&type=video"
+            . "&order=relevance"
+            . "&maxResults=1";
+            
+        // Use secure cURL instead of file_get_contents
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_USERAGENT => 'EventSchedule/1.0',
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_PROTOCOLS => CURLPROTO_HTTPS, // Only HTTPS for Google API
+            CURLOPT_MAXFILESIZE => 1048576, // 1MB limit
+        ]);
+        
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        
+        if ($response === false || $httpCode !== 200) {
+            return null;
+        }
+        
+        $data = json_decode($response, true);
+
+        if (isset($data['items'][0]['id']['videoId'])) {
+            $videoId = $data['items'][0]['id']['videoId'];
+            // Validate video ID format
+            if (preg_match('/^[a-zA-Z0-9_-]{11}$/', $videoId)) {
+                return "https://www.youtube.com/watch?v=" . $videoId;
+            }
+        }
+
+        return null;
     }
 }   

@@ -1261,55 +1261,86 @@ class RoleController extends Controller
         if ($address = $role->fullAddress()) {
             $urlAddress = urlencode($address);
             
-            $url = "https://maps.googleapis.com/maps/api/geocode/json?key=" . config('services.google.backend') . "&address={$urlAddress}";
-            $response = file_get_contents($url);
+            // Validate Google API configuration
+            $apiKey = config('services.google.backend');
+            if (!$apiKey) {
+                return response()->json(['error' => 'Geocoding service not configured'], 500);
+            }
+            
+            $url = "https://maps.googleapis.com/maps/api/geocode/json?key=" . $apiKey . "&address={$urlAddress}";
+            
+            // Use secure cURL instead of file_get_contents
+            $ch = curl_init();
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 10,
+                CURLOPT_CONNECTTIMEOUT => 5,
+                CURLOPT_USERAGENT => 'EventSchedule/1.0',
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_PROTOCOLS => CURLPROTO_HTTPS, // Only HTTPS for Google API
+                CURLOPT_MAXFILESIZE => 1048576, // 1MB limit
+            ]);
+            
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            
+            if ($response === false || $httpCode !== 200) {
+                return response()->json(['error' => 'Failed to validate address'], 500);
+            }
+            
             $responseData = json_decode($response, true);
 
-            if ($responseData['status'] == 'OK') {
-                $result = $responseData['results'][0];
-                $addressComponents = $result['address_components'];
+            if (!$responseData || $responseData['status'] !== 'OK') {
+                return response()->json(['error' => 'Address validation failed'], 400);
+            }
+            
+            $result = $responseData['results'][0];
+            $addressComponents = $result['address_components'];
 
-                $addressParts = [
-                    'street_number' => '',
-                    'route' => '',
-                    'sublocality_level_1' => '',
-                    'locality' => '',
-                    'administrative_area_level_1' => '',
-                    'postal_code' => '',
-                    'country' => '',
-                ];
+            $addressParts = [
+                'street_number' => '',
+                'route' => '',
+                'sublocality_level_1' => '',
+                'locality' => '',
+                'administrative_area_level_1' => '',
+                'postal_code' => '',
+                'country' => '',
+            ];
 
-                foreach ($addressComponents as $component) {
-                    foreach ($component['types'] as $type) {
-                        if (array_key_exists($type, $addressParts)) {
-                            $addressParts[$type] = $type == 'country' ? $component['short_name'] : $component['long_name'];
-                        }
+            foreach ($addressComponents as $component) {
+                foreach ($component['types'] as $type) {
+                    if (array_key_exists($type, $addressParts)) {
+                        $addressParts[$type] = $type == 'country' ? $component['short_name'] : $component['long_name'];
                     }
                 }
+            }
 
-                $address1 = trim($addressParts['street_number'] . ' ' . $addressParts['route']);
-                $address2 = $addressParts['sublocality_level_1'];
-                $city = $addressParts['locality'] ?: $addressParts['sublocality_level_1'];
-                $state = $addressParts['administrative_area_level_1'];
-                $postal_code = $addressParts['postal_code'];
-                $country = $addressParts['country'];
+            $address1 = trim($addressParts['street_number'] . ' ' . $addressParts['route']);
+            $address2 = $addressParts['sublocality_level_1'];
+            $city = $addressParts['locality'] ?: $addressParts['sublocality_level_1'];
+            $state = $addressParts['administrative_area_level_1'];
+            $postal_code = $addressParts['postal_code'];
+            $country = $addressParts['country'];
 
-                return response()->json([
+            return response()->json([
+                'success' => true,
+                'data' => [
                     'address1' => $address1,
                     'address2' => $address2,
                     'city' => $city,
                     'state' => $state,
                     'postal_code' => $postal_code,
-                    'country_code' => $country,
-                    'formatted_address' => $result['formatted_address'],
-                ]);
-            } else {
-                \Log::error('Google Maps Error: ' . json_encode($responseData));
-                return response()->json(['error' => 'Unable to validate address'], 400);
-            }
+                    'country' => $country,
+                    'lat' => $result['geometry']['location']['lat'],
+                    'lng' => $result['geometry']['location']['lng'],
+                ]
+            ]);
         }
 
-        return '';
+        return response()->json(['error' => 'No address provided'], 400);
     }
 
     public function availability(Request $request, $subdomain)

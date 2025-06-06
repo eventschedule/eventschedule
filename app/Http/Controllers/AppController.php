@@ -63,7 +63,7 @@ class AppController extends Controller
         $requestSecret = request()->get('secret');
         $serverSecret = config('app.cron_secret');
         
-        if (! $serverSecret || $requestSecret != $serverSecret) {
+        if (!$serverSecret || !$requestSecret || !hash_equals($serverSecret, $requestSecret)) {
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
