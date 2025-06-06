@@ -571,7 +571,7 @@
                                 required autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                             @if ($event->exists)
-                            <p class="text-sm text-gray-500 flex items-center gap-2">
+                            <div class="text-sm text-gray-500 flex items-center gap-2">
                                 <a href="{{ $event->getGuestUrl($subdomain, $isUnique ? false : null) }}" target="_blank" class="hover:underline">
                                     {{ \App\Utils\UrlUtils::clean($event->getGuestUrl($subdomain, $isUnique ? false : null)) }}
                                 </a>
@@ -580,11 +580,11 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
                                     </svg>
                                 </button>
-                            </p>
+                            </div>
                             @endif
                         </div>
 
-<!--
+                        <!--
                         <x-input-label for="event_slug" :value="__('messages.url')" />
                             <div class="mt-1 flex">
                                 <x-text-input type="text" 
@@ -599,7 +599,20 @@
                                     placeholder="{{ __('messages.auto_generated') }}"                                    autocomplete="off" />
                             </div>
                             <x-input-error class="mt-2" :messages="$errors->get('slug')" />
--->
+                        -->
+
+                        @if($role->groups && count($role->groups))
+                        <div class="mb-6">
+                            <x-input-label for="group_id" :value="__('messages.schedule')" />
+                            <select id="group_id" name="group_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                <option value="">{{ __('messages.please_select') }}</option>
+                                @foreach($role->groups as $group)
+                                    <option value="{{ $group->id }}" {{ old('group_id', $event->group_id) == $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('group_id')" />
+                        </div>
+                        @endif
 
                         <div class="mb-6">
                             <x-input-label for="category_id" :value="__('messages.category')" />
@@ -611,18 +624,6 @@
                             </select>
                             <x-input-error class="mt-2" :messages="$errors->get('category_id')" />
                         </div>
-                        @if($role->groups && count($role->groups))
-                        <div class="mb-6">
-                            <x-input-label for="group_id" :value="__('messages.group')" />
-                            <select id="group_id" name="group_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
-                                <option value="">{{ __('messages.please_select') }}</option>
-                                @foreach($role->groups as $group)
-                                    <option value="{{ $group->id }}" {{ old('group_id', $event->group_id) == $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
-                                @endforeach
-                            </select>
-                            <x-input-error class="mt-2" :messages="$errors->get('group_id')" />
-                        </div>
-                        @endif
 
                         @if (! $role->isCurator())
                         <div class="mb-6 sm:flex sm:items-center sm:space-x-10">
