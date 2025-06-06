@@ -218,6 +218,7 @@ class RoleController extends Controller
 
         $otherRole = null;
         $event = null;
+        $selectedGroup = null;
         $date = $request->date ? date('Y-m-d', strtotime($request->date)) : null;
 
         if ($date && $date != '1970-01-01') {
@@ -230,7 +231,20 @@ class RoleController extends Controller
         }
 
         if ($slug) {
-            $event = $this->eventRepo->getEvent($subdomain, $slug, $date);
+            // Check if slug is a group slug first
+            if ($role->groups) {
+                $group = $role->groups->where('slug', $slug)->first();
+                if ($group) {
+                    $selectedGroup = $group;
+                    $slug = ''; // Clear slug since it's a group, not an event
+                } else {
+                    // Try to find event by slug
+                    $event = $this->eventRepo->getEvent($subdomain, $slug, $date);
+                }
+            } else {
+                // Try to find event by slug
+                $event = $this->eventRepo->getEvent($subdomain, $slug, $date);
+            }
 
             if ($event) {
                 if (! $date && $event->days_of_week) {
@@ -244,10 +258,10 @@ class RoleController extends Controller
                     }
                     $date = $nextDate->format('Y-m-d');
                 }
-            } else {
+            } else if (!$selectedGroup) {
                 return redirect($role->getGuestUrl());
             }        
-        } 
+        }
 
         if ($event) {
             if ($event->venue) {
@@ -292,9 +306,9 @@ class RoleController extends Controller
                     $query->select('event_id')
                         ->from('event_role')
                         ->where('role_id', $role->id);
-                })
-                ->orderBy('starts_at')
-                ->get();
+                });
+                        
+            $events = $events->orderBy('starts_at')->get();
         } else {
             $events = Event::with(['roles', 'venue'])
                 ->where(function ($query) use ($startOfMonth, $endOfMonth) {
@@ -311,9 +325,9 @@ class RoleController extends Controller
                                 ->where('is_accepted', true);
                         });
                     }
-                })
-                ->orderBy('starts_at')
-                ->get();
+                });
+                        
+            $events = $events->orderBy('starts_at')->get();
         }
 
         $embed = request()->embed;
@@ -358,6 +372,7 @@ class RoleController extends Controller
             'curatorRoles',
             'fonts',
             'translation',
+            'selectedGroup',
         ));
 
 
