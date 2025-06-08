@@ -304,6 +304,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchResults = document.getElementById('search-results');
     const noResults = document.getElementById('no-results');
     let searchTimeout = null;
+    let currentFocusIndex = -1;
+    let lastResults = [];
     
     if (searchInput) {
         searchInput.addEventListener('input', function() {
@@ -314,9 +316,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 clearTimeout(searchTimeout);
             }
             
-            // Hide all dropdowns initially
+            // Hide all dropdowns initially and reset focus
             searchResults.classList.add('hidden');
             noResults.classList.add('hidden');
+            currentFocusIndex = -1;
             
             if (query.length < 2) {
                 searchLoading.classList.add('hidden');
@@ -327,28 +330,115 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Debounce the search
             searchTimeout = setTimeout(() => {
-                fetch(`/search_events/{{ $role->subdomain }}?q=${encodeURIComponent(query)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        searchLoading.classList.add('hidden');
-                        
-                        if (data.length > 0) {
-                            displaySearchResults(data);
-                        } else {
-                            noResults.classList.remove('hidden');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Search error:', error);
-                        searchLoading.classList.add('hidden');
-                        noResults.classList.remove('hidden');
-                    });
+                performSearch(query);
             }, 300);
+        });
+        
+        // Add keyboard navigation
+        searchInput.addEventListener('keydown', function(e) {
+            const resultItems = searchResults.querySelectorAll('.search-result-item');
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                currentFocusIndex = Math.min(currentFocusIndex + 1, resultItems.length - 1);
+                updateFocus(resultItems);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                currentFocusIndex = Math.max(currentFocusIndex - 1, -1);
+                updateFocus(resultItems);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (currentFocusIndex >= 0 && resultItems[currentFocusIndex]) {
+                    resultItems[currentFocusIndex].click();
+                }
+            } else if (e.key === 'Escape') {
+                searchInput.value = '';
+                searchResults.classList.add('hidden');
+                noResults.classList.add('hidden');
+                currentFocusIndex = -1;
+            }
+        });
+    }
+    
+    function performSearch(query) {
+        const selectedGroup = getSelectedGroupFromVue();
+        let searchUrl = `/search_events/{{ $role->subdomain }}?q=${encodeURIComponent(query)}`;
+        
+        if (selectedGroup) {
+            searchUrl += `&group=${encodeURIComponent(selectedGroup)}`;
+        }
+        
+        fetch(searchUrl)
+            .then(response => response.json())
+            .then(data => {
+                searchLoading.classList.add('hidden');
+                lastResults = data;
+                currentFocusIndex = -1;
+                
+                if (data.length > 0) {
+                    displaySearchResults(data);
+                } else {
+                    noResults.classList.remove('hidden');
+                }
+            })
+            .catch(error => {
+                console.error('Search error:', error);
+                searchLoading.classList.add('hidden');
+                noResults.classList.remove('hidden');
+            });
+    }
+    
+    function getSelectedGroupFromVue() {
+        // Try to get the selected group from the Vue.js app in the calendar
+        try {
+            // For Vue 3, we need to access the app instance differently
+            const calendarApp = document.getElementById('calendar-app');
+            if (calendarApp && window.calendarVueApp) {
+                return window.calendarVueApp.selectedGroup || '';
+            }
+            
+            // Fallback: check URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const scheduleParam = urlParams.get('schedule');
+            
+            // Also check the current path for group slug
+            const pathSegments = window.location.pathname.split('/');
+            if (pathSegments.length >= 3 && pathSegments[2] !== '') {
+                return pathSegments[2];
+            }
+            
+            return scheduleParam || '';
+        } catch (e) {
+            console.log('Could not access Vue app, using URL fallback');
+            // Fallback: check URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const scheduleParam = urlParams.get('schedule');
+            
+            // Also check the current path for group slug
+            const pathSegments = window.location.pathname.split('/');
+            if (pathSegments.length >= 3 && pathSegments[2] !== '') {
+                return pathSegments[2];
+            }
+            
+            return scheduleParam || '';
+        }
+    }
+    
+    function updateFocus(resultItems) {
+        // Remove focus from all items
+        resultItems.forEach((item, index) => {
+            if (index === currentFocusIndex) {
+                item.classList.add('bg-blue-50', 'border-l-blue-500');
+                item.classList.remove('hover:bg-gray-50', 'border-l-transparent');
+            } else {
+                item.classList.remove('bg-blue-50', 'border-l-blue-500');
+                item.classList.add('hover:bg-gray-50', 'border-l-transparent');
+            }
         });
     }
     
     function displaySearchResults(events) {
-        const resultsHtml = events.map(event => {
+        const resultsHtml = events.map((event, index) => {
             const imageHtml = event.image_url 
                 ? `<img src="${event.image_url}" alt="${event.name}" class="w-12 h-12 object-cover rounded-md">`
                 : `<div class="w-12 h-12 bg-gray-200 rounded-md flex items-center justify-center">
@@ -362,7 +452,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 : '';
             
             return `
-                <div class="flex items-center p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0" onclick="selectEvent('${event.guest_url}')">
+                <div class="search-result-item flex items-center p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 border-l-4 border-l-transparent last:border-b-0" onclick="selectEvent('${event.guest_url}', ${index})">
                     <div class="flex-shrink-0 mr-3">
                         ${imageHtml}
                     </div>
@@ -391,15 +481,44 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    window.selectEvent = function(url) {
+    window.selectEvent = function(url, index) {
         // Clear search when event is selected
         searchInput.value = '';
         searchResults.classList.add('hidden');
         noResults.classList.add('hidden');
+        currentFocusIndex = -1;
+        
+        // Add current group parameter to URL to preserve selection
+        const selectedGroup = getSelectedGroupFromVue();
+        let finalUrl = url;
+        
+        if (selectedGroup) {
+            const urlObj = new URL(url, window.location.origin);
+            urlObj.searchParams.set('schedule', selectedGroup);
+            finalUrl = urlObj.toString();
+        }
         
         // Navigate to the event page
-        window.location.href = url;
+        window.location.href = finalUrl;
     };
+    
+    // Global keyboard shortcut to focus search
+    document.addEventListener('keydown', function(e) {
+        // Focus search box with '/' key (like GitHub)
+        if (e.key === '/' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            searchInput.focus();
+        }
+        
+        // Handle escape globally
+        if (e.key === 'Escape' && (document.activeElement === searchInput || searchResults.classList.contains('visible'))) {
+            searchInput.value = '';
+            searchResults.classList.add('hidden');
+            noResults.classList.add('hidden');
+            currentFocusIndex = -1;
+            searchInput.blur();
+        }
+    });
     
     // Handle clicking outside search dropdown to close it
     document.addEventListener('click', function(e) {
@@ -407,15 +526,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (searchContainer && !searchContainer.contains(e.target)) {
             searchResults.classList.add('hidden');
             noResults.classList.add('hidden');
-        }
-    });
-    
-    // Handle Escape key to clear search
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            searchInput.value = '';
-            searchResults.classList.add('hidden');
-            noResults.classList.add('hidden');
+            currentFocusIndex = -1;
         }
     });
 });
