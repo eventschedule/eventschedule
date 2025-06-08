@@ -1469,9 +1469,17 @@ class RoleController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
         $search = $request->get('q', '');
+        $groupSlug = $request->get('group', '');
         
         if (empty($search)) {
             return response()->json([]);
+        }
+
+        // Get the group ID if a group slug is provided
+        $groupId = null;
+        if (!empty($groupSlug)) {
+            $group = $role->groups()->where('slug', $groupSlug)->first();
+            $groupId = $group ? $group->id : null;
         }
 
         // Get events based on role type
@@ -1486,6 +1494,13 @@ class RoleController extends Controller
                         ->from('event_role')
                         ->where('role_id', $role->id)
                         ->where('is_accepted', true);
+                })
+                ->when($groupId, function ($query) use ($groupId) {
+                    $query->where('group_id', $groupId);
+                })
+                ->where(function ($query) {
+                    $query->where('starts_at', '>=', now()->startOfDay())
+                        ->orWhereNotNull('days_of_week');
                 })
                 ->orderBy('starts_at')
                 ->limit(10)
@@ -1506,6 +1521,13 @@ class RoleController extends Controller
                                 ->where('is_accepted', true);
                         });
                     }
+                })
+                ->when($groupId, function ($query) use ($groupId) {
+                    $query->where('group_id', $groupId);
+                })
+                ->where(function ($query) {
+                    $query->where('starts_at', '>=', now()->startOfDay())
+                        ->orWhereNotNull('days_of_week');
                 })
                 ->orderBy('starts_at')
                 ->limit(10)

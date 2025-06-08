@@ -520,7 +520,7 @@
 <script>
 const { createApp } = Vue;
 
-createApp({
+const calendarApp = createApp({
     data() {
         return {
             selectedGroup: '{{ isset($selectedGroup) ? $selectedGroup->slug : "" }}',
@@ -719,5 +719,8 @@ createApp({
             }
         });
     }
-}).mount('#calendar-app');
+});
+
+const calendarAppInstance = calendarApp.mount('#calendar-app');
+window.calendarVueApp = calendarAppInstance;
 </script>
