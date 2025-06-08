@@ -6,11 +6,25 @@
     >
       <div class="container mx-auto pt-[100px] pb-10 px-5 relative z-10">
         <div class="flex flex-col sm:flex-row justify-between mb-10 py-[7px]">
-          <h2
-            class="text-white text-[40px] sm:text-{52px} leading-snug font-semibold"
-          >
-            {{ $translation ? $translation->name_translated : $event->translatedName() }}
-          </h2>
+          <div class="flex flex-col">
+            <h2
+              class="text-white text-[40px] sm:text-{52px} leading-snug font-semibold"
+            >
+              {{ $translation ? $translation->name_translated : $event->translatedName() }}
+            </h2>
+            @php
+              $backUrl = route('role.view_guest', ['subdomain' => $role->subdomain]);
+              $queryParams = [];
+              if (request('category')) $queryParams['category'] = request('category');
+              if (request('schedule')) $queryParams['schedule'] = request('schedule');
+              if (!empty($queryParams)) {
+                $backUrl .= '?' . http_build_query($queryParams);
+              }
+            @endphp
+            <a href="{{ $backUrl }}" class="text-white text-sm hover:underline mt-2 inline-block">
+              ← {{ __('messages.back_to_calendar') }}
+            </a>
+          </div>
           <!--
           <a
             href="route('role.follow', ['subdomain' => $event->role()->subdomain])"
