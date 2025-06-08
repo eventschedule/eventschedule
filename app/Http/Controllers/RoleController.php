@@ -1482,52 +1482,47 @@ class RoleController extends Controller
             $groupId = $group ? $group->id : null;
         }
 
-        // Get events based on role type
+        // First, let's try a very basic search to see if we can get any events at all
         if ($role->isCurator()) {
-            $events = Event::with(['roles', 'venue'])
-                ->where(function ($query) use ($search) {
-                    $query->where('name', 'like', "%{$search}%")
-                        ->orWhere('description', 'like', "%{$search}%");
-                })
+            // For curators, get events they're associated with
+            $events = Event::with(['roles', 'venue', 'group'])
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
                         ->where('role_id', $role->id)
                         ->where('is_accepted', true);
                 })
+                ->where(function ($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                })
                 ->when($groupId, function ($query) use ($groupId) {
                     $query->where('group_id', $groupId);
-                })
-                ->where(function ($query) {
-                    $query->where('starts_at', '>=', now()->startOfDay())
-                        ->orWhereNotNull('days_of_week');
                 })
                 ->orderBy('starts_at')
                 ->limit(10)
                 ->get();
         } else {
-            $events = Event::with(['roles', 'venue'])
+            // For venues/talents
+            $baseQuery = Event::with(['roles', 'venue', 'group']);
+            
+            if ($role->isVenue()) {
+                $baseQuery->where('venue_id', $role->id)
+                         ->where('is_accepted', true);
+            } else {
+                $baseQuery->whereHas('roles', function ($query) use ($role) {
+                    $query->where('role_id', $role->id)
+                          ->where('is_accepted', true);
+                });
+            }
+            
+            $events = $baseQuery
                 ->where(function ($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
                         ->orWhere('description', 'like', "%{$search}%");
                 })
-                ->where(function ($query) use ($role) {
-                    if ($role->isVenue()) {
-                        $query->where('venue_id', $role->id)
-                            ->where('is_accepted', true);
-                    } else {
-                        $query->whereHas('roles', function ($query) use ($role) {
-                            $query->where('role_id', $role->id)
-                                ->where('is_accepted', true);
-                        });
-                    }
-                })
                 ->when($groupId, function ($query) use ($groupId) {
                     $query->where('group_id', $groupId);
-                })
-                ->where(function ($query) {
-                    $query->where('starts_at', '>=', now()->startOfDay())
-                        ->orWhereNotNull('days_of_week');
                 })
                 ->orderBy('starts_at')
                 ->limit(10)
@@ -1541,11 +1536,10 @@ class RoleController extends Controller
                 'name' => $event->translatedName(),
                 'description' => $event->translatedDescription(),
                 'venue_name' => $event->getVenueDisplayName(),
-                'starts_at' => $event->starts_at,
                 'local_starts_at' => $event->localStartsAt(),
                 'image_url' => $event->getImageUrl(),
                 'guest_url' => $event->getGuestUrl($subdomain, ''),
-                'group_id' => $event->group_id,
+                'group_slug' => $event->group ? $event->group->slug : null,
                 'category_id' => $event->category_id,
             ];
         });
