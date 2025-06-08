@@ -450,6 +450,13 @@ return [
     'show_past_events' => 'Mostrar eventos passados',
     'category' => 'Categoria',
     'all_categories' => 'Todas as Categorias',
+    'search_events' => 'Buscar eventos...',
+    'no_events_found' => 'Nenhum evento encontrado',
+    'subschedules' => 'Sub-agendas',
+    'slug' => 'Identificador',
+    'schedule_url' => 'URL da Agenda',
+    'updated_talent' => 'Talento atualizado com sucesso',
+    'back_to_schedule' => 'Voltar para Agenda',
     'all_schedules' => 'Todas as Agendas',
     
     // Categories

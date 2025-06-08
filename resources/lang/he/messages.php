@@ -459,6 +459,13 @@ return [
     'show_past_events' => 'הצג אירועים קודמים',
     'category' => 'קטגוריה',
     'all_categories' => 'כל הקטגוריות',
+    'search_events' => 'חפש אירועים...',
+    'no_events_found' => 'לא נמצאו אירועים',
+    'subschedules' => 'לוחות זמנים משניים',
+    'slug' => 'מזהה',
+    'schedule_url' => 'קישור לוח זמנים',
+    'updated_talent' => 'הכישרון עודכן בהצלחה',
+    'back_to_schedule' => 'חזור ללוח זמנים',
     'all_schedules' => 'כל לוחות הזמנים',
     
     // Categories

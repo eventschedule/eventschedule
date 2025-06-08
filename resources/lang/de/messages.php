@@ -457,6 +457,13 @@ return [
     'show_past_events' => 'Vergangene Events anzeigen',
     'category' => 'Kategorie',
     'all_categories' => 'Alle Kategorien',
+    'search_events' => 'Veranstaltungen suchen...',
+    'no_events_found' => 'Keine Veranstaltungen gefunden',
+    'subschedules' => 'Unterzeitpläne',
+    'slug' => 'Kennung',
+    'schedule_url' => 'Zeitplan-URL',
+    'updated_talent' => 'Talent erfolgreich aktualisiert',
+    'back_to_schedule' => 'Zurück zum Zeitplan',
     'all_schedules' => 'Alle Zeitpläne',
     
     // Categories

@@ -503,6 +503,13 @@ return [
     'show_past_events' => 'Toon eerdere evenementen',
     'category' => 'Categorie',
     'all_categories' => 'Alle Categorieën',
+    'search_events' => 'Zoek evenementen...',
+    'no_events_found' => 'Geen evenementen gevonden',
+    'subschedules' => 'Subschema\'s',
+    'slug' => 'Identificatie',
+    'schedule_url' => 'Schema-URL',
+    'updated_talent' => 'Talent succesvol bijgewerkt',
+    'back_to_schedule' => 'Terug naar Schema',
     'all_schedules' => 'Alle Schema\'s',
     
     // Categories
