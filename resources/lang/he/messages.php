@@ -457,4 +457,21 @@ return [
     'curator_schedules' => 'לוחות זמנים של אוצר',
     'event_created_by' => 'אירוע נוצר על ידי :user',
     'show_past_events' => 'הצג אירועים קודמים',
+    'category' => 'קטגוריה',
+    'all_categories' => 'כל הקטגוריות',
+    'all_schedules' => 'כל לוחות הזמנים',
+    
+    // Categories
+    'parties_&_festivals' => 'מסיבות ופסטיבלים',
+    'concerts' => 'קונצרטים',
+    'art_&_culture' => 'אמנות ותרבות',
+    'personal_growth' => 'צמיחה אישית',
+    'education' => 'חינוך',
+    'business_networking' => 'רשתות עסקיות',
+    'health_&_fitness' => 'בריאות וכושר',
+    'food_&_drink' => 'אוכל ושתייה',
+    'community' => 'קהילה',
+    'tech' => 'טכנולוגיה',
+    'sports' => 'ספורט',
+    'spirituality' => 'רוחניות',
 ];

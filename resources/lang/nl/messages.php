@@ -501,4 +501,21 @@ return [
     'curator_schedules' => 'Curator roosters',
     'event_created_by' => 'Evenement aangemaakt door :user',
     'show_past_events' => 'Toon eerdere evenementen',
+    'category' => 'Categorie',
+    'all_categories' => 'Alle Categorieën',
+    'all_schedules' => 'Alle Schema\'s',
+    
+    // Categories
+    'parties_&_festivals' => 'Feesten & Festivals',
+    'concerts' => 'Concerten',
+    'art_&_culture' => 'Kunst & Cultuur',
+    'personal_growth' => 'Persoonlijke Groei',
+    'education' => 'Onderwijs',
+    'business_networking' => 'Zakelijk Netwerken',
+    'health_&_fitness' => 'Gezondheid & Fitness',
+    'food_&_drink' => 'Eten & Drinken',
+    'community' => 'Gemeenschap',
+    'tech' => 'Technologie',
+    'sports' => 'Sport',
+    'spirituality' => 'Spiritualiteit',
 ];

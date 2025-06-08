@@ -453,4 +453,21 @@ return [
     'curator_schedules' => 'Horaires du conservateur',
     'event_created_by' => 'Événement créé par :user',
     'show_past_events' => 'Afficher les événements passés',
+    'category' => 'Catégorie',
+    'all_categories' => 'Toutes les Catégories',
+    'all_schedules' => 'Tous les Programmes',
+    
+    // Categories
+    'parties_&_festivals' => 'Fêtes et Festivals',
+    'concerts' => 'Concerts',
+    'art_&_culture' => 'Art et Culture',
+    'personal_growth' => 'Développement Personnel',
+    'education' => 'Éducation',
+    'business_networking' => 'Réseautage Professionnel',
+    'health_&_fitness' => 'Santé et Fitness',
+    'food_&_drink' => 'Nourriture et Boisson',
+    'community' => 'Communauté',
+    'tech' => 'Technologie',
+    'sports' => 'Sports',
+    'spirituality' => 'Spiritualité',
 ];

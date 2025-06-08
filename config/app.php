@@ -128,13 +128,18 @@ return [
     ],
 
     'event_categories' => [
-        1 => 'Music',
-        2 => 'Art',
-        3 => 'Sports',
-        4 => 'Theatre',
-        5 => 'Workshop',
-        6 => 'Networking',
-        7 => 'Other',
+        1 => 'Art & Culture',
+        2 => 'Business Networking',
+        3 => 'Community',
+        4 => 'Concerts',
+        5 => 'Education',
+        6 => 'Food & Drink',
+        7 => 'Health & Fitness',
+        8 => 'Parties & Festivals',
+        9 => 'Personal Growth',
+        10 => 'Sports',
+        11 => 'Spirituality',
+        12 => 'Tech',
     ],
 
 ];

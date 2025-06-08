@@ -453,4 +453,21 @@ return [
     'curator_schedules' => 'Horarios del curador',
     'event_created_by' => 'Evento creado por :user',
     'show_past_events' => 'Mostrar eventos pasados',
+    'category' => 'Categoría',
+    'all_categories' => 'Todas las Categorías',
+    'all_schedules' => 'Todos los Horarios',
+    
+    // Categories
+    'parties_&_festivals' => 'Fiestas y Festivales',
+    'concerts' => 'Conciertos',
+    'art_&_culture' => 'Arte y Cultura',
+    'personal_growth' => 'Crecimiento Personal',
+    'education' => 'Educación',
+    'business_networking' => 'Red de Contactos Empresariales',
+    'health_&_fitness' => 'Salud y Fitness',
+    'food_&_drink' => 'Comida y Bebida',
+    'community' => 'Comunidad',
+    'tech' => 'Tecnología',
+    'sports' => 'Deportes',
+    'spirituality' => 'Espiritualidad',
 ];

@@ -174,7 +174,7 @@ class EventController extends Controller
             'selectedMembers' => $selectedMembers,
             'members' => $members,
             'currencies' => $currencies,
-            'event_categories' => config('app.event_categories'),
+            'event_categories' => get_translated_categories(),
         ]);
     }
 
@@ -279,7 +279,7 @@ class EventController extends Controller
             'members' => $members,
             'currencies' => $currencies,
             'isUnique' => $isUnique,
-            'event_categories' => config('app.event_categories'),
+            'event_categories' => get_translated_categories(),
         ]);
     }
 
