@@ -522,8 +522,8 @@
 
 <div id="tooltip" class="tooltip"></div>
 
-<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-<script>
+<script src="{{ asset('js/vue.global.prod.js') }}"></script>
+<script {!! nonce_attr() !!}>
 const { createApp } = Vue;
 
 const calendarApp = createApp({

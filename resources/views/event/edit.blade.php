@@ -13,7 +13,7 @@
     }
   </style>
   <script src="{{ asset('js/vue.global.prod.js') }}"></script>
-  <script>
+  <script {!! nonce_attr() !!}>
     document.addEventListener('DOMContentLoaded', function() {
         var f = flatpickr('.datepicker', {
             allowInput: true,
@@ -926,7 +926,7 @@
     </form>
 </div>
 
-<script>
+<script {!! nonce_attr() !!}>
   const { createApp, ref } = Vue
 
   app = createApp({

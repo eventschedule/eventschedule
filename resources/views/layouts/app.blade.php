@@ -31,18 +31,13 @@
         <meta name="twitter:card" content="summary_large_image">
     @endif    
 
-    <meta http-equiv="Content-Security-Policy" content="
-        img-src 'self' data: https://maps.gstatic.com https://maps.googleapis.com https://*.ytimg.com https://eventschedule.test:5173 {{ config('app.hosted') ? 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com' : '' }};
-        frame-src 'self' https://www.youtube.com https://www.googletagmanager.com;
-    ">
-
     <script src="{{ asset('js/jquery.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/toastify-js.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/toastify.min.css') }}">
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics') }}"></script>
-    <script>
+    <script {!! nonce_attr() !!}>
     window.dataLayer = window.dataLayer || [];
 
     function gtag() {
@@ -235,7 +230,7 @@
 
     </style>
 
-    <script>
+    <script {!! nonce_attr() !!}>
         $(document).ready(function() {
             $('.has-tooltip').hover(function(e) {
                 var tooltipText = $(this).attr('data-tooltip');
