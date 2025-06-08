@@ -334,7 +334,7 @@
 
     </form>
 
-    <script>
+    <script {!! nonce_attr() !!}>
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize flatpickr for any existing datepickers on page load
             initializeFlatpickr();

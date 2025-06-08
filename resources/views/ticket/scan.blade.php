@@ -97,7 +97,7 @@
         </div>
     </div>
 
-    <script>
+    <script {!! nonce_attr() !!}>
         const { createApp } = Vue
 
         createApp({
