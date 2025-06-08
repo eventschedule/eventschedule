@@ -103,7 +103,7 @@
                 </div>
                 <div class="hidden md:flex md:flex-row md:items-center md:justify-end md:w-auto md:gap-0">
                     @if(isset($role) && $role->groups && $role->groups->count() > 1)
-                        <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 md:w-auto md:ml-4">
+                        <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 md:w-auto md:ml-4 flex items-center text-sm">
                             <option value="">{{ __('messages.all_schedules') }}</option>
                             @foreach($role->groups as $group)
                                 <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
@@ -111,7 +111,7 @@
                         </select>
                     @endif
                     @if(count($uniqueCategoryIds ?? []) > 1)
-                        <select v-model="selectedCategory" class="border-gray-300 rounded-md shadow-sm h-9 md:w-auto md:ml-4">
+                        <select v-model="selectedCategory" class="border-gray-300 rounded-md shadow-sm h-9 md:w-auto md:ml-4 flex items-center text-sm">
                             <option value="">{{ __('messages.all_categories') }}</option>
                             @foreach(config('app.event_categories', []) as $catKey => $catName)
                                 <option value="{{ $catKey }}">{{ $catName }}</option>
@@ -240,7 +240,7 @@
             </div>
             <div class="md:hidden flex flex-col gap-2 w-full">
                 @if(isset($role) && $role->groups && $role->groups->count() > 1)
-                    <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 w-full mt-4">
+                    <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 w-full mt-4 flex items-center text-sm">
                         <option value="">{{ __('messages.all_schedules') }}</option>
                         @foreach($role->groups as $group)
                             <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
@@ -248,7 +248,7 @@
                     </select>
                 @endif
                 @if(count($uniqueCategoryIds ?? []) > 1)
-                    <select v-model="selectedCategory" class="border-gray-300 rounded-md shadow-sm h-9 w-full mt-4">
+                    <select v-model="selectedCategory" class="border-gray-300 rounded-md shadow-sm h-9 w-full mt-4 flex items-center text-sm">
                         <option value="">{{ __('messages.all_categories') }}</option>
                         @foreach(config('app.event_categories', []) as $catKey => $catName)
                             <option value="{{ $catKey }}">{{ $catName }}</option>
