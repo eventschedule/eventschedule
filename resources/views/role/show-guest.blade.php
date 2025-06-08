@@ -32,20 +32,30 @@
             @else
             <div style="height: 42px;"></div>
             @endif
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5">
-              <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] mb-4 mt-1 sm:mb-0 text-center sm:text-left w-full sm:w-auto">
-                {{ $role->translatedName() }}
-              </h3>
-              <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center sm:justify-start mt-5 lg:mt-0">
+            <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6 mb-5">
+              <div class="text-center lg:text-left">
+                <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] mb-2">
+                  {{ $role->translatedName() }}
+                </h3>
+                @if (auth()->user() && auth()->user()->isMember($role->subdomain))
+                <a 
+                  href="{{ config('app.url') . route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false) }}"
+                  class="text-sm font-medium text-[#4E81FA] hover:underline inline-block"
+                >
+                  {{ __('messages.edit_schedule') }}
+                </a>
+                @endif
+              </div>
+              <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-end items-center">
               
               <!-- Event Search Box -->
-              <div class="relative search-container">
+              <div class="relative search-container flex-shrink-0">
                 <div class="relative">
                   <input 
                     type="text" 
                     id="search-input"
                     placeholder="{{ __('messages.search_events') }}"
-                    class="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    class="w-full sm:w-64 pl-10 pr-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                   >
                   <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,31 +85,32 @@
               @if ($role->isCurator() && $role->is_open)
               <a
                 href="{{ route('role.follow', ['subdomain' => $role->subdomain], ['add_event' => true]) }}"
-                class="inline-flex items-center justify-center"
+                class="inline-flex items-center justify-center flex-shrink-0"
               >
               <button
                   type="button"
                   style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
-                  class="inline-flex items-center rounded-md px-8 py-4 hover:opacity-90 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  class="inline-flex items-center rounded-md px-6 py-3 hover:opacity-90 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 h-12"
                 >
                   {{ __('messages.add_event') }}
                 </button>
               </a>
               @endif
+              
+                @if (!auth()->user() || !auth()->user()->isMember($role->subdomain))
                 <a
-                href="{{ auth()->user() && auth()->user()->isMember($role->subdomain)
-                  ? config('app.url') . route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false) 
-                  : route('role.follow', ['subdomain' => $role->subdomain]) }}"
-                class="inline-flex items-center justify-center sm:inline-flex {{ $role->isCurator() && $role->is_open ? 'hidden' : '' }}"
-              >
-                <button
-                  type="button"
-                  style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
-                  class="inline-flex items-center rounded-md px-8 py-4 hover:opacity-90 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
+                  class="inline-flex items-center justify-center flex-shrink-0 {{ $role->isCurator() && $role->is_open ? 'hidden' : '' }}"
                 >
-                  {{ auth()->user() && auth()->user()->isMember($role->subdomain) ? __('messages.manage') : __('messages.follow') }}
-                </button>
+                  <button
+                    type="button"
+                    style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
+                    class="inline-flex items-center rounded-md px-6 py-3 hover:opacity-90 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 h-12"
+                  >
+                    {{ __('messages.follow') }}
+                  </button>
                 </a>
+                @endif
               </div>
             </div>
             <!--
