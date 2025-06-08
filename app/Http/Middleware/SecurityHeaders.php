@@ -57,7 +57,7 @@ class SecurityHeaders
             // Stricter CSP for production
             $csp = [
                 "default-src 'self'",
-                "script-src 'self' 'nonce-{$nonce}' 'unsafe-eval' 'unsafe-inline' *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com unpkg.com js.sentry-cdn.com browser.sentry-cdn.com *.sentry.io",
+                "script-src 'self' 'unsafe-eval' 'unsafe-inline' *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com unpkg.com js.sentry-cdn.com browser.sentry-cdn.com *.sentry.io",
                 "style-src 'self' 'unsafe-inline' *.googleapis.com *.gstatic.com rsms.me",
                 "img-src 'self' data: *.googleapis.com *.gstatic.com *.stripe.com *.ytimg.com eventschedule.nyc3.cdn.digitaloceanspaces.com",
                 "font-src 'self' data: *.googleapis.com *.gstatic.com rsms.me",
