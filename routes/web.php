@@ -53,6 +53,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::post('/validate_address', [RoleController::class, 'validateAddress'])->name('validate_address')->middleware('throttle:25,1440');
     Route::post('/store', [RoleController::class, 'store'])->name('role.store');
     Route::get('/search_roles', [RoleController::class, 'search'])->name('role.search');
+    Route::get('/search_events/{subdomain}', [RoleController::class, 'searchEvents'])->name('role.search_events');
     Route::get('/edit_event/{hash}', [EventController::class, 'editAdmin'])->name('event.edit_admin');
     Route::get('/following', [RoleController::class, 'following'])->name('following');
     Route::get('/tickets', [TicketController::class, 'tickets'])->name('tickets');
