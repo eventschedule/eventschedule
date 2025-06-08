@@ -1,7 +1,7 @@
 <x-auth-layout>
 
     <x-slot name="head">
-        <script>
+        <script {!! nonce_attr() !!}>
         document.addEventListener('DOMContentLoaded', function() {
             var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;            
             document.getElementById('timezone').value = timezone;

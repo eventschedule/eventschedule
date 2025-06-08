@@ -211,7 +211,7 @@ Leaving: "ease-in duration-200"
     </div>
 </div>
 
-<script>
+<script {!! nonce_attr() !!}>
 function showAdd(link_type) {
     $('#add_modal').fadeIn(function() {
         $('#link').focus();

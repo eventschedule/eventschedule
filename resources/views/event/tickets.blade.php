@@ -1,6 +1,6 @@
 <x-slot name="head">
   <script src="{{ asset('js/vue.global.prod.js') }}"></script>
-  <script>
+  <script {!! nonce_attr() !!}>
     window.addEventListener('DOMContentLoaded', function() {
         const { createApp, ref } = Vue;
 

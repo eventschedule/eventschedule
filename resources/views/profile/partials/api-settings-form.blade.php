@@ -84,7 +84,7 @@
     </form>
 </section>
 
-<script>
+<script {!! nonce_attr() !!}>
 function copyApiKey() {
     const apiKeyInput = document.getElementById('api_key');
     apiKeyInput.select();

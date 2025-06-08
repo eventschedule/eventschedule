@@ -59,7 +59,7 @@
 
         </style>
 
-        <script>
+        <script {!! nonce_attr() !!}>
         document.addEventListener('DOMContentLoaded', () => {
             $("#country").countrySelect({
                 defaultCountry: '{{ old('country_code', $role->country_code) }}',
@@ -1069,7 +1069,7 @@
 
 </x-app-admin-layout>
 
-<script>
+<script {!! nonce_attr() !!}>
 function addGroupField() {
     const container = document.getElementById('group-items');
     const idx = container.children.length;

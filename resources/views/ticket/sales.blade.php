@@ -34,7 +34,7 @@
 
 </x-app-admin-layout>
 
-<script>
+<script {!! nonce_attr() !!}>
 let timeoutId;
 const filterInput = document.getElementById('filter');
 const clearButton = document.getElementById('clear-filter');
