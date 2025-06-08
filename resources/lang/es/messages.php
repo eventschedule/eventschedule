@@ -455,6 +455,13 @@ return [
     'show_past_events' => 'Mostrar eventos pasados',
     'category' => 'Categoría',
     'all_categories' => 'Todas las Categorías',
+    'search_events' => 'Buscar eventos...',
+    'no_events_found' => 'No se encontraron eventos',
+    'subschedules' => 'Subhorarios',
+    'slug' => 'Identificador',
+    'schedule_url' => 'URL del Horario',
+    'updated_talent' => 'Talento actualizado exitosamente',
+    'back_to_schedule' => 'Volver al Horario',
     'all_schedules' => 'Todos los Horarios',
     
     // Categories

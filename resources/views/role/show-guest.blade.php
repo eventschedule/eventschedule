@@ -308,7 +308,7 @@
   display: none !important;
 }
 </style>
-<script>
+<script {!! nonce_attr() !!}>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('search-input');
     const searchLoading = document.getElementById('search-loading');

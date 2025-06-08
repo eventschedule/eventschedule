@@ -455,6 +455,13 @@ return [
     'show_past_events' => 'عرض الأحداث السابقة',
     'category' => 'الفئة',
     'all_categories' => 'جميع الفئات',
+    'search_events' => 'البحث عن الفعاليات...',
+    'no_events_found' => 'لم يتم العثور على فعاليات',
+    'subschedules' => 'الجداول الفرعية',
+    'slug' => 'المعرف',
+    'schedule_url' => 'رابط الجدول',
+    'updated_talent' => 'تم تحديث الموهبة بنجاح',
+    'back_to_schedule' => 'العودة إلى الجدول',
     'all_schedules' => 'جميع الجداول',
     
     // Categories

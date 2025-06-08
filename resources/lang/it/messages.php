@@ -452,6 +452,13 @@ return [
     'show_past_events' => 'Mostra eventi passati',
     'category' => 'Categoria',
     'all_categories' => 'Tutte le Categorie',
+    'search_events' => 'Cerca eventi...',
+    'no_events_found' => 'Nessun evento trovato',
+    'subschedules' => 'Sottoprogrammi',
+    'slug' => 'Identificatore',
+    'schedule_url' => 'URL del Programma',
+    'updated_talent' => 'Talento aggiornato con successo',
+    'back_to_schedule' => 'Torna al Programma',
     'all_schedules' => 'Tutti i Programmi',
     
     // Categories
