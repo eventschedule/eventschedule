@@ -22,7 +22,7 @@
               }
             @endphp
             <a href="{{ $backUrl }}" class="text-white text-sm hover:underline mt-2 inline-block">
-              ← {{ __('messages.back_to_calendar') }}
+              ← {{ __('messages.back_to_schedule') }}
             </a>
           </div>
           <!--
