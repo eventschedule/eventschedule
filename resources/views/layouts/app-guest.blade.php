@@ -181,17 +181,8 @@
         <p class="text-[#F5F9FE] text-base text-center">
             <!-- Per the AAL license, please do not remove the link to Event Schedule -->
             {!! str_replace(':link', '<a href="https://www.eventschedule.com" target="_blank" class="hover:underline">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}
-            @if (config('app.hosted'))
                 •
-                @if (config('app.custom_footer') && (($role->country_code == 'il' && $role->id != 6) || ($event && $event->venue && $event->venue->country_code == 'il' && $event->venue->id != 6)))
-                    {!! config('app.custom_footer') !!}
-                @else
-                    {!! str_replace([':link1', ':link2'], [
-                        '<a href="https://invoiceninja.com" target="_blank" class="hover:underline" title="Leading small-business platform to manage invoices, expenses & tasks">Invoice Ninja</a>', 
-                        '<a href="https://mudeo.app" target="_blank" class="hover:underline" title="Make music together">mudeo</a>'
-                    ],  __('messages.supported_by_both')) !!}
-                @endif
-            @endif
+            {!! __('messages.supported_by', ['link' => '<a href="https://invoiceninja.com" target="_blank" class="hover:underline" title="Leading small-business platform to manage invoices, expenses & tasks">Invoice Ninja</a>']) !!}
         </p>
       </div>
     </footer>

@@ -95,8 +95,86 @@
             z-index: 9999;
         }
 
+        /* EasyMDE Toolbar Fixes */
         .editor-toolbar {
-            background-color: white;
+            background-color: #f8f9fa !important; /* Temporarily change to light gray for debugging */
+            border-bottom: 1px solid #d1d5db !important;
+        }
+
+        .editor-toolbar button,
+        .editor-toolbar a,
+        .editor-toolbar .fa,
+        .editor-toolbar i {
+            color: #374151 !important;
+            background-color: transparent !important;
+            border: none !important;
+            text-shadow: 0 0 1px rgba(0,0,0,0.5) !important; /* Add text shadow for visibility */
+        }
+
+        .editor-toolbar button:hover,
+        .editor-toolbar a:hover {
+            background-color: #f3f4f6 !important;
+            color: #111827 !important;
+        }
+
+        .editor-toolbar button.active,
+        .editor-toolbar a.active {
+            background-color: #e5e7eb !important;
+            color: #111827 !important;
+        }
+
+        .editor-toolbar .separator {
+            border-left: 1px solid #d1d5db !important;
+            border-right: none !important;
+            color: transparent !important;
+            font-size: 0 !important;
+            width: 1px !important;
+            height: 18px !important;
+            margin: 0 8px !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+        }
+
+        /* Additional EasyMDE icon fixes */
+        .editor-toolbar button:before,
+        .editor-toolbar a:before {
+            color: #374151 !important;
+            text-shadow: 0 0 1px rgba(0,0,0,0.5) !important;
+        }
+
+        .editor-toolbar button:hover:before,
+        .editor-toolbar a:hover:before {
+            color: #111827 !important;
+        }
+
+        /* More specific EasyMDE fixes for different icon types */
+        .CodeMirror .editor-toolbar > * {
+            color: #374151 !important;
+        }
+
+        .editor-toolbar > * {
+            color: #374151 !important;
+        }
+
+        .editor-toolbar > button > i,
+        .editor-toolbar > a > i {
+            color: #374151 !important;
+        }
+
+        /* Force visibility of all toolbar elements */
+        .editor-toolbar > * {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        /* Style text-based buttons */
+        .editor-toolbar .editor-button-text {
+            font-weight: bold !important;
+            font-size: 14px !important;
+            padding: 6px 8px !important;
+            min-width: 24px !important;
+            text-align: center !important;
+            display: inline-block !important;
         }
 
         .custom-content * {
