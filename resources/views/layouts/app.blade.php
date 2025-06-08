@@ -83,6 +83,53 @@
             text-align: right;
         }
         
+        .rtl select {
+            text-align: right;
+            direction: rtl;
+        }
+        
+        .rtl select option {
+            text-align: right;
+            direction: rtl;
+        }
+        
+        /* RTL-specific spacing adjustments */
+        .rtl .ml-2 { margin-left: 0; margin-right: 0.5rem; }
+        .rtl .ml-4 { margin-left: 0; margin-right: 1rem; }
+        .rtl .mr-1\.5 { margin-right: 0; margin-left: 0.375rem; }
+        .rtl .mr-3 { margin-right: 0; margin-left: 0.75rem; }
+        .rtl .-ml-0\.5 { margin-left: 0; margin-right: -0.125rem; }
+        .rtl .-mr-1 { margin-right: 0; margin-left: -0.25rem; }
+        .rtl .sm\\:ml-2 { margin-left: 0; margin-right: 0.5rem; }
+        .rtl .lg\\:ml-2 { margin-left: 0; margin-right: 0.5rem; }
+        .rtl .lg\\:ml-4 { margin-left: 0; margin-right: 1rem; }
+        .rtl .xl\\:ml-3\.5 { margin-left: 0; margin-right: 0.875rem; }
+        .rtl .xl\\:pl-3\.5 { padding-left: 0; padding-right: 0.875rem; }
+        .rtl .xl\\:border-l { border-left: none; border-right: 1px solid; }
+        
+        /* RTL flex direction adjustments */
+        .rtl .space-x-3 > :not([hidden]) ~ :not([hidden]) {
+            --tw-space-x-reverse: 1;
+        }
+        .rtl .space-x-10 > :not([hidden]) ~ :not([hidden]) {
+            --tw-space-x-reverse: 1;
+        }
+        
+        /* RTL text alignment fixes */
+        .rtl .text-left { text-align: right; }
+        .rtl .lg\\:text-left { text-align: right; }
+        
+        /* RTL positioning adjustments */
+        .rtl .right-4 { right: auto; left: 1rem; }
+        .rtl .absolute.right-0 { right: auto; left: 0; }
+        
+        /* RTL flex justification adjustments */
+        .rtl .justify-start { justify-content: flex-end; }
+        .rtl .justify-end { justify-content: flex-start; }
+        .rtl .lg\\:justify-start { justify-content: flex-end; }
+        .rtl .lg\\:justify-end { justify-content: flex-start; }
+        .rtl .sm\\:justify-end { justify-content: flex-start; }
+        
         .tooltip {
             font-family: sans-serif !important;
             position: absolute;

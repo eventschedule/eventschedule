@@ -453,4 +453,21 @@ return [
     'curator_schedules' => 'جداول المنسق',
     'event_created_by' => 'تم إنشاء الحدث بواسطة :user',
     'show_past_events' => 'عرض الأحداث السابقة',
+    'category' => 'الفئة',
+    'all_categories' => 'جميع الفئات',
+    'all_schedules' => 'جميع الجداول',
+    
+    // Categories
+    'parties_&_festivals' => 'الحفلات والمهرجانات',
+    'concerts' => 'الحفلات الموسيقية',
+    'art_&_culture' => 'الفن والثقافة',
+    'personal_growth' => 'النمو الشخصي',
+    'education' => 'التعليم',
+    'business_networking' => 'الشبكات التجارية',
+    'health_&_fitness' => 'الصحة واللياقة',
+    'food_&_drink' => 'الطعام والشراب',
+    'community' => 'المجتمع',
+    'tech' => 'التكنولوجيا',
+    'sports' => 'الرياضة',
+    'spirituality' => 'الروحانية',
 ];

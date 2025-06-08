@@ -104,7 +104,7 @@
                 <div class="hidden sm:flex sm:flex-col lg:flex-row sm:items-start lg:items-center sm:justify-end sm:w-auto sm:gap-2 lg:gap-0">
                     <div class="flex flex-wrap items-center gap-2 lg:gap-0 sm:justify-end lg:justify-start">
                         @if(isset($role) && $role->groups && $role->groups->count() > 1)
-                            <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 md:w-auto lg:ml-4 flex items-center text-sm">
+                            <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 md:w-auto lg:ml-4 flex items-center text-sm {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
                                 <option value="">{{ __('messages.all_schedules') }}</option>
                                 @foreach($role->groups as $group)
                                     <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
@@ -112,9 +112,9 @@
                             </select>
                         @endif
                         @if(count($uniqueCategoryIds ?? []) > 1)
-                            <select v-model="selectedCategory" class="border-gray-300 rounded-md shadow-sm h-9 sm:w-auto sm:ml-2 lg:ml-4 flex items-center text-sm">
+                            <select v-model="selectedCategory" class="border-gray-300 rounded-md shadow-sm h-9 sm:w-auto sm:ml-2 lg:ml-4 flex items-center text-sm {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
                                 <option value="">{{ __('messages.all_categories') }}</option>
-                                @foreach(config('app.event_categories', []) as $catKey => $catName)
+                                @foreach(get_translated_categories() as $catKey => $catName)
                                     <option value="{{ $catKey }}">{{ $catName }}</option>
                                 @endforeach
                             </select>
@@ -245,7 +245,7 @@
             <div class="sm:hidden w-full mt-6">
                 <div class="flex flex-row gap-2 w-full">
                     @if(isset($role) && $role->groups && $role->groups->count() > 1)
-                        <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 flex-1 flex items-center text-sm">
+                        <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 flex-1 flex items-center text-sm {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
                             <option value="">{{ __('messages.all_schedules') }}</option>
                             @foreach($role->groups as $group)
                                 <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
@@ -253,9 +253,9 @@
                         </select>
                     @endif
                     @if(count($uniqueCategoryIds ?? []) > 1)
-                        <select v-model="selectedCategory" class="border-gray-300 rounded-md shadow-sm h-9 flex-1 flex items-center text-sm">
+                        <select v-model="selectedCategory" class="border-gray-300 rounded-md shadow-sm h-9 flex-1 flex items-center text-sm {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
                             <option value="">{{ __('messages.all_categories') }}</option>
-                            @foreach(config('app.event_categories', []) as $catKey => $catName)
+                            @foreach(get_translated_categories() as $catKey => $catName)
                                 <option value="{{ $catKey }}">{{ $catName }}</option>
                             @endforeach
                         </select>

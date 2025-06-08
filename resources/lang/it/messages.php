@@ -450,4 +450,21 @@ return [
     'curator_schedules' => 'Programmi curatore',
     'event_created_by' => 'Evento creato da :user',
     'show_past_events' => 'Mostra eventi passati',
+    'category' => 'Categoria',
+    'all_categories' => 'Tutte le Categorie',
+    'all_schedules' => 'Tutti i Programmi',
+    
+    // Categories
+    'parties_&_festivals' => 'Feste e Festival',
+    'concerts' => 'Concerti',
+    'art_&_culture' => 'Arte e Cultura',
+    'personal_growth' => 'Crescita Personale',
+    'education' => 'Educazione',
+    'business_networking' => 'Networking Aziendale',
+    'health_&_fitness' => 'Salute e Fitness',
+    'food_&_drink' => 'Cibo e Bevande',
+    'community' => 'Comunità',
+    'tech' => 'Tecnologia',
+    'sports' => 'Sport',
+    'spirituality' => 'Spiritualità',
 ];

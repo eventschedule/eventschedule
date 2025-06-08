@@ -455,4 +455,21 @@ return [
     'curator_schedules' => 'Kurator Zeitpläne',
     'event_created_by' => 'Veranstaltung erstellt von :user',
     'show_past_events' => 'Vergangene Events anzeigen',
+    'category' => 'Kategorie',
+    'all_categories' => 'Alle Kategorien',
+    'all_schedules' => 'Alle Zeitpläne',
+    
+    // Categories
+    'parties_&_festivals' => 'Partys & Festivals',
+    'concerts' => 'Konzerte',
+    'art_&_culture' => 'Kunst & Kultur',
+    'personal_growth' => 'Persönlichkeitsentwicklung',
+    'education' => 'Bildung',
+    'business_networking' => 'Business-Networking',
+    'health_&_fitness' => 'Gesundheit & Fitness',
+    'food_&_drink' => 'Essen & Trinken',
+    'community' => 'Gemeinschaft',
+    'tech' => 'Technologie',
+    'sports' => 'Sport',
+    'spirituality' => 'Spiritualität',
 ];

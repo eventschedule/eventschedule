@@ -469,4 +469,18 @@ return [
     'schedule_url' => 'Schedule URL',
     'updated_talent' => 'Successfully updated talent',
     'back_to_schedule' => 'Back to Schedule',
+    
+    // Categories
+    'parties_&_festivals' => 'Parties & Festivals',
+    'concerts' => 'Concerts',
+    'art_&_culture' => 'Art & Culture',
+    'personal_growth' => 'Personal Growth',
+    'education' => 'Education',
+    'business_networking' => 'Business Networking',
+    'health_&_fitness' => 'Health & Fitness',
+    'food_&_drink' => 'Food & Drink',
+    'community' => 'Community',
+    'tech' => 'Tech',
+    'sports' => 'Sports',
+    'spirituality' => 'Spirituality',
 ];
