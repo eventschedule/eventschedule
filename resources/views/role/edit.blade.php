@@ -883,9 +883,9 @@
                                 :value="old('new_subdomain', $role->subdomain)" required minlength="4" maxlength="50"
                                 pattern="[a-z0-9-]+" oninput="this.value = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '')" />
                             <x-input-error class="mt-2" :messages="$errors->get('new_subdomain')" />
-                            <button type="button" onclick="toggleSubdomainEdit()" class="mt-2 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                            <x-secondary-button type="button" onclick="toggleSubdomainEdit()" class="mt-2">
                                 {{ __('messages.cancel') }}
-                            </button>
+                            </x-secondary-button>
                         </div>
                         @endif
 
