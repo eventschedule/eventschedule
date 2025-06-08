@@ -17,14 +17,9 @@
 
     <link rel="icon" href="{{ asset('images/favicon.png') }}">
 
-    <meta http-equiv="Content-Security-Policy" content="
-        img-src 'self' data:;
-        frame-src 'self';
-    ">
-
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics') }}"></script>
-    <script>
+    <script {!! nonce_attr() !!}>
     window.dataLayer = window.dataLayer || [];
 
     function gtag() {

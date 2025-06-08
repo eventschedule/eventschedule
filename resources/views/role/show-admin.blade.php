@@ -15,7 +15,7 @@
                 pointer-events: none;
             }
         </style>
-        <script>
+        <script {!! nonce_attr() !!}>
         $(document).ready(function () {
             const availableDays = new Set();
             const unavailableDays = new Set({!! json_encode($datesUnavailable) !!});
@@ -64,7 +64,7 @@
         </style>
         @endif
 
-        <script>
+        <script {!! nonce_attr() !!}>
             function onTabChange() {
                 var tab = $('#current-tab').find(':selected').val();
                 location.href = "{{ url('/') }}" + '/{{ $subdomain }}/' + tab;

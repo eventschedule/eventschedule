@@ -4,7 +4,7 @@
         <link rel="preconnect" href="https://rsms.me/">
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css">        
 
-        <script>
+        <script {!! nonce_attr() !!}>
             $(document).ready(function() {
                 const sidebar = document.getElementById('sidebar');
                 const openButton = document.getElementById('open-sidebar');

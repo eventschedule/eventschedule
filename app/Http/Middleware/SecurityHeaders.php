@@ -43,12 +43,12 @@ class SecurityHeaders
             // More permissive CSP for development
             $csp = [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' {$host}:* *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com unpkg.com",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' {$host}:* *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com unpkg.com js.sentry-cdn.com *.sentry.io",
                 "style-src 'self' 'unsafe-inline' {$host}:* *.googleapis.com *.gstatic.com rsms.me",
-                "img-src 'self' data: {$host}:* *.googleapis.com *.gstatic.com *.stripe.com",
+                "img-src 'self' data: {$host}:* *.googleapis.com *.gstatic.com *.stripe.com *.ytimg.com eventschedule.nyc3.cdn.digitaloceanspaces.com",
                 "font-src 'self' data: {$host}:* *.googleapis.com *.gstatic.com rsms.me",
                 "connect-src 'self' {$host}:* ws://{$host}:* wss://{$host}:* *.googleapis.com *.stripe.com *.sentry.io",
-                "frame-src 'self' *.stripe.com",
+                "frame-src 'self' *.stripe.com *.youtube.com *.googletagmanager.com",
                 "object-src 'none'",
                 "base-uri 'self'",
                 "form-action 'self'"
@@ -57,12 +57,12 @@ class SecurityHeaders
             // Stricter CSP for production
             $csp = [
                 "default-src 'self'",
-                "script-src 'self' 'nonce-{$nonce}' *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com unpkg.com",
+                "script-src 'self' 'nonce-{$nonce}' *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com unpkg.com js.sentry-cdn.com *.sentry.io",
                 "style-src 'self' 'unsafe-inline' *.googleapis.com *.gstatic.com rsms.me",
-                "img-src 'self' data: *.googleapis.com *.gstatic.com *.stripe.com",
+                "img-src 'self' data: *.googleapis.com *.gstatic.com *.stripe.com *.ytimg.com eventschedule.nyc3.cdn.digitaloceanspaces.com",
                 "font-src 'self' data: *.googleapis.com *.gstatic.com rsms.me",
                 "connect-src 'self' *.googleapis.com *.stripe.com *.sentry.io",
-                "frame-src 'self' *.stripe.com",
+                "frame-src 'self' *.stripe.com *.youtube.com *.googletagmanager.com",
                 "object-src 'none'",
                 "base-uri 'self'",
                 "form-action 'self'",
