@@ -468,4 +468,5 @@ return [
     'all_schedules' => 'All Schedules',
     'schedule_url' => 'Schedule URL',
     'updated_talent' => 'Successfully updated talent',
+    'back_to_calendar' => 'Back to Calendar',
 ];
