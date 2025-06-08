@@ -36,7 +36,42 @@
               <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] mb-4 mt-1 sm:mb-0 text-center sm:text-left w-full sm:w-auto">
                 {{ $role->translatedName() }}
               </h3>
-              <div class="flex flex-row gap-4 w-full sm:w-auto justify-center sm:justify-start mt-5 lg:mt-0">
+              <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center sm:justify-start mt-5 lg:mt-0">
+              
+              <!-- Event Search Box -->
+              <div class="relative search-container">
+                <div class="relative">
+                  <input 
+                    type="text" 
+                    id="search-input"
+                    placeholder="{{ __('messages.search_events') }}"
+                    class="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  >
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                  </div>
+                  <!-- Loading indicator -->
+                  <div id="search-loading" class="absolute inset-y-0 right-0 pr-3 flex items-center hidden">
+                    <svg class="animate-spin h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </div>
+                </div>
+                
+                <!-- Search Results Dropdown -->
+                <div id="search-results" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-96 overflow-y-auto">
+                  <!-- Results will be populated by JavaScript -->
+                </div>
+                
+                <!-- No Results Message -->
+                <div id="no-results" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg p-3">
+                  <p class="text-sm text-gray-500 text-center">{{ __('messages.no_events_found') }}</p>
+                </div>
+              </div>
+              
               @if ($role->isCurator() && $role->is_open)
               <a
                 href="{{ route('role.follow', ['subdomain' => $role->subdomain], ['add_event' => true]) }}"
@@ -256,5 +291,134 @@
       @endif
     </div>
   </main>
+
+<style>
+[v-cloak] {
+  display: none !important;
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-input');
+    const searchLoading = document.getElementById('search-loading');
+    const searchResults = document.getElementById('search-results');
+    const noResults = document.getElementById('no-results');
+    let searchTimeout = null;
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value;
+            
+            // Clear previous timeout
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+            
+            // Hide all dropdowns initially
+            searchResults.classList.add('hidden');
+            noResults.classList.add('hidden');
+            
+            if (query.length < 2) {
+                searchLoading.classList.add('hidden');
+                return;
+            }
+            
+            searchLoading.classList.remove('hidden');
+            
+            // Debounce the search
+            searchTimeout = setTimeout(() => {
+                fetch(`/search_events/{{ $role->subdomain }}?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        searchLoading.classList.add('hidden');
+                        
+                        if (data.length > 0) {
+                            displaySearchResults(data);
+                        } else {
+                            noResults.classList.remove('hidden');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Search error:', error);
+                        searchLoading.classList.add('hidden');
+                        noResults.classList.remove('hidden');
+                    });
+            }, 300);
+        });
+    }
+    
+    function displaySearchResults(events) {
+        const resultsHtml = events.map(event => {
+            const imageHtml = event.image_url 
+                ? `<img src="${event.image_url}" alt="${event.name}" class="w-12 h-12 object-cover rounded-md">`
+                : `<div class="w-12 h-12 bg-gray-200 rounded-md flex items-center justify-center">
+                     <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                     </svg>
+                   </div>`;
+            
+            const timeHtml = event.local_starts_at 
+                ? `<p class="text-xs text-gray-400">${formatEventTime(event.local_starts_at)}</p>`
+                : '';
+            
+            return `
+                <div class="flex items-center p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0" onclick="selectEvent('${event.guest_url}')">
+                    <div class="flex-shrink-0 mr-3">
+                        ${imageHtml}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-900 truncate">${event.name}</p>
+                        <p class="text-sm text-gray-500 truncate">${event.venue_name}</p>
+                        ${timeHtml}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        searchResults.innerHTML = resultsHtml;
+        searchResults.classList.remove('hidden');
+    }
+    
+    function formatEventTime(datetime) {
+        if (!datetime) return '';
+        
+        const date = new Date(datetime);
+        return date.toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit',
+            day: 'numeric',
+            month: 'short'
+        });
+    }
+    
+    window.selectEvent = function(url) {
+        // Clear search when event is selected
+        searchInput.value = '';
+        searchResults.classList.add('hidden');
+        noResults.classList.add('hidden');
+        
+        // Navigate to the event page
+        window.location.href = url;
+    };
+    
+    // Handle clicking outside search dropdown to close it
+    document.addEventListener('click', function(e) {
+        const searchContainer = document.querySelector('.search-container');
+        if (searchContainer && !searchContainer.contains(e.target)) {
+            searchResults.classList.add('hidden');
+            noResults.classList.add('hidden');
+        }
+    });
+    
+    // Handle Escape key to clear search
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            searchInput.value = '';
+            searchResults.classList.add('hidden');
+            noResults.classList.add('hidden');
+        }
+    });
+});
+</script>
 
 </x-app-guest-layout>

@@ -161,6 +161,8 @@ return [
     'unfollow' => 'Unfollow',
     'event_requested' => 'Successfully submitted request',
     'search' => 'Search',
+    'search_events' => 'Search events...',
+    'no_events_found' => 'No events found',
     'style' => 'Style',
     'is_unlisted' => 'Is Unlisted',
     'confirmed_email' => 'Successfully confirmed email',

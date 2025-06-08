@@ -1465,6 +1465,72 @@ class RoleController extends Controller
         return response()->json($roles);
     }
 
+    public function searchEvents(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $search = $request->get('q', '');
+        
+        if (empty($search)) {
+            return response()->json([]);
+        }
+
+        // Get events based on role type
+        if ($role->isCurator()) {
+            $events = Event::with(['roles', 'venue'])
+                ->where(function ($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                })
+                ->whereIn('id', function ($query) use ($role) {
+                    $query->select('event_id')
+                        ->from('event_role')
+                        ->where('role_id', $role->id)
+                        ->where('is_accepted', true);
+                })
+                ->orderBy('starts_at')
+                ->limit(10)
+                ->get();
+        } else {
+            $events = Event::with(['roles', 'venue'])
+                ->where(function ($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                })
+                ->where(function ($query) use ($role) {
+                    if ($role->isVenue()) {
+                        $query->where('venue_id', $role->id)
+                            ->where('is_accepted', true);
+                    } else {
+                        $query->whereHas('roles', function ($query) use ($role) {
+                            $query->where('role_id', $role->id)
+                                ->where('is_accepted', true);
+                        });
+                    }
+                })
+                ->orderBy('starts_at')
+                ->limit(10)
+                ->get();
+        }
+
+        // Format events for frontend
+        $eventsData = $events->map(function ($event) use ($subdomain) {
+            return [
+                'id' => $event->id,
+                'name' => $event->translatedName(),
+                'description' => $event->translatedDescription(),
+                'venue_name' => $event->getVenueDisplayName(),
+                'starts_at' => $event->starts_at,
+                'local_starts_at' => $event->localStartsAt(),
+                'image_url' => $event->getImageUrl(),
+                'guest_url' => $event->getGuestUrl($subdomain, ''),
+                'group_id' => $event->group_id,
+                'category_id' => $event->category_id,
+            ];
+        });
+
+        return response()->json($eventsData);
+    }
+
     public function changePlan($subdomain, $plan_type)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
