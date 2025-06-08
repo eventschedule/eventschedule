@@ -107,6 +107,11 @@ class Event extends Model
         return $this->belongsTo(Role::class, 'venue_id');
     }
 
+    public function group()
+    {
+        return $this->belongsTo(Group::class, 'group_id');
+    }
+
     public function curator()
     {
         return $this->belongsTo(Role::class, 'curator_id');
