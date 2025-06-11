@@ -338,7 +338,11 @@
                 $('#city').val(validatedAddress['city']);
                 $('#state').val(validatedAddress['state']);
                 $('#postal_code').val(validatedAddress['postal_code']);
-                $("#country").countrySelect("selectCountry", validatedAddress['country_code']);
+                
+                // Only select country if country_code is defined and not null
+                if (validatedAddress['country_code']) {
+                    $("#country").countrySelect("selectCountry", validatedAddress['country_code']);
+                }
                                 
                 // Hide the address response and accept button after accepting
                 $('#address_response').hide();
