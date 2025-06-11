@@ -101,10 +101,10 @@
                         </a>
                     </div>
                 </div>
-                <div class="hidden sm:flex sm:flex-col lg:flex-row sm:items-start lg:items-center sm:justify-end sm:w-auto sm:gap-2 lg:gap-0">
-                    <div class="flex flex-wrap items-center gap-2 lg:gap-0 sm:justify-end lg:justify-start">
+                <div class="hidden sm:flex sm:flex-row sm:items-center sm:justify-end sm:w-auto sm:gap-2">
+                    <div class="flex items-center gap-2">
                         @if(isset($role) && $role->groups && $role->groups->count() > 1)
-                            <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 md:w-auto sm:ml-2 lg:ml-2 flex items-center text-sm {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
+                            <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 w-auto flex items-center text-sm {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
                                 <option value="">{{ __('messages.all_schedules') }}</option>
                                 @foreach($role->groups as $group)
                                     <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
@@ -112,7 +112,7 @@
                             </select>
                         @endif
                         @if(count($uniqueCategoryIds ?? []) > 1)
-                            <select v-model="selectedCategory" class="border-gray-300 rounded-md shadow-sm h-9 sm:w-auto sm:ml-2 lg:ml-2 flex items-center text-sm {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
+                            <select v-model="selectedCategory" class="border-gray-300 rounded-md shadow-sm h-9 w-auto flex items-center text-sm {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
                                 <option value="">{{ __('messages.all_categories') }}</option>
                                 @foreach(get_translated_categories() as $catKey => $catName)
                                     <option value="{{ $catKey }}">{{ $catName }}</option>
@@ -121,10 +121,10 @@
                         @endif
                     </div>
 
-                    <div class="flex flex-wrap items-center gap-2 lg:gap-0 sm:justify-end lg:justify-start">
+                    <div class="flex items-center gap-2">
                         @if ($route == 'admin' && $role->email_verified_at)
                             @if ($tab == 'schedule')
-                            <span class="hidden sm:block lg:ml-2">
+                            <span class="hidden sm:block">
                                 <a href="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'embed' => 'true']) }}" target="_blank">
                                     <button type="button"
                                         class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
@@ -136,7 +136,7 @@
                                     </button>
                                 </a>
                             </span>
-                            <a href="{{ route('event.show_import', ['subdomain' => $role->subdomain]) }}" class="sm:ml-2 lg:ml-2">
+                            <a href="{{ route('event.show_import', ['subdomain' => $role->subdomain]) }}">
                                 <button type="button"
                                     class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                                     <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
@@ -147,7 +147,7 @@
                             </a>
                             @elseif ($tab == 'availability')
                             <button type="button" id="saveButton" disabled
-                                class="inline-flex items-center rounded-md shadow-sm bg-[#4E81FA] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#3A6BE0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 lg:ml-2">
+                                class="inline-flex items-center rounded-md shadow-sm bg-[#4E81FA] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#3A6BE0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50">
                                 <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                                     <path
                                         d="M6.5 20Q4.22 20 2.61 18.43 1 16.85 1 14.58 1 12.63 2.17 11.1 3.35 9.57 5.25 9.15 5.88 6.85 7.75 5.43 9.63 4 12 4 14.93 4 16.96 6.04 19 8.07 19 11 20.73 11.2 21.86 12.5 23 13.78 23 15.5 23 17.38 21.69 18.69 20.38 20 18.5 20H13Q12.18 20 11.59 19.41 11 18.83 11 18V12.85L9.4 14.4L8 13L12 9L16 13L14.6 14.4L13 12.85V18H18.5Q19.55 18 20.27 17.27 21 16.55 21 15.5 21 14.45 20.27 13.73 19.55 13 18.5 13H17V11Q17 8.93 15.54 7.46 14.08 6 12 6 9.93 6 8.46 7.46 7 8.93 7 11H6.5Q5.05 11 4.03 12.03 3 13.05 3 14.5 3 15.95 4.03 17 5.05 18 6.5 18H9V20M12 13Z" />
@@ -156,7 +156,7 @@
                             </button>
                             @endif
                         @elseif ($route == 'home' && \App\Utils\HostedUtils::isHostedOrAdmin())
-                            <div style="font-family: sans-serif" class="sm:ml-2 lg:ml-2 shadow-sm relative inline-block text-left">
+                            <div style="font-family: sans-serif" class="shadow-sm relative inline-block text-left">
                                 <button type="button" 
                                     onclick="onPopUpClick('calendar-pop-up-menu', event)"
                                     class="inline-flex w-full justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
@@ -202,7 +202,7 @@
                             </div>
                         @endif
 
-                        <div class="flex flex-row items-center bg-white rounded-md shadow-sm sm:ml-2 lg:ml-2">
+                        <div class="flex flex-row items-center bg-white rounded-md shadow-sm">
                             <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}"
                                 class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50"
                                 rel="nofollow">
@@ -228,7 +228,7 @@
                         </div>
 
                         @if ($route == 'admin' && $role->email_verified_at && $tab == 'schedule')
-                            <a href="{{ route('event.create', ['subdomain' => $role->subdomain]) }}" class="sm:ml-2 lg:ml-2">
+                            <a href="{{ route('event.create', ['subdomain' => $role->subdomain]) }}">
                                 <button type="button"
                                     class="inline-flex items-center rounded-md shadow-sm bg-[#4E81FA] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#3A6BE0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]">
                                     <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
