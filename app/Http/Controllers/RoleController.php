@@ -1117,7 +1117,7 @@ class RoleController extends Controller
                 continue;
             }
 
-            $links[] = UrlUtils::getUrlDetails($link);
+            $links[] = UrlUtils::getUrlInfo($link);
         }
 
         $links = json_encode($links);
