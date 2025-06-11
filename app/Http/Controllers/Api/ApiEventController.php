@@ -10,6 +10,7 @@ use App\Repos\EventRepo;
 use Illuminate\Http\Request;
 use App\Utils\UrlUtils;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class ApiEventController extends Controller
 {
@@ -191,5 +192,42 @@ class ApiEventController extends Controller
                 'message' => 'Event created successfully'
             ]
         ], 201, [], JSON_PRETTY_PRINT);
+    }
+
+    public function flyer(Request $request, $event_id)
+    {
+        $event = Event::findOrFail(UrlUtils::decodeId($event_id));
+
+        if (! $event->user_id === auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        if (! $event->isPro()) {
+            return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
+        }
+
+        if ($request->hasFile('flyer_image')) {
+            if ($event->flyer_image_url) {
+                $path = $event->getAttributes()['flyer_image_url'];
+                if (config('filesystems.default') == 'local') {
+                    $path = 'public/' . $path;
+                }
+                Storage::delete($path);
+            }
+
+            $file = $request->file('flyer_image');
+            $filename = strtolower('flyer_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+
+            $event->flyer_image_url = $filename;
+            $event->save();
+        }        
+        
+        return response()->json([
+            'data' => $event->toApiData(),
+            'meta' => [
+                'message' => 'Flyer uploaded successfully'
+            ]
+        ], 200, [], JSON_PRETTY_PRINT);
     }
 }
