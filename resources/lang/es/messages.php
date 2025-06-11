@@ -477,4 +477,5 @@ return [
     'tech' => 'Tecnología',
     'sports' => 'Deportes',
     'spirituality' => 'Espiritualidad',
+    'this_month' => 'Este Mes',
 ];

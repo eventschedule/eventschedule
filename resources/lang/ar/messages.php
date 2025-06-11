@@ -477,4 +477,5 @@ return [
     'tech' => 'التكنولوجيا',
     'sports' => 'الرياضة',
     'spirituality' => 'الروحانية',
+    'this_month' => 'هذا الشهر',
 ];

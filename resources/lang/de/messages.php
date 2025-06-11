@@ -37,6 +37,7 @@ return [
     'remember_me' => 'Angemeldet bleiben',
     'log_in' => 'Anmelden',
     'name' => 'Name',
+    'english_name' => 'Englischer Name',
     'confirm_password' => 'Passwort bestätigen',
     'terms_of_service' => 'Nutzungsbedingungen',
     'privacy_policy' => 'Datenschutzrichtlinie',
@@ -479,4 +480,5 @@ return [
     'tech' => 'Technologie',
     'sports' => 'Sport',
     'spirituality' => 'Spiritualität',
+    'this_month' => 'Dieser Monat',
 ];

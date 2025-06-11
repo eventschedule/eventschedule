@@ -37,6 +37,7 @@ return [
     'remember_me' => 'זכור אותי',
     'log_in' => 'התחברות',
     'name' => 'שם',
+    'english_name' => 'שם באנגלית',
     'confirm_password' => 'אשר סיסמה',
     'terms_of_service' => 'תנאי השירות',
     'privacy_policy' => 'מדיניות פרטיות',
@@ -481,4 +482,5 @@ return [
     'tech' => 'טכנולוגיה',
     'sports' => 'ספורט',
     'spirituality' => 'רוחניות',
+    'this_month' => 'החודש הזה',
 ];

@@ -410,8 +410,7 @@
                                         </div>
                                         <pre class="mt-2 overflow-x-auto"><code>{
     "data": {
-        "id": "456",
-        "url": "{{ config('app.url') }}/venue-name/event-slug",
+        "event_url": "https://example.com",        
         "name": "Event Name",
         "description": "Event description",
         "starts_at": "{{ now()->format('Y-m-d') }} 19:00:00",

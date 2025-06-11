@@ -469,8 +469,6 @@ return [
     'schedule_url' => 'Schedule URL',
     'updated_talent' => 'Successfully updated talent',
     'back_to_schedule' => 'Back to Schedule',
-    
-    // Categories
     'parties_&_festivals' => 'Parties & Festivals',
     'concerts' => 'Concerts',
     'art_&_culture' => 'Art & Culture',
@@ -483,4 +481,5 @@ return [
     'tech' => 'Tech',
     'sports' => 'Sports',
     'spirituality' => 'Spirituality',
+    'this_month' => 'This Month',
 ];
