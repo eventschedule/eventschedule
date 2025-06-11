@@ -57,9 +57,6 @@ class ApiAuthentication
         // Increment rate limit counter
         Cache::put($rateLimitKey, $attempts + 1, now()->addMinute());
 
-        // Update last used timestamp
-        $user->update(['api_last_used_at' => now()]);
-        
         auth()->login($user);
         
         return $next($request);

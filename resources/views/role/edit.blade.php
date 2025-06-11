@@ -299,10 +299,10 @@
                 },
                 success: function(response) {
                     if (response) {
-                        var address = response['formatted_address'];
+                        var address = response['data']['formatted_address'];
                         $('#address_response').text(address);
                         $('#accept_button').show();
-                        $('#address_response').data('validated_address', response);
+                        $('#address_response').data('validated_address', response['data']);
                     } else {
                         $('#address_response').text("{{ __('messages.address_not_found') }}");    
                     }
@@ -338,11 +338,6 @@
                 $('#city').val(validatedAddress['city']);
                 $('#state').val(validatedAddress['state']);
                 $('#postal_code').val(validatedAddress['postal_code']);
-                
-                // Only select country if country_code is defined and not null
-                if (validatedAddress['country_code']) {
-                    $("#country").countrySelect("selectCountry", validatedAddress['country_code']);
-                }
                                 
                 // Hide the address response and accept button after accepting
                 $('#address_response').hide();
