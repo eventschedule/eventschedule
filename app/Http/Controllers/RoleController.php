@@ -1334,7 +1334,7 @@ class RoleController extends Controller
                     'state' => $state,
                     'postal_code' => $postal_code,
                     'country' => $country,
-                    'formatted_address' => $address1,
+                    'formatted_address' => $address1 . ' ' . $city . ' ' . $state . ' ' . $postal_code,
                     'lat' => $result['geometry']['location']['lat'],
                     'lng' => $result['geometry']['location']['lng'],
                 ]
