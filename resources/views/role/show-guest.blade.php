@@ -250,9 +250,11 @@
           >
             <div class="grid grid-cols-1 md:grid-cols-{{ $role->getVideoColumns() }} gap-8">
             @foreach (json_decode($role->youtube_links) as $link)
+            @if ($link)
               <div class="bg-white rounded-lg shadow-sm overflow-hidden">
                 <iframe class="w-full" style="height:{{ $role->getVideoHeight() }}px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-              </div>
+                </div>
+            @endif
             @endforeach
           </div>          
         </div>
@@ -270,9 +272,11 @@
           >
             <div class="grid grid-cols-1 md:grid-cols-{{ $role->getVideoColumns() }} gap-8">
             @foreach (json_decode($role->youtube_links) as $link)
+            @if ($link)
               <div class="bg-white rounded-lg shadow-sm overflow-hidden">
                 <iframe class="w-full" style="height:{{ $role->getVideoHeight() }}px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
               </div>
+            @endif
             @endforeach
           </div>          
         </div>
