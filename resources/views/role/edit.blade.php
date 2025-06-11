@@ -588,6 +588,14 @@
                         </div>
 
                         <div class="mb-6">
+                            <x-input-label for="country" :value="__('messages.country')" />
+                            <x-text-input id="country" name="country" type="text" class="mt-1 block w-full"
+                                :value="old('country')" onchange="onChangeCountry()" autocomplete="off" />
+                            <x-input-error class="mt-2" :messages="$errors->get('country')" />
+                            <input type="hidden" id="country_code" name="country_code" />
+                        </div>
+
+                        <div class="mb-6">
                             <div class="flex items-center space-x-4">
                                 <x-secondary-button id="view_map_button" onclick="viewMap()">{{ __('messages.view_map') }}</x-secondary-button>
                                 @if (config('services.google.backend'))
