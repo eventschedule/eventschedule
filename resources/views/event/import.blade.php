@@ -496,6 +496,7 @@
                         }
 
                         // Ensure preview.parsed is always an array            
+                        // TODO: remove this, it shouldn't be needed
                         if (data && data.parsed && !Array.isArray(data.parsed)) {
                             data.parsed = [data.parsed];
                         } else if (data && Array.isArray(data)) {

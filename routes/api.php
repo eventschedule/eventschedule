@@ -13,5 +13,5 @@ Route::middleware([ApiAuthentication::class])->group(function () {
     
     Route::get('/events', [ApiEventController::class, 'index']);
     Route::post('/events/{subdomain}', [ApiEventController::class, 'store']);
-    //Route::put('/events/{event_id}', [ApiEventController::class, 'update']);
+    Route::post('/events/flyer/{event_id}', [ApiEventController::class, 'flyer']);
 }); 
