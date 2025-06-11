@@ -495,9 +495,11 @@
                             throw new Error(data.message || data.error || 'An unexpected error occurred');
                         }
 
-                        // Ensure preview.parsed is always an array
+                        // Ensure preview.parsed is always an array            
                         if (data && data.parsed && !Array.isArray(data.parsed)) {
                             data.parsed = [data.parsed];
+                        } else if (data && Array.isArray(data)) {
+                            data = { parsed: data };
                         }
 
                         // Now that we have valid data and this is still the latest request, update the preview

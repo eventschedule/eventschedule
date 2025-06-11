@@ -37,6 +37,7 @@ return [
     'remember_me' => 'Onthoud mij',
     'log_in' => 'Inloggen',
     'name' => 'Naam',
+    'english_name' => 'Engelse Naam',
     'confirm_password' => 'Bevestig Wachtwoord',
     'terms_of_service' => 'Gebruiksvoorwaarden',
     'privacy_policy' => 'Privacybeleid',
@@ -525,4 +526,5 @@ return [
     'tech' => 'Technologie',
     'sports' => 'Sport',
     'spirituality' => 'Spiritualiteit',
+    'this_month' => 'Deze Maand',
 ];

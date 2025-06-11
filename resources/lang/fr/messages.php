@@ -477,4 +477,5 @@ return [
     'tech' => 'Technologie',
     'sports' => 'Sports',
     'spirituality' => 'Spiritualité',
+    'this_month' => 'Ce Mois',
 ];
