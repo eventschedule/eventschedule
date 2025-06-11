@@ -454,6 +454,7 @@
           @if ($event->venue->social_links)
           <div class="flex flex-row gap-4 items-center">
             @foreach (json_decode($event->venue->social_links) as $link)
+              @if ($link)
               <a 
                 href="{{ $link->url }}" target="_blank"
                 style="background-color: {{ $otherRole->accent_color ?? '#4E81FA' }}"
@@ -463,6 +464,7 @@
                   {{ \App\Utils\UrlUtils::clean($link->url) }}
                 </x-url-icon>
               </a>
+              @endif
             @endforeach
           </div>
           @endif

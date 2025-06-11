@@ -30,6 +30,7 @@
 
             <ul role="list" class="divide-y divide-gray-200">
                 @foreach(json_decode($role->youtube_links) as $link)
+                @if ($link)
                 <li class="py-4">
                     <div class="flex">
                         <div class="mr-4 flex-shrink-0 text-gray-500">
@@ -50,6 +51,7 @@
                         </div>
                     </div>
                 </li>
+                @endif
                 @endforeach
             </ul>
 
@@ -72,6 +74,7 @@
             <p class="text-gray-700">
             <ul role="list" class="divide-y divide-gray-200">
                 @foreach(json_decode($role->social_links) as $link)
+                @if ($link)
                 <li class="py-4">
                     <div class="flex">
                         <div class="mr-4 flex-shrink-0 pt-1 text-gray-500">
@@ -94,6 +97,7 @@
                         </div>
                     </div>
                 </li>
+                @endif
                 @endforeach
             </ul>
             </p>
@@ -113,6 +117,7 @@
             <p class="text-gray-700">
             <ul role="list" class="divide-y divide-gray-200">
                 @foreach(json_decode($role->payment_links) as $link)
+                @if ($link)
                 <li class="py-4">
                     <div class="flex">
                         <div class="mr-4 flex-shrink-0 pt-1 text-gray-500">
@@ -135,6 +140,7 @@
                         </div>
                     </div>
                 </li>
+                @endif
                 @endforeach
             </ul>
             </p>
