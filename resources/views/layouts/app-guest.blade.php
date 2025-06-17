@@ -1,5 +1,11 @@
 <x-app-layout :title="$role->name . ' | Event Schedule'">
 
+    <noscript>
+      <div style="background: #fff3cd; color: #856404; padding: 16px; text-align: center; font-size: 1rem;">
+        JavaScript is required to use Event Schedule. Please enable JavaScript in your browser.
+      </div>
+    </noscript>
+
     @php
         $subdomain = $role->subdomain;
         if ($event) {
