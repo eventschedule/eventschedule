@@ -249,18 +249,20 @@ class GeminiUtils
             if (isset($response['en'])) {
                 $value = $response['en']; 
             }
-        }
-        
-        if (is_array($value)) {
-            $value = implode(' ', array_filter($value, 'trim'));
+            // If still array, try to extract a string
+            if (is_array($value)) {
+                $value = implode(' ', array_filter($value, 'is_string'));
+            }
+            // If value is still null, try to implode all string values in $response
+            if (!$value) {
+                $value = implode(' ', array_filter($response, 'is_string'));
+            }
+        } elseif (is_string($response)) {
+            $value = $response;
         }
 
-        if (! $value) {
-            $value = json_decode('"' . $response . '"');
-        }
-        
-        // Then check if we have a valid string
-        if (! $value || ! is_string($value)) {
+        // If value is still not a string, log and set to null
+        if (!is_string($value) || !$value) {
             \Log::info("Error: translation response: " . json_encode($response) . " => " . $value);
             $value = null;
         }
