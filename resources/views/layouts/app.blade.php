@@ -10,7 +10,7 @@
     <link rel="icon" href="{{ asset('images/favicon.png') }}">
     <link rel="sitemap" type="application/xml" href="{{ config('app.url') . route('sitemap', [], false) }}">    
     
-    @if (config('app.sentry_js_dsn'))
+    @if (config('app.hosted') || config('app.report_errors'))
         <script src="{{ config('app.sentry_js_dsn') }}" crossorigin="anonymous"></script>
     @endif
 

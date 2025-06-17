@@ -79,6 +79,10 @@ class RegisteredUserController extends Controller
             $envContent = preg_replace('/DB_USERNAME=.*/', 'DB_USERNAME="' . $sanitizedUsername . '"', $envContent);
             $envContent = preg_replace('/DB_PASSWORD=.*/', 'DB_PASSWORD="' . $sanitizedPassword . '"', $envContent);
 
+            if ($request->report_errors) {
+                $envContent = preg_replace('/REPORT_ERRORS=.*/', 'REPORT_ERRORS=true', $envContent);
+            }
+
             // Write to temporary file first, then move to prevent corruption
             $tempFile = $envPath . '.tmp';
             if (file_put_contents($tempFile, $envContent) === false) {
