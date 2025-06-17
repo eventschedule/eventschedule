@@ -356,10 +356,10 @@
             </div>
         </div>
     </header>
-    <div class="{{ $tab == 'availability' ? '' : 'hidden' }} shadow-sm ring-1 ring-black ring-opacity-5 md:flex md:flex-auto md:flex-col {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
+    <div class="{{ ($tab == 'availability' || (isset($embed) && $embed)) ? '' : 'hidden' }} shadow-sm ring-1 ring-black ring-opacity-5 md:flex md:flex-auto md:flex-col {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
         <div class="{{ $tab == 'availability' ? 'hidden md:block' : '' }}"> 
             <div
-                class="grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center text-xs font-semibold leading-6 text-gray-700 md:flex-none">
+                class="grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center text-xs font-semibold leading-6 text-gray-700">
                 @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $day)
                 <div class="flex justify-center bg-white py-2">
                     {{ __('messages.' . $day) }}
@@ -367,8 +367,8 @@
                 @endforeach
             </div>
         </div>
-        <div class="flex bg-gray-200 text-xs leading-6 text-gray-700 md:flex-auto">
-            <div class="w-full md:grid md:grid-cols-7 md:grid-rows-{{ $totalWeeks }} md:gap-px">
+        <div class="bg-gray-200 text-xs leading-6 text-gray-700">
+            <div class="w-full grid grid-cols-7 grid-rows-{{ $totalWeeks }} gap-px">
                 @while ($currentDate->lte($endOfMonth))
                 @if ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at)
                 @php
@@ -436,6 +436,7 @@
                 </div>
             </div>
         </div>
+        @if (!isset($embed) || !$embed)
         <div class="py-10 sm:px-6 md:hidden">
             @php
             $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth();
@@ -518,6 +519,7 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
 
 <div id="tooltip" class="tooltip"></div>
