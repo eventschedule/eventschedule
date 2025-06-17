@@ -8,7 +8,7 @@
 return [
 
     // @see https://docs.sentry.io/product/sentry-basics/dsn-explainer/
-    'dsn' => env('SENTRY_LARAVEL_DSN', env('SENTRY_DSN')),
+    'dsn' => (env('APP_HOSTED') == 'true') ? env('SENTRY_LARAVEL_DSN') : (env('REPORT_ERRORS') == 'true' ? 'https://f0f405237c1903155177379f6b1d0bc2@o4509513336291328.ingest.us.sentry.io/4509513337012224' : null),
 
     // @see https://spotlightjs.com/
     // 'spotlight' => env('SENTRY_SPOTLIGHT', false),
