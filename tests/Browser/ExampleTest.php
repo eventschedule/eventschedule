@@ -28,7 +28,6 @@ class ExampleTest extends DuskTestCase
                     ->type('password', $password)
                     ->check('terms')
                     ->press('SIGN UP')
-                    ->screenshot('registration_complete')
                     ->assertPathIs('/events')
                     ->assertSee($name);            
 
@@ -54,35 +53,36 @@ class ExampleTest extends DuskTestCase
                     ->type('address1', '123 Test St')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
+                    ->waitForLocation('/test-venue/schedule', 5)
                     ->assertPathIs('/test-venue/schedule')
                     ->clickLink('Edit Venue')
                     ->assertPathIs('/test-venue/edit')
                     ->type('website', 'https://google.com')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->assertPathIs('/test-venue/schedule')
+                    ->waitForLocation('/test-venue/schedule', 5)
                     ->assertSee('google.com');
 
             // Create/edit talent
-            $browser->visit('/new/schedule')
-                    ->type('name', 'Test Schedule')
+            $browser->visit('/new/talent')
+                    ->type('name', 'Test Talent')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->assertPathIs('/test-schedule/schedule')
-                    ->clickLink('Edit Schedule')
-                    ->assertPathIs('/test-schedule/edit')
+                    ->waitForLocation('/test-talent/schedule', 5)
+                    ->clickLink('Edit Talent')
+                    ->assertPathIs('/test-talent/edit')
                     ->type('website', 'https://google.com')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->assertPathIs('/test-schedule/schedule')
+                    ->waitForLocation('/test-talent/schedule', 5)
                     ->assertSee('google.com');
 
             // Create/edit event
-            $browser->visit('/test-schedule/add_event?date=' . date('Y-m-d'))
+            $browser->visit('/test-talent/add_event?date=' . date('Y-m-d'))
                     ->select('#selected_venue')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->assertPathIs('/test-schedule/schedule')
+                    ->waitForLocation('/test-talent/schedule', 5)
                     ->assertSee('Test Venue');
             
             // Create/edit event
@@ -91,7 +91,7 @@ class ExampleTest extends DuskTestCase
                     ->type('name', 'Venue Event')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->assertPathIs('/test-venue/schedule')
+                    ->waitForLocation('/test-venue/schedule', 5)
                     ->assertSee('Venue Event');
         });
     }
