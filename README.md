@@ -77,6 +77,7 @@ cp .env .env.dusk.local
 php artisan dusk
 
 # Run specific test classes
+php artisan dusk tests/Browser/GeneralTest.php
 php artisan dusk tests/Browser/AuthenticationTest.php
 php artisan dusk tests/Browser/VenueManagementTest.php
 php artisan dusk tests/Browser/EventManagementTest.php
