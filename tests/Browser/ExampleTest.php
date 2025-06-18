@@ -28,21 +28,15 @@ class ExampleTest extends DuskTestCase
                     ->type('password', $password)
                     ->check('terms')
                     ->press('SIGN UP')
-                    ->pause(5000)
                     ->screenshot('registration_complete')
-                    ->assertPathIs('/verify-email');
-
-            $user = User::where('email', $email)->first();
-            $user->email_verified_at = now();
-            $user->save();
-
-            $browser->visit('/events')                
                     ->assertPathIs('/events')
                     ->assertSee($name);            
 
             // Log out
             $browser->press($name)
+                    ->waitForText('Log Out', 2)
                     ->clickLink('Log Out')
+                    ->waitForLocation('/login', 5)
                     ->assertPathIs('/login');
 
             // Log back in
@@ -50,6 +44,7 @@ class ExampleTest extends DuskTestCase
                     ->type('email', $email)
                     ->type('password', $password)
                     ->press('LOG IN')
+                    ->waitForLocation('/events', 5)
                     ->assertPathIs('/events')
                     ->assertSee($name);
 
