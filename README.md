@@ -47,46 +47,6 @@
     <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_4.png?raw=true" width="49%" alt="Admin > Event">
 </div>
 
-## Testing
-
-Event Schedule includes a comprehensive browser test suite powered by Laravel Dusk.
-
-### Prerequisites
-
-1. **Install Laravel Dusk:**
-```bash
-composer require --dev laravel/dusk
-php artisan dusk:install
-```
-
-2. **Configure Chrome Driver:**
-```bash
-php artisan dusk:chrome-driver
-```
-
-3. **Set up test environment:**
-```bash
-cp .env .env.dusk.local
-# Configure your test database in .env.dusk.local
-```
-
-### Running Tests
-
-```bash
-# Run all browser tests
-php artisan dusk
-
-# Run specific test classes
-php artisan dusk tests/Browser/GeneralTest.php
-php artisan dusk tests/Browser/AuthenticationTest.php
-php artisan dusk tests/Browser/VenueManagementTest.php
-php artisan dusk tests/Browser/EventManagementTest.php
-php artisan dusk tests/Browser/TicketManagementTest.php
-php artisan dusk tests/Browser/UserProfileTest.php
-php artisan dusk tests/Browser/TalentManagementTest.php
-php artisan dusk tests/Browser/SearchAndFilterTest.php
-```
-
 ## Installation Guide
 
 Follow these steps to set up Event Schedule:
@@ -144,3 +104,36 @@ Add the following line to your crontab to ensure scheduled tasks run automatical
 ---
 
 You're all set! 🎉 Event Schedule should now be up and running.
+
+## Testing
+
+Event Schedule includes a comprehensive browser test suite powered by Laravel Dusk.
+
+> [!WARNING]  
+> WARNING: Running the tests will empty the database. 
+
+### Prerequisites
+
+1. **Install Laravel Dusk:**
+```bash
+composer require --dev laravel/dusk
+php artisan dusk:install
+```
+
+2. **Configure Chrome Driver:**
+```bash
+php artisan dusk:chrome-driver
+```
+
+3. **Set up test environment:**
+```bash
+cp .env .env.dusk.local
+# Configure your test database in .env.dusk.local
+```
+
+### Running Tests
+
+```bash
+# Run all browser tests
+php artisan dusk
+```
