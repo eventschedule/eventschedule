@@ -7,7 +7,7 @@
         const app = createApp({
             data() {
                 return {
-                    createAccount: @json(old('create_account', false) ? 'true' : 'false'),
+                    createAccount: @json(old('create_account', false)),
                     tickets: @json($event->tickets->map(function ($ticket) { 
                         $data = $ticket->toData(request()->date); 
                         $data['selectedQty'] = old('tickets')[$data['id']] ?? 0;
