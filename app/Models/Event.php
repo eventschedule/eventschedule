@@ -32,6 +32,10 @@ class Event extends Model
         'group_id',
     ];
 
+    protected $casts = [
+        'duration' => 'float',
+    ];
+
     protected static function boot()
     {
         parent::boot();
