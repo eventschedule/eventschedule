@@ -51,7 +51,7 @@ class SecurityHeaders
                 "frame-src 'self' *.stripe.com *.youtube.com *.googletagmanager.com",
                 "object-src 'none'",
                 "base-uri 'self'",
-                "form-action 'self'"
+                "form-action 'self' https://checkout.stripe.com"
             ];
         } else {
             // Stricter CSP for production
@@ -65,7 +65,7 @@ class SecurityHeaders
                 "frame-src 'self' *.stripe.com *.youtube.com *.googletagmanager.com",
                 "object-src 'none'",
                 "base-uri 'self'",
-                "form-action 'self'",
+                "form-action 'self' https://checkout.stripe.com",
                 "frame-ancestors 'none'",
                 "upgrade-insecure-requests"
             ];
