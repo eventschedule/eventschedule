@@ -7,7 +7,7 @@ use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
 use App\Models\User;
 
-class ExampleTest extends DuskTestCase
+class GeneralTest extends DuskTestCase
 {
     use DatabaseTruncation;
 
