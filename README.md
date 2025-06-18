@@ -84,15 +84,6 @@ php artisan dusk tests/Browser/TicketManagementTest.php
 php artisan dusk tests/Browser/UserProfileTest.php
 php artisan dusk tests/Browser/TalentManagementTest.php
 php artisan dusk tests/Browser/SearchAndFilterTest.php
-
-# Run with browser visible (for debugging)
-php artisan dusk --browse
-
-# Run tests in parallel (faster execution)
-php artisan dusk --parallel
-
-# Run specific test method
-php artisan dusk --filter testUserRegistration
 ```
 
 ## Installation Guide
