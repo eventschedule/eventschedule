@@ -201,20 +201,32 @@ class RoleController extends Controller
 
         if ($request->tid) {
             $translation = EventRole::where('id', UrlUtils::decodeId($request->tid))->firstOrFail();
-            app()->setLocale($translation->role->language_code);            
+            // Validate the language code from database before setting it
+            if (is_valid_language_code($translation->role->language_code)) {
+                app()->setLocale($translation->role->language_code);
+            }
         } else if ($request->lang) {
-            app()->setLocale($request->lang);
+            // Validate the language code before setting it
+            if (is_valid_language_code($request->lang)) {
+                app()->setLocale($request->lang);
 
-            if ($request->lang == 'en') {
-                session()->put('translate', true);
+                if ($request->lang == 'en') {
+                    session()->put('translate', true);
+                } else {
+                    session()->forget('translate');
+                    return redirect(request()->url());
+                }
             } else {
-                session()->forget('translate');
+                // If invalid language code, redirect to the same URL without the lang parameter
                 return redirect(request()->url());
             }
         } else if (session()->has('translate')) {
             app()->setLocale('en');
         } else {
-            app()->setLocale($role->language_code);
+            // Validate the language code from database before setting it
+            if (is_valid_language_code($role->language_code)) {
+                app()->setLocale($role->language_code);
+            }
         }
 
         $otherRole = null;

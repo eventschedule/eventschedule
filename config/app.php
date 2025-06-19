@@ -145,4 +145,26 @@ return [
         12 => 'Tech',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Supported Languages
+    |--------------------------------------------------------------------------
+    |
+    | This array contains all the language codes that are supported by the
+    | application. These should correspond to the directories in resources/lang.
+    |
+    */
+
+    'supported_languages' => [
+        'en', // English
+        'ar', // Arabic
+        'de', // German
+        'es', // Spanish
+        'fr', // French
+        'he', // Hebrew
+        'it', // Italian
+        'nl', // Dutch
+        'pt', // Portuguese
+    ],
+
 ];

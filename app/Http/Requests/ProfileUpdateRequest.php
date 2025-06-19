@@ -23,7 +23,7 @@ class ProfileUpdateRequest extends FormRequest
                 config('app.hosted') ? [new NoFakeEmail] : []
             ),            
             'timezone' => ['required', 'string', 'max:255'],
-            'language_code' => ['required', 'string', 'max:255'],
+            'language_code' => ['required', 'string', 'in:' . implode(',', config('app.supported_languages', ['en']))],
             'profile_image' => ['image', 'max:2500'],
         ];
     }

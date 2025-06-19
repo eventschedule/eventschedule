@@ -19,7 +19,10 @@ class SetUserLanguage
     {
         if (Auth::check()) {
             $languageCode = Auth::user()->language_code;
-            App::setLocale($languageCode);
+            // Validate the language code before setting it
+            if (is_valid_language_code($languageCode)) {
+                App::setLocale($languageCode);
+            }
         }
 
         return $next($request); 
