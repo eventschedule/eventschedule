@@ -117,6 +117,7 @@ class RegisteredUserController extends Controller
                 config('app.hosted') ? [new NoFakeEmail] : []
             ),
             'password' => ['required', 'string', 'min:8'],
+            'language_code' => ['nullable', 'string', 'in:' . implode(',', config('app.supported_languages', ['en']))],
         ]);
 
         $user = User::create([

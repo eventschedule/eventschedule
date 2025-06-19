@@ -40,4 +40,19 @@ if (!function_exists('get_translated_categories')) {
         
         return $translatedCategories;
     }
+}
+
+if (!function_exists('is_valid_language_code')) {
+    /**
+     * Check if a language code is supported by the application
+     */
+    function is_valid_language_code(?string $languageCode): bool
+    {
+        if (empty($languageCode)) {
+            return false;
+        }
+        
+        $supportedLanguages = config('app.supported_languages', ['en']);
+        return in_array($languageCode, $supportedLanguages, true);
+    }
 } 
