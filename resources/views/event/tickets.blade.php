@@ -113,7 +113,7 @@
                     <select 
                         v-model="ticket.selectedQty"
                         class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        :name="`tickets[${ticket.id}]`"
+                        :name="`tickets[${ticket.id}]`" :id="`ticket-${index}`"
                     >
                         <option value="0">0</option>
                         <template v-for="n in ticket.quantity">

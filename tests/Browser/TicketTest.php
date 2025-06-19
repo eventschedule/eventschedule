@@ -66,7 +66,9 @@ class TicketTest extends DuskTestCase
             // Purchase ticket
             $browser->visit('/test-talent/test-venue')
                     ->press('Buy Tickets')
-                    ->screenshot('ticket_page');
+                    ->select('#ticket-0', '1')
+                    ->press('CHECKOUT')
+                    ->assertSee('NUMBER OF ATTENDEES');
         });
     }
 }
