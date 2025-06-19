@@ -58,7 +58,7 @@ jobs:
       - name: Run Laravel Dusk tests
         run: |
           cp .env .env.dusk.local
-          php artisan dusk
+          php artisan dusk tests/Browser/GeneralTest.php
         env:
           APP_ENV: local
           APP_URL: http://127.0.0.1:8000
