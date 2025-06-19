@@ -12,9 +12,9 @@ class TicketTest extends DuskTestCase
     use DatabaseTruncation;
 
     /**
-     * A basic browser test example.
+     * A basic test for ticket functionality.
      */
-    public function testGeneral(): void
+    public function testBasicTicketFunctionality(): void
     {
         $name = 'John Doe';
         $email = 'test@gmail.com';
@@ -52,10 +52,21 @@ class TicketTest extends DuskTestCase
             // Create event
             $browser->visit('/test-talent/add_event?date=' . date('Y-m-d'))
                     ->select('#selected_venue')
+                    ->type('name', 'Test Event')
+                    ->scrollIntoView('input[name="tickets_enabled"]')
+                    ->check('tickets_enabled')
+                    ->type('tickets[0][price]', '10')
+                    ->type('tickets[0][quantity]', '50')
+                    ->type('tickets[0][description]', 'General admission ticket')                    
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
                     ->waitForLocation('/test-talent/schedule', 5)
-                    ->assertSee('Test Venue');            
+                    ->assertSee('Test Venue');
+
+            // Purchase ticket
+            $browser->visit('/test-talent/test-venue')
+                    ->press('Buy Tickets')
+                    ->screenshot('ticket_page');
         });
     }
 }
