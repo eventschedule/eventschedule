@@ -68,7 +68,8 @@ class TicketTest extends DuskTestCase
                     ->press('Buy Tickets')
                     ->select('#ticket-0', '1')
                     ->press('CHECKOUT')
-                    ->assertSee('NUMBER OF ATTENDEES');
+                    ->waitForText('NUMBER OF ATTENDEES', 3)
+                    ->assertSee(strtoupper($name));
         });
     }
 }
