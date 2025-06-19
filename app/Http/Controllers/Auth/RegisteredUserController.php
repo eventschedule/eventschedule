@@ -25,7 +25,7 @@ class RegisteredUserController extends Controller
      */
     public function create()
     {
-        if (! config('app.hosted') && config('app.url') && ! config('app.debug')) {
+        if (! config('app.hosted') && config('app.url') && ! config('app.is_testing')) {
             return redirect()->route('login');
         }
 
@@ -127,7 +127,7 @@ class RegisteredUserController extends Controller
             'language_code' => $request->language_code ?? 'en',
         ]);
 
-        if (! config('app.hosted')) {
+        if (! config('app.hosted') || config('app.is_testing')) {
             $user->email_verified_at = now();
             $user->save();
         }
