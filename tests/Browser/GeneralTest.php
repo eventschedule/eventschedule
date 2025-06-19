@@ -14,7 +14,7 @@ class GeneralTest extends DuskTestCase
     /**
      * A basic browser test example.
      */
-    public function testBasicExample(): void
+    public function testGeneral(): void
     {
         $name = 'John Doe';
         $email = 'test@gmail.com';
