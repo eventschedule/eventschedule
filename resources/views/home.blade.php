@@ -5,7 +5,8 @@
         @if(is_hosted_or_admin())
         <div class="mb-8">
             <!-- Header Panel -->
-            <div class="relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border border-blue-100/50 rounded-3xl p-10 mb-8 overflow-hidden">
+            <div class="relative bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 border border-blue-100/50 rounded-3xl p-10 mb-8 overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-radial from-transparent via-blue-50/30 to-indigo-100/40 rounded-3xl"></div>
                 <div class="relative text-center">
                     <h2 class="text-4xl font-bold text-gray-900 mb-4 tracking-tight">Welcome {{ auth()->user()->firstName() }}, let's get started...</h2>
                     <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed font-medium">{{ __('messages.create_your_first_schedule') }}</p>
