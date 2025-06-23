@@ -173,6 +173,7 @@ return [
     'added_to_team_detail' => 'You\'ve been added to :name as an admin by :user.',
     'set_new_password' => 'Set new password',
     'get_started' => 'Get Started',
+    'create_your_first_schedule' => 'Choose the type of schedule that best fits your needs',
     'thank_you_for_using' => 'Thank you for using our application!',
     'reset_password' => 'Reset Password',
     'new_request' => 'New request from :name',

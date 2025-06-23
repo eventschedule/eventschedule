@@ -164,6 +164,7 @@ return [
     'added_to_team_detail' => 'Fuiste agregado a :name como administrador por :user.',
     'set_new_password' => 'Establecer nueva contraseña',
     'get_started' => 'Comenzar',
+    'create_your_first_schedule' => 'Elige el tipo de horario que mejor se adapte a tus necesidades',
     'thank_you_for_using' => '¡Gracias por usar nuestra aplicación!',
     'reset_password' => 'Restablecer Contraseña',
     'new_request' => 'Nueva solicitud de :name',
