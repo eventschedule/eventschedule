@@ -5,17 +5,10 @@
         @if(is_hosted_or_admin())
         <div class="mb-8">
             <!-- Header Panel -->
-            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-8 mb-8">
-                <div class="text-center">
-                    <div class="flex items-center justify-center mb-4">
-                        <div class="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl mr-4">
-                            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/>
-                            </svg>
-                        </div>
-                        <h2 class="text-3xl font-bold text-gray-900">{{ __('messages.get_started') }}</h2>
-                    </div>
-                    <p class="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">{{ __('messages.create_your_first_schedule') }}</p>
+            <div class="relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border border-blue-100/50 rounded-3xl p-10 mb-8 overflow-hidden">
+                <div class="relative text-center">
+                    <h2 class="text-4xl font-bold text-gray-900 mb-4 tracking-tight">Welcome {{ auth()->user()->firstName() }}, let's get started...</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed font-medium">{{ __('messages.create_your_first_schedule') }}</p>
                 </div>
             </div>
             
