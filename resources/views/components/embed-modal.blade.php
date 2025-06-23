@@ -37,7 +37,7 @@
                                     <input type="text" id="embed-url" readonly 
                                            value="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'embed' => 'true']) }}"
                                            class="block w-full rounded-l-md border-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] sm:text-sm">
-                                    <button type="button" onclick="copyEmbedUrl()" 
+                                    <button type="button" id="embed-url-btn" onclick="copyEmbedUrl()" 
                                             class="inline-flex items-center rounded-r-md border border-l-0 border-gray-300 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:border-[#4E81FA] focus:outline-none focus:ring-1 focus:ring-[#4E81FA]">
                                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
@@ -55,7 +55,7 @@
                                     <textarea id="iframe-code" readonly rows="4" 
                                               class="block w-full rounded-l-md border-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] sm:text-sm font-mono text-xs"
                                               style="resize: vertical;"><iframe src="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'embed' => 'true']) }}" width="100%" height="600" frameborder="0" style="border: none;"></iframe></textarea>
-                                    <button type="button" onclick="copyIframeCode()" 
+                                    <button type="button" id="iframe-code-btn" onclick="copyIframeCode()" 
                                             class="inline-flex items-center rounded-r-md border border-l-0 border-gray-300 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:border-[#4E81FA] focus:outline-none focus:ring-1 focus:ring-[#4E81FA]">
                                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
@@ -120,7 +120,7 @@ function copyIframeCode() {
 }
 
 function showCopySuccess(buttonId) {
-    const button = document.querySelector(`[onclick*="${buttonId}"]`);
+    const button = document.getElementById(buttonId);
     if (button) {
         const originalContent = button.innerHTML;
         button.innerHTML = `
