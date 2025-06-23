@@ -1,9 +1,14 @@
 <x-app-admin-layout>
     <script src="{{ asset('js/vue.global.prod.js') }}"></script>
 
-    <h2 class="pt-2 my-4 text-xl font-bold leading-7 text-gray-900 dark:text-gray-100x sm:truncate sm:text-2xl sm:tracking-tight">
-        {{ __('messages.import_event') }}
-    </h2>
+    <div class="flex items-center justify-between pt-2 my-4">
+        <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100x sm:truncate sm:text-2xl sm:tracking-tight">
+            {{ __('messages.import_event') }}
+        </h2>
+        <button onclick="history.back()" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+            {{ __('messages.cancel') }}
+        </button>
+    </div>
 
     <form method="post"
         action="{{ route('event.import', ['subdomain' => $role->subdomain]) }}"
