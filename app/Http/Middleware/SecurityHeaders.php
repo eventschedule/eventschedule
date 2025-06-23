@@ -55,7 +55,7 @@ class SecurityHeaders
                 "img-src 'self' data: {$host}:* *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com *.ytimg.com eventschedule.nyc3.cdn.digitaloceanspaces.com",
                 "font-src 'self' data: {$host}:* *.googleapis.com *.gstatic.com *.bootstrapcdn.com rsms.me",
                 "connect-src 'self' {$host}:* ws://{$host}:* wss://{$host}:* *.googleapis.com *.google-analytics.com *.googletagmanager.com *.jsdelivr.net *.stripe.com *.sentry.io",
-                "frame-src 'self' *.stripe.com *.youtube.com *.googletagmanager.com",
+                "frame-src 'self' *.{$host} *.stripe.com *.youtube.com *.googletagmanager.com",
                 "object-src 'none'",
                 "base-uri 'self'",
                 "form-action 'self' *.stripe.com *.invoicing.co"
@@ -69,7 +69,7 @@ class SecurityHeaders
                 "img-src 'self' data: *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com *.ytimg.com eventschedule.nyc3.cdn.digitaloceanspaces.com",
                 "font-src 'self' data: *.googleapis.com *.gstatic.com *.bootstrapcdn.com rsms.me",
                 "connect-src 'self' *.googleapis.com *.google-analytics.com *.googletagmanager.com *.jsdelivr.net *.stripe.com *.sentry.io",
-                "frame-src 'self' *.stripe.com *.youtube.com *.googletagmanager.com",
+                "frame-src 'self' *.eventschedule.com *.stripe.com *.youtube.com *.googletagmanager.com",
                 "object-src 'none'",
                 "base-uri 'self'",
                 "form-action 'self' *.stripe.com *.invoicing.co",
