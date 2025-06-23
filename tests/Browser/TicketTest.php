@@ -50,7 +50,7 @@ class TicketTest extends DuskTestCase
                     ->assertPathIs('/test-talent/edit');
 
             // Create event
-            $browser->visit('/test-talent/add_event?date=' . date('Y-m-d'))
+            $browser->visit('/test-talent/add_event?date=' . date('Y-m-d', strtotime('+3 days')))
                     ->select('#selected_venue')
                     ->type('name', 'Test Event')
                     ->scrollIntoView('input[name="tickets_enabled"]')
