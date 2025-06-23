@@ -134,7 +134,7 @@ class RoleController extends Controller
         Notification::route('mail', $emails)->notify(new DeletedRoleNotification($role, $user));
 
         return redirect(route('home'))
-                ->with('message', __('messages.deleted_' . $type));
+                ->with('message', __('messages.deleted_schedule'));
     }
 
     public function follow(Request $request, $subdomain)
@@ -860,7 +860,7 @@ class RoleController extends Controller
             $role->sendEmailVerificationNotification();
         }
 
-        $message = __('messages.created_' . $role->type);
+        $message = __('messages.created_schedule');
 
         if ($subdomain = session('pending_venue') && $user->countRoles() == 1) {
             $data = [
@@ -1085,7 +1085,7 @@ class RoleController extends Controller
         }
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))
-                    ->with('message', __('messages.updated_' . $role->type));
+                    ->with('message', __('messages.updated_schedule'));
     }
 
     public function updateLinks(Request $request, $subdomain): RedirectResponse

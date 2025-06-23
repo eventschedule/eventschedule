@@ -37,7 +37,7 @@ class AppServiceProvider extends ServiceProvider
             return collect();
         });
     
-        View::composer('layouts.navigation', function ($view) {
+        View::composer(['layouts.navigation', 'home'], function ($view) {
             $allRoles = app('userRoles');
             $view->with([
                 'schedules' => $allRoles
