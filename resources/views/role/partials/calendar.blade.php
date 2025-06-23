@@ -155,7 +155,7 @@
                                 {{ __('messages.save') }}
                             </button>
                             @endif
-                        @elseif ($route == 'home' && \App\Utils\HostedUtils::isHostedOrAdmin())
+                        @elseif ($route == 'home')
                             <div style="font-family: sans-serif" class="shadow-sm relative inline-block text-left">
                                 <button type="button" 
                                     onclick="onPopUpClick('calendar-pop-up-menu', event)"
@@ -307,7 +307,7 @@
                         </button>
                     </div>
                     @endif
-                @elseif ($route == 'home' && \App\Utils\HostedUtils::isHostedOrAdmin())
+                @elseif ($route == 'home')
                     <div style="font-family: sans-serif" class="mt-4 shadow-sm relative inline-block text-left w-full">
                         <button type="button" 
                             onclick="onPopUpClick('calendar-pop-up-menu-mobile', event)"

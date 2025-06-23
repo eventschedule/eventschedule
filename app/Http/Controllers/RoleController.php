@@ -654,10 +654,6 @@ class RoleController extends Controller
 
     public function create($type)
     {
-        if (! \App\Utils\HostedUtils::isHostedOrAdmin()) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
-
         $role = new Role;
         $role->type = $type;
         $role->font_family = 'Roboto';
@@ -734,10 +730,6 @@ class RoleController extends Controller
 
     public function store(RoleCreateRequest $request): RedirectResponse
     {
-        if (! \App\Utils\HostedUtils::isHostedOrAdmin()) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
-
         $user = $request->user();        
 
         $role = new Role;
@@ -879,10 +871,6 @@ class RoleController extends Controller
 
     public function edit($subdomain)
     {
-        if (! \App\Utils\HostedUtils::isHostedOrAdmin()) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
-
         $role = Role::with('groups')->subdomain($subdomain)->firstOrFail();
 
         // Header images
@@ -950,10 +938,6 @@ class RoleController extends Controller
 
     public function update(RoleUpdateRequest $request, $subdomain): RedirectResponse
     {
-        if (! \App\Utils\HostedUtils::isHostedOrAdmin()) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
-
         if (! auth()->user()->isMember($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }        

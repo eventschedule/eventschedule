@@ -55,4 +55,18 @@ if (!function_exists('is_valid_language_code')) {
         $supportedLanguages = config('app.supported_languages', ['en']);
         return in_array($languageCode, $supportedLanguages, true);
     }
+}
+
+if (!function_exists('is_hosted_or_admin')) {
+    /**
+     * Check if the current environment is hosted or user is admin
+     */
+    function is_hosted_or_admin(): bool
+    {
+        if (config('app.hosted')) {
+            return true;
+        }
+
+        return auth()->user() && auth()->user()->isAdmin();
+    }
 } 

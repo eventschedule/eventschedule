@@ -164,6 +164,7 @@ return [
     'added_to_team_detail' => 'Vous avez été ajouté à :name comme admin par :user.',
     'set_new_password' => 'Définir un nouveau mot de passe',
     'get_started' => 'Commencer',
+    'create_your_first_schedule' => 'Choisissez le type de programme qui correspond le mieux à vos besoins',
     'thank_you_for_using' => 'Merci d\'utiliser notre application !',
     'reset_password' => 'Réinitialiser le Mot de Passe',
     'new_request' => 'Nouvelle demande de :name',
