@@ -27,7 +27,7 @@ class SecurityHeaders
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         
         // Allow embedding when embed parameter is present
-        if ($request->has('embed') && $request->embed === 'true') {
+        if ($request->has('embed') && ($request->embed === 'true' || $request->embed === '1')) {
             $response->headers->set('X-Frame-Options', 'ALLOW-FROM *');
         } else {
             $response->headers->set('X-Frame-Options', 'DENY');
@@ -78,8 +78,8 @@ class SecurityHeaders
         }
         
         // Allow frame-ancestors when embedding
-        if ($request->has('embed') && $request->embed === 'true') {
-            $csp[] = "frame-ancestors 'self'";
+        if ($request->has('embed') && ($request->embed === 'true' || $request->embed === '1')) {
+            $csp[] = "frame-ancestors *";
         } else {
             $csp[] = "frame-ancestors 'none'";
         }
