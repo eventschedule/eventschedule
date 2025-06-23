@@ -480,4 +480,9 @@ return [
     'created_schedule' => 'Successfully created schedule',
     'updated_schedule' => 'Successfully updated schedule',
     'deleted_schedule' => 'Successfully deleted schedule',
+    'embed_schedule' => 'Embed Schedule',
+    'embed_description' => 'Embed your schedule on your website or blog using the iframe code below.',
+    'embed_url' => 'Embed URL',
+    'iframe_code' => 'Iframe Code',
+    'close' => 'Close',
 ];

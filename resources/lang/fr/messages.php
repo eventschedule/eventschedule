@@ -479,4 +479,9 @@ return [
     'sports' => 'Sports',
     'spirituality' => 'Spiritualité',
     'this_month' => 'Ce Mois',
+    'embed_schedule' => 'Intégrer le Programme',
+    'embed_description' => 'Intégrez votre programme sur votre site web ou blog en utilisant le code iframe ci-dessous.',
+    'embed_url' => 'URL d\'Intégration',
+    'iframe_code' => 'Code Iframe',
+    'close' => 'Fermer',
 ];
