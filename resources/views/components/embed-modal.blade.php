@@ -54,7 +54,7 @@
                                 <div class="flex">
                                     <textarea id="iframe-code" readonly rows="4" 
                                               class="block w-full rounded-l-md border-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] sm:text-sm font-mono text-xs"
-                                              style="resize: vertical;"><iframe src="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'embed' => 'true']) }}" width="100%" height="600" frameborder="0" style="border: none;"></iframe></textarea>
+                                              style="resize: vertical;"><iframe src="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'embed' => 'true']) }}" width="100%" height="800" frameborder="0" style="border: none;"></iframe></textarea>
                                     <button type="button" id="iframe-code-btn" onclick="copyIframeCode()" 
                                             class="inline-flex items-center rounded-r-md border border-l-0 border-gray-300 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:border-[#4E81FA] focus:outline-none focus:ring-1 focus:ring-[#4E81FA]">
                                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -68,10 +68,10 @@
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     {{ __('messages.preview') }}
-                                </label>
-                                <div class="border border-gray-300 rounded-md p-2 bg-gray-50">
+                                </label>                                
+                                <div class="border border-gray-300 rounded-md p-2 bg-gray-50" style="height: 300px; overflow: auto;">
                                     <iframe src="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'embed' => 'true']) }}" 
-                                            width="100%" height="300" frameborder="0" 
+                                            width="100%" height="800" frameborder="0" 
                                             style="border: none; border-radius: 4px;"></iframe>
                                 </div>
                             </div>
