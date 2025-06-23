@@ -2,7 +2,7 @@
     <div class="py-5">
         
         <!-- Get Started Panel -->
-        @if(is_hosted_or_admin() && $schedules->isEmpty() && $venues->isEmpty() && $curators->isEmpty())
+        @if($schedules->isEmpty() && $venues->isEmpty() && $curators->isEmpty())
         <div class="mb-8">
             <!-- Header Panel -->
             <div class="relative bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 border border-blue-100/50 rounded-3xl p-10 mb-8 overflow-hidden">
@@ -14,7 +14,7 @@
             </div>
             
             <!-- Schedule Types Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-{{ config('app.hosted') ? '3' : '2' }} gap-6 max-w-6xl mx-auto">
                 <!-- Talent Card -->
                 <div class="group relative bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-6 border border-purple-100 hover:border-purple-200 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                     <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-indigo-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -60,7 +60,7 @@
                 </div>
 
                 <!-- Curator Card -->
-                @if (config('app.hosted'))
+                 @if (config('app.hosted'))
                 <div class="group relative bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-100 hover:border-amber-200 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                     <div class="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-orange-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div class="relative">
