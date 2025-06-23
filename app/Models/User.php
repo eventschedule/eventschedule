@@ -188,4 +188,19 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->id == 1;
     }
+
+    /**
+     * Get the user's first name
+     *
+     * @return string
+     */
+    public function firstName(): string
+    {
+        if (!$this->name) {
+            return 'there';
+        }
+        
+        $nameParts = explode(' ', trim($this->name));
+        return $nameParts[0] ?: 'there';
+    }
 }
