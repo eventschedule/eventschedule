@@ -25,7 +25,14 @@ class SecurityHeaders
 
         // Add security headers
         $response->headers->set('X-Content-Type-Options', 'nosniff');
-        $response->headers->set('X-Frame-Options', 'DENY');
+        
+        // Allow embedding when embed parameter is present
+        if ($request->has('embed') && $request->embed === 'true') {
+            $response->headers->set('X-Frame-Options', 'ALLOW-FROM *');
+        } else {
+            $response->headers->set('X-Frame-Options', 'DENY');
+        }
+        
         $response->headers->set('X-XSS-Protection', '1; mode=block');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
@@ -66,9 +73,15 @@ class SecurityHeaders
                 "object-src 'none'",
                 "base-uri 'self'",
                 "form-action 'self' *.stripe.com *.invoicing.co",
-                "frame-ancestors 'none'",
                 "upgrade-insecure-requests"
             ];
+        }
+        
+        // Allow frame-ancestors when embedding
+        if ($request->has('embed') && $request->embed === 'true') {
+            $csp[] = "frame-ancestors 'self'";
+        } else {
+            $csp[] = "frame-ancestors 'none'";
         }
         
         // Don't set CSP for debug toolbar

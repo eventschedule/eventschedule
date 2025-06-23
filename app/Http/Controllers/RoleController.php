@@ -401,10 +401,11 @@ class RoleController extends Controller
         ));
 
 
-        if (! $role->isPro()) {
-            $response->header('X-Frame-Options', 'DENY');
+        // Allow embedding when embed parameter is present
+        if ($embed && $role->isPro()) {
+            $response->header('X-Frame-Options', 'ALLOW-FROM *');
         }
-
+        
         return $response;
     }
 

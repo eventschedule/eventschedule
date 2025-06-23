@@ -479,4 +479,9 @@ return [
     'sports' => 'Deportes',
     'spirituality' => 'Espiritualidad',
     'this_month' => 'Este Mes',
+    'embed_schedule' => 'Insertar Horario',
+    'embed_description' => 'Inserta tu horario en tu sitio web o blog usando el código iframe de abajo.',
+    'embed_url' => 'URL de Inserción',
+    'iframe_code' => 'Código Iframe',
+    'close' => 'Cerrar',
 ];
