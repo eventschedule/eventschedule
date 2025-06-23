@@ -21,9 +21,17 @@
                 $backUrl .= '?' . http_build_query($queryParams);
               }
             @endphp
-            <a href="{{ $backUrl }}" class="text-white text-sm hover:underline mt-2 inline-block">
-              ← {{ __('messages.back_to_schedule') }}
-            </a>
+            <div class="mt-2">
+              <a href="{{ $backUrl }}" class="text-white text-sm hover:underline">
+                ← {{ __('messages.back_to_schedule') }}
+              </a>
+              @if (auth()->user() && auth()->user()->canEditEvent($event))
+                <span class="text-white text-sm mx-1">|</span>
+                <a href="{{ route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) }}" class="text-white text-sm hover:underline">
+                  {{ __('messages.edit_event') }}
+                </a>
+              @endif
+            </div>
           </div>
           <!--
           <a
