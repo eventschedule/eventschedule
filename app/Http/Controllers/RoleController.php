@@ -667,6 +667,10 @@ class RoleController extends Controller
         $role->timezone = auth()->user()->timezone;
         $role->language_code = auth()->user()->language_code;
 
+        if ($role->type == 'talent') {
+            $role->name = auth()->user()->name;
+        }
+
         // Header images
         $headers = file_get_contents(base_path('storage/headers.json'));
         $headers = json_decode($headers);
