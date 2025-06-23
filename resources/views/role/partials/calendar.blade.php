@@ -732,4 +732,3 @@ window.calendarVueApp = calendarAppInstance;
 @if ($route == 'admin' && $role->email_verified_at && $tab == 'schedule')
     @include('components.embed-modal')
 @endif
-</div>
