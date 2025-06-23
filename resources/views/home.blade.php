@@ -2,7 +2,7 @@
     <div class="py-5">
         
         <!-- Get Started Panel -->
-        @if(is_hosted_or_admin())
+        @if(is_hosted_or_admin() && $schedules->isEmpty() && $venues->isEmpty() && $curators->isEmpty())
         <div class="mb-8">
             <!-- Header Panel -->
             <div class="relative bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 border border-blue-100/50 rounded-3xl p-10 mb-8 overflow-hidden">
