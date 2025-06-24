@@ -95,7 +95,7 @@ class EventController extends Controller
 
     public function create(Request $request, $subdomain)
     {
-        if (! \App\Utils\HostedUtils::isHostedOrAdmin()) {
+        if (! is_hosted_or_admin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -203,7 +203,7 @@ class EventController extends Controller
 
     public function edit(Request $request, $subdomain, $hash)
     {
-        if (! \App\Utils\HostedUtils::isHostedOrAdmin()) {
+        if (! is_hosted_or_admin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -285,7 +285,7 @@ class EventController extends Controller
 
     public function update(EventUpdateRequest $request, $subdomain, $hash)
     {
-        if (! \App\Utils\HostedUtils::isHostedOrAdmin()) {
+        if (! is_hosted_or_admin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -389,7 +389,7 @@ class EventController extends Controller
 
     public function store(EventCreateRequest $request, $subdomain)
     {
-        if (! \App\Utils\HostedUtils::isHostedOrAdmin()) {
+        if (! is_hosted_or_admin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 

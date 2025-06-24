@@ -56,3 +56,17 @@ if (!function_exists('is_valid_language_code')) {
         return in_array($languageCode, $supportedLanguages, true);
     }
 }
+
+if (!function_exists('is_hosted_or_admin')) {
+    /**
+     * Check if the current user is hosted or an admin
+     */
+    function is_hosted_or_admin(): bool
+    {
+        if (config('app.hosted')) {
+            return true;
+        }
+
+        return auth()->user() && auth()->user()->isAdmin();
+    }
+}
