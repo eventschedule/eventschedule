@@ -126,6 +126,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->member()->type('curator');
     }
 
+    public function tickets()
+    {
+        return $this->hasMany(Sale::class);
+    }
+
     public function editableCurators()
     {
         return $this->roles()
