@@ -485,4 +485,7 @@ return [
     'embed_url' => 'Embed URL',
     'iframe_code' => 'Iframe Code',
     'close' => 'Close',
+    'payment_url' => 'Payment URL',
+    'payment_url_connected' => 'Payment URL connected successfully!',
+    'payment_url_unlinked' => 'Payment URL unlinked successfully!',
 ];

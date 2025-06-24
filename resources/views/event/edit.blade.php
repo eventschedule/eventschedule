@@ -754,7 +754,7 @@
                             @if ($role->isPro())
                             <div v-show="event.tickets_enabled">
 
-                                @if ($user->stripe_completed_at || $user->invoiceninja_api_key)
+                                @if ($user->stripe_completed_at || $user->invoiceninja_api_key || $user->payment_url)
                                 <div class="mb-6">
                                     <x-input-label for="payment_method" :value="__('messages.payment_method')"/>
                                     <select id="payment_method" name="payment_method" v-model="event.payment_method" required
@@ -765,6 +765,9 @@
                                         @endif
                                         @if ($user->invoiceninja_api_key)
                                         <option value="invoiceninja">Invoice Ninja - {{ $user->invoiceninja_company_name }}</option>
+                                        @endif
+                                        @if ($user->payment_url)
+                                        <option value="payment_url">Payment URL</option>
                                         @endif
                                     </select>
                                     <div class="text-xs pt-1">
@@ -788,7 +791,7 @@
                                         </option>
                                         @endforeach
                                     </select>
-                                    @if (! $user->stripe_completed_at && ! $user->invoiceninja_api_key)
+                                    @if (! $user->stripe_completed_at && ! $user->invoiceninja_api_key && ! $user->payment_url)
                                     <div class="text-xs pt-1">
                                         <a href="{{ route('profile.edit') }}" class="hover:underline text-gray-600 dark:text-gray-400" target="_blank">
                                             {{ __('messages.manage_payment_methods') }}

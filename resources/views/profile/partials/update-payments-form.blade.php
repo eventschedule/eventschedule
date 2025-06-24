@@ -96,3 +96,49 @@
 
     </form>
 </section>
+
+<section class="mt-8">
+    <header>
+        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            Payment URL
+        </h2>
+
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            Configure a custom payment URL that customers will be redirected to for payment processing.
+        </p>
+    </header>
+
+    <form method="post" action="{{ route('profile.update_payments') }}" enctype="multipart/form-data" class="mt-6">
+        @csrf
+        @method('patch')
+        
+        @if ($user->payment_url)
+            <div class="mt-4">
+                <x-text-input type="text" class="mt-1 block w-full" :value="$user->payment_url" readonly/>
+                <div class="text-xs pt-1">
+                    <a href="#" onclick="return confirm('{{ __('messages.are_you_sure') }}') ? window.location.href='{{ route('profile.unlink_payment_url') }}' : false" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.unlink_account') }}</a>
+                </div>
+            </div>
+        @else
+            <div class="pt-4">
+                <x-input-label for="payment_url" :value="__('messages.payment_url') . ' *'" />
+                <x-text-input id="payment_url" name="payment_url" type="url" class="mt-1 block w-full" 
+                    :value="old('payment_url', $user->payment_url)" placeholder="https://your-payment-gateway.com/pay" autocomplete="off" required />
+                <x-input-error class="mt-2" :messages="$errors->get('payment_url')" />
+                <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                    Enter the URL where customers will be redirected to complete their payment.
+                </p>
+            </div>
+
+            <div class="flex items-center gap-4 pt-8">
+                <x-primary-button>{{ __('messages.save') }}</x-primary-button>
+
+                @if (session('status') === 'payments-updated')
+                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
+                    class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.saved') }}</p>
+                @endif
+            </div>
+        @endif
+
+    </form>
+</section>
