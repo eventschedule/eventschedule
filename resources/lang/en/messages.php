@@ -486,7 +486,7 @@ return [
     'iframe_code' => 'Iframe Code',
     'close' => 'Close',
     'payment_url' => 'Payment Link',
-    'payment_url_help' => 'Configure a custom payment URL that customers will be redirected to for payment processing.',
+    'payment_url_help' => 'Configure a custom payment URL that customers will be redirected to.',
     'payment_url_connected' => 'Payment link connected successfully!',
     'payment_url_unlinked' => 'Payment link unlinked successfully!',
 ];
