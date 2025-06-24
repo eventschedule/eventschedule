@@ -479,4 +479,9 @@ return [
     'embed_url' => 'URL de Inserción',
     'iframe_code' => 'Código Iframe',
     'close' => 'Cerrar',
+    'payment_url' => 'Enlace de Pago',
+    'payment_url_help' => 'Configura una URL de pago personalizada a la que serán redirigidos los clientes.',
+    'payment_url_connected' => '¡Enlace de pago conectado con éxito!',
+    'payment_url_unlinked' => '¡Enlace de pago desvinculado con éxito!',
+    'payment_url_mobile_only' => 'Por favor, usa un dispositivo móvil para completar tu pago.',
 ];

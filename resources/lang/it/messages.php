@@ -479,4 +479,9 @@ return [
     'embed' => 'Incorpora',
     'about' => 'Informazioni',
     'social_media' => 'Social media',
+    'payment_url' => 'Link di Pagamento',
+    'payment_url_help' => 'Configura un URL di pagamento personalizzato a cui i clienti saranno reindirizzati.',
+    'payment_url_connected' => 'Link di pagamento connesso con successo!',
+    'payment_url_unlinked' => 'Link di pagamento scollegato con successo!',
+    'payment_url_mobile_only' => 'Utilizza un dispositivo mobile per completare il pagamento.',
 ];

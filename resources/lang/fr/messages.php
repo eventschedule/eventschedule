@@ -479,4 +479,9 @@ return [
     'embed_url' => 'URL d\'Intégration',
     'iframe_code' => 'Code Iframe',
     'close' => 'Fermer',
+    'payment_url' => 'Lien de Paiement',
+    'payment_url_help' => 'Configurez une URL de paiement personnalisée vers laquelle les clients seront redirigés.',
+    'payment_url_connected' => 'Lien de paiement connecté avec succès !',
+    'payment_url_unlinked' => 'Lien de paiement dissocié avec succès !',
+    'payment_url_mobile_only' => 'Veuillez utiliser un appareil mobile pour compléter votre paiement.',
 ];

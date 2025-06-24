@@ -480,4 +480,9 @@ return [
     'embed_url' => 'رابط التضمين',
     'iframe_code' => 'كود Iframe',
     'close' => 'إغلاق',
+    'payment_url' => 'رابط الدفع',
+    'payment_url_help' => 'قم بتكوين رابط دفع مخصص سيتم توجيه العملاء إليه.',
+    'payment_url_connected' => 'تم ربط رابط الدفع بنجاح!',
+    'payment_url_unlinked' => 'تم إلغاء ربط رابط الدفع بنجاح!',
+    'payment_url_mobile_only' => 'يرجى استخدام جهاز محمول لإكمال الدفع.',
 ];

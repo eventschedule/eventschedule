@@ -483,4 +483,9 @@ return [
     'embed_url' => 'Einbettungs-URL',
     'iframe_code' => 'Iframe-Code',
     'close' => 'Schließen',
+    'payment_url' => 'Zahlungslink',
+    'payment_url_help' => 'Konfigurieren Sie eine benutzerdefinierte Zahlungs-URL, zu der Kunden weitergeleitet werden.',
+    'payment_url_connected' => 'Zahlungslink erfolgreich verbunden!',
+    'payment_url_unlinked' => 'Zahlungslink erfolgreich getrennt!',
+    'payment_url_mobile_only' => 'Bitte verwenden Sie ein mobiles Gerät, um Ihre Zahlung abzuschließen.',
 ];

@@ -476,4 +476,9 @@ return [
     'embed' => 'Insluiten',
     'about' => 'Over',
     'social_media' => 'Sociale media',
+    'payment_url' => 'Betaallink',
+    'payment_url_help' => 'Configureer een aangepaste betaal-URL waar klanten naartoe worden doorgestuurd.',
+    'payment_url_connected' => 'Betaallink succesvol verbonden!',
+    'payment_url_unlinked' => 'Betaallink succesvol losgekoppeld!',
+    'payment_url_mobile_only' => 'Gebruik een mobiel apparaat om je betaling te voltooien.',
 ];
