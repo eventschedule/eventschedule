@@ -22,7 +22,7 @@
 
 - 🗓️ **Event Calendars:** Create and share event calendars effortlessly to keep your audience informed.  
 - 🎟️ **Sell Tickets Online:** Offer ticket sales directly through the platform with a seamless checkout process.  
-- 💳 **Online Payments with Invoice Ninja Integration:** Accept secure online payments via [Invoice Ninja](https://www.invoiceninja.com).  
+- 💳 **Online Payments with Invoice Ninja Integration:** Accept secure online payments via [Invoice Ninja](https://www.invoiceninja.com) or payment links.
 - 🤖 **AI Event Parsing:** Automatically extract event details using AI to quickly create new events.
 - 🔁 **Recurring Events:** Schedule recurring events which occur on a regular basis.  
 - 📲 **QR Code Ticketing:** Generate and scan QR codes for easy and secure event check-ins.  
