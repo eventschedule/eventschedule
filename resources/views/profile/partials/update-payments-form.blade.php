@@ -120,7 +120,7 @@
                 </div>
             </div>
         @else
-            <div class="pt-4">
+            <div class="mt-4">
                 <x-text-input id="payment_url" name="payment_url" type="url" class="mt-1 block w-full" 
                     :value="old('payment_url', $user->payment_url)" placeholder="https://your-payment-gateway.com/pay" autocomplete="off" required />
                 <x-input-error class="mt-2" :messages="$errors->get('payment_url')" />
