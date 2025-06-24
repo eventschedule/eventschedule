@@ -28,6 +28,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'invoiceninja_api_key',
         'invoiceninja_api_url',
         'invoiceninja_webhook_secret',
+        'payment_url',
+        'payment_secret',
     ];
 
     /**
@@ -43,6 +45,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'invoiceninja_api_url',
         'invoiceninja_webhook_secret',
         'api_key',
+        'payment_secret',
     ];
 
     protected static function boot()

@@ -138,6 +138,7 @@ class ProfileController extends Controller
         $user = $request->user();
         $apiKey = $request->invoiceninja_api_key;
         $apiUrl = $request->invoiceninja_api_url;
+        $paymentUrl = $request->payment_url;
         $name = '';
 
         if ($apiKey) {
@@ -160,6 +161,24 @@ class ProfileController extends Controller
             }
         }
 
+        if ($paymentUrl) {
+            $user->payment_url = $paymentUrl;
+            $user->payment_secret = strtolower(\Str::random(32));
+            $user->save();
+
+            return Redirect::route('profile.edit')->with('message', __('messages.payment_url_connected'));
+        }
+
         return Redirect::route('profile.edit')->with('status', 'payments-updated');
+    }
+
+    public function unlinkPaymentUrl(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        $user->payment_url = null;
+        $user->payment_secret = null;
+        $user->save();
+
+        return Redirect::route('profile.edit')->with('message', __('messages.payment_url_unlinked'));
     }
 }
