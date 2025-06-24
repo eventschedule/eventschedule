@@ -489,4 +489,5 @@ return [
     'payment_url_help' => 'Configure a custom payment URL that customers will be redirected to.',
     'payment_url_connected' => 'Payment link connected successfully!',
     'payment_url_unlinked' => 'Payment link unlinked successfully!',
+    'payment_url_mobile_only' => 'Please use a mobile device to complete your payment.',
 ];
