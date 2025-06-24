@@ -272,42 +272,7 @@ class TicketController extends Controller
     {
         $user = $event->user;
         
-        if (!$user->payment_url) {
-            return $this->cashCheckout($subdomain, $sale, $event);
-        }
-
-        // Build the payment URL with parameters
-        $paymentUrl = $user->payment_url;
-        
-        // Add query parameters for the payment gateway
-        $params = [
-            'amount' => $sale->payment_amount,
-            'currency' => $event->ticket_currency_code,
-            'customer_name' => $sale->name,
-            'customer_email' => $sale->email,
-            'reference' => $sale->id,
-            'return_url' => route('payment_url.success', ['sale_id' => UrlUtils::encodeId($sale->id)]),
-            'cancel_url' => route('payment_url.cancel', ['sale_id' => UrlUtils::encodeId($sale->id)]),
-        ];
-
-        // Add ticket details
-        $ticketDetails = [];
-        foreach ($sale->saleTickets as $saleTicket) {
-            $ticketDetails[] = [
-                'name' => $saleTicket->ticket->type ?: __('messages.tickets'),
-                'quantity' => $saleTicket->quantity,
-                'price' => $saleTicket->ticket->price,
-            ];
-        }
-        $params['tickets'] = json_encode($ticketDetails);
-        $params['event_name'] = $event->name;
-        $params['event_date'] = $sale->event_date;
-
-        // Build the final URL with query parameters
-        $separator = str_contains($paymentUrl, '?') ? '&' : '?';
-        $finalUrl = $paymentUrl . $separator . http_build_query($params);
-
-        return redirect($finalUrl);
+        return redirect($user->payment_url);
     }
 
     private function cashCheckout($subdomain, $sale, $event)
