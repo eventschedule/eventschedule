@@ -53,7 +53,7 @@
           @if ($event->canSellTickets() || $event->registration_url)
             @if (request()->get('tickets') !== 'true')
               <a href="{{ $event->registration_url ? $event->registration_url : request()->fullUrlWithQuery(['tickets' => 'true']) }}" {{ $event->registration_url ? 'target="_blank"' : '' }}
-                @if ($event->user && $event->user->paymentUrlMobileOnly() && ! is_mobile())
+                @if ($event->payment_method === 'payment_url' && $event->user && $event->user->paymentUrlMobileOnly() && ! is_mobile())
                   onclick="alert('{{ __('messages.payment_url_mobile_only') }}'); return false;"
                 @endif
               >

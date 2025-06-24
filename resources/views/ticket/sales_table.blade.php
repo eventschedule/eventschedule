@@ -123,7 +123,7 @@
                                                 </button>
                                             @endif
                                             
-                                            @if(! in_array($sale->status, ['unpaid', 'paid']) && ! $sale->is_deleted)
+                                            @if(! $sale->is_deleted)
                                             <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'delete')" 
                                                     class="block px-4 py-2 text-sm text-red-700 hover:bg-gray-100 w-full text-left" 
                                                     role="menuitem">
