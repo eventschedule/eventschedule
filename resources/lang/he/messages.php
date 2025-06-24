@@ -475,4 +475,9 @@ return [
     'embed' => 'הטמע',
     'about' => 'אודות',
     'social_media' => 'מדיה חברתית',
+    'payment_url' => 'קישור תשלום',
+    'payment_url_help' => 'הגדר כתובת URL מותאמת אישית לתשלום שאליה יועברו הלקוחות.',
+    'payment_url_connected' => 'קישור התשלום חובר בהצלחה!',
+    'payment_url_unlinked' => 'קישור התשלום נותק בהצלחה!',
+    'payment_url_mobile_only' => 'אנא השתמש במכשיר נייד כדי להשלים את התשלום שלך.',
 ];
