@@ -162,6 +162,23 @@ class User extends Authenticatable implements MustVerifyEmail
         return $host;
     }
 
+    public function paymentUrlMobileOnly()
+    {
+        $host = $this->paymentUrlHost();
+
+        $mobileOnly = [
+            'venmo.com',
+            'cash.app',
+            'paytm.me',
+            'phon.pe',
+            'bitpay.co.il',
+            'qr.alipay.com',
+            'tikkie.me',
+        ];
+
+        return in_array($host, $mobileOnly);
+    }
+
     public function canEditEvent($event)
     {
         if ($this->id == $event->user_id) {

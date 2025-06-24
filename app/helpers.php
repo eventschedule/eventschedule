@@ -70,3 +70,13 @@ if (!function_exists('is_hosted_or_admin')) {
         return auth()->user() && auth()->user()->isAdmin();
     }
 }
+
+if (!function_exists('is_mobile')) {
+    /**
+     * Check if the current user is on a mobile device
+     */
+    function is_mobile(): bool
+    {
+        return preg_match('/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i', request()->header('User-Agent'));
+    }
+}
