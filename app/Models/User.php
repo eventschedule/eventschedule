@@ -153,6 +153,15 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->roles()->where('subdomain', $subdomain)->exists();
     }
 
+    public function paymentUrlHost()
+    {
+        $host = parse_url($this->payment_url, PHP_URL_HOST);
+
+        $host = str_replace('www.', '', $host);
+
+        return $host;
+    }
+
     public function canEditEvent($event)
     {
         if ($this->id == $event->user_id) {
