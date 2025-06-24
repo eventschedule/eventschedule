@@ -58,7 +58,6 @@ class SecurityHeaders
                 "frame-src 'self' *.{$host} *.stripe.com *.youtube.com *.googletagmanager.com",
                 "object-src 'none'",
                 "base-uri 'self'",
-                "form-action 'self' *.stripe.com *.invoicing.co"
             ];
         } else {
             // Stricter CSP for production
@@ -72,7 +71,6 @@ class SecurityHeaders
                 "frame-src 'self' *.eventschedule.com *.stripe.com *.youtube.com *.googletagmanager.com",
                 "object-src 'none'",
                 "base-uri 'self'",
-                "form-action 'self' *.stripe.com *.invoicing.co",
                 "upgrade-insecure-requests"
             ];
         }
