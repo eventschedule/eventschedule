@@ -100,11 +100,11 @@
 <section class="mt-8">
     <header>
         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-            Payment URL
+            {{ __('messages.payment_url') }}
         </h2>
 
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            Configure a custom payment URL that customers will be redirected to for payment processing.
+            {{ __('messages.payment_url_help') }}
         </p>
     </header>
 
@@ -125,9 +125,6 @@
                 <x-text-input id="payment_url" name="payment_url" type="url" class="mt-1 block w-full" 
                     :value="old('payment_url', $user->payment_url)" placeholder="https://your-payment-gateway.com/pay" autocomplete="off" required />
                 <x-input-error class="mt-2" :messages="$errors->get('payment_url')" />
-                <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
-                    Enter the URL where customers will be redirected to complete their payment.
-                </p>
             </div>
 
             <div class="flex items-center gap-4 pt-8">

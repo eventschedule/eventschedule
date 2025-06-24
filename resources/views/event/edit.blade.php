@@ -767,7 +767,7 @@
                                         <option value="invoiceninja">Invoice Ninja - {{ $user->invoiceninja_company_name }}</option>
                                         @endif
                                         @if ($user->payment_url)
-                                        <option value="payment_url">Payment URL</option>
+                                        <option value="payment_url">{{ __('messages.payment_url') }} - {{ $user->paymentUrlHost() }}</option>
                                         @endif
                                     </select>
                                     <div class="text-xs pt-1">
