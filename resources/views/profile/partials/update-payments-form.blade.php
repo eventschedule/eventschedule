@@ -98,20 +98,20 @@
 </section>
 
 <section class="mt-8">
-    <header>
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+
+    <form method="post" action="{{ route('profile.update_payments') }}" enctype="multipart/form-data" class="mt-6">
+        @csrf
+        @method('patch')
+
+        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 pt-4">
             {{ __('messages.payment_url') }}
         </h2>
 
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
             {{ __('messages.payment_url_help') }}
         </p>
-    </header>
 
-    <form method="post" action="{{ route('profile.update_payments') }}" enctype="multipart/form-data" class="mt-6">
-        @csrf
-        @method('patch')
-        
+
         @if ($user->payment_url)
             <div class="mt-4">
                 <x-text-input type="text" class="mt-1 block w-full" :value="$user->payment_url" readonly/>
@@ -121,7 +121,6 @@
             </div>
         @else
             <div class="pt-4">
-                <x-input-label for="payment_url" :value="__('messages.payment_url') . ' *'" />
                 <x-text-input id="payment_url" name="payment_url" type="url" class="mt-1 block w-full" 
                     :value="old('payment_url', $user->payment_url)" placeholder="https://your-payment-gateway.com/pay" autocomplete="off" required />
                 <x-input-error class="mt-2" :messages="$errors->get('payment_url')" />
