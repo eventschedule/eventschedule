@@ -41,7 +41,7 @@ jobs:
       - name: Set up Dusk environment
         run: |
           php artisan dusk:install
-          php artisan dusk:chrome-driver
+          php artisan dusk:chrome-driver --detect
           php artisan storage:link
           php artisan migrate --env=testing --force
 
