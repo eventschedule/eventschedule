@@ -27,7 +27,7 @@ class VerifyEmail extends BaseVerifyEmail
         $verificationUrl = $this->verificationUrl($notifiable);
 
         $mailMessage = (new MailMessage)
-            ->subject('Verify Email Address')
+            ->subject('Welcome to Event Schedule, please verify your email address')
             ->line('Please click the button below to verify your email address.')
             ->action('Verify Email Address', $verificationUrl);
 
