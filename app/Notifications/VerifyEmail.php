@@ -13,6 +13,7 @@ class VerifyEmail extends BaseVerifyEmail
 {
     protected $type;
     protected $subdomain;
+    protected $notifiable;
 
     public function __construct($type = 'user', $subdomain = '')
     {        
@@ -22,17 +23,13 @@ class VerifyEmail extends BaseVerifyEmail
     
     public function toMail($notifiable)
     {
+        $this->notifiable = $notifiable;
         $verificationUrl = $this->verificationUrl($notifiable);
 
         $mailMessage = (new MailMessage)
             ->subject('Verify Email Address')
             ->line('Please click the button below to verify your email address.')
             ->action('Verify Email Address', $verificationUrl);
-
-        // Add unsubscribe link for user verification emails
-        if ($this->type == 'user') {
-            $mailMessage->line('To unsubscribe from future emails, click here: ' . route('user.unsubscribe', ['email' => base64_encode($notifiable->email)]));
-        }
 
         return $mailMessage;
     }
@@ -60,8 +57,13 @@ class VerifyEmail extends BaseVerifyEmail
             ];
         }
         
-        // For user verification emails, we can't include the email in the header
-        // The unsubscribe link is provided in the email body instead
+        if ($this->type == 'user' && $this->notifiable) {
+            return [
+                'List-Unsubscribe' => '<' . route('user.unsubscribe', ['email' => base64_encode($this->notifiable->email)]) . '>',
+                'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
+            ];
+        }
+        
         return [];
     }
 }
