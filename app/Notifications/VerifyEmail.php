@@ -49,7 +49,7 @@ class VerifyEmail extends BaseVerifyEmail
             public function envelope(): Envelope
             {
                 return new Envelope(
-                    subject: 'Welcome to Event Schedule, please verify your email address',
+                    subject: 'Welcome to Event Schedule!',
                 );
             }
 
@@ -64,7 +64,7 @@ class VerifyEmail extends BaseVerifyEmail
                         'actionUrl' => $this->verificationUrl,
                         'displayableActionUrl' => $this->verificationUrl,
                         'outroLines' => [],
-                        'salutation' => 'Regards,<br>The Event Schedule team',
+                        'salutation' => "Regards,\nThe Event Schedule team",
                         'level' => 'primary',
                     ],
                 );
