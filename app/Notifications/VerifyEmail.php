@@ -31,14 +31,10 @@ class VerifyEmail extends BaseVerifyEmail
             ->line('Please click the button below to verify your email address.')
             ->action('Verify Email Address', $verificationUrl);
 
-        // Add headers to the mail message
+        // Add headers to the mail message using the modern approach
         $headers = $this->toMailHeaders();
         if (!empty($headers)) {
-            $mailMessage->withSwiftMessage(function ($message) use ($headers) {
-                foreach ($headers as $key => $value) {
-                    $message->getHeaders()->addTextHeader($key, $value);
-                }
-            });
+            $mailMessage->headers($headers);
         }
 
         return $mailMessage;
