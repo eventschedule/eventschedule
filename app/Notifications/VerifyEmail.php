@@ -57,6 +57,7 @@ class VerifyEmail extends BaseVerifyEmail
                         'introLines' => ['Please click the button below to verify your email address.'],
                         'actionText' => 'Verify Email Address',
                         'actionUrl' => $this->verificationUrl,
+                        'displayableActionUrl' => $this->verificationUrl,
                         'outroLines' => [],
                         'salutation' => 'Regards,<br>The Event Schedule team',
                         'level' => 'primary',
