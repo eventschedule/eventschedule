@@ -56,7 +56,7 @@ class VerifyEmail extends BaseVerifyEmail
             public function content(): Content
             {
                 return new Content(
-                    view: 'vendor.notifications.email',
+                    markdown: 'vendor.notifications.email',
                     with: [
                         'greeting' => 'Hello!',
                         'introLines' => ['Please click the button below to verify your email address.'],
@@ -64,7 +64,7 @@ class VerifyEmail extends BaseVerifyEmail
                         'actionUrl' => $this->verificationUrl,
                         'displayableActionUrl' => $this->verificationUrl,
                         'outroLines' => [],
-                        'salutation' => 'Regards,<br>The Event Schedule team',
+                        'salutation' => "Regards,\n\nThe Event Schedule team",
                         'level' => 'primary',
                     ],
                 );
