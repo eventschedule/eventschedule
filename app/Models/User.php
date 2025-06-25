@@ -177,6 +177,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'paytm.me',
             'phon.pe',
             'bitpay.co.il',
+            'payboxapp.com',
             'qr.alipay.com',
             'tikkie.me',
         ];
