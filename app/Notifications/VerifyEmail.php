@@ -8,6 +8,10 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\URL;
 use Carbon\Carbon;
 use Config;
+use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Headers;
 
 class VerifyEmail extends BaseVerifyEmail
 {
@@ -26,18 +30,47 @@ class VerifyEmail extends BaseVerifyEmail
         $this->notifiable = $notifiable;
         $verificationUrl = $this->verificationUrl($notifiable);
 
-        $mailMessage = (new MailMessage)
-            ->subject('Welcome to Event Schedule, please verify your email address')
-            ->line('Please click the button below to verify your email address.')
-            ->action('Verify Email Address', $verificationUrl);
+        return new class($verificationUrl, $this->toMailHeaders()) extends Mailable
+        {
+            protected $verificationUrl;
+            protected $headers;
 
-        // Add headers to the mail message using the modern approach
-        $headers = $this->toMailHeaders();
-        if (!empty($headers)) {
-            $mailMessage->headers($headers);
-        }
+            public function __construct($verificationUrl, $headers)
+            {
+                $this->verificationUrl = $verificationUrl;
+                $this->headers = $headers;
+            }
 
-        return $mailMessage;
+            public function envelope(): Envelope
+            {
+                return new Envelope(
+                    subject: 'Welcome to Event Schedule, please verify your email address',
+                );
+            }
+
+            public function content(): Content
+            {
+                return new Content(
+                    markdown: 'vendor.notifications.email',
+                    with: [
+                        'greeting' => 'Hello!',
+                        'introLines' => ['Please click the button below to verify your email address.'],
+                        'actionText' => 'Verify Email Address',
+                        'actionUrl' => $this->verificationUrl,
+                        'outroLines' => [],
+                        'salutation' => 'Regards,<br>The Event Schedule team',
+                        'level' => 'primary',
+                    ],
+                );
+            }
+
+            public function headers(): Headers
+            {
+                return new Headers(
+                    text: $this->headers,
+                );
+            }
+        };
     }
 
     protected function verificationUrl($notifiable)
