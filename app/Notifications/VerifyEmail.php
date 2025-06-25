@@ -30,15 +30,20 @@ class VerifyEmail extends BaseVerifyEmail
         $this->notifiable = $notifiable;
         $verificationUrl = $this->verificationUrl($notifiable);
 
-        return new class($verificationUrl, $this->toMailHeaders()) extends Mailable
+        return new class($verificationUrl, $this->toMailHeaders(), $notifiable) extends Mailable
         {
             protected $verificationUrl;
             protected $headers;
+            protected $notifiable;
 
-            public function __construct($verificationUrl, $headers)
+            public function __construct($verificationUrl, $headers, $notifiable)
             {
                 $this->verificationUrl = $verificationUrl;
                 $this->headers = $headers;
+                $this->notifiable = $notifiable;
+                
+                // Set the recipient
+                $this->to($notifiable->getEmailForVerification());
             }
 
             public function envelope(): Envelope
