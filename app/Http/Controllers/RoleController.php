@@ -1416,8 +1416,29 @@ class RoleController extends Controller
             $role->save();
         }
 
-        echo __('messages.unsubscribed');
-        exit;
+        return redirect()->route('role.show_unsubscribe', ['email' => $request->email])->with('status', __('messages.unsubscribed'));
+    }
+
+    public function unsubscribeUser(Request $request)
+    {
+        $email = null;
+        
+        if ($request->has('email')) {
+            $email = base64_decode($request->email);
+        }
+        
+        if (!$email) {
+            return redirect()->route('role.show_unsubscribe')->with('error', 'Invalid unsubscribe link.');
+        }
+
+        $users = User::where('email', $email)->get();
+
+        foreach ($users as $user) {
+            $user->is_subscribed = false;
+            $user->save();
+        }
+
+        return redirect()->route('role.show_unsubscribe', ['email' => base64_encode($email)])->with('status', __('messages.unsubscribed'));
     }
 
     public function subscribe(Request $request, $subdomain)

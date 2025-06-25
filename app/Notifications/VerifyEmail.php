@@ -24,10 +24,17 @@ class VerifyEmail extends BaseVerifyEmail
     {
         $verificationUrl = $this->verificationUrl($notifiable);
 
-        return (new MailMessage)
+        $mailMessage = (new MailMessage)
             ->subject('Verify Email Address')
             ->line('Please click the button below to verify your email address.')
             ->action('Verify Email Address', $verificationUrl);
+
+        // Add unsubscribe link for user verification emails
+        if ($this->type == 'user') {
+            $mailMessage->line('To unsubscribe from future emails, click here: ' . route('user.unsubscribe', ['email' => base64_encode($notifiable->email)]));
+        }
+
+        return $mailMessage;
     }
 
     protected function verificationUrl($notifiable)
@@ -39,5 +46,22 @@ class VerifyEmail extends BaseVerifyEmail
                 ? ['id' => $notifiable->getKey(), 'hash' => sha1($notifiable->getEmailForVerification())]
                 : ['subdomain' => $this->subdomain, 'hash' => sha1($notifiable->getEmailForVerification())]
         );        
-    }    
+    }
+
+    /**
+     * Get the notification's mail headers.
+     */
+    public function toMailHeaders(): array
+    {
+        if ($this->type == 'role' && $this->subdomain) {
+            return [
+                'List-Unsubscribe' => '<' . route('role.unsubscribe', ['subdomain' => $this->subdomain]) . '>',
+                'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
+            ];
+        }
+        
+        // For user verification emails, we can't include the email in the header
+        // The unsubscribe link is provided in the email body instead
+        return [];
+    }
 }

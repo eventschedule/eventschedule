@@ -63,4 +63,15 @@ class AddedMemberNotification extends Notification
             //
         ];
     }
+
+    /**
+     * Get the notification's mail headers.
+     */
+    public function toMailHeaders(): array
+    {
+        return [
+            'List-Unsubscribe' => '<' . route('role.unsubscribe', ['subdomain' => $this->role->subdomain]) . '>',
+            'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
+        ];
+    }
 }

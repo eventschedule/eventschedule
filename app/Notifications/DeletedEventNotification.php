@@ -62,4 +62,16 @@ class DeletedEventNotification extends Notification
             //
         ];
     }
+
+    /**
+     * Get the notification's mail headers.
+     */
+    public function toMailHeaders(): array
+    {
+        $role = $this->event->role();
+        return [
+            'List-Unsubscribe' => '<' . route('role.unsubscribe', ['subdomain' => $role->subdomain]) . '>',
+            'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
+        ];
+    }
 }
