@@ -59,4 +59,16 @@ class RequestAcceptedNotification extends Notification
             //
         ];
     }
+
+    /**
+     * Get the notification's mail headers.
+     */
+    public function toMailHeaders(): array
+    {
+        $venue = $this->event->venue;
+        return [
+            'List-Unsubscribe' => '<' . route('role.unsubscribe', ['subdomain' => $venue->subdomain]) . '>',
+            'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
+        ];
+    }
 }

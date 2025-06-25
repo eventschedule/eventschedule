@@ -30,6 +30,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'invoiceninja_webhook_secret',
         'payment_url',
         'payment_secret',
+        'is_subscribed',
     ];
 
     /**
@@ -66,7 +67,10 @@ class User extends Authenticatable implements MustVerifyEmail
     
     public function sendEmailVerificationNotification()
     {
-        $this->notify(new CustomVerifyEmail('user'));
+        // Only send verification email if user is subscribed
+        if ($this->is_subscribed !== false) {
+            $this->notify(new CustomVerifyEmail('user'));
+        }
     }
 
     /**
