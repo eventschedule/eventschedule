@@ -30,7 +30,6 @@ return new class extends Migration
             // Indexes for SEO and performance
             $table->index(['published_at', 'is_published']);
             $table->index('slug');
-            $table->index('tags');
         });
     }
 
