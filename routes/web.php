@@ -13,6 +13,7 @@ use App\Http\Controllers\BlogController;
 use Illuminate\Support\Facades\Route;
 
 if (config('app.hosted')) {
+    
     // Redirect all requests to eventschedule.com to www.eventschedule.com
     Route::group(['domain' => 'eventschedule.com'], function () {
         Route::get('{path?}', function ($path = null) {
