@@ -390,6 +390,7 @@ class GeminiUtils
         - Ensure the content is original and valuable
         - Make it SEO-friendly with relevant keywords
         - Always maintain a professional tone
+        - Add links in the text where relevant to www.eventschedule.com
         - For image_category, choose the most appropriate category based on the topic:
           * business: for business, professional, corporate topics
           * wellness: for health, wellness, meditation, yoga topics
