@@ -375,7 +375,8 @@ class GeminiUtils
             \"excerpt\": \"Brief summary (150-160 characters)\",
             \"tags\": [\"tag1\", \"tag2\", \"tag3\", \"tag4\", \"tag5\"],
             \"meta_title\": \"SEO meta title (50-60 characters)\",
-            \"meta_description\": \"SEO meta description (150-160 characters)\"
+            \"meta_description\": \"SEO meta description (150-160 characters)\",
+            \"image_category\": \"business|wellness|sports|music|networking|family|productivity|nature|arts|general\"
         }
         
         Requirements:
@@ -387,7 +388,18 @@ class GeminiUtils
         - Ensure the content is original and valuable
         - Include a call-to-action at the end
         - Make it SEO-friendly with relevant keywords
-        - Always maintain a professional tone";
+        - Always maintain a professional tone
+        - For image_category, choose the most appropriate category based on the topic:
+          * business: for business, professional, corporate topics
+          * wellness: for health, wellness, meditation, yoga topics
+          * sports: for sports, fitness, athletics topics
+          * music: for music, arts, entertainment topics
+          * networking: for networking, social, community topics
+          * family: for family, children, parenting topics
+          * productivity: for productivity, time management, organization topics
+          * nature: for outdoor, nature, environmental topics
+          * arts: for creative, artistic, cultural topics
+          * general: for general topics that don't fit other categories";
 
         try {
             $data = self::sendRequest($prompt);
@@ -402,6 +414,10 @@ class GeminiUtils
                 $result['tags'] = $result['tags'] ?? ['events', 'scheduling'];
                 $result['meta_title'] = $result['meta_title'] ?? $result['title'];
                 $result['meta_description'] = $result['meta_description'] ?? $result['excerpt'];
+                $result['image_category'] = $result['image_category'] ?? 'general';
+                
+                // Select appropriate image based on category
+                $result['featured_image'] = self::selectImageForCategory($result['image_category']);
                 
                 return $result;
             }
@@ -418,8 +434,28 @@ class GeminiUtils
                 'excerpt' => 'A brief summary about ' . $topic,
                 'tags' => ['events', 'scheduling', 'management'],
                 'meta_title' => 'Blog Post about ' . $topic,
-                'meta_description' => 'A brief summary about ' . $topic
+                'meta_description' => 'A brief summary about ' . $topic,
+                'featured_image' => 'Lets_do_Business.png'
             ];
         }
+    }
+
+    private static function selectImageForCategory($category)
+    {
+        $imageMap = [
+            'business' => ['Lets_do_Business.png', 'Network_Summit.png', 'Synergy.png'],
+            'wellness' => ['Yoga_and_Wellness.png', 'Peaceful_Studio.png', 'Meditation.png', 'Mindful.png'],
+            'sports' => ['Sports_Centre.png', 'Fitness_Morning.png', 'Arena.png', 'Sports_and_Youth.png'],
+            'music' => ['Music_Potential.png', 'The_Stage_Awaits.png', 'Ready_to_Dance.png'],
+            'networking' => ['Network_Summit.png', 'Networking_and_Bagels.png', 'People_of_the_World.png'],
+            'family' => ['Kids_Bonanza.png', 'Sports_and_Youth.png'],
+            'productivity' => ['5am_Club.png', 'Chess_Vibrancy.png', 'Warming_Up.png'],
+            'nature' => ['Nature_Calls.png', 'Flowerful_Life.png'],
+            'arts' => ['Literature.png', 'Music_Potential.png', 'The_Stage_Awaits.png'],
+            'general' => ['Lets_do_Business.png', 'All_Hands_on_Deck.png', 'Flowerful_Life.png', 'Chill_Evening.png']
+        ];
+
+        $images = $imageMap[$category] ?? $imageMap['general'];
+        return $images[array_rand($images)];
     }
 }   

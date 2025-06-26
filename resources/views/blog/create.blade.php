@@ -38,6 +38,17 @@
                         document.getElementById('meta_title').value = data.meta_title || '';
                         document.getElementById('meta_description').value = data.meta_description || '';
                         
+                        // Set featured image if provided
+                        if (data.featured_image) {
+                            const featuredImageSelect = document.getElementById('featured_image');
+                            for (let i = 0; i < featuredImageSelect.options.length; i++) {
+                                if (featuredImageSelect.options[i].value === data.featured_image) {
+                                    featuredImageSelect.selectedIndex = i;
+                                    break;
+                                }
+                            }
+                        }
+                        
                         // Show success message
                         Toastify({
                             text: "Content generated successfully!",
