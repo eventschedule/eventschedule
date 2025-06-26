@@ -15,37 +15,45 @@
 
     <div class="bg-gray-900 py-12">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto max-w-2xl lg:mx-0">
-                <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white">Blog</h1>
-                <p class="mt-4 text-lg leading-8 text-gray-300">
-                    Latest news, tips, and insights about event scheduling and management.
-                </p>
+            <div class="w-full flex flex-col sm:flex-row items-center gap-4 sm:gap-8 mb-4 text-center sm:text-left">
+                <a href="{{ route('home') }}" class="hover:opacity-80 transition-opacity flex-shrink-0 flex justify-center sm:block">
+                    <img class="h-12 w-auto sm:h-14 mb-4 sm:mb-0" src="{{ url('images/light_logo.png') }}" alt="EventSchedule Logo"/>
+                </a>
+                <div class="w-full h-px bg-gray-600 sm:w-px sm:h-14 sm:bg-gray-600"></div>
+                <div class="flex-1 min-w-0">
+                    <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mb-2">Blog</h1>
+                    <p class="text-base sm:text-xl text-gray-300">
+                        Latest news, tips, and insights about event scheduling and management.
+                    </p>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="bg-blue-50 min-h-screen py-10">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mt-0 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+    <div class="bg-blue-50 min-h-screen">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+            <div class="mx-auto mt-0 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
                 <!-- Main content -->
-                <div class="lg:col-span-2 space-y-8">
+                <div class="lg:col-span-2 space-y-6">
                     @if($posts->count() > 0)
                         @foreach($posts as $post)
-                            <div class="bg-white border border-blue-100 rounded-2xl shadow-sm p-8 flex flex-col h-full">
+                            <div class="bg-white border border-blue-100 rounded-2xl shadow-sm p-6">
                                 @if($post->featured_image_url)
                                     <div class="mb-4">
                                         <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" class="w-full h-48 object-cover rounded-lg">
                                     </div>
                                 @endif
-                                <div class="flex items-center gap-x-4 text-xs">
-                                    @if($post->published_at)
-                                        <time datetime="{{ $post->published_at->toISOString() }}" class="text-gray-500">
-                                            {{ $post->formatted_published_at }}
-                                        </time>
-                                    @endif
-                                    <span class="text-gray-500">{{ $post->reading_time }}</span>
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-x-4 text-xs mb-3">
+                                    <div class="flex items-center gap-x-4">
+                                        @if($post->published_at)
+                                            <time datetime="{{ $post->published_at->toISOString() }}" class="text-gray-500">
+                                                {{ $post->formatted_published_at }}
+                                            </time>
+                                        @endif
+                                        <span class="text-gray-500">{{ $post->reading_time }}</span>
+                                    </div>
                                     @if($post->tags)
-                                        <div class="flex gap-2">
+                                        <div class="flex gap-2 mt-1 sm:mt-0">
                                             @foreach(array_slice($post->tags, 0, 3) as $tag)
                                                 <a href="{{ route('blog.index', ['tag' => $tag]) }}" class="text-blue-600 hover:text-blue-800">
                                                     #{{ $tag }}
@@ -55,20 +63,20 @@
                                     @endif
                                 </div>
                                 <div class="group relative">
-                                    <h3 class="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
+                                    <h3 class="text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600 mb-3">
                                         <a href="{{ route('blog.show', $post->slug) }}">
                                             <span class="absolute inset-0"></span>
                                             {{ $post->title }}
                                         </a>
                                     </h3>
-                                    <p class="mt-5 line-clamp-3 text-sm leading-6 text-gray-600">
+                                    <p class="line-clamp-3 text-sm leading-6 text-gray-600">
                                         {{ $post->excerpt }}
                                     </p>
                                 </div>
                             </div>
                         @endforeach
                         <!-- Pagination -->
-                        <div class="mt-12">
+                        <div class="mt-8">
                             {{ $posts->links() }}
                         </div>
                     @else
@@ -79,7 +87,7 @@
                     @endif
                 </div>
                 <!-- Sidebar -->
-                <div class="space-y-8">
+                <div class="space-y-6">
                     @if($allTags->count() > 0)
                         <div class="bg-white border border-blue-100 rounded-2xl shadow-sm p-6">
                             <h3 class="text-lg font-semibold text-gray-900 mb-4">Tags</h3>

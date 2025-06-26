@@ -100,6 +100,16 @@
                     @endif
                 </div>
             </header>
+            
+            <!-- Featured Image -->
+            @if($post->featured_image_url)
+                <div class="mb-8">
+                    <img src="{{ $post->featured_image_url }}" 
+                         alt="{{ $post->title }}" 
+                         class="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-2xl shadow-lg">
+                </div>
+            @endif
+            
             <div class="bg-white border border-blue-100 rounded-2xl shadow-sm p-8">
                 <!-- Content -->
                 <div class="prose prose-lg max-w-none" style="font-size: 1.125rem;">

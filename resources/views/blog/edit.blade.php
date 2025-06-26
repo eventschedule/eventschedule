@@ -15,7 +15,7 @@
             </div>
         </div>
 
-        <form method="POST" action="{{ route('blog.update', $blogPost) }}" enctype="multipart/form-data" class="mt-8 space-y-8">
+        <form method="POST" action="{{ route('blog.update', $blogPost) }}" class="mt-8 space-y-8">
             @csrf
             @method('PUT')
             
@@ -51,10 +51,10 @@
                         <div class="sm:col-span-2">
                             <label for="excerpt" class="block text-sm font-medium leading-6 text-gray-900">Excerpt</label>
                             <div class="mt-2">
-                                <textarea name="excerpt" id="excerpt" rows="3"
+                                <textarea name="excerpt" id="excerpt" rows="3" maxlength="500"
                                           class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">{{ old('excerpt', $blogPost->excerpt) }}</textarea>
                             </div>
-                            <p class="mt-2 text-sm text-gray-500">Brief summary of the post (optional, will be auto-generated if left empty)</p>
+                            <p class="mt-2 text-sm text-gray-500">Leave empty to auto-generate from content (max 500 characters)</p>
                             @error('excerpt')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -84,10 +84,17 @@
                                 </div>
                             @endif
                             <div class="mt-2">
-                                <input type="file" name="featured_image" id="featured_image" accept="image/*"
-                                       class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                <select name="featured_image" id="featured_image"
+                                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
+                                    <option value="">No featured image</option>
+                                    @foreach(\App\Models\BlogPost::getAvailableHeaderImages() as $image => $description)
+                                        <option value="{{ $image }}" {{ old('featured_image', $blogPost->featured_image) == $image ? 'selected' : '' }}>
+                                            {{ $description }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
-                            <p class="mt-2 text-sm text-gray-500">Recommended size: 1200x630 pixels. Leave empty to keep current image.</p>
+                            <p class="mt-2 text-sm text-gray-500">Select a header image that best represents your blog post</p>
                             @error('featured_image')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
