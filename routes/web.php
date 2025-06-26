@@ -19,6 +19,11 @@ if (config('app.hosted')) {
         })->where('path', '.*');
     });
 
+    Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => 'blog'])->group(function () {
+        Route::get('/', [BlogController::class, 'index'])->name('blog.index');
+        Route::get('/{slug}', [BlogController::class, 'show'])->name('blog.show');
+    });
+
     Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app).*'])->group(function () {
         Route::get('/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
@@ -161,15 +166,13 @@ Route::middleware(['auth', 'verified'])->group(function ()
 });
 
 if (config('app.hosted')) {
-    /*
-    Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => 'blog'])->group(function () {
-        Route::get('/', [BlogController::class, 'index'])->name('blog.index');
-        Route::get('/{slug}', [BlogController::class, 'show'])->name('blog.show');
-    });
-    */
     Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app).*'])->group(function () {
         Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');
     });
+    if (config('app.env') == 'local') {
+        Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+        Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');    
+    }
 } else {
     Route::get('/{subdomain}/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
@@ -181,8 +184,5 @@ if (config('app.hosted')) {
     Route::get('/{subdomain}', [RoleController::class, 'viewGuest'])->name('role.view_guest');
     Route::get('/{subdomain}/{slug}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
 }
-
-Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
-Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 Route::get('/{slug?}', [HomeController::class, 'landing'])->name('landing');
