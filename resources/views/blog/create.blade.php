@@ -1,20 +1,8 @@
 <x-app-admin-layout>
     <x-slot name="head">
-        <style>
-            .topic-button {
-                transition: all 0.2s ease-in-out;
-                cursor: pointer;
-            }
-            .topic-button:hover {
-                transform: translateY(-1px);
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
-        </style>
         <script {!! nonce_attr() !!}>
             function generateContent() {
                 const topic = document.getElementById('ai_topic').value;
-                const tone = document.getElementById('ai_tone').value;
-                const length = document.getElementById('ai_length').value;
                 
                 if (!topic.trim()) {
                     alert('Please enter a topic for AI generation');
@@ -34,9 +22,7 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
                     body: JSON.stringify({
-                        topic: topic,
-                        tone: tone,
-                        length: length
+                        topic: topic
                     })
                 })
                 .then(response => response.json())
@@ -73,10 +59,6 @@
                     generateBtn.disabled = false;
                 });
             }
-
-            function setTopic(topic) {
-                document.getElementById('ai_topic').value = topic;
-            }
         </script>
     </x-slot>
 
@@ -100,7 +82,7 @@
         <div class="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">🤖 AI Content Generation</h3>
             <p class="text-sm text-gray-600 mb-4">
-                Let AI help you create engaging blog content. Enter a topic and customize the tone and length.
+                Let AI help you create engaging blog content. Enter a topic and AI will generate professional content with automatically varied lengths.
             </p>
             
             @if (! config('services.google.gemini_key'))
@@ -120,64 +102,12 @@
                 </div>
             @endif
             
-            <!-- Suggested Topics -->
-            <div class="mb-4">
-                <p class="text-sm font-medium text-gray-700 mb-2">Suggested topics:</p>
-                <div class="flex flex-wrap gap-2">
-                    <button type="button" onclick="setTopic('Event Planning Tips for Beginners')" 
-                            class="topic-button px-3 py-1 text-xs bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition-colors">
-                        Event Planning Tips for Beginners
-                    </button>
-                    <button type="button" onclick="setTopic('How to Promote Your Events on Social Media')" 
-                            class="topic-button px-3 py-1 text-xs bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition-colors">
-                        Social Media Event Promotion
-                    </button>
-                    <button type="button" onclick="setTopic('Venue Selection Guide for Event Organizers')" 
-                            class="topic-button px-3 py-1 text-xs bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition-colors">
-                        Venue Selection Guide
-                    </button>
-                    <button type="button" onclick="setTopic('Event Marketing Strategies That Work')" 
-                            class="topic-button px-3 py-1 text-xs bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition-colors">
-                        Event Marketing Strategies
-                    </button>
-                    <button type="button" onclick="setTopic('Managing Event Budgets Effectively')" 
-                            class="topic-button px-3 py-1 text-xs bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition-colors">
-                        Event Budget Management
-                    </button>
-                    <button type="button" onclick="setTopic('Digital Tools for Event Management')" 
-                            class="topic-button px-3 py-1 text-xs bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition-colors">
-                        Digital Event Tools
-                    </button>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label for="ai_topic" class="block text-sm font-medium text-gray-700">Topic *</label>
-                    <input type="text" id="ai_topic" placeholder="e.g., Event Planning Tips" 
+                    <input type="text" id="ai_topic" placeholder="e.g., Event Planning Tips for Beginners" 
                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                            {{ config('services.google.gemini_key') ? '' : 'disabled' }}>
-                </div>
-                
-                <div>
-                    <label for="ai_tone" class="block text-sm font-medium text-gray-700">Tone</label>
-                    <select id="ai_tone" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                            {{ config('services.google.gemini_key') ? '' : 'disabled' }}>
-                        <option value="professional">Professional</option>
-                        <option value="casual">Casual</option>
-                        <option value="friendly">Friendly</option>
-                        <option value="authoritative">Authoritative</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="ai_length" class="block text-sm font-medium text-gray-700">Length</label>
-                    <select id="ai_length" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                            {{ config('services.google.gemini_key') ? '' : 'disabled' }}>
-                        <option value="short">Short (300-500 words)</option>
-                        <option value="medium" selected>Medium (800-1200 words)</option>
-                        <option value="long">Long (1500-2000 words)</option>
-                    </select>
                 </div>
                 
                 <div class="flex items-end">

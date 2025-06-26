@@ -357,11 +357,15 @@ class GeminiUtils
         return null;
     }
 
-    public static function generateBlogPost($topic, $tone = 'professional', $length = 'medium')
+    public static function generateBlogPost($topic)
     {
+        // Randomly select a length to vary content length
+        $lengths = ['short', 'medium', 'long'];
+        $length = $lengths[array_rand($lengths)];
+        
         $prompt = "Generate a blog post about '{$topic}' with the following specifications:
         
-        Tone: {$tone}
+        Tone: professional
         Length: {$length} (short: 300-500 words, medium: 800-1200 words, long: 1500-2000 words)
         
         Please return a JSON object with the following structure:
@@ -382,7 +386,8 @@ class GeminiUtils
         - Make it relevant to event scheduling and management
         - Ensure the content is original and valuable
         - Include a call-to-action at the end
-        - Make it SEO-friendly with relevant keywords";
+        - Make it SEO-friendly with relevant keywords
+        - Always maintain a professional tone";
 
         try {
             $data = self::sendRequest($prompt);

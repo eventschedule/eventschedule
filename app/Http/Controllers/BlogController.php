@@ -253,16 +253,12 @@ class BlogController extends Controller
 
         $request->validate([
             'topic' => 'required|string|max:255',
-            'tone' => 'nullable|string|in:professional,casual,friendly,authoritative',
-            'length' => 'nullable|string|in:short,medium,long',
         ]);
 
         try {
             $topic = $request->input('topic');
-            $tone = $request->input('tone', 'professional');
-            $length = $request->input('length', 'medium');
 
-            $generatedContent = GeminiUtils::generateBlogPost($topic, $tone, $length);
+            $generatedContent = GeminiUtils::generateBlogPost($topic);
 
             return response()->json($generatedContent);
         } catch (\Exception $e) {
