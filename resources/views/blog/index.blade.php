@@ -32,6 +32,27 @@
 
     <div class="bg-blue-50 min-h-screen">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+            <!-- Selected Tag Display -->
+            @if(request('tag'))
+                <div class="mb-6 bg-white border border-blue-200 rounded-2xl shadow-sm p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm text-gray-600">Filtered by:</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                #{{ request('tag') }}
+                            </span>
+                        </div>
+                        <a href="{{ route('blog.index') }}" 
+                           class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Clear filter
+                        </a>
+                    </div>
+                </div>
+            @endif
+
             <div class="mx-auto mt-0 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
                 <!-- Main content -->
                 <div class="lg:col-span-2 space-y-6">
@@ -90,12 +111,31 @@
                     @if($allTags->count() > 0)
                         <div class="bg-white border border-blue-100 rounded-2xl shadow-sm p-6">
                             <h3 class="text-lg font-semibold text-gray-900 mb-4">Tags</h3>
-                            <div class="flex flex-wrap gap-2">
-                                @foreach($allTags as $tag)
-                                    <a href="{{ route('blog.index', ['tag' => $tag]) }}" class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-800 hover:bg-blue-100 transition-colors">
+                            <div class="flex flex-wrap gap-2" id="tags-container">
+                                @foreach($allTags->take(20) as $tag)
+                                    <a href="{{ route('blog.index', ['tag' => $tag]) }}" 
+                                       class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-800 hover:bg-blue-100 transition-colors {{ request('tag') == $tag ? 'bg-blue-200 text-blue-900' : '' }}">
                                         #{{ $tag }}
                                     </a>
                                 @endforeach
+                                @if($allTags->count() > 20)
+                                    <div id="hidden-tags" class="hidden flex flex-wrap gap-2">
+                                        @foreach($allTags->slice(20) as $tag)
+                                            <a href="{{ route('blog.index', ['tag' => $tag]) }}" 
+                                               class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-800 hover:bg-blue-100 transition-colors {{ request('tag') == $tag ? 'bg-blue-200 text-blue-900' : '' }}">
+                                                #{{ $tag }}
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                    <button id="show-more-tags" 
+                                            class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors mt-2">
+                                        Show more tags
+                                    </button>
+                                    <button id="show-less-tags" 
+                                            class="hidden inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors mt-2">
+                                        Show less
+                                    </button>
+                                @endif
                             </div>
                         </div>
                     @endif
@@ -124,4 +164,26 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const showMoreBtn = document.getElementById('show-more-tags');
+            const showLessBtn = document.getElementById('show-less-tags');
+            const hiddenTags = document.getElementById('hidden-tags');
+
+            if (showMoreBtn && showLessBtn && hiddenTags) {
+                showMoreBtn.addEventListener('click', function() {
+                    hiddenTags.classList.remove('hidden');
+                    showMoreBtn.classList.add('hidden');
+                    showLessBtn.classList.remove('hidden');
+                });
+
+                showLessBtn.addEventListener('click', function() {
+                    hiddenTags.classList.add('hidden');
+                    showLessBtn.classList.add('hidden');
+                    showMoreBtn.classList.remove('hidden');
+                });
+            }
+        });
+    </script>
 </x-app-layout> 
