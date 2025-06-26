@@ -55,7 +55,7 @@
         </script>
     </x-slot>
 
-    <div class="bg-blue-50 min-h-screen">
+    <div class="bg-blue-50 min-h-screen pb-12">
         <article class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <!-- Header (inline, not partial) -->
             <header class="mb-8 bg-gray-900 py-12 rounded-b-3xl">
@@ -82,7 +82,6 @@
                             </time>
                         @endif
                         <span>{{ $post->reading_time }}</span>
-                        <span>{{ $post->view_count }} views</span>
                     </div>
                     @if($post->excerpt)
                         <p class="text-xl text-gray-300 leading-relaxed mb-6">
@@ -165,5 +164,5 @@
                 </div>
             </div>
         </article>
-    </div>
+    </div>    
 </x-app-layout> 

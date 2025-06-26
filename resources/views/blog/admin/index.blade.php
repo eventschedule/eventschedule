@@ -57,7 +57,7 @@
         </script>
     </x-slot>
 
-    <div class="px-4 sm:px-6 lg:px-8">
+    <div class="pt-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
                 <h1 class="text-base font-semibold leading-6 text-gray-900">Blog Posts</h1>
@@ -85,7 +85,6 @@
                                         <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
                                         <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Published</th>
                                         <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Views</th>
-                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Tags</th>
                                         <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                                             <span class="sr-only">Actions</span>
                                         </th>
@@ -124,22 +123,6 @@
                                             </td>
                                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                                 {{ number_format($post->view_count) }}
-                                            </td>
-                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                @if($post->tags)
-                                                    <div class="flex flex-wrap gap-1">
-                                                        @foreach(array_slice($post->tags, 0, 3) as $tag)
-                                                            <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20">
-                                                                {{ $tag }}
-                                                            </span>
-                                                        @endforeach
-                                                        @if(count($post->tags) > 3)
-                                                            <span class="text-gray-400">+{{ count($post->tags) - 3 }}</span>
-                                                        @endif
-                                                    </div>
-                                                @else
-                                                    -
-                                                @endif
                                             </td>
                                             <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                                 <div class="flex items-center justify-end gap-2">
