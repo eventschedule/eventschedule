@@ -102,7 +102,7 @@
                 </div>
             @endif
             
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto]">
                 <div>
                     <label for="ai_topic" class="block text-sm font-medium text-gray-700">Topic *</label>
                     <input type="text" id="ai_topic" placeholder="e.g., Event Planning Tips for Beginners" 
@@ -112,7 +112,7 @@
                 
                 <div class="flex items-end">
                     <button type="button" id="generate_btn" onclick="generateContent()"
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                            class="w-48 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center justify-center"
                             {{ config('services.google.gemini_key') ? '' : 'disabled' }}>
                         Generate Content
                     </button>
