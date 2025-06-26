@@ -116,9 +116,9 @@
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto]">
                 <div>
                     <label for="ai_topic" class="block text-sm font-medium text-gray-700">Topic *</label>
-                    <input type="text" id="ai_topic" placeholder="e.g., Event Planning Tips for Beginners" 
+                    <textarea id="ai_topic" placeholder="e.g., Event Planning Tips for Beginners" rows="3"
                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                           {{ config('services.google.gemini_key') ? '' : 'disabled' }}>
+                           {{ config('services.google.gemini_key') ? '' : 'disabled' }}></textarea>
                 </div>
                 
                 <div class="flex items-end">
