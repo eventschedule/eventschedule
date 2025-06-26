@@ -161,10 +161,12 @@ Route::middleware(['auth', 'verified'])->group(function ()
 });
 
 if (config('app.hosted')) {
+    /*
     Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => 'blog'])->group(function () {
         Route::get('/', [BlogController::class, 'index'])->name('blog.index');
         Route::get('/{slug}', [BlogController::class, 'show'])->name('blog.show');
     });
+    */
     Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app).*'])->group(function () {
         Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');
     });
