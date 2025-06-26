@@ -101,6 +101,24 @@
                 </div>
             </header>
             
+            <!-- CTA Card -->
+            <div class="mb-8">
+                <a href="https://www.eventschedule.com" target="_blank" class="block group">
+                    <div class="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 rounded-2xl p-6 shadow-md transform transition-all duration-300 group-hover:shadow-lg" style="--tw-scale-x: 1; --tw-scale-y: 1;">
+                        <style>
+                            .group:hover .bg-gradient-to-r {
+                                transform: scale(1.03);
+                            }
+                        </style>
+                        <div class="text-center">
+                            <p class="text-white text-lg font-medium">
+                                {!! str_replace(':link', '<span class="font-bold underline">eventschedule.com</span>',  __('messages.try_event_schedule')) !!}
+                            </p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            
             <!-- Featured Image -->
             @if($post->featured_image_url)
                 <div class="mb-8">
