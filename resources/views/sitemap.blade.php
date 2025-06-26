@@ -6,6 +6,14 @@
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
     </url>
+    @foreach($blogPosts as $post)
+        <url>
+            <loc>{{ $post->url }}</loc>
+            <lastmod>{{ $post->published_at->toIso8601String() }}</lastmod>
+            <changefreq>monthly</changefreq>
+            <priority>0.7</priority>
+        </url>
+    @endforeach
     @foreach($roles as $role)
         <url>
             <loc>{{ url($role->getGuestUrl()) }}</loc>
