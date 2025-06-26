@@ -116,23 +116,10 @@
                         .prose-lg ul li { display: list-item !important; }
                     </style>
                     {!! $post->content !!}
-                </div>
-                <!-- Author -->
-                <div class="mt-12 pt-8 border-t border-gray-200">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
-                                <span class="text-white font-semibold text-lg">
-                                    {{ substr($post->author_name, 0, 1) }}
-                                </span>
-                            </div>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-900">{{ $post->author_name }}</p>
-                            <p class="text-sm text-gray-500">Event Schedule Team</p>
-                        </div>
-                    </div>
-                </div>
+                    <p>
+                    {!! str_replace(':link', '<a href="https://www.eventschedule.com" target="_blank" class="hover:underline">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}    
+                    </p>
+                </div>                
                 <!-- Related Posts -->
                 @if($relatedPosts->count() > 0)
                     <div class="mt-16 pt-8 border-t border-gray-200">
