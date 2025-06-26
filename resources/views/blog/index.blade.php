@@ -13,7 +13,7 @@
         <link rel="canonical" href="{{ url()->current() }}">
     </x-slot>
 
-    <div class="bg-gray-900 py-12 mb-12">
+    <div class="bg-gray-900 py-12">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto max-w-2xl lg:mx-0">
                 <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white">Blog</h1>
@@ -26,7 +26,7 @@
 
     <div class="bg-blue-50 min-h-screen py-10">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mt-8 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+            <div class="mx-auto mt-0 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-3">
                 <!-- Main content -->
                 <div class="lg:col-span-2 space-y-8">
                     @if($posts->count() > 0)

@@ -55,7 +55,7 @@
         </script>
     </x-slot>
 
-    <div class="bg-blue-50 min-h-screen py-10">
+    <div class="bg-blue-50 min-h-screen">
         <article class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <!-- Header (inline, not partial) -->
             <header class="mb-8 bg-gray-900 py-12 rounded-b-3xl">
@@ -106,7 +106,10 @@
                 <div class="prose prose-lg max-w-none" style="font-size: 1.125rem;">
                     <style>
                         .prose-lg p { margin-bottom: 2rem !important; }
-                        .prose-lg h2, .prose-lg h3, .prose-lg h4 { margin-top: 2.5rem !important; margin-bottom: 1.5rem !important; }
+                        .prose-lg h1 { font-size: 2.5rem !important; font-weight: 800 !important; margin-top: 3rem !important; margin-bottom: 2rem !important; line-height: 1.1 !important; }
+                        .prose-lg h2 { font-size: 2rem !important; font-weight: 700 !important; margin-top: 2.5rem !important; margin-bottom: 1.5rem !important; line-height: 1.15 !important; }
+                        .prose-lg h3 { font-size: 1.5rem !important; font-weight: 600 !important; margin-top: 2rem !important; margin-bottom: 1rem !important; }
+                        .prose-lg h4 { font-size: 1.25rem !important; font-weight: 600 !important; margin-top: 1.5rem !important; margin-bottom: 0.75rem !important; }
                         .prose-lg ol, .prose-lg ul { margin-bottom: 2rem !important; }
                         .prose-lg li { margin-bottom: 0.5rem !important; }
                         .prose-lg ul { list-style-type: disc !important; padding-left: 2rem !important; }
