@@ -390,7 +390,7 @@ class GeminiUtils
         - Ensure the content is original and valuable
         - Make it SEO-friendly with relevant keywords
         - Always maintain a professional tone
-        - Add up to 1 link in the text where relevant to 'https://www.eventschedule.com' with 'Event Schedule' as the text and target _blank
+        - Add 1 or 2 links in the text where relevant to 'https://www.eventschedule.com' with 'Event Schedule' as the text and target _blank
         - For image_category, choose the most appropriate category based on the topic:
           * business: for business, professional, corporate topics
           * wellness: for health, wellness, meditation, yoga topics
