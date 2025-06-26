@@ -8,7 +8,7 @@
     </url>
     @foreach($blogPosts as $post)
         <url>
-            <loc>{{ $post->url }}</loc>
+            <loc>{{ route('blog.show', $post->slug) }}</loc>
             <lastmod>{{ $post->published_at->toIso8601String() }}</lastmod>
             <changefreq>monthly</changefreq>
             <priority>0.7</priority>
