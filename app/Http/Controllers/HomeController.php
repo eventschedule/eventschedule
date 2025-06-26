@@ -116,7 +116,7 @@ class HomeController extends Controller
         $content = view('sitemap', [
             'roles' => ! request()->has('events') ? $roles : [],
             'events' => ! request()->has('roles') ? $events : [],
-            'blogPosts' => $blogPosts,
+            'blogPosts' => request()->has('events') || request()->has('roles') ? [] : $blogPosts,
             'lastmod' => now()->toIso8601String()
         ]);
         
