@@ -53,6 +53,14 @@
             @endif
         }
         </script>
+
+        <style>
+            /* Override any existing hover styles that might conflict */
+            .prose a:hover,
+            .prose-lg a:hover {
+                text-decoration: underline !important;
+            }
+        </style>        
     </x-slot>
 
     <div class="bg-blue-50 min-h-screen pb-12">
