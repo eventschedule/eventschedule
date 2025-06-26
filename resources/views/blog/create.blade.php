@@ -73,7 +73,7 @@
         </script>
     </x-slot>
 
-    <div class="px-4 sm:px-6 lg:px-8">
+    <div class="px-4 sm:px-6 lg:px-8 pt-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
                 <h1 class="text-base font-semibold leading-6 text-gray-900">Create Blog Post</h1>
@@ -205,18 +205,6 @@
                             </div>
                             <p class="mt-2 text-sm text-gray-500">Select a header image that best represents your blog post</p>
                             @error('featured_image')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <!-- Author Name -->
-                        <div>
-                            <label for="author_name" class="block text-sm font-medium leading-6 text-gray-900">Author Name</label>
-                            <div class="mt-2">
-                                <input type="text" name="author_name" id="author_name" value="{{ old('author_name', 'Event Schedule Team') }}"
-                                       class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
-                            </div>
-                            @error('author_name')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
