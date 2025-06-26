@@ -55,131 +55,124 @@
         </script>
     </x-slot>
 
-    <div class="bg-white">
-        <article class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-12">
-            <!-- Breadcrumb -->
-            <nav class="mb-8" aria-label="Breadcrumb">
-                <ol class="flex items-center space-x-2 text-sm text-gray-500">
-                    <li><a href="{{ route('blog.index') }}" class="hover:text-gray-700">Blog</a></li>
-                    <li>
-                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                        </svg>
-                    </li>
-                    <li class="text-gray-900">{{ $post->title }}</li>
-                </ol>
-            </nav>
-
-            <!-- Header -->
-            <header class="mb-8">
-                <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl mb-4">
-                    {{ $post->title }}
-                </h1>
-                
-                <div class="flex items-center gap-x-4 text-sm text-gray-500 mb-6">
-                    @if($post->published_at)
-                        <time datetime="{{ $post->published_at->toISOString() }}">
-                            {{ $post->formatted_published_at }}
-                        </time>
+    <div class="bg-blue-50 min-h-screen py-10">
+        <article class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <!-- Header (inline, not partial) -->
+            <header class="mb-8 bg-gray-900 py-12 rounded-b-3xl">
+                <div class="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+                    <!-- Breadcrumb -->
+                    <nav class="mb-6" aria-label="Breadcrumb">
+                        <ol class="flex items-center space-x-2 text-sm text-gray-300">
+                            <li><a href="{{ route('blog.index') }}" class="hover:text-white">Blog</a></li>
+                            <li>
+                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </li>
+                            <li class="text-white">{{ $post->title }}</li>
+                        </ol>
+                    </nav>
+                    <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white mb-4">
+                        {{ $post->title }}
+                    </h1>
+                    <div class="flex items-center gap-x-4 text-sm text-gray-300 mb-6">
+                        @if($post->published_at)
+                            <time datetime="{{ $post->published_at->toISOString() }}">
+                                {{ $post->formatted_published_at }}
+                            </time>
+                        @endif
+                        <span>{{ $post->reading_time }}</span>
+                        <span>{{ $post->view_count }} views</span>
+                    </div>
+                    @if($post->excerpt)
+                        <p class="text-xl text-gray-300 leading-relaxed mb-6">
+                            {{ $post->excerpt }}
+                        </p>
                     @endif
-                    <span>{{ $post->reading_time }}</span>
-                    <span>{{ $post->view_count }} views</span>
+                    @if($post->tags)
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            @foreach($post->tags as $tag)
+                                <a href="{{ route('blog.index', ['tag' => $tag]) }}" 
+                                   class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors">
+                                    #{{ $tag }}
+                                </a>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
-
-                @if($post->featured_image_url)
-                    <div class="mb-8">
-                        <img src="{{ $post->featured_image_url }}" 
-                             alt="{{ $post->title }}" 
-                             class="w-full h-64 md:h-96 object-cover rounded-lg">
-                    </div>
-                @endif
-
-                @if($post->excerpt)
-                    <p class="text-xl text-gray-600 leading-relaxed mb-6">
-                        {{ $post->excerpt }}
-                    </p>
-                @endif
-
-                @if($post->tags)
-                    <div class="flex flex-wrap gap-2 mb-6">
-                        @foreach($post->tags as $tag)
-                            <a href="{{ route('blog.index', ['tag' => $tag]) }}" 
-                               class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors">
-                                #{{ $tag }}
-                            </a>
-                        @endforeach
-                    </div>
-                @endif
             </header>
-
-            <!-- Content -->
-            <div class="prose prose-lg max-w-none">
-                {!! $post->content !!}
-            </div>
-
-            <!-- Author -->
-            <div class="mt-12 pt-8 border-t border-gray-200">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
-                            <span class="text-white font-semibold text-lg">
-                                {{ substr($post->author_name, 0, 1) }}
-                            </span>
+            <div class="bg-white border border-blue-100 rounded-2xl shadow-sm p-8">
+                <!-- Content -->
+                <div class="prose prose-lg max-w-none" style="font-size: 1.125rem;">
+                    <style>
+                        .prose-lg p { margin-bottom: 2rem !important; }
+                        .prose-lg h2, .prose-lg h3, .prose-lg h4 { margin-top: 2.5rem !important; margin-bottom: 1.5rem !important; }
+                        .prose-lg ol, .prose-lg ul { margin-bottom: 2rem !important; }
+                        .prose-lg li { margin-bottom: 0.5rem !important; }
+                        .prose-lg ul { list-style-type: disc !important; padding-left: 2rem !important; }
+                        .prose-lg ul li { display: list-item !important; }
+                    </style>
+                    {!! $post->content !!}
+                </div>
+                <!-- Author -->
+                <div class="mt-12 pt-8 border-t border-gray-200">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                                <span class="text-white font-semibold text-lg">
+                                    {{ substr($post->author_name, 0, 1) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-900">{{ $post->author_name }}</p>
+                            <p class="text-sm text-gray-500">Event Schedule Team</p>
                         </div>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-900">{{ $post->author_name }}</p>
-                        <p class="text-sm text-gray-500">Event Schedule Team</p>
-                    </div>
                 </div>
-            </div>
-
-            <!-- Related Posts -->
-            @if($relatedPosts->count() > 0)
-                <div class="mt-16 pt-8 border-t border-gray-200">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Related Posts</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        @foreach($relatedPosts as $relatedPost)
-                            <article class="group">
-                                @if($relatedPost->featured_image_url)
-                                    <div class="mb-4">
-                                        <img src="{{ $relatedPost->featured_image_url }}" 
-                                             alt="{{ $relatedPost->title }}" 
-                                             class="w-full h-32 object-cover rounded-lg">
+                <!-- Related Posts -->
+                @if($relatedPosts->count() > 0)
+                    <div class="mt-16 pt-8 border-t border-gray-200">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Related Posts</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            @foreach($relatedPosts as $relatedPost)
+                                <article class="group">
+                                    @if($relatedPost->featured_image_url)
+                                        <div class="mb-4">
+                                            <img src="{{ $relatedPost->featured_image_url }}" 
+                                                 alt="{{ $relatedPost->title }}" 
+                                                 class="w-full h-32 object-cover rounded-lg">
+                                        </div>
+                                    @endif
+                                    <h3 class="text-lg font-semibold text-gray-900 group-hover:text-gray-600 mb-2">
+                                        <a href="{{ route('blog.show', $relatedPost->slug) }}">
+                                            {{ $relatedPost->title }}
+                                        </a>
+                                    </h3>
+                                    <div class="flex items-center gap-x-4 text-xs text-gray-500 mb-2">
+                                        <time datetime="{{ $relatedPost->published_at->toISOString() }}">
+                                            {{ $relatedPost->formatted_published_at }}
+                                        </time>
+                                        <span>{{ $relatedPost->reading_time }}</span>
                                     </div>
-                                @endif
-                                
-                                <h3 class="text-lg font-semibold text-gray-900 group-hover:text-gray-600 mb-2">
-                                    <a href="{{ route('blog.show', $relatedPost->slug) }}">
-                                        {{ $relatedPost->title }}
-                                    </a>
-                                </h3>
-                                
-                                <div class="flex items-center gap-x-4 text-xs text-gray-500 mb-2">
-                                    <time datetime="{{ $relatedPost->published_at->toISOString() }}">
-                                        {{ $relatedPost->formatted_published_at }}
-                                    </time>
-                                    <span>{{ $relatedPost->reading_time }}</span>
-                                </div>
-                                
-                                <p class="text-sm text-gray-600 line-clamp-2">
-                                    {{ $relatedPost->excerpt }}
-                                </p>
-                            </article>
-                        @endforeach
+                                    <p class="text-sm text-gray-600 line-clamp-2">
+                                        {{ $relatedPost->excerpt }}
+                                    </p>
+                                </article>
+                            @endforeach
+                        </div>
                     </div>
+                @endif
+                <!-- Back to Blog -->
+                <div class="mt-12 pt-8 border-t border-gray-200">
+                    <a href="{{ route('blog.index') }}" 
+                       class="inline-flex items-center text-blue-600 hover:text-blue-800">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                        </svg>
+                        Back to Blog
+                    </a>
                 </div>
-            @endif
-
-            <!-- Back to Blog -->
-            <div class="mt-12 pt-8 border-t border-gray-200">
-                <a href="{{ route('blog.index') }}" 
-                   class="inline-flex items-center text-blue-600 hover:text-blue-800">
-                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-                    </svg>
-                    Back to Blog
-                </a>
             </div>
         </article>
     </div>
