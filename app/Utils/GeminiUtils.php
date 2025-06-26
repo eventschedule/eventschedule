@@ -380,13 +380,14 @@ class GeminiUtils
         }
         
         Requirements:
+        - Try not to seem like a robot
+        - Never use em dashes 
         - Make the content engaging and informative
         - Include practical tips and actionable advice
         - Use proper HTML formatting with h1, h2, h3 tags
         - Include bullet points and numbered lists where appropriate
-        - Make it relevant to event scheduling and management
+        - Make it relevant to event scheduling and ticketing
         - Ensure the content is original and valuable
-        - Include a call-to-action at the end
         - Make it SEO-friendly with relevant keywords
         - Always maintain a professional tone
         - For image_category, choose the most appropriate category based on the topic:
