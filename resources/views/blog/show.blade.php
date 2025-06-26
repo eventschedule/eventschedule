@@ -125,9 +125,6 @@
                         .prose-lg ul li { display: list-item !important; }
                     </style>
                     {!! $post->content !!}
-                    <p>
-                    {!! str_replace(':link', '<a href="https://www.eventschedule.com" target="_blank" class="hover:underline">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}    
-                    </p>
                 </div>                
                 <!-- Related Posts -->
                 @if($relatedPosts->count() > 0)
@@ -175,4 +172,18 @@
             </div>
         </article>
     </div>    
+
+    <footer class="bg-[#151B26]">
+      <div
+        class="container mx-auto flex flex-row justify-center items-center py-8 px-5"
+      >
+        <p class="text-[#F5F9FE] text-base text-center">
+            <!-- Per the AAL license, please do not remove the link to Event Schedule -->
+            {!! str_replace(':link', '<a href="https://www.eventschedule.com" target="_blank" class="hover:underline">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}
+                •
+            {!! __('messages.supported_by', ['link' => '<a href="https://invoiceninja.com" target="_blank" class="hover:underline" title="Leading small-business platform to manage invoices, expenses & tasks">Invoice Ninja</a>']) !!}
+        </p>
+      </div>
+    </footer>
+
 </x-app-layout> 
