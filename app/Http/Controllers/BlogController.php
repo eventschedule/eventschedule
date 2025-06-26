@@ -84,7 +84,7 @@ class BlogController extends Controller
             'published_at' => 'nullable|date',
             'meta_title' => 'nullable|string|max:60',
             'meta_description' => 'nullable|string|max:160',
-            'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'featured_image' => 'nullable|string|in:' . implode(',', array_keys(BlogPost::getAvailableHeaderImages())),
             'author_name' => 'nullable|string|max:255',
             'is_published' => 'boolean',
         ]);
@@ -96,12 +96,6 @@ class BlogController extends Controller
             $tags = array_map('trim', explode(',', $request->tags));
             $tags = array_filter($tags);
             $data['tags'] = $tags;
-        }
-
-        // Handle featured image
-        if ($request->hasFile('featured_image')) {
-            $path = $request->file('featured_image')->store('blog', 'public');
-            $data['featured_image'] = $path;
         }
 
         // Set published_at if not provided but is_published is true
@@ -174,7 +168,7 @@ class BlogController extends Controller
             'published_at' => 'nullable|date',
             'meta_title' => 'nullable|string|max:60',
             'meta_description' => 'nullable|string|max:160',
-            'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'featured_image' => 'nullable|string|in:' . implode(',', array_keys(BlogPost::getAvailableHeaderImages())),
             'author_name' => 'nullable|string|max:255',
             'is_published' => 'boolean',
         ]);
@@ -186,17 +180,6 @@ class BlogController extends Controller
             $tags = array_map('trim', explode(',', $request->tags));
             $tags = array_filter($tags);
             $data['tags'] = $tags;
-        }
-
-        // Handle featured image
-        if ($request->hasFile('featured_image')) {
-            // Delete old image
-            if ($blogPost->featured_image) {
-                Storage::disk('public')->delete($blogPost->featured_image);
-            }
-            
-            $path = $request->file('featured_image')->store('blog', 'public');
-            $data['featured_image'] = $path;
         }
 
         // Set published_at if not provided but is_published is true
@@ -216,11 +199,6 @@ class BlogController extends Controller
     {
         if (!auth()->user()->isAdmin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
-
-        // Delete featured image
-        if ($blogPost->featured_image) {
-            Storage::disk('public')->delete($blogPost->featured_image);
         }
 
         $blogPost->delete();

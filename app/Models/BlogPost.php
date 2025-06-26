@@ -32,6 +32,37 @@ class BlogPost extends Model
         'is_published' => 'boolean',
     ];
 
+    // Generic header images that work well for blog posts
+    public static $availableHeaderImages = [
+        'Literature.png' => 'Literature & Writing',
+        'Lets_do_Business.png' => 'Business & Professional',
+        'Network_Summit.png' => 'Networking & Events',
+        'Synergy.png' => 'Collaboration & Teamwork',
+        'People_of_the_World.png' => 'Community & Diversity',
+        'All_Hands_on_Deck.png' => 'Team Building',
+        'Tradeshow_Expo.png' => 'Exhibitions & Shows',
+        'Yoga_and_Wellness.png' => 'Wellness & Health',
+        'Peaceful_Studio.png' => 'Mindfulness & Peace',
+        'Nature_Calls.png' => 'Nature & Outdoors',
+        'Flowerful_Life.png' => 'Life & Growth',
+        'Sports_Centre.png' => 'Sports & Fitness',
+        'Meditation.png' => 'Meditation & Spirituality',
+        'Mindful.png' => 'Mindfulness & Awareness',
+        'Fitness_Morning.png' => 'Fitness & Motivation',
+        'Chess_Vibrancy.png' => 'Strategy & Thinking',
+        'Summer_Events.png' => 'Seasonal Events',
+        'Chill_Evening.png' => 'Relaxation & Leisure',
+        'Arena.png' => 'Competition & Performance',
+        'Sports_and_Youth.png' => 'Youth & Sports',
+        'Kids_Bonanza.png' => 'Family & Children',
+        'Music_Potential.png' => 'Music & Arts',
+        'The_Stage_Awaits.png' => 'Performance & Entertainment',
+        'Ready_to_Dance.png' => 'Dance & Movement',
+        'Warming_Up.png' => 'Preparation & Warm-up',
+        'Networking_and_Bagels.png' => 'Networking & Social',
+        '5am_Club.png' => 'Productivity & Early Bird',
+    ];
+
     protected static function boot()
     {
         parent::boot();
@@ -126,12 +157,12 @@ class BlogPost extends Model
             return null;
         }
 
-        if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
-            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $this->featured_image;
-        } else if (config('filesystems.default') == 'local') {
-            return url('/storage/' . $this->featured_image);
-        } else {
-            return $this->featured_image;
-        }
+        // Return the URL to the header image
+        return url('/images/headers/' . $this->featured_image);
+    }
+
+    public static function getAvailableHeaderImages()
+    {
+        return self::$availableHeaderImages;
     }
 }
