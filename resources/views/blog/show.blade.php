@@ -111,7 +111,7 @@
             
             <!-- CTA Card -->
             <div class="mb-8">
-                <a href="https://www.eventschedule.com" target="_blank" class="block group">
+                <a href="https://www.eventschedule.com" class="block group">
                     <div class="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 rounded-2xl p-6 shadow-md transform transition-all duration-300 group-hover:shadow-lg" style="--tw-scale-x: 1; --tw-scale-y: 1;">
                         <style>
                             .group:hover .bg-gradient-to-r {
@@ -205,7 +205,7 @@
       >
         <p class="text-[#F5F9FE] text-base text-center">
             <!-- Per the AAL license, please do not remove the link to Event Schedule -->
-            {!! str_replace(':link', '<a href="https://www.eventschedule.com" target="_blank" class="hover:underline">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}
+            {!! str_replace(':link', '<a href="https://www.eventschedule.com" class="hover:underline">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}
                 •
             {!! __('messages.supported_by', ['link' => '<a href="https://invoiceninja.com" target="_blank" class="hover:underline" title="Leading small-business platform to manage invoices, expenses & tasks">Invoice Ninja</a>']) !!}
         </p>
