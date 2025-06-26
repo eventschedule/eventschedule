@@ -42,15 +42,22 @@ class BlogController extends Controller
 
         // Get monthly archives
         $archives = BlogPost::published()
-            ->selectRaw("strftime('%Y', published_at) as year, strftime('%m', published_at) as month, COUNT(*) as count")
-            ->groupBy('year', 'month')
-            ->orderBy('year', 'desc')
-            ->orderBy('month', 'desc')
             ->get()
-            ->map(function ($archive) {
-                $archive->month_name = Carbon::createFromDate($archive->year, $archive->month, 1)->format('F');
-                return $archive;
-            });
+            ->groupBy(function($post) {
+                return $post->published_at->format('Y-m');
+            })
+            ->map(function($posts, $yearMonth) {
+                $parts = explode('-', $yearMonth);
+                return (object) [
+                    'year' => $parts[0],
+                    'month' => $parts[1],
+                    'count' => $posts->count(),
+                    'month_name' => Carbon::createFromDate($parts[0], $parts[1], 1)->format('F')
+                ];
+            })
+            ->sortByDesc('year')
+            ->sortByDesc('month')
+            ->values();
 
         return view('blog.index', compact('posts', 'allTags', 'archives'));
     }
