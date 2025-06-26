@@ -55,6 +55,19 @@
                     </a>
                 </li>
 
+                @if (config('app.hosted') && auth()->user()->isAdmin())
+                <li>
+                    <a href="{{ route('blog.admin.index') }}"
+                        class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('admin/blog*') ? 'bg-gray-800 text-white' : '' }}">
+                        <svg class="h-6 w-6 shrink-0" viewBox="0 0 24 24"
+                            fill="{{ request()->is('admin/blog*') ? '#ccc' : '#666' }}" aria-hidden="true">
+                            <path d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,19H5V5H19V19M17,17H7V15H17V17M17,13H7V11H17V13M17,9H7V7H17V9Z" />
+                        </svg>
+                        Blog
+                    </a>
+                </li>
+                @endif
+
             </ul>
         </li>
 

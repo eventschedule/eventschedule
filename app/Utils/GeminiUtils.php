@@ -356,4 +356,65 @@ class GeminiUtils
 
         return null;
     }
+
+    public static function generateBlogPost($topic, $tone = 'professional', $length = 'medium')
+    {
+        $prompt = "Generate a blog post about '{$topic}' with the following specifications:
+        
+        Tone: {$tone}
+        Length: {$length} (short: 300-500 words, medium: 800-1200 words, long: 1500-2000 words)
+        
+        Please return a JSON object with the following structure:
+        {
+            \"title\": \"SEO-optimized title (50-60 characters)\",
+            \"content\": \"HTML formatted content with proper headings (h1, h2, h3), paragraphs, and lists. Include practical tips, examples, and actionable advice.\",
+            \"excerpt\": \"Brief summary (150-160 characters)\",
+            \"tags\": [\"tag1\", \"tag2\", \"tag3\", \"tag4\", \"tag5\"],
+            \"meta_title\": \"SEO meta title (50-60 characters)\",
+            \"meta_description\": \"SEO meta description (150-160 characters)\"
+        }
+        
+        Requirements:
+        - Make the content engaging and informative
+        - Include practical tips and actionable advice
+        - Use proper HTML formatting with h1, h2, h3 tags
+        - Include bullet points and numbered lists where appropriate
+        - Make it relevant to event scheduling and management
+        - Ensure the content is original and valuable
+        - Include a call-to-action at the end
+        - Make it SEO-friendly with relevant keywords";
+
+        try {
+            $data = self::sendRequest($prompt);
+            
+            if (isset($data[0])) {
+                $result = $data[0];
+                
+                // Ensure all required fields exist
+                $result['title'] = $result['title'] ?? 'Blog Post about ' . $topic;
+                $result['content'] = $result['content'] ?? '<p>Content about ' . $topic . ' will be generated here.</p>';
+                $result['excerpt'] = $result['excerpt'] ?? 'A brief summary about ' . $topic;
+                $result['tags'] = $result['tags'] ?? ['events', 'scheduling'];
+                $result['meta_title'] = $result['meta_title'] ?? $result['title'];
+                $result['meta_description'] = $result['meta_description'] ?? $result['excerpt'];
+                
+                return $result;
+            }
+            
+            throw new \Exception('Invalid response structure from Gemini API');
+            
+        } catch (\Exception $e) {
+            \Log::error('Failed to generate blog post: ' . $e->getMessage());
+            
+            // Return fallback content
+            return [
+                'title' => 'Blog Post about ' . $topic,
+                'content' => '<h1>' . $topic . '</h1><p>This is a placeholder for content about ' . $topic . '. Please edit this content to add your own insights and information.</p>',
+                'excerpt' => 'A brief summary about ' . $topic,
+                'tags' => ['events', 'scheduling', 'management'],
+                'meta_title' => 'Blog Post about ' . $topic,
+                'meta_description' => 'A brief summary about ' . $topic
+            ];
+        }
+    }
 }   
