@@ -81,7 +81,7 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Title</th>
+                                        <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6 w-1/3">Title</th>
                                         <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
                                         <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Published</th>
                                         <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Views</th>
@@ -93,10 +93,10 @@
                                 <tbody class="divide-y divide-gray-200 bg-white">
                                     @forelse($posts as $post)
                                         <tr>
-                                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                                <div>
-                                                    <div class="font-medium text-gray-900">{{ $post->title }}</div>
-                                                    <div class="text-gray-500">{{ Str::limit($post->excerpt, 60) }}</div>
+                                            <td class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6 w-1/3">
+                                                <div class="max-w-xs">
+                                                    <div class="font-medium text-gray-900 truncate">{{ $post->title }}</div>
+                                                    <div class="text-gray-500 truncate">{{ Str::limit($post->excerpt, 60) }}</div>
                                                 </div>
                                             </td>
                                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
