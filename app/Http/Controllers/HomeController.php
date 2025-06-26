@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Role;
+use App\Models\BlogPost;
 use Carbon\Carbon;
 use App\Mail\SupportEmail;
 use Mail;
@@ -108,9 +109,14 @@ class HomeController extends Controller
             ->orderBy(request()->has('events') ? 'id' : 'starts_at', 'desc')
             ->get();
 
+        $blogPosts = BlogPost::published()
+            ->orderBy('published_at', 'desc')
+            ->get();
+
         $content = view('sitemap', [
             'roles' => ! request()->has('events') ? $roles : [],
             'events' => ! request()->has('roles') ? $events : [],
+            'blogPosts' => $blogPosts,
             'lastmod' => now()->toIso8601String()
         ]);
         

@@ -161,6 +161,11 @@ class BlogPost extends Model
         return url('/images/headers/' . $this->featured_image);
     }
 
+    public function getUrlAttribute()
+    {
+        return url('/blog/' . $this->slug);
+    }
+
     public static function getAvailableHeaderImages()
     {
         return self::$availableHeaderImages;
