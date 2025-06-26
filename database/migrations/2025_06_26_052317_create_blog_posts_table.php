@@ -11,7 +11,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        /*
         Schema::create('blog_posts', function (Blueprint $table) {
             $table->id();
             $table->string('title');
@@ -32,7 +31,6 @@ return new class extends Migration
             $table->index(['published_at', 'is_published']);
             $table->index('slug');
         });
-        */
     }
 
     /**
