@@ -488,4 +488,8 @@ return [
     'payment_url_connected' => 'Zahlungslink erfolgreich verbunden!',
     'payment_url_unlinked' => 'Zahlungslink erfolgreich getrennt!',
     'payment_url_mobile_only' => 'Bitte verwenden Sie ein mobiles Gerät, um Ihre Zahlung abzuschließen.',
+    'no_following' => 'Keine Zeitpläne',
+    'start_following_schedules' => 'Beginnen Sie mit dem Folgen von Zeitplänen, um deren Veranstaltungen und Updates zu sehen',
+    'no_sales' => 'Keine Verkäufe',
+    'no_sales_description' => 'Keine Ticketverkäufe gefunden. Erstellen Sie Veranstaltungen, um mit dem Verkauf von Tickets zu beginnen.',
 ];

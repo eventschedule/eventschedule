@@ -484,4 +484,8 @@ return [
     'payment_url_connected' => '¡Enlace de pago conectado con éxito!',
     'payment_url_unlinked' => '¡Enlace de pago desvinculado con éxito!',
     'payment_url_mobile_only' => 'Por favor, usa un dispositivo móvil para completar tu pago.',
+    'no_following' => 'Sin horarios',
+    'start_following_schedules' => 'Comienza a seguir horarios para ver sus eventos y actualizaciones',
+    'no_sales' => 'Sin ventas',
+    'no_sales_description' => 'No se encontraron ventas de entradas. Crea eventos para comenzar a vender entradas.',
 ];
