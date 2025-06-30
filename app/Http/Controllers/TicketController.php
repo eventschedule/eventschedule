@@ -77,6 +77,13 @@ class TicketController extends Controller
         $event = Event::findOrFail(UrlUtils::decodeId($request->event_id));
         $user = auth()->user();
 
+        // Validate basic required fields for all checkout requests
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255'],
+            'tickets' => ['required', 'array'],
+        ]);
+
         if (! $user && $request->create_account && config('app.hosted')) {
 
             $request->validate([
