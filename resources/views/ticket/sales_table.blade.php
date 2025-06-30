@@ -62,18 +62,19 @@
                                 <div class="flex items-center gap-3">
                                     <div class="relative" x-data="{ 
                                         open: false,
-                                        updatePosition() {
+                                        positionDropdown() {
                                             if (!this.open) return;
                                             const button = this.$refs.button;
                                             const dropdown = this.$refs.dropdown;
                                             const rect = button.getBoundingClientRect();
                                             
-                                            dropdown.style.top = `${rect.bottom + window.scrollY}px`;
-                                            dropdown.style.left = `${Math.min(rect.left, window.innerWidth - dropdown.offsetWidth - 5)}px`;
+                                            dropdown.style.position = 'fixed';
+                                            dropdown.style.top = `${rect.bottom + 4}px`;
+                                            dropdown.style.left = `${rect.left}px`;
+                                            dropdown.style.zIndex = '1000';
                                         }
-                                    }" 
-                                    @resize.window="updatePosition">
-                                        <button @click="open = !open; $nextTick(() => updatePosition())" 
+                                    }">
+                                        <button @click="open = !open; $nextTick(() => positionDropdown())" 
                                                 x-ref="button"
                                                 type="button" 
                                                 class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
@@ -86,7 +87,7 @@
                                         <div x-show="open" 
                                              x-ref="dropdown"
                                              @click.away="open = false"
-                                             class="fixed right-0 z-[100] w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" 
+                                             class="w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" 
                                              role="menu" 
                                              x-cloak
                                              aria-orientation="vertical">
