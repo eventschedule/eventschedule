@@ -246,7 +246,6 @@
                         <div class="text-sm text-gray-500">{{ $sale->event->ticket_currency_code }}</div>
                     </div>
 
-                    @if ($sale->transaction_reference)
                     <div class="bg-gray-50 rounded-lg p-3">
                         <div class="text-sm font-medium text-gray-700 mb-1">{{ __('messages.transaction_reference') }}</div>
                         <div class="text-sm text-gray-900">
@@ -264,9 +263,7 @@
                                 <span class="font-mono text-sm break-all">{{ $sale->transaction_reference }}</span>
                             @endif
                         </div>
-                    </div>
-                    @endif
-                </div>
+                    </div>                </div>
 
                 <!-- Actions -->
                 <div class="pt-2">

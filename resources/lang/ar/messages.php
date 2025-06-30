@@ -485,4 +485,8 @@ return [
     'payment_url_connected' => 'تم ربط رابط الدفع بنجاح!',
     'payment_url_unlinked' => 'تم إلغاء ربط رابط الدفع بنجاح!',
     'payment_url_mobile_only' => 'يرجى استخدام جهاز محمول لإكمال الدفع.',
+    'no_following' => 'لا توجد جداول',
+    'start_following_schedules' => 'ابدأ بمتابعة الجداول لرؤية أحداثها وتحديثاتها',
+    'no_sales' => 'لا توجد مبيعات',
+    'no_sales_description' => 'لم يتم العثور على مبيعات تذاكر. أنشئ أحداثاً لبدء بيع التذاكر.',
 ];
