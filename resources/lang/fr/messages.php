@@ -484,4 +484,8 @@ return [
     'payment_url_connected' => 'Lien de paiement connecté avec succès !',
     'payment_url_unlinked' => 'Lien de paiement dissocié avec succès !',
     'payment_url_mobile_only' => 'Veuillez utiliser un appareil mobile pour compléter votre paiement.',
+    'no_following' => 'Aucun programme',
+    'start_following_schedules' => 'Commencez à suivre des programmes pour voir leurs événements et mises à jour',
+    'no_sales' => 'Aucune vente',
+    'no_sales_description' => 'Aucune vente de billets trouvée. Créez des événements pour commencer à vendre des billets.',
 ];

@@ -484,4 +484,8 @@ return [
     'payment_url_connected' => 'Link di pagamento connesso con successo!',
     'payment_url_unlinked' => 'Link di pagamento scollegato con successo!',
     'payment_url_mobile_only' => 'Utilizza un dispositivo mobile per completare il pagamento.',
+    'no_following' => 'Nessun programma',
+    'start_following_schedules' => 'Inizia a seguire i programmi per vedere i loro eventi e aggiornamenti',
+    'no_sales' => 'Nessuna vendita',
+    'no_sales_description' => 'Nessuna vendita di biglietti trovata. Crea eventi per iniziare a vendere biglietti.',
 ];
