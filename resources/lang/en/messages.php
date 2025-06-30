@@ -490,4 +490,8 @@ return [
     'payment_url_connected' => 'Payment link connected successfully!',
     'payment_url_unlinked' => 'Payment link unlinked successfully!',
     'payment_url_mobile_only' => 'Please use a mobile device to complete your payment.',
+    'no_following' => 'No schedules',
+    'start_following_schedules' => 'Start following schedules to see their events and updates',
+    'no_sales' => 'No sales',
+    'no_sales_description' => 'No ticket sales found. Create events to start selling tickets.',
 ];
