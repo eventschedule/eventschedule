@@ -481,4 +481,8 @@ return [
     'payment_url_connected' => 'Betaallink succesvol verbonden!',
     'payment_url_unlinked' => 'Betaallink succesvol losgekoppeld!',
     'payment_url_mobile_only' => 'Gebruik een mobiel apparaat om je betaling te voltooien.',
+    'no_following' => 'Geen schema\'s',
+    'start_following_schedules' => 'Begin met het volgen van schema\'s om hun evenementen en updates te zien',
+    'no_sales' => 'Geen verkopen',
+    'no_sales_description' => 'Geen ticketverkopen gevonden. Maak evenementen aan om te beginnen met het verkopen van tickets.',
 ];
