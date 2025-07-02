@@ -296,7 +296,8 @@ class EventController extends Controller
             return redirect()->back();
         }
 
-        $this->eventRepo->saveEvent($request, $event);
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $this->eventRepo->saveEvent($role, $request, $event);
 
         if ($request->has('save_default_tickets')) {
             $role = Role::subdomain($subdomain)->firstOrFail();
@@ -394,8 +395,7 @@ class EventController extends Controller
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-        $curatorId = $role->isCurator() ? $role->id : null;
-        $event = $this->eventRepo->saveEvent($request, null, $curatorId);
+        $event = $this->eventRepo->saveEvent($role, $request, null);
 
         if ($request->has('save_default_tickets')) {
             $role = Role::subdomain($subdomain)->firstOrFail();
@@ -698,9 +698,8 @@ class EventController extends Controller
         //return redirect()->back();
         
         $role = Role::subdomain($subdomain)->firstOrFail();
-        $curatorId = $role->isCurator() ? $role->id : null;
                 
-        $event = $this->eventRepo->saveEvent($request, null, $curatorId);
+        $event = $this->eventRepo->saveEvent($role, $request, null);
 
         if ($request->social_image) {
             $file = new \Illuminate\Http\UploadedFile($request->social_image, basename($request->social_image));

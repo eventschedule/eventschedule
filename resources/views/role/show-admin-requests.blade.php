@@ -38,6 +38,16 @@
                 @if ($event->starts_at)
                 <p class="text-sm text-gray-500">{{ $event->localStartsAt(true) }}</p>
                 @endif
+                
+                @if ($role->isCurator())
+                    @php
+                        $group = $event->getGroupForSubdomain($role->subdomain);
+                    @endphp
+                    @if ($group)
+                    <p class="text-sm text-[#4E81FA] font-medium">{{ $group->translatedName() }}</p>
+                    @endif
+                @endif
+                
                 <dl class="mt-1 flex flex-grow flex-col justify-between">
                     @if ($role->isVenue() || $role->isCurator())
                         <dd class="text-sm text-gray-500 line-clamp-3">{{ $event->role() ? $event->role()->description : '' }}</dd>

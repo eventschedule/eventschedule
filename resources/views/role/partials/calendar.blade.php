@@ -39,9 +39,14 @@
     // Prepare data for Vue
     $eventsForVue = [];
     foreach ($events as $event) {
+        $group = null;
+        if (isset($role)) {
+            $group = $event->getGroupForSubdomain($role->subdomain);
+        }
+        
         $eventsForVue[] = [
             'id' => $event->id,
-            'group_id' => $event->group_id,
+            'group_id' => $group ? $group->id : null,
             'category_id' => $event->category_id,
             'name' => $event->translatedName(),
             'venue_name' => $event->getVenueDisplayName(),

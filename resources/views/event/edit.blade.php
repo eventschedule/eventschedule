@@ -601,15 +601,42 @@
                         -->
 
                         @if($role->groups && count($role->groups))
-                        <div class="mb-6">
+                        <div class="mb-6" id="group-selection" style="display: none;">
                             <x-input-label for="group_id" :value="__('messages.schedule')" />
                             <select id="group_id" name="group_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                 <option value="">{{ __('messages.please_select') }}</option>
                                 @foreach($role->groups as $group)
-                                    <option value="{{ $group->id }}" {{ old('group_id', $event->group_id) == $group->id ? 'selected' : '' }}>{{ $group->translatedName() }}</option>
+                                    @php
+                                        $selectedGroupId = null;
+                                        if ($event->exists) {
+                                            $selectedGroup = $event->getGroupForSubdomain($role->subdomain);
+                                            $selectedGroupId = $selectedGroup ? $selectedGroup->id : null;
+                                        }
+                                    @endphp
+                                    <option value="{{ $group->id }}" {{ old('group_id', $selectedGroupId) == $group->id ? 'selected' : '' }}>{{ $group->translatedName() }}</option>
                                 @endforeach
                             </select>
                             <x-input-error class="mt-2" :messages="$errors->get('group_id')" />
+                        </div>
+                        @endif
+
+                        @if($role->groups && count($role->groups))
+                        <div class="mb-6">
+                            <x-input-label for="current_role_group_id" :value="__('messages.schedule')" />
+                            <select id="current_role_group_id" name="current_role_group_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                <option value="">{{ __('messages.please_select') }}</option>
+                                @foreach($role->groups as $group)
+                                    @php
+                                        $selectedGroupId = null;
+                                        if ($event->exists) {
+                                            $selectedGroup = $event->getGroupForSubdomain($role->subdomain);
+                                            $selectedGroupId = $selectedGroup ? $selectedGroup->id : null;
+                                        }
+                                    @endphp
+                                    <option value="{{ $group->id }}" {{ old('current_role_group_id', $selectedGroupId) == $group->id ? 'selected' : '' }}>{{ $group->translatedName() }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('current_role_group_id')" />
                         </div>
                         @endif
 
@@ -1373,6 +1400,29 @@
       }
 
       this.ensureOneChecked('in_person');
+      
+      // Handle curator checkbox changes for group selection
+      this.setupCuratorGroupHandling();
+    },
+    methods: {
+      setupCuratorGroupHandling() {
+        const curatorCheckboxes = document.querySelectorAll('input[name="curators[]"]');
+        const groupSelection = document.getElementById('group-selection');
+        
+        if (!groupSelection) return;
+        
+        const updateGroupVisibility = () => {
+          const hasCheckedCurator = Array.from(curatorCheckboxes).some(checkbox => checkbox.checked);
+          groupSelection.style.display = hasCheckedCurator ? 'block' : 'none';
+        };
+        
+        curatorCheckboxes.forEach(checkbox => {
+          checkbox.addEventListener('change', updateGroupVisibility);
+        });
+        
+        // Initial state
+        updateGroupVisibility();
+      }
     }
   }).mount('#app')
 </script>

@@ -460,7 +460,6 @@ class RoleController extends Controller
 
             if ($tab == 'schedule') {
                 if ($role->isCurator()) {
-                    // TODO this may not be needed
                     $events = Event::with(['roles', 'venue'])
                         ->where(function ($query) use ($startOfMonth, $endOfMonth) {
                             $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
@@ -471,6 +470,13 @@ class RoleController extends Controller
                                 ->from('event_role')
                                 ->where('role_id', $role->id)
                                 ->where('is_accepted', true);
+                        })
+                        ->when($selectedGroup, function ($query) use ($selectedGroup) {
+                            $query->whereIn('id', function ($subQuery) use ($selectedGroup) {
+                                $subQuery->select('event_id')
+                                    ->from('event_role')
+                                    ->where('group_id', $selectedGroup->id);
+                            });
                         })
                         ->orderBy('starts_at')
                         ->get();
@@ -1524,7 +1530,7 @@ class RoleController extends Controller
         // First, let's try a very basic search to see if we can get any events at all
         if ($role->isCurator()) {
             // For curators, get events they're associated with
-            $events = Event::with(['roles', 'venue', 'group'])
+            $events = Event::with(['roles', 'venue'])
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
@@ -1536,14 +1542,18 @@ class RoleController extends Controller
                         ->orWhere('description', 'like', "%{$search}%");
                 })
                 ->when($groupId, function ($query) use ($groupId) {
-                    $query->where('group_id', $groupId);
+                    $query->whereIn('id', function ($subQuery) use ($groupId) {
+                        $subQuery->select('event_id')
+                            ->from('event_role')
+                            ->where('group_id', $groupId);
+                    });
                 })
                 ->orderBy('starts_at')
                 ->limit(10)
                 ->get();
         } else {
             // For venues/talents
-            $baseQuery = Event::with(['roles', 'venue', 'group']);
+            $baseQuery = Event::with(['roles', 'venue']);
             
             if ($role->isVenue()) {
                 $baseQuery->where('venue_id', $role->id)
@@ -1561,7 +1571,11 @@ class RoleController extends Controller
                         ->orWhere('description', 'like', "%{$search}%");
                 })
                 ->when($groupId, function ($query) use ($groupId) {
-                    $query->where('group_id', $groupId);
+                    $query->whereIn('id', function ($subQuery) use ($groupId) {
+                        $subQuery->select('event_id')
+                            ->from('event_role')
+                            ->where('group_id', $groupId);
+                    });
                 })
                 ->orderBy('starts_at')
                 ->limit(10)
@@ -1569,7 +1583,8 @@ class RoleController extends Controller
         }
 
         // Format events for frontend
-        $eventsData = $events->map(function ($event) use ($subdomain) {
+        $eventsData = $events->map(function ($event) use ($subdomain, $role) {
+            $group = $event->getGroupForSubdomain($role->subdomain);
             return [
                 'id' => $event->id,
                 'name' => $event->translatedName(),
@@ -1578,7 +1593,7 @@ class RoleController extends Controller
                 'local_starts_at' => $event->localStartsAt(),
                 'image_url' => $event->getImageUrl(),
                 'guest_url' => $event->getGuestUrl($subdomain, ''),
-                'group_slug' => $event->group ? $event->group->slug : null,
+                'group_slug' => $group ? $group->slug : null,
                 'category_id' => $event->category_id,
             ];
         });
