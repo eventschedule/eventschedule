@@ -14,6 +14,7 @@ class EventRole extends Pivot
         'event_id',
         'role_id',
         'is_accepted',
+        'group_id',
     ];
 
     public function role()
@@ -24,5 +25,10 @@ class EventRole extends Pivot
     public function event()
     {
         return $this->belongsTo(Event::class);
+    }
+
+    public function group()
+    {
+        return $this->belongsTo(Group::class);
     }
 }

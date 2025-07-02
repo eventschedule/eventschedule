@@ -29,7 +29,6 @@ class Event extends Model
         'expire_unpaid_tickets',
         'registration_url',
         'category_id',
-        'group_id',
     ];
 
     protected $casts = [
@@ -111,9 +110,16 @@ class Event extends Model
         return $this->belongsTo(Role::class, 'venue_id');
     }
 
-    public function group()
+    public function getGroupForRole($roleId)
     {
-        return $this->belongsTo(Group::class, 'group_id');
+        $eventRole = $this->roles()->where('role_id', $roleId)->first();
+        return $eventRole ? $eventRole->pivot->group : null;
+    }
+
+    public function getGroupForSubdomain($subdomain)
+    {
+        $role = $this->roles()->where('subdomain', $subdomain)->first();
+        return $role ? $role->pivot->group : null;
     }
 
     public function curator()
@@ -124,7 +130,8 @@ class Event extends Model
     public function roles()
     {
         return $this->belongsToMany(Role::class)
-                    ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted');
+                    ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id')
+                    ->using(EventRole::class);
     }
 
     public function curatorBySubdomain($subdomain)

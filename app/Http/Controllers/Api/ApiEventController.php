@@ -76,7 +76,7 @@ class ApiEventController extends Controller
             $request->merge(['members' => [$encodedRoleId => ['name' => $role->name]]]);
         }   
 
-        $curatorId = $role->isCurator() ? $role->id : null;
+
             
         if (! $role->isPro()) {
             return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
@@ -184,7 +184,7 @@ class ApiEventController extends Controller
             $request->merge(['curators' => [$encodedRoleId]]);
         }
 
-        $event = $this->eventRepo->saveEvent($request, null, $curatorId);
+        $event = $this->eventRepo->saveEvent($role, $request, null);
                 
         return response()->json([
             'data' => $event->toApiData(),
