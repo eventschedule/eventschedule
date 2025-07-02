@@ -20,43 +20,49 @@
 <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 pt-5">
     @foreach($requests as $event)
     <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow">
-        <a href="{{ $event->getGuestUrl() }}" target="_blank" class="hover:underline">
-            <div class="flex flex-1 flex-col p-8">
+        <div class="flex flex-1 flex-col p-8 items-center">
+            {{-- Profile Image --}}
+            @if ($role->isVenue() || $role->isCurator())
+                @if ($event->role() && $event->role()->profile_image_url)
+                    <img class="mx-auto rounded-2xl h-24 w-24 object-cover mb-4" src="{{ $event->role()->profile_image_url }}" alt="Profile Image">
+                @endif
+                <div class="text-lg font-bold text-gray-900 mb-1">{{ $event->role() ? $event->role()->name : $event->translatedName() }}</div>
+            @else
+                @if ($event->venue && $event->venue->profile_image_url)
+                    <img class="mx-auto rounded-2xl h-24 w-24 object-cover mb-4" src="{{ $event->venue->profile_image_url }}" alt="Profile Image">
+                @endif
+                <div class="text-lg font-bold text-gray-900 mb-1">{{ $event->venue ? $event->venue->name : $event->translatedName() }}</div>
+            @endif
+
+            {{-- Date/Time --}}
+            @if ($event->starts_at)
+                <div class="text-sm text-gray-500 mb-2">{{ $event->localStartsAt(true) }}</div>
+            @endif
+
+            {{-- Group/Curator Badge --}}
+            @if ($role->isCurator())
+                @php $group = $event->getGroupForSubdomain($role->subdomain); @endphp
+                @if ($group)
+                    <span class="inline-block bg-blue-100 text-[#4E81FA] text-xs font-semibold px-3 py-1 rounded-full mb-2">
+                        {{ $group->translatedName() }}
+                    </span>
+                @endif
+            @endif
+
+            {{-- Description --}}
+            <dl class="mt-1 flex-grow w-full">
                 @if ($role->isVenue() || $role->isCurator())
-                    @if ($event->role() && $event->role()->profile_image_url)
-                    <img class="mx-auto rounded-2xl h-32 w-32 flex-shrink-0 object-cover" src="{{ $event->role()->profile_image_url }}"
-                        alt="Profile Image">
-                    @endif
-                    <h3 class="mt-6 text-sm font-medium text-gray-900">{{ $event->role() ? $event->role()->name : $event->translatedName() }}</h3>
+                    <dd class="text-xs text-gray-500 line-clamp-3">{{ $event->role() ? $event->role()->description : '' }}</dd>
                 @else
-                    @if ($event->venue && $event->venue->profile_image_url)
-                    <img class="mx-auto rounded-2xl h-32 w-32 flex-shrink-0 object-cover" src="{{ $event->venue->profile_image_url }}"
-                        alt="Profile Image">
-                    @endif
-                    <h3 class="mt-6 text-sm font-medium text-gray-900">{{ $event->venue ? $event->venue->name : $event->translatedName() }}</h3>
+                    <dd class="text-xs text-gray-500 line-clamp-3">{{ $event->venue ? $event->venue->description : '' }}</dd>
                 @endif
-                @if ($event->starts_at)
-                <p class="text-sm text-gray-500">{{ $event->localStartsAt(true) }}</p>
-                @endif
-                
-                @if ($role->isCurator())
-                    @php
-                        $group = $event->getGroupForSubdomain($role->subdomain);
-                    @endphp
-                    @if ($group)
-                    <p class="text-sm text-[#4E81FA] font-medium">{{ $group->translatedName() }}</p>
-                    @endif
-                @endif
-                
-                <dl class="mt-1 flex flex-grow flex-col justify-between">
-                    @if ($role->isVenue() || $role->isCurator())
-                        <dd class="text-sm text-gray-500 line-clamp-3">{{ $event->role() ? $event->role()->description : '' }}</dd>
-                    @else
-                        <dd class="text-sm text-gray-500 line-clamp-3">{{ $event->venue ? $event->venue->description : '' }}</dd>
-                    @endif
-                </dl>
-            </div>
-        </a>
+            </dl>
+
+            {{-- View Event Button --}}
+            <a href="{{ $event->getGuestUrl() }}" target="_blank" class="inline-block mt-4 px-4 py-2 bg-blue-500 text-white text-sm font-semibold rounded hover:bg-blue-600 transition">
+                {{ __('messages.view_event') }}
+            </a>
+        </div>
         <div>
             <div class="-mt-px flex divide-x divide-gray-200">
                 <div class="flex w-0 flex-1 cursor-pointer"
