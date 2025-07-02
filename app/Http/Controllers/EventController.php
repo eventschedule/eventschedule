@@ -345,17 +345,23 @@ class EventController extends Controller
 
         $user = $request->user();
         $event_id = UrlUtils::decodeId($hash);
-        $event = Event::findOrFail($event_id);        
+        $event = Event::findOrFail($event_id);
+        $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if ($event->venue && $user->isMember($event->venue->subdomain)) {
+        // Handle venue acceptance
+        if ($role->isVenue() && $event->venue && $event->venue->subdomain === $subdomain && $user->isMember($subdomain)) {
             $event->is_accepted = true;
             $event->save();
         }
 
-        foreach ($event->roles as $role) {
-            if ($user->isMember($role->subdomain)) {
-                $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
-            }
+        // Handle curator acceptance
+        if ($role->isCurator() && $user->isMember($subdomain)) {
+            $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
+        }
+
+        // Handle talent acceptance (existing logic)
+        if ($role->isTalent() && $user->isMember($subdomain)) {
+            $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
         }
 
         //$emails = $event->role->members()->pluck('email');
@@ -371,10 +377,26 @@ class EventController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        $user = $request->user();
         $event_id = UrlUtils::decodeId($hash);
-        $event = Event::findOrFail($event_id);        
-        $event->is_accepted = false;
-        $event->save();
+        $event = Event::findOrFail($event_id);
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        // Handle venue decline
+        if ($role->isVenue() && $event->venue && $event->venue->subdomain === $subdomain && $user->isMember($subdomain)) {
+            $event->is_accepted = false;
+            $event->save();
+        }
+
+        // Handle curator decline
+        if ($role->isCurator() && $user->isMember($subdomain)) {
+            $event->roles()->updateExistingPivot($role->id, ['is_accepted' => false]);
+        }
+
+        // Handle talent decline (existing logic)
+        if ($role->isTalent() && $user->isMember($subdomain)) {
+            $event->roles()->updateExistingPivot($role->id, ['is_accepted' => false]);
+        }
 
         //$emails = $event->role->members()->pluck('email');
         //Notification::route('mail', $emails)->notify(new RequestDeclinedNotification($event));
