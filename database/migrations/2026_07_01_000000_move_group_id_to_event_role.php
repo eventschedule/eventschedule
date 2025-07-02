@@ -15,17 +15,21 @@ return new class extends Migration
         // Add group_id to event_role if it doesn't exist
         if (!Schema::hasColumn('event_role', 'group_id')) {
             Schema::table('event_role', function (Blueprint $table) {
-                
                 $table->foreignId('group_id')->nullable()->constrained()->onDelete('set null');
             });
         }
 
         // Remove group_id from events table
         if (Schema::hasColumn('events', 'group_id')) {
-            Schema::table('events', function (Blueprint $table) {
-                $table->dropForeign(['group_id']);
-                $table->dropColumn('group_id');
-            });
+            if (config('database.default') === 'sqlite') {
+                // For SQLite, use raw SQL to avoid ENUM constraint issues
+                DB::statement('ALTER TABLE events DROP COLUMN group_id');
+            } else {
+                Schema::table('events', function (Blueprint $table) {
+                    $table->dropForeign(['group_id']);
+                    $table->dropColumn('group_id');
+                });
+            }
         }
     }
 
