@@ -471,13 +471,6 @@ class RoleController extends Controller
                                 ->where('role_id', $role->id)
                                 ->where('is_accepted', true);
                         })
-                        ->when($selectedGroup, function ($query) use ($selectedGroup) {
-                            $query->whereIn('id', function ($subQuery) use ($selectedGroup) {
-                                $subQuery->select('event_id')
-                                    ->from('event_role')
-                                    ->where('group_id', $selectedGroup->id);
-                            });
-                        })
                         ->orderBy('starts_at')
                         ->get();
                 } else {
