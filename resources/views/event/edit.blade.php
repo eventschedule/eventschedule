@@ -600,25 +600,7 @@
                             <x-input-error class="mt-2" :messages="$errors->get('slug')" />
                         -->
 
-                        @if($role->groups && count($role->groups))
-                        <div class="mb-6" id="group-selection" style="display: none;">
-                            <x-input-label for="group_id" :value="__('messages.schedule')" />
-                            <select id="group_id" name="group_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
-                                <option value="">{{ __('messages.please_select') }}</option>
-                                @foreach($role->groups as $group)
-                                    @php
-                                        $selectedGroupId = null;
-                                        if ($event->exists) {
-                                            $selectedGroup = $event->getGroupForSubdomain($role->subdomain);
-                                            $selectedGroupId = $selectedGroup ? $selectedGroup->id : null;
-                                        }
-                                    @endphp
-                                    <option value="{{ $group->id }}" {{ old('group_id', $selectedGroupId) == $group->id ? 'selected' : '' }}>{{ $group->translatedName() }}</option>
-                                @endforeach
-                            </select>
-                            <x-input-error class="mt-2" :messages="$errors->get('group_id')" />
-                        </div>
-                        @endif
+
 
                         @if($role->groups && count($role->groups))
                         <div class="mb-6">
@@ -733,17 +715,45 @@
                         @if ($curators->count() > 0)
                         <div class="mb-6">
                             <x-input-label for="curators" :value="__(count($curators) > 1 ? 'messages.add_to_schedules' : 'messages.add_to_schedule')" />
+                            
                             @foreach($curators as $curator)
-                            <div class="flex items-center mb-4 mt-1">
-                                <input type="checkbox" 
-                                       id="curator_{{ $curator->encodeId() }}" 
-                                       name="curators[]" 
-                                       value="{{ $curator->encodeId() }}"
-                                       {{ (! $event->exists && $role->subdomain == $curator->subdomain) || $event->curators->contains($curator->id) ? 'checked' : '' }}
-                                       class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                                <label for="curator_{{ $curator->encodeId() }}" class="ml-2 block text-sm text-gray-900 dark:text-gray-100">
-                                    {{ $curator->name }}
-                                </label>
+                            <div class="mb-4">
+                                <div class="flex items-center mb-2">
+                                    <input type="checkbox" 
+                                           id="curator_{{ $curator->encodeId() }}" 
+                                           name="curators[]" 
+                                           value="{{ $curator->encodeId() }}"
+                                           {{ (! $event->exists && $role->subdomain == $curator->subdomain) || $event->curators->contains($curator->id) ? 'checked' : '' }}
+                                           class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
+                                           @change="toggleCuratorGroupSelection('{{ $curator->encodeId() }}')">
+                                    <label for="curator_{{ $curator->encodeId() }}" class="ml-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
+                                        {{ $curator->name }}
+                                    </label>
+                                </div>
+                                
+                                @if($curator->groups && count($curator->groups) > 0)
+                                <div id="curator_group_{{ $curator->encodeId() }}" class="ml-6 mb-2" style="display: none;">
+                                    <select id="curator_group_{{ $curator->encodeId() }}" 
+                                            name="curator_groups[{{ $curator->encodeId() }}]" 
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                        <option value="">{{ __('messages.please_select') }}</option>
+                                        @foreach($curator->groups as $group)
+                                            @php
+                                                $selectedGroupId = null;
+                                                if ($event->exists) {
+                                                    $selectedGroup = $event->getGroupForSubdomain($curator->subdomain);
+                                                    $selectedGroupId = $selectedGroup ? $selectedGroup->id : null;
+                                                }
+                                            @endphp
+                                            <option value="{{ $group->id }}" {{ old('curator_groups.' . $curator->encodeId(), $selectedGroupId) == $group->id ? 'selected' : '' }}>{{ $group->translatedName() }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                @else
+                                <div class="ml-6 mb-2 text-xs text-gray-500">
+                                    No groups available for this curator
+                                </div>
+                                @endif
                             </div>
                             @endforeach
                         </div>
@@ -1019,7 +1029,6 @@
         
 
         this.$nextTick(() => {
-            console.log('this.venueCountryCode', this.venueCountryCode);
             $("#venue_country").countrySelect({
                 defaultCountry: this.venueCountryCode,
             });
@@ -1311,6 +1320,27 @@
           this.event.expire_unpaid_tickets = 0;
         }
       },
+      toggleCuratorGroupSelection(curatorId) {
+        const groupSelection = document.getElementById(`curator_group_${curatorId}`);
+        if (groupSelection) {
+          const checkbox = document.getElementById(`curator_${curatorId}`);
+          if (checkbox && checkbox.checked) {
+            groupSelection.style.display = 'block';
+          } else {
+            groupSelection.style.display = 'none';
+          }
+        }
+      },
+      initializeCuratorGroupSelections() {
+        // Show group selection for curators that are already checked
+        const curatorCheckboxes = document.querySelectorAll('input[name="curators[]"]');
+        curatorCheckboxes.forEach(checkbox => {
+          if (checkbox.checked) {
+            const curatorId = checkbox.value;
+            this.toggleCuratorGroupSelection(curatorId);
+          }
+        });
+      },
     },
     computed: {
       filteredMembers() {
@@ -1331,7 +1361,6 @@
         this.venueEmail = "";
         this.venueSearchEmail = "";
         this.venueSearchResults = [];
-        this.setFocusBasedOnVenueType();
 
         this.$nextTick(() => {
             $("#venue_country").countrySelect({
@@ -1343,7 +1372,6 @@
         this.memberSearchResults = [];
         this.memberEmail = "";
         this.memberName = "";
-        this.setFocusBasedOnMemberType();
       },
       selectedVenue() {
         this.venueName = this.selectedVenue ? this.selectedVenue.name : "";
@@ -1378,8 +1406,6 @@
       },
     },
     mounted() {
-      this.setFocusBasedOnVenueType();
-      this.setFocusBasedOnMemberType();
       this.showMemberTypeRadio = this.selectedMembers.length === 0;
 
       if (this.event.id) {
@@ -1399,30 +1425,8 @@
         this.eventName = this.selectedMembers[0].name;
       }
 
-      this.ensureOneChecked('in_person');
-      
-      // Handle curator checkbox changes for group selection
-      this.setupCuratorGroupHandling();
-    },
-    methods: {
-      setupCuratorGroupHandling() {
-        const curatorCheckboxes = document.querySelectorAll('input[name="curators[]"]');
-        const groupSelection = document.getElementById('group-selection');
-        
-        if (!groupSelection) return;
-        
-        const updateGroupVisibility = () => {
-          const hasCheckedCurator = Array.from(curatorCheckboxes).some(checkbox => checkbox.checked);
-          groupSelection.style.display = hasCheckedCurator ? 'block' : 'none';
-        };
-        
-        curatorCheckboxes.forEach(checkbox => {
-          checkbox.addEventListener('change', updateGroupVisibility);
-        });
-        
-        // Initial state
-        updateGroupVisibility();
-      }
+      // Initialize curator group selections
+      this.initializeCuratorGroupSelections();
     }
   }).mount('#app')
 </script>

@@ -215,14 +215,19 @@ class EventRepo
         
         // Prepare pivot data with group_id for curators and current role
         $pivotData = [];
+        $curatorGroups = $request->input('curator_groups', []);
+        
         foreach ($roleIds as $roleId) {
             $pivotData[$roleId] = ['is_accepted' => $user->isMember(Role::find($roleId)->subdomain)];
             
             $role = Role::find($roleId);
             
-            // If this is a curator and group_id is provided, add it to the pivot
-            if ($role && $role->isCurator() && $request->has('group_id') && $request->group_id) {
-                $pivotData[$roleId]['group_id'] = $request->group_id;
+            // If this is a curator and curator_groups is provided, add it to the pivot
+            if ($role && $role->isCurator()) {
+                $curatorEncodedId = UrlUtils::encodeId($roleId);
+                if (isset($curatorGroups[$curatorEncodedId]) && $curatorGroups[$curatorEncodedId]) {
+                    $pivotData[$roleId]['group_id'] = $curatorGroups[$curatorEncodedId];
+                }
             }
             
             // If this is the current role and current_role_group_id is provided, add it to the pivot
