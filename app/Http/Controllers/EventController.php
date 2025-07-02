@@ -347,7 +347,7 @@ class EventController extends Controller
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);        
 
-        if ($user->isMember($event->venue->subdomain)) {
+        if ($event->venue && $user->isMember($event->venue->subdomain)) {
             $event->is_accepted = true;
             $event->save();
         }
