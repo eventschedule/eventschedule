@@ -146,19 +146,10 @@ class EventRepo
 
         $venueId = $venue ? $venue->id : null;
 
-        if ($event) {
-            // Check if venue relationship has changed
-            $currentVenue = $event->venue;
-            $venueChanged = ($currentVenue && $currentVenue->id != $venueId) || (!$currentVenue && $venueId);
-            
-            if ($venueChanged) {
-                $event->is_accepted = $venue && $user->isMember($venue->subdomain) ? true : null;
-            }
-        } else {
+        if (! $event) {
             $event = new Event;       
             $event->user_id = auth()->user()->id;
             $event->creator_role_id = $creatorRoleId;
-            $event->is_accepted = $venue && $user->isMember($venue->subdomain) ? true : null;
 
             if ($request->name_en) {
                 $event->slug = \Str::slug($request->name_en);
