@@ -342,8 +342,10 @@ class RoleController extends Controller
                 })
                 ->where(function ($query) use ($role) {
                     if ($role->isVenue()) {
-                        $query->where('venue_id', $role->id)
-                            ->where('is_accepted', true);
+                        $query->whereHas('roles', function ($query) use ($role) {
+                            $query->where('role_id', $role->id)
+                                ->where('is_accepted', true);
+                        });
                     } else {
                         $query->whereHas('roles', function ($query) use ($role) {
                             $query->where('role_id', $role->id)
@@ -431,8 +433,10 @@ class RoleController extends Controller
         $requests = Event::with(['roles', 'venue'])
                         ->where(function ($query) use ($role) {
                             if ($role->isVenue()) {
-                                $query->where('venue_id', $role->id)
-                                    ->whereNull('is_accepted');
+                                $query->whereHas('roles', function ($query) use ($role) {
+                                    $query->where('role_id', $role->id)
+                                        ->whereNull('is_accepted');
+                                });
                             } else {
                                 $query->whereHas('roles', function ($query) use ($role) {
                                     $query->where('role_id', $role->id)
@@ -477,8 +481,10 @@ class RoleController extends Controller
                     $events = Event::with(['roles', 'venue'])
                         ->where(function ($query) use ($role) {
                             if ($role->isVenue()) {
-                                $query->where('venue_id', $role->id)
-                                    ->where('is_accepted', true);
+                                $query->whereHas('roles', function ($query) use ($role) {
+                                    $query->where('role_id', $role->id)
+                                        ->where('is_accepted', true);
+                                });
                             } else {
                                 $query->whereHas('roles', function ($query) use ($role) {
                                     $query->where('role_id', $role->id)
@@ -496,8 +502,10 @@ class RoleController extends Controller
                     $unscheduled = Event::with(['roles', 'venue'])
                         ->where(function ($query) use ($role) {
                             if ($role->isVenue()) {
-                                $query->where('venue_id', $role->id)
-                                    ->where('is_accepted', true);
+                                $query->whereHas('roles', function ($query) use ($role) {
+                                    $query->where('role_id', $role->id)
+                                        ->where('is_accepted', true);
+                                });
                             } else {
                                 $query->whereHas('roles', function ($query) use ($role) {
                                     $query->where('role_id', $role->id)
@@ -1549,8 +1557,10 @@ class RoleController extends Controller
             $baseQuery = Event::with(['roles', 'venue']);
             
             if ($role->isVenue()) {
-                $baseQuery->where('venue_id', $role->id)
-                         ->where('is_accepted', true);
+                $baseQuery->whereHas('roles', function ($query) use ($role) {
+                    $query->where('role_id', $role->id)
+                          ->where('is_accepted', true);
+                });
             } else {
                 $baseQuery->whereHas('roles', function ($query) use ($role) {
                     $query->where('role_id', $role->id)

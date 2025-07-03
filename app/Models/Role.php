@@ -179,7 +179,8 @@ class Role extends Model implements MustVerifyEmail
 
     public function venueEvents()
     {
-        return $this->hasMany(Event::class, 'venue_id');
+        return $this->belongsToMany(Event::class, 'event_role', 'role_id', 'event_id')
+                    ->where('roles.type', 'venue');
     }
     
     public function scopeType($query, $type)

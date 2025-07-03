@@ -17,7 +17,6 @@ class Event extends Model
         'description_en',
         'event_url',
         'event_password',
-        'venue_id',
         'name',
         'name_en',
         'slug',
@@ -108,7 +107,16 @@ class Event extends Model
     
     public function venue()
     {
-        return $this->belongsTo(Role::class, 'venue_id');
+        // Load venue from event_role table where the role is a venue
+        return $this->belongsToMany(Role::class, 'event_role', 'event_id', 'role_id')
+                    ->where('roles.type', 'venue')
+                    ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id')
+                    ->using(EventRole::class);
+    }
+
+    public function getVenueAttribute()
+    {
+        return $this->venue()->first();
     }
 
     public function getGroupForRole($roleId)
@@ -601,7 +609,7 @@ class Event extends Model
         $data->description = $this->description;
         $data->starts_at = $this->starts_at;
         $data->duration = $this->duration;
-        $data->venue_id = UrlUtils::encodeId($this->venue_id);
+        $data->venue_id = $this->venue ? UrlUtils::encodeId($this->venue->id) : null;
 
         $data->members = $this->members()->mapWithKeys(function ($member) {
             return [UrlUtils::encodeId($member->id) => [

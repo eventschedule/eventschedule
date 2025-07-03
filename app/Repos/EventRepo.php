@@ -146,7 +146,11 @@ class EventRepo
         $venueId = $venue ? $venue->id : null;
 
         if ($event) {
-            if ($event->venue_id != $venueId) {
+            // Check if venue relationship has changed
+            $currentVenue = $event->venue;
+            $venueChanged = ($currentVenue && $currentVenue->id != $venueId) || (!$currentVenue && $venueId);
+            
+            if ($venueChanged) {
                 $event->is_accepted = $venue && $user->isMember($venue->subdomain) ? true : null;
             }
         } else {
@@ -168,7 +172,6 @@ class EventRepo
 
         $event->fill($request->all());
         
-        $event->venue_id = $venueId;
         if (! $request->event_url) {
             $event->event_url = null;
         }
@@ -213,6 +216,11 @@ class EventRepo
         // Prepare pivot data with group_id for curators and current role
         $pivotData = [];
         $curatorGroups = $request->input('curator_groups', []);
+        
+        // Add venue to roleIds if it exists
+        if ($venue) {
+            $roleIds[] = $venue->id;
+        }
         
         foreach ($roleIds as $roleId) {
             $pivotData[$roleId] = ['is_accepted' => $user->isMember(Role::find($roleId)->subdomain)];
@@ -348,7 +356,9 @@ class EventRepo
                         ->whereHas('roles', function ($query) use ($role) {
                             $query->where('role_id', $role->id);
                         })
-                        ->where('venue_id', $venue->id)
+                        ->whereHas('roles', function ($query) use ($venue) {
+                            $query->where('role_id', $venue->id);
+                        })
                         ->where(function ($query) use ($eventDate, $timezone) {
                             $query->whereBetween('starts_at', [
                                 $eventDate->copy()->setTimezone($timezone)->startOfDay()->setTimezone('UTC'),
@@ -367,7 +377,9 @@ class EventRepo
                         ->whereHas('roles', function ($query) use ($role) {
                             $query->where('role_id', $role->id);
                         })
-                        ->where('venue_id', $venue->id)
+                        ->whereHas('roles', function ($query) use ($venue) {
+                            $query->where('role_id', $venue->id);
+                        })
                         ->where('starts_at', '>=', now()->subDay())
                         ->orderBy('starts_at')
                         ->first();
@@ -377,7 +389,9 @@ class EventRepo
                             ->whereHas('roles', function ($query) use ($role) {
                                 $query->where('role_id', $role->id);
                             })    
-                            ->where('venue_id', $venue->id)
+                            ->whereHas('roles', function ($query) use ($venue) {
+                                $query->where('role_id', $venue->id);
+                            })
                             ->where('starts_at', '<', now())
                             ->orderBy('starts_at', 'desc')
                             ->first();
@@ -406,8 +420,9 @@ class EventRepo
                                 });
                         })
                         ->where(function($query) use ($subdomain) {
-                            $query->whereHas('venue', function($q) use ($subdomain) {
-                                $q->where('subdomain', $subdomain);
+                            $query->whereHas('roles', function($q) use ($subdomain) {
+                                $q->where('type', 'venue')
+                                  ->where('subdomain', $subdomain);
                             })->orWhereHas('roles', function($q) use ($subdomain) {
                                 $q->where('subdomain', $subdomain);
                             });
@@ -420,8 +435,9 @@ class EventRepo
                         ->where('slug', $slug)
                         ->where('starts_at', '>=', now()->subDay())                    
                         ->where(function($query) use ($subdomain) {
-                            $query->whereHas('venue', function($q) use ($subdomain) {
-                                $q->where('subdomain', $subdomain);
+                            $query->whereHas('roles', function($q) use ($subdomain) {
+                                $q->where('type', 'venue')
+                                  ->where('subdomain', $subdomain);
                             })->orWhereHas('roles', function($q) use ($subdomain) {
                                 $q->where('subdomain', $subdomain);
                             });
@@ -434,8 +450,9 @@ class EventRepo
                             ->where('slug', $slug)
                             ->where('starts_at', '<', now())
                             ->where(function($query) use ($subdomain) {
-                                $query->whereHas('venue', function($q) use ($subdomain) {
-                                    $q->where('subdomain', $subdomain);
+                                $query->whereHas('roles', function($q) use ($subdomain) {
+                                    $q->where('type', 'venue')
+                                      ->where('subdomain', $subdomain);
                                 })->orWhereHas('roles', function($q) use ($subdomain) {
                                     $q->where('subdomain', $subdomain);
                                 });
@@ -460,8 +477,9 @@ class EventRepo
                             $query->whereBetween('starts_at', [$startOfDay, $endOfDay]);
                         })
                         ->where(function($query) use ($subdomain) {
-                            $query->whereHas('venue', function($q) use ($subdomain) {
-                                $q->where('subdomain', $subdomain);
+                            $query->whereHas('roles', function($q) use ($subdomain) {
+                                $q->where('type', 'venue')
+                                  ->where('subdomain', $subdomain);
                             })->orWhereHas('roles', function($q) use ($subdomain) {
                                 $q->where('subdomain', $subdomain);
                             });
