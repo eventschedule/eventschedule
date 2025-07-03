@@ -1409,7 +1409,7 @@
       this.showMemberTypeRadio = this.selectedMembers.length === 0;
 
       if (this.event.id) {
-        this.isInPerson = !!this.event.venue_id;
+        this.isInPerson = !!this.event.venue;
         this.isOnline = !!this.event.event_url;
       } else {
         this.loadPreferences();

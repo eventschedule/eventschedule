@@ -637,8 +637,9 @@ class EventController extends Controller
                 // Check for same venue address
                 if (! empty($item['event_address'])) {
                     $similarByAddress = (clone $query)
-                        ->whereHas('venue', function($q) use ($item) {
-                            $q->where('address1', $item['event_address']);
+                        ->whereHas('roles', function($q) use ($item) {
+                            $q->where('type', 'venue')
+                              ->where('address1', $item['event_address']);
                         })
                         ->first();
 
