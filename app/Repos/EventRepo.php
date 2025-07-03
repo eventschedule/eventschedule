@@ -216,7 +216,11 @@ class EventRepo
             return UrlUtils::decodeId($id);
         }, $selectedCurators);
 
-        $roleIds = array_merge($roleIds, $selectedCurators);        
+        foreach ($selectedCurators as $curatorId) {
+            $curator = Role::find($curatorId);
+            $roles[] = $curator;
+            $roleIds[] = $curator->id;
+        }
 
         $event->roles()->sync($roleIds);
         
@@ -230,7 +234,7 @@ class EventRepo
                         
             // If this is a curator and curator_groups is provided, add it to the pivot
             if ($role && $role->isCurator()) {
-                $curatorEncodedId = UrlUtils::encodeId($roleId);
+                $curatorEncodedId = UrlUtils::encodeId($role->id);
                 if (isset($curatorGroups[$curatorEncodedId]) && $curatorGroups[$curatorEncodedId]) {
                     $event->roles()->updateExistingPivot($role->id, ['group_id' => $curatorGroups[$curatorEncodedId]]);
                 }
