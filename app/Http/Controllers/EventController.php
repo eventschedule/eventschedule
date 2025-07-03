@@ -356,19 +356,7 @@ class EventController extends Controller
         $event = Event::with(['creatorRole', 'curators'])->findOrFail($event_id);
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        // Handle venue acceptance
-        if ($role->isVenue() && $event->venue && $event->venue->subdomain === $subdomain && $user->isMember($subdomain)) {
-            $event->is_accepted = true;
-            $event->save();
-        }
-
-        // Handle curator acceptance
-        if ($role->isCurator() && $user->isMember($subdomain)) {
-            $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
-        }
-
-        // Handle talent acceptance (existing logic)
-        if ($role->isTalent() && $user->isMember($subdomain)) {
+        if ($user->isMember($subdomain)) {
             $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
         }
 
@@ -390,19 +378,7 @@ class EventController extends Controller
         $event = Event::with(['creatorRole', 'curators'])->findOrFail($event_id);
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        // Handle venue decline
-        if ($role->isVenue() && $event->venue && $event->venue->subdomain === $subdomain && $user->isMember($subdomain)) {
-            $event->is_accepted = false;
-            $event->save();
-        }
-
-        // Handle curator decline
-        if ($role->isCurator() && $user->isMember($subdomain)) {
-            $event->roles()->updateExistingPivot($role->id, ['is_accepted' => false]);
-        }
-
-        // Handle talent decline (existing logic)
-        if ($role->isTalent() && $user->isMember($subdomain)) {
+        if ($user->isMember($subdomain)) {
             $event->roles()->updateExistingPivot($role->id, ['is_accepted' => false]);
         }
 
