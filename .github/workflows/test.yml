@@ -73,6 +73,7 @@ jobs:
           cp .env .env.dusk.local
           php artisan dusk tests/Browser/GeneralTest.php
           php artisan dusk tests/Browser/TicketTest.php
+          php artisan dusk tests/Browser/ApiTest.php
         env:
           APP_ENV: local
           APP_URL: http://127.0.0.1:8000

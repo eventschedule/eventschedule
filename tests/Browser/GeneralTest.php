@@ -5,11 +5,13 @@ namespace Tests\Browser;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
+use Tests\Browser\Traits\AccountSetupTrait;
 use App\Models\User;
 
 class GeneralTest extends DuskTestCase
 {
     use DatabaseTruncation;
+    use AccountSetupTrait;
 
     /**
      * A basic browser test example.
@@ -21,15 +23,8 @@ class GeneralTest extends DuskTestCase
         $password = 'password';
 
         $this->browse(function (Browser $browser) use ($name, $email, $password) {
-            // Sign up
-            $browser->visit('/sign_up')
-                    ->type('name', $name)
-                    ->type('email', $email)
-                    ->type('password', $password)
-                    ->check('terms')
-                    ->press('SIGN UP')
-                    ->assertPathIs('/events')
-                    ->assertSee($name);            
+            // Set up account using the trait
+            $this->setupTestAccount($browser, $name, $email, $password);
 
             // Log out
             $browser->press($name)
@@ -47,15 +42,9 @@ class GeneralTest extends DuskTestCase
                     ->assertPathIs('/events')
                     ->assertSee($name);
 
-            // Create/edit venue
-            $browser->visit('/new/venue')
-                    ->type('name', 'Test Venue')
-                    ->type('address1', '123 Test St')
-                    ->scrollIntoView('button[type="submit"]')
-                    ->press('SAVE')
-                    ->waitForLocation('/test-venue/schedule', 5)
-                    ->assertPathIs('/test-venue/schedule')
-                    ->clickLink('Edit Venue')
+            // Create/edit venue using the trait
+            $this->createTestVenue($browser);
+            $browser->clickLink('Edit Venue')
                     ->assertPathIs('/test-venue/edit')
                     ->type('website', 'https://google.com')
                     ->scrollIntoView('button[type="submit"]')
@@ -63,15 +52,9 @@ class GeneralTest extends DuskTestCase
                     ->waitForLocation('/test-venue/schedule', 5)
                     ->assertSee('google.com');
 
-            // Create/edit talent
-            $browser->visit('/new/talent')
-                    ->type('name', 'Test Talent')
-                    ->scrollIntoView('button[type="submit"]')
-                    ->press('SAVE')
-                    ->waitForLocation('/test-talent/schedule', 5)
-                    ->clickLink('Edit Talent')
-                    ->assertPathIs('/test-talent/edit')
-                    ->type('website', 'https://google.com')
+            // Create/edit talent using the trait
+            $this->createTestTalent($browser);
+            $browser->type('website', 'https://google.com')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
                     ->waitForLocation('/test-talent/schedule', 5)
