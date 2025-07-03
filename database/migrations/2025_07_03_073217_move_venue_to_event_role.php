@@ -36,7 +36,7 @@ return new class extends Migration
                 DB::table('event_role')->insert([
                     'event_id' => $event->id,
                     'role_id' => $event->venue_id,
-                    'is_accepted' => true,
+                    'is_accepted' => $event->is_accepted,
                     'group_id' => null,
                 ]);
             }
