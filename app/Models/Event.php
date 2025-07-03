@@ -29,6 +29,7 @@ class Event extends Model
         'expire_unpaid_tickets',
         'registration_url',
         'category_id',
+        'creator_role_id',
     ];
 
     protected $casts = [
@@ -122,9 +123,19 @@ class Event extends Model
         return $role ? $role->pivot->group : null;
     }
 
+    public function creatorRole()
+    {
+        return $this->belongsTo(Role::class, 'creator_role_id');
+    }
+
     public function curator()
     {
-        return $this->belongsTo(Role::class, 'curator_id');
+        // Return the creator role if it's a curator, otherwise return null
+        if ($this->creatorRole && $this->creatorRole->isCurator()) {
+            return $this->creatorRole;
+        }
+        
+        return null;
     }
 
     public function roles()
@@ -334,6 +345,10 @@ class Event extends Model
 
         if (! $subdomain) {
             $subdomain = $this->curator ? $this->curator->subdomain : null;
+        }
+
+        if (! $subdomain) {
+            $subdomain = $this->creatorRole ? $this->creatorRole->subdomain : null;
         }
 
         $slug = $this->slug;
