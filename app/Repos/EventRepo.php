@@ -204,6 +204,12 @@ class EventRepo
         }
         */
 
+        $event->save();        
+
+        if ($venue) {
+            $roles[] = $venue;
+            $roleIds[] = $venue->id;
+        }
 
         $selectedCurators = $request->input('curators', []);
         $selectedCurators = array_map(function($id) {
@@ -212,7 +218,7 @@ class EventRepo
 
         $roleIds = array_merge($roleIds, $selectedCurators);        
 
-        $event->save();        
+        $event->roles()->sync($roleIds);
         
         $curatorGroups = $request->input('curator_groups', []);
         
