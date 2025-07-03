@@ -138,8 +138,9 @@ class EventRepo
             }
         }
 
-        // Ensure current role is included if it's a talent role and not already in the list
-        if ($currentRole && $currentRole->isTalent() && !in_array($currentRole->id, $roleIds)) {
+        // Ensure current role is included if it's not already in the list
+        if ($currentRole && ! in_array($currentRole->id, $roleIds)) {
+            $roles[] = $currentRole;
             $roleIds[] = $currentRole->id;
         }
 
@@ -213,37 +214,27 @@ class EventRepo
 
         $event->save();        
         
-        // Prepare pivot data with group_id for curators and current role
-        $pivotData = [];
         $curatorGroups = $request->input('curator_groups', []);
         
-        // Add venue to roleIds if it exists
-        if ($venue) {
-            $roleIds[] = $venue->id;
-        }
-        
-        foreach ($roleIds as $roleId) {
-            $pivotData[$roleId] = ['is_accepted' => $user->isMember(Role::find($roleId)->subdomain)];
-            
-            $role = Role::find($roleId);
-            
+        foreach ($roles as $role) {
+
+            if ($user->isMember($role->subdomain)) {
+                $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);            
+            }
+                        
             // If this is a curator and curator_groups is provided, add it to the pivot
             if ($role && $role->isCurator()) {
                 $curatorEncodedId = UrlUtils::encodeId($roleId);
                 if (isset($curatorGroups[$curatorEncodedId]) && $curatorGroups[$curatorEncodedId]) {
-                    $pivotData[$roleId]['group_id'] = $curatorGroups[$curatorEncodedId];
+                    $event->roles()->updateExistingPivot($role->id, ['group_id' => $curatorGroups[$curatorEncodedId]]);
                 }
             }
             
             // If this is the current role and current_role_group_id is provided, add it to the pivot
             if ($role && $role->id === $currentRole->id && $request->has('current_role_group_id') && $request->current_role_group_id) {
-                $pivotData[$roleId]['group_id'] = $request->current_role_group_id;
-            }
-            
-
+                $event->roles()->updateExistingPivot($role->id, ['group_id' => $request->current_role_group_id]);
+            }            
         }
-        
-        $event->roles()->sync($pivotData);
         
         if ($request->hasFile('flyer_image')) {
             if ($event->flyer_image_url) {
