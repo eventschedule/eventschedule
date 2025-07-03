@@ -600,8 +600,6 @@
                             <x-input-error class="mt-2" :messages="$errors->get('slug')" />
                         -->
 
-
-
                         @if($effectiveRole->groups && count($effectiveRole->groups))
                         <div class="mb-6">
                             <x-input-label for="current_role_group_id" :value="__('messages.schedule')" />
@@ -1409,7 +1407,7 @@
       this.showMemberTypeRadio = this.selectedMembers.length === 0;
 
       if (this.event.id) {
-        this.isInPerson = !!this.event.venue;
+        this.isInPerson = !!this.event.venue || !!this.selectedVenue;
         this.isOnline = !!this.event.event_url;
       } else {
         this.loadPreferences();
