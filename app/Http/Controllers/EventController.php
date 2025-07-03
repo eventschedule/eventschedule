@@ -164,6 +164,7 @@ class EventController extends Controller
 
         return view('event/edit', [
             'role' => $role,
+            'effectiveRole' => $role,
             'user' => $user,
             'roles' => $roles,
             'event' => $event,
@@ -208,7 +209,7 @@ class EventController extends Controller
         }
 
         $event_id = UrlUtils::decodeId($hash);
-        $event = Event::findOrFail($event_id);
+        $event = Event::with(['creatorRole', 'curators'])->findOrFail($event_id);
         $user = $request->user();
 
         if (! $user->canEditEvent($event)) {
@@ -223,6 +224,11 @@ class EventController extends Controller
             ];
         }
 
+        // Use the creator role's subdomain to determine the correct groups/sub-schedules
+        $creatorRole = $event->creatorRole;
+        $effectiveSubdomain = $creatorRole ? $creatorRole->subdomain : $subdomain;
+        $effectiveRole = Role::subdomain($effectiveSubdomain)->firstOrFail();
+        
         $role = Role::subdomain($subdomain)->firstOrFail();
         $venue = $event->venue;
         $selectedMembers = [];
@@ -268,6 +274,7 @@ class EventController extends Controller
 
         return view('event/edit', [
             'role' => $role,
+            'effectiveRole' => $effectiveRole,
             'user' => $user,
             'roles' => $roles,
             'event' => $event,
@@ -290,13 +297,14 @@ class EventController extends Controller
         }
 
         $event_id = UrlUtils::decodeId($hash);
-        $event = Event::findOrFail($event_id);
+        $event = Event::with(['creatorRole', 'curators'])->findOrFail($event_id);
 
         if (! $request->user()->canEditEvent($event)) {
             return redirect()->back();
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
+        
         $this->eventRepo->saveEvent($role, $request, $event);
 
         if ($request->has('save_default_tickets')) {
@@ -345,7 +353,7 @@ class EventController extends Controller
 
         $user = $request->user();
         $event_id = UrlUtils::decodeId($hash);
-        $event = Event::findOrFail($event_id);
+        $event = Event::with(['creatorRole', 'curators'])->findOrFail($event_id);
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         // Handle venue acceptance
@@ -379,7 +387,7 @@ class EventController extends Controller
 
         $user = $request->user();
         $event_id = UrlUtils::decodeId($hash);
-        $event = Event::findOrFail($event_id);
+        $event = Event::with(['creatorRole', 'curators'])->findOrFail($event_id);
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         // Handle venue decline

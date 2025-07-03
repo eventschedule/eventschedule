@@ -602,16 +602,16 @@
 
 
 
-                        @if($role->groups && count($role->groups))
+                        @if($effectiveRole->groups && count($effectiveRole->groups))
                         <div class="mb-6">
                             <x-input-label for="current_role_group_id" :value="__('messages.schedule')" />
                             <select id="current_role_group_id" name="current_role_group_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                 <option value="">{{ __('messages.please_select') }}</option>
-                                @foreach($role->groups as $group)
+                                @foreach($effectiveRole->groups as $group)
                                     @php
                                         $selectedGroupId = null;
                                         if ($event->exists) {
-                                            $selectedGroup = $event->getGroupForSubdomain($role->subdomain);
+                                            $selectedGroup = $event->getGroupForSubdomain($effectiveRole->subdomain);
                                             $selectedGroupId = $selectedGroup ? $selectedGroup->id : null;
                                         }
                                     @endphp

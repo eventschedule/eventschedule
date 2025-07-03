@@ -23,11 +23,8 @@ class EventRepo
         $user = $request->user();
         $venue = null;
 
-        // Calculate curator ID based on currentRole
-        $curatorId = null;
-        if ($currentRole && $currentRole->isCurator()) {
-            $curatorId = $currentRole->id;
-        }
+        // Set creator_role_id to the current role
+        $creatorRoleId = $currentRole ? $currentRole->id : null;
 
         if ($request->venue_id) {
             $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
@@ -155,7 +152,7 @@ class EventRepo
         } else {
             $event = new Event;       
             $event->user_id = auth()->user()->id;
-            $event->curator_id = $curatorId;
+            $event->creator_role_id = $creatorRoleId;
             $event->is_accepted = $venue && $user->isMember($venue->subdomain) ? true : null;
 
             if ($request->name_en) {
@@ -234,6 +231,8 @@ class EventRepo
             if ($role && $role->id === $currentRole->id && $request->has('current_role_group_id') && $request->current_role_group_id) {
                 $pivotData[$roleId]['group_id'] = $request->current_role_group_id;
             }
+            
+
         }
         
         $event->roles()->sync($pivotData);
