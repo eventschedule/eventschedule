@@ -34,6 +34,7 @@ class GroupsTest extends DuskTestCase
             
             $this->setupTestAccount($browser, $userName, $userEmail, $userPassword);
             $this->createTestTalent($browser, 'Test Talent');
+            $this->createTestVenue($browser, 'Test Venue');
             
             // Step 2: Create sub-schedules
             $this->createGroups($browser);
@@ -79,10 +80,8 @@ class GroupsTest extends DuskTestCase
         
         $browser->script("addGroupField();");
         
-        $browser->screenshot('test-1')
-                ->waitFor('#group-items > div:last-child input[name*="groups"][name*="name"]', 5)
+        $browser->waitFor('#group-items > div:last-child input[name*="groups"][name*="name"]', 5)
                 ->type('#group-items > div:last-child input[name*="groups"][name*="name"]', 'Workshops')
-                ->screenshot('test-2')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
                 ->waitForLocation('/test-talent/schedule', 5);
@@ -107,6 +106,7 @@ class GroupsTest extends DuskTestCase
     {
         // Create first event for "Main Shows" sub-schedule
         $browser->visit('/test-talent/add_event?date=' . date('Y-m-d', strtotime('+3 days')))
+                ->select('#selected_venue')
                 ->type('name', 'Main Show Event')
                 ->type('duration', '2')
                 ->scrollIntoView('select[name="current_role_group_id"]')
@@ -118,6 +118,7 @@ class GroupsTest extends DuskTestCase
         
         // Create second event for "Workshops" sub-schedule
         $browser->visit('/test-talent/add_event?date=' . date('Y-m-d', strtotime('+5 days')))
+                ->select('#selected_venue')
                 ->type('name', 'Workshop Event')
                 ->type('duration', '3')
                 ->scrollIntoView('select[name="current_role_group_id"]')
@@ -129,6 +130,7 @@ class GroupsTest extends DuskTestCase
         
         // Create third event without sub-schedule
         $browser->visit('/test-talent/add_event?date=' . date('Y-m-d', strtotime('+7 days')))
+                ->select('#selected_venue')
                 ->type('name', 'General Event')
                 ->type('duration', '1')
                 ->scrollIntoView('button[type="submit"]')
