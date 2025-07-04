@@ -12,7 +12,7 @@ use App\Models\Event;
 use App\Models\Group;
 use App\Models\EventRole;
 
-class SubScheduleTest extends DuskTestCase
+class GroupsTest extends DuskTestCase
 {
     use DatabaseTruncation;
     use AccountSetupTrait;
@@ -38,10 +38,10 @@ class SubScheduleTest extends DuskTestCase
             // Step 2: Create sub-schedules
             $this->createSubSchedules($browser);
             
-            /*
             // Step 3: Create events and assign them to sub-schedules
             $this->createEventsWithSubSchedules($browser);
             
+            /*
             // Step 4: Test filtering in guest view
             $this->testGuestViewFiltering($browser);
             
