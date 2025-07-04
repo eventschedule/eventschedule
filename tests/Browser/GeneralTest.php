@@ -54,7 +54,9 @@ class GeneralTest extends DuskTestCase
 
             // Create/edit talent using the trait
             $this->createTestTalent($browser);
-            $browser->type('website', 'https://google.com')
+            $browser->clickLink('Edit Talent')
+                    ->assertPathIs('/test-talent/edit')
+                    ->type('website', 'https://google.com')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
                     ->waitForLocation('/test-talent/schedule', 5)
