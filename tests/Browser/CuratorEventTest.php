@@ -64,10 +64,6 @@ class CuratorEventTest extends DuskTestCase
                     ->waitForLocation('/following', 5)
                     ->assertSee('Second Curator');
 
-            // Wait for 10 seconds
-            $browser->visit('/following')
-                    ->screenshot('following');
-            
             // Create an event that will be added to both curator roles
             $this->createEventForBothCurators($browser);
             
