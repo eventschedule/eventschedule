@@ -103,8 +103,7 @@ class CuratorEventTest extends DuskTestCase
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
                     ->waitForLocation('/first-curator/schedule', 5)
-                    ->assertSee('Test Talent')
-                    ->screenshot('edit-event');
+                    ->assertSee('Test Talent');
             
             // Assert that the number of records remains the same
             $this->assertEquals(EventRole::count(), 4, 

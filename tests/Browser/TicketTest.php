@@ -36,7 +36,6 @@ class TicketTest extends DuskTestCase
                     ->press('Buy Tickets')
                     ->select('#ticket-0', '1')
                     ->scrollIntoView('button[type="submit"]')
-                    ->screenshot('ticket-purchase')
                     ->press('CHECKOUT')
                     ->waitForText('NUMBER OF ATTENDEES', 3)
                     ->assertSee(strtoupper($name));
