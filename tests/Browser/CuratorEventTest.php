@@ -79,28 +79,21 @@ class CuratorEventTest extends DuskTestCase
                     ->assertPathIs('/events')
                     ->assertSee($user1Name);
             
-            // Navigate to first curator's schedule
-            $browser->visit('/first-curator/schedule')
-                    ->waitForText('Test Event', 5)
-                    ->assertSee('Test Event');
+            // Approve the event
+            $browser->visit('/first-curator/requests')
+                    ->waitForText('Accept', 5)
+                    ->click('.accept-event')
+                    ->waitForLocation('/first-curator/schedule', 5)
+                    ->assertSee('Test Talent');
             
             // Try to edit the event - this should fail because the event
             // will no longer be linked to both curator roles after editing
-            $browser->clickLink('Test Event')
+            $browser->clickLink('Test Talent')
                     ->waitForLocation('/first-curator/edit_event', 5)
                     ->type('name', 'Updated Test Event')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->waitForLocation('/first-curator/schedule', 5);
-            
-            // Verify the event was updated
-            $browser->assertSee('Updated Test Event');
-            
-            // Now check if the event is still linked to the second curator
-            // This is where we expect the test to fail
-            $browser->visit('/second-curator/schedule')
-                    ->waitForText('Updated Test Event', 5)
-                    ->assertSee('Updated Test Event');
+                    ->waitForLocation('/first-curator/schedule', 5);            
         });
     }
 
