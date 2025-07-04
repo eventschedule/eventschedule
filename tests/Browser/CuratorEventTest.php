@@ -9,6 +9,7 @@ use Tests\Browser\Traits\AccountSetupTrait;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Event;
+use App\Models\EventRole;
 
 class CuratorEventTest extends DuskTestCase
 {
@@ -90,6 +91,9 @@ class CuratorEventTest extends DuskTestCase
             $event = \App\Models\Event::where('name', 'Test Talent')->latest()->first();
             $eventUrl = $event->getGuestUrl('first-curator');
             
+            // Check the number of event_role records before editing
+            $eventRoleCountBefore = EventRole::count();
+            
             $browser->visit($eventUrl)
                     ->waitForText('Edit Event', 5)
                     ->clickLink('Edit Event')
@@ -100,6 +104,13 @@ class CuratorEventTest extends DuskTestCase
                     ->waitForLocation('/first-curator/schedule', 5)
                     ->assertSee('Test Talent')
                     ->screenshot('edit-event');
+            
+            // Check the number of event_role records after editing
+            $eventRoleCountAfter = EventRole::count();
+            
+            // Assert that the number of records remains the same
+            $this->assertEquals($eventRoleCountBefore, $eventRoleCountAfter, 
+                'The number of event_role records should remain the same after editing the event');
         });
     }
 
