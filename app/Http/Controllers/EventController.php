@@ -300,7 +300,7 @@ class EventController extends Controller
         $event = Event::with(['creatorRole', 'curators'])->findOrFail($event_id);
 
         if (! $request->user()->canEditEvent($event)) {
-            return redirect()->back();
+            return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
