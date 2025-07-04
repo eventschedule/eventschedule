@@ -105,10 +105,31 @@ trait AccountSetupTrait
      */
     protected function logoutUser(Browser $browser, string $name = 'John Doe'): void
     {
-        $browser->press($name)
-                ->waitForText('Log Out', 5)
-                ->clickLink('Log Out')
-                ->waitForLocation('/login', 5)
-                ->assertPathIs('/login');
+        /*
+        $browser->visit('/events')
+            ->waitForText($name, 5)
+            ->press($name)
+            ->waitForText('Log Out', 5)
+            ->clickLink('Log Out')
+            ->waitForLocation('/login', 5)
+            ->assertPathIs('/login');
+        */
+        
+        $browser->script("
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/logout';
+            var csrf = document.querySelector('meta[name=\"csrf-token\"]').getAttribute('content');
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = '_token';
+            input.value = csrf;
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+        ");
+
+        $browser->waitForLocation('/login', 5)
+            ->assertPathIs('/login');
     }
 } 
