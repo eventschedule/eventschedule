@@ -73,6 +73,7 @@ jobs:
           cp .env .env.dusk.local
           php artisan dusk tests/Browser/GeneralTest.php
           php artisan dusk tests/Browser/TicketTest.php
+          php artisan dusk tests/Browser/CuratorEventTest.php
           php artisan dusk tests/Browser/ApiTest.php
         env:
           APP_ENV: local
