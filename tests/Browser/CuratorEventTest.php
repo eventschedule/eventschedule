@@ -26,7 +26,7 @@ class CuratorEventTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             // Step 1: Create first user with curator role
-            $user1Name = 'Curator 1';
+            $user1Name = 'Curator One';
             $user1Email = 'curator1@test.com';
             $user1Password = 'password123';
             
@@ -35,7 +35,7 @@ class CuratorEventTest extends DuskTestCase
             $this->logoutUser($browser, $user1Name);
 
             // Step 2: Create second user with curator role
-            $user2Name = 'Curator 2';
+            $user2Name = 'Curator Two';
             $user2Email = 'curator2@test.com';
             $user2Password = 'password123';
             
