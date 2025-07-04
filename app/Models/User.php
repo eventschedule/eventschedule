@@ -130,21 +130,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->member()->type('curator');
     }
 
-    public function tickets()
-    {
-        return $this->hasMany(Sale::class);
-    }
-
-    public function editableCurators()
+    public function allCurators()
     {
         return $this->roles()
                     ->whereIn('type', ['curator'])
-                    ->get()
-                    ->filter(function ($role) {
-                        return $role->is_open 
-                            || $role->pivot->level == 'admin' 
-                            || $role->pivot->level == 'owner';
-                    });
+                    ->get();
+    }
+
+    public function tickets()
+    {
+        return $this->hasMany(Sale::class);
     }
 
     public function isMember($subdomain): bool

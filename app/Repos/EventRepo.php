@@ -207,10 +207,28 @@ class EventRepo
             return UrlUtils::decodeId($id);
         }, $selectedCurators);
 
+        // If editing an existing event, preserve curators that the current user can't see
+        if ($event && $event->exists) {
+            $existingCurators = $event->roles()->where('roles.type', 'curator')->pluck('roles.id')->toArray();
+            $userCurators = $user->curators()->pluck('roles.id')->toArray();
+            
+            // Find curators that exist on the event but the user can't edit
+            $preservedCurators = array_diff($existingCurators, $userCurators);
+            
+            // Add preserved curators to the selected curators
+            foreach ($preservedCurators as $curatorId) {
+                if (!in_array($curatorId, $selectedCurators)) {
+                    $selectedCurators[] = $curatorId;
+                }
+            }
+        }
+
         foreach ($selectedCurators as $curatorId) {
             $curator = Role::find($curatorId);
-            $roles[] = $curator;
-            $roleIds[] = $curator->id;
+            if ($curator) {
+                $roles[] = $curator;
+                $roleIds[] = $curator->id;
+            }
         }
 
         $event->roles()->sync($roleIds);

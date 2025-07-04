@@ -34,8 +34,9 @@ class ClaimVenue extends Mailable
         $venue = $event->venue;
         $role = $event->role();
         $user = $event->user;
+        $curator = $event->curator();
 
-        if ($event->curator_id) {
+        if ($curator) {
             $subject = __('messages.claim_your_venue_curated');
         } else {
             $subject = __('messages.claim_your_venue');
@@ -44,7 +45,7 @@ class ClaimVenue extends Mailable
         return new Envelope(
             subject: str_replace(
                         [':role', ':venue', ':event', ':curator'], 
-                        [$role->name, $venue->name, $event->name, $event->curator ? $event->curator->name : ''],
+                        [$role->name, $venue->name, $event->name, $curator ? $curator->name : ''],
                         $subject),
             replyTo: [
                 new Address($user->email, $user->name),
@@ -61,8 +62,9 @@ class ClaimVenue extends Mailable
         $role = $event->role();
         $venue = $event->venue;
         $user = $event->user;
+        $curator = $event->curator();
 
-        if ($event->curator_id) {
+        if ($curator) {
             $subject = __('messages.claim_your_venue_curated');
         } else {
             $subject = __('messages.claim_your_venue');
@@ -77,7 +79,7 @@ class ClaimVenue extends Mailable
                 'user' => $user,
                 'subject' => str_replace(
                         [':role', ':venue', ':event', ':curator'], 
-                        [$role->name, $venue->name, $event->name, $event->curator ? $event->curator->name : ''],
+                        [$role->name, $venue->name, $event->name, $curator ? $curator->name : ''],
                         $subject),
                 'unsubscribe_url' => route('role.unsubscribe', ['subdomain' => $venue->subdomain]),
             ]
