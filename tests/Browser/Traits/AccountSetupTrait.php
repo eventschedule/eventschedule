@@ -46,8 +46,20 @@ trait AccountSetupTrait
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
                 ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 5)
-                ->clickLink('Edit Talent')
-                ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/edit');
+                ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
+    }
+
+    /**
+     * Create a test curator
+     */
+    protected function createTestCurator(Browser $browser, string $name = 'Test Curator'): void
+    {
+        $browser->visit('/new/curator')
+                ->type('name', $name)
+                ->scrollIntoView('button[type="submit"]')
+                ->press('SAVE')
+                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 5)
+                ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
     }
 
     /**

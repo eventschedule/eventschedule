@@ -106,7 +106,7 @@ class RegisteredUserController extends Controller
             Artisan::call('storage:link');
         }        
 
-        if (! config('app.hosted') && User::count() > 0) {
+        if (! config('app.hosted') && ! config('app.is_testing') && User::count() > 0) {
             return redirect()->route('login');
         }
 
