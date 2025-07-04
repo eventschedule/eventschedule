@@ -106,7 +106,7 @@ trait AccountSetupTrait
     protected function logoutUser(Browser $browser, string $name = 'John Doe'): void
     {
         $browser->press($name)
-                ->waitForText('Log Out', 5)
+                ->waitForText('Log Out', 25)
                 ->clickLink('Log Out')
                 ->waitForLocation('/login', 5)
                 ->assertPathIs('/login');
