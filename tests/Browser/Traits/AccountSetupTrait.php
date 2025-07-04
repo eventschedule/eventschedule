@@ -57,6 +57,8 @@ trait AccountSetupTrait
     {
         $browser->visit('/new/curator')
                 ->type('name', $name)
+                ->scrollIntoView('input[name="is_open"]')
+                ->check('is_open')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
                 ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 5)
