@@ -24,7 +24,7 @@ class GroupsTest extends DuskTestCase
      * 3. The filters in the guest view correctly show/hide the events
      * 4. The API can be used to create an event and assign it to the subschedule
      */
-    public function testSubSchedulesFunctionality(): void
+    public function testGroupsFunctionality(): void
     {
         $this->browse(function (Browser $browser) {
             // Step 1: Create a user and talent role
@@ -36,17 +36,17 @@ class GroupsTest extends DuskTestCase
             $this->createTestTalent($browser, 'Test Talent');
             
             // Step 2: Create sub-schedules
-            $this->createSubSchedules($browser);
+            $this->createGroups($browser);
             
             // Step 3: Create events and assign them to sub-schedules
-            $this->createEventsWithSubSchedules($browser);
+            $this->createEventsWithGroups($browser);
             
             /*
             // Step 4: Test filtering in guest view
             $this->testGuestViewFiltering($browser);
             
             // Step 5: Test API functionality
-            $this->testApiSubScheduleFunctionality($browser);
+            $this->testApiGroupFunctionality($browser);
             */
         });
     }
@@ -54,7 +54,7 @@ class GroupsTest extends DuskTestCase
     /**
      * Create sub-schedules for the talent role
      */
-    protected function createSubSchedules(Browser $browser): void
+    protected function createGroups(Browser $browser): void
     {
         $browser->visit('/test-talent/edit')
                 ->waitForText('Subschedules', 5)
@@ -103,7 +103,7 @@ class GroupsTest extends DuskTestCase
     /**
      * Create events and assign them to different sub-schedules
      */
-    protected function createEventsWithSubSchedules(Browser $browser): void
+    protected function createEventsWithGroups(Browser $browser): void
     {
         // Create first event for "Main Shows" sub-schedule
         $browser->visit('/test-talent/add_event?date=' . date('Y-m-d', strtotime('+3 days')))
@@ -197,7 +197,7 @@ class GroupsTest extends DuskTestCase
     /**
      * Test API functionality for creating events with sub-schedules
      */
-    protected function testApiSubScheduleFunctionality(Browser $browser): void
+    protected function testApiGroupFunctionality(Browser $browser): void
     {
         // Enable API for the user
         $apiKey = $this->enableApi($browser);
@@ -258,7 +258,7 @@ class GroupsTest extends DuskTestCase
      * Test that sub-schedules are properly saved and retrieved
      */
     /*
-    public function testSubSchedulePersistence(): void
+    public function testGroupPersistence(): void
     {
         $this->browse(function (Browser $browser) {
             // Create user and role
@@ -310,7 +310,7 @@ class GroupsTest extends DuskTestCase
      * Test that events can be moved between sub-schedules
      */
     /*
-    public function testMoveEventBetweenSubSchedules(): void
+    public function testMoveEventBetweenGroups(): void
     {
         $this->browse(function (Browser $browser) {
             // Create user and role with sub-schedules
