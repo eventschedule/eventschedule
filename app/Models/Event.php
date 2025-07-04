@@ -342,10 +342,6 @@ class Event extends Model
     {
         $venueSubdomain = $this->venue && $this->venue->isClaimed() ? $this->venue->subdomain : null;
         $roleSubdomain = $this->role() && $this->role()->isClaimed() ? $this->role()->subdomain : null;
-
-        if (! in_array($subdomain, [$venueSubdomain, $roleSubdomain])) {
-            $subdomain = $roleSubdomain;
-        }   
         
         if (! $subdomain) {
             $subdomain = $roleSubdomain ? $roleSubdomain : $venueSubdomain;

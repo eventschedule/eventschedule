@@ -88,7 +88,9 @@ class CuratorEventTest extends DuskTestCase
             
             // Get the event from the database
             $event = \App\Models\Event::where('name', 'Test Talent')->latest()->first();
-            $browser->visit($event->getGuestUrl())
+            $eventUrl = $event->getGuestUrl('first-curator');
+            
+            $browser->visit($eventUrl)
                     ->waitForText('Edit Event', 5)
                     ->clickLink('Edit Event')
                     ->waitForText('Edit Event', 5)
