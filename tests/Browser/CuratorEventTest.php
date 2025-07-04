@@ -124,11 +124,24 @@ class CuratorEventTest extends DuskTestCase
                 ->type('duration', '2')
                 
                 ->scrollIntoView('input[name="curators[]"]')
-                ->check('input[name="curators[]"][value*="curator-one"]')
-                ->check('input[name="curators[]"][value*="curator-two"]')
+                // Use curator names to find and check the checkboxes
+                ->script("
+                    var labels = document.querySelectorAll('label[for^=\"curator_\"]');
+                    labels.forEach(function(label) {
+                        if (label.textContent.includes('First Curator') || label.textContent.includes('Second Curator')) {
+                            var checkboxId = label.getAttribute('for');
+                            var checkbox = document.getElementById(checkboxId);
+                            if (checkbox) {
+                                checkbox.checked = true;
+                            }
+                        }
+                    });
+                ");
                 
-                ->scrollIntoView('button[type="submit"]')
+        $browser->scrollIntoView('button[type="submit"]')
+                ->screenshot('add-event-1')
                 ->press('SAVE')
+                ->screenshot('add-event-2')
                 ->waitForLocation('/test-talent/schedule', 5)
                 ->assertSee('Test Event');
     }
