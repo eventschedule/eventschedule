@@ -121,8 +121,6 @@ class CuratorEventTest extends DuskTestCase
         // Create an event and add it to both curators
         $browser->visit('/test-talent/add_event?date=' . date('Y-m-d', strtotime('+3 days')))
                 ->type('name', 'Test Event')
-                ->type('description', 'This is a test event for both curators')
-                ->type('starts_at', date('Y-m-d H:i', strtotime('+3 days 19:00')))
                 ->type('duration', '2')
                 
                 // Add to first curator
