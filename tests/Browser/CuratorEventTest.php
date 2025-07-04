@@ -52,15 +52,15 @@ class CuratorEventTest extends DuskTestCase
             
             // Follow first curator
             $browser->visit('/first-curator')
-                    ->waitForText('Follow', 5)
-                    ->clickLink('Follow')
+                    ->waitForText('Add Event', 5)
+                    ->clickLink('Add Event')
                     ->waitForLocation('/following', 5)
                     ->assertSee('First Curator');
             
             // Follow second curator
             $browser->visit('/second-curator')
-                    ->waitForText('Follow', 5)
-                    ->clickLink('Follow')
+                    ->waitForText('Add Event', 5)
+                    ->clickLink('Add Event')
                     ->waitForLocation('/following', 5)
                     ->assertSee('Second Curator');
 
@@ -123,12 +123,9 @@ class CuratorEventTest extends DuskTestCase
                 ->type('name', 'Test Event')
                 ->type('duration', '2')
                 
-                // Add to first curator
                 ->scrollIntoView('input[name="curators[]"]')
-                ->check('input[name="curators[]"][value*="first-curator"]')
-                
-                // Add to second curator  
-                ->check('input[name="curators[]"][value*="second-curator"]')
+                ->check('input[name="curators[]"][value*="curator-one"]')
+                ->check('input[name="curators[]"][value*="curator-two"]')
                 
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
