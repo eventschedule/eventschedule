@@ -87,7 +87,7 @@ class CuratorEventTest extends DuskTestCase
                     ->assertSee('Test Talent');
             
 
-            // Get the event ID from the database
+            // Get the event from the database
             $event = \App\Models\Event::where('name', 'Test Talent')->latest()->first();
             $browser->visit($event->getGuestUrl())
                     ->waitForText('Edit Event', 5)

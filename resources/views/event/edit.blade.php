@@ -747,10 +747,6 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                @else
-                                <div class="ml-6 mb-2 text-xs text-gray-500">
-                                    No groups available for this curator
-                                </div>
                                 @endif
                             </div>
                             @endforeach
