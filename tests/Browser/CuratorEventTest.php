@@ -95,7 +95,10 @@ class CuratorEventTest extends DuskTestCase
                     ->waitForText('Edit Event', 5)
                     ->scrollIntoView('input[name="curators[]"]')
                     ->scrollIntoView('button[type="submit"]')
-                    ->press('SAVE');
+                    ->press('SAVE')
+                    ->waitForLocation('/first-curator/schedule', 5)
+                    ->assertSee('Test Talent')
+                    ->screenshot('edit-event');
         });
     }
 
