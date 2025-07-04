@@ -29,8 +29,8 @@ class GroupsTest extends DuskTestCase
         $this->browse(function (Browser $browser) {
             // Step 1: Create a user and talent role
             $userName = 'Test User';
-            $userEmail = 'test@example.com';
-            $userPassword = 'password123';
+            $userEmail = 'test@gmail.com';
+            $userPassword = 'password';
             
             $this->setupTestAccount($browser, $userName, $userEmail, $userPassword);
             $this->createTestTalent($browser, 'Test Talent');
@@ -42,13 +42,11 @@ class GroupsTest extends DuskTestCase
             // Step 3: Create events and assign them to sub-schedules
             $this->createEventsWithGroups($browser);
             
-            /*
             // Step 4: Test filtering in guest view
             $this->testGuestViewFiltering($browser);
             
             // Step 5: Test API functionality
-            $this->testApiGroupFunctionality($browser);
-            */
+            //$this->testApiGroupFunctionality($browser);
         });
     }
 
