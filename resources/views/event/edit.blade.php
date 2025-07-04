@@ -707,12 +707,12 @@
                         </div>
 
                         @php
-                            $curators = $user->editableCurators();
+                            $curators = $user->allCurators();
                         @endphp
                         
                         @if ($curators->count() > 0)
                         <div class="mb-6">
-                            <x-input-label for="curators" :value="__(count($curators) > 1 ? 'messages.add_to_schedules' : 'messages.add_to_schedule')" />
+                            <x-input-label class="mb-2" for="curators" :value="__(count($curators) > 1 ? 'messages.add_to_schedules' : 'messages.add_to_schedule')" />
                             
                             @foreach($curators as $curator)
                             <div class="mb-4">

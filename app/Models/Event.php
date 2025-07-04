@@ -348,10 +348,6 @@ class Event extends Model
         }
 
         if (! $subdomain) {
-            $subdomain = $this->curator ? $this->curator->subdomain : null;
-        }
-
-        if (! $subdomain) {
             $subdomain = $this->creatorRole ? $this->creatorRole->subdomain : null;
         }
 
@@ -476,14 +472,11 @@ class Event extends Model
     public function getStartDateTime($date = null, $locale = false)
     {
         $timezone = 'UTC';
+        
         if ($user = auth()->user()) {
             $timezone = $user->timezone;
-        } else if ($this->venue) {
-            $timezone = $this->venue->timezone;
-        } else if ($this->role()) {
-            $timezone = $this->role()->timezone;
-        } else if ($this->curator) {
-            $timezone = $this->curator->timezone;
+        } else if ($this->creatorRole) {
+            $timezone = $this->creatorRole->timezone;
         }
 
         $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');

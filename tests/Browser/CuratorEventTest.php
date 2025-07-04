@@ -91,8 +91,9 @@ class CuratorEventTest extends DuskTestCase
             $event = \App\Models\Event::where('name', 'Test Talent')->latest()->first();
             $eventUrl = $event->getGuestUrl('first-curator');
             
-            // Check the number of event_role records before editing
-            $eventRoleCountBefore = EventRole::count();
+            // Assert that the number of records remains the same
+            $this->assertEquals(EventRole::count(), 4, 
+                'There should be 4 event_role records before editing the event');
             
             $browser->visit($eventUrl)
                     ->waitForText('Edit Event', 5)
@@ -105,11 +106,8 @@ class CuratorEventTest extends DuskTestCase
                     ->assertSee('Test Talent')
                     ->screenshot('edit-event');
             
-            // Check the number of event_role records after editing
-            $eventRoleCountAfter = EventRole::count();
-            
             // Assert that the number of records remains the same
-            $this->assertEquals($eventRoleCountBefore, $eventRoleCountAfter, 
+            $this->assertEquals(EventRole::count(), 4, 
                 'The number of event_role records should remain the same after editing the event');
         });
     }

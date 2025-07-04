@@ -191,7 +191,7 @@ class RoleController extends Controller
 
         $translation = null;
         $user = auth()->user();
-        $curatorRoles = $user ? $user->editableCurators() : collect();
+        $curatorRoles = $user ? $user->curators() : collect();
 
         $role = Role::subdomain($subdomain)->first();
 
