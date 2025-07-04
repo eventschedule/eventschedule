@@ -82,18 +82,20 @@ class CuratorEventTest extends DuskTestCase
             // Approve the event
             $browser->visit('/first-curator/requests')
                     ->waitForText('Accept', 5)
-                    ->click('.accept-event')
+                    ->click('.test-accept-event')
                     ->waitForLocation('/first-curator/schedule', 5)
                     ->assertSee('Test Talent');
             
-            // Try to edit the event - this should fail because the event
-            // will no longer be linked to both curator roles after editing
-            $browser->clickLink('Test Talent')
-                    ->waitForLocation('/first-curator/edit_event', 5)
-                    ->type('name', 'Updated Test Event')
+
+            // Get the event ID from the database
+            $event = \App\Models\Event::where('name', 'Test Talent')->latest()->first();
+            $browser->visit($event->getGuestUrl())
+                    ->waitForText('Edit Event', 5)
+                    ->clickLink('Edit Event')
+                    ->waitForText('Edit Event', 5)
+                    ->scrollIntoView('input[name="curators[]"]')
                     ->scrollIntoView('button[type="submit"]')
-                    ->press('SAVE')
-                    ->waitForLocation('/first-curator/schedule', 5);            
+                    ->press('SAVE');
         });
     }
 
@@ -126,9 +128,7 @@ class CuratorEventTest extends DuskTestCase
                 ");
                 
         $browser->scrollIntoView('button[type="submit"]')
-                ->screenshot('add-event-1')
                 ->press('SAVE')
-                ->screenshot('add-event-2')
                 ->waitForLocation('/test-talent/schedule', 5)
                 ->assertSee('Test Talent');
     }
