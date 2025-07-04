@@ -294,7 +294,7 @@ class EventController extends Controller
     {
         if (! is_hosted_or_admin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
+        }   
 
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::with(['creatorRole', 'curators'])->findOrFail($event_id);

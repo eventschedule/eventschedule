@@ -86,7 +86,6 @@ class CuratorEventTest extends DuskTestCase
                     ->waitForLocation('/first-curator/schedule', 5)
                     ->assertSee('Test Talent');
             
-
             // Get the event from the database
             $event = \App\Models\Event::where('name', 'Test Talent')->latest()->first();
             $browser->visit($event->getGuestUrl())
