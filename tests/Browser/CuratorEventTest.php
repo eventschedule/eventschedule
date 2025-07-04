@@ -31,16 +31,8 @@ class CuratorEventTest extends DuskTestCase
             $user1Password = 'password123';
             
             $this->setupTestAccount($browser, $user1Name, $user1Email, $user1Password);
-            
-            // Create curator role for first user
-            $this->createTestCurator($browser, 'First Curator');
-            
-            // Log out first user
-            $browser->press($user1Name)
-                    ->waitForText('Log Out', 2)
-                    ->clickLink('Log Out')
-                    ->waitForLocation('/login', 5)
-                    ->assertPathIs('/login');
+            $this->createTestCurator($browser, 'First Curator');            
+            $this->logoutUser($browser, $user1Name);
 
             // Step 2: Create second user with curator role
             $user2Name = 'Curator Two';
@@ -48,16 +40,8 @@ class CuratorEventTest extends DuskTestCase
             $user2Password = 'password123';
             
             $this->setupTestAccount($browser, $user2Name, $user2Email, $user2Password);
-            
-            // Create curator role for second user
             $this->createTestCurator($browser, 'Second Curator');
-            
-            // Log out second user
-            $browser->press($user2Name)
-                    ->waitForText('Log Out', 2)
-                    ->clickLink('Log Out')
-                    ->waitForLocation('/login', 5)
-                    ->assertPathIs('/login');
+            $this->logoutUser($browser, $user2Name);
 
             // Step 3: Create third user who follows both curator roles
             $user3Name = 'Event Creator';
@@ -84,11 +68,7 @@ class CuratorEventTest extends DuskTestCase
             $this->createEventForBothCurators($browser);
             
             // Log out third user
-            $browser->press($user3Name)
-                    ->waitForText('Log Out', 2)
-                    ->clickLink('Log Out')
-                    ->waitForLocation('/login', 5)
-                    ->assertPathIs('/login');
+            $this->logoutUser($browser, $user3Name);
 
             // Step 4: First user logs back in and tries to edit the event
             $browser->visit('/login')

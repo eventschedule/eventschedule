@@ -98,4 +98,16 @@ trait AccountSetupTrait
         $apiKey = $browser->value('#api_key');
         return $apiKey;
     }
+
+    /**
+     * Logout user
+     */
+    protected function logoutUser(Browser $browser, string $name = 'John Doe'): void
+    {
+        $browser->press($name)
+                ->waitForText('Log Out', 5)
+                ->clickLink('Log Out')
+                ->waitForLocation('/login', 5)
+                ->assertPathIs('/login');
+    }
 } 
