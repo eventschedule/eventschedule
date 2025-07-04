@@ -18,6 +18,7 @@ trait AccountSetupTrait
                 ->type('password', $password)
                 ->check('terms')
                 ->press('SIGN UP')
+                ->waitForLocation('/events', 5)
                 ->assertPathIs('/events')
                 ->assertSee($name);
     }
@@ -105,7 +106,6 @@ trait AccountSetupTrait
     protected function logoutUser(Browser $browser, string $name = 'John Doe'): void
     {
         $browser->press($name)
-                ->screenshot('logout-user')
                 ->waitForText('Log Out', 5)
                 ->clickLink('Log Out')
                 ->waitForLocation('/login', 5)
