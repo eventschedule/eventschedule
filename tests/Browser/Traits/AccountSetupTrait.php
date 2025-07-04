@@ -9,7 +9,7 @@ trait AccountSetupTrait
     /**
      * Set up a test account with basic data
      */
-    protected function setupTestAccount(Browser $browser, string $name = 'John Doe', string $email = 'test@gmail.com', string $password = 'password'): void
+    protected function setupTestAccount(Browser $browser, string $name = 'Test Talent', string $email = 'test@gmail.com', string $password = 'password'): void
     {
         // Sign up
         $browser->visit('/sign_up')

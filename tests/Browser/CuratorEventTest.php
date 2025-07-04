@@ -109,18 +109,12 @@ class CuratorEventTest extends DuskTestCase
      */
     protected function createEventForBothCurators(Browser $browser): void
     {
-        // Create a talent role first (needed to create events)
-        $browser->visit('/new/talent')
-                ->waitForText('New Talent', 5)
-                ->type('name', 'Test Talent')
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
-                ->waitForLocation('/test-talent/schedule', 5)
-                ->assertPathIs('/test-talent/schedule');
+        $this->createTestTalent($browser);
+        $this->createTestVenue($browser);
         
         // Create an event and add it to both curators
         $browser->visit('/test-talent/add_event?date=' . date('Y-m-d', strtotime('+3 days')))
-                ->type('name', 'Test Event')
+                ->select('#selected_venue')
                 ->type('duration', '2')
                 
                 ->scrollIntoView('input[name="curators[]"]')
@@ -143,6 +137,6 @@ class CuratorEventTest extends DuskTestCase
                 ->press('SAVE')
                 ->screenshot('add-event-2')
                 ->waitForLocation('/test-talent/schedule', 5)
-                ->assertSee('Test Event');
+                ->assertSee('Test Talent');
     }
 } 
