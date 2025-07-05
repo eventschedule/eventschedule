@@ -67,6 +67,9 @@ class ApiEventController extends Controller
 
     public function store(Request $request, $subdomain)
     {
+        \Log::info('here 1');
+        \Log::info($request->all());
+
         $role = Role::with('groups')->subdomain($subdomain)->firstOrFail();
         $encodedRoleId = UrlUtils::encodeId($role->id);
         
@@ -76,8 +79,6 @@ class ApiEventController extends Controller
             $request->merge(['members' => [$encodedRoleId => ['name' => $role->name]]]);
         }   
 
-
-            
         if (! $role->isPro()) {
             return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
         }
