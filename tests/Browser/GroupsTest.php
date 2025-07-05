@@ -46,7 +46,7 @@ class GroupsTest extends DuskTestCase
             $this->testGuestViewFiltering($browser);
             
             // Step 5: Test API functionality
-            //$this->testApiGroupFunctionality($browser);
+            $this->testApiGroupFunctionality($browser);
         });
     }
 
@@ -142,7 +142,7 @@ class GroupsTest extends DuskTestCase
      */
     protected function testGuestViewFiltering(Browser $browser): void
     {
-        // Visit guest view
+        // Visit guest view - should show all events initially
         $browser->visit('/test-talent')
                 ->waitForText('Test Talent', 5);
         
@@ -151,44 +151,23 @@ class GroupsTest extends DuskTestCase
                 ->assertSee('Workshop Event')
                 ->assertSee('General Event');
         
-        // Test filtering by "Main Shows" sub-schedule
-        $browser->script("
-            var select = document.querySelector('select[v-model=\"selectedGroup\"]');
-            if (select) {
-                select.value = 'main-shows';
-                select.dispatchEvent(new Event('change'));
-            }
-        ");
-        
-        $browser->waitForText('Main Show Event', 5)
+        // Test filtering by "Main Shows" sub-schedule by visiting the filtered URL
+        $browser->visit('/test-talent/main-shows')
+                ->waitForText('Test Talent', 5)
                 ->assertSee('Main Show Event')
                 ->assertDontSee('Workshop Event')
                 ->assertDontSee('General Event');
         
-        // Test filtering by "Workshops" sub-schedule
-        $browser->script("
-            var select = document.querySelector('select[v-model=\"selectedGroup\"]');
-            if (select) {
-                select.value = 'workshops';
-                select.dispatchEvent(new Event('change'));
-            }
-        ");
-        
-        $browser->waitForText('Workshop Event', 5)
+        // Test filtering by "Workshops" sub-schedule by visiting the filtered URL
+        $browser->visit('/test-talent/workshops')
+                ->waitForText('Test Talent', 5)
                 ->assertSee('Workshop Event')
                 ->assertDontSee('Main Show Event')
                 ->assertDontSee('General Event');
         
-        // Test "All Schedules" filter
-        $browser->script("
-            var select = document.querySelector('select[v-model=\"selectedGroup\"]');
-            if (select) {
-                select.value = '';
-                select.dispatchEvent(new Event('change'));
-            }
-        ");
-        
-        $browser->waitForText('Main Show Event', 5)
+        // Test "All Schedules" filter by visiting the base URL again
+        $browser->visit('/test-talent')
+                ->waitForText('Test Talent', 5)
                 ->assertSee('Main Show Event')
                 ->assertSee('Workshop Event')
                 ->assertSee('General Event');
@@ -253,134 +232,4 @@ class GroupsTest extends DuskTestCase
         
         return $response;
     }
-
-    /**
-     * Test that sub-schedules are properly saved and retrieved
-     */
-    /*
-    public function testGroupPersistence(): void
-    {
-        $this->browse(function (Browser $browser) {
-            // Create user and role
-            $this->setupTestAccount($browser, 'Persistence Test User', 'persistence@test.com', 'password123');
-            $this->createTestTalent($browser, 'Persistence Talent');
-            
-            // Create sub-schedule
-            $browser->visit('/persistence-talent/edit')
-                    ->waitForText('Subschedules', 5)
-                    ->scrollIntoView('#address')
-                    ->waitForText('Subschedules', 5);
-            
-            $browser->script("addGroupField();");
-            
-            $browser->waitFor('input[name*="groups"][name*="name"]', 5)
-                    ->type('input[name*="groups"][name*="name"]', 'Test Schedule')
-                    ->scrollIntoView('button[type="submit"]')
-                    ->press('SAVE')
-                    ->waitForText('Settings updated successfully', 5);
-            
-            // Verify sub-schedule was saved in database
-            $role = Role::where('subdomain', 'persistence-talent')->first();
-            $this->assertNotNull($role);
-            
-            $group = $role->groups()->where('name', 'Test Schedule')->first();
-            $this->assertNotNull($group);
-            $this->assertEquals('test-schedule', $group->slug);
-            
-            // Logout and login again to test persistence
-            $this->logoutUser($browser, 'Persistence Test User');
-            
-            $browser->visit('/login')
-                    ->type('email', 'persistence@test.com')
-                    ->type('password', 'password123')
-                    ->press('LOG IN')
-                    ->waitForLocation('/events', 5);
-            
-            // Verify sub-schedule is still there
-            $browser->visit('/persistence-talent/edit')
-                    ->waitForText('Subschedules', 5)
-                    ->scrollIntoView('#address')
-                    ->waitForText('Test Schedule', 5)
-                    ->assertSee('Test Schedule');
-        });
-    }
-    */
-
-    /**
-     * Test that events can be moved between sub-schedules
-     */
-    /*
-    public function testMoveEventBetweenGroups(): void
-    {
-        $this->browse(function (Browser $browser) {
-            // Create user and role with sub-schedules
-            $this->setupTestAccount($browser, 'Move Test User', 'move@test.com', 'password123');
-            $this->createTestTalent($browser, 'Move Talent');
-            
-            // Create two sub-schedules
-            $browser->visit('/move-talent/edit')
-                    ->waitForText('Subschedules', 5)
-                    ->scrollIntoView('#address')
-                    ->waitForText('Subschedules', 5);
-            
-            // Add first sub-schedule
-            $browser->script("addGroupField();");
-            
-            $browser->waitFor('input[name*="groups"][name*="name"]', 5)
-                    ->type('input[name*="groups"][name*="name"]', 'Schedule A')
-                    ->scrollIntoView('button[type="submit"]')
-                    ->press('SAVE')
-                    ->waitForText('Settings updated successfully', 5);
-            
-            // Add second sub-schedule
-            $browser->visit('/move-talent/edit')
-                    ->waitForText('Subschedules', 5)
-                    ->scrollIntoView('#address')
-                    ->waitForText('Subschedules', 5);
-            
-            $browser->script("addGroupField();");
-            
-            $browser->waitFor('input[name*="groups"][name*="name"]:last-of-type', 5)
-                    ->type('input[name*="groups"][name*="name"]:last-of-type', 'Schedule B')
-                    ->scrollIntoView('button[type="submit"]')
-                    ->press('SAVE')
-                    ->waitForText('Settings updated successfully', 5);
-            
-            // Create event in Schedule A
-            $browser->visit('/move-talent/add_event?date=' . date('Y-m-d', strtotime('+3 days')))
-                    ->type('name', 'Movable Event')
-                    ->type('duration', '2')
-                    ->scrollIntoView('select[name="current_role_group_id"]')
-                    ->select('current_role_group_id', '1')
-                    ->scrollIntoView('button[type="submit"]')
-                    ->press('SAVE')
-                    ->waitForLocation('/move-talent/schedule', 5)
-                    ->assertSee('Movable Event');
-            
-            // Edit event and move it to Schedule B
-            $event = Event::where('name', 'Movable Event')->first();
-            $eventUrl = $event->getGuestUrl('move-talent');
-            
-            $browser->visit($eventUrl)
-                    ->waitForText('Edit Event', 5)
-                    ->clickLink('Edit Event')
-                    ->waitForText('Edit Event', 5)
-                    ->scrollIntoView('select[name="current_role_group_id"]')
-                    ->select('current_role_group_id', '2')
-                    ->scrollIntoView('button[type="submit"]')
-                    ->press('SAVE')
-                    ->waitForLocation('/move-talent/schedule', 5)
-                    ->assertSee('Movable Event');
-            
-            // Verify the event was moved in the database
-            $role = Role::where('subdomain', 'move-talent')->first();
-            $scheduleB = $role->groups()->where('name', 'Schedule B')->first();
-            
-            $eventRole = EventRole::where('event_id', $event->id)
-                                 ->where('role_id', $role->id)
-                                 ->first();
-            $this->assertEquals($scheduleB->id, $eventRole->group_id);
-        });
-    }
-        */
 } 
