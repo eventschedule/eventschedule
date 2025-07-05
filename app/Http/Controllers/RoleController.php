@@ -321,7 +321,7 @@ class RoleController extends Controller
         $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
         if ($role->isCurator()) {
-            $events = Event::with(['roles', 'venue'])
+            $events = Event::with('roles')
                 ->where(function ($query) use ($startOfMonth, $endOfMonth) {
                     $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
                         ->orWhereNotNull('days_of_week');
@@ -335,23 +335,16 @@ class RoleController extends Controller
                 ->orderBy('starts_at')
                 ->get();
         } else {
-            $events = Event::with(['roles', 'venue'])
+            $events = Event::with('roles')
                 ->where(function ($query) use ($startOfMonth, $endOfMonth) {
                     $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
                         ->orWhereNotNull('days_of_week');
                 })
                 ->where(function ($query) use ($role) {
-                    if ($role->isVenue()) {
-                        $query->whereHas('roles', function ($query) use ($role) {
-                            $query->where('role_id', $role->id)
-                                ->where('is_accepted', true);
-                        });
-                    } else {
-                        $query->whereHas('roles', function ($query) use ($role) {
-                            $query->where('role_id', $role->id)
-                                ->where('is_accepted', true);
-                        });
-                    }
+                    $query->whereHas('roles', function ($query) use ($role) {
+                        $query->where('role_id', $role->id)
+                            ->where('is_accepted', true);
+                    });
                 });
                         
             $events = $events->orderBy('starts_at')->get();
@@ -430,19 +423,12 @@ class RoleController extends Controller
         $endOfMonth = '';
         $datesUnavailable = [];
 
-        $requests = Event::with(['roles', 'venue'])
+        $requests = Event::with('roles')
                         ->where(function ($query) use ($role) {
-                            if ($role->isVenue()) {
-                                $query->whereHas('roles', function ($query) use ($role) {
-                                    $query->where('role_id', $role->id)
-                                        ->whereNull('is_accepted');
-                                });
-                            } else {
-                                $query->whereHas('roles', function ($query) use ($role) {
-                                    $query->where('role_id', $role->id)
-                                        ->whereNull('is_accepted');
-                                });
-                            }
+                            $query->whereHas('roles', function ($query) use ($role) {
+                                $query->where('role_id', $role->id)
+                                    ->whereNull('is_accepted');
+                            });
                         })
                         ->orderBy('created_at', 'desc')
                         ->get();
@@ -464,7 +450,7 @@ class RoleController extends Controller
 
             if ($tab == 'schedule') {
                 if ($role->isCurator()) {
-                    $events = Event::with(['roles', 'venue'])
+                    $events = Event::with('roles')
                         ->where(function ($query) use ($startOfMonth, $endOfMonth) {
                             $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
                                 ->orWhereNotNull('days_of_week');
@@ -478,19 +464,12 @@ class RoleController extends Controller
                         ->orderBy('starts_at')
                         ->get();
                 } else {
-                    $events = Event::with(['roles', 'venue'])
+                    $events = Event::with('roles')
                         ->where(function ($query) use ($role) {
-                            if ($role->isVenue()) {
-                                $query->whereHas('roles', function ($query) use ($role) {
-                                    $query->where('role_id', $role->id)
-                                        ->where('is_accepted', true);
-                                });
-                            } else {
-                                $query->whereHas('roles', function ($query) use ($role) {
-                                    $query->where('role_id', $role->id)
-                                        ->where('is_accepted', true);
-                                });
-                            }                                
+                            $query->whereHas('roles', function ($query) use ($role) {
+                                $query->where('role_id', $role->id)
+                                    ->where('is_accepted', true);
+                            });
                         })
                         ->where(function ($query) use ($startOfMonth, $endOfMonth) {
                             $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
@@ -499,19 +478,12 @@ class RoleController extends Controller
                         ->orderBy('starts_at')
                         ->get();
 
-                    $unscheduled = Event::with(['roles', 'venue'])
+                    $unscheduled = Event::with('roles')
                         ->where(function ($query) use ($role) {
-                            if ($role->isVenue()) {
-                                $query->whereHas('roles', function ($query) use ($role) {
-                                    $query->where('role_id', $role->id)
-                                        ->where('is_accepted', true);
-                                });
-                            } else {
-                                $query->whereHas('roles', function ($query) use ($role) {
-                                    $query->where('role_id', $role->id)
-                                        ->where('is_accepted', true);
-                                });
-                            }
+                            $query->whereHas('roles', function ($query) use ($role) {
+                                $query->where('role_id', $role->id)
+                                    ->where('is_accepted', true);
+                            });
                         })
                         ->whereNull('starts_at')
                         ->orderBy('created_at', 'desc')
@@ -1531,7 +1503,7 @@ class RoleController extends Controller
         // First, let's try a very basic search to see if we can get any events at all
         if ($role->isCurator()) {
             // For curators, get events they're associated with
-            $events = Event::with(['roles', 'venue'])
+            $events = Event::with('roles')
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
@@ -1554,19 +1526,12 @@ class RoleController extends Controller
                 ->get();
         } else {
             // For venues/talents
-            $baseQuery = Event::with(['roles', 'venue']);
-            
-            if ($role->isVenue()) {
-                $baseQuery->whereHas('roles', function ($query) use ($role) {
-                    $query->where('role_id', $role->id)
-                          ->where('is_accepted', true);
-                });
-            } else {
-                $baseQuery->whereHas('roles', function ($query) use ($role) {
-                    $query->where('role_id', $role->id)
-                          ->where('is_accepted', true);
-                });
-            }
+            $baseQuery = Event::with('roles');
+                
+            $baseQuery->whereHas('roles', function ($query) use ($role) {
+                $query->where('role_id', $role->id)
+                        ->where('is_accepted', true);
+            });
             
             $events = $baseQuery
                 ->where(function ($query) use ($search) {

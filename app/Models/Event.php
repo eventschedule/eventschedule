@@ -116,18 +116,42 @@ class Event extends Model
 
     public function getVenueAttribute()
     {
-        return $this->venue()->first();
+        if (! $this->relationLoaded('roles')) {
+            $this->load('roles');
+        }
+
+        foreach ($this->roles as $role) {
+            if ($role->isVenue()) {
+                return $role;
+            }
+        }
+
+        return null;
     }
 
     public function getGroupForRole($roleId)
     {
-        $eventRole = $this->roles()->where('role_id', $roleId)->first();
+        if (! $this->relationLoaded('roles')) {
+            $this->load('roles');
+        }
+
+        $eventRole = $this->roles->first(function($role) use ($roleId) {
+            return $role->id == $roleId;
+        });
+
         return $eventRole ? $eventRole->pivot->group : null;
     }
 
     public function getGroupForSubdomain($subdomain)
     {
-        $role = $this->roles()->where('subdomain', $subdomain)->first();
+        if (! $this->relationLoaded('roles')) {
+            $this->load('roles');
+        }
+
+        $role = $this->roles->first(function($role) use ($subdomain) {
+            return $role->subdomain == $subdomain;
+        });
+
         return $role ? $role->pivot->group : null;
     }
 
@@ -181,10 +205,6 @@ class Event extends Model
 
     public function isPro()
     {
-        if ($this->venue && $this->venue->isPro()) {
-            return true;
-        }
-
         foreach ($this->roles as $role) {
             if ($role->isPro()) {
                 return true;
