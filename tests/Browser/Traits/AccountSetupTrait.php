@@ -43,6 +43,7 @@ trait AccountSetupTrait
     protected function createTestTalent(Browser $browser, string $name = 'Test Talent'): void
     {
         $browser->visit('/new/talent')
+                ->clear('name')
                 ->type('name', $name)
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')

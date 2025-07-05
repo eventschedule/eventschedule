@@ -183,7 +183,7 @@ class GroupsTest extends DuskTestCase
         
         // Test API call to create event with sub-schedule
         $response = $this->createEventViaApi($apiKey, 'API Test Event', 'main-shows');
-        
+
         $this->assertEquals(200, $response->getStatusCode());
         $responseData = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('id', $responseData);
@@ -219,14 +219,11 @@ class GroupsTest extends DuskTestCase
             'name' => $eventName,
             'starts_at' => date('Y-m-d H:i:s', strtotime('+10 days')),
             'venue_address1' => '123 Test Street',
-            'venue_city' => 'Test City',
-            'venue_state' => 'TS',
-            'venue_postal_code' => '12345',
-            'venue_country_code' => 'US',
+            'name' => 'Test API Event',
             'schedule' => $scheduleSlug,
         ], [
-            'Authorization' => 'Bearer ' . $apiKey,
-            'Accept' => 'application/json',
+            'X-API-Key' => $apiKey,
+            'X-Requested-With' => 'XMLHttpRequest',
             'Content-Type' => 'application/json',
         ]);
         
