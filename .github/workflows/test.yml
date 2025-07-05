@@ -75,6 +75,7 @@ jobs:
           php artisan dusk tests/Browser/TicketTest.php
           php artisan dusk tests/Browser/CuratorEventTest.php
           php artisan dusk tests/Browser/ApiTest.php
+          php artisan dusk tests/Browser/GroupsTest.php
         env:
           APP_ENV: local
           APP_URL: http://127.0.0.1:8000
