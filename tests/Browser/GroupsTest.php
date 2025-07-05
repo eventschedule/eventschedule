@@ -184,9 +184,9 @@ class GroupsTest extends DuskTestCase
         // Test API call to create event with sub-schedule
         $response = $this->createEventViaApi($apiKey, 'API Test Event', 'main-shows');
 
-        $this->assertEquals(200, $response->getStatusCode());
-        $responseData = json_decode($response->getContent(), true);
-        $this->assertArrayHasKey('id', $responseData);
+        $this->assertEquals(201, $response['httpCode'], 'POST /api/events should return 201');
+        $this->assertArrayHasKey('data', $response['data'], 'Response should have data key');
+        $this->assertArrayHasKey('id', $response['data']['data'], 'Response should have id in data');
         
         // Verify the event was created with the correct sub-schedule
         $event = Event::where('name', 'API Test Event')->first();
@@ -204,29 +204,47 @@ class GroupsTest extends DuskTestCase
         
         // Test API call with invalid sub-schedule
         $response = $this->createEventViaApi($apiKey, 'Invalid Schedule Event', 'invalid-schedule');
-        $this->assertEquals(422, $response->getStatusCode());
+        $this->assertEquals(422, $response['httpCode'], 'Invalid schedule should return 422');
         
-        $responseData = json_decode($response->getContent(), true);
-        $this->assertStringContainsString('Schedule not found', $responseData['error']);
+        $this->assertStringContainsString('Schedule not found', $response['data']['error']);
     }
 
     /**
-     * Helper method to create event via API
+     * Helper method to create event via API using cURL
      */
-    protected function createEventViaApi(string $apiKey, string $eventName, string $scheduleSlug)
+    protected function createEventViaApi(string $apiKey, string $eventName, string $scheduleSlug): array
     {
-        $response = $this->post('/api/events/test-talent', [
+        $baseUrl = config('app.url');
+        $eventData = [
             'name' => $eventName,
             'starts_at' => date('Y-m-d H:i:s', strtotime('+10 days')),
             'venue_address1' => '123 Test Street',
-            'name' => 'Test API Event',
             'schedule' => $scheduleSlug,
-        ], [
-            'X-API-Key' => $apiKey,
-            'X-Requested-With' => 'XMLHttpRequest',
-            'Content-Type' => 'application/json',
+        ];
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $baseUrl . '/api/events/test-talent',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => json_encode($eventData),
+            CURLOPT_HTTPHEADER => [
+                'X-API-Key: ' . $apiKey,
+                'Accept: application/json',
+                'Content-Type: application/json'
+            ],
+            CURLOPT_TIMEOUT => 30
         ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        $data = json_decode($response, true);
         
-        return $response;
+        return [
+            'httpCode' => $httpCode,
+            'data' => $data
+        ];
     }
 } 
