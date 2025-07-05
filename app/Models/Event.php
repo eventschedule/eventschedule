@@ -129,7 +129,7 @@ class Event extends Model
         return null;
     }
 
-    public function getGroupForSubdomain($subdomain)
+    public function getGroupIdForSubdomain($subdomain)
     {
         if (! $this->relationLoaded('roles')) {
             $this->load('roles');
@@ -139,7 +139,7 @@ class Event extends Model
             return $role->subdomain == $subdomain;
         });
 
-        return $role ? $role->pivot->group : null;
+        return $role ? $role->pivot->group_id : null;
     }
 
     public function creatorRole()
