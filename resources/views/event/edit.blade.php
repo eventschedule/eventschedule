@@ -609,8 +609,7 @@
                                     @php
                                         $selectedGroupId = null;
                                         if ($event->exists) {
-                                            $selectedGroup = $event->getGroupForSubdomain($effectiveRole->subdomain);
-                                            $selectedGroupId = $selectedGroup ? $selectedGroup->id : null;
+                                            $selectedGroupId = $event->getGroupIdForSubdomain($effectiveRole->subdomain);
                                         }
                                     @endphp
                                     <option value="{{ $group->id }}" {{ old('current_role_group_id', $selectedGroupId) == $group->id ? 'selected' : '' }}>{{ $group->translatedName() }}</option>
@@ -739,8 +738,7 @@
                                             @php
                                                 $selectedGroupId = null;
                                                 if ($event->exists) {
-                                                    $selectedGroup = $event->getGroupForSubdomain($curator->subdomain);
-                                                    $selectedGroupId = $selectedGroup ? $selectedGroup->id : null;
+                                                    $selectedGroupId = $event->getGroupIdForSubdomain($curator->subdomain);
                                                 }
                                             @endphp
                                             <option value="{{ $group->id }}" {{ old('curator_groups.' . $curator->encodeId(), $selectedGroupId) == $group->id ? 'selected' : '' }}>{{ $group->translatedName() }}</option>

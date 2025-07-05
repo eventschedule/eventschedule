@@ -40,13 +40,14 @@
             @endif
 
             {{-- Group/Curator Badge --}}
-            @if ($role->isCurator())
-                @php $group = $event->getGroupForSubdomain($role->subdomain); @endphp
-                @if ($group)
-                    <span class="inline-block bg-blue-100 text-[#4E81FA] text-xs font-semibold px-3 py-1 rounded-full mb-2">
-                        {{ $group->translatedName() }}
-                    </span>
-                @endif
+            @php 
+                $groupId = $event->getGroupIdForSubdomain($role->subdomain);
+                $group = $groupId ? Group::find($groupId) : null;
+            @endphp
+            @if ($group)
+                <span class="inline-block bg-blue-100 text-[#4E81FA] text-xs font-semibold px-3 py-1 rounded-full mb-2">
+                    {{ $group->translatedName() }}
+                </span>
             @endif
 
             {{-- Description --}}
