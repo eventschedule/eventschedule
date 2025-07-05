@@ -129,19 +129,6 @@ class Event extends Model
         return null;
     }
 
-    public function getGroupForRole($roleId)
-    {
-        if (! $this->relationLoaded('roles')) {
-            $this->load('roles');
-        }
-
-        $eventRole = $this->roles->first(function($role) use ($roleId) {
-            return $role->id == $roleId;
-        });
-
-        return $eventRole ? $eventRole->pivot->group : null;
-    }
-
     public function getGroupForSubdomain($subdomain)
     {
         if (! $this->relationLoaded('roles')) {
