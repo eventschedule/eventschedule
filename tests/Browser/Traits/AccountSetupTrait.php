@@ -92,8 +92,6 @@ trait AccountSetupTrait
         $browser->visit('/account')
                 ->scrollIntoView('#enable_api');
         $browser->script("document.getElementById('enable_api').checked = true;");
-        // Hide PHP Debug Bar if present
-        $browser->script("var bar = document.getElementById('phpdebugbar'); if (bar) { bar.style.display = 'none'; } var badge = document.querySelector('.phpdebugbar-badge'); if (badge) { badge.style.display = 'none'; }");
         $browser->press('Save')
                 ->waitForText('API settings updated successfully', 5);
         
