@@ -57,18 +57,9 @@ class HomeController extends Controller
         $user = $request->user();
         $roleIds = $user->roles()->pluck('roles.id');
         
-        $events = Event::with(['roles', 'venue'])
+        $events = Event::with('roles')
             ->where(function ($query) use ($roleIds, $user) {
                 $query->where(function ($query) use ($roleIds) {
-                    $query->whereIn('id', function ($query) use ($roleIds) {
-                            $query->select('event_id')
-                                ->from('event_role')
-                                ->join('roles', 'event_role.role_id', '=', 'roles.id')
-                                ->whereIn('event_role.role_id', $roleIds)
-                                ->where('roles.type', 'venue')
-                                ->where('event_role.is_accepted', true);
-                    });
-                })->orWhere(function ($query) use ($roleIds) {
                     $query->whereIn('id', function ($query) use ($roleIds) {
                             $query->select('event_id')
                                 ->from('event_role')
