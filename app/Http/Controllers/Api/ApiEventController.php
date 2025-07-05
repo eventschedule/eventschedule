@@ -67,9 +67,6 @@ class ApiEventController extends Controller
 
     public function store(Request $request, $subdomain)
     {
-        \Log::info('here 1');
-        \Log::info($request->all());
-
         $role = Role::with('groups')->subdomain($subdomain)->firstOrFail();
         $encodedRoleId = UrlUtils::encodeId($role->id);
         
