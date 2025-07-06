@@ -493,5 +493,7 @@ return [
     'no_following' => 'No schedules',
     'start_following_schedules' => 'Start following schedules to see their events and updates',
     'no_sales' => 'No sales',
-    'no_sales_description' => 'No ticket sales found. Create events to start selling tickets.',
+    'no_sales_description' => 'No sales found. Create events to start selling tickets.',
+    'no_tickets' => 'No tickets',
+    'no_tickets_description' => 'No tickets found. Once you purchase a ticket, it will appear here.',
 ];
