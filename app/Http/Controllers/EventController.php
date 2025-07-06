@@ -334,6 +334,12 @@ class EventController extends Controller
             $date = Carbon::now();
         }
 
+        // A user may be using a different subdomain to edit an event 
+        // if they clicked on the edit link from the guest view
+        if (! $user->isMember($subdomain)) {
+            return redirect(route('home'));
+        }
+
         $data = [
             'subdomain' => $subdomain, 
             'tab' => 'schedule',
