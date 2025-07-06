@@ -336,7 +336,7 @@ class EventController extends Controller
 
         // A user may be using a different subdomain to edit an event 
         // if they clicked on the edit link from the guest view
-        if (! $user->isMember($subdomain)) {
+        if (! auth()->user()->isMember($subdomain)) {
             return redirect(route('home'));
         }
 

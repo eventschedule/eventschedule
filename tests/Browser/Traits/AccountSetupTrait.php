@@ -32,7 +32,7 @@ trait AccountSetupTrait
                 ->waitForText('New Venue', 5)
                 ->clear('name')
                 ->type('name', $name)
-                
+                ->pause(1000)
                 ->type('address1', $address)
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
