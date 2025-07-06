@@ -692,7 +692,7 @@
 
                 getSocialImageUrl(path) {
                     // Extract filename from /tmp/event_XXXXX.jpg path
-                    const filename = path.split('/').pop().replace('event_', '');
+                    const filename = path.split('/').pop();
                     return `{{ route('event.tmp_image', ['filename' => '']) }}/${filename}`;
                 },
 
