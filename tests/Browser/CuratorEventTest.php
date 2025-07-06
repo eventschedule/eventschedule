@@ -27,21 +27,21 @@ class CuratorEventTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             // Step 1: Create first user with curator role
-            $user1Name = 'Curator One';
+            $user1Name = 'Curator1';
             $user1Email = 'curator1@test.com';
             $user1Password = 'password123';
             
             $this->setupTestAccount($browser, $user1Name, $user1Email, $user1Password);
-            $this->createTestCurator($browser, 'First Curator');            
+            $this->createTestCurator($browser, 'Curator1');            
             $this->logoutUser($browser, $user1Name);
 
             // Step 2: Create second user with curator role
-            $user2Name = 'Curator Two';
+            $user2Name = 'Curator2';
             $user2Email = 'curator2@test.com';
             $user2Password = 'password123';
             
             $this->setupTestAccount($browser, $user2Name, $user2Email, $user2Password);
-            $this->createTestCurator($browser, 'Second Curator');
+            $this->createTestCurator($browser, 'Curator2');
             $this->logoutUser($browser, $user2Name);
 
             // Step 3: Create third user who follows both curator roles
@@ -52,18 +52,18 @@ class CuratorEventTest extends DuskTestCase
             $this->setupTestAccount($browser, $user3Name, $user3Email, $user3Password);
             
             // Follow first curator
-            $browser->visit('/first-curator')
+            $browser->visit('/curator1')
                     ->waitForText('Add Event', 5)
                     ->clickLink('Add Event')
                     ->waitForLocation('/following', 5)
-                    ->assertSee('First Curator');
+                    ->assertSee('Curator1');
             
             // Follow second curator
-            $browser->visit('/second-curator')
+            $browser->visit('/curator2')
                     ->waitForText('Add Event', 5)
                     ->clickLink('Add Event')
                     ->waitForLocation('/following', 5)
-                    ->assertSee('Second Curator');
+                    ->assertSee('Curator2');
 
             // Create an event that will be added to both curator roles
             $this->createEventForBothCurators($browser);
@@ -81,15 +81,15 @@ class CuratorEventTest extends DuskTestCase
                     ->assertSee($user1Name);
             
             // Approve the event
-            $browser->visit('/first-curator/requests')
+            $browser->visit('/curator1/requests')
                     ->waitForText('Accept', 5)
                     ->click('.test-accept-event')
-                    ->waitForLocation('/first-curator/schedule', 5)
-                    ->assertSee('Test Talent');
+                    ->waitForLocation('/curator1/schedule', 5)
+                    ->assertSee('Talent');
             
             // Get the event from the database
-            $event = \App\Models\Event::where('name', 'Test Talent')->latest()->first();
-            $eventUrl = $event->getGuestUrl('first-curator');
+            $event = \App\Models\Event::where('name', 'Talent')->latest()->first();
+            $eventUrl = $event->getGuestUrl('curator1');
             
             // Assert that the number of records remains the same
             $this->assertEquals(EventRole::count(), 4, 
@@ -101,8 +101,8 @@ class CuratorEventTest extends DuskTestCase
                     ->waitForText('Edit Event', 5)
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->waitForLocation('/first-curator/schedule', 5)
-                    ->assertSee('Test Talent');
+                    ->waitForLocation('/curator1/schedule', 5)
+                    ->assertSee('Talent');
             
             // Assert that the number of records remains the same
             $this->assertEquals(EventRole::count(), 4, 
@@ -119,7 +119,7 @@ class CuratorEventTest extends DuskTestCase
         $this->createTestVenue($browser);
         
         // Create an event and add it to both curators
-        $browser->visit('/test-talent/add_event?date=' . date('Y-m-d', strtotime('+3 days')))
+        $browser->visit('/talent/add_event?date=' . date('Y-m-d', strtotime('+3 days')))
                 ->select('#selected_venue')
                 ->type('duration', '2')
                 
@@ -128,7 +128,7 @@ class CuratorEventTest extends DuskTestCase
                 ->script("
                     var labels = document.querySelectorAll('label[for^=\"curator_\"]');
                     labels.forEach(function(label) {
-                        if (label.textContent.includes('First Curator') || label.textContent.includes('Second Curator')) {
+                        if (label.textContent.includes('Curator1') || label.textContent.includes('Curator2')) {
                             var checkboxId = label.getAttribute('for');
                             var checkbox = document.getElementById(checkboxId);
                             if (checkbox) {
@@ -140,7 +140,7 @@ class CuratorEventTest extends DuskTestCase
                 
         $browser->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
-                ->waitForLocation('/test-talent/schedule', 5)
-                ->assertSee('Test Talent');
+                ->waitForLocation('/talent/schedule', 5)
+                ->assertSee('Talent');
     }
 } 

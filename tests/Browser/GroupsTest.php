@@ -33,8 +33,8 @@ class GroupsTest extends DuskTestCase
             $userPassword = 'password';
             
             $this->setupTestAccount($browser, $userName, $userEmail, $userPassword);
-            $this->createTestTalent($browser, 'Test Talent');
-            $this->createTestVenue($browser, 'Test Venue');
+            $this->createTestTalent($browser);
+            $this->createTestVenue($browser);
             
             // Step 2: Create sub-schedules
             $this->createGroups($browser);
@@ -55,7 +55,7 @@ class GroupsTest extends DuskTestCase
      */
     protected function createGroups(Browser $browser): void
     {
-        $browser->visit('/test-talent/edit')
+        $browser->visit('/talent/edit')
                 ->waitForText('Subschedules', 5)
                 ->scrollIntoView('#address')
                 ->waitForText('Subschedules', 5);
@@ -67,10 +67,10 @@ class GroupsTest extends DuskTestCase
                 ->type('input[name*="groups"][name*="name"]', 'Main Shows')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
-                ->waitForLocation('/test-talent/schedule', 5);
+                ->waitForLocation('/talent/schedule', 5);
         
         // Add second sub-schedule
-        $browser->visit('/test-talent/edit')
+        $browser->visit('/talent/edit')
                 ->waitForText('Subschedules', 5)
                 ->scrollIntoView('#address')
                 ->waitForText('Subschedules', 5)
@@ -82,10 +82,10 @@ class GroupsTest extends DuskTestCase
                 ->type('#group-items > div:last-child input[name*="groups"][name*="name"]', 'Workshops')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
-                ->waitForLocation('/test-talent/schedule', 5);
+                ->waitForLocation('/talent/schedule', 5);
 
         // Verify both sub-schedules were saved in database
-        $role = Role::where('subdomain', 'test-talent')->first();
+        $role = Role::where('subdomain', 'talent')->first();
         $this->assertNotNull($role);
         
         $mainShows = $role->groups()->where('name', 'Main Shows')->first();
@@ -103,12 +103,12 @@ class GroupsTest extends DuskTestCase
     protected function createEventsWithGroups(Browser $browser): void
     {
         // Get the actual group IDs from the database
-        $role = Role::where('subdomain', 'test-talent')->first();
+        $role = Role::where('subdomain', 'talent')->first();
         $mainShows = $role->groups()->where('name', 'Main Shows')->first();
         $workshops = $role->groups()->where('name', 'Workshops')->first();
         
         // Create first event for "Main Shows" sub-schedule
-        $browser->visit('/test-talent/add_event?date=' . date('Y-m-d', strtotime('+3 days')))
+        $browser->visit('/talent/add_event?date=' . date('Y-m-d', strtotime('+3 days')))
                 ->select('#selected_venue')
                 ->type('name', 'Main Show Event')
                 ->type('duration', '2')
@@ -116,11 +116,11 @@ class GroupsTest extends DuskTestCase
                 ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($mainShows->id))
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
-                ->waitForLocation('/test-talent/schedule', 5)
+                ->waitForLocation('/talent/schedule', 5)
                 ->assertSee('Main Show Event');
         
         // Create second event for "Workshops" sub-schedule
-        $browser->visit('/test-talent/add_event?date=' . date('Y-m-d', strtotime('+5 days')))
+        $browser->visit('/talent/add_event?date=' . date('Y-m-d', strtotime('+5 days')))
                 ->select('#selected_venue')
                 ->type('name', 'Workshop Event')
                 ->type('duration', '3')
@@ -128,17 +128,17 @@ class GroupsTest extends DuskTestCase
                 ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($workshops->id))
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
-                ->waitForLocation('/test-talent/schedule', 5)
+                ->waitForLocation('/talent/schedule', 5)
                 ->assertSee('Workshop Event');
         
         // Create third event without sub-schedule
-        $browser->visit('/test-talent/add_event?date=' . date('Y-m-d', strtotime('+7 days')))
+        $browser->visit('/talent/add_event?date=' . date('Y-m-d', strtotime('+7 days')))
                 ->select('#selected_venue')
                 ->type('name', 'General Event')
                 ->type('duration', '1')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
-                ->waitForLocation('/test-talent/schedule', 5)
+                ->waitForLocation('/talent/schedule', 5)
                 ->assertSee('General Event');
     }
 
@@ -148,8 +148,8 @@ class GroupsTest extends DuskTestCase
     protected function testGuestViewFiltering(Browser $browser): void
     {
         // Visit guest view - should show all events initially
-        $browser->visit('/test-talent')
-                ->waitForText('Test Talent', 5);
+        $browser->visit('/talent')
+                ->waitForText('Talent', 5);
         
         // Check that all events are visible initially
         $browser->assertSee('Main Show Event')
@@ -157,22 +157,22 @@ class GroupsTest extends DuskTestCase
                 ->assertSee('General Event');
         
         // Test filtering by "Main Shows" sub-schedule by visiting the filtered URL
-        $browser->visit('/test-talent/main-shows')
-                ->waitForText('Test Talent', 5)
+        $browser->visit('/talent/main-shows')
+                ->waitForText('Talent', 5)
                 ->assertSee('Main Show Event')
                 ->assertDontSee('Workshop Event')
                 ->assertDontSee('General Event');
         
         // Test filtering by "Workshops" sub-schedule by visiting the filtered URL
-        $browser->visit('/test-talent/workshops')
-                ->waitForText('Test Talent', 5)
+        $browser->visit('/talent/workshops')
+                ->waitForText('Talent', 5)
                 ->assertSee('Workshop Event')
                 ->assertDontSee('Main Show Event')
                 ->assertDontSee('General Event');
         
         // Test "All Schedules" filter by visiting the base URL again
-        $browser->visit('/test-talent')
-                ->waitForText('Test Talent', 5)
+        $browser->visit('/talent')
+                ->waitForText('Talent', 5)
                 ->assertSee('Main Show Event')
                 ->assertSee('Workshop Event')
                 ->assertSee('General Event');
@@ -197,7 +197,7 @@ class GroupsTest extends DuskTestCase
         $event = Event::where('name', 'API Test Event')->first();
         $this->assertNotNull($event);
         
-        $role = Role::where('subdomain', 'test-talent')->first();
+        $role = Role::where('subdomain', 'talent')->first();
         $group = $role->groups()->where('slug', 'main-shows')->first();
         $this->assertNotNull($group);
         
@@ -229,7 +229,7 @@ class GroupsTest extends DuskTestCase
 
         $ch = curl_init();
         curl_setopt_array($ch, [
-            CURLOPT_URL => $baseUrl . '/api/events/test-talent',
+            CURLOPT_URL => $baseUrl . '/api/events/talent',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => json_encode($eventData),

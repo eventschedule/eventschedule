@@ -32,7 +32,7 @@ class TicketTest extends DuskTestCase
             $this->createTestEventWithTickets($browser);
 
             // Purchase ticket
-            $browser->visit('/test-talent/test-venue')
+            $browser->visit('/talent/venue')
                     ->press('Buy Tickets')
                     ->select('#ticket-0', '1')
                     ->scrollIntoView('button[type="submit"]')

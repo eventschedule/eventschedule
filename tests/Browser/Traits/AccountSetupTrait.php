@@ -9,7 +9,7 @@ trait AccountSetupTrait
     /**
      * Set up a test account with basic data
      */
-    protected function setupTestAccount(Browser $browser, string $name = 'Test Talent', string $email = 'test@gmail.com', string $password = 'password'): void
+    protected function setupTestAccount(Browser $browser, string $name = 'Talent', string $email = 'test@gmail.com', string $password = 'password'): void
     {
         // Sign up
         $browser->visit('/sign_up')
@@ -17,6 +17,7 @@ trait AccountSetupTrait
                 ->type('email', $email)
                 ->type('password', $password)
                 ->check('terms')
+                ->scrollIntoView('button[type="submit"]')
                 ->press('SIGN UP')
                 ->waitForLocation('/events', 5)
                 ->assertPathIs('/events')
@@ -26,7 +27,7 @@ trait AccountSetupTrait
     /**
      * Create a test venue
      */
-    protected function createTestVenue(Browser $browser, string $name = 'Test Venue', string $address = '123 Test St'): void
+    protected function createTestVenue(Browser $browser, string $name = 'Venue', string $address = '123 Test St'): void
     {
         $browser->visit('/new/venue')
                 ->waitForText('New Venue', 5)
@@ -43,7 +44,7 @@ trait AccountSetupTrait
     /**
      * Create a test talent
      */
-    protected function createTestTalent(Browser $browser, string $name = 'Test Talent'): void
+    protected function createTestTalent(Browser $browser, string $name = 'Talent'): void
     {
         $browser->visit('/new/talent')
                 ->waitForText('New Talent', 5)
@@ -59,7 +60,7 @@ trait AccountSetupTrait
     /**
      * Create a test curator
      */
-    protected function createTestCurator(Browser $browser, string $name = 'Test Curator'): void
+    protected function createTestCurator(Browser $browser, string $name = 'Curator'): void
     {
         $browser->visit('/new/curator')
                 ->waitForText('New Curator', 5)
@@ -77,7 +78,7 @@ trait AccountSetupTrait
     /**
      * Create a test event with tickets
      */
-    protected function createTestEventWithTickets(Browser $browser, string $talentName = 'Test Talent', string $venueName = 'Test Venue', string $eventName = 'Test Event'): void
+    protected function createTestEventWithTickets(Browser $browser, string $talentName = 'Talent', string $venueName = 'Venue', string $eventName = 'Test Event'): void
     {
         $browser->visit('/' . strtolower(str_replace(' ', '-', $talentName)) . '/add_event?date=' . date('Y-m-d', strtotime('+3 days')))
                 ->select('#selected_venue')
