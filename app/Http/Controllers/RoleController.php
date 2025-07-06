@@ -1395,7 +1395,7 @@ class RoleController extends Controller
             $role->save();
         }
 
-        return redirect()->route('role.show_unsubscribe', ['email' => $request->email])->with('status', __('messages.unsubscribed'));
+        return redirect()->route('role.show_unsubscribe', ['email' => $request->email]);
     }
 
     public function unsubscribeUser(Request $request)
