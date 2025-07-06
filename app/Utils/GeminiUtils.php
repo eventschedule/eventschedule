@@ -458,6 +458,23 @@ class GeminiUtils
         ];
 
         $images = $imageMap[$category] ?? $imageMap['general'];
-        return $images[array_rand($images)];
+        
+        // Get available header images (already excludes recently used ones)
+        $availableImages = \App\Models\BlogPost::getAvailableHeaderImages();
+        
+        // Filter to only include images from the current category
+        $categoryImages = array_intersect_key($availableImages, array_flip($images));
+        
+        // If no category images are available, use any available image
+        if (empty($categoryImages)) {
+            $categoryImages = $availableImages;
+        }
+        
+        // If still no images available, fall back to any image from the category
+        if (empty($categoryImages)) {
+            $categoryImages = array_flip($images);
+        }
+        
+        return array_rand($categoryImages);
     }
 }   
