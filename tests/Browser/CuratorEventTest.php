@@ -99,7 +99,6 @@ class CuratorEventTest extends DuskTestCase
                     ->waitForText('Edit Event', 5)
                     ->clickLink('Edit Event')
                     ->waitForText('Edit Event', 5)
-                    ->scrollIntoView('input[name="curators[]"]')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
                     ->waitForLocation('/first-curator/schedule', 5)
