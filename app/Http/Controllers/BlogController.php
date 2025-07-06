@@ -97,7 +97,7 @@ class BlogController extends Controller
         ]);
 
         $data = $request->all();
-
+        
         // Handle tags
         if ($request->has('tags')) {
             $tags = array_map('trim', explode(',', $request->tags));
@@ -107,7 +107,7 @@ class BlogController extends Controller
 
         // Set published_at if not provided but is_published is true
         if ($request->is_published && !$request->published_at) {
-            $data['published_at'] = now();
+            $data['published_at'] = now()->addSeconds(rand(-60 * 60 * 60, 60 * 60 * 60));
         }
 
         BlogPost::create($data);
