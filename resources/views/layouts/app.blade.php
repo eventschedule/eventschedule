@@ -42,7 +42,12 @@
     window.dataLayer = window.dataLayer || [];
 
     function gtag() {
-        dataLayer.push(arguments);
+        try {
+            dataLayer.push(arguments);
+        } catch (e) {
+            // Handle DataCloneError silently
+            console.warn('Analytics data could not be cloned:', e);
+        }
     }
     gtag('js', new Date());
     gtag('config', '{{ config('services.google.analytics') }}');

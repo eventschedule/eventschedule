@@ -17,17 +17,26 @@
 
     <link rel="icon" href="{{ asset('images/favicon.png') }}">
 
+    @if (! auth()->user() || ! auth()->user()->isAdmin())
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics') }}"></script>
     <script {!! nonce_attr() !!}>
     window.dataLayer = window.dataLayer || [];
 
     function gtag() {
-        dataLayer.push(arguments);
+        try {
+            dataLayer.push(arguments);
+        } catch (e) {
+            // Handle DataCloneError silently
+            console.warn('Analytics data could not be cloned:', e);
+        }
     }
     gtag('js', new Date());
     gtag('config', '{{ config('services.google.analytics') }}');
     </script>
+    @else
+    <script {!! nonce_attr() !!}>
+    @endif
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
