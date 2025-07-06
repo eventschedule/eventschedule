@@ -5,7 +5,7 @@
 
     @if (session('status') == 'verification-link-sent')
         <div class="mb-4 font-medium text-sm text-green-600 dark:text-green-400">
-            {{ __('messages.new_verification_link_has_been_sent') }}
+            {{ __('messages.verification_link_sent', ['email' => auth()->user()->email]) }}
         </div>
     @endif
 
