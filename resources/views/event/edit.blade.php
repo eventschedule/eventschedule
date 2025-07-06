@@ -170,7 +170,7 @@
 
   <form method="POST"
         @submit="validateForm"
-        action="{{ $event->exists ? route('event.update', ['subdomain' => $subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) : route('event.store', ['subdomain' => $subdomain]) }}"
+        action="{{ $event->exists ? route('event.update', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) : route('event.store', ['subdomain' => $subdomain]) }}"
         enctype="multipart/form-data">
 
         @csrf
@@ -610,9 +610,12 @@
                                         $selectedGroupId = null;
                                         if ($event->exists) {
                                             $selectedGroupId = $event->getGroupIdForSubdomain($effectiveRole->subdomain);
+                                            if ($selectedGroupId) {
+                                                $selectedGroupId = \App\Utils\UrlUtils::encodeId($selectedGroupId);
+                                            }
                                         }
                                     @endphp
-                                    <option value="{{ $group->id }}" {{ old('current_role_group_id', $selectedGroupId) == $group->id ? 'selected' : '' }}>{{ $group->translatedName() }}</option>
+                                    <option value="{{ \App\Utils\UrlUtils::encodeId($group->id) }}" {{ old('current_role_group_id', $selectedGroupId) == \App\Utils\UrlUtils::encodeId($group->id) ? 'selected' : '' }}>{{ $group->translatedName() }}</option>
                                 @endforeach
                             </select>
                             <x-input-error class="mt-2" :messages="$errors->get('current_role_group_id')" />
@@ -690,7 +693,7 @@
                             @if ($event->flyer_image_url)
                             <img src="{{ $event->flyer_image_url }}" style="max-height:120px" class="pt-3" />
                             <a href="#"
-                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.delete_image', ['subdomain' => $subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id), 'image_type' => 'flyer']) }}'; }"
+                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.delete_image', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id), 'image_type' => 'flyer']) }}'; }"
                                 class="hover:underline text-gray-900 dark:text-gray-100">
                                 {{ __('messages.delete_image') }}
                             </a>
@@ -739,9 +742,12 @@
                                                 $selectedGroupId = null;
                                                 if ($event->exists) {
                                                     $selectedGroupId = $event->getGroupIdForSubdomain($curator->subdomain);
+                                                    if ($selectedGroupId) {
+                                                        $selectedGroupId = \App\Utils\UrlUtils::encodeId($selectedGroupId);
+                                                    }
                                                 }
                                             @endphp
-                                            <option value="{{ $group->id }}" {{ old('curator_groups.' . $curator->encodeId(), $selectedGroupId) == $group->id ? 'selected' : '' }}>{{ $group->translatedName() }}</option>
+                                            <option value="{{ \App\Utils\UrlUtils::encodeId($group->id) }}" {{ old('curator_groups.' . $curator->encodeId(), $selectedGroupId) == \App\Utils\UrlUtils::encodeId($group->id) ? 'selected' : '' }}>{{ $group->translatedName() }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -946,7 +952,7 @@
                 <div>
                     @if ($event->exists)
                     <x-delete-button
-                        :url="route('event.delete', ['subdomain' => $subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)])"
+                        :url="route('event.delete', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)])"
                        >
                     </x-delete-button>
                     @endif

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Utils\UrlUtils;
 
 class Group extends Model
 {
@@ -15,6 +16,11 @@ class Group extends Model
     public function role()
     {
         return $this->belongsTo(\App\Models\Role::class);
+    }
+
+    public function encodeId()
+    {
+        return UrlUtils::encodeId($this->id);
     }
 
     public function translatedName()

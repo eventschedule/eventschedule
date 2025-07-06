@@ -245,13 +245,15 @@ class EventRepo
             if ($role && $role->isCurator()) {
                 $curatorEncodedId = UrlUtils::encodeId($role->id);
                 if (isset($curatorGroups[$curatorEncodedId]) && $curatorGroups[$curatorEncodedId]) {
-                    $event->roles()->updateExistingPivot($role->id, ['group_id' => $curatorGroups[$curatorEncodedId]]);
+                    $groupId = UrlUtils::decodeId($curatorGroups[$curatorEncodedId]);
+                    $event->roles()->updateExistingPivot($role->id, ['group_id' => $groupId]);
                 }
             }
             
             // If this is the current role and current_role_group_id is provided, add it to the pivot
             if ($role && $role->id === $currentRole->id && $request->has('current_role_group_id') && $request->current_role_group_id) {
-                $event->roles()->updateExistingPivot($role->id, ['group_id' => $request->current_role_group_id]);
+                $groupId = UrlUtils::decodeId($request->current_role_group_id);
+                $event->roles()->updateExistingPivot($role->id, ['group_id' => $groupId]);
             }            
         }
         

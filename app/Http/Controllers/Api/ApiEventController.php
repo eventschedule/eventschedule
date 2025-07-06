@@ -101,7 +101,7 @@ class ApiEventController extends Controller
             $groupSlug = $request->schedule;
             $group = $role->groups()->where('slug', $groupSlug)->first();
             if ($group) {
-                $request->merge(['current_role_group_id' => $group->id]);
+                $request->merge(['current_role_group_id' => UrlUtils::encodeId($group->id)]);
             } else {
                 return response()->json(['error' => 'Schedule not found: ' . $request->schedule], 422);
             }

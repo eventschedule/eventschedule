@@ -40,7 +40,7 @@
     $eventsForVue = [];
     foreach ($events as $event) {
         $eventsForVue[] = [
-            'id' => $event->id,
+            'id' => \App\Utils\UrlUtils::encodeId($event->id),
             'group_id' => isset($role) ? $event->getGroupIdForSubdomain($role->subdomain) : null,
             'category_id' => $event->category_id,
             'name' => $event->translatedName(),
@@ -62,7 +62,7 @@
     if (isset($role) && $role->groups) {
         foreach ($role->groups as $group) {
             $groupsForVue[] = [
-                'id' => $group->id,
+                'id' => \App\Utils\UrlUtils::encodeId($group->id),
                 'slug' => $group->slug,
                 'name' => $group->translatedName()
             ];
@@ -544,7 +544,7 @@ const calendarApp = createApp({
                 if (this.selectedGroup) {
                     // Find the group by slug to get its ID for filtering
                     const selectedGroupObj = this.groups.find(group => group.slug === this.selectedGroup);
-                    if (selectedGroupObj && event.group_id != selectedGroupObj.id) {
+                    if (selectedGroupObj && event.group_id !== selectedGroupObj.id) {
                         return false;
                     }
                 }
@@ -585,7 +585,7 @@ const calendarApp = createApp({
             if (this.selectedGroup) {
                 // Find the group by slug to get its ID for filtering
                 const selectedGroupObj = this.groups.find(group => group.slug === this.selectedGroup);
-                if (selectedGroupObj && event.group_id != selectedGroupObj.id) {
+                if (selectedGroupObj && event.group_id !== selectedGroupObj.id) {
                     return false;
                 }
             }
