@@ -168,6 +168,20 @@ class BlogPost extends Model
 
     public static function getAvailableHeaderImages()
     {
-        return self::$availableHeaderImages;
+        // Get the last 2 used featured images from the database
+        $recentlyUsedImages = self::whereNotNull('featured_image')
+            ->where('featured_image', '!=', '')
+            ->orderBy('created_at', 'desc')
+            ->limit(2)
+            ->pluck('featured_image')
+            ->toArray();
+
+        // Filter out the recently used images from available options
+        $availableImages = self::$availableHeaderImages;
+        foreach ($recentlyUsedImages as $usedImage) {
+            unset($availableImages[$usedImage]);
+        }
+
+        return $availableImages;
     }
 }
