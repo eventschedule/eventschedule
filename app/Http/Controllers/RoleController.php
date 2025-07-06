@@ -1552,6 +1552,7 @@ class RoleController extends Controller
 
         // Format events for frontend
         $eventsData = $events->map(function ($event) use ($subdomain, $role) {
+            $groupId = $event->getGroupIdForSubdomain($role->subdomain);
             return [
                 'id' => $event->id,
                 'name' => $event->translatedName(),
@@ -1560,7 +1561,7 @@ class RoleController extends Controller
                 'local_starts_at' => $event->localStartsAt(),
                 'image_url' => $event->getImageUrl(),
                 'guest_url' => $event->getGuestUrl($subdomain, ''),
-                'group_id' => $event->getGroupIdForSubdomain($role->subdomain),
+                'group_id' => $groupId ? \App\Utils\UrlUtils::encodeId($groupId) : null,
                 'category_id' => $event->category_id,
             ];
         });
