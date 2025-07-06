@@ -140,15 +140,10 @@ Route::middleware(['auth', 'verified'])->group(function ()
     
         $path = '/tmp/' . $filename;
         
-        // Verify the resolved path is still within /tmp directory
-        $realPath = realpath($path);
-        if (!$realPath || !str_starts_with($realPath, '/tmp/')) {
-            abort(404);
+        if (file_exists($path)) {
+            return response()->file($path);
         }
-        
-        if (file_exists($realPath)) {
-            return response()->file($realPath);
-        }
+
         abort(404);
     })->name('event.tmp_image');
 
