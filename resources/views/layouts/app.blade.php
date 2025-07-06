@@ -46,6 +46,8 @@
     }
     gtag('js', new Date());
     gtag('config', '{{ config('services.google.analytics') }}');
+    @else
+    <script {!! nonce_attr() !!}>
     @endif
 
     function onPopUpClick(id, event) {
