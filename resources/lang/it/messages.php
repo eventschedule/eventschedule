@@ -42,7 +42,6 @@ return [
     'already_registered' => 'Sei già registrato?',
     'reset_password' => 'Reset Password',
     'thanks_for_signing_up' => 'Grazie per esserti registrato! Prima di iniziare, verifica la tua email cliccando sul link che ti abbiamo inviato. Se non hai ricevuto l\'email, saremo felici di inviartene un\'altra.',
-    'new_verification_link_has_been_sent' => 'Un nuovo link di verifica è stato inviato all\'indirizzo email fornito durante la registrazione.',
     'resend_verification_email' => 'Reinvia Email di Verifica',
     'log_out' => 'Esci',
     'cancel' => 'Annulla',
@@ -488,4 +487,8 @@ return [
     'start_following_schedules' => 'Inizia a seguire i programmi per vedere i loro eventi e aggiornamenti',
     'no_sales' => 'Nessuna vendita',
     'no_sales_description' => 'Nessuna vendita di biglietti trovata. Crea eventi per iniziare a vendere biglietti.',
+    'no_tickets' => 'Nessun biglietto',
+    'no_tickets_description' => 'Nessun biglietto trovato. Una volta acquistato un biglietto, apparirà qui.',
+    'verification_link_sent' => 'Un link di verifica è stato inviato a :email.',
+    'import_event_help' => 'Nota: i dati sono condivisi con :link per analizzare i dettagli dell\'evento.',
 ];

@@ -42,7 +42,6 @@ return [
     'already_registered' => 'Al geregistreerd?',
     'reset_password' => 'Wachtwoord Resetten',
     'thanks_for_signing_up' => 'Bedankt voor je registratie! Controleer je e-mailadres door op de link te klikken die we net hebben gestuurd. Als je de e-mail niet hebt ontvangen, sturen we graag een nieuwe.',
-    'new_verification_link_has_been_sent' => 'Een nieuwe verificatielink is verzonden naar het opgegeven e-mailadres.',
     'resend_verification_email' => 'Verstuur Verificatie E-mail Opnieuw',
     'log_out' => 'Uitloggen',
     'cancel' => 'Annuleren',
@@ -485,4 +484,8 @@ return [
     'start_following_schedules' => 'Begin met het volgen van schema\'s om hun evenementen en updates te zien',
     'no_sales' => 'Geen verkopen',
     'no_sales_description' => 'Geen ticketverkopen gevonden. Maak evenementen aan om te beginnen met het verkopen van tickets.',
+    'no_tickets' => 'Geen tickets',
+    'no_tickets_description' => 'Geen tickets gevonden. Zodra je een ticket koopt, verschijnt het hier.',
+    'verification_link_sent' => 'Een verificatielink is verzonden naar :email.',
+    'import_event_help' => 'Opmerking: gegevens worden gedeeld met :link om de evenementdetails te analyseren.',
 ];

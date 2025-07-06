@@ -42,7 +42,6 @@ return [
     'already_registered' => '¿Ya estás registrado?',
     'reset_password' => 'Restablecer Contraseña',
     'thanks_for_signing_up' => '¡Gracias por registrarte! Antes de comenzar, ¿podrías verificar tu dirección de correo electrónico haciendo clic en el enlace que te acabamos de enviar? Si no recibiste el correo, con gusto te enviaremos otro.',
-    'new_verification_link_has_been_sent' => 'Se ha enviado un nuevo enlace de verificación a la dirección de correo electrónico que proporcionaste durante el registro.',
     'resend_verification_email' => 'Reenviar Correo de Verificación',
     'log_out' => 'Cerrar Sesión',
     'cancel' => 'Cancelar',
@@ -488,4 +487,8 @@ return [
     'start_following_schedules' => 'Comienza a seguir horarios para ver sus eventos y actualizaciones',
     'no_sales' => 'Sin ventas',
     'no_sales_description' => 'No se encontraron ventas de entradas. Crea eventos para comenzar a vender entradas.',
+    'no_tickets' => 'Sin entradas',
+    'no_tickets_description' => 'No se encontraron entradas. Una vez que compres una entrada, aparecerá aquí.',
+    'verification_link_sent' => 'Se ha enviado un enlace de verificación a :email.',
+    'import_event_help' => 'Nota: los datos se comparten con :link para analizar los detalles del evento.',
 ];
