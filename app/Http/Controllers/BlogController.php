@@ -126,10 +126,12 @@ class BlogController extends Controller
         } else {
             $post = \App\Models\BlogPost::published()->where('slug', $slug)->firstOrFail();
         }
+
         // Increment view count only for public views
-        if (!$isPreview) {
+        if (! $isPreview && (! auth()->user() || ! auth()->user()->isAdmin())) {
             $post->incrementViewCount();
         }
+
         // Get related posts
         $relatedPosts = \App\Models\BlogPost::published()
             ->where('id', '!=', $post->id)
