@@ -379,6 +379,26 @@ class Role extends Model implements MustVerifyEmail
 
         $subdomain = self::cleanSubdomain($name);
 
+        // Check variations of the subdomain
+        $parts = explode('-', $subdomain);
+        $variations = [];
+        
+        // Build variations from left to right (live, live-music, live-music-shop)
+        $current = '';
+        foreach ($parts as $i => $part) {
+            $current = $current ? $current . '-' . $part : $part;
+            $variations[] = $current;
+        }
+
+        // Check each variation in order - use the first available one
+        foreach ($variations as $variation) {
+            if (!self::where('subdomain', $variation)->exists()) {
+                $subdomain = $variation;
+                break;
+            }
+        }
+
+        // If no variation is available, use the original subdomain with a number suffix
         $originalSubdomain = $subdomain;
         $count = 1;
 
