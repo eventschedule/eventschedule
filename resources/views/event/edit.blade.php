@@ -710,6 +710,11 @@
 
                         @php
                             $curators = $user->allCurators();
+                            /*
+                            $curators = $curators->filter(function($curator) use ($subdomain) {
+                                return $curator->subdomain !== $subdomain;
+                            });
+                            */
                         @endphp
                         
                         @if ($curators->count() > 0)

@@ -46,8 +46,8 @@ class CuratorEventTest extends DuskTestCase
 
             // Step 3: Create third user who follows both curator roles
             $user3Name = 'Event Creator';
-            $user3Email = 'creator@test.com';
-            $user3Password = 'password123';
+            $user3Email = 'test@gmail.com';
+            $user3Password = 'password';
             
             $this->setupTestAccount($browser, $user3Name, $user3Email, $user3Password);
             
