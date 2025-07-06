@@ -29,7 +29,10 @@ trait AccountSetupTrait
     protected function createTestVenue(Browser $browser, string $name = 'Test Venue', string $address = '123 Test St'): void
     {
         $browser->visit('/new/venue')
+                ->waitForText('New Venue', 5)
+                ->clear('name')
                 ->type('name', $name)
+                
                 ->type('address1', $address)
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
@@ -43,8 +46,10 @@ trait AccountSetupTrait
     protected function createTestTalent(Browser $browser, string $name = 'Test Talent'): void
     {
         $browser->visit('/new/talent')
+                ->waitForText('New Talent', 5)
                 ->clear('name')
                 ->type('name', $name)
+                ->pause(1000)
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
                 ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 5)
@@ -57,7 +62,10 @@ trait AccountSetupTrait
     protected function createTestCurator(Browser $browser, string $name = 'Test Curator'): void
     {
         $browser->visit('/new/curator')
+                ->waitForText('New Curator', 5)
+                ->clear('name')
                 ->type('name', $name)
+                ->pause(1000)
                 ->scrollIntoView('input[name="is_open"]')
                 ->check('is_open')
                 ->scrollIntoView('button[type="submit"]')
