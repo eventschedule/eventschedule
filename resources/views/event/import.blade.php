@@ -36,6 +36,9 @@
                                         @input="debouncedPreview"
                                         @paste="handlePaste" autofocus {{ config('services.google.gemini_key') ? '' : 'disabled' }}
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
+                                    <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                        {!! __('messages.import_event_help', ['link' => '<a href="https://gemini.google.com" class="hover:underline" target="_blank">Gemini</a>']) !!}
+                                    </div>
                                     <x-input-error class="mt-2" :messages="$errors->get('event_details')" />
 
                                     @if (! config('services.google.gemini_key'))

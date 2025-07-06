@@ -496,4 +496,5 @@ return [
     'no_tickets' => 'No tickets',
     'no_tickets_description' => 'No tickets found. Once you purchase a ticket, it will appear here.',
     'verification_link_sent' => 'A verification link has been sent to :email.',
+    'import_event_help' => 'Note: data is shared with :link to parse the event details.',
 ];
