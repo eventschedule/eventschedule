@@ -451,6 +451,8 @@ class EventController extends Controller
 
     public function curate(Request $request, $subdomain, $hash)
     {
+        return redirect()->back()->with('error', __('messages.not_authorized'));
+
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
 
