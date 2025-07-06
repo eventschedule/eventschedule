@@ -42,7 +42,6 @@ return [
     'already_registered' => 'Already registered?',
     'reset_password' => 'Reset Password',
     'thanks_for_signing_up' => 'Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.',
-    'new_verification_link_has_been_sent' => 'A new verification link has been sent to the email address you provided during registration.',
     'resend_verification_email' => 'Resend Verification Email',
     'log_out' => 'Log Out',
     'cancel' => 'Cancel',
@@ -496,4 +495,5 @@ return [
     'no_sales_description' => 'No sales found. Create events to start selling tickets.',
     'no_tickets' => 'No tickets',
     'no_tickets_description' => 'No tickets found. Once you purchase a ticket, it will appear here.',
+    'verification_link_sent' => 'A verification link has been sent to :email.',
 ];
