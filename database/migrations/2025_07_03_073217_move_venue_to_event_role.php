@@ -12,7 +12,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        /*
         // First, backup the venue_id column
         Schema::table('events', function (Blueprint $table) {
             $table->foreignId('venue_id_bak')->nullable()->after('venue_id');
@@ -20,7 +19,6 @@ return new class extends Migration
 
         // Copy venue_id to venue_id_bak
         DB::statement('UPDATE events SET venue_id_bak = venue_id WHERE venue_id IS NOT NULL');
-        */
 
         // Add venue relationships to event_role table for existing events with venues
         $eventsWithVenues = DB::table('events')
