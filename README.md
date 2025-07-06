@@ -18,6 +18,9 @@
 - [Hosted](https://www.eventschedule.com): Our hosted version is a Software as a Service (SaaS) solution. You're up and running in under 5 minutes, with no need to worry about hosting or server infrastructure.
 - [Self-Hosted](https://github.com/eventschedule/eventschedule?tab=readme-ov-file#installation-guide): For those who prefer to manage their own hosting and server infrastructure. This version gives you full control and flexibility.
 
+> [!NOTE]  
+> You can use [Softaculous](https://www.softaculous.com/apps/calendars/Event_Schedule) to automatically install the selfhost app.
+
 ## Features
 
 - 🗓️ **Event Calendars:** Create and share event calendars effortlessly to keep your audience informed.  
