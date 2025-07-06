@@ -190,10 +190,8 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
-        foreach ($event->roles as $role) {
-            if ($this->isMember($role->subdomain) && ! $role->isCurator()) {
-                return true;
-            }
+        if ($this->isMember($event->subdomain)) {
+            return true;
         }
 
         return false;
