@@ -42,7 +42,6 @@ return [
     'already_registered' => 'Bereits registriert?',
     'reset_password' => 'Passwort zurücksetzen',
     'thanks_for_signing_up' => 'Vielen Dank für Ihre Anmeldung! Bevor Sie loslegen, bestätigen Sie bitte Ihre E-Mail-Adresse, indem Sie auf den Link in der E-Mail klicken, die wir Ihnen gesendet haben. Wenn Sie die E-Mail nicht erhalten haben, senden wir Ihnen gerne eine neue.',
-    'new_verification_link_has_been_sent' => 'Ein neuer Bestätigungslink wurde an die angegebene E-Mail-Adresse gesendet.',
     'resend_verification_email' => 'Bestätigungs-E-Mail erneut senden',
     'log_out' => 'Abmelden',
     'cancel' => 'Abbrechen',
@@ -492,4 +491,8 @@ return [
     'start_following_schedules' => 'Beginnen Sie mit dem Folgen von Zeitplänen, um deren Veranstaltungen und Updates zu sehen',
     'no_sales' => 'Keine Verkäufe',
     'no_sales_description' => 'Keine Ticketverkäufe gefunden. Erstellen Sie Veranstaltungen, um mit dem Verkauf von Tickets zu beginnen.',
+    'no_tickets' => 'Keine Tickets',
+    'no_tickets_description' => 'Keine Tickets gefunden. Sobald Sie ein Ticket kaufen, wird es hier angezeigt.',
+    'verification_link_sent' => 'Ein Bestätigungslink wurde an :email gesendet.',
+    'import_event_help' => 'Hinweis: Daten werden mit :link geteilt, um die Veranstaltungsdetails zu analysieren.',
 ];
