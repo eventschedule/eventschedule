@@ -28,6 +28,9 @@ class CheckData extends Command
      */
     public function handle()
     {
+        // TODO
+        // check all roles have emails and subdomains 
+
         $errors = [];
         $shouldFix = $this->option('fix') == 'true';
 
