@@ -24,7 +24,7 @@ class ProfileController extends Controller
             'user' => $request->user(),
         ];
 
-        if (! config('app.hosted')) {
+        if (! config('app.hosted') && ! config('app.testing')) {
             $data['version_installed'] = $updater->source()->getVersionInstalled();
 
             try {
