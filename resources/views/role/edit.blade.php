@@ -1069,7 +1069,7 @@
                                 <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                                     <div class="mb-4">
                                         <x-input-label for="import_url_{{ $i }}" :value="__('messages.url')" />
-                                        <x-text-input name="import_urls[{{ $i }}]" type="url" class="mt-1 block w-full" :value="$url" placeholder="https://example.com/events" />
+                                        <x-text-input name="import_urls[]" type="url" class="mt-1 block w-full" :value="$url" placeholder="https://example.com/events" />
                                     </div>
                                     <div class="flex gap-4 items-center">
                                         <x-secondary-button onclick="this.parentElement.parentElement.remove()" type="button">
@@ -1097,7 +1097,7 @@
                                 <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                                     <div class="mb-4">
                                         <x-input-label for="import_city_{{ $i }}" :value="__('messages.city')" />
-                                        <x-text-input name="import_cities[{{ $i }}]" type="text" class="mt-1 block w-full" :value="$city" placeholder="New York" />
+                                        <x-text-input name="import_cities[]" type="text" class="mt-1 block w-full" :value="$city" placeholder="New York" />
                                     </div>
                                     <div class="flex gap-4 items-center">
                                         <x-secondary-button onclick="this.parentElement.parentElement.remove()" type="button">
