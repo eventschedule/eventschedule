@@ -664,89 +664,6 @@
                     </div>
                 </div>
 
-                @if($role->isCurator())
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
-                    <div class="max-w-xl">
-
-                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('messages.auto_import_settings') }}
-                        </h2>
-
-                        <div class="mb-6">
-                            <h3 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">
-                                {{ __('messages.import_urls') }}
-                            </h3>
-                            <div id="import-urls-list">
-                                <div id="import-url-items">
-                                    @php $urls = $role->import_config['urls'] ?? []; @endphp
-                                    @foreach(old('import_urls', $urls) as $i => $url)
-                                        <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                                            <div class="mb-4">
-                                                <x-input-label for="import_url_{{ $i }}" :value="__('messages.url')" />
-                                                <x-text-input name="import_urls[{{ $i }}]" type="url" class="mt-1 block w-full" :value="$url" placeholder="https://example.com/events" />
-                                            </div>
-                                            <div class="flex gap-4 items-center">
-                                                <x-secondary-button onclick="this.parentElement.parentElement.remove()" type="button">
-                                                    {{ __('messages.remove') }}
-                                                </x-secondary-button>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                                <x-secondary-button type="button" onclick="addImportUrlField()">
-                                    {{ __('messages.add') }}
-                                </x-secondary-button>
-                            </div>
-                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                {{ __('messages.import_urls_help') }}
-                            </p>
-                            <x-input-error class="mt-2" :messages="$errors->get('import_urls')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <h3 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">
-                                {{ __('messages.import_cities') }}
-                            </h3>
-                            <div id="import-cities-list">
-                                <div id="import-city-items">
-                                    @php $cities = $role->import_config['cities'] ?? []; @endphp
-                                    @foreach(old('import_cities', $cities) as $i => $city)
-                                        <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                                            <div class="mb-4">
-                                                <x-input-label for="import_city_{{ $i }}" :value="__('messages.city')" />
-                                                <x-text-input name="import_cities[{{ $i }}]" type="text" class="mt-1 block w-full" :value="$city" placeholder="New York" />
-                                            </div>
-                                            <div class="flex gap-4 items-center">
-                                                <x-secondary-button onclick="this.parentElement.parentElement.remove()" type="button">
-                                                    {{ __('messages.remove') }}
-                                                </x-secondary-button>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                                <x-secondary-button type="button" onclick="addImportCityField()">
-                                    {{ __('messages.add') }}
-                                </x-secondary-button>
-                            </div>
-                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                {{ __('messages.import_cities_help') }}
-                            </p>
-                            <x-input-error class="mt-2" :messages="$errors->get('import_cities')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-secondary-button onclick="testImport()" type="button">
-                                {{ __('messages.test_import') }}
-                            </x-secondary-button>
-                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                {{ __('messages.import_test_help') }}
-                            </p>
-                        </div>
-
-                    </div>
-                </div>
-                @endif
-
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="address">
                     <div>
 
@@ -1129,9 +1046,85 @@
 
                     </div>
                 </div>
+                
+            </div>
+        </div>
+
+        @if($role->isCurator())
+        <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="import-settings">
+            <div class="max-w-xl">
+
+                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                    {{ __('messages.auto_import_settings') }}
+                </h2>
+
+                <div class="mb-6">
+                    <h3 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">
+                        {{ __('messages.import_urls') }}
+                    </h3>
+                    <div id="import-urls-list">
+                        <div id="import-url-items">
+                            @php $urls = $role->import_config['urls'] ?? []; @endphp
+                            @foreach(old('import_urls', $urls) as $i => $url)
+                                <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                    <div class="mb-4">
+                                        <x-input-label for="import_url_{{ $i }}" :value="__('messages.url')" />
+                                        <x-text-input name="import_urls[{{ $i }}]" type="url" class="mt-1 block w-full" :value="$url" placeholder="https://example.com/events" />
+                                    </div>
+                                    <div class="flex gap-4 items-center">
+                                        <x-secondary-button onclick="this.parentElement.parentElement.remove()" type="button">
+                                            {{ __('messages.remove') }}
+                                        </x-secondary-button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                        <x-secondary-button type="button" onclick="addImportUrlField()">
+                            {{ __('messages.add') }}
+                        </x-secondary-button>
+                    </div>
+                    <x-input-error class="mt-2" :messages="$errors->get('import_urls')" />
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">
+                        {{ __('messages.import_cities') }}
+                    </h3>
+                    <div id="import-cities-list">
+                        <div id="import-city-items">
+                            @php $cities = $role->import_config['cities'] ?? []; @endphp
+                            @foreach(old('import_cities', $cities) as $i => $city)
+                                <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                    <div class="mb-4">
+                                        <x-input-label for="import_city_{{ $i }}" :value="__('messages.city')" />
+                                        <x-text-input name="import_cities[{{ $i }}]" type="text" class="mt-1 block w-full" :value="$city" placeholder="New York" />
+                                    </div>
+                                    <div class="flex gap-4 items-center">
+                                        <x-secondary-button onclick="this.parentElement.parentElement.remove()" type="button">
+                                            {{ __('messages.remove') }}
+                                        </x-secondary-button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                        <x-secondary-button type="button" onclick="addImportCityField()">
+                            {{ __('messages.add') }}
+                        </x-secondary-button>
+                    </div>
+                    <x-input-error class="mt-2" :messages="$errors->get('import_cities')" />
+                </div>
+
+                <div class="mb-6">
+                    <x-secondary-button onclick="testImport()" type="button">
+                        {{ __('messages.test_import') }}
+                    </x-secondary-button>
+                </div>
 
             </div>
         </div>
+        @endif
+
+
 
         <div class="max-w-7xl mx-auto space-y-6 mt-3">
             @if (! $role->exists)
