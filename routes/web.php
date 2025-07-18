@@ -117,6 +117,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/import', [EventController::class, 'showImport'])->name('event.show_import');
     Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse');    
     Route::post('/{subdomain}/import', [EventController::class, 'import'])->name('event.import');    
+    Route::post('/{subdomain}/test_import', [RoleController::class, 'testImport'])->name('role.test_import');
     Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|availability|requests|profile|followers|team|plan');
 
     Route::post('/{subdomain}/upload_image', [EventController::class, 'uploadImage'])->name('event.upload_image');

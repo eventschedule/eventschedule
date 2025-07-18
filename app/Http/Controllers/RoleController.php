@@ -957,6 +957,15 @@ class RoleController extends Controller
             $role->background_colors = $request->custom_color1 . ', ' . $request->custom_color2;
         }
 
+        // Handle import configuration for curator roles
+        if ($role->isCurator()) {
+            $importConfig = [
+                'urls' => array_filter($request->input('import_urls', []), 'trim'),
+                'cities' => array_filter($request->input('import_cities', []), 'trim')
+            ];
+            $role->import_config = $importConfig;
+        }
+
         $role->save();
 
         // Sync groups
@@ -1582,5 +1591,65 @@ class RoleController extends Controller
         $role->save();
 
         return redirect()->back()->with('message', __('messages.plan_changed'));
+    }
+
+    public function testImport(Request $request, $subdomain)
+    {
+        if (!auth()->user()->isMember($subdomain)) {
+            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        
+        if (!$role->isCurator()) {
+            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
+        }
+
+        $roleId = $request->input('role_id');
+        
+        if (!$roleId) {
+            return response()->json(['success' => false, 'message' => __('messages.role_id_required')]);
+        }
+
+        try {
+            // Run the console command for this specific role
+            $command = "php artisan app:import-curator-events --role_id={$roleId} --debug";
+            $output = shell_exec($command . ' 2>&1');
+            
+            // Parse the output to extract information
+            $eventsProcessed = 0;
+            $errors = [];
+            
+            // Look for patterns in the output
+            if (preg_match('/(\d+) events processed/', $output, $matches)) {
+                $eventsProcessed = (int)$matches[1];
+            }
+            
+            if (preg_match('/(\d+) total errors/', $output, $matches)) {
+                $totalErrors = (int)$matches[1];
+            }
+            
+            // Check if the command was successful
+            if (strpos($output, 'Import completed') !== false) {
+                return response()->json([
+                    'success' => true,
+                    'events_processed' => $eventsProcessed,
+                    'message' => __('messages.import_test_success'),
+                    'output' => $output
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('messages.import_test_error'),
+                    'output' => $output
+                ]);
+            }
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.import_test_error') . ': ' . $e->getMessage()
+            ]);
+        }
     }
 }
