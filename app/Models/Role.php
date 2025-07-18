@@ -56,6 +56,7 @@ class Role extends Model implements MustVerifyEmail
         'geo_lon',
         'show_email',
         'is_open',
+        'import_config',
     ];
 
     protected static function boot()
@@ -651,5 +652,49 @@ class Role extends Model implements MustVerifyEmail
     public function groups()
     {
         return $this->hasMany(\App\Models\Group::class);
+    }
+
+    /**
+     * Get the import configuration as an array
+     */
+    public function getImportConfigAttribute($value)
+    {
+        if (!$value) {
+            return [
+                'urls' => [],
+                'cities' => []
+            ];
+        }
+        
+        $config = json_decode($value, true);
+        return $config ?: [
+            'urls' => [],
+            'cities' => []
+        ];
+    }
+
+    /**
+     * Set the import configuration from an array
+     */
+    public function setImportConfigAttribute($value)
+    {
+        if (is_array($value)) {
+            $this->attributes['import_config'] = json_encode($value);
+        } else {
+            $this->attributes['import_config'] = $value;
+        }
+    }
+
+    /**
+     * Check if this curator has import configuration
+     */
+    public function hasImportConfig()
+    {
+        if (!$this->isCurator()) {
+            return false;
+        }
+        
+        $config = $this->import_config;
+        return !empty($config['urls']) || !empty($config['cities']);
     }
 }

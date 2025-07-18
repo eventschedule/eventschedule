@@ -664,6 +664,89 @@
                     </div>
                 </div>
 
+                @if($role->isCurator())
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                    <div class="max-w-xl">
+
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                            {{ __('messages.auto_import_settings') }}
+                        </h2>
+
+                        <div class="mb-6">
+                            <h3 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">
+                                {{ __('messages.import_urls') }}
+                            </h3>
+                            <div id="import-urls-list">
+                                <div id="import-url-items">
+                                    @php $urls = $role->import_config['urls'] ?? []; @endphp
+                                    @foreach(old('import_urls', $urls) as $i => $url)
+                                        <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                            <div class="mb-4">
+                                                <x-input-label for="import_url_{{ $i }}" :value="__('messages.url')" />
+                                                <x-text-input name="import_urls[{{ $i }}]" type="url" class="mt-1 block w-full" :value="$url" placeholder="https://example.com/events" />
+                                            </div>
+                                            <div class="flex gap-4 items-center">
+                                                <x-secondary-button onclick="this.parentElement.parentElement.remove()" type="button">
+                                                    {{ __('messages.remove') }}
+                                                </x-secondary-button>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <x-secondary-button type="button" onclick="addImportUrlField()">
+                                    {{ __('messages.add') }}
+                                </x-secondary-button>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                {{ __('messages.import_urls_help') }}
+                            </p>
+                            <x-input-error class="mt-2" :messages="$errors->get('import_urls')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <h3 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">
+                                {{ __('messages.import_cities') }}
+                            </h3>
+                            <div id="import-cities-list">
+                                <div id="import-city-items">
+                                    @php $cities = $role->import_config['cities'] ?? []; @endphp
+                                    @foreach(old('import_cities', $cities) as $i => $city)
+                                        <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                            <div class="mb-4">
+                                                <x-input-label for="import_city_{{ $i }}" :value="__('messages.city')" />
+                                                <x-text-input name="import_cities[{{ $i }}]" type="text" class="mt-1 block w-full" :value="$city" placeholder="New York" />
+                                            </div>
+                                            <div class="flex gap-4 items-center">
+                                                <x-secondary-button onclick="this.parentElement.parentElement.remove()" type="button">
+                                                    {{ __('messages.remove') }}
+                                                </x-secondary-button>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <x-secondary-button type="button" onclick="addImportCityField()">
+                                    {{ __('messages.add') }}
+                                </x-secondary-button>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                {{ __('messages.import_cities_help') }}
+                            </p>
+                            <x-input-error class="mt-2" :messages="$errors->get('import_cities')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-secondary-button onclick="testImport()" type="button">
+                                {{ __('messages.test_import') }}
+                            </x-secondary-button>
+                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                {{ __('messages.import_test_help') }}
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+                @endif
+
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="address">
                     <div>
 
@@ -1171,5 +1254,101 @@ function toggleGroupSlugEdit(groupId) {
         }
         document.getElementById(`group_slug_${groupId}`).focus();
     }
+}
+
+function testImport() {
+    // Collect URLs from the new structure
+    const urlInputs = document.querySelectorAll('input[name^="import_urls["]');
+    const urls = Array.from(urlInputs).map(input => input.value.trim()).filter(url => url);
+    
+    // Collect cities from the new structure
+    const cityInputs = document.querySelectorAll('input[name^="import_cities["]');
+    const cities = Array.from(cityInputs).map(input => input.value.trim()).filter(city => city);
+    
+    if (urls.length === 0 && cities.length === 0) {
+        alert('{{ __("messages.please_enter_urls_or_cities") }}');
+        return;
+    }
+    
+    // Show loading state
+    const button = event.target;
+    const originalText = button.textContent;
+    button.textContent = '{{ __("messages.testing") }}...';
+    button.disabled = true;
+    
+    // Only test import if we have a subdomain (existing role)
+    @if($role->exists)
+    // Make AJAX request to run console command
+    fetch('{{ route("role.test_import", ["subdomain" => $role->subdomain]) }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            role_id: '{{ $role->id }}',
+            urls: urls,
+            cities: cities
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(`{{ __("messages.import_test_success") }}: ${data.events_processed} events processed`);
+        } else {
+            alert(`{{ __("messages.import_test_error") }}: ${data.message}`);
+        }
+    })
+    .catch(error => {
+        alert('{{ __("messages.import_test_error") }}: ' + error.message);
+    })
+    .finally(() => {
+        button.textContent = originalText;
+        button.disabled = false;
+    });
+    @else
+    // For new roles, just show a message
+    alert('{{ __("messages.save_role_first_to_test_import") }}');
+    button.textContent = originalText;
+    button.disabled = false;
+    @endif
+}
+
+function addImportUrlField() {
+    const container = document.getElementById('import-url-items');
+    const idx = container.children.length;
+    const div = document.createElement('div');
+    div.className = 'mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg';
+    div.innerHTML = `
+        <div class="mb-4">
+            <label for="import_url_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.url') }}</label>
+            <input name="import_urls[new_${idx}]" type="url" id="import_url_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" placeholder="https://example.com/events" />
+        </div>
+        <div class="flex gap-4 items-center">
+            <button type="button" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150" onclick="this.parentElement.parentElement.remove()">
+                {{ __('messages.remove') }}
+            </button>
+        </div>
+    `;
+    container.appendChild(div);
+}
+
+function addImportCityField() {
+    const container = document.getElementById('import-city-items');
+    const idx = container.children.length;
+    const div = document.createElement('div');
+    div.className = 'mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg';
+    div.innerHTML = `
+        <div class="mb-4">
+            <label for="import_city_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.city') }}</label>
+            <input name="import_cities[new_${idx}]" type="text" id="import_city_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" placeholder="New York" />
+        </div>
+        <div class="flex gap-4 items-center">
+            <button type="button" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150" onclick="this.parentElement.parentElement.remove()">
+                {{ __('messages.remove') }}
+            </button>
+        </div>
+    `;
+    container.appendChild(div);
 }
 </script>
