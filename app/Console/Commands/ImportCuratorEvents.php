@@ -86,27 +86,20 @@ class ImportCuratorEvents extends Command
             if (!empty($config['urls'])) {
                 $this->info("Processing " . count($config['urls']) . " URL(s) for curator {$curator->name}");
                 
-                        foreach ($config['urls'] as $url) {
-            try {
-                $urlEvents = $this->processUrl($curator, $url, $debug);
-                $eventsProcessed += $urlEvents;
-                $this->info("Processed {$urlEvents} events from URL: {$url}");
-            } catch (\Exception $e) {
-                $errorsForCurator++;
-                $totalErrors++;
-                $this->error("Error processing URL {$url}: " . $e->getMessage());
-                if ($debug) {
-                    Log::error("Import error for curator {$curator->id}, URL {$url}: " . $e->getMessage());
+                foreach ($config['urls'] as $url) {
+                    try {
+                        $urlEvents = $this->processUrl($curator, $url, $debug);
+                        $eventsProcessed += $urlEvents;
+                        $this->info("Processed {$urlEvents} events from URL: {$url}");
+                    } catch (\Exception $e) {
+                        $errorsForCurator++;
+                        $totalErrors++;
+                        $this->error("Error processing URL {$url}: " . $e->getMessage());
+                        if ($debug) {
+                            Log::error("Import error for curator {$curator->id}, URL {$url}: " . $e->getMessage());
+                        }
+                    }
                 }
-            }
-        }
-            }
-
-            // Process cities (placeholder for future implementation)
-            if (!empty($config['cities'])) {
-                $this->info("Processing " . count($config['cities']) . " city(ies) for curator {$curator->name}");
-                // TODO: Implement city-based event discovery
-                $this->warn("City-based event discovery not yet implemented");
             }
 
             $totalEvents += $eventsProcessed;
@@ -302,6 +295,19 @@ class ImportCuratorEvents extends Command
                 $this->line("Could not extract event details from: {$eventUrl}");
             }
             return false;
+        }
+
+        $config = $curator->import_config;
+
+        // Process cities (placeholder for future implementation)
+        if (! empty($config['cities'])) {
+            if (! in_array(strtolower($eventDetails['event_city']), $config['cities']) && ! in_array(strtolower($eventDetails['event_city_en']), $config['cities'])) {
+                if ($debug) {
+                    $this->warn("Event city ({$eventDetails['event_city']}) does not match configured city");
+                }
+
+                return false;
+            }
         }
 
         // Create the event

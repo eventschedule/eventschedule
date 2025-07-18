@@ -748,8 +748,8 @@ class RoleController extends Controller
 
         if ($role->isCurator() && is_selfhosted_or_admin()) {
             $importConfig = [
-                'urls' => array_filter($request->input('import_urls', []), 'trim'),
-                'cities' => array_filter($request->input('import_cities', []), 'trim')
+                'urls' => array_filter(array_filter($request->input('import_urls', []), 'trim'), 'strtolower'),
+                'cities' => array_filter(array_filter($request->input('import_cities', []), 'trim'), 'strtolower')
             ];
             $role->import_config = $importConfig;
         }
@@ -967,8 +967,8 @@ class RoleController extends Controller
 
         if ($role->isCurator() && is_selfhosted_or_admin()) {
             $importConfig = [
-                'urls' => array_filter($request->input('import_urls', []), 'trim'),
-                'cities' => array_filter($request->input('import_cities', []), 'trim')
+                'urls' => array_filter(array_filter($request->input('import_urls', []), 'trim'), 'strtolower'),
+                'cities' => array_filter(array_filter($request->input('import_cities', []), 'trim'), 'strtolower')
             ];
             $role->import_config = $importConfig;
         }
