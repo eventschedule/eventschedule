@@ -277,11 +277,16 @@ class ImportCuratorEvents extends Command
         $ogDescription = $xpath->evaluate('string(//meta[@property="og:description"]/@content)');
         $ogImage = $xpath->evaluate('string(//meta[@property="og:image"]/@content)');
         
+        /*
         if ($ogTitle && $ogDescription) {
             $eventDetails = $ogTitle . ' ' . $ogDescription;
         } else {
             $eventDetails = $this->extractTextContent($html);
-        }
+        }*/
+
+
+        $eventDetails = $ogTitle . ' ' . $ogDescription . ' ' . $this->extractTextContent($html);
+        
 
         // Extract event details using Gemini
         $eventDetails = $this->extractEventDetails($eventDetails, $eventUrl, $debug);
@@ -301,9 +306,10 @@ class ImportCuratorEvents extends Command
 
         // Process cities (placeholder for future implementation)
         if (! empty($config['cities'])) {
-            if (! in_array(strtolower($eventDetails['event_city']), $config['cities']) && ! in_array(strtolower($eventDetails['event_city_en']), $config['cities'])) {
+            $eventCity = isset($eventDetails['event_city']) ? strtolower($eventDetails['event_city']) : (isset($eventDetails['event_city_en']) ? strtolower($eventDetails['event_city_en']) : null);
+            if (! in_array($eventCity, $config['cities'])) {
                 if ($debug) {
-                    $this->warn("Event city ({$eventDetails['event_city']}) does not match configured city");
+                    $this->warn("Event city ({$eventCity}) does not match configured cities (" . implode(', ', $config['cities']) . ")");
                 }
 
                 return false;
