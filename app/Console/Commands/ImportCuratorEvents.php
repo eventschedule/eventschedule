@@ -198,6 +198,7 @@ class ImportCuratorEvents extends Command
                 if ($href) {
                     // Convert relative URLs to absolute
                     $absoluteUrl = $this->makeAbsoluteUrl($href, $baseUrl);
+
                     if ($absoluteUrl && !in_array($absoluteUrl, $links)) {
                         $links[] = $absoluteUrl;
                     }
@@ -213,6 +214,9 @@ class ImportCuratorEvents extends Command
      */
     private function makeAbsoluteUrl(string $href, string $baseUrl): ?string
     {
+        $href = explode('?', $href);
+        $href = $href[0];
+
         // Skip if already absolute
         if (filter_var($href, FILTER_VALIDATE_URL)) {
             return $href;
