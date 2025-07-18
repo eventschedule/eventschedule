@@ -746,6 +746,14 @@ class RoleController extends Controller
             $role->background_colors = $request->custom_color1 . ', ' . $request->custom_color2;
         }
 
+        if ($role->isCurator() && is_selfhosted_or_admin()) {
+            $importConfig = [
+                'urls' => array_filter($request->input('import_urls', []), 'trim'),
+                'cities' => array_filter($request->input('import_cities', []), 'trim')
+            ];
+            $role->import_config = $importConfig;
+        }
+
         $role->save();
 
         // Save groups
@@ -957,8 +965,7 @@ class RoleController extends Controller
             $role->background_colors = $request->custom_color1 . ', ' . $request->custom_color2;
         }
 
-        // Handle import configuration for curator roles
-        if ($role->isCurator()) {
+        if ($role->isCurator() && is_selfhosted_or_admin()) {
             $importConfig = [
                 'urls' => array_filter($request->input('import_urls', []), 'trim'),
                 'cities' => array_filter($request->input('import_cities', []), 'trim')

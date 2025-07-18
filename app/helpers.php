@@ -71,6 +71,20 @@ if (!function_exists('is_hosted_or_admin')) {
     }
 }
 
+if (!function_exists('is_selfhosted_or_admin')) {
+    /**
+     * Check if the current user is self-hosted or an admin
+     */
+    function is_selfhosted_or_admin(): bool
+    {
+        if (! config('app.hosted') || config('app.is_testing')) {
+            return true;
+        }
+
+        return auth()->user() && auth()->user()->isAdmin();
+    }
+}
+
 if (!function_exists('is_mobile')) {
     /**
      * Check if the current user is on a mobile device
