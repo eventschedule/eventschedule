@@ -413,13 +413,18 @@ class ImportCuratorEvents extends Command
                 'name' => $eventData['event_name'] ?? 'Imported Event',
                 'name_en' => $eventData['event_name_en'] ?? null,
                 'starts_at' => $startsAt->format('Y-m-d H:i:s'),
-                //'duration' => $eventData['event_duration'] ?? null,
                 'description' => $eventData['event_details'] ?? '',
                 'social_image' => $eventData['social_image'] ?? null,
                 'registration_url' => $eventUrl,
                 'curators' => [UrlUtils::encodeId($curator->id)],
                 'tickets_enabled' => false,
             ]);
+
+            if (isset($eventData['event_duration']) && $eventData['event_duration'] > 0) {
+                $request->merge([
+                    'duration' => $eventData['event_duration']
+                ]);
+            }
 
             // Set the authenticated user for the request
             $user = User::find($curator->user_id);
