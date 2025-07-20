@@ -14,6 +14,11 @@ return new class extends Migration
         Schema::table('roles', function (Blueprint $table) {
             $table->text('import_config')->nullable()->after('youtube_links');
         });
+
+        Schema::create('parsed_event_urls', function (Blueprint $table) {
+            $table->id();
+            $table->string('url')->unique();
+        });
     }
 
     /**
@@ -24,5 +29,7 @@ return new class extends Migration
         Schema::table('roles', function (Blueprint $table) {
             $table->dropColumn('import_config');
         });
+
+        Schema::dropTable('parsed_event_urls');
     }
 };
