@@ -503,7 +503,12 @@ return [
     'test_import' => 'Test Import',
     'testing' => 'Testing',
     'import_test_success' => 'Import test successful',
+    'import_test_success_no_events' => 'Import test completed - no events found',
     'import_test_error' => 'Import test failed',
+    'import_test_results' => 'Import Test Results',
+    'console_output' => 'Console Output',
+    'please_enter_urls_or_cities' => 'Please enter at least one URL or city to test',
+    'save_role_first_to_test_import' => 'Please save the role first to test import',
     'no_events_found' => 'No events found',
     'url' => 'URL',
 ];

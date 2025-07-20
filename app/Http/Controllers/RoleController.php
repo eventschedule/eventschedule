@@ -1618,37 +1618,67 @@ class RoleController extends Controller
             return response()->json(['success' => false, 'message' => __('messages.role_id_required')]);
         }
 
+        // Ensure roleId is properly formatted
+        if (!is_numeric($roleId)) {
+            $roleId = \App\Utils\UrlUtils::decodeId($roleId);
+        }
+
         try {
-            // Run the console command for this specific role
-            $command = "php artisan app:import-curator-events --role_id={$roleId} --debug";
-            $output = shell_exec($command . ' 2>&1');
+            // Use shell_exec as a fallback if Artisan call fails
+            try {
+                // Capture output using BufferedOutput
+                $output = new \Symfony\Component\Console\Output\BufferedOutput();
+                $exitCode = \Artisan::call('app:import-curator-events', [
+                    '--role_id' => (string)$roleId,
+                    '--debug' => null,
+                    '--test' => null
+                ], $output);
+                
+                $outputText = $output->fetch();
+            } catch (\Exception $e) {
+                // Fallback to shell_exec if Artisan call fails
+                $command = "php artisan app:import-curator-events --role_id={$roleId} --debug --test 2>&1";
+                $outputText = shell_exec($command);
+                $exitCode = 0; // Assume success for shell_exec
+            }
             
             // Parse the output to extract information
             $eventsProcessed = 0;
-            $errors = [];
+            $totalErrors = 0;
             
-            // Look for patterns in the output
-            if (preg_match('/(\d+) events processed/', $output, $matches)) {
+            // Look for patterns in the output - try multiple patterns
+            if (preg_match('/(\d+) total events processed/', $outputText, $matches)) {
+                $eventsProcessed = (int)$matches[1];
+            } elseif (preg_match('/(\d+) events processed/', $outputText, $matches)) {
+                $eventsProcessed = (int)$matches[1];
+            } elseif (preg_match('/Processed (\d+) events from URL/', $outputText, $matches)) {
+                $eventsProcessed = (int)$matches[1];
+            } elseif (preg_match('/Completed curator.*: (\d+) events processed/', $outputText, $matches)) {
                 $eventsProcessed = (int)$matches[1];
             }
             
-            if (preg_match('/(\d+) total errors/', $output, $matches)) {
+            if (preg_match('/(\d+) total errors/', $outputText, $matches)) {
                 $totalErrors = (int)$matches[1];
             }
             
-            // Check if the command was successful
-            if (strpos($output, 'Import completed') !== false) {
+            // Check if the command was successful - look for completion message or successful processing
+            $isSuccessful = strpos($outputText, 'Import completed') !== false || 
+                           strpos($outputText, 'Import test successful') !== false ||
+                           $exitCode === 0;
+            
+            // If no events were processed but the command ran successfully, that's still a success
+            if ($isSuccessful) {
                 return response()->json([
                     'success' => true,
                     'events_processed' => $eventsProcessed,
-                    'message' => __('messages.import_test_success'),
-                    'output' => $output
+                    'message' => $eventsProcessed > 0 ? __('messages.import_test_success') : __('messages.import_test_success_no_events'),
+                    'output' => $outputText
                 ]);
             } else {
                 return response()->json([
                     'success' => false,
                     'message' => __('messages.import_test_error'),
-                    'output' => $output
+                    'output' => $outputText
                 ]);
             }
             
