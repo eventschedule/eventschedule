@@ -298,7 +298,11 @@ class ImportCuratorEvents extends Command
 
         foreach ($eventLinks as $eventUrl) {
             // Check if the event URL has already been parsed
-            $parsedEventUrl = DB::table('parsed_event_urls')->where('url', $eventUrl)->first();
+            $parsedEventUrl = DB::table('parsed_event_urls')
+                                ->where('url', $eventUrl)
+                                ->where('role_id', $curator->id)
+                                ->first();
+            
             if ($parsedEventUrl) {
                 continue;
             }
@@ -315,7 +319,8 @@ class ImportCuratorEvents extends Command
                 }
                 Log::error("Error processing event URL {$eventUrl}: " . $e->getMessage());
             } finally {
-                DB::table('parsed_event_urls')->insert(['url' => $eventUrl]);
+                DB::table('parsed_event_urls')
+                    ->insert(['url' => $eventUrl, 'role_id' => $curator->id]);
             }
         }
 
