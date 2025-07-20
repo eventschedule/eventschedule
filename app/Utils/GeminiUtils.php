@@ -3,6 +3,9 @@
 namespace App\Utils;
 
 use App\Utils\UrlUtils;
+use App\Models\Role;
+use App\Models\Event;
+use App\Models\RoleUser;
 use Carbon\Carbon;
 
 class GeminiUtils
@@ -82,7 +85,7 @@ class GeminiUtils
         return $data;
     }
 
-    public static function parseEvent($details, $imageData = null)
+    public static function parseEvent($role, $details, $imageData = null)
     {
         // Define fields and their descriptions
         $fields = [
@@ -224,6 +227,130 @@ class GeminiUtils
         // if ($data['performer_name']) {
         //     $data['performer_youtube_url'] = self::getPerformerYoutubeUrl($data['performer_name']);
         // }
+
+        foreach ($data as $key => $item) {
+            if ($imageData && empty($data[$key]['social_image']) && count($data) == 1) {
+                $data[$key]['social_image'] = $filename;
+            }
+
+            if ($role->isVenue()) {
+                $data[$key]['venue_id'] = UrlUtils::encodeId($role->id);
+                $data[$key]['event_address'] = $role->address1;
+            } elseif (! empty($item['venue_name']) && ! empty($item['event_address'])) {
+                $venue = Role::where(function($query) use ($item) {
+                            $query->where('name', $item['venue_name'])
+                                ->when(! empty($item['venue_name_en']), function($q) use ($item) {
+                                    $q->orWhere('name_en', $item['venue_name_en']); 
+                                });
+                        })
+                        ->where(function($query) use ($item) {
+                            $query->where('address1', $item['event_address'])
+                                ->when(! empty($item['event_address_en']), function($q) use ($item) {
+                                    $q->orWhere('address1_en', $item['event_address_en']);
+                                });
+                        })
+                        ->where('type', 'venue')
+                        ->orderBy('id')
+                        ->first();
+
+                if ($venue) {
+                    $data[$key]['venue_id'] = UrlUtils::encodeId($venue->id);
+                }
+            }
+
+            if ($role->isCurator()) {
+                if (empty($item['event_country_code'])) {
+                    $data[$key]['event_country_code'] = $role->country_code;
+                }
+            }
+
+            if ($role->isTalent()) {
+                $data[$key]['talent_id'] = UrlUtils::encodeId($role->id);
+            } elseif (! empty($item['performer_name'])) {
+
+                $followerRoleIds = RoleUser::where('user_id', auth()->user()->id)
+                ->whereIn('level', ['owner', 'follower'])
+                ->orderBy('id')->pluck('role_id')->toArray();
+
+                $talent = Role::where('is_deleted', false)
+                    ->where(function($query) use ($item) {
+                        $query->where('name', $item['performer_name'])
+                            ->when(! empty($item['performer_name_en']), function($q) use ($item) {
+                                $q->orWhere('name_en', $item['performer_name_en']);
+                            });
+                    })
+                    ->where('type', 'talent')
+                    ->whereIn('id', $followerRoleIds)
+                    ->orderBy('id')
+                    ->first();
+
+                if ($talent) {
+                    $data[$key]['talent_id'] = UrlUtils::encodeId($talent->id);
+                }
+            }
+
+            if (! empty($item['event_date_time'])) {
+                try {
+                    $eventDate = Carbon::parse($item['event_date_time']);
+                } catch (\Exception $e) {
+                    $data[$key]['event_date_time'] = null;
+                    continue;
+                }
+                if ($eventDate->lt(now()->subDays(3)) || $eventDate->diffInMonths(now()) > 2) {
+                    $data[$key]['event_date_time'] = null;
+                }
+            }
+
+            // Check if the event is already imported
+            $eventUrl = null;
+            $event = Event::where('registration_url', $item['registration_url'])->first();
+            if ($event) {
+                $data[$key]['event_url'] = $event->getGuestUrl();
+                $data[$key]['event_id'] = UrlUtils::encodeId($event->id);
+                $data[$key]['is_curated'] = $role->isCurator() && $event->roles->contains($role->id);
+            }
+
+            // Check for similar events at the same time
+            if (! $event && ! empty($item['event_date_time'])) {
+                $timezone = $role->user->timezone;
+                $eventDate = Carbon::parse($item['event_date_time'], $timezone)->setTimezone('UTC');
+                $query = Event::where('starts_at', $eventDate);
+                
+                // Check for same venue address
+                if (! empty($item['event_address'])) {
+                    $similarByAddress = (clone $query)
+                        ->whereHas('roles', function($q) use ($item) {
+                            $q->where('type', 'venue')
+                              ->where('address1', $item['event_address']);
+                        })
+                        ->first();
+
+                    if ($similarByAddress) {
+                        $data[$key]['event_url'] = $similarByAddress->getGuestUrl();
+                        $data[$key]['event_id'] = UrlUtils::encodeId($similarByAddress->id);
+                    }
+                }
+
+                // Check for same performer name
+                if (! empty($item['performer_name']) && empty($data[$key]['event_url'])) {
+                    $similarByPerformer = (clone $query)
+                        ->whereHas('roles', function($q) use ($item) {
+                            $q->where('type', 'talent')
+                              ->where('name', 'like', '%' . $item['performer_name'] . '%')
+                              ->when(!empty($item['performer_name_en']), function($q) use ($item) {
+                                  $q->orWhere('name', 'like', '%' . $item['performer_name_en'] . '%');
+                              });
+                        })
+                        ->first();
+
+                    if ($similarByPerformer) {
+                        $data[$key]['event_url'] = $similarByPerformer->getGuestUrl();
+                        $data[$key]['event_id'] = UrlUtils::encodeId($similarByPerformer->id);
+                    }
+                }
+            }
+        }
+
 
         return $data;
     }
