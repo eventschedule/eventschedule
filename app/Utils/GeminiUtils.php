@@ -236,19 +236,26 @@ class GeminiUtils
             if ($role->isVenue()) {
                 $data[$key]['venue_id'] = UrlUtils::encodeId($role->id);
                 $data[$key]['event_address'] = $role->address1;
-            } elseif (! empty($item['venue_name']) && ! empty($item['event_address'])) {
-                $venue = Role::where(function($query) use ($item) {
-                            $query->where('name', $item['venue_name'])
-                                ->when(! empty($item['venue_name_en']), function($q) use ($item) {
-                                    $q->orWhere('name_en', $item['venue_name_en']); 
-                                });
-                        })
+            } elseif (! empty($item['event_city']) && (! empty($item['venue_name']) || ! empty($item['event_address']))) {
+                $venue = Role::where('is_deleted', false)
+                        ->where('country_code', $role->country_code)
+                        ->where('city', $item['event_city'])
                         ->where(function($query) use ($item) {
-                            $query->where('address1', $item['event_address'])
-                                ->when(! empty($item['event_address_en']), function($q) use ($item) {
-                                    $q->orWhere('address1_en', $item['event_address_en']);
-                                });
-                        })
+                            $query->when(! empty($item['venue_name']), function($q) use ($item) {
+                                $q->where('name', $item['venue_name']);
+                            })
+                            ->when(! empty($item['venue_name_en']), function($q) use ($item) {
+                                $q->orWhere('name_en', $item['venue_name_en']); 
+                            });
+                        })                        
+                        ->where(function($query) use ($item) {
+                            $query->when(! empty($item['event_address']), function($q) use ($item) {
+                                $q->where('address1', $item['event_address']);
+                            })
+                            ->when(! empty($item['event_address_en']), function($q) use ($item) {
+                                $q->orWhere('address1_en', $item['event_address_en']); 
+                            });
+                        })                                                
                         ->where('type', 'venue')
                         ->orderBy('id')
                         ->first();
@@ -271,7 +278,7 @@ class GeminiUtils
                 $followerRoleIds = RoleUser::where('user_id', auth()->user()->id)
                 ->whereIn('level', ['owner', 'follower'])
                 ->orderBy('id')->pluck('role_id')->toArray();
-
+                
                 $talent = Role::where('is_deleted', false)
                     ->where(function($query) use ($item) {
                         $query->where('name', $item['performer_name'])
