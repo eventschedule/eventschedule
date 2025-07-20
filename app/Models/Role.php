@@ -139,6 +139,11 @@ class Role extends Model implements MustVerifyEmail
         $this->notify(new CustomVerifyEmail('role', $this->subdomain));
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function events()
     {
         return $this->belongsToMany(Event::class)

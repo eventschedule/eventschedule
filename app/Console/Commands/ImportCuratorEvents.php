@@ -289,7 +289,7 @@ class ImportCuratorEvents extends Command
         
 
         // Extract event details using Gemini
-        $eventDetails = $this->extractEventDetails($eventDetails, $eventUrl, $debug);
+        $eventDetails = $this->extractEventDetails($curator, $eventDetails, $eventUrl, $debug);
         
         if ($debug) {
             $this->line("Event details: " . json_encode($eventDetails));
@@ -332,7 +332,7 @@ class ImportCuratorEvents extends Command
     /**
      * Extract event details from HTML using Gemini
      */
-    private function extractEventDetails(string $textContent, string $eventUrl, bool $debug = false): ?array
+    private function extractEventDetails(Role $curator, string $textContent, string $eventUrl, bool $debug = false): ?array
     {
         try {            
             if ($debug) {
@@ -340,7 +340,7 @@ class ImportCuratorEvents extends Command
             }
 
             // Use Gemini to parse event details
-            $parsedEvents = GeminiUtils::parseEvent($textContent);
+            $parsedEvents = GeminiUtils::parseEvent($curator, $textContent);
             
             if (empty($parsedEvents)) {
                 return null;
