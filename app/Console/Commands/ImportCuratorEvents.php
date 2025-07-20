@@ -134,7 +134,9 @@ class ImportCuratorEvents extends Command
             }
 
             // Fetch robots.txt
-            $response = Http::timeout(10)->get($robotsUrl);
+            $response = Http::timeout(10)
+                ->withHeaders(['User-Agent' => 'Event Schedule Bot/1.0 (+https://www.eventschedule.com)'])
+                ->get($robotsUrl);
             
             if (!$response->successful()) {
                 if ($debug) {
@@ -271,7 +273,9 @@ class ImportCuratorEvents extends Command
         }
 
         // Fetch the webpage content
-        $response = Http::timeout(30)->get($url);
+        $response = Http::timeout(30)
+            ->withHeaders(['User-Agent' => 'Event Schedule Bot/1.0 (+https://www.eventschedule.com)'])
+            ->get($url);
         
         if (!$response->successful()) {
             throw new \Exception("Failed to fetch URL: HTTP {$response->status()}");
@@ -418,7 +422,9 @@ class ImportCuratorEvents extends Command
         }
 
         // Fetch event page content
-        $response = Http::timeout(30)->get($eventUrl);
+        $response = Http::timeout(30)
+            ->withHeaders(['User-Agent' => 'Event Schedule Bot/1.0 (+https://www.eventschedule.com)'])
+            ->get($eventUrl);
         
         if (!$response->successful()) {
             throw new \Exception("Failed to fetch event URL: HTTP {$response->status()}");
