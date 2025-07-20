@@ -1287,13 +1287,15 @@ function testImport() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert(`{{ __("messages.import_test_success") }}: ${data.events_processed} events processed`);
+            // Create a modal to show the detailed output
+            showImportOutput(data.output, data.events_processed, data.message);
         } else {
-            alert(`{{ __("messages.import_test_error") }}: ${data.message}`);
+            // Show error output in modal
+            showImportOutput(data.output || '', 0, data.message, false);
         }
     })
     .catch(error => {
-        alert('{{ __("messages.import_test_error") }}: ' + error.message);
+        showImportOutput('', 0, '{{ __("messages.import_test_error") }}: ' + error.message, false);
     })
     .finally(() => {
         button.textContent = originalText;
@@ -1305,6 +1307,63 @@ function testImport() {
     button.textContent = originalText;
     button.disabled = false;
     @endif
+}
+
+function showImportOutput(output, eventsProcessed, message, isSuccess = true) {
+    // Create modal HTML
+    const modalHtml = `
+        <div id="import-output-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white dark:bg-gray-800">
+                <div class="mt-3">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                            {{ __("messages.import_test_results") }}
+                        </h3>
+                        <button onclick="closeImportOutput()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="flex items-center mb-2">
+                            <div class="w-3 h-3 rounded-full ${isSuccess ? 'bg-green-500' : 'bg-red-500'} mr-2"></div>
+                            <span class="font-medium ${isSuccess ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}">
+                                ${message}
+                            </span>
+                        </div>
+                        ${eventsProcessed > 0 ? `<p class="text-sm text-gray-600 dark:text-gray-400">${eventsProcessed} events processed</p>` : ''}
+                    </div>
+                    
+                    ${output ? `
+                        <div class="mb-4">
+                            <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">{{ __("messages.console_output") }}:</h4>
+                            <div class="bg-gray-100 dark:bg-gray-700 rounded p-3 max-h-96 overflow-y-auto">
+                                <pre class="text-xs text-gray-800 dark:text-gray-200 whitespace-pre-wrap">${output}</pre>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="flex justify-end">
+                        <button onclick="closeImportOutput()" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500">
+                            {{ __("messages.close") }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function closeImportOutput() {
+    const modal = document.getElementById('import-output-modal');
+    if (modal) {
+        modal.remove();
+    }
 }
 
 function addImportUrlField() {

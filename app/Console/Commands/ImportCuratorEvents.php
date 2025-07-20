@@ -23,7 +23,7 @@ class ImportCuratorEvents extends Command
      *
      * @var string
      */
-    protected $signature = 'app:import-curator-events {--role_id= : Import events for a specific curator role by ID} {--debug : Enable debug mode with verbose logging}';
+    protected $signature = 'app:import-curator-events {--role_id= : Import events for a specific curator role by ID} {--debug : Enable debug mode with verbose logging} {--test : Test mode - only process first event from each URL}';
 
     /**
      * The console command description.
@@ -41,9 +41,14 @@ class ImportCuratorEvents extends Command
 
         $roleId = $this->option('role_id');
         $debug = $this->option('debug');
+        $test = $this->option('test');
 
         if ($debug) {
             $this->info('Debug mode enabled - verbose logging will be shown');
+        }
+
+        if ($test) {
+            $this->info('Test mode enabled - only processing first event from each URL');
         }
 
         // Decode ID if it's an encoded string
@@ -90,7 +95,7 @@ class ImportCuratorEvents extends Command
                 
                 foreach ($config['urls'] as $url) {
                     try {
-                        $urlEvents = $this->processUrl($curator, $url, $debug);
+                        $urlEvents = $this->processUrl($curator, $url, $debug, $test);
                         $eventsProcessed += $urlEvents;
                         $this->info("Processed {$urlEvents} events from URL: {$url}");
                     } catch (\Exception $e) {
@@ -258,7 +263,7 @@ class ImportCuratorEvents extends Command
     /**
      * Process a URL to find and import events
      */
-    private function processUrl(Role $curator, string $url, bool $debug = false): int
+    private function processUrl(Role $curator, string $url, bool $debug = false, bool $test = false): int
     {
         if ($debug) {
             $this->line("Fetching content from: {$url}");
@@ -288,7 +293,7 @@ class ImportCuratorEvents extends Command
         }
 
         // Extract event links from the HTML
-        $eventLinks = $this->extractEventLinks($html, $url);
+        $eventLinks = $this->extractEventLinks($html, $url, $test);
         
         if ($debug) {
             $this->line("Found " . count($eventLinks) . " potential event links");
@@ -330,7 +335,7 @@ class ImportCuratorEvents extends Command
     /**
      * Extract event links from HTML content
      */
-    private function extractEventLinks(string $html, string $baseUrl): array
+    private function extractEventLinks(string $html, string $baseUrl, bool $test = false): array
     {
         $links = [];
         
@@ -367,7 +372,9 @@ class ImportCuratorEvents extends Command
             }
         }
 
-        return array_slice($links, 0, 10); // Limit to 10 events per URL to avoid spam
+        // In test mode, only return the first event URL, otherwise return up to 10
+        $limit = $test ? 1 : 10;
+        return array_slice($links, 0, $limit);
     }
 
     /**
