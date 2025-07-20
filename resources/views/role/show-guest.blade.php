@@ -266,7 +266,7 @@
         </div>
       @endif
 
-      @if ($role->social_links)
+      @if ($role->social_links && $role->social_links != '[]')
       <div 
         class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-10 flex flex-col gap-6 mb-6"
       >
