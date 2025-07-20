@@ -1630,14 +1630,13 @@ class RoleController extends Controller
                 $output = new \Symfony\Component\Console\Output\BufferedOutput();
                 $exitCode = \Artisan::call('app:import-curator-events', [
                     '--role_id' => (string)$roleId,
-                    '--debug' => null,
                     '--test' => null
                 ], $output);
                 
                 $outputText = $output->fetch();
             } catch (\Exception $e) {
                 // Fallback to shell_exec if Artisan call fails
-                $command = "php artisan app:import-curator-events --role_id={$roleId} --debug --test 2>&1";
+                $command = "php artisan app:import-curator-events --role_id={$roleId} --test 2>&1";
                 $outputText = shell_exec($command);
                 $exitCode = 0; // Assume success for shell_exec
             }
