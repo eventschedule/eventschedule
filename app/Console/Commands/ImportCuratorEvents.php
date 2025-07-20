@@ -9,6 +9,7 @@ use App\Models\EventRole;
 use App\Models\User;
 use App\Utils\GeminiUtils;
 use App\Utils\UrlUtils;
+use App\Utils\ImageUtils;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -277,6 +278,26 @@ class ImportCuratorEvents extends Command
         $ogDescription = $xpath->evaluate('string(//meta[@property="og:description"]/@content)');
         $ogImage = $xpath->evaluate('string(//meta[@property="og:image"]/@content)');
         
+        // Download image data once if available
+        $imageData = null;
+        $imageFormat = null;
+        $imageUrl = null;
+        
+        if ($ogImage) {
+            try {
+                $imageData = file_get_contents($ogImage);
+                $imageUrl = $ogImage;
+                $imageFormat = ImageUtils::detectImageFormat($imageData, $ogImage);
+                if ($debug) {
+                    $this->line("Downloaded image data: " . strlen($imageData) . " bytes, format: " . $imageFormat);
+                }
+            } catch (\Exception $e) {
+                if ($debug) {
+                    $this->warn("Failed to download image: " . $e->getMessage());
+                }
+            }
+        }
+        
         /*
         if ($ogTitle && $ogDescription) {
             $eventDetails = $ogTitle . ' ' . $ogDescription;
@@ -289,7 +310,7 @@ class ImportCuratorEvents extends Command
         
 
         // Extract event details using Gemini
-        $eventDetails = $this->extractEventDetails($curator, $eventDetails, $eventUrl, $debug);
+        $eventDetails = $this->extractEventDetails($curator, $eventDetails, $eventUrl, $imageData, $imageFormat, $imageUrl, $debug);
         
         if ($debug) {
             $this->line("Event details: " . json_encode($eventDetails));
@@ -317,7 +338,7 @@ class ImportCuratorEvents extends Command
         }
 
         // Create the event
-        $event = $this->createEvent($curator, $eventDetails, $eventUrl, $ogImage, $debug);
+        $event = $this->createEvent($curator, $eventDetails, $eventUrl, $imageData, $imageFormat, $imageUrl, $debug);
         
         if ($event) {
             if ($debug) {
@@ -332,15 +353,25 @@ class ImportCuratorEvents extends Command
     /**
      * Extract event details from HTML using Gemini
      */
-    private function extractEventDetails(Role $curator, string $textContent, string $eventUrl, bool $debug = false): ?array
+    private function extractEventDetails(Role $curator, string $textContent, string $eventUrl, string $imageData = null, string $imageFormat = null, string $imageUrl = null, bool $debug = false): ?array
     {
         try {            
             if ($debug) {
                 $this->line("Text content: " . $textContent);
             }
 
+            // Create UploadedFile object from image data if available
+            $file = null;
+            if ($imageData && $imageUrl) {
+                $file = ImageUtils::createUploadedFileFromImageData($imageData, $imageUrl);
+                
+                if ($debug) {
+                    $this->line("Created UploadedFile from image data: " . strlen($imageData) . " bytes, format: " . $imageFormat);
+                }
+            }
+
             // Use Gemini to parse event details
-            $parsedEvents = GeminiUtils::parseEvent($curator, $textContent);
+            $parsedEvents = GeminiUtils::parseEvent($curator, $textContent, $file);
             
             if (empty($parsedEvents)) {
                 return null;
@@ -390,7 +421,7 @@ class ImportCuratorEvents extends Command
     /**
      * Create an event from extracted details
      */
-    private function createEvent(Role $curator, array $eventData, string $eventUrl, string $socialImage, bool $debug = false): ?Event
+    private function createEvent(Role $curator, array $eventData, string $eventUrl, string $imageData = null, string $imageFormat = null, string $imageUrl = null, bool $debug = false): ?Event
     {
         try {
             $this->info("Creating event: " . $eventData['event_name']);
@@ -467,14 +498,10 @@ class ImportCuratorEvents extends Command
             $eventRepo = app(\App\Repos\EventRepo::class);
             $event = $eventRepo->saveEvent($curator, $request);
 
-            if ($socialImage) {
-                // Download the image from URL and create temp file
-                $tempFile = tempnam(sys_get_temp_dir(), 'event_' . $event->id . '_');
-                file_put_contents($tempFile, file_get_contents($socialImage));
-                $file = new \Illuminate\Http\UploadedFile($tempFile, basename($socialImage));
-                $filename = strtolower('flyer_' . \Illuminate\Support\Str::random(32) . '.' . $file->getClientOriginalExtension());
-                $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
-    
+            if ($imageData && $imageUrl) {
+                // Use the already-downloaded image data
+                $filename = ImageUtils::saveImageData($imageData, $imageUrl);
+
                 $event->flyer_image_url = $filename;
                 $event->save();    
             }
