@@ -349,6 +349,11 @@ class ImportCuratorEvents extends Command
             // Use the first parsed event
             $eventData = $parsedEvents[0];
             
+            // Check the event is valid
+            if (empty($eventData['event_name']) || empty($eventData['event_date_time'])) {
+                return null;
+            }
+
             // Add the registration URL
             $eventData['registration_url'] = $eventUrl;
             
