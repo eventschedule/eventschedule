@@ -17,6 +17,7 @@ return new class extends Migration
 
         Schema::create('parsed_event_urls', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('role_id')->constrained()->onDelete('cascade');
             $table->string('url')->unique();
         });
     }
@@ -30,6 +31,6 @@ return new class extends Migration
             $table->dropColumn('import_config');
         });
 
-        Schema::dropTable('parsed_event_urls');
+        Schema::dropIfExists('parsed_event_urls');
     }
 };
