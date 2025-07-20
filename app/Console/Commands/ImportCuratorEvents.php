@@ -113,12 +113,161 @@ class ImportCuratorEvents extends Command
     }
 
     /**
+     * Check if scraping is allowed according to robots.txt
+     */
+    private function checkRobotsTxt(string $url, bool $debug = false): bool
+    {
+        try {
+            // Parse the URL to get the base domain
+            $parsedUrl = parse_url($url);
+            if (!$parsedUrl || !isset($parsedUrl['scheme']) || !isset($parsedUrl['host'])) {
+                if ($debug) {
+                    $this->warn("Could not parse URL: {$url}");
+                }
+                return true; // Default to allowing if we can't parse the URL
+            }
+
+            $robotsUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] . '/robots.txt';
+            
+            if ($debug) {
+                $this->line("Checking robots.txt at: {$robotsUrl}");
+            }
+
+            // Fetch robots.txt
+            $response = Http::timeout(10)->get($robotsUrl);
+            
+            if (!$response->successful()) {
+                if ($debug) {
+                    $this->warn("Could not fetch robots.txt (HTTP {$response->status()}), assuming scraping is allowed");
+                }
+                return true; // Default to allowing if robots.txt is not accessible
+            }
+
+            $robotsContent = $response->body();
+            
+            if ($debug) {
+                $this->line("Robots.txt content length: " . strlen($robotsContent) . " bytes");
+            }
+
+            // Parse robots.txt content
+            $lines = explode("\n", $robotsContent);
+            $userAgent = '*'; // We'll check for all user agents
+            $disallowRules = [];
+            $allowRules = [];
+            $currentUserAgent = null;
+
+            foreach ($lines as $line) {
+                $line = trim($line);
+                
+                // Skip comments and empty lines
+                if (empty($line) || strpos($line, '#') === 0) {
+                    continue;
+                }
+
+                // Parse User-agent line
+                if (preg_match('/^User-agent:\s*(.+)$/i', $line, $matches)) {
+                    $currentUserAgent = trim($matches[1]);
+                    continue;
+                }
+
+                // Parse Disallow line
+                if (preg_match('/^Disallow:\s*(.+)$/i', $line, $matches)) {
+                    $path = trim($matches[1]);
+                    if ($currentUserAgent === '*' || $currentUserAgent === $userAgent) {
+                        $disallowRules[] = $path;
+                    }
+                    continue;
+                }
+
+                // Parse Allow line
+                if (preg_match('/^Allow:\s*(.+)$/i', $line, $matches)) {
+                    $path = trim($matches[1]);
+                    if ($currentUserAgent === '*' || $currentUserAgent === $userAgent) {
+                        $allowRules[] = $path;
+                    }
+                    continue;
+                }
+            }
+
+            // Check if the URL path is disallowed
+            $urlPath = $parsedUrl['path'] ?? '/';
+            
+            // Check disallow rules
+            foreach ($disallowRules as $disallowPath) {
+                if ($this->pathMatches($urlPath, $disallowPath)) {
+                    if ($debug) {
+                        $this->warn("URL path '{$urlPath}' matches disallow rule '{$disallowPath}'");
+                    }
+                    return false;
+                }
+            }
+
+            // Check allow rules (allow rules override disallow rules)
+            foreach ($allowRules as $allowPath) {
+                if ($this->pathMatches($urlPath, $allowPath)) {
+                    if ($debug) {
+                        $this->line("URL path '{$urlPath}' matches allow rule '{$allowPath}'");
+                    }
+                    return true;
+                }
+            }
+
+            if ($debug) {
+                $this->line("No robots.txt restrictions found for URL: {$url}");
+            }
+
+            return true;
+
+        } catch (\Exception $e) {
+            if ($debug) {
+                $this->warn("Error checking robots.txt: " . $e->getMessage());
+            }
+            return true; // Default to allowing if there's an error
+        }
+    }
+
+    /**
+     * Check if a URL path matches a robots.txt rule
+     */
+    private function pathMatches(string $urlPath, string $rulePath): bool
+    {
+        // Handle wildcard patterns
+        if ($rulePath === '*') {
+            return true;
+        }
+
+        // Handle exact path match
+        if ($rulePath === $urlPath) {
+            return true;
+        }
+
+        // Handle prefix matching (most common case)
+        if (strpos($rulePath, '*') === false) {
+            return strpos($urlPath, $rulePath) === 0;
+        }
+
+        // Handle wildcard patterns (basic implementation)
+        $pattern = str_replace(['*', '?'], ['.*', '.'], $rulePath);
+        $pattern = '#^' . $pattern . '#';
+        
+        return preg_match($pattern, $urlPath);
+    }
+
+    /**
      * Process a URL to find and import events
      */
     private function processUrl(Role $curator, string $url, bool $debug = false): int
     {
         if ($debug) {
             $this->line("Fetching content from: {$url}");
+        }
+
+        // Check robots.txt first
+        if (!$this->checkRobotsTxt($url, $debug)) {
+            if ($debug) {
+                $this->warn("Scraping not allowed for URL: {$url}");
+            }
+            return 0;
         }
 
         // Fetch the webpage content
