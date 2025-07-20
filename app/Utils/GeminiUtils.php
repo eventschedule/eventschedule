@@ -3,6 +3,7 @@
 namespace App\Utils;
 
 use App\Utils\UrlUtils;
+use App\Utils\ImageUtils;
 use App\Models\Role;
 use App\Models\Event;
 use App\Models\RoleUser;
@@ -29,9 +30,14 @@ class GeminiUtils
 
         // Add image data if provided
         if ($imageData) {
+            // Use ImageUtils to get the correct MIME type
+            $imageUrl = 'temp_image'; // Placeholder for format detection
+            $detectedFormat = ImageUtils::detectImageFormat($imageData, $imageUrl);
+            $mimeType = ImageUtils::getImageMimeType($detectedFormat);
+            
             $data['contents'][0]['parts'][] = [
                 'inline_data' => [
-                    'mime_type' => 'image/jpeg',
+                    'mime_type' => $mimeType,
                     'data' => base64_encode($imageData)
                 ]
             ];
@@ -85,8 +91,76 @@ class GeminiUtils
         return $data;
     }
 
-    public static function parseEvent($role, $details, $imageData = null)
+    public static function parseEvent($role, $details, $file = null)
     {
+        $imageData = null;
+        $filename = null;
+        
+        if ($file) {
+            // Check if this is a file created from image data (not a real uploaded file)
+            $isFromImageData = $file->getClientOriginalName() === 'event_image.jpg' || 
+                              $file->getClientOriginalName() === 'event_image.png' || 
+                              $file->getClientOriginalName() === 'event_image.gif' || 
+                              $file->getClientOriginalName() === 'event_image.webp';
+            
+            if ($isFromImageData) {
+                // File was created from image data, so we can trust it
+                $imageData = file_get_contents($file->getRealPath());
+                $imageUrl = $file->getClientOriginalName();
+                $detectedFormat = ImageUtils::detectImageFormat($imageData, $imageUrl);
+                
+                // Check if detected format is supported
+                $allowedFormats = ['jpeg', 'jpg', 'png', 'gif', 'webp'];
+                if (!in_array($detectedFormat, $allowedFormats)) {
+                    $imageData = null;
+                } else {
+                    // Use the file directly since it's already a temporary file
+                    $filename = $file->getRealPath();
+                    
+                    // Validate that it's actually an image
+                    $imageInfo = getimagesize($filename);
+                    if ($imageInfo === false) {
+                        $imageData = null;
+                        $filename = null;
+                    }
+                }
+            } else {
+                // This is a real uploaded file, validate it
+                ImageUtils::validateUploadedFile($file);
+                
+                // Read file content securely
+                $imageData = file_get_contents($file->getRealPath());
+                
+                // Use ImageUtils to detect format and validate
+                $imageUrl = $file->getClientOriginalName();
+                $detectedFormat = ImageUtils::detectImageFormat($imageData, $imageUrl);
+                
+                // Check if detected format is supported
+                $allowedFormats = ['jpeg', 'jpg', 'png', 'gif', 'webp'];
+                if (!in_array($detectedFormat, $allowedFormats)) {
+                    $imageData = null;
+                } else {
+                    // Generate secure filename with correct extension
+                    $extension = ImageUtils::getImageExtension($detectedFormat);
+                    $filename = '/tmp/event_' . strtolower(\Str::random(32)) . '.' . $extension;
+                    
+                    // Use move_uploaded_file for security
+                    if (!move_uploaded_file($file->getRealPath(), $filename)) {
+                        $imageData = null;
+                        $filename = null;
+                    }
+                    
+                    // Validate that it's actually an image
+                    $imageInfo = getimagesize($filename);
+                    if ($imageInfo === false) {
+                        unlink($filename); // Remove invalid file
+                        $imageData = null;
+                        $filename = null;
+                    }
+                }
+            }
+        }
+
         // Define fields and their descriptions
         $fields = [
             'event_name' => '',
@@ -611,4 +685,7 @@ class GeminiUtils
         
         return array_rand($categoryImages);
     }
+
+    
+    
 }   

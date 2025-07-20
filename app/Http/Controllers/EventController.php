@@ -491,96 +491,19 @@ class EventController extends Controller
     public function parse(Request $request, $subdomain)
     {
         $details = request()->input('event_details');
-        $imageData = null;
+        $file = null;
 
+        
         // Handle image data if provided
         if ($request->hasFile('details_image')) {
             $file = $request->file('details_image');
-            
-            // Validate file
-            $this->validateUploadedFile($file);
-            
-            // Read file content securely
-            $imageData = file_get_contents($file->getRealPath());
-            
-            // Generate secure filename
-            $extension = $file->getClientOriginalExtension();
-            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-            
-            if (!in_array(strtolower($extension), $allowedExtensions)) {
-                return back()->withErrors(['details_image' => 'Invalid file type. Only images are allowed.']);
-            }
-            
-            $filename = '/tmp/event_' . strtolower(\Str::random(32)) . '.' . strtolower($extension);
-            
-            // Use move_uploaded_file for security
-            if (!move_uploaded_file($file->getRealPath(), $filename)) {
-                return back()->withErrors(['details_image' => 'Failed to upload image.']);
-            }
-            
-            // Validate that it's actually an image
-            $imageInfo = getimagesize($filename);
-            if ($imageInfo === false) {
-                unlink($filename); // Remove invalid file
-                return back()->withErrors(['details_image' => 'Invalid image file.']);
-            }
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-        $parsed = GeminiUtils::parseEvent($role, $details, $imageData);
+
+        $parsed = GeminiUtils::parseEvent($role, $details, $file);
 
         return response()->json($parsed);
-    }
-    
-    /**
-     * Validate uploaded file for security
-     */
-    private function validateUploadedFile($file)
-    {
-        // Check if file upload was successful
-        if (!$file->isValid()) {
-            throw new \Exception('File upload failed');
-        }
-        
-        // Check file size (5MB limit)
-        if ($file->getSize() > 5242880) {
-            throw new \Exception('File too large. Maximum size is 5MB.');
-        }
-        
-        // Check MIME type
-        $allowedMimes = [
-            'image/jpeg',
-            'image/jpg', 
-            'image/png',
-            'image/gif',
-            'image/webp'
-        ];
-        
-        if (!in_array($file->getMimeType(), $allowedMimes)) {
-            throw new \Exception('Invalid file type. Only images are allowed.');
-        }
-        
-        // Additional security check - verify file signature
-        $fileSignature = bin2hex(fread(fopen($file->getRealPath(), 'rb'), 10));
-        $validSignatures = [
-            'ffd8ff', // JPEG
-            '89504e470d0a1a0a', // PNG
-            '474946383761', // GIF87a
-            '474946383961', // GIF89a
-            '524946462a', // WEBP (starts with RIFF)
-        ];
-        
-        $isValidSignature = false;
-        foreach ($validSignatures as $signature) {
-            if (str_starts_with($fileSignature, $signature)) {
-                $isValidSignature = true;
-                break;
-            }
-        }
-        
-        if (!$isValidSignature) {
-            throw new \Exception('Invalid file format detected.');
-        }
     }
 
     public function import(Request $request, $subdomain)
