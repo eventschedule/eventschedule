@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ImportCuratorEvents extends Command
 {
@@ -143,6 +144,12 @@ class ImportCuratorEvents extends Command
         $eventsProcessed = 0;
 
         foreach ($eventLinks as $eventUrl) {
+            // Check if the event URL has already been parsed
+            $parsedEventUrl = DB::table('parsed_event_urls')->where('url', $eventUrl)->first();
+            if ($parsedEventUrl) {
+                continue;
+            }
+
             try {
                 $eventCreated = $this->processEventUrl($curator, $eventUrl, $debug);
 
@@ -154,6 +161,8 @@ class ImportCuratorEvents extends Command
                     $this->error("Error processing event URL {$eventUrl}: " . $e->getMessage());
                 }
                 Log::error("Error processing event URL {$eventUrl}: " . $e->getMessage());
+            } finally {
+                DB::table('parsed_event_urls')->insert(['url' => $eventUrl]);
             }
         }
 
