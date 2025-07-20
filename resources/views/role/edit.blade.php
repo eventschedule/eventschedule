@@ -1279,7 +1279,6 @@ function testImport() {
             'X-CSRF-TOKEN': '{{ csrf_token() }}'
         },
         body: JSON.stringify({
-            role_id: '{{ $role->id }}',
             urls: urls,
             cities: cities
         })

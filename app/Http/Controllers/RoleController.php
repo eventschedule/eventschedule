@@ -1612,7 +1612,7 @@ class RoleController extends Controller
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
 
-        $roleId = $request->input('role_id');
+        $roleId = $role->id;
         
         if (!$roleId) {
             return response()->json(['success' => false, 'message' => __('messages.role_id_required')]);
