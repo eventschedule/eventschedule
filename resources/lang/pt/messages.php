@@ -489,4 +489,12 @@ return [
     'no_tickets_description' => 'Nenhum ingresso encontrado. Assim que você comprar um ingresso, ele aparecerá aqui.',
     'verification_link_sent' => 'Um link de verificação foi enviado para :email.',
     'import_event_help' => 'Nota: os dados são compartilhados com :link para analisar os detalhes do evento.',
+    'auto_import_settings' => 'Configurações de Importação Automática',
+    'import_urls' => 'URLs de Importação',
+    'import_cities' => 'Importar Cidades',
+    'test_import' => 'Testar Importação',
+    'testing' => 'Testando',
+    'import_test_success' => 'Teste de importação bem-sucedido',
+    'import_test_error' => 'Teste de importação falhou',
+    'url' => 'URL',
 ];

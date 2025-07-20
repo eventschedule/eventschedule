@@ -492,4 +492,12 @@ return [
     'no_tickets_description' => 'لم يتم العثور على تذاكر. بمجرد شراء تذكرة، ستظهر هنا.',
     'verification_link_sent' => 'تم إرسال رابط التحقق إلى :email.',
     'import_event_help' => 'ملاحظة: يتم مشاركة البيانات مع :link لتحليل تفاصيل الحدث.',
+    'auto_import_settings' => 'إعدادات الاستيراد التلقائي',
+    'import_urls' => 'روابط الاستيراد',
+    'import_cities' => 'استيراد المدن',
+    'test_import' => 'اختبار الاستيراد',
+    'testing' => 'اختبار',
+    'import_test_success' => 'نجح اختبار الاستيراد',
+    'import_test_error' => 'فشل اختبار الاستيراد',
+    'url' => 'الرابط',
 ];

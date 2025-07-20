@@ -491,4 +491,12 @@ return [
     'no_tickets_description' => 'No se encontraron entradas. Una vez que compres una entrada, aparecerá aquí.',
     'verification_link_sent' => 'Se ha enviado un enlace de verificación a :email.',
     'import_event_help' => 'Nota: los datos se comparten con :link para analizar los detalles del evento.',
+    'auto_import_settings' => 'Configuración de Importación Automática',
+    'import_urls' => 'URLs de Importación',
+    'import_cities' => 'Importar Ciudades',
+    'test_import' => 'Probar Importación',
+    'testing' => 'Probando',
+    'import_test_success' => 'Prueba de importación exitosa',
+    'import_test_error' => 'Prueba de importación fallida',
+    'url' => 'URL',
 ];
