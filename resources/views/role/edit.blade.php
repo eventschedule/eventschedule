@@ -1050,7 +1050,7 @@
             </div>
         </div>
 
-        @if($role->isCurator() && is_selfhosted_or_admin())
+        @if($role->isCurator())
         <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="import-settings">
             <div class="max-w-xl">
 
