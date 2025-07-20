@@ -746,7 +746,7 @@ class RoleController extends Controller
             $role->background_colors = $request->custom_color1 . ', ' . $request->custom_color2;
         }
 
-        if ($role->isCurator() && is_selfhosted_or_admin()) {
+        if ($role->isCurator()) {
             $importConfig = [
                 'urls' => array_map('strtolower', array_filter(array_map('trim', $request->input('import_urls', [])))),
                 'cities' => array_map('strtolower', array_filter(array_map('trim', $request->input('import_cities', []))))
@@ -965,7 +965,7 @@ class RoleController extends Controller
             $role->background_colors = $request->custom_color1 . ', ' . $request->custom_color2;
         }
 
-        if ($role->isCurator() && is_selfhosted_or_admin()) {
+        if ($role->isCurator()) {
             $importConfig = [
                 'urls' => array_map('strtolower', array_filter(array_map('trim', $request->input('import_urls', [])))),
                 'cities' => array_map('strtolower', array_filter(array_map('trim', $request->input('import_cities', []))))
