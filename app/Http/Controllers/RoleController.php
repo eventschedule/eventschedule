@@ -1640,26 +1640,7 @@ class RoleController extends Controller
                 $outputText = shell_exec($command);
                 $exitCode = 0; // Assume success for shell_exec
             }
-            
-            // Parse the output to extract information
-            $eventsProcessed = 0;
-            $totalErrors = 0;
-            
-            // Look for patterns in the output - try multiple patterns
-            if (preg_match('/(\d+) total events processed/', $outputText, $matches)) {
-                $eventsProcessed = (int)$matches[1];
-            } elseif (preg_match('/(\d+) events processed/', $outputText, $matches)) {
-                $eventsProcessed = (int)$matches[1];
-            } elseif (preg_match('/Processed (\d+) events from URL/', $outputText, $matches)) {
-                $eventsProcessed = (int)$matches[1];
-            } elseif (preg_match('/Completed curator.*: (\d+) events processed/', $outputText, $matches)) {
-                $eventsProcessed = (int)$matches[1];
-            }
-            
-            if (preg_match('/(\d+) total errors/', $outputText, $matches)) {
-                $totalErrors = (int)$matches[1];
-            }
-            
+                        
             // Check if the command was successful - look for completion message or successful processing
             $isSuccessful = strpos($outputText, 'Import completed') !== false || 
                            strpos($outputText, 'Import test successful') !== false ||
@@ -1669,8 +1650,7 @@ class RoleController extends Controller
             if ($isSuccessful) {
                 return response()->json([
                     'success' => true,
-                    'events_processed' => $eventsProcessed,
-                    'message' => $eventsProcessed > 0 ? __('messages.import_test_success') : __('messages.import_test_success_no_events'),
+                    'message' => __('messages.import_test_success'),
                     'output' => $outputText
                 ]);
             } else {

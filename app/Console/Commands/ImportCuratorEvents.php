@@ -48,13 +48,12 @@ class ImportCuratorEvents extends Command
         }
 
         if ($test) {
-            $this->info('Test mode enabled - only processing first event from each URL');
+            $this->warn('Test mode enabled - only processing first event from each URL');
         }
 
         // Decode ID if it's an encoded string
         if ($roleId && !is_numeric($roleId)) {
             $roleId = UrlUtils::decodeId($roleId);
-            $this->info("Decoded role ID: $roleId");
         }
 
         // Get curator roles with import configuration
@@ -67,7 +66,7 @@ class ImportCuratorEvents extends Command
         $curatorRoles = $query->get();
 
         if ($curatorRoles->isEmpty()) {
-            $this->info('No curator roles with import configuration found.');
+            $this->error('No curator roles with import configuration found.');
             return 0;
         }
 
@@ -76,9 +75,7 @@ class ImportCuratorEvents extends Command
         $totalEvents = 0;
         $totalErrors = 0;
 
-        foreach ($curatorRoles as $curator) {
-            $this->info("\nProcessing curator: {$curator->name} (ID: {$curator->id})");
-            
+        foreach ($curatorRoles as $curator) {            
             $config = $curator->import_config;
             
             if (empty($config['urls']) && empty($config['cities'])) {
@@ -110,10 +107,9 @@ class ImportCuratorEvents extends Command
             }
 
             $totalEvents += $eventsProcessed;
-            $this->info("Completed curator {$curator->name}: {$eventsProcessed} events processed, {$errorsForCurator} errors");
         }
 
-        $this->info("\nImport completed: {$totalEvents} total events processed, {$totalErrors} total errors");
+        $this->info("\nImport completed: {$totalEvents} events processed, {$totalErrors} errors");
         return 0;
     }
 
@@ -202,9 +198,7 @@ class ImportCuratorEvents extends Command
             // Check disallow rules
             foreach ($disallowRules as $disallowPath) {
                 if ($this->pathMatches($urlPath, $disallowPath)) {
-                    if ($debug) {
-                        $this->warn("URL path '{$urlPath}' matches disallow rule '{$disallowPath}'");
-                    }
+                    $this->warn("Scraping blocked for {$url} by robots.txt");
                     return false;
                 }
             }
@@ -600,8 +594,6 @@ class ImportCuratorEvents extends Command
     private function createEvent(Role $curator, array $eventData, string $eventUrl, string $imageData = null, string $imageFormat = null, string $imageUrl = null, bool $debug = false): ?Event
     {
         try {
-            $this->info("Creating event: " . $eventData['event_name']);
-            
             // Parse event date and time
             $eventDateTime = $eventData['event_date_time'] ?? null;
             
@@ -683,7 +675,7 @@ class ImportCuratorEvents extends Command
             }
 
             if ($event) {
-                $this->info("Event created: " . $event->id);
+                $this->info("Event created: " . $event->name);
             } else {
                 $this->info("Event not created");
             }
