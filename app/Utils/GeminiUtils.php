@@ -347,17 +347,17 @@ class GeminiUtils
 
             if ($role->isTalent()) {
                 $data[$key]['talent_id'] = UrlUtils::encodeId($role->id);
-            } elseif (! empty($item['performer_name'])) {
+            } elseif (! (empty($item['performers'][0]['name']) ?? null)) {
 
-                $followerRoleIds = RoleUser::where('user_id', auth()->user()->id)
-                ->whereIn('level', ['owner', 'follower'])
-                ->orderBy('id')->pluck('role_id')->toArray();
-                
+                $followerRoleIds = RoleUser::where('user_id', auth()->user() ? auth()->user()->id : $role->user_id)
+                                    ->whereIn('level', ['owner', 'follower'])
+                                    ->orderBy('id')->pluck('role_id')->toArray();
+                                    
                 $talent = Role::where('is_deleted', false)
                     ->where(function($query) use ($item) {
-                        $query->where('name', $item['performer_name'])
-                            ->when(! empty($item['performer_name_en']), function($q) use ($item) {
-                                $q->orWhere('name_en', $item['performer_name_en']);
+                        $query->where('name', $item['performers'][0]['name'])
+                            ->when(! empty($item['performers'][0]['name_en']), function($q) use ($item) {
+                                $q->orWhere('name_en', $item['performers'][0]['name_en']);
                             });
                     })
                     ->where('type', 'talent')
@@ -413,13 +413,13 @@ class GeminiUtils
                 }
 
                 // Check for same performer name
-                if (! empty($item['performer_name']) && empty($data[$key]['event_url'])) {
+                if ((! empty($item['performers'][0]['name']) ?? null) && empty($data[$key]['event_url'])) {
                     $similarByPerformer = (clone $query)
                         ->whereHas('roles', function($q) use ($item) {
                             $q->where('type', 'talent')
-                              ->where('name', 'like', '%' . $item['performer_name'] . '%')
-                              ->when(!empty($item['performer_name_en']), function($q) use ($item) {
-                                  $q->orWhere('name', 'like', '%' . $item['performer_name_en'] . '%');
+                              ->where('name', 'like', '%' . $item['performers'][0]['name'] . '%')
+                              ->when(!empty($item['performers'][0]['name_en']), function($q) use ($item) {
+                                  $q->orWhere('name', 'like', '%' . $item['performers'][0]['name_en'] . '%');
                               });
                         })
                         ->first();
