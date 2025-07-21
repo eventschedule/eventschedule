@@ -322,14 +322,14 @@ class ImportCuratorEvents extends Command
                         break;
                     }
                 }
+
+                DB::table('parsed_event_urls')
+                    ->insert(['url' => $eventUrl, 'role_id' => $curator->id]);
             } catch (\Exception $e) {
                 if ($debug) {
                     $this->error("Error processing event URL {$eventUrl}: " . $e->getMessage());
                 }
                 Log::error("Error processing event URL {$eventUrl}: " . $e->getMessage());
-            } finally {
-                DB::table('parsed_event_urls')
-                    ->insert(['url' => $eventUrl, 'role_id' => $curator->id]);
             }
         }
 
@@ -533,48 +533,39 @@ class ImportCuratorEvents extends Command
      */
     private function extractEventDetails(Role $curator, string $textContent, string $eventUrl, string $imageData = null, string $imageFormat = null, string $imageUrl = null, bool $debug = false): ?array
     {
-        try {            
+        if ($debug) {
+            $this->line("Text content: " . $textContent);
+        }
+
+        // Create UploadedFile object from image data if available
+        $file = null;
+        if ($imageData && $imageUrl) {
+            $file = ImageUtils::createUploadedFileFromImageData($imageData, $imageUrl);
+            
             if ($debug) {
-                $this->line("Text content: " . $textContent);
+                $this->line("Created UploadedFile from image data: " . strlen($imageData) . " bytes, format: " . $imageFormat);
             }
+        }
 
-            // Create UploadedFile object from image data if available
-            $file = null;
-            if ($imageData && $imageUrl) {
-                $file = ImageUtils::createUploadedFileFromImageData($imageData, $imageUrl);
-                
-                if ($debug) {
-                    $this->line("Created UploadedFile from image data: " . strlen($imageData) . " bytes, format: " . $imageFormat);
-                }
-            }
-
-            // Use Gemini to parse event details
-            $parsedEvents = GeminiUtils::parseEvent($curator, $textContent, $file);
-            
-            if (empty($parsedEvents)) {
-                return null;
-            }
-
-            // Use the first parsed event
-            $eventData = $parsedEvents[0];
-            
-            // Check the event is valid
-            if (empty($eventData['event_name']) || empty($eventData['event_date_time'])) {
-                return null;
-            }
-
-            // Add the registration URL
-            $eventData['registration_url'] = $eventUrl;
-            
-            return $eventData;
-
-        } catch (\Exception $e) {
-            if ($debug) {
-                $this->error("Error extracting event details: " . $e->getMessage());
-            }
-
+        // Use Gemini to parse event details
+        $parsedEvents = GeminiUtils::parseEvent($curator, $textContent, $file);
+        
+        if (empty($parsedEvents)) {
             return null;
         }
+
+        // Use the first parsed event
+        $eventData = $parsedEvents[0];
+        
+        // Check the event is valid
+        if (empty($eventData['event_name']) || empty($eventData['event_date_time'])) {
+            return null;
+        }
+
+        // Add the registration URL
+        $eventData['registration_url'] = $eventUrl;
+        
+        return $eventData;
     }
 
     /**
