@@ -619,7 +619,9 @@ class ImportCuratorEvents extends Command
             }
 
             if ($debug) {
-                $this->info("Event duration: " . $eventData['event_duration']);
+                $this->info("\nEvent Name: " . $eventData['event_name']);
+                $this->info("Event Name (en): " . $eventData['event_name_en']);                
+                $this->info("\nEvent Details: " . $eventData['event_details']);                
             }
             
             // Create a mock request object with the event data
