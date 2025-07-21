@@ -347,27 +347,31 @@ class GeminiUtils
 
             if ($role->isTalent()) {
                 $data[$key]['talent_id'] = UrlUtils::encodeId($role->id);
-            } elseif (! (empty($item['performers'][0]['name']) ?? null)) {
-
+            } elseif (! empty($item['performers'])) {
+                
                 $followerRoleIds = RoleUser::where('user_id', auth()->user() ? auth()->user()->id : $role->user_id)
                                     ->whereIn('level', ['owner', 'follower'])
                                     ->orderBy('id')->pluck('role_id')->toArray();
-                                    
-                $talent = Role::where('is_deleted', false)
-                    ->where(function($query) use ($item) {
-                        $query->where('name', $item['performers'][0]['name'])
-                            ->when(! empty($item['performers'][0]['name_en']), function($q) use ($item) {
-                                $q->orWhere('name_en', $item['performers'][0]['name_en']);
-                            });
-                    })
-                    ->where('type', 'talent')
-                    ->whereIn('id', $followerRoleIds)
-                    ->orderBy('id')
-                    ->first();
+                
+                foreach ($item['performers'] as $index => $performer) {                    
+                    $talent = Role::where('is_deleted', false)
+                        ->where(function($query) use ($performer, $followerRoleIds) {
+                            $query->where('name', $performer['name'])
+                                ->when(! empty($performer['name_en']), function($q) use ($performer) {
+                                    $q->orWhere('name_en', $performer['name_en']);
+                                });
+                        })
+                        ->where('type', 'talent')
+                        ->whereIn('id', $followerRoleIds)
+                        ->orderBy('id')
+                        ->first();
 
-                if ($talent) {
-                    $data[$key]['talent_id'] = UrlUtils::encodeId($talent->id);
+                    if ($talent) {
+                        $data[$key]['performers'][$index]['talent_id'] = UrlUtils::encodeId($talent->id);
+                    }
                 }
+
+                \Log::info('Talent: ' . $talent ? 'Yes' : 'No');
             }
 
             if (! empty($item['event_date_time'])) {

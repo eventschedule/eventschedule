@@ -727,27 +727,17 @@ class ImportCuratorEvents extends Command
         $members = [];
 
         // Handle performers array if present
-        if (!empty($eventData['performers']) && is_array($eventData['performers'])) {
+        if (!empty($eventData['performers'])) {
             foreach ($eventData['performers'] as $index => $performer) {
-                $members["new_talent_{$index}"] = [
+                $members[! empty($performer['talent_id']) ? $performer['talent_id'] : "new_talent_{$index}"] = [
                     'name' => $performer['name'] ?? '',
                     'name_en' => $performer['name_en'] ?? '',
                     'email' => $performer['email'] ?? '',
                     'website' => $performer['website'] ?? '',
-                    'language_code' => 'en', // Default to English
+                    'youtube_url' => $performer['youtube_url'] ?? '',
                 ];
             }
         } 
-        // Handle single talent if present
-        elseif (!empty($eventData['talent_id'])) {
-            $members[$eventData['talent_id']] = [
-                'name' => $eventData['performer_name'] ?? '',
-                'name_en' => $eventData['performer_name_en'] ?? '',
-                'email' => $eventData['performer_email'] ?? '',
-                'youtube_url' => $eventData['performer_youtube_url'] ?? '',
-                'language_code' => 'en', // Default to English
-            ];
-        }
 
         return $members;
     }
