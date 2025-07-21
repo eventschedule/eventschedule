@@ -646,8 +646,16 @@ class ImportCuratorEvents extends Command
                 ]);
             }
 
-            // Set the authenticated user for the request
-            $user = User::find($curator->user_id);
+            // TODO remove the need for this by removing the 
+            // user from the event repo
+            $needToLogout = false;
+            if (auth()->check()) {
+                $user = auth()->user();
+            } else {
+                $user = User::find($curator->user_id);
+                $needToLogout = true;
+            }
+
             if ($user) {
                 if ($debug) {
                     $this->info("Auth user: " . $user->name);
@@ -681,7 +689,9 @@ class ImportCuratorEvents extends Command
             }
 
             // Clean up authentication
-            auth()->logout();
+            if ($needToLogout) {
+                auth()->logout();
+            }
 
             return $event;
         } catch (\Exception $e) {
@@ -690,6 +700,10 @@ class ImportCuratorEvents extends Command
             }
 
             Log::error("Error creating event: " . $e->getMessage());
+
+            if ($needToLogout) {
+                auth()->logout();
+            }
 
             return null;
         }
