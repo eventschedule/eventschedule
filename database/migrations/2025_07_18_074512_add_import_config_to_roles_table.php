@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('roles', function (Blueprint $table) {
-            $table->text('import_config')->nullable()->after('youtube_links');
+            $table->text('import_config')->nullable();
         });
 
         Schema::create('parsed_event_urls', function (Blueprint $table) {
