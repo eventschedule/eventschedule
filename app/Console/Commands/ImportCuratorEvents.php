@@ -376,7 +376,7 @@ class ImportCuratorEvents extends Command
             }
         }
 
-        return array_slice($links, 0, 20);
+        return array_slice($links, 0, 50);
     }
 
     /**
