@@ -14,7 +14,7 @@ class GeminiUtils
     private static function sendRequest($prompt, $imageData = null)
     {
         $apiKey = config('services.google.gemini_key');
-        $model = 'gemini-2.0-flash';
+        $model = 'gemini-2.5-flash';
         $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=" . $apiKey;
         
         $data = [
