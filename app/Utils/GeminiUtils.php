@@ -161,6 +161,11 @@ class GeminiUtils
             }
         }
 
+        // Get available categories
+        $categories = config('app.event_categories', []);
+        $categoryNames = array_values($categories);
+        $categoryIds = array_keys($categories);
+
         // Define fields and their descriptions
         $fields = [
             'event_name' => '',
@@ -185,6 +190,7 @@ class GeminiUtils
             'performer_name_en' => 'English translation, only if the performer name is not English',
             'performer_email' => '',
             'performer_website' => '',
+            'category_name' => 'Choose the most appropriate category from: ' . implode(', ', $categoryNames),
         ];
 
         // Build prompt from fields
@@ -237,6 +243,52 @@ class GeminiUtils
                     $data[$key]['event_address'] = $item['event_state'];
                     unset($data[$key]['event_state']);
                 }
+            }
+
+            // Convert category name to category ID
+            if (!empty($item['category_name'])) {
+                $categoryName = trim($item['category_name']);
+                $categoryId = null;
+                
+                // Try exact match first
+                foreach ($categories as $id => $name) {
+                    if (strcasecmp($name, $categoryName) === 0) {
+                        $categoryId = $id;
+                        break;
+                    }
+                }
+                
+                // If no exact match, try partial match
+                if (!$categoryId) {
+                    foreach ($categories as $id => $name) {
+                        if (stripos($name, $categoryName) !== false || stripos($categoryName, $name) !== false) {
+                            $categoryId = $id;
+                            break;
+                        }
+                    }
+                }
+                
+                // If still no match, try fuzzy matching
+                if (!$categoryId) {
+                    $bestMatch = null;
+                    $bestScore = 0;
+                    
+                    foreach ($categories as $id => $name) {
+                        $score = similar_text(strtolower($name), strtolower($categoryName), $percent);
+                        if ($percent > $bestScore) {
+                            $bestScore = $percent;
+                            $bestMatch = $id;
+                        }
+                    }
+                    
+                    // Only use fuzzy match if similarity is above 70%
+                    if ($bestScore > 70) {
+                        $categoryId = $bestMatch;
+                    }
+                }
+                
+                $data[$key]['category_id'] = $categoryId;
+                unset($data[$key]['category_name']);
             }
 
             // Convert performer data to array format
@@ -370,8 +422,6 @@ class GeminiUtils
                         $data[$key]['performers'][$index]['talent_id'] = UrlUtils::encodeId($talent->id);
                     }
                 }
-
-                \Log::info('Talent: ' . $talent ? 'Yes' : 'No');
             }
 
             if (! empty($item['event_date_time'])) {
