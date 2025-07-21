@@ -48,7 +48,7 @@ class ImportCuratorEvents extends Command
         }
 
         if ($test) {
-            $this->warn('Test mode enabled - only processing first event from each URL');
+            $this->warn('Test mode enabled - processing one new event from each URL');
         }
 
         // Decode ID if it's an encoded string
@@ -303,7 +303,12 @@ class ImportCuratorEvents extends Command
                                 ->first();
             
             if ($parsedEventUrl) {
-                continue;
+                if ($test) {
+                    // In test mode, continue to the next URL to find an unprocessed one
+                    continue;
+                } else {
+                    continue;
+                }
             }
 
             try {
@@ -311,6 +316,11 @@ class ImportCuratorEvents extends Command
 
                 if ($eventCreated) {                    
                     $eventsProcessed++;
+                    
+                    // In test mode, stop after processing one new event
+                    if ($test) {
+                        break;
+                    }
                 }
             } catch (\Exception $e) {
                 if ($debug) {
@@ -366,9 +376,7 @@ class ImportCuratorEvents extends Command
             }
         }
 
-        // In test mode, only return the first event URL, otherwise return up to 10
-        $limit = $test ? 1 : 10;
-        return array_slice($links, 0, $limit);
+        return array_slice($links, 0, 20);
     }
 
     /**
