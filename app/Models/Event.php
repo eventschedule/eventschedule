@@ -90,8 +90,12 @@ class Event extends Model
         });
 
         static::deleting(function ($event) {
-            if ($event->venue && ! $event->venue->email) {
-                $event->venue->delete();
+            foreach ($event->roles as $role) {
+                if (($role->isTalent() || $role->isVenue()) && ! $role->isRegistered()) {
+                    if ($role->events->count() == 1) {
+                        $role->delete();
+                    }
+                }
             }
 
             if ($event->registration_url) {
