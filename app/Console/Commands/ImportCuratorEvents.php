@@ -648,6 +648,7 @@ class ImportCuratorEvents extends Command
                 'registration_url' => $eventUrl,
                 'curators' => [UrlUtils::encodeId($curator->id)],
                 'tickets_enabled' => false,
+                'category_id' => $eventData['category_id'] ?? null,
             ]);
 
             if (isset($eventData['event_duration']) && $eventData['event_duration'] > 0) {
