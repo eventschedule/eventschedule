@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class Event extends Model
 {
@@ -91,6 +92,12 @@ class Event extends Model
         static::deleting(function ($event) {
             if ($event->venue && ! $event->venue->email) {
                 $event->venue->delete();
+            }
+
+            if ($event->registration_url) {
+                DB::table('parsed_event_urls')
+                    ->where('url', $event->registration_url)
+                    ->delete();
             }
         });
     }
