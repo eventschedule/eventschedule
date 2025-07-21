@@ -1287,14 +1287,14 @@ function testImport() {
     .then(data => {
         if (data.success) {
             // Create a modal to show the detailed output
-            showImportOutput(data.output, data.events_processed, data.message);
+            showImportOutput(data.output, data.message);
         } else {
             // Show error output in modal
-            showImportOutput(data.output || '', 0, data.message, false);
+            showImportOutput(data.output || '', data.message, false);
         }
     })
     .catch(error => {
-        showImportOutput('', 0, '{{ __("messages.import_test_error") }}: ' + error.message, false);
+        showImportOutput('', '{{ __("messages.import_test_error") }}: ' + error.message, false);
     })
     .finally(() => {
         button.textContent = originalText;
@@ -1308,7 +1308,7 @@ function testImport() {
     @endif
 }
 
-function showImportOutput(output, eventsProcessed, message, isSuccess = true) {
+function showImportOutput(output, message, isSuccess = true) {
     // Create modal HTML
     const modalHtml = `
         <div id="import-output-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
@@ -1318,11 +1318,6 @@ function showImportOutput(output, eventsProcessed, message, isSuccess = true) {
                         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                             {{ __("messages.import_test_results") }}
                         </h3>
-                        <button onclick="closeImportOutput()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
                     </div>
                     
                     <div class="mb-4">
@@ -1332,7 +1327,6 @@ function showImportOutput(output, eventsProcessed, message, isSuccess = true) {
                                 ${message}
                             </span>
                         </div>
-                        ${eventsProcessed > 0 ? `<p class="text-sm text-gray-600 dark:text-gray-400">${eventsProcessed} events processed</p>` : ''}
                     </div>
                     
                     ${output ? `
