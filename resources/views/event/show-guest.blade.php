@@ -17,13 +17,24 @@
               $queryParams = [];
               if (request('category')) $queryParams['category'] = request('category');
               if (request('schedule')) $queryParams['schedule'] = request('schedule');
+              if (request('date')) {
+                $date = request('date');
+                if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+                  $dateParts = explode('-', $date);
+                  $queryParams['month'] = (int)$dateParts[1];
+                  $queryParams['year'] = (int)$dateParts[0];
+                }
+              } else {
+                if (request('month')) $queryParams['month'] = request('month');
+                if (request('year')) $queryParams['year'] = request('year');
+              }
               if (!empty($queryParams)) {
                 $backUrl .= '?' . http_build_query($queryParams);
               }
             @endphp
             <div class="mt-2">
               <a href="{{ $backUrl }}" class="text-white text-sm hover:underline">
-                ← {{ __('messages.back_to_schedule') }}
+                <div style="display: inline-block;" class="hover:underline">← {{ __('messages.back_to_schedule') }}</div>
               </a>
               @if (auth()->user() && auth()->user()->canEditEvent($event))
                 <span class="text-white text-sm mx-1">|</span>
@@ -122,6 +133,17 @@
                   $queryParams = [];
                   if (request('category')) $queryParams['category'] = request('category');
                   if (request('schedule')) $queryParams['schedule'] = request('schedule');
+                  if (request('date')) {
+                    $date = request('date');
+                    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+                      $dateParts = explode('-', $date);
+                      $queryParams['month'] = (int)$dateParts[1];
+                      $queryParams['year'] = (int)$dateParts[0];
+                    }
+                  } else {
+                    if (request('month')) $queryParams['month'] = request('month');
+                    if (request('year')) $queryParams['year'] = request('year');
+                  }
                   if (!empty($queryParams)) {
                     $venueUrl .= '?' . http_build_query($queryParams);
                   }
@@ -281,6 +303,17 @@
                   $queryParams = [];
                   if (request('category')) $queryParams['category'] = request('category');
                   if (request('schedule')) $queryParams['schedule'] = request('schedule');
+                  if (request('date')) {
+                    $date = request('date');
+                    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+                      $dateParts = explode('-', $date);
+                      $queryParams['month'] = (int)$dateParts[1];
+                      $queryParams['year'] = (int)$dateParts[0];
+                    }
+                  } else {
+                    if (request('month')) $queryParams['month'] = request('month');
+                    if (request('year')) $queryParams['year'] = request('year');
+                  }
                   if (!empty($queryParams)) {
                     $memberUrl .= '?' . http_build_query($queryParams);
                   }
