@@ -66,7 +66,7 @@ class Event extends Model
                 });    
             }
 
-            if ($model->isDirty('name')) {
+            if ($model->isDirty('name') && $model->exists) {
                 $model->name_en = null;
 
                 $eventRoles = EventRole::where('event_id', $model->id)->get();
@@ -76,7 +76,7 @@ class Event extends Model
                 }
             }
 
-            if ($model->isDirty('description')) {
+            if ($model->isDirty('description') && $model->exists) {
                 $model->description_en = null;
                 $model->description_html_en = null;
 
