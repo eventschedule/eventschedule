@@ -39,6 +39,11 @@ class InvoiceNinjaController extends Controller
         }
     
         $payload = json_decode($request->getContent(), true);    
+
+        if (empty($payload['paymentables']) || count($payload['paymentables']) == 0) {
+            return response()->json(['status' => 'error', 'message' => 'No paymentables found'], 400);
+        }
+
         $invoiceId = $payload['paymentables'][0]['invoice_id'];
         
         if (! $invoiceId) {
