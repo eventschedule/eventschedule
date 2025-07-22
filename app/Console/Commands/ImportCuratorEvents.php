@@ -531,7 +531,7 @@ class ImportCuratorEvents extends Command
     /**
      * Extract event details from HTML using Gemini
      */
-    private function extractEventDetails(Role $curator, string $textContent, string $eventUrl, string $imageData = null, string $imageFormat = null, string $imageUrl = null, bool $debug = false): ?array
+    private function extractEventDetails(Role $curator, string $textContent, string $eventUrl, ?string $imageData = null, ?string $imageFormat = null, ?string $imageUrl = null, bool $debug = false): ?array
     {
         if ($debug) {
             $this->line("Text content: " . $textContent);
@@ -590,7 +590,7 @@ class ImportCuratorEvents extends Command
     /**
      * Create an event from extracted details
      */
-    private function createEvent(Role $curator, array $eventData, string $eventUrl, string $imageData = null, string $imageFormat = null, string $imageUrl = null, bool $debug = false): ?Event
+    private function createEvent(Role $curator, array $eventData, string $eventUrl, ?string $imageData = null, ?string $imageFormat = null, ?string $imageUrl = null, bool $debug = false): ?Event
     {
         try {
             // Parse event date and time
