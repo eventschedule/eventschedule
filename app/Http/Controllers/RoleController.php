@@ -1637,19 +1637,55 @@ class RoleController extends Controller
         }
 
         try {
+            // Get URLs and cities from the request
+            $urls = $request->input('urls', []);
+            $cities = $request->input('cities', []);
+
+            // Filter out empty values
+            $urls = array_filter(array_map('trim', $urls));
+            $cities = array_filter(array_map('trim', $cities));
+
+            if (empty($urls) && empty($cities)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('messages.please_enter_urls_or_cities')
+                ]);
+            }
+
             // Use shell_exec as a fallback if Artisan call fails
             try {
                 // Capture output using BufferedOutput
                 $output = new \Symfony\Component\Console\Output\BufferedOutput();
-                $exitCode = \Artisan::call('app:import-curator-events', [
+                
+                $artisanParams = [
                     '--role_id' => (string)$roleId,
                     '--test' => null
-                ], $output);
+                ];
+                
+                // Add URLs and cities as command line arguments
+                foreach ($urls as $url) {
+                    $artisanParams['--urls'][] = $url;
+                }
+                foreach ($cities as $city) {
+                    $artisanParams['--cities'][] = $city;
+                }
+                
+                $exitCode = \Artisan::call('app:import-curator-events', $artisanParams, $output);
                 
                 $outputText = $output->fetch();
             } catch (\Exception $e) {
                 // Fallback to shell_exec if Artisan call fails
-                $command = "php artisan app:import-curator-events --role_id={$roleId} --test 2>&1";
+                $urlArgs = '';
+                $cityArgs = '';
+                
+                if (!empty($urls)) {
+                    $urlArgs = ' --urls=' . implode(' --urls=', array_map('escapeshellarg', $urls));
+                }
+                if (!empty($cities)) {
+                    $cityArgs = ' --cities=' . implode(' --cities=', array_map('escapeshellarg', $cities));
+                }
+                
+                $command = "php artisan app:import-curator-events --role_id={$roleId} --test{$urlArgs}{$cityArgs} 2>&1";
                 $outputText = shell_exec($command);
                 $exitCode = 0; // Assume success for shell_exec
             }
