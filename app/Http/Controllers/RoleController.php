@@ -1106,6 +1106,11 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        $request->validate([
+            'link_type' => 'required|in:social_links,payment_links,youtube_links',
+            'link' => 'required|string|max:1000',
+        ]);
+
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if ($request->link_type == 'social_links') {
@@ -1129,7 +1134,10 @@ class RoleController extends Controller
                 continue;
             }
 
-            $links[] = UrlUtils::getUrlInfo($link);
+            $urlInfo = UrlUtils::getUrlInfo($link);
+            if ($urlInfo !== null) {
+                $links[] = $urlInfo;
+            }
         }
 
         $links = json_encode($links);
@@ -1153,6 +1161,11 @@ class RoleController extends Controller
         if (! auth()->user()->isMember($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
+
+        $request->validate([
+            'remove_link_type' => 'required|in:social_links,payment_links,youtube_links',
+            'remove_link' => 'required|string|max:1000',
+        ]);
 
         $role = Role::subdomain($subdomain)->firstOrFail();        
         if ($request->remove_link_type == 'social_links') {
