@@ -266,7 +266,7 @@
             <div id="events-carousel" class="flex overflow-x-auto scrollbar-hide gap-6 pb-4">
               @foreach($upcomingEventsWithVideos as $eventData)
                 @foreach($eventData['video_roles'] as $videoRole)
-                  <div class="carousel-item flex-shrink-0 w-80 bg-white rounded-xl shadow-md overflow-hidden">
+                  <div class="carousel-item flex-shrink-0 w-80 bg-white rounded-xl shadow-md overflow-hidden group/card">
                     <!-- Video iframe -->
                     <iframe 
                       class="w-full h-48 object-cover"
@@ -279,14 +279,14 @@
                     
                     <!-- Event details below video -->
                     <div class="p-4">
-                      <a href="{{ $eventData['event']->getGuestUrl($role->subdomain) }}" class="block group">
-                        <h3 class="text-gray-900 font-semibold text-lg mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors duration-200">
+                      <a href="{{ $eventData['event']->getGuestUrl($role->subdomain) }}" class="block">
+                        <h3 class="text-gray-900 font-semibold text-lg mb-2 line-clamp-1 group-hover/card:text-blue-600 transition-colors duration-200">
                           {{ $eventData['event']->translatedName() }}
                         </h3>
-                        <p class="text-gray-600 text-sm mb-1 group-hover:text-gray-700 transition-colors duration-200">
+                        <p class="text-gray-600 text-sm mb-1 group-hover/card:text-gray-700 transition-colors duration-200">
                           {{ $videoRole->translatedName() }}
                         </p>
-                        <p class="text-gray-500 text-xs group-hover:text-gray-600 transition-colors duration-200">
+                        <p class="text-gray-500 text-xs group-hover/card:text-gray-600 transition-colors duration-200">
                           {{ $eventData['event']->getStartEndTime() }}
                         </p>
                       </a>
