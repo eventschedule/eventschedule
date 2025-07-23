@@ -98,7 +98,10 @@ class EventRepo
 
                     $links = [];
                     if (! empty($member['youtube_url'])) {
-                        $links[] = UrlUtils::getUrlInfo($member['youtube_url']);
+                        $urlInfo = UrlUtils::getUrlInfo($member['youtube_url']);
+                        if ($urlInfo !== null) {
+                            $links[] = $urlInfo;
+                        }
                     }
                     $role->youtube_links = json_encode($links);
 
@@ -125,7 +128,10 @@ class EventRepo
                         
                         $links = [];
                         if (! empty($member['youtube_url'])) {
-                            $links[] = UrlUtils::getUrlInfo($member['youtube_url']);
+                            $urlInfo = UrlUtils::getUrlInfo($member['youtube_url']);
+                            if ($urlInfo !== null) {
+                                $links[] = $urlInfo;
+                            }
                         }
                         $role->youtube_links = json_encode($links);    
 

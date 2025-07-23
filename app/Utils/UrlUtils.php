@@ -191,13 +191,6 @@ class UrlUtils
             return false;
         }
 
-        // Resolve hostname to IP to check for private ranges
-        $ip = gethostbyname($host);
-        if ($ip !== $host && filter_var($ip, FILTER_VALIDATE_IP)) {
-            return !filter_var($ip, FILTER_VALIDATE_IP, 
-                FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
-        }
-
         return true;
     }
 

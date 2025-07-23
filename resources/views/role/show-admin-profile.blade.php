@@ -199,7 +199,7 @@ Leaving: "ease-in duration-200"
 
                                 <x-text-input id="link" name="link" type="url" class="mt-1 block w-full" required
                                     autofocus />
-                                <x-input-error class="mt-2" :messages="$errors->get('url')" />
+                                <x-input-error class="mt-2" :messages="$errors->get('link')" />
                             </div>
                         </div>
                     </div>
