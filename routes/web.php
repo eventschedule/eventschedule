@@ -118,7 +118,11 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse');    
     Route::post('/{subdomain}/import', [EventController::class, 'import'])->name('event.import');    
     Route::post('/{subdomain}/test_import', [RoleController::class, 'testImport'])->name('role.test_import');
-    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|availability|requests|profile|followers|team|plan');
+    Route::get('/{subdomain}/search_youtube', [RoleController::class, 'searchYouTube'])->name('role.search_youtube');
+    Route::get('/{subdomain}/talent-roles-without-videos', [RoleController::class, 'getTalentRolesWithoutVideos'])->name('role.talent_roles_without_videos');
+    Route::post('/{subdomain}/save-video', [RoleController::class, 'saveVideo'])->name('role.save_video');
+    Route::post('/{subdomain}/save-videos', [RoleController::class, 'saveVideos'])->name('role.save_videos');
+    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|availability|requests|profile|followers|team|plan|videos');
 
     Route::post('/{subdomain}/upload_image', [EventController::class, 'uploadImage'])->name('event.upload_image');
     Route::get('/tmp/event-image/{filename?}', function ($filename = null) {

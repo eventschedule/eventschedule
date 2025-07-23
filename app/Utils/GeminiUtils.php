@@ -354,11 +354,6 @@ class GeminiUtils
             }
         }
 
-        // Commented out YouTube URL fetching
-        // if ($data['performer_name']) {
-        //     $data['performer_youtube_url'] = self::getPerformerYoutubeUrl($data['performer_name']);
-        // }
-
         foreach ($data as $key => $item) {
             if ($imageData && empty($data[$key]['social_image']) && count($data) == 1) {
                 $data[$key]['social_image'] = $filename;
@@ -495,11 +490,6 @@ class GeminiUtils
         return $data;
     }
 
-    private static function getPerformerYoutubeUrl($performerName)
-    {
-        return self::searchYouTube($performerName);
-    }
-
     public static function translate($text, $from = 'auto', $to = 'en')
     {
         $prompt = "Translate this text from {$from} to {$to}. Return only the translation as a JSON string:\n{$text}";
@@ -569,30 +559,32 @@ class GeminiUtils
         return [];
     }
 
-    public static function searchYouTube($performerName)
+    public static function searchYouTube($query, $maxResults = 6)
     {
-        // Validate performer name input
-        if (empty($performerName) || strlen($performerName) > 100) {
-            return null;
+        // Validate query input
+        if (empty($query) || strlen($query) > 100) {
+            return [];
         }
         
         // Validate API key
         $apiKey = config('services.google.backend');
         if (!$apiKey) {
-            return null;
+            return [];
         }
         
-        $url = "https://www.googleapis.com/youtube/v3/search"
+        // First, search for videos
+        $searchUrl = "https://www.googleapis.com/youtube/v3/search"
             . "?key=" . $apiKey
-            . "&q=" . urlencode($performerName)
+            . "&q=" . urlencode($query)
             . "&type=video"
             . "&order=relevance"
-            . "&maxResults=1";
+            . "&maxResults=" . $maxResults
+            . "&part=snippet";
             
         // Use secure cURL instead of file_get_contents
         $ch = curl_init();
         curl_setopt_array($ch, [
-            CURLOPT_URL => $url,
+            CURLOPT_URL => $searchUrl,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => 10,
             CURLOPT_CONNECTTIMEOUT => 5,
@@ -608,20 +600,93 @@ class GeminiUtils
         curl_close($ch);
         
         if ($response === false || $httpCode !== 200) {
-            return null;
+            return [];
         }
         
         $data = json_decode($response, true);
 
-        if (isset($data['items'][0]['id']['videoId'])) {
-            $videoId = $data['items'][0]['id']['videoId'];
-            // Validate video ID format
-            if (preg_match('/^[a-zA-Z0-9_-]{11}$/', $videoId)) {
-                return "https://www.youtube.com/watch?v=" . $videoId;
+        if (!isset($data['items']) || !is_array($data['items'])) {
+            return [];
+        }
+
+        $videos = [];
+        $videoIds = [];
+        
+        // Extract video IDs and basic info
+        foreach ($data['items'] as $item) {
+            if (isset($item['id']['videoId']) && isset($item['snippet'])) {
+                $videoId = $item['id']['videoId'];
+                $snippet = $item['snippet'];
+                
+                // Validate video ID format
+                if (preg_match('/^[a-zA-Z0-9_-]{11}$/', $videoId)) {
+                    $videoIds[] = $videoId;
+                    $videos[$videoId] = [
+                        'id' => $videoId,
+                        'title' => html_entity_decode($snippet['title'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+                        'description' => html_entity_decode($snippet['description'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+                        'channelTitle' => html_entity_decode($snippet['channelTitle'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+                        'thumbnail' => $snippet['thumbnails']['medium']['url'] ?? null,
+                        'url' => "https://www.youtube.com/watch?v=" . $videoId,
+                        'publishedAt' => $snippet['publishedAt'] ?? null,
+                        'viewCount' => 0,
+                        'likeCount' => 0
+                    ];
+                }
+            }
+        }
+        
+        // If we have video IDs, try to get statistics
+        if (!empty($videoIds)) {
+            $videoIdsString = implode(',', $videoIds);
+            $statsUrl = "https://www.googleapis.com/youtube/v3/videos"
+                . "?key=" . $apiKey
+                . "&id=" . $videoIdsString
+                . "&part=statistics";
+                
+            $ch = curl_init();
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $statsUrl,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 10,
+                CURLOPT_CONNECTTIMEOUT => 5,
+                CURLOPT_USERAGENT => 'EventSchedule/1.0',
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_PROTOCOLS => CURLPROTO_HTTPS,
+                CURLOPT_MAXFILESIZE => 1048576,
+            ]);
+            
+            $statsResponse = curl_exec($ch);
+            $statsHttpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            
+            if ($statsResponse !== false && $statsHttpCode === 200) {
+                $statsData = json_decode($statsResponse, true);
+                
+                if (isset($statsData['items']) && is_array($statsData['items'])) {
+                    foreach ($statsData['items'] as $item) {
+                        if (isset($item['id']) && isset($item['statistics'])) {
+                            $videoId = $item['id'];
+                            $statistics = $item['statistics'];
+                            
+                            if (isset($videos[$videoId])) {
+                                $videos[$videoId]['viewCount'] = (int)($statistics['viewCount'] ?? 0);
+                                $videos[$videoId]['likeCount'] = (int)($statistics['likeCount'] ?? 0);
+                            }
+                        }
+                    }
+                }
             }
         }
 
-        return null;
+        // Sort videos by view count in descending order
+        $sortedVideos = array_values($videos);
+        usort($sortedVideos, function($a, $b) {
+            return $b['viewCount'] - $a['viewCount'];
+        });
+
+        return $sortedVideos;
     }
 
     public static function generateBlogPost($topic)
