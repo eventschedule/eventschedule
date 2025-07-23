@@ -23,7 +23,7 @@ class ImportCuratorEvents extends Command
      *
      * @var string
      */
-    protected $signature = 'app:import-curator-events {--role_id= : Import events for a specific curator role by ID} {--debug : Enable debug mode with verbose logging} {--test : Test mode - only process first event from each URL}';
+    protected $signature = 'app:import-curator-events {--role_id= : Import events for a specific curator role by ID} {--debug : Enable debug mode with verbose logging} {--test : Test mode - only process first event from each URL} {--urls=* : URLs to import from (for testing)} {--cities=* : Cities to import from (for testing)}';
 
     /**
      * The console command description.
@@ -42,6 +42,8 @@ class ImportCuratorEvents extends Command
         $roleId = $this->option('role_id');
         $debug = $this->option('debug');
         $test = $this->option('test');
+        $providedUrls = $this->option('urls');
+        $providedCities = $this->option('cities');
 
         if ($debug) {
             $this->info('Debug mode enabled - verbose logging will be shown');
@@ -76,7 +78,15 @@ class ImportCuratorEvents extends Command
         $totalErrors = 0;
 
         foreach ($curatorRoles as $curator) {            
-            $config = $curator->import_config;
+            // Use provided URLs/cities for testing, otherwise use role's config
+            if ($test && (!empty($providedUrls) || !empty($providedCities))) {
+                $config = [
+                    'urls' => array_map('strtolower', $providedUrls),
+                    'cities' => array_map('strtolower', $providedCities)
+                ];
+            } else {
+                $config = $curator->import_config;
+            }
             
             if (empty($config['urls']) && empty($config['cities'])) {
                 $this->warn("No URLs or cities configured for curator {$curator->name}");
