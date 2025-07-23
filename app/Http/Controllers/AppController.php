@@ -67,8 +67,9 @@ class AppController extends Controller
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
+        \Artisan::call('app:import-curator-events');
         \Artisan::call('app:translate');
 
-        return response()->json(['success' => true]);        
+        return response()->json(['success' => true]);
     }
 }
