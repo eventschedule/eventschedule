@@ -231,6 +231,86 @@
           </div>
         </div>
 
+        @php
+          // Filter events for upcoming events with videos (only on main role page, not event pages)
+          $upcomingEventsWithVideos = collect();
+          if (!$event) {
+            $upcomingEvents = $events->filter(function($event) {
+              return $event->starts_at && Carbon\Carbon::parse($event->starts_at)->isAfter(now()->subDay());
+            })->take(10);
+            
+            foreach ($upcomingEvents as $upcomingEvent) {
+              $videoRoles = $upcomingEvent->roles->filter(function($eventRole) {
+                return $eventRole->isTalent() && $eventRole->getFirstVideoUrl();
+              });
+              
+              if ($videoRoles->count() > 0) {
+                $upcomingEventsWithVideos->push([
+                  'event' => $upcomingEvent,
+                  'video_roles' => $videoRoles
+                ]);
+              }
+            }
+          }
+        @endphp
+
+        @if($upcomingEventsWithVideos && $upcomingEventsWithVideos->count() > 0)
+        <div class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-10 flex flex-col gap-6 mb-6">
+          <div class="text-[32px] font-semibold leading-10 text-[#151B26] mb-4">
+            {{ __('messages.upcoming_events') }}
+          </div>
+          
+          <!-- Carousel Container -->
+          <div class="relative group">
+            <!-- Carousel Track -->
+            <div id="events-carousel" class="flex overflow-x-auto scrollbar-hide gap-6 pb-4">
+              @foreach($upcomingEventsWithVideos as $eventData)
+                @foreach($eventData['video_roles'] as $videoRole)
+                  <div class="carousel-item flex-shrink-0 w-80 bg-white rounded-xl shadow-md overflow-hidden">
+                    <!-- Video iframe -->
+                    <iframe 
+                      class="w-full h-48 object-cover"
+                      src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($videoRole->getFirstVideoUrl()) }}" 
+                      frameborder="0" 
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                      referrerpolicy="strict-origin-when-cross-origin" 
+                      allowfullscreen>
+                    </iframe>
+                    
+                    <!-- Event details below video -->
+                    <div class="p-4">
+                      <a href="{{ $eventData['event']->getGuestUrl($role->subdomain) }}" class="block group">
+                        <h3 class="text-gray-900 font-semibold text-lg mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors duration-200">
+                          {{ $eventData['event']->translatedName() }}
+                        </h3>
+                        <p class="text-gray-600 text-sm mb-1 group-hover:text-gray-700 transition-colors duration-200">
+                          {{ $videoRole->translatedName() }}
+                        </p>
+                        <p class="text-gray-500 text-xs group-hover:text-gray-600 transition-colors duration-200">
+                          {{ $eventData['event']->getStartEndTime() }}
+                        </p>
+                      </a>
+                    </div>
+                  </div>
+                @endforeach
+              @endforeach
+            </div>
+            
+            <!-- Navigation arrows -->
+            <button id="carousel-prev" class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 opacity-0 group-hover:opacity-100">
+              <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+            </button>
+            <button id="carousel-next" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 opacity-0 group-hover:opacity-100">
+              <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        @endif
+
         @if($role->translatedDescription())
         <div
           class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-10 flex flex-col gap-4 mb-6 {{ $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}"
@@ -306,6 +386,51 @@
 <style>
 [v-cloak] {
   display: none !important;
+}
+
+/* Carousel styles */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-item {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.carousel-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Navigation button styles */
+#carousel-prev,
+#carousel-next {
+  transition: opacity 0.3s ease, background-color 0.2s ease;
+  z-index: 10;
+}
+
+#carousel-prev:hover,
+#carousel-next:hover {
+  background-color: white !important;
 }
 </style>
 <script {!! nonce_attr() !!}>
@@ -540,6 +665,67 @@ document.addEventListener('DOMContentLoaded', function() {
             currentFocusIndex = -1;
         }
     });
+    
+    // Carousel functionality
+    const carousel = document.getElementById('events-carousel');
+    const prevButton = document.getElementById('carousel-prev');
+    const nextButton = document.getElementById('carousel-next');
+    
+    if (carousel && prevButton && nextButton) {
+        const carouselContainer = carousel.parentElement;
+        const carouselItems = carousel.querySelectorAll('.carousel-item');
+        
+        // Only show navigation if there are multiple items
+        if (carouselItems.length <= 1) {
+            prevButton.style.display = 'none';
+            nextButton.style.display = 'none';
+            return;
+        }
+        
+        // Show/hide navigation buttons based on scroll position
+        function updateNavigationButtons() {
+            const isAtStart = carousel.scrollLeft <= 0;
+            const isAtEnd = carousel.scrollLeft >= carousel.scrollWidth - carousel.clientWidth - 1;
+            
+            prevButton.style.opacity = isAtStart ? '0' : '1';
+            nextButton.style.opacity = isAtEnd ? '0' : '1';
+        }
+        
+        // Navigation button event listeners
+        prevButton.addEventListener('click', function() {
+            carousel.scrollBy({
+                left: -320, // Width of carousel item + gap
+                behavior: 'smooth'
+            });
+        });
+        
+        nextButton.addEventListener('click', function() {
+            carousel.scrollBy({
+                left: 320, // Width of carousel item + gap
+                behavior: 'smooth'
+            });
+        });
+        
+        // Update navigation buttons on scroll
+        carousel.addEventListener('scroll', updateNavigationButtons);
+        
+        // Initial button state
+        updateNavigationButtons();
+        
+        // Show navigation buttons on hover
+        carouselContainer.addEventListener('mouseenter', function() {
+            if (carousel.scrollLeft > 0) {
+                prevButton.style.opacity = '1';
+            }
+            if (carousel.scrollLeft < carousel.scrollWidth - carousel.clientWidth - 1) {
+                nextButton.style.opacity = '1';
+            }
+        });
+        
+        carouselContainer.addEventListener('mouseleave', function() {
+            updateNavigationButtons();
+        });
+    }
 });
 </script>
 
