@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role" :fonts="$fonts">
+<x-app-guest-layout :role="$role" :event="$events->filter(function($event) { return $event->starts_at >= now() || $event->days_of_week === null; })->first()" :fonts="$fonts">
 
   <main>
     <div>
