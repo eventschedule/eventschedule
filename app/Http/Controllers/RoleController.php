@@ -1668,4 +1668,184 @@ class RoleController extends Controller
             ]);
         }
     }
+
+    public function getTalentRolesWithoutVideos(Request $request, $subdomain)
+    {
+        if (!auth()->user()->isMember($subdomain)) {
+            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        
+        if (!$role->isCurator()) {
+            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
+        }
+
+        // Get upcoming events for this curator
+        $upcomingEvents = Event::with('roles')
+            ->where('starts_at', '>=', now()->subDay())
+            ->whereIn('id', function ($query) use ($role) {
+                $query->select('event_id')
+                    ->from('event_role')
+                    ->where('role_id', $role->id)
+                    ->where('is_accepted', true);
+            })
+            ->orderBy('starts_at')
+            ->get();
+
+        // Get talent roles from these events that don't have YouTube videos
+        $talentRoles = collect();
+        
+        foreach ($upcomingEvents as $event) {
+            foreach ($event->roles as $eventRole) {
+                if ($eventRole->isTalent() && 
+                    (! $eventRole->youtube_links && $eventRole->youtube_links != '[]')) {
+                    
+                    // Check if we already have this role
+                    if (!$talentRoles->contains('id', $eventRole->id)) {
+                        $talentRoles->push([
+                            'id' => $eventRole->id,
+                            'name' => $eventRole->name,
+                            'description' => $eventRole->description,
+                            'profile_image_url' => $eventRole->profile_image_url,
+                            'event_name' => $event->name,
+                            'event_date' => $event->localStartsAt()
+                        ]);
+                    }
+                }
+            }
+        }
+
+        return response()->json($talentRoles->values());
+    }
+
+    public function searchYouTube(Request $request, $subdomain)
+    {
+        if (!auth()->user()->isMember($subdomain)) {
+            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        
+        if (!$role->isCurator()) {
+            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
+        }
+
+        $query = $request->get('q');
+        
+        if (empty($query)) {
+            return response()->json(['success' => false, 'message' => __('messages.query_required')]);
+        }
+
+        try {
+            $videos = \App\Utils\GeminiUtils::searchYouTube($query);
+            
+            return response()->json([
+                'success' => true,
+                'videos' => $videos
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.error_searching_videos') . ': ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function saveVideo(Request $request, $subdomain)
+    {
+        if (!auth()->user()->isMember($subdomain)) {
+            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        
+        if (!$role->isCurator()) {
+            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
+        }
+
+        $request->validate([
+            'role_id' => 'required|integer',
+            'video_url' => 'required|url',
+            'video_title' => 'required|string'
+        ]);
+
+        $talentRole = Role::find($request->role_id);
+        
+        if (!$talentRole || !$talentRole->isTalent()) {
+            return response()->json(['success' => false, 'message' => __('messages.talent_role_not_found')]);
+        }
+
+        // Add the video to the talent role's YouTube links
+        $existingLinks = $talentRole->youtube_links ? json_decode($talentRole->youtube_links, true) : [];
+        
+        $newLink = [
+            'url' => $request->video_url,
+            'title' => $request->video_title,
+            'type' => 'youtube'
+        ];
+        
+        $existingLinks[] = $newLink;
+        
+        $talentRole->youtube_links = json_encode($existingLinks);
+        $talentRole->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => __('messages.video_saved_successfully')
+        ]);
+    }
+
+    public function saveVideos(Request $request, $subdomain)
+    {
+        if (!auth()->user()->isMember($subdomain)) {
+            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        
+        if (!$role->isCurator()) {
+            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
+        }
+
+        $request->validate([
+            'role_id' => 'required|integer',
+            'videos' => 'required|array|max:2'
+        ]);
+
+        // Only validate video details if videos are provided
+        if (!empty($request->videos)) {
+            $request->validate([
+                'videos.*.url' => 'required|url',
+                'videos.*.title' => 'required|string'
+            ]);
+        }
+
+        $talentRole = Role::find($request->role_id);
+        
+        if (!$talentRole || !$talentRole->isTalent()) {
+            return response()->json(['success' => false, 'message' => __('messages.talent_role_not_found')]);
+        }
+
+        // Add the videos to the talent role's YouTube links
+        $existingLinks = $talentRole->youtube_links ? json_decode($talentRole->youtube_links, true) : [];
+        
+        foreach ($request->videos as $video) {
+            $newLink = [
+                'url' => $video['url'],
+                'title' => $video['title'],
+                'type' => 'youtube'
+            ];
+            
+            $existingLinks[] = $newLink;
+        }
+        
+        $talentRole->youtube_links = json_encode($existingLinks);
+        $talentRole->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => __('messages.videos_saved_successfully')
+        ]);
+    }
 }
