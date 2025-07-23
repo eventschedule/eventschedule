@@ -648,29 +648,9 @@ class ImportCuratorEvents extends Command
                 ]);
             }
 
-            // TODO remove the need for this by removing the 
-            // user from the event repo
-            $needToLogout = false;
-            if (auth()->check()) {
-                $user = auth()->user();
-            } else {
-                $user = User::find($curator->user_id);
-                $needToLogout = true;
-            }
-
-            if ($user) {
-                if ($debug) {
-                    $this->info("Auth user: " . $user->name);
-                }
-
-                // Authenticate the user for this request
-                auth()->login($user);
-                
-                // Also set the user on the request object
-                $request->setUserResolver(function () use ($user) {
-                    return $user;
-                });
-            }
+            $request->setUserResolver(function () use ($curator) {
+                return User::find($curator->user_id);
+            });
 
             // Use the EventRepo to save the event
             $eventRepo = app(\App\Repos\EventRepo::class);
@@ -690,11 +670,6 @@ class ImportCuratorEvents extends Command
                 $this->info("Event not created");
             }
 
-            // Clean up authentication
-            if ($needToLogout) {
-                auth()->logout();
-            }
-
             return $event;
         } catch (\Exception $e) {
             if ($debug) {
@@ -702,10 +677,6 @@ class ImportCuratorEvents extends Command
             }
 
             Log::error("Error creating event: " . $e->getMessage());
-
-            if ($needToLogout) {
-                auth()->logout();
-            }
 
             return null;
         }
