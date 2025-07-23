@@ -389,15 +389,25 @@
               {!! \App\Utils\UrlUtils::convertUrlsToLinks($each->description_html) !!}
             </div>
             @if ($each->youtube_links)
-              <div class="grid grid-cols-1 md:grid-cols-{{ $role->getVideoColumns() }} gap-8">
-              @foreach (json_decode($each->youtube_links) as $link)
-              @if($link)
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-                  <iframe class="w-full" style="height:{{ $each->getVideoHeight() }}px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                </div>
+              @php
+                $videoLinks = json_decode($each->youtube_links);
+                $videoCount = 0;
+                foreach ($videoLinks as $link) {
+                  if ($link) $videoCount++;
+                }
+                $gridCols = min($videoCount, $role->getVideoColumns());
+              @endphp
+              @if ($videoCount > 0)
+                <div class="grid grid-cols-1 md:grid-cols-{{ $gridCols }} gap-8">
+                @foreach ($videoLinks as $link)
+                @if($link)
+                  <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <iframe class="w-full" style="height:{{ $each->getVideoHeight() }}px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                  </div>
+                @endif
+                @endforeach
+                </div> 
               @endif
-              @endforeach
-              </div> 
             @endif
           </div>
 
