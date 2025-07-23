@@ -103,7 +103,9 @@ class EventRepo
                             $links[] = $urlInfo;
                         }
                     }
-                    $role->youtube_links = json_encode($links);
+                    if (count($links)) {
+                        $role->youtube_links = json_encode($links);
+                    }
 
                     $role->save();
                     $role->refresh();
