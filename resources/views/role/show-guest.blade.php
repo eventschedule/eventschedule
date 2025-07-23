@@ -256,14 +256,10 @@
 
         @if($upcomingEventsWithVideos && $upcomingEventsWithVideos->count() > 0)
         <div class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-10 flex flex-col gap-6 mb-6">
-          <div class="text-[32px] font-semibold leading-10 text-[#151B26] mb-4">
-            {{ __('messages.upcoming_events') }}
-          </div>
-          
           <!-- Carousel Container -->
           <div class="relative group">
             <!-- Carousel Track -->
-            <div id="events-carousel" class="flex overflow-x-auto scrollbar-hide gap-6 pb-4">
+            <div id="events-carousel" class="flex overflow-x-auto scrollbar-hide gap-6 pb-4 pt-4">
               @foreach($upcomingEventsWithVideos as $eventData)
                 @foreach($eventData['video_roles'] as $videoRole)
                   <div class="carousel-item flex-shrink-0 w-80 bg-white rounded-xl shadow-md overflow-hidden group/card">
@@ -403,7 +399,7 @@
 }
 
 .carousel-item:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
