@@ -291,7 +291,6 @@ return [
     'embed' => 'Embed',
     'about' => 'About',
     'social_media' => 'Social Media',
-    'upcoming_events' => 'Upcoming Events',
     'create_schedule' => 'Create Schedule',
     'create_your_own_event_schedule' => 'Create your own event schedule!',
     'header_image' => 'Header Image',
