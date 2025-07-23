@@ -148,7 +148,7 @@ class EventRepo
 
         if (! $event) {
             $event = new Event;       
-            $event->user_id = auth()->user()->id;
+            $event->user_id = $user->id;
             $event->creator_role_id = $creatorRoleId;
 
             if ($request->name_en) {
@@ -176,7 +176,7 @@ class EventRepo
         $event->days_of_week = request()->schedule_type == 'recurring' ? $days_of_week : null;
 
         if ($event->starts_at) {
-            $timezone = auth()->user()->timezone;
+            $timezone = $user->timezone;
             $event->starts_at = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, $timezone)
                 ->setTimezone('UTC')
                 ->format('Y-m-d H:i:s');
