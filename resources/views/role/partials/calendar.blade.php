@@ -115,9 +115,7 @@
                         @if(count($uniqueCategoryIds ?? []) > 1)
                             <select v-model="selectedCategory" class="border-gray-300 rounded-md shadow-sm h-9 w-auto flex items-center text-sm {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
                                 <option value="">{{ __('messages.all_categories') }}</option>
-                                @foreach(get_translated_categories() as $catKey => $catName)
-                                    <option value="{{ $catKey }}">{{ $catName }}</option>
-                                @endforeach
+                                <option v-for="category in availableCategories" :key="category.id" :value="category.id" v-text="category.name"></option>
                             </select>
                         @endif
                     </div>
@@ -252,9 +250,7 @@
                     @if(count($uniqueCategoryIds ?? []) > 1)
                         <select v-model="selectedCategory" class="border-gray-300 rounded-md shadow-sm h-9 flex-1 flex items-center text-sm {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
                             <option value="">{{ __('messages.all_categories') }}</option>
-                            @foreach(get_translated_categories() as $catKey => $catName)
-                                <option value="{{ $catKey }}">{{ $catName }}</option>
-                            @endforeach
+                            <option v-for="category in availableCategories" :key="category.id" :value="category.id" v-text="category.name"></option>
                         </select>
                     @endif
                 </div>
@@ -530,6 +526,7 @@ const calendarApp = createApp({
             selectedCategory: '{{ $category ?? "" }}',
             allEvents: @json($eventsForVue),
             groups: @json($groupsForVue),
+            categories: @json(get_translated_categories()),
             startOfMonth: '{{ $startOfMonth->format('Y-m-d') }}',
             endOfMonth: '{{ $endOfMonth->format('Y-m-d') }}',
             use24Hour: {{ isset($role) && $role->use_24_hour_time ? 'true' : 'false' }},
@@ -554,12 +551,38 @@ const calendarApp = createApp({
                 }
                 return true;
             });
+        },
+        availableCategories() {
+            // Get events filtered only by group (not by category) to show all available categories
+            const groupFilteredEvents = this.allEvents.filter(event => {
+                if (this.selectedGroup) {
+                    // Find the group by slug to get its ID for filtering
+                    const selectedGroupObj = this.groups.find(group => group.slug === this.selectedGroup);
+                    if (selectedGroupObj && event.group_id !== selectedGroupObj.id) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+            
+            // Get unique category IDs from the group-filtered events
+            const categoryIds = [...new Set(groupFilteredEvents.map(event => event.category_id).filter(id => id))];
+            
+            // Convert to array of category objects
+            return categoryIds.map(id => ({
+                id: id,
+                name: this.categories[id] || `Category ${id}`
+            })).sort((a, b) => a.name.localeCompare(b.name));
         }
     },
     watch: {
         selectedGroup(newGroupSlug) {
             if (this.route === 'guest' && !this.embed) {
                 this.updateUrlWithGroup(newGroupSlug);
+            }
+            // Reset category selection when group changes, as available categories may change
+            if (this.selectedCategory && !this.availableCategories.find(cat => cat.id == this.selectedCategory)) {
+                this.selectedCategory = '';
             }
         }
     },
