@@ -251,15 +251,36 @@
                 ]);
               }
             }
+            
+            // Sort events by start date (earliest first)
+            $upcomingEventsWithVideos = $upcomingEventsWithVideos->sortBy(function($eventData) {
+              return $eventData['event']->starts_at;
+            });
           }
         @endphp
 
         @if($upcomingEventsWithVideos && $upcomingEventsWithVideos->count() > 0)
+        @php
+          $isRtl = $role->isRtl() && !session()->has('translate');
+          // For RTL, we need to reverse the order of videos to show earliest first
+          if ($isRtl) {
+            // For RTL, we want earliest events first, so we don't reverse the collection
+            // But we do need to reverse the video roles within each event to show earliest videos first
+            $upcomingEventsWithVideos = $upcomingEventsWithVideos->map(function($eventData) {
+              $eventData['video_roles'] = $eventData['video_roles']->reverse();
+              return $eventData;
+            });
+          }
+        @endphp
+        <!-- Debug: RTL = {{ $isRtl ? 'true' : 'false' }}, Role language = {{ $role->language_code }}, Event count = {{ $upcomingEventsWithVideos->count() }} -->
+        @foreach($upcomingEventsWithVideos as $eventData)
+          <!-- Event: {{ $eventData['event']->name }} - {{ $eventData['event']->starts_at }} -->
+        @endforeach
         <div class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-10 flex flex-col gap-6 mb-6">
           <!-- Carousel Container -->
           <div class="relative group">
             <!-- Carousel Track -->
-            <div id="events-carousel" class="flex overflow-x-auto scrollbar-hide gap-6 pb-4 pt-4">
+            <div id="events-carousel" class="flex overflow-x-auto scrollbar-hide gap-6 pb-4 pt-4 {{ $isRtl ? 'rtl' : '' }}">
               @foreach($upcomingEventsWithVideos as $eventData)
                 @foreach($eventData['video_roles'] as $videoRole)
                   <div class="carousel-item flex-shrink-0 w-80 bg-white rounded-xl shadow-md overflow-hidden group/card">
@@ -293,14 +314,14 @@
             </div>
             
             <!-- Navigation arrows -->
-            <button id="carousel-prev" class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 opacity-0 group-hover:opacity-100">
+            <button id="carousel-prev" class="absolute {{ $isRtl ? 'right-2' : 'left-2' }} top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 opacity-100 z-10">
               <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $isRtl ? 'M9 5l7 7-7 7' : 'M15 19l-7-7 7-7' }}"></path>
               </svg>
             </button>
-            <button id="carousel-next" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 opacity-0 group-hover:opacity-100">
+            <button id="carousel-next" class="absolute {{ $isRtl ? 'left-2' : 'right-2' }} top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 opacity-100 z-10">
               <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $isRtl ? 'M15 19l-7-7 7-7' : 'M9 5l7 7-7 7' }}"></path>
               </svg>
             </button>
           </div>
@@ -670,6 +691,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (carousel && prevButton && nextButton) {
         const carouselContainer = carousel.parentElement;
         const carouselItems = carousel.querySelectorAll('.carousel-item');
+        const isRtl = carousel.classList.contains('rtl');
         
         // Only show navigation if there are multiple items
         if (carouselItems.length <= 1) {
@@ -678,26 +700,38 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        // Make buttons visible by default for multiple items
+        prevButton.style.display = 'block';
+        nextButton.style.display = 'block';
+        
         // Show/hide navigation buttons based on scroll position
         function updateNavigationButtons() {
             const isAtStart = carousel.scrollLeft <= 0;
             const isAtEnd = carousel.scrollLeft >= carousel.scrollWidth - carousel.clientWidth - 1;
             
-            prevButton.style.opacity = isAtStart ? '0' : '1';
-            nextButton.style.opacity = isAtEnd ? '0' : '1';
+            if (isRtl) {
+                // For RTL, swap the logic since we start from the end
+                prevButton.style.opacity = isAtEnd ? '0.3' : '1';
+                nextButton.style.opacity = isAtStart ? '0.3' : '1';
+            } else {
+                prevButton.style.opacity = isAtStart ? '0.3' : '1';
+                nextButton.style.opacity = isAtEnd ? '0.3' : '1';
+            }
         }
         
         // Navigation button event listeners
         prevButton.addEventListener('click', function() {
+            const scrollAmount = isRtl ? 320 : -320;
             carousel.scrollBy({
-                left: -320, // Width of carousel item + gap
+                left: scrollAmount, // Width of carousel item + gap
                 behavior: 'smooth'
             });
         });
         
         nextButton.addEventListener('click', function() {
+            const scrollAmount = isRtl ? -320 : 320;
             carousel.scrollBy({
-                left: 320, // Width of carousel item + gap
+                left: scrollAmount, // Width of carousel item + gap
                 behavior: 'smooth'
             });
         });
@@ -708,12 +742,28 @@ document.addEventListener('DOMContentLoaded', function() {
         // Initial button state
         updateNavigationButtons();
         
+        // For RTL, start scrolled to the end to show the earliest video first
+        if (isRtl && carouselItems.length > 1) {
+            // Wait for the carousel to be fully rendered
+            setTimeout(() => {
+                carousel.scrollLeft = carousel.scrollWidth;
+                updateNavigationButtons();
+                console.log('RTL carousel initialized, scrolled to end');
+            }, 100);
+        }
+        
+        // Debug logging
+        console.log('Carousel initialized:', {
+            isRtl: isRtl,
+            itemCount: carouselItems.length,
+            scrollWidth: carousel.scrollWidth,
+            clientWidth: carousel.clientWidth
+        });
+        
         // Show navigation buttons on hover
         carouselContainer.addEventListener('mouseenter', function() {
-            if (carousel.scrollLeft > 0) {
+            if (carouselItems.length > 1) {
                 prevButton.style.opacity = '1';
-            }
-            if (carousel.scrollLeft < carousel.scrollWidth - carousel.clientWidth - 1) {
                 nextButton.style.opacity = '1';
             }
         });
