@@ -769,100 +769,49 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         
-        // For RTL, we need to use a different approach since scrollLeft doesn't work as expected
-        if (isRtl) {
-            // RTL carousel navigation using scrollBy instead of scrollTo
-            prevButton.addEventListener('click', function(e) {
-                // Check if button is disabled (faded out) - for RTL, prev button fades at end
-                if (this.style.opacity === '0.3') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return;
-                }
-                
-                const itemWidth = 320; // Width of carousel item + gap
-                const containerWidth = carousel.clientWidth;
-                const visibleItems = Math.floor(containerWidth / itemWidth);
-                // For RTL prev, we also need to adjust the scroll amount for better alignment
-                const scrollAmount = (visibleItems * itemWidth) + 24 + (itemWidth / 8);
-                
-                console.log('RTL Prev button clicked, scrolling by:', scrollAmount);
-                carousel.scrollBy({
-                    left: scrollAmount,
-                    behavior: 'smooth'
-                });
-            });
+        // Consistent scrolling for both RTL and LTR
+        function scrollCarousel(direction) {
+            const itemWidth = 320; // Width of carousel item + gap
+            const scrollAmount = itemWidth; // Scroll by exactly one item width
             
-            nextButton.addEventListener('click', function(e) {
-                // Check if button is disabled (faded out) - for RTL, next button fades at start
-                if (this.style.opacity === '0.3') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return;
-                }
-                
-                const itemWidth = 320; // Width of carousel item + gap
-                const containerWidth = carousel.clientWidth;
-                const visibleItems = Math.floor(containerWidth / itemWidth);
-                // For RTL next, we need to scroll by a larger amount to align properly
-                const scrollAmount = (visibleItems * itemWidth) + 24 + (itemWidth / 8);
-                
-                console.log('RTL Next button clicked, scrolling by:', -scrollAmount);
+            if (isRtl) {
+                // For RTL, reverse the direction
+                const actualScrollAmount = direction === 'next' ? -scrollAmount : scrollAmount;
                 carousel.scrollBy({
-                    left: -scrollAmount,
+                    left: actualScrollAmount,
                     behavior: 'smooth'
                 });
-            });
-        } else {
-            // LTR carousel navigation using scrollTo
-            prevButton.addEventListener('click', function(e) {
-                // Check if button is disabled (faded out)
-                if (this.style.opacity === '0.3') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return;
-                }
-                
-                const itemWidth = 320; // Width of carousel item + gap
-                const currentScroll = carousel.scrollLeft;
-                const containerWidth = carousel.clientWidth;
-                const visibleItems = Math.floor(containerWidth / itemWidth);
-                const targetScroll = currentScroll - (visibleItems * itemWidth) - 24;
-                
-                // Ensure we don't scroll beyond bounds
-                const finalScroll = Math.max(0, Math.min(targetScroll, carousel.scrollWidth - containerWidth));
-                
-                console.log('LTR Prev button clicked, scrolling to:', finalScroll);
-                carousel.scrollTo({
-                    left: finalScroll,
+            } else {
+                // For LTR, use normal direction
+                const actualScrollAmount = direction === 'next' ? scrollAmount : -scrollAmount;
+                carousel.scrollBy({
+                    left: actualScrollAmount,
                     behavior: 'smooth'
                 });
-            });
-            
-            nextButton.addEventListener('click', function(e) {
-                // Check if button is disabled (faded out)
-                if (this.style.opacity === '0.3') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return;
-                }
-                
-                const itemWidth = 320; // Width of carousel item + gap
-                const currentScroll = carousel.scrollLeft;
-                const containerWidth = carousel.clientWidth;
-                const visibleItems = Math.floor(containerWidth / itemWidth);
-                const targetScroll = currentScroll + (visibleItems * itemWidth) + 24;
-                
-                // Ensure we don't scroll beyond bounds
-                const finalScroll = Math.max(0, Math.min(targetScroll, carousel.scrollWidth - containerWidth));
-                
-                console.log('LTR Next button clicked, scrolling to:', finalScroll);
-                carousel.scrollTo({
-                    left: finalScroll,
-                    behavior: 'smooth'
-                });
-            });
+            }
         }
+        
+        prevButton.addEventListener('click', function(e) {
+            // Check if button is disabled (faded out)
+            if (this.style.opacity === '0.3') {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            }
+            
+            scrollCarousel('prev');
+        });
+        
+        nextButton.addEventListener('click', function(e) {
+            // Check if button is disabled (faded out)
+            if (this.style.opacity === '0.3') {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            }
+            
+            scrollCarousel('next');
+        });
         
         // Update navigation buttons on scroll
         carousel.addEventListener('scroll', updateNavigationButtons);
