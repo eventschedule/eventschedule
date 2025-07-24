@@ -314,16 +314,20 @@
             </div>
             
             <!-- Navigation arrows -->
-            <button id="carousel-prev" class="absolute {{ $isRtl ? 'right-2' : 'left-2' }} top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 opacity-100 z-10">
+            <button id="carousel-prev" class="absolute {{ $isRtl ? 'right-2' : 'left-2' }} top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 opacity-100 z-20">
               <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $isRtl ? 'M9 5l7 7-7 7' : 'M15 19l-7-7 7-7' }}"></path>
               </svg>
             </button>
-            <button id="carousel-next" class="absolute {{ $isRtl ? 'left-2' : 'right-2' }} top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 opacity-100 z-10">
+            <button id="carousel-next" class="absolute {{ $isRtl ? 'left-2' : 'right-2' }} top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 opacity-100 z-20">
               <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $isRtl ? 'M15 19l-7-7 7-7' : 'M9 5l7 7-7 7' }}"></path>
               </svg>
             </button>
+            
+            <!-- Invisible overlays to prevent video clicks when buttons are faded -->
+            <div id="carousel-overlay-left" class="absolute {{ $isRtl ? 'right-2' : 'left-2' }} top-1/2 transform -translate-y-1/2 w-10 h-10 bg-transparent z-15 pointer-events-none transition-opacity duration-200 rounded-full"></div>
+            <div id="carousel-overlay-right" class="absolute {{ $isRtl ? 'left-2' : 'right-2' }} top-1/2 transform -translate-y-1/2 w-10 h-10 bg-transparent z-15 pointer-events-none transition-opacity duration-200 rounded-full"></div>
           </div>
         </div>
         @endif
@@ -716,6 +720,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const clientWidth = carousel.clientWidth;
                 const maxScroll = scrollWidth - clientWidth;
                 
+                // Get overlay elements
+                const overlayLeft = document.getElementById('carousel-overlay-left');
+                const overlayRight = document.getElementById('carousel-overlay-right');
+                
                 // For RTL, we need to check the opposite conditions
                 if (isRtl) {
                     // In RTL, scrollLeft uses negative values!
@@ -727,6 +735,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     // For RTL: when at end (scrollLeft ≈ -maxScroll), next button should fade (can't go forward)
                     prevButton.style.opacity = isAtStart ? '0.3' : '1'; // Prev button fades when at start
                     nextButton.style.opacity = isAtEnd ? '0.3' : '1';   // Next button fades when at end
+                    
+                    // Update overlays for RTL
+                    if (overlayLeft) {
+                        overlayLeft.style.pointerEvents = isAtStart ? 'auto' : 'none';
+                        overlayLeft.style.opacity = isAtStart ? '0.01' : '0'; // Tiny opacity to make it clickable
+                    }
+                    if (overlayRight) {
+                        overlayRight.style.pointerEvents = isAtEnd ? 'auto' : 'none';
+                        overlayRight.style.opacity = isAtEnd ? '0.01' : '0'; // Tiny opacity to make it clickable
+                    }
                 } else {
                     // Standard LTR logic
                     const isAtStart = scrollLeft <= 1; // Allow for small rounding errors
@@ -734,15 +752,27 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     prevButton.style.opacity = isAtStart ? '0.3' : '1';
                     nextButton.style.opacity = isAtEnd ? '0.3' : '1';
+                    
+                    // Update overlays for LTR
+                    if (overlayLeft) {
+                        overlayLeft.style.pointerEvents = isAtStart ? 'auto' : 'none';
+                        overlayLeft.style.opacity = isAtStart ? '0.01' : '0'; // Tiny opacity to make it clickable
+                    }
+                    if (overlayRight) {
+                        overlayRight.style.pointerEvents = isAtEnd ? 'auto' : 'none';
+                        overlayRight.style.opacity = isAtEnd ? '0.01' : '0'; // Tiny opacity to make it clickable
+                    }
                 }
             }
         
         // For RTL, we need to use a different approach since scrollLeft doesn't work as expected
         if (isRtl) {
             // RTL carousel navigation using scrollBy instead of scrollTo
-            prevButton.addEventListener('click', function() {
+            prevButton.addEventListener('click', function(e) {
                 // Check if button is disabled (faded out) - for RTL, prev button fades at end
                 if (this.style.opacity === '0.3') {
+                    e.preventDefault();
+                    e.stopPropagation();
                     return;
                 }
                 
@@ -759,9 +789,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             });
             
-            nextButton.addEventListener('click', function() {
+            nextButton.addEventListener('click', function(e) {
                 // Check if button is disabled (faded out) - for RTL, next button fades at start
                 if (this.style.opacity === '0.3') {
+                    e.preventDefault();
+                    e.stopPropagation();
                     return;
                 }
                 
@@ -779,9 +811,11 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         } else {
             // LTR carousel navigation using scrollTo
-            prevButton.addEventListener('click', function() {
+            prevButton.addEventListener('click', function(e) {
                 // Check if button is disabled (faded out)
                 if (this.style.opacity === '0.3') {
+                    e.preventDefault();
+                    e.stopPropagation();
                     return;
                 }
                 
@@ -801,9 +835,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             });
             
-            nextButton.addEventListener('click', function() {
+            nextButton.addEventListener('click', function(e) {
                 // Check if button is disabled (faded out)
                 if (this.style.opacity === '0.3') {
+                    e.preventDefault();
+                    e.stopPropagation();
                     return;
                 }
                 
@@ -829,6 +865,48 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Initial button state
         updateNavigationButtons();
+        
+        // Prevent clicks on faded buttons from propagating to videos
+        function preventFadedButtonClicks(e) {
+            if (this.style.opacity === '0.3') {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                return false;
+            }
+        }
+        
+        // Add mousedown and touchstart handlers to prevent video interaction when buttons are faded
+        [prevButton, nextButton].forEach(button => {
+            button.addEventListener('mousedown', preventFadedButtonClicks);
+            button.addEventListener('touchstart', preventFadedButtonClicks);
+            button.addEventListener('pointerdown', preventFadedButtonClicks);
+        });
+        
+        // Add event handlers for overlays to prevent video clicks
+        const overlayLeft = document.getElementById('carousel-overlay-left');
+        const overlayRight = document.getElementById('carousel-overlay-right');
+        
+        function preventVideoClicks(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            return false;
+        }
+        
+        if (overlayLeft) {
+            overlayLeft.addEventListener('click', preventVideoClicks);
+            overlayLeft.addEventListener('mousedown', preventVideoClicks);
+            overlayLeft.addEventListener('touchstart', preventVideoClicks);
+            overlayLeft.addEventListener('pointerdown', preventVideoClicks);
+        }
+        
+        if (overlayRight) {
+            overlayRight.addEventListener('click', preventVideoClicks);
+            overlayRight.addEventListener('mousedown', preventVideoClicks);
+            overlayRight.addEventListener('touchstart', preventVideoClicks);
+            overlayRight.addEventListener('pointerdown', preventVideoClicks);
+        }
         
         // For RTL, we don't need to set initial scroll position since scrollBy will work correctly
         if (isRtl && carouselItems.length > 1) {
