@@ -774,7 +774,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Get the actual width of a carousel item (responsive)
             const firstItem = carousel.querySelector('.carousel-item');
             const itemWidth = firstItem ? firstItem.offsetWidth + 24 : 320; // 24px is the gap (gap-6 = 1.5rem = 24px)
-            const scrollAmount = itemWidth * 1.25; // Scroll by 1.25 item widths
+            const scrollAmount = itemWidth * 1; // Scroll by 1.25 item widths
             
             if (isRtl) {
                 // For RTL, reverse the direction
