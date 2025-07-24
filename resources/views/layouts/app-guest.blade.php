@@ -46,16 +46,22 @@
             @else
                 <link rel="canonical" href="{{ $role->getGuestUrl() }}">
             @endif
-            <meta name="description" content="{{ trim(strip_tags($role->translatedDescription())) }}">
-            <meta property="og:title" content="{{ $role->translatedName() }}">
-            <meta property="og:description" content="{{ trim(strip_tags($role->translatedDescription())) }}">
-            <meta property="og:image" content="{{ $role->profile_image_url }}">
+            @if ($description = trim(strip_tags($role->translatedDescription())))
+            <meta name="description" content="{{ $description }}">
+            <meta property="og:description" content="{{ $description }}">
+            <meta name="twitter:description" content="{{ $description }}">
+            @endif
+            @if ($name = $role->translatedName())
+            <meta property="og:title" content="{{ $name }}">
+            <meta name="twitter:title" content="{{ $name }}">
+            <meta name="twitter:image:alt" content="{{ $name }}">
+            @endif
+            @if ($image = $role->profile_image_url)
+            <meta property="og:image" content="{{ $image }}">
+            <meta name="twitter:image" content="{{ $image }}">
+            @endif
             <meta property="og:url" content="{{ str_replace('http://', 'https://', request()->url()) }}">
             <meta property="og:site_name" content="Event Schedule">
-            <meta name="twitter:title" content="{{ $role->translatedName() }}">
-            <meta name="twitter:description" content="{{ trim(strip_tags($role->translatedDescription())) }}">
-            <meta name="twitter:image" content="{{ $role->profile_image_url }}">
-            <meta name="twitter:image:alt" content="{{ $role->translatedName() }}">
             <meta name="twitter:card" content="summary_large_image">
         @endif
     </x-slot>
