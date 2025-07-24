@@ -449,6 +449,13 @@
 #carousel-next:hover {
   background-color: white !important;
 }
+
+/* Disabled state for navigation buttons */
+#carousel-prev[style*="opacity: 0.3"],
+#carousel-next[style*="opacity: 0.3"] {
+  cursor: not-allowed;
+  pointer-events: none;
+}
 </style>
 <script {!! nonce_attr() !!}>
 document.addEventListener('DOMContentLoaded', function() {
@@ -683,36 +690,62 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Carousel functionality
-    const carousel = document.getElementById('events-carousel');
-    const prevButton = document.getElementById('carousel-prev');
-    const nextButton = document.getElementById('carousel-next');
-    
-    if (carousel && prevButton && nextButton) {
-        const carouselItems = carousel.querySelectorAll('.carousel-item');
-        const isRtl = carousel.classList.contains('rtl');
+            // Carousel functionality
+        const carousel = document.getElementById('events-carousel');
+        const prevButton = document.getElementById('carousel-prev');
+        const nextButton = document.getElementById('carousel-next');
         
-        // Only show navigation if there are multiple items
-        if (carouselItems.length <= 1) {
-            prevButton.style.display = 'none';
-            nextButton.style.display = 'none';
-            return;
-        }
-        
-        // Make buttons visible by default for multiple items
-        prevButton.style.display = 'block';
-        nextButton.style.display = 'block';
-        
-        function updateNavigationButtons() {
-            // Always show both buttons with full opacity
-            prevButton.style.opacity = '1';
-            nextButton.style.opacity = '1';
-        }
+        if (carousel && prevButton && nextButton) {
+            const carouselItems = carousel.querySelectorAll('.carousel-item');
+            const isRtl = carousel.classList.contains('rtl');
+            
+            // Only show navigation if there are multiple items
+            if (carouselItems.length <= 1) {
+                prevButton.style.display = 'none';
+                nextButton.style.display = 'none';
+                return;
+            }
+            
+            // Make buttons visible by default for multiple items
+            prevButton.style.display = 'block';
+            nextButton.style.display = 'block';
+            
+            function updateNavigationButtons() {
+                const scrollLeft = carousel.scrollLeft;
+                const scrollWidth = carousel.scrollWidth;
+                const clientWidth = carousel.clientWidth;
+                const maxScroll = scrollWidth - clientWidth;
+                
+                // For RTL, we need to check the opposite conditions
+                if (isRtl) {
+                    // In RTL, scrollLeft uses negative values!
+                    // scrollLeft: 0 = start, scrollLeft: -maxScroll = end
+                    const isAtStart = scrollLeft >= -1; // Allow for small rounding errors
+                    const isAtEnd = scrollLeft <= -maxScroll + 1; // Allow for small rounding errors
+                    
+                    // For RTL: when at start (scrollLeft ≈ 0), prev button should fade (can't go back)
+                    // For RTL: when at end (scrollLeft ≈ -maxScroll), next button should fade (can't go forward)
+                    prevButton.style.opacity = isAtStart ? '0.3' : '1'; // Prev button fades when at start
+                    nextButton.style.opacity = isAtEnd ? '0.3' : '1';   // Next button fades when at end
+                } else {
+                    // Standard LTR logic
+                    const isAtStart = scrollLeft <= 1; // Allow for small rounding errors
+                    const isAtEnd = scrollLeft >= maxScroll - 1; // Allow for small rounding errors
+                    
+                    prevButton.style.opacity = isAtStart ? '0.3' : '1';
+                    nextButton.style.opacity = isAtEnd ? '0.3' : '1';
+                }
+            }
         
         // For RTL, we need to use a different approach since scrollLeft doesn't work as expected
         if (isRtl) {
             // RTL carousel navigation using scrollBy instead of scrollTo
             prevButton.addEventListener('click', function() {
+                // Check if button is disabled (faded out) - for RTL, prev button fades at end
+                if (this.style.opacity === '0.3') {
+                    return;
+                }
+                
                 const itemWidth = 320; // Width of carousel item + gap
                 const containerWidth = carousel.clientWidth;
                 const visibleItems = Math.floor(containerWidth / itemWidth);
@@ -727,6 +760,11 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             nextButton.addEventListener('click', function() {
+                // Check if button is disabled (faded out) - for RTL, next button fades at start
+                if (this.style.opacity === '0.3') {
+                    return;
+                }
+                
                 const itemWidth = 320; // Width of carousel item + gap
                 const containerWidth = carousel.clientWidth;
                 const visibleItems = Math.floor(containerWidth / itemWidth);
@@ -742,6 +780,11 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             // LTR carousel navigation using scrollTo
             prevButton.addEventListener('click', function() {
+                // Check if button is disabled (faded out)
+                if (this.style.opacity === '0.3') {
+                    return;
+                }
+                
                 const itemWidth = 320; // Width of carousel item + gap
                 const currentScroll = carousel.scrollLeft;
                 const containerWidth = carousel.clientWidth;
@@ -759,6 +802,11 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             nextButton.addEventListener('click', function() {
+                // Check if button is disabled (faded out)
+                if (this.style.opacity === '0.3') {
+                    return;
+                }
+                
                 const itemWidth = 320; // Width of carousel item + gap
                 const currentScroll = carousel.scrollLeft;
                 const containerWidth = carousel.clientWidth;
