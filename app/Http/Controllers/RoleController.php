@@ -435,6 +435,10 @@ class RoleController extends Controller
 
         if ($tab == 'requests' && ! count($requests)) {
             return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
+        } else if ($tab == 'availability' && $role->isCurator()) {
+            return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
+        } else if ($tab == 'videos' && ! $role->isCurator()) {
+            return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
         }
 
         if ($tab == 'schedule' || $tab == 'availability') {
