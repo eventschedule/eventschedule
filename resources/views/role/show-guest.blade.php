@@ -286,7 +286,7 @@
             <div id="events-carousel" class="flex overflow-x-auto scrollbar-hide gap-6 pb-4 pt-4 {{ $isRtl ? 'rtl' : '' }}">
               @foreach($upcomingEventsWithVideos as $eventData)
                 @foreach($eventData['video_roles'] as $videoRole)
-                  <div class="carousel-item flex-shrink-0 w-80 bg-white rounded-xl shadow-md overflow-hidden group/card">
+                  <div class="carousel-item flex-shrink-0 w-full sm:w-80 bg-white rounded-xl shadow-md overflow-hidden group/card">
                     <!-- Video iframe -->
                     <iframe 
                       class="w-full h-48 object-cover"
@@ -771,8 +771,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Consistent scrolling for both RTL and LTR
         function scrollCarousel(direction) {
-            const itemWidth = 320; // Width of carousel item + gap
-            const scrollAmount = itemWidth * 1.25; // Scroll by two item widths
+            // Get the actual width of a carousel item (responsive)
+            const firstItem = carousel.querySelector('.carousel-item');
+            const itemWidth = firstItem ? firstItem.offsetWidth + 24 : 320; // 24px is the gap (gap-6 = 1.5rem = 24px)
+            const scrollAmount = itemWidth * 1.25; // Scroll by 1.25 item widths
             
             if (isRtl) {
                 // For RTL, reverse the direction
