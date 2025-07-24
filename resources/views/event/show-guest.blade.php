@@ -568,9 +568,6 @@
 
         <!-- Calendar section moved here and modified to show mobile view -->
         <div class="p-6 rounded-xl flex flex-col gap-6 bg-[#F5F9FE] {{ $role->isRtl() ? 'rtl' : '' }}">
-          <h4 class="text-[#151B26] text-[24px] leading-snug font-semibold">
-            {{ __('messages.schedule') }}
-          </h4>
           <div class="w-full">
             @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule'), 'force_mobile' => true])
           </div>

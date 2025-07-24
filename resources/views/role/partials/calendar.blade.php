@@ -428,7 +428,7 @@
             </div>
         </div>
         @if (!isset($embed) || !$embed)
-        <div class="py-10 {{ (isset($force_mobile) && $force_mobile) ? 'px-2' : 'sm:px-6' }} {{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">
+        <div class="pt-4 pb-10 {{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">
             @php
             $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth();
             $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth();
@@ -438,7 +438,7 @@
             @endphp
 
             <div v-if="filteredEvents.length">
-                <div class="mb-4 text-center">
+                <div class="mb-2 text-center">
                     <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden">
                         {{ __('messages.show_past_events') }}
                     </button>
@@ -449,7 +449,7 @@
                     <template v-for="event in getEventsForDate('{{ $currentDate->format('Y-m-d') }}')" :key="'mobile-' + event.id">
                         <a v-if="isEventVisible(event)" :href="getEventUrl(event, '{{ $currentDate->format('Y-m-d') }}')" 
                            {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}>
-                            <li class="relative flex items-center space-x-6 py-6 {{ (isset($force_mobile) && $force_mobile) ? 'px-2' : 'px-4' }} {{ (isset($force_mobile) && $force_mobile) ? '' : 'xl:static' }} event-item"
+                            <li class="relative flex items-center space-x-6 py-6 px-4 {{ (isset($force_mobile) && $force_mobile) ? '' : 'xl:static' }} event-item"
                                 :class="isPastEvent('{{ $currentDate->format('Y-m-d') }}') ? 'past-event hidden' : ''">
                                 <div class="flex-auto">
                                     <h3 class="{{ (isset($force_mobile) && $force_mobile) ? 'pr-20' : 'pr-16' }} font-semibold text-gray-900" v-text="event.name">
