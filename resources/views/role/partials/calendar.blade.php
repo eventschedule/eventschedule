@@ -126,7 +126,7 @@
                             <span class="hidden sm:block">
                                 <button type="button" onclick="openEmbedModal()"
                                     class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                                    <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                                    <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? '-mr-0.5 ml-1.5' : '-ml-0.5 mr-1.5' }} h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                                         <path
                                             d="M12.89,3L14.85,3.4L11.11,21L9.15,20.6L12.89,3M19.59,12L16,8.41V5.58L22.42,12L16,18.41V15.58L19.59,12M1.58,12L8,5.58V8.41L4.41,12L8,15.58V18.41L1.58,12Z" />
                                     </svg>
@@ -158,15 +158,15 @@
                                     onclick="onPopUpClick('calendar-pop-up-menu', event)"
                                     class="inline-flex w-full justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
                                     {{ __('messages.new_schedule') }}
-                                    <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? '-ml-1' : '-mr-1' }} h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                         <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                                     </svg>
                                 </button>
 
-                                <div id="calendar-pop-up-menu" class="pop-up-menu hidden absolute right-0 z-10 mt-2 w-64 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                                <div id="calendar-pop-up-menu" class="pop-up-menu hidden absolute {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'left-0' : 'right-0' }} z-10 mt-2 w-64 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                                     <div class="py-1" role="none" onclick="onPopUpClick('calendar-pop-up-menu', event)">
                                         <a href="{{ route('new', ['type' => 'talent']) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-1">
-                                            <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'ml-3' : 'mr-3' }} h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                             <path d="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z"/>
                                             </svg>                        
                                             <div>
@@ -175,7 +175,7 @@
                                             </div>
                                         </a>
                                         <a href="{{ route('new', ['type' => 'venue']) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-0">
-                                            <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'ml-3' : 'mr-3' }} h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                             <path d="M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z" />
                                             </svg>
                                             <div>
@@ -184,7 +184,7 @@
                                             </div>
                                         </a>
                                         <a href="{{ route('new', ['type' => 'curator']) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-1">
-                                            <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'ml-3' : 'mr-3' }} h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                             <path d="M12,19.2C9.5,19.2 7.29,17.92 6,16C6.03,14 10,12.9 12,12.9C14,12.9 17.97,14 18,16C16.71,17.92 14.5,19.2 12,19.2M12,5A3,3 0 0,1 15,8A3,3 0 0,1 12,11A3,3 0 0,1 9,8A3,3 0 0,1 12,5M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12C22,6.47 17.5,2 12,2Z" />
                                             </svg>
                                             <div>
@@ -226,7 +226,7 @@
                             <a href="{{ route('event.create', ['subdomain' => $role->subdomain]) }}">
                                 <button type="button"
                                     class="inline-flex items-center rounded-md shadow-sm bg-[#4E81FA] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#3A6BE0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]">
-                                    <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                                    <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? '-mr-0.5 ml-1.5' : '-ml-0.5 mr-1.5' }} h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                                         <path
                                             d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
                                     </svg>
@@ -269,7 +269,7 @@
                         <a href="{{ route('event.show_import', ['subdomain' => $role->subdomain]) }}" class="w-full">
                             <button type="button"
                                 class="w-full inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                                <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                                <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? '-mr-0.5 ml-1.5' : '-ml-0.5 mr-1.5' }} h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M14,12L10,8V11H2V13H10V16M20,18V6C20,4.89 19.1,4 18,4H6A2,2 0 0,0 4,6V9H6V6H18V18H6V15H4V18A2,2 0 0,0 6,20H18A2,2 0 0,0 20,18Z" />
                                 </svg>
                                 {{ __('messages.import') }}
@@ -278,7 +278,7 @@
                         <a href="{{ route('event.create', ['subdomain' => $role->subdomain]) }}" class="w-full">
                             <button type="button"
                                 class="w-full inline-flex items-center justify-center rounded-md shadow-sm bg-[#4E81FA] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#3A6BE0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]">
-                                <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                                <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? '-mr-0.5 ml-1.5' : '-ml-0.5 mr-1.5' }} h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                                     <path
                                         d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
                                 </svg>
@@ -290,7 +290,7 @@
                     <div class="mt-4">
                         <button type="button" id="saveButtonMobile" disabled
                             class="w-full inline-flex items-center justify-center rounded-md shadow-sm bg-[#4E81FA] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#3A6BE0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50">
-                            <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                            <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? '-mr-0.5 ml-1.5' : '-ml-0.5 mr-1.5' }} h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                                 <path
                                     d="M6.5 20Q4.22 20 2.61 18.43 1 16.85 1 14.58 1 12.63 2.17 11.1 3.35 9.57 5.25 9.15 5.88 6.85 7.75 5.43 9.63 4 12 4 14.93 4 16.96 6.04 19 8.07 19 11 20.73 11.2 21.86 12.5 23 13.78 23 15.5 23 17.38 21.69 18.69 20.38 20 18.5 20H13Q12.18 20 11.59 19.41 11 18.83 11 18V12.85L9.4 14.4L8 13L12 9L16 13L14.6 14.4L13 12.85V18H18.5Q19.55 18 20.27 17.27 21 16.55 21 15.5 21 14.45 20.27 13.73 19.55 13 18.5 13H17V11Q17 8.93 15.54 7.46 14.08 6 12 6 9.93 6 8.46 7.46 7 8.93 7 11H6.5Q5.05 11 4.03 12.03 3 13.05 3 14.5 3 15.95 4.03 17 5.05 18 6.5 18H9V20M12 13Z" />
                             </svg>
@@ -304,15 +304,15 @@
                             onclick="onPopUpClick('calendar-pop-up-menu-mobile', event)"
                             class="w-full inline-flex justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button-mobile" aria-expanded="true" aria-haspopup="true">
                             {{ __('messages.new_schedule') }}
-                            <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? '-ml-1' : '-mr-1' }} h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                             </svg>
                         </button>
 
-                        <div id="calendar-pop-up-menu-mobile" class="pop-up-menu hidden absolute right-0 z-10 mt-2 w-full origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button-mobile" tabindex="-1">
+                        <div id="calendar-pop-up-menu-mobile" class="pop-up-menu hidden absolute {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'left-0' : 'right-0' }} z-10 mt-2 w-full {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button-mobile" tabindex="-1">
                             <div class="py-1" role="none" onclick="onPopUpClick('calendar-pop-up-menu-mobile', event)">
                                 <a href="{{ route('new', ['type' => 'talent']) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
-                                    <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'ml-3' : 'mr-3' }} h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path d="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z"/>
                                     </svg>                        
                                     <div>
@@ -440,13 +440,13 @@
                     <template v-for="event in filteredEvents" :key="'mobile-' + event.id">
                         <a v-if="isEventVisible(event)" :href="getEventUrl(event, getEventDate(event))" 
                            {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}>
-                            <li class="relative flex items-center space-x-6 py-6 px-4 {{ (isset($force_mobile) && $force_mobile) ? '' : 'xl:static' }} event-item"
+                            <li class="relative flex items-center py-6 px-4 {{ (isset($force_mobile) && $force_mobile) ? '' : 'xl:static' }} event-item {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'space-x-reverse' : '' }} space-x-6"
                                 :class="isPastEvent(getEventDate(event)) ? 'past-event hidden' : ''">
                                 <div class="flex-auto">
-                                    <h3 class="{{ (isset($force_mobile) && $force_mobile) ? 'pr-20' : 'pr-16' }} font-semibold text-gray-900" v-text="event.name">
+                                    <h3 class="{{ (isset($force_mobile) && $force_mobile) ? (isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pl-20' : 'pr-20') : (isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pl-16' : 'pr-16') }} font-semibold text-gray-900" v-text="event.name">
                                     </h3>
-                                    <dl class="{{ (isset($force_mobile) && $force_mobile) ? 'pr-20' : 'pr-16' }} mt-2 flex flex-col text-gray-500 {{ (isset($force_mobile) && $force_mobile) ? '' : 'xl:flex-row' }}">
-                                        <div class="flex items-start space-x-3">
+                                    <dl class="{{ (isset($force_mobile) && $force_mobile) ? (isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pl-20' : 'pr-20') : (isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pl-16' : 'pr-16') }} mt-2 flex flex-col text-gray-500 {{ (isset($force_mobile) && $force_mobile) ? '' : 'xl:flex-row' }}">
+                                        <div class="flex items-start {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'space-x-reverse' : '' }} space-x-3">
                                             <dt class="mt-0.5">
                                                 <span class="sr-only">Date</span>
                                                 <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"
@@ -463,7 +463,7 @@
                                             </dd>
                                         </div>
                                         <div
-                                            class="mt-2 flex items-start space-x-3 {{ (isset($force_mobile) && $force_mobile) ? '' : 'xl:ml-3.5 xl:mt-0 xl:border-l xl:border-gray-400 xl:border-opacity-50 xl:pl-3.5' }}">
+                                            class="mt-2 flex items-start {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'space-x-reverse' : '' }} space-x-3 {{ (isset($force_mobile) && $force_mobile) ? '' : (isset($role) && $role->isRtl() && ! session()->has('translate') ? 'xl:mr-3.5 xl:mt-0 xl:border-r xl:border-gray-400 xl:border-opacity-50 xl:pr-3.5' : 'xl:ml-3.5 xl:mt-0 xl:border-l xl:border-gray-400 xl:border-opacity-50 xl:pl-3.5') }}">
                                             <dt class="mt-0.5">
                                                 <span class="sr-only">Location</span>
                                                 <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"
@@ -478,7 +478,7 @@
                                         </div>
                                     </dl>
                                 </div>
-                                <div class="absolute right-4 text-right top-6">
+                                <div class="absolute {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'left-4' : 'right-4' }} {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'text-left' : 'text-right' }} top-6">
                                     <img v-if="event.image_url" :src="event.image_url" class="h-16 w-16 flex-none rounded-lg object-cover mb-2">
                                     <a v-if="event.can_edit" :href="event.edit_url"
                                         class="text-[#4E81FA] hover:text-[#4E81FA] hover:underline"

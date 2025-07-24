@@ -426,7 +426,7 @@
 
       <div class="flex flex-col gap-6 {{ $role->isRtl() ? 'rtl' : '' }}">
         @if ($event->venue && $event->venue->name)
-        <div class="p-6 rounded-xl flex flex-col gap-6" style="background-color: {{ $otherRole->accent_color ?? '#4E81FA' }}; font-family: {{ $event->venue->font_family }}, sans-serif;">
+        <div class="p-6 rounded-xl flex flex-col gap-6" style="background-color: {{ $role->accent_color ?? '#4E81FA' }}; font-family: {{ $event->venue->font_family }}, sans-serif;">
           <h4 class="text-white text-[24px] leading-snug font-semibold">
             {{ $event->venue->translatedName() }}
           </h4>
