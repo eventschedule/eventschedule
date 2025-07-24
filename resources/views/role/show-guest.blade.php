@@ -3,7 +3,7 @@
   <main>
     <div>
       <div class="container mx-auto pt-7 pb-10 px-5">
-        <div class="bg-[#F5F9FE] rounded-2xl mb-6">
+        <div class="bg-[#F5F9FE] rounded-2xl mb-6 {{ !$role->header_image && !$role->header_image_url && $role->profile_image_url ? 'pt-16' : '' }}">
           <div
             class="relative before:block before:absolute before:bg-[#00000033] before:-inset-0"
           >
