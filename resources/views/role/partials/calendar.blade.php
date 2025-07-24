@@ -442,10 +442,10 @@
                            {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}>
                             <li class="relative flex items-center py-6 px-4 {{ (isset($force_mobile) && $force_mobile) ? '' : 'xl:static' }} event-item {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'space-x-reverse' : '' }} space-x-6"
                                 :class="isPastEvent(getEventDate(event)) ? 'past-event hidden' : ''">
-                                <div class="flex-auto">
-                                    <h3 class="{{ (isset($force_mobile) && $force_mobile) ? (isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pl-20' : 'pr-20') : (isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pl-16' : 'pr-16') }} font-semibold text-gray-900" v-text="event.name">
+                                <div class="flex-auto pl-4">
+                                    <h3 class="{{ (isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pl-16' : 'pr-16') }} font-semibold text-gray-900" v-text="event.name">
                                     </h3>
-                                    <dl class="{{ (isset($force_mobile) && $force_mobile) ? (isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pl-20' : 'pr-20') : (isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pl-16' : 'pr-16') }} mt-2 flex flex-col text-gray-500 {{ (isset($force_mobile) && $force_mobile) ? '' : 'xl:flex-row' }}">
+                                    <dl class="{{ (isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pl-16' : 'pr-16') }} mt-2 flex flex-col text-gray-500 {{ (isset($force_mobile) && $force_mobile) ? '' : 'xl:flex-row' }}">
                                         <div class="flex items-start {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'space-x-reverse' : '' }} space-x-3">
                                             <dt class="mt-0.5">
                                                 <span class="sr-only">Date</span>
