@@ -233,6 +233,7 @@
           </div>
         </div>
 
+        @if (! $role->isTalent())
         @php
           // Filter events for upcoming events with videos (only on main role page, not event pages)
           $upcomingEventsWithVideos = collect();
@@ -332,6 +333,7 @@
             <div id="carousel-overlay-right" class="absolute {{ $isRtl ? 'left-2' : 'right-2' }} top-1/2 transform -translate-y-1/2 w-10 h-10 bg-transparent z-15 pointer-events-none transition-opacity duration-200 rounded-full"></div>
           </div>
         </div>
+        @endif
         @endif
 
         @if($role->translatedDescription())
