@@ -713,17 +713,55 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Navigation button event listeners
         prevButton.addEventListener('click', function() {
-            const scrollAmount = isRtl ? 320 : -320;
-            carousel.scrollBy({
-                left: scrollAmount, // Width of carousel item + gap
+            const itemWidth = 320; // Width of carousel item + gap
+            const currentScroll = carousel.scrollLeft;
+            const containerWidth = carousel.clientWidth;
+            
+            // Calculate how many items are currently visible
+            const visibleItems = Math.floor(containerWidth / itemWidth);
+            
+            // Calculate the target scroll position to align with the starting side
+            let targetScroll;
+            if (isRtl) {
+                // For RTL, scroll right to show earlier items
+                targetScroll = currentScroll + (visibleItems * itemWidth) + 24; // Add extra scroll for better alignment
+            } else {
+                // For LTR, scroll left to show earlier items
+                targetScroll = currentScroll - (visibleItems * itemWidth) - 24; // Add extra scroll for better alignment
+            }
+            
+            // Ensure we don't scroll beyond bounds
+            targetScroll = Math.max(0, Math.min(targetScroll, carousel.scrollWidth - containerWidth));
+            
+            carousel.scrollTo({
+                left: targetScroll,
                 behavior: 'smooth'
             });
         });
         
         nextButton.addEventListener('click', function() {
-            const scrollAmount = isRtl ? -320 : 320;
-            carousel.scrollBy({
-                left: scrollAmount, // Width of carousel item + gap
+            const itemWidth = 320; // Width of carousel item + gap
+            const currentScroll = carousel.scrollLeft;
+            const containerWidth = carousel.clientWidth;
+            
+            // Calculate how many items are currently visible
+            const visibleItems = Math.floor(containerWidth / itemWidth);
+            
+            // Calculate the target scroll position to align with the starting side
+            let targetScroll;
+            if (isRtl) {
+                // For RTL, scroll left to show later items
+                targetScroll = currentScroll - (visibleItems * itemWidth) - 24; // Add extra scroll for better alignment
+            } else {
+                // For LTR, scroll right to show later items
+                targetScroll = currentScroll + (visibleItems * itemWidth) + 24; // Add extra scroll for better alignment
+            }
+            
+            // Ensure we don't scroll beyond bounds
+            targetScroll = Math.max(0, Math.min(targetScroll, carousel.scrollWidth - containerWidth));
+            
+            carousel.scrollTo({
+                left: targetScroll,
                 behavior: 'smooth'
             });
         });
