@@ -364,6 +364,14 @@
                   {{ auth()->user() && auth()->user()->isMember($role->subdomain) ? __('messages.manage') : __('messages.follow') }}
                 </button>
               </a>
+              @elseif (auth()->user() && auth()->user()->id === $event->user_id && $each->youtube_links)
+              <button
+                type="button"
+                onclick="clearVideos('{{ route('event.clear_videos', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)]) }}')"
+                class="inline-flex items-center rounded-md px-4 py-2 text-sm font-semibold text-red-600 bg-white border border-red-300 hover:bg-red-50 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              >
+                {{ __('messages.clear_videos') }}
+              </button>
               @endif
             </div>
             <!--
@@ -578,5 +586,13 @@
       </div>
     </div>
   </main>
+
+  <script>
+    function clearVideos(url) {
+      if (confirm('{{ __("messages.are_you_sure_clear_videos") }}')) {
+        window.location.href = url;
+      }
+    }
+  </script>
 
 </x-app-guest-layout>
