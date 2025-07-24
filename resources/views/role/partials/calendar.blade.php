@@ -347,7 +347,7 @@
             </div>
         </div>
     </header>
-    <div class="{{ ($tab == 'availability' || (isset($embed) && $embed) || (isset($force_mobile) && $force_mobile)) ? 'hidden' : '' }} shadow-sm ring-1 ring-black ring-opacity-5 md:flex md:flex-auto md:flex-col {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
+    <div class="{{ ($tab == 'availability' || (isset($embed) && $embed) || (isset($force_mobile) && $force_mobile)) ? '' : 'hidden' }} shadow-sm ring-1 ring-black ring-opacity-5 md:flex md:flex-auto md:flex-col {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
         <div class="{{ $tab == 'availability' ? 'hidden md:block' : '' }} {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }}"> 
             <div
                 class="grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center text-xs font-semibold leading-6 text-gray-700">
@@ -428,7 +428,7 @@
             </div>
         </div>
         @if (!isset($embed) || !$embed)
-        <div class="pt-4 pb-10 {{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">
+        <div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">
             @php
             $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth();
             $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth();
