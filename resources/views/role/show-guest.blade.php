@@ -2,7 +2,7 @@
 
   <main>
     <div>
-      <div class="container mx-auto py-10 px-5">
+      <div class="container mx-auto pt-7 pb-10 px-5">
         <div class="bg-[#F5F9FE] rounded-2xl mb-6">
           <div
             class="relative before:block before:absolute before:bg-[#00000033] before:-inset-0"
@@ -48,6 +48,7 @@
               </div>
               <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-end items-center">
               
+              @if (false)
               <!-- Event Search Box -->
               <div class="relative search-container flex-shrink-0">
                 <div class="relative">
@@ -81,6 +82,7 @@
                   <p class="text-sm text-gray-500 text-center">{{ __('messages.no_events_found') }}</p>
                 </div>
               </div>
+              @endif
               
               @if ($role->isCurator() && $role->is_open)
               <a
