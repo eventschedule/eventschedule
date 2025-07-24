@@ -1752,7 +1752,7 @@ class RoleController extends Controller
         foreach ($upcomingEvents as $event) {
             foreach ($event->roles as $eventRole) {
                 //if ($eventRole->isTalent() && (! $eventRole->youtube_links && $eventRole->youtube_links != '[]')) {                    
-                if ($eventRole->isTalent()) {
+                if ($eventRole->isTalent() && (! $eventRole->youtube_links || $eventRole->youtube_links == '[]')) {                    
                     // Check if we already have this role
                     if (!$talentRoles->contains('id', $eventRole->id)) {
                         $talentRoles->push([
