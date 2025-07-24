@@ -427,7 +427,7 @@
                 </div>
             </div>
         </div>
-        @if (!isset($embed) || !$embed)
+        @if (! isset($embed) || ! $embed)
         <div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">
             @php
             $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth();
