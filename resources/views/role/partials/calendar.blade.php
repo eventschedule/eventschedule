@@ -70,7 +70,7 @@
         }
     }
 @endphp
-    <header class="py-4">
+    <header class="py-4 hidden {{ (isset($force_mobile) && $force_mobile) ? '' : 'md:block' }}">
         <div class="w-full">
             <div class="md:flex md:flex-row md:items-center w-full mb-4">
                 <div class="flex flex-row justify-between items-center w-full md:w-auto md:flex-1 md:justify-start">
