@@ -60,6 +60,28 @@ class EventController extends Controller
                 ->with('message', __('messages.deleted_image'));
     }
 
+    public function clearVideos(Request $request, $subdomain, $hash)
+    {
+        $event_id = UrlUtils::decodeId($hash);
+        $event = Event::findOrFail($event_id);
+        $user = $request->user();
+
+        // Check if user is the creator of the event
+        if ($event->user_id !== $user->id) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        // Clear YouTube videos for unclaimed roles in this event
+        foreach ($event->roles as $role) {
+            if (!$role->isClaimed() && $role->youtube_links) {
+                $role->youtube_links = null;
+                $role->save();
+            }
+        }
+
+        return redirect()->back()->with('message', __('messages.videos_cleared'));
+    }
+
     public function delete(Request $request, $subdomain, $hash)
     {
         $user = $request->user();
