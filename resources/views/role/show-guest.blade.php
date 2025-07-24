@@ -283,7 +283,7 @@
                           {{ $eventData['event']->getVenueDisplayName() }}
                         </p>
                         <p class="text-gray-500 text-xs group-hover/card:text-gray-600 transition-colors duration-200">
-                          {{ $eventData['event']->localStartsAt(true, $request->date) }}
+                          {{ $eventData['event']->localStartsAt(true, request()->date) }}
                         </p>
                       </a>
                     </div>
