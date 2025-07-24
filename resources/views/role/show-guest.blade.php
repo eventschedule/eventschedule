@@ -704,19 +704,11 @@ document.addEventListener('DOMContentLoaded', function() {
         prevButton.style.display = 'block';
         nextButton.style.display = 'block';
         
-        // Show/hide navigation buttons based on scroll position
+        // Keep navigation buttons always visible
         function updateNavigationButtons() {
-            const isAtStart = carousel.scrollLeft <= 0;
-            const isAtEnd = carousel.scrollLeft >= carousel.scrollWidth - carousel.clientWidth - 1;
-            
-            if (isRtl) {
-                // For RTL, swap the logic since we start from the end
-                prevButton.style.opacity = isAtEnd ? '0.3' : '1';
-                nextButton.style.opacity = isAtStart ? '0.3' : '1';
-            } else {
-                prevButton.style.opacity = isAtStart ? '0.3' : '1';
-                nextButton.style.opacity = isAtEnd ? '0.3' : '1';
-            }
+            // Always show both buttons with full opacity
+            prevButton.style.opacity = '1';
+            nextButton.style.opacity = '1';
         }
         
         // Navigation button event listeners
@@ -760,17 +752,7 @@ document.addEventListener('DOMContentLoaded', function() {
             clientWidth: carousel.clientWidth
         });
         
-        // Show navigation buttons on hover
-        carouselContainer.addEventListener('mouseenter', function() {
-            if (carouselItems.length > 1) {
-                prevButton.style.opacity = '1';
-                nextButton.style.opacity = '1';
-            }
-        });
-        
-        carouselContainer.addEventListener('mouseleave', function() {
-            updateNavigationButtons();
-        });
+        // Navigation buttons are always visible, no hover effects needed
     }
 });
 </script>
