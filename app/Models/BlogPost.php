@@ -166,8 +166,12 @@ class BlogPost extends Model
         return url('/blog/' . $this->slug);
     }
 
-    public static function getAvailableHeaderImages()
+    public static function getAvailableHeaderImages($filter = true)
     {
+        if (! $filter) {
+            return self::$availableHeaderImages;
+        }
+
         // Get the last 2 used featured images from the database
         $recentlyUsedImages = self::whereNotNull('featured_image')
             ->where('featured_image', '!=', '')
