@@ -318,7 +318,7 @@ class RoleController extends Controller
         }    
 
         $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
-        $endOfMonth = $startOfMonth->copy()->endOfMonth();
+        $endOfMonth = $startOfMonth->copy()->addMonth()->endOfMonth();
 
         if ($role->isCurator()) {
             $events = Event::with('roles')
