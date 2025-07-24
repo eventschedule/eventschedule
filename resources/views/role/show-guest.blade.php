@@ -22,7 +22,7 @@
           </div>
           <div class="px-6 lg:px-16 pb-4 relative z-10">
             @if ($role->profile_image_url)
-            <div class="rounded-2xl w-[130px] h-[130px] -mt-[85px] -ml-2 mb-6 bg-[#F5F9FE] flex items-center justify-center">
+            <div class="rounded-2xl w-[130px] h-[130px] -mt-[90px] -ml-2 mb-6 bg-[#F5F9FE] flex items-center justify-center">
               <img
                 class="rounded-2xl w-[120px] h-[120px] object-cover"
                 src="{{ $role->profile_image_url }}"
@@ -772,7 +772,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Consistent scrolling for both RTL and LTR
         function scrollCarousel(direction) {
             const itemWidth = 320; // Width of carousel item + gap
-            const scrollAmount = itemWidth; // Scroll by exactly one item width
+            const scrollAmount = itemWidth * 1.25; // Scroll by two item widths
             
             if (isRtl) {
                 // For RTL, reverse the direction
