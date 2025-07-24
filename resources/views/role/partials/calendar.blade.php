@@ -429,14 +429,6 @@
         </div>
         @if (! isset($embed) || ! $embed)
         <div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">
-            @php
-            $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth();
-            $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth();
-            $currentDate = $startOfMonth->copy();
-            $hasPastEvents = false;
-            $today = now()->startOfDay();
-            @endphp
-
             <div v-if="filteredEvents.length">
                 <div class="mb-2 text-center">
                     <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden">
@@ -445,12 +437,11 @@
                 </div>
                 <ol id="mobileEventsList"
                     class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow ring-1 ring-black ring-opacity-5">
-                    @while ($currentDate->lte($endOfMonth))
-                    <template v-for="event in getEventsForDate('{{ $currentDate->format('Y-m-d') }}')" :key="'mobile-' + event.id">
-                        <a v-if="isEventVisible(event)" :href="getEventUrl(event, '{{ $currentDate->format('Y-m-d') }}')" 
+                    <template v-for="event in filteredEvents" :key="'mobile-' + event.id">
+                        <a v-if="isEventVisible(event)" :href="getEventUrl(event, getEventDate(event))" 
                            {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}>
                             <li class="relative flex items-center space-x-6 py-6 px-4 {{ (isset($force_mobile) && $force_mobile) ? '' : 'xl:static' }} event-item"
-                                :class="isPastEvent('{{ $currentDate->format('Y-m-d') }}') ? 'past-event hidden' : ''">
+                                :class="isPastEvent(getEventDate(event)) ? 'past-event hidden' : ''">
                                 <div class="flex-auto">
                                     <h3 class="{{ (isset($force_mobile) && $force_mobile) ? 'pr-20' : 'pr-16' }} font-semibold text-gray-900" v-text="event.name">
                                     </h3>
@@ -466,8 +457,8 @@
                                                 </svg>
                                             </dt>
                                             <dd>
-                                                <time :datetime="'{{ $currentDate->format('Y-m-d') }}'">
-                                                    {{ $currentDate->format('M jS') }} • <span v-text="getEventTime(event)"></span>
+                                                <time :datetime="getEventDate(event)">
+                                                    <span v-text="getEventDisplayDate(event)"></span> • <span v-text="getEventTime(event)"></span>
                                                 </time>
                                             </dd>
                                         </div>
@@ -498,8 +489,6 @@
                             </li>
                         </a>
                     </template>
-                    @php $currentDate->addDay(); @endphp
-                    @endwhile
                 </ol>
             </div>
             <div v-else-if="{{ $tab != 'availability' ? 'true' : 'false' }}" class="p-10 max-w-5xl mx-auto px-4">
@@ -670,6 +659,61 @@ const calendarApp = createApp({
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             return eventDate < today;
+        },
+        getEventDate(event) {
+            if (event.starts_at) {
+                const eventDate = new Date(event.starts_at);
+                return eventDate.toISOString().split('T')[0]; // Return YYYY-MM-DD format
+            }
+            // For recurring events, we need to determine the date based on the current month
+            // This is a simplified approach - you might need to adjust based on your specific logic
+            const currentMonth = new Date(this.startOfMonth);
+            const dayOfWeek = this.getDayOfWeekFromDaysOfWeek(event.days_of_week);
+            if (dayOfWeek !== null) {
+                const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+                const firstOccurrence = this.getFirstOccurrenceOfDay(firstDayOfMonth, dayOfWeek);
+                return firstOccurrence.toISOString().split('T')[0];
+            }
+            return null;
+        },
+        getEventDisplayDate(event) {
+            const date = this.getEventDate(event);
+            if (!date) return '';
+            
+            const eventDate = new Date(date);
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const day = eventDate.getDate();
+            const suffix = this.getDaySuffix(day);
+            const month = monthNames[eventDate.getMonth()];
+            
+            return `${month} ${day}${suffix}`;
+        },
+        getDayOfWeekFromDaysOfWeek(daysOfWeek) {
+            if (!daysOfWeek) return null;
+            // Find the first day of the week that is set to '1'
+            for (let i = 0; i < daysOfWeek.length; i++) {
+                if (daysOfWeek[i] === '1') {
+                    return i; // 0 = Sunday, 1 = Monday, etc.
+                }
+            }
+            return null;
+        },
+        getFirstOccurrenceOfDay(startDate, dayOfWeek) {
+            const currentDay = startDate.getDay();
+            const daysToAdd = (dayOfWeek - currentDay + 7) % 7;
+            const firstOccurrence = new Date(startDate);
+            firstOccurrence.setDate(startDate.getDate() + daysToAdd);
+            return firstOccurrence;
+        },
+        getDaySuffix(day) {
+            if (day >= 11 && day <= 13) return 'th';
+            switch (day % 10) {
+                case 1: return 'st';
+                case 2: return 'nd';
+                case 3: return 'rd';
+                default: return 'th';
+            }
         },
         initTooltips() {
             // Reinitialize tooltips after Vue updates
