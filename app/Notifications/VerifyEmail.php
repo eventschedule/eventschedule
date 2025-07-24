@@ -49,7 +49,7 @@ class VerifyEmail extends BaseVerifyEmail
             public function envelope(): Envelope
             {
                 return new Envelope(
-                    subject: 'Welcome to Event Schedule!',
+                    subject: 'Confirm your email address',
                 );
             }
 
