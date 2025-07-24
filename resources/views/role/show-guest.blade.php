@@ -716,7 +716,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 const itemWidth = 320; // Width of carousel item + gap
                 const containerWidth = carousel.clientWidth;
                 const visibleItems = Math.floor(containerWidth / itemWidth);
-                const scrollAmount = visibleItems * itemWidth + 24;
+                // For RTL prev, we also need to adjust the scroll amount for better alignment
+                const scrollAmount = (visibleItems * itemWidth) + 24 + (itemWidth / 8);
                 
                 console.log('RTL Prev button clicked, scrolling by:', scrollAmount);
                 carousel.scrollBy({
@@ -729,7 +730,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 const itemWidth = 320; // Width of carousel item + gap
                 const containerWidth = carousel.clientWidth;
                 const visibleItems = Math.floor(containerWidth / itemWidth);
-                const scrollAmount = visibleItems * itemWidth + 24;
+                // For RTL next, we need to scroll by a larger amount to align properly
+                const scrollAmount = (visibleItems * itemWidth) + 24 + (itemWidth / 8);
                 
                 console.log('RTL Next button clicked, scrolling by:', -scrollAmount);
                 carousel.scrollBy({
