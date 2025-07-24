@@ -84,7 +84,7 @@
               
               @if ($role->isCurator() && $role->is_open)
               <a
-                href="{{ route('role.follow', ['subdomain' => $role->subdomain], ['add_event' => true]) }}"
+                href="{{ config('app.url') . route('role.follow', ['subdomain' => $role->subdomain], ['add_event' => true], false) }}"
                 class="inline-flex items-center justify-center flex-shrink-0"
               >
               <button
@@ -99,7 +99,7 @@
               
                 @if (!auth()->user() || !auth()->user()->isMember($role->subdomain))
                 <a
-                  href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
+                  href="{{ config('app.url') . route('role.follow', ['subdomain' => $role->subdomain], false) }}"
                   class="inline-flex items-center justify-center flex-shrink-0 {{ $role->isCurator() && $role->is_open ? 'hidden' : '' }}"
                 >
                   <button
@@ -280,10 +280,10 @@
                           {{ $eventData['event']->translatedName() }}
                         </h3>
                         <p class="text-gray-600 text-sm mb-1 group-hover/card:text-gray-700 transition-colors duration-200">
-                          {{ $videoRole->translatedName() }}
+                          {{ $eventData['event']->getVenueDisplayName() }}
                         </p>
                         <p class="text-gray-500 text-xs group-hover/card:text-gray-600 transition-colors duration-200">
-                          {{ $eventData['event']->getStartEndTime() }}
+                          {{ $eventData['event']->localStartsAt(true, $request->date) }}
                         </p>
                       </a>
                     </div>
