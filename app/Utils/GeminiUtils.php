@@ -716,7 +716,7 @@ class GeminiUtils
         - Never use em dashes 
         - Make the content engaging and informative
         - Include practical tips and actionable advice
-        - Use proper HTML formatting with h1, h2, h3 tags
+        - Format the content as markdown
         - Include bullet points and numbered lists where appropriate
         - Make it relevant to event scheduling and ticketing
         - Ensure the content is original and valuable
