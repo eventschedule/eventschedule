@@ -347,8 +347,8 @@
             </div>
         </div>
     </header>
-    <div class="{{ ($tab == 'availability' || (isset($embed) && $embed)) ? '' : 'hidden' }} shadow-sm ring-1 ring-black ring-opacity-5 md:flex md:flex-auto md:flex-col {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
-        <div class="{{ $tab == 'availability' ? 'hidden md:block' : '' }}"> 
+    <div class="{{ ($tab == 'availability' || (isset($embed) && $embed) || (isset($force_mobile) && $force_mobile)) ? '' : 'hidden' }} shadow-sm ring-1 ring-black ring-opacity-5 md:flex md:flex-auto md:flex-col {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
+        <div class="{{ $tab == 'availability' ? 'hidden md:block' : '' }} {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }}"> 
             <div
                 class="grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center text-xs font-semibold leading-6 text-gray-700">
                 @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $day)
@@ -358,7 +358,7 @@
                 @endforeach
             </div>
         </div>
-        <div class="bg-gray-200 text-xs leading-6 text-gray-700">
+        <div class="bg-gray-200 text-xs leading-6 text-gray-700 {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }}">
             <div class="w-full grid grid-cols-7 grid-rows-{{ $totalWeeks }} gap-px">
                 @while ($currentDate->lte($endOfMonth))
                 @if ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at)
@@ -428,7 +428,7 @@
             </div>
         </div>
         @if (!isset($embed) || !$embed)
-        <div class="py-10 sm:px-6 md:hidden">
+        <div class="py-10 {{ (isset($force_mobile) && $force_mobile) ? 'px-2' : 'sm:px-6' }} {{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">
             @php
             $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth();
             $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth();
@@ -449,12 +449,12 @@
                     <template v-for="event in getEventsForDate('{{ $currentDate->format('Y-m-d') }}')" :key="'mobile-' + event.id">
                         <a v-if="isEventVisible(event)" :href="getEventUrl(event, '{{ $currentDate->format('Y-m-d') }}')" 
                            {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}>
-                            <li class="relative flex items-center space-x-6 py-6 px-4 xl:static event-item"
+                            <li class="relative flex items-center space-x-6 py-6 {{ (isset($force_mobile) && $force_mobile) ? 'px-2' : 'px-4' }} {{ (isset($force_mobile) && $force_mobile) ? '' : 'xl:static' }} event-item"
                                 :class="isPastEvent('{{ $currentDate->format('Y-m-d') }}') ? 'past-event hidden' : ''">
                                 <div class="flex-auto">
-                                    <h3 class="pr-16 font-semibold text-gray-900" v-text="event.name">
+                                    <h3 class="{{ (isset($force_mobile) && $force_mobile) ? 'pr-20' : 'pr-16' }} font-semibold text-gray-900" v-text="event.name">
                                     </h3>
-                                    <dl class="pr-16 mt-2 flex flex-col text-gray-500 xl:flex-row">
+                                    <dl class="{{ (isset($force_mobile) && $force_mobile) ? 'pr-20' : 'pr-16' }} mt-2 flex flex-col text-gray-500 {{ (isset($force_mobile) && $force_mobile) ? '' : 'xl:flex-row' }}">
                                         <div class="flex items-start space-x-3">
                                             <dt class="mt-0.5">
                                                 <span class="sr-only">Date</span>
@@ -472,7 +472,7 @@
                                             </dd>
                                         </div>
                                         <div
-                                            class="mt-2 flex items-start space-x-3 xl:ml-3.5 xl:mt-0 xl:border-l xl:border-gray-400 xl:border-opacity-50 xl:pl-3.5">
+                                            class="mt-2 flex items-start space-x-3 {{ (isset($force_mobile) && $force_mobile) ? '' : 'xl:ml-3.5 xl:mt-0 xl:border-l xl:border-gray-400 xl:border-opacity-50 xl:pl-3.5' }}">
                                             <dt class="mt-0.5">
                                                 <span class="sr-only">Location</span>
                                                 <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"
