@@ -32,8 +32,8 @@
             @else
             <div style="height: 42px;"></div>
             @endif
-            <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6 mb-5 {{ $role->isRtl() && !session()->has('translate') ? 'rtl' : '' }}">
-              <div class="text-center lg:text-left {{ $role->isRtl() && !session()->has('translate') ? 'lg:text-right' : '' }}">
+            <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6 mb-5">
+              <div class="text-center lg:text-left">
                 <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] mb-2">
                   {{ $role->translatedName() }}
                 </h3>
@@ -46,7 +46,7 @@
                 </a>
                 @endif
               </div>
-              <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-end items-center {{ $role->isRtl() && !session()->has('translate') ? 'lg:justify-start' : '' }}">
+              <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-end items-center">
               
               @if (false)
               <!-- Event Search Box -->
