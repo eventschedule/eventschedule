@@ -430,7 +430,7 @@
         @if (! isset($embed) || ! $embed)
         <div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">
             <div v-if="filteredEvents.length">
-                <div class="mb-2 text-center">
+                <div class="mb-4 text-center">
                     <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden">
                         {{ __('messages.show_past_events') }}
                     </button>

@@ -20,9 +20,9 @@
             />
             @endif
           </div>
-          <div class="px-6 lg:px-16 pb-6 relative z-10">
+          <div class="px-6 lg:px-16 pb-4 relative z-10">
             @if ($role->profile_image_url)
-            <div class="rounded-2xl w-[196px] h-[196px] -mt-[96px] -ml-2 mb-8 bg-[#F5F9FE] flex items-center justify-center">
+            <div class="rounded-2xl w-[196px] h-[196px] -mt-[96px] -ml-2 mb-6 bg-[#F5F9FE] flex items-center justify-center">
               <img
                 class="rounded-2xl w-[180px] h-[180px] object-cover"
                 src="{{ $role->profile_image_url }}"
