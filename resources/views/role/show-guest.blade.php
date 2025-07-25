@@ -1,5 +1,9 @@
 <x-app-guest-layout :role="$role" :fonts="$fonts">
 
+  @if ($role->profile_image_url && ! $role->header_image && ! $role->header_image && $role->lang = 'en')
+  <div class="pt-8"></div>
+  @endif
+
   <main>
     <div>
       <div class="container mx-auto pt-7 pb-10 px-5">
@@ -22,7 +26,7 @@
           </div>
           <div class="px-6 lg:px-16 pb-4 relative z-10">
             @if ($role->profile_image_url)
-            <div class="rounded-2xl w-[130px] h-[130px] -mt-[90px] -ml-2 mb-6 bg-[#F5F9FE] flex items-center justify-center">
+            <div class="rounded-2xl w-[130px] h-[130px] -mt-[100px] -ml-2 mb-6 bg-[#F5F9FE] flex items-center justify-center">
               <img
                 class="rounded-2xl w-[120px] h-[120px] object-cover"
                 src="{{ $role->profile_image_url }}"
