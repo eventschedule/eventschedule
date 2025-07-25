@@ -157,6 +157,7 @@ class RoleController extends Controller
 
         if ($request->add_event) {
             // TODO
+            $redirectUrl = $mainDomain . route('following', [], false);
         } else {
             $redirectUrl = $mainDomain . route('following', [], false);
         }
