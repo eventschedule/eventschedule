@@ -254,7 +254,7 @@
     >
       <div class="flex flex-col gap-10">
         @if (request()->get('tickets') === 'true' && $event->isPro())
-        <div class="flex flex-col xl:flex-row gap-10 bg-[#F5F9FE] rounded-2xl p-10 mb-4">
+        <div class="flex flex-col xl:flex-row gap-10 bg-[#F5F9FE] rounded-2xl px-5 py-10 sm:p-10 mb-4">
           <div class="flex-1">
             <div class="flex flex-col gap-4">
               <h4 class="text-[28px] leading-snug text-black">
@@ -274,7 +274,7 @@
         @else
         <div>
         @if ($translation ? $translation->description_translated : $event->translatedDescription())
-          <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4 {{ $role->isRtl() || ($translation && $translation->role->isRtl()) ? 'rtl' : '' }}">
+          <div class="bg-[#F5F9FE] rounded-2xl px-5 py-8 sm:p-8 mb-6 flex flex-col gap-4 {{ $role->isRtl() || ($translation && $translation->role->isRtl()) ? 'rtl' : '' }}">
             <h2
               class="text-[#151B26] text-[40px] sm:text-{52px} leading-snug font-semibold"
             >
@@ -290,7 +290,7 @@
             @if (! $each->isClaimed() && ! $each->getFirstVideoUrl())
               @continue       
             @endif
-          <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4" 
+          <div class="bg-[#F5F9FE] rounded-2xl px-5 py-8 sm:p-8 mb-6 flex flex-col gap-4" 
             style="font-family: {{ $each->isClaimed() ? $each->font_family : $otherRole->font_family }}, sans-serif;"
           >
             <div
@@ -422,7 +422,7 @@
           @endforeach
 
           @if ($event->flyer_image_url)
-          <div class="bg-[#F5F9FE] rounded-2xl p-8 mb-6 flex flex-col gap-4">
+          <div class="bg-[#F5F9FE] rounded-2xl px-5 py-8 sm:p-8 mb-6 flex flex-col gap-4">
             <img src="{{ $event->flyer_image_url }}" class="block"/>
           </div>
           @endif
