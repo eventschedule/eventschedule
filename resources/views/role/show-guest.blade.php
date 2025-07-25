@@ -243,7 +243,7 @@
           $upcomingEventsWithVideos = collect();
           if (!$event) {
             $upcomingEvents = $events->filter(function($event) {
-              return $event->starts_at && Carbon\Carbon::parse($event->starts_at)->isAfter(now()->subDay());
+              return $event->starts_at && Carbon\Carbon::parse($event->starts_at)->isAfter(now());
             })->take(10);
             
             foreach ($upcomingEvents as $upcomingEvent) {
