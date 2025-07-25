@@ -1,7 +1,7 @@
 <x-app-guest-layout :role="$role" :fonts="$fonts">
 
   @if ($role->profile_image_url && ! $role->header_image && ! $role->header_image && $role->language_code == 'en')
-  <div class="pt-6"></div>
+  <div class="pt-8"></div>
   @endif
 
   <main>
