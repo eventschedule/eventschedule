@@ -90,7 +90,7 @@
               
               @if ($role->isCurator() && $role->is_open)
               <a
-                href="{{ config('app.url') . route('role.follow', ['subdomain' => $role->subdomain, 'add_event' => true], false) }}"
+                href="{{ route('role.follow', ['subdomain' => $role->subdomain, 'add_event' => true]) }}"
                 class="inline-flex items-center justify-center flex-shrink-0"
               >
               <button
@@ -105,7 +105,7 @@
               
                 @if (!auth()->user() || !auth()->user()->isMember($role->subdomain))
                 <a
-                  href="{{ config('app.url') . route('role.follow', ['subdomain' => $role->subdomain], false) }}"
+                  href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
                   class="inline-flex items-center justify-center flex-shrink-0 {{ $role->isCurator() && $role->is_open ? 'hidden' : '' }}"
                 >
                   <button
