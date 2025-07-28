@@ -234,7 +234,7 @@ class GeminiUtils
                     $data[$key][$field] = trim($item[$field], '*');
                 }
 
-                if ($data[$key][$field] == strtoupper($data[$key][$field])) {
+                if (is_string($data[$key][$field]) && $data[$key][$field] == strtoupper($data[$key][$field])) {
                     $data[$key][$field] = $item[$field] = ucwords(strtolower($data[$key][$field]));
                 }
             }
