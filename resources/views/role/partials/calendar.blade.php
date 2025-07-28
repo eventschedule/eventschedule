@@ -49,6 +49,7 @@
             'starts_at' => $event->starts_at,
             'days_of_week' => $event->days_of_week,
             'local_starts_at' => $event->localStartsAt(),
+            'local_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
             'guest_url' => $event->getGuestUrl(isset($subdomain) ? $subdomain : '', ''),
             'image_url' => $event->getImageUrl(),
             'can_edit' => auth()->user() && auth()->user()->canEditEvent($event),
@@ -586,6 +587,12 @@ const calendarApp = createApp({
             const checkDate = new Date(dateStr + 'T00:00:00');
             
             if (event.starts_at) {
+                // Use the local_date that's already converted to the role's timezone
+                if (event.local_date) {
+                    return event.local_date === dateStr;
+                }
+                
+                // Fallback for events without local_date
                 const eventDate = new Date(event.starts_at);
                 return eventDate.toDateString() === checkDate.toDateString();
             } else if (event.days_of_week) {
@@ -662,6 +669,12 @@ const calendarApp = createApp({
         },
         getEventDate(event) {
             if (event.starts_at) {
+                // Use the local_date that's already converted to the role's timezone
+                if (event.local_date) {
+                    return event.local_date;
+                }
+                
+                // Fallback for events without local_date
                 const eventDate = new Date(event.starts_at);
                 return eventDate.toISOString().split('T')[0]; // Return YYYY-MM-DD format
             }
