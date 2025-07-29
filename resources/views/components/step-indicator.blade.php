@@ -9,7 +9,7 @@
 ])
 
 @php
-    $isRtl = in_array(request()->lang, ['ar', 'he']);
+    $isRtl = in_array(auth()->user() ? auth()->user()->language_code : request()->lang, ['ar', 'he']);
 
     // Determine the current step if not provided
     if ($currentStep === null) {
