@@ -519,4 +519,8 @@ return [
     'please_enter_urls_or_cities' => 'Voer ten minste één URL of stad in om te testen',
     'save_role_first_to_test_import' => 'Sla eerst de rol op om import te testen',
     'skip' => 'Overslaan',
+    'create_event' => 'Evenement Aanmaken',
+    'videos_cleared' => 'Video\'s succesvol gewist.',
+    'clear_videos' => 'Video\'s wissen',
+    'are_you_sure_clear_videos' => 'Weet je zeker dat je alle video\'s voor niet-opgeëiste rollen in dit evenement wilt wissen?',
 ];

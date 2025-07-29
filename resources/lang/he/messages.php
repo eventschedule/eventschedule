@@ -518,4 +518,8 @@ return [
     'please_enter_urls_or_cities' => 'אנא הזן לפחות כתובת URL אחת או עיר לבדיקה',
     'save_role_first_to_test_import' => 'אנא שמור את התפקיד תחילה כדי לבדוק ייבוא',
     'skip' => 'דלג',
+    'create_event' => 'צור אירוע',
+    'videos_cleared' => 'הסרטונים נוקו בהצלחה.',
+    'clear_videos' => 'נקה סרטונים',
+    'are_you_sure_clear_videos' => 'האם אתה בטוח שברצונך לנקות את כל הסרטונים לתפקידים שלא נטענו באירוע זה?',
 ];

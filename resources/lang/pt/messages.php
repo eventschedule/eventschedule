@@ -520,4 +520,8 @@ return [
     'please_enter_urls_or_cities' => 'Por favor, insira pelo menos uma URL ou cidade para testar',
     'save_role_first_to_test_import' => 'Por favor, salve o papel primeiro para testar a importação',
     'skip' => 'Pular',
+    'create_event' => 'Criar Evento',
+    'videos_cleared' => 'Vídeos limpos com sucesso.',
+    'clear_videos' => 'Limpar vídeos',
+    'are_you_sure_clear_videos' => 'Tem certeza de que deseja limpar todos os vídeos para papéis não reivindicados neste evento?',
 ];
