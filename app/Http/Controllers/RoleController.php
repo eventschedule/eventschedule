@@ -871,7 +871,7 @@ class RoleController extends Controller
         $message = __('messages.created_schedule');
 
         if ($subdomain = session('pending_request')) {
-            return redirect(route('event.create', ['subdomain' => $subdomain]))->with('message', $message);
+            return redirect(route('event.create', ['subdomain' => $role->subdomain]))->with('message', $message);
         } else {    
             return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))->with('message', $message);
         }
