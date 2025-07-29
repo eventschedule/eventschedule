@@ -6,7 +6,7 @@
 ])
 
 <!-- Step Indicator for Add Event Flow -->
-@if(session('pending_venue'))
+@if(session('pending_request'))
     <div class="my-6">
         <x-step-indicator :compact="true" />
     </div>

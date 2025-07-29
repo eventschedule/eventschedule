@@ -155,7 +155,7 @@ class RoleController extends Controller
 
         session()->forget('pending_follow');
 
-        if ($subdomain = session('pending_venue')) {            
+        if ($subdomain = session('pending_request')) {            
             if ($user->talents()->count() == 0) {
                 $redirectUrl = $mainDomain . route('new', ['type' => 'talent'], false);
                 return redirect($redirectUrl);
@@ -870,7 +870,7 @@ class RoleController extends Controller
 
         $message = __('messages.created_schedule');
 
-        if ($subdomain = session('pending_venue')) {
+        if ($subdomain = session('pending_request')) {
             return redirect(route('event.create', ['subdomain' => $subdomain]))->with('message', $message);
         } else {    
             return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))->with('message', $message);
@@ -1269,7 +1269,7 @@ class RoleController extends Controller
         $mainDomain = config('app.url');
 
         if (! auth()->user()) {
-            session(['pending_venue' => $subdomain]);
+            session(['pending_request' => $subdomain]);
             $redirectUrl = $mainDomain . route('sign_up', [], false);
             return redirect($redirectUrl);
         }
@@ -1277,7 +1277,7 @@ class RoleController extends Controller
         $user = auth()->user();
         
         if ($user->talents()->count() == 0) {
-            session(['pending_venue' => $subdomain]);
+            session(['pending_request' => $subdomain]);
             $redirectUrl = $mainDomain . route('new', ['type' => 'talent'], false);
             return redirect($redirectUrl);
         }
