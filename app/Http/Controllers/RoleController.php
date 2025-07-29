@@ -1266,10 +1266,11 @@ class RoleController extends Controller
 
     public function request(Request $request, $subdomain)
     {
+        session(['pending_request' => $subdomain]);
+            
         $mainDomain = config('app.url');
 
         if (! auth()->user()) {
-            session(['pending_request' => $subdomain]);
             $redirectUrl = $mainDomain . route('sign_up', [], false);
             return redirect($redirectUrl);
         }
@@ -1277,12 +1278,12 @@ class RoleController extends Controller
         $user = auth()->user();
         
         if ($user->talents()->count() == 0) {
-            session(['pending_request' => $subdomain]);
             $redirectUrl = $mainDomain . route('new', ['type' => 'talent'], false);
             return redirect($redirectUrl);
         }
 
-        $redirectUrl = $mainDomain . route('event.create', ['subdomain' => $subdomain], false);
+        $role = $user->talents()->first();
+        $redirectUrl = $mainDomain . route('event.create', ['subdomain' => $role->subdomain], false);
         return redirect($redirectUrl);
     }
 
