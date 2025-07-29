@@ -139,14 +139,16 @@ class RoleController extends Controller
 
     public function follow(Request $request, $subdomain)
     {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
         $mainDomain = config('app.url');
 
         if (! auth()->user()) {
             session(['pending_follow' => $subdomain]);
-            return redirect($mainDomain . route('sign_up', [], false));
+            $lang = session()->has('translate') ? 'en' : $role->language_code;
+            return redirect($mainDomain . route('sign_up', ['lang' => $lang], false));
         }
 
-        $role = Role::subdomain($subdomain)->firstOrFail();
         $user = $request->user();
 
         if (! $user->isConnected($role->subdomain)) {
@@ -1266,19 +1268,21 @@ class RoleController extends Controller
 
     public function request(Request $request, $subdomain)
     {
+        $role = Role::whereSubdomain($subdomain)->firstOrFail();
+
         session(['pending_request' => $subdomain]);
             
         $mainDomain = config('app.url');
 
         if (! auth()->user()) {
-            $redirectUrl = $mainDomain . route('sign_up', [], false);
+            $lang = session()->has('translate') ? 'en' : $role->language_code;
+            $redirectUrl = $mainDomain . route('sign_up', ['lang' => $lang], false);
             return redirect($redirectUrl);
         }
         
         $user = auth()->user();
 
         if (! $user->isConnected($subdomain)) {
-            $role = Role::whereSubdomain($subdomain)->firstOrFail();
             $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
         }
 

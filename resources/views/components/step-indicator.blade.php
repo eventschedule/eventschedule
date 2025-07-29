@@ -6,7 +6,6 @@
         2 => ['title' => 'messages.create_schedule', 'icon' => 'calendar'],
         3 => ['title' => 'messages.create_event', 'icon' => 'plus']
     ],
-    'compact' => false
 ])
 
 @php
@@ -24,7 +23,7 @@
     }
 @endphp
 
-<div class="step-indicator bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border border-gray-100 p-6 {{ $compact ? 'p-4' : 'p-6' }} mb-6 relative overflow-hidden">
+<div class="step-indicator p-6 relative overflow-hidden">
 
     <!-- Steps Layout - Always Mobile Style -->
     <div class="flex items-start justify-center space-x-6 relative z-10">

@@ -29,6 +29,10 @@ class RegisteredUserController extends Controller
             return redirect()->route('login');
         }
 
+        if (request()->has('lang')) {
+            \App::setLocale(request('lang'));                    
+        }
+
         return view('auth.register');
     }
 
