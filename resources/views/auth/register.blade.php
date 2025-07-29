@@ -1,7 +1,7 @@
 <x-auth-layout>
 
     <x-slot name="head">
-        @if(session('pending_venue'))
+        @if(session('pending_request'))
             <x-step-indicator :compact="true" />
         @endif
 

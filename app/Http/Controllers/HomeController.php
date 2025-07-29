@@ -25,7 +25,7 @@ class HomeController extends Controller
     {
         $subdomain = session('pending_follow');
         if (! $subdomain) {
-            $subdomain = session('pending_venue');
+            $subdomain = session('pending_request');
         }
 
         if ($subdomain) {

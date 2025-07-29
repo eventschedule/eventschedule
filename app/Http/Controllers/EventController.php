@@ -452,7 +452,7 @@ class EventController extends Controller
             $role->save();
         }
 
-        session()->forget('pending_venue');
+        session()->forget('pending_request');
 
         if ($event->starts_at) {
             $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
