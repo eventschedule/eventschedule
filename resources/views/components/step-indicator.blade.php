@@ -9,6 +9,8 @@
 ])
 
 @php
+    $isRtl = in_array(request()->lang, ['ar', 'he']);
+
     // Determine the current step if not provided
     if ($currentStep === null) {
         $user = auth()->user();
@@ -28,18 +30,21 @@
     <!-- Steps Layout - Always Mobile Style -->
     <div class="flex items-start justify-center space-x-6 relative z-10">
         @for ($i = 1; $i <= $totalSteps; $i++)
+            @php
+                $stepNumber = $isRtl ? ($totalSteps - $i + 1) : $i;
+            @endphp
             <div class="flex flex-col items-center">
                 <!-- Step Circle -->
                 <div class="relative">
-                    <div class="w-14 h-14 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-500 ease-out transform hover:scale-110 {{ $i < $currentStep ? 'bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg ring-4 ring-green-100' : ($i == $currentStep ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg ring-4 ring-blue-100 animate-pulse' : 'bg-gray-100 text-gray-400 border-2 border-gray-200') }}">
-                        @if ($i < $currentStep)
+                    <div class="w-14 h-14 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-500 ease-out transform hover:scale-110 {{ $stepNumber < $currentStep ? 'bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg ring-4 ring-green-100' : ($stepNumber == $currentStep ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg ring-4 ring-blue-100 animate-pulse' : 'bg-gray-100 text-gray-400 border-2 border-gray-200') }}">
+                        @if ($stepNumber < $currentStep)
                             <!-- Checkmark for completed steps -->
                             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                             </svg>
-                        @elseif ($i == $currentStep)
+                        @elseif ($stepNumber == $currentStep)
                             <!-- Icon for current step -->
-                            @switch($steps[$i]['icon'])
+                            @switch($steps[$stepNumber]['icon'])
                                 @case('user')
                                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
@@ -59,20 +64,20 @@
                                     {{ $i }}
                             @endswitch
                         @else
-                            {{ $i }}
+                            {{ $stepNumber }}
                         @endif
                     </div>
                     
                     <!-- Progress line (except for last step) -->
                     @if ($i < $totalSteps)
-                        <div class="absolute top-7 left-14 w-20 h-1 {{ $i < $currentStep ? 'bg-gradient-to-r from-green-500 to-green-400' : 'bg-gray-200' }} transition-all duration-500 ease-out rounded-full -z-10"></div>
+                        <div class="absolute top-7 left-14 w-20 h-1 {{ $stepNumber < $currentStep ? 'bg-gradient-to-r from-green-500 to-green-400' : 'bg-gray-200' }} transition-all duration-500 ease-out rounded-full -z-10"></div>
                     @endif
                 </div>
                 
                 <!-- Step Content -->
                 <div class="mt-3 text-center max-w-24">
-                    <div class="text-sm font-semibold {{ $i <= $currentStep ? 'text-gray-900' : 'text-gray-500' }} transition-colors duration-300 leading-tight">
-                        {{ __($steps[$i]['title']) }}
+                    <div class="text-sm font-semibold {{ $stepNumber <= $currentStep ? 'text-gray-900' : 'text-gray-500' }} transition-colors duration-300 leading-tight">
+                        {{ __($steps[$stepNumber]['title']) }}
                     </div>
                 </div>
             </div>
