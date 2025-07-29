@@ -10,9 +10,13 @@
             var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;            
             document.getElementById('timezone').value = timezone;
 
-            var language = navigator.language || navigator.userLanguage;
-            var twoLetterLanguageCode = language.substring(0, 2);
-            document.getElementById('language_code').value = twoLetterLanguageCode;
+            @if(request()->has('lang'))
+                document.getElementById('language_code').value = '{{ request('lang') }}';
+            @else
+                var language = navigator.language || navigator.userLanguage;
+                var twoLetterLanguageCode = language.substring(0, 2);
+                document.getElementById('language_code').value = twoLetterLanguageCode;
+            @endif
 
             @if (! config('app.hosted') && ! config('app.url'))
                 // Disable register button initially
