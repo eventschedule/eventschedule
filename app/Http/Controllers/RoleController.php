@@ -1276,7 +1276,12 @@ class RoleController extends Controller
         }
         
         $user = auth()->user();
-        
+
+        if (! $user->isConnected($subdomain)) {
+            $role = Role::whereSubdomain($subdomain)->firstOrFail();
+            $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
+        }
+
         if ($user->talents()->count() == 0) {
             $redirectUrl = $mainDomain . route('new', ['type' => 'talent'], false);
             return redirect($redirectUrl);
