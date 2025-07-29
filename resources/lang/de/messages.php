@@ -526,4 +526,8 @@ return [
     'please_enter_urls_or_cities' => 'Bitte geben Sie mindestens eine URL oder Stadt zum Testen ein',
     'save_role_first_to_test_import' => 'Bitte speichern Sie zuerst die Rolle, um den Import zu testen',
     'skip' => 'Überspringen',
+    'create_event' => 'Veranstaltung erstellen',
+    'videos_cleared' => 'Videos erfolgreich gelöscht.',
+    'clear_videos' => 'Videos löschen',
+    'are_you_sure_clear_videos' => 'Sind Sie sicher, dass Sie alle Videos für nicht beanspruchte Rollen in dieser Veranstaltung löschen möchten?',
 ];

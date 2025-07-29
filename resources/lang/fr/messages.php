@@ -522,4 +522,8 @@ return [
     'please_enter_urls_or_cities' => 'Veuillez entrer au moins une URL ou ville pour tester',
     'save_role_first_to_test_import' => 'Veuillez d\'abord enregistrer le rôle pour tester l\'importation',
     'skip' => 'Passer',
+    'create_event' => 'Créer un Événement',
+    'videos_cleared' => 'Vidéos effacées avec succès.',
+    'clear_videos' => 'Effacer les vidéos',
+    'are_you_sure_clear_videos' => 'Êtes-vous sûr de vouloir effacer toutes les vidéos pour les rôles non réclamés dans cet événement ?',
 ];
