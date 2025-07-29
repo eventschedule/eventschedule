@@ -1,4 +1,11 @@
 <x-auth-layout>
+
+    <x-slot name="head">
+        @if(session('pending_venue'))
+            <x-step-indicator :compact="true" />
+        @endif
+    </x-slot>
+
     <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
         {{ __('messages.thanks_for_signing_up') }}
     </div>

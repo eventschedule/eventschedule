@@ -29,7 +29,7 @@ if (config('app.hosted')) {
     }
 
     Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app).*'])->group(function () {
-        Route::get('/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
+        Route::get('/request', [RoleController::class, 'request'])->name('role.request');
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
         Route::post('/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
         Route::get('/checkout/success/{sale_id}/{date}', [TicketController::class, 'success'])->name('checkout.success');
@@ -175,7 +175,7 @@ if (config('app.hosted')) {
         Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');
     });
 } else {
-    Route::get('/{subdomain}/sign_up', [RoleController::class, 'signUp'])->name('event.sign_up');
+    Route::get('/{subdomain}/request', [RoleController::class, 'request'])->name('role.request');
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
     Route::post('/{subdomain}/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
     Route::get('/{subdomain}/checkout/success/{sale_id}', [TicketController::class, 'success'])->name('checkout.success');

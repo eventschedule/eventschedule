@@ -120,7 +120,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->member()->type('venue');
     }
 
-    public function schedules()
+    public function talents()
     {
         return $this->member()->type('talent');
     }
