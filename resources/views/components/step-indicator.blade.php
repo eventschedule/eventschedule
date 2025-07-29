@@ -66,7 +66,7 @@
                     
                     <!-- Progress line (except for last step) -->
                     @if ($i < $totalSteps)
-                        <div class="absolute top-7 left-14 w-20 h-1 {{ $i < $currentStep ? 'bg-gradient-to-r from-green-500 to-green-400' : 'bg-gray-200' }} transition-all duration-500 ease-out rounded-full"></div>
+                        <div class="absolute top-7 left-14 w-20 h-1 {{ $i < $currentStep ? 'bg-gradient-to-r from-green-500 to-green-400' : 'bg-gray-200' }} transition-all duration-500 ease-out rounded-full -z-10"></div>
                     @endif
                 </div>
                 
