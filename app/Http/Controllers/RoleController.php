@@ -139,9 +139,11 @@ class RoleController extends Controller
 
     public function follow(Request $request, $subdomain)
     {
+        $mainDomain = config('app.url');
+
         if (! auth()->user()) {
             session(['pending_follow' => $subdomain]);
-            return redirect()->route('sign_up');
+            return redirect($mainDomain . route('sign_up', [], false));
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
@@ -153,17 +155,22 @@ class RoleController extends Controller
 
         session()->forget('pending_follow');
 
-        $mainDomain = config('app.url');
+        if ($subdomain = session('pending_venue')) {            
+            if ($user->talents()->count() == 0) {
+                $redirectUrl = $mainDomain . route('new', ['type' => 'talent'], false);
+                return redirect($redirectUrl);
+            }
 
-        if ($request->add_event) {
-            // TODO
-            $redirectUrl = $mainDomain . route('following', [], false);
+            $role = $user->talents()->first();
+            $redirectUrl = $mainDomain . route('event.create', ['subdomain' => $role->subdomain], false);
+            return redirect($redirectUrl);            
+
         } else {
             $redirectUrl = $mainDomain . route('following', [], false);
+            
+            return redirect($redirectUrl)
+                    ->with('message', str_replace(':name', $role->name, __('messages.followed_role')));
         }
-
-        return redirect($redirectUrl)
-                ->with('message', str_replace(':name', $role->name, __('messages.followed_role')));
     }
 
     public function unfollow(Request $request, $subdomain)
@@ -863,12 +870,8 @@ class RoleController extends Controller
 
         $message = __('messages.created_schedule');
 
-        if ($subdomain = session('pending_venue') && $user->countRoles() == 1) {
-            $data = [
-                'subdomain' => $subdomain,
-                'role_email' => $role->email,
-            ];
-            return redirect(route('event.create', $data))->with('message', $message);
+        if ($subdomain = session('pending_venue')) {
+            return redirect(route('event.create', ['subdomain' => $subdomain]))->with('message', $message);
         } else {    
             return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))->with('message', $message);
         }
@@ -1261,7 +1264,7 @@ class RoleController extends Controller
             ->with('message', __('messages.sent_confirmation_email'));
     }
 
-    public function signUp(Request $request, $subdomain)
+    public function request(Request $request, $subdomain)
     {
         $mainDomain = config('app.url');
 
@@ -1273,7 +1276,7 @@ class RoleController extends Controller
         
         $user = auth()->user();
         
-        if ($user->schedules()->count() == 0) {
+        if ($user->talents()->count() == 0) {
             session(['pending_venue' => $subdomain]);
             $redirectUrl = $mainDomain . route('new', ['type' => 'talent'], false);
             return redirect($redirectUrl);

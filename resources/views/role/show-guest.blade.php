@@ -90,7 +90,7 @@
               
               @if ($role->isCurator() && $role->is_open)
               <a
-                href="{{ route('role.follow', ['subdomain' => $role->subdomain, 'add_event' => true]) }}"
+                href="{{ route('role.request', ['subdomain' => $role->subdomain]) }}"
                 class="inline-flex items-center justify-center flex-shrink-0"
               >
               <button

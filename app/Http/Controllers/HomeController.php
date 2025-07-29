@@ -23,13 +23,13 @@ class HomeController extends Controller
 
     public function home(Request $request)
     {
-        if (session('pending_venue') && auth()->user()->countRoles() == 0) {
-            $role = Role::whereSubdomain(session('pending_venue'))->firstOrFail();
-            if ($role->accept_requests) {
-                return redirect()->route('new', ['type' => 'talent']);
-            }
-        } else if ($subdomain = session('pending_follow')) {
-            $role = Role::whereSubdomain(session('pending_follow'))->firstOrFail();
+        $subdomain = session('pending_follow');
+        if (! $subdomain) {
+            $subdomain = session('pending_venue');
+        }
+
+        if ($subdomain) {
+            $role = Role::whereSubdomain($subdomain)->firstOrFail();
             
             $user = auth()->user();
             $user->language_code = $role->language_code;

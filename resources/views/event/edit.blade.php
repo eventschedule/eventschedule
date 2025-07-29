@@ -5,6 +5,13 @@
     'resources/css/countrySelect.min.css',
 ])
 
+<!-- Step Indicator for Add Event Flow -->
+@if(session('pending_venue'))
+    <div class="my-6">
+        <x-step-indicator :compact="true" />
+    </div>
+@endif
+
 <x-slot name="head">
   <style>
     button {

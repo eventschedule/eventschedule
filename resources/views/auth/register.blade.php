@@ -1,6 +1,10 @@
 <x-auth-layout>
 
     <x-slot name="head">
+        @if(session('pending_venue'))
+            <x-step-indicator :compact="true" />
+        @endif
+
         <script {!! nonce_attr() !!}>
         document.addEventListener('DOMContentLoaded', function() {
             var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;            
