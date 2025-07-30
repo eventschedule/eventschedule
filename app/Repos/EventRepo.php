@@ -293,13 +293,13 @@ class EventRepo
         }
 
         if (config('app.hosted')) {
-            if ($event->wasRecentlyCreated && $venue && ! $venue->isClaimed() && $venue->is_subscribed && $venue->email) {
-                Mail::to($venue->email)->send(new ClaimVenue($event));
-            }
-
             foreach ($roles as $role) {
                 if ($event->wasRecentlyCreated && ! $role->isClaimed() && $role->is_subscribed && $role->email) {
-                    Mail::to($role->email)->send(new ClaimRole($event));
+                    if ($role->isVenue()) {
+                        Mail::to($role->email)->send(new ClaimVenue($event));
+                    } elseif ($role->isTalent()) {
+                        Mail::to($role->email)->send(new ClaimRole($event));
+                    }
                 }
             }
         }
