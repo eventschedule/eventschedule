@@ -59,7 +59,7 @@ class ImportCuratorEvents extends Command
         }
 
         // Get curator roles with import configuration
-        $query = Role::where('type', 'curator')->whereNotNull('import_config');
+        $query = Role::whereNotNull('import_config');
         
         if ($roleId) {
             $query->where('id', $roleId);
