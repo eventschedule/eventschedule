@@ -133,7 +133,25 @@ class User extends Authenticatable implements MustVerifyEmail
     public function allCurators()
     {
         return $this->roles()
-                    ->whereIn('type', ['curator'])
+                    ->where('type', 'curator')
+                    ->where(function($query) {
+                        $query->whereIn('roles.id', function($subquery) {
+                            $subquery->select('role_id')
+                                    ->from('role_user')
+                                    ->where('user_id', $this->id)
+                                    ->whereIn('level', ['owner', 'admin']);
+                        })
+                        ->orWhere(function($q) {
+                            $q->whereIn('roles.id', function($subquery) {
+                                $subquery->select('role_id')
+                                        ->from('role_user') 
+                                        ->where('user_id', $this->id)
+                                        ->where('level', 'follower');
+                            })
+                            ->where('is_open', true);
+                        });
+                    })
+                    ->orderBy('name')
                     ->get();
     }
 
