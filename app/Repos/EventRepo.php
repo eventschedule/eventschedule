@@ -67,8 +67,11 @@ class EventRepo
                     $user->roles()->attach($venue->id, ['level' => 'follower', 'created_at' => now()]);
                 }
             } else if ($venue && ! $venue->isClaimed()) {
+                if ($request->venue_email) {
+                    $venue->email = $request->venue_email;
+                }
+                
                 $venue->name = $request->venue_name ?? null;
-                $venue->email = $request->venue_email ?? null;
                 $venue->address1 = $request->venue_address1;
                 $venue->address2 = $request->venue_address2;
                 $venue->city = $request->venue_city;
@@ -125,17 +128,24 @@ class EventRepo
                     $role = Role::findOrFail($roleId);
 
                     if (! $role->isClaimed()) {
-                        $role->name = $member['name'];
-                        $role->email = $member['email'];
+                        if (! empty($member['name'])) {
+                            $role->name = $member['name'];
+                        }
+
+                        if (! empty($member['email'])) {
+                            $role->email = $member['email'];
+                        }
                         
-                        $links = [];
+                        $links = $role->youtube_links ? json_decode($role->youtube_links, true) : [];
+
                         if (! empty($member['youtube_url'])) {
                             $urlInfo = UrlUtils::getUrlInfo($member['youtube_url']);
                             if ($urlInfo !== null) {
                                 $links[] = $urlInfo;
                             }
+
+                            $role->youtube_links = json_encode($links);
                         }
-                        $role->youtube_links = json_encode($links);    
 
                         $role->save();
                     }

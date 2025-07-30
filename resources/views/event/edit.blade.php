@@ -186,7 +186,8 @@
         @method('put')
         @endif
 
-        <x-text-input name="venue_name" type="hidden" v-model="venueName" />                                                                
+        <x-text-input name="venue_name" type="hidden" v-model="venueName" />
+        <x-text-input name="venue_email" type="hidden" v-model="venueEmail" />                                                                
         <x-text-input name="venue_address1" type="hidden" v-model="venueAddress1" />                                                                
         <x-text-input name="venue_city" type="hidden" v-model="venueCity" />                                                                
         <x-text-input name="venue_state" type="hidden" v-model="venueState" />                                                                
