@@ -760,7 +760,7 @@ class RoleController extends Controller
             $role->background_colors = $request->custom_color1 . ', ' . $request->custom_color2;
         }
 
-        if ($role->isCurator()) {
+        if ($request->has('import_urls') || $request->has('import_cities')) {
             $importConfig = [
                 'urls' => array_map('strtolower', array_filter(array_map('trim', $request->input('import_urls', [])))),
                 'cities' => array_map('strtolower', array_filter(array_map('trim', $request->input('import_cities', []))))
@@ -975,7 +975,7 @@ class RoleController extends Controller
             $role->background_colors = $request->custom_color1 . ', ' . $request->custom_color2;
         }
 
-        if ($role->isCurator()) {
+        if ($request->has('import_urls') || $request->has('import_cities')) {
             $importConfig = [
                 'urls' => array_map('strtolower', array_filter(array_map('trim', $request->input('import_urls', [])))),
                 'cities' => array_map('strtolower', array_filter(array_map('trim', $request->input('import_cities', []))))
@@ -1638,11 +1638,6 @@ class RoleController extends Controller
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-        
-        if (!$role->isCurator()) {
-            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
-        }
-
         $roleId = $role->id;
         
         if (!$roleId) {
