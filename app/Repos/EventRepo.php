@@ -292,6 +292,7 @@ class EventRepo
             $event->save();
         }
 
+        /*
         if (config('app.hosted')) {
             foreach ($roles as $role) {
                 if ($event->wasRecentlyCreated && ! $role->isClaimed() && $role->is_subscribed && $role->email) {
@@ -303,6 +304,7 @@ class EventRepo
                 }
             }
         }
+        */
 
         if ($event->tickets_enabled) {
             $ticketData = $request->input('tickets', []);
