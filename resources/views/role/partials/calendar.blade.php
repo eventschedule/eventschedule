@@ -71,7 +71,7 @@
         }
     }
 @endphp
-    <header class="py-4 hidden {{ (isset($force_mobile) && $force_mobile) ? '' : 'md:block' }}">
+    <header class="py-4 {{ (isset($force_mobile) && $force_mobile) ? '' : 'md:block' }}">
         <div class="w-full">
             <div class="md:flex md:flex-row md:items-center w-full mb-4">
                 <div class="flex flex-row justify-between items-center w-full md:w-auto md:flex-1 md:justify-start">
@@ -103,7 +103,7 @@
                         </a>
                     </div>
                 </div>
-                <div class="hidden sm:flex sm:flex-row sm:items-center sm:justify-end sm:w-auto sm:gap-2">
+                <div class="sm:flex sm:flex-row sm:items-center sm:justify-end sm:w-auto sm:gap-2">
                     <div class="flex items-center gap-2">
                         @if(isset($role) && $role->groups && $role->groups->count() > 1)
                             <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 w-auto flex items-center text-sm {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
