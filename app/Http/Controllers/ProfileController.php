@@ -28,6 +28,10 @@ class ProfileController extends Controller
             $data['version_installed'] = $updater->source()->getVersionInstalled();
 
             try {
+                if ($request->has('clear_cache')) {
+                    cache()->forget('version_available');
+                }
+
                 $data['version_available'] = cache()->remember('version_available', 3600, function () use ($updater) {
                     \Log::info('Checking for new version');
                     return $updater->source()->getVersionAvailable();
