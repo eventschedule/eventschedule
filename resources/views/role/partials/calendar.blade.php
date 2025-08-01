@@ -104,7 +104,7 @@
             @endif
 
             {{-- Primary Actions Container --}}
-            <div class="flex flex-col md:flex-row md:items-center gap-3 w-full md:w-auto">
+            <div class="flex flex-row md:flex-row md:items-center gap-3 w-full md:w-auto">
                 @if ($route == 'admin' && $role->email_verified_at)
                     @if ($tab == 'schedule')
                         <a href="#" onclick="openEmbedModal()" class="w-full md:w-auto">
