@@ -179,13 +179,11 @@
                 </div>
             </div>
 
-            <div class="mt-4 flex flex-shrink-0 md:ml-4 md:mt-0">
-
-
-                <span class="hidden sm:block">
+            <div class="mt-4 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3 flex-shrink-0 md:ml-4 md:mt-0">
+                <span class="block">
                     <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}">
                         <button type="button"
-                            class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                            class="w-full sm:w-auto inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor"
                                 aria-hidden="true">
                                 <path
@@ -195,12 +193,11 @@
                         </button>
                     </a>
                 </span>
-
-                <span class="ml-3 hidden sm:block">
+                <span class="block">
                     <a href="{{ route('role.view_guest', (now()->year == $year && now()->month == $month) ? ['subdomain' => $role->subdomain] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'month' => $month] : ['subdomain' => $role->subdomain, 'year' => $year, 'month' => $month])) }}"
                         target="_blank">
                         <button type="button" {{ ! $role->email_verified_at ? 'disabled' : '' }}
-                            class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm 
+                            class="w-full sm:w-auto inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm 
                              ring-1 ring-inset ring-gray-300 hover:bg-gray-50 {{ ! $role->email_verified_at ? 'disabled:cursor-not-allowed' : '' }}">
                             <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor"
                                 aria-hidden="true">
@@ -211,7 +208,6 @@
                         </button>
                     </a>
                 </span>
-
             </div>
         </div>
     </div>
