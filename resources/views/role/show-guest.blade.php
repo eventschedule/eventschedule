@@ -87,8 +87,9 @@
                 </div>
               </div>
               @endif
-                            
-              @if (config('app.hosted') && $role->isCurator() && $role->accept_requests)
+                    
+              @if (config('app.hosted') || config('app.is_testing'))
+              @if (($role->isCurator() || $role->isVenue()) && $role->accept_requests)
               <a
                 href="{{ route('role.request', ['subdomain' => $role->subdomain]) }}"
                 class="inline-flex items-center justify-center flex-shrink-0"
@@ -101,7 +102,7 @@
                   {{ __('messages.add_event') }}
                 </button>
               </a>
-              @elseif (config('app.hosted') && (!auth()->user() || !auth()->user()->isMember($role->subdomain)))
+              @elseif (! auth()->user() || ! auth()->user()->isMember($role->subdomain))
                 <a
                   href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
                   class="inline-flex items-center justify-center flex-shrink-0"
@@ -114,6 +115,7 @@
                     {{ __('messages.follow') }}
                   </button>
                 </a>
+                @endif
                 @endif
               </div>
             </div>
