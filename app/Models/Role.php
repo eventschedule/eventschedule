@@ -55,7 +55,7 @@ class Role extends Model implements MustVerifyEmail
         'geo_lat',
         'geo_lon',
         'show_email',
-        'is_open',
+        'require_approval',
         'import_config',
     ];
 
@@ -573,7 +573,7 @@ class Role extends Model implements MustVerifyEmail
     public function acceptEventRequests()
     {
         if ($this->isClaimed()) {
-            return $this->accept_requests || $this->is_open;
+            return $this->accept_requests;
         }
 
         return true;

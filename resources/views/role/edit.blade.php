@@ -966,9 +966,9 @@
                             <x-input-error class="mt-2" :messages="$errors->get('accept_requests')" />
                         </div>
                         <div class="mb-6" id="require_approval_section">
-                            <x-checkbox name="is_open"
+                            <x-checkbox name="require_approval"
                                 label="{{ __('messages.require_approval') }}"
-                                checked="{{ ! old('is_open', $role->is_open) }}"
+                                checked="{{ old('require_approval', $role->require_approval) }}"
                                 data-custom-attribute="value" />
                             <x-input-error class="mt-2" :messages="$errors->get('is_open')" />
                         </div>
