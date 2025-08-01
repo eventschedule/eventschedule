@@ -76,7 +76,7 @@
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 
         {{-- Month and Year Title: Always visible and positioned first. --}}
-        <h1 class="text-lg font-semibold leading-6 flex-shrink-0">
+        <h1 class="text-lg font-semibold leading-6 flex-shrink-0 hidden md:block">
             <time datetime="{{ sprintf('%04d-%02d', $year, $month) }}">{{ Carbon\Carbon::create($year, $month, 1)->format('F Y') }}</time>
         </h1>
 
@@ -107,14 +107,12 @@
             <div class="flex flex-col md:flex-row md:items-center gap-2 w-full md:w-auto">
                 @if ($route == 'admin' && $role->email_verified_at)
                     @if ($tab == 'schedule')
-                        <span class="hidden sm:block">
-                            <button type="button" onclick="openEmbedModal()" class="w-full md:w-auto inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                                <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? '-mr-0.5 ml-1.5' : '-ml-0.5 mr-1.5' }} h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12.89,3L14.85,3.4L11.11,21L9.15,20.6L12.89,3M19.59,12L16,8.41V5.58L22.42,12L16,18.41V15.58L19.59,12M1.58,12L8,5.58V8.41L4.41,12L8,15.58V18.41L1.58,12Z" />
-                                </svg>
-                                {{ __('messages.embed') }}
-                            </button>
-                        </span>
+                        <button type="button" onclick="openEmbedModal()" class="w-full md:w-auto inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                            <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? '-mr-0.5 ml-1.5' : '-ml-0.5 mr-1.5' }} h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12.89,3L14.85,3.4L11.11,21L9.15,20.6L12.89,3M19.59,12L16,8.41V5.58L22.42,12L16,18.41V15.58L19.59,12M1.58,12L8,5.58V8.41L4.41,12L8,15.58V18.41L1.58,12Z" />
+                            </svg>
+                            {{ __('messages.embed') }}
+                        </button>
                         <a href="{{ route('event.show_import', ['subdomain' => $role->subdomain]) }}" class="w-full md:w-auto">
                             <button type="button" class="w-full inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                                 <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
@@ -175,7 +173,7 @@
             </div>
 
             {{-- Month Navigation Controls --}}
-            <div class="flex items-center bg-white rounded-md shadow-sm">
+            <div class="flex items-center bg-white rounded-md shadow-sm hidden md:flex">
                 <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}" class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50" rel="nofollow">
                     <span class="sr-only">{{ __('messages.previous_month') }}</span>
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
