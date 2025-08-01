@@ -35,7 +35,7 @@
     <script type="text/javascript" src="{{ asset('js/toastify-js.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/toastify.min.css') }}">
 
-    @if (! auth()->user() || ! auth()->user()->isAdmin())
+    @if (config('services.google.analytics') && (! auth()->user() || ! auth()->user()->isAdmin()))
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics') }}"></script>
     <script {!! nonce_attr() !!}>
