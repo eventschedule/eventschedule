@@ -957,7 +957,7 @@
                             <x-input-error class="mt-2" :messages="$errors->get('use_24_hour_time')" />
                         </div>
 
-                        @if (config('app.hosted') && ($role->isVenue() || $role->isCurator()))
+                        @if ((config('app.hosted') || config('app.is_testing')) && ($role->isVenue() || $role->isCurator()))
                         <div class="mb-6">
                             <x-checkbox name="accept_requests"
                                 label="{{ __('messages.accept_requests') }}"
