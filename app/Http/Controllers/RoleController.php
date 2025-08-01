@@ -952,6 +952,8 @@ class RoleController extends Controller
 
     public function update(RoleUpdateRequest $request, $subdomain): RedirectResponse
     {
+        dd($request->all());
+
         if (! is_hosted_or_admin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }

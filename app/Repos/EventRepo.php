@@ -254,7 +254,7 @@ class EventRepo
         $curatorGroups = $request->input('curator_groups', []);
         
         foreach ($roles as $role) {
-            if ($user->isMember($role->subdomain) || ($role->accept_requests && $role->is_open)) {
+            if ($user->isMember($role->subdomain) || ($role->accept_requests && ! $role->require_approval)) {
                 $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);            
             }
                         
