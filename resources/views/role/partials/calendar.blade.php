@@ -107,12 +107,14 @@
             <div class="flex flex-col md:flex-row md:items-center gap-2 w-full md:w-auto">
                 @if ($route == 'admin' && $role->email_verified_at)
                     @if ($tab == 'schedule')
-                        <button type="button" onclick="openEmbedModal()" class="w-full md:w-auto inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                            <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? '-mr-0.5 ml-1.5' : '-ml-0.5 mr-1.5' }} h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12.89,3L14.85,3.4L11.11,21L9.15,20.6L12.89,3M19.59,12L16,8.41V5.58L22.42,12L16,18.41V15.58L19.59,12M1.58,12L8,5.58V8.41L4.41,12L8,15.58V18.41L1.58,12Z" />
-                            </svg>
-                            {{ __('messages.embed') }}
-                        </button>
+                        <a href="#" onclick="openEmbedModal()" class="w-full md:w-auto">
+                            <button type="button" class="w-full md:w-auto inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                                <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? '-mr-0.5 ml-1.5' : '-ml-0.5 mr-1.5' }} h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12.89,3L14.85,3.4L11.11,21L9.15,20.6L12.89,3M19.59,12L16,8.41V5.58L22.42,12L16,18.41V15.58L19.59,12M1.58,12L8,5.58V8.41L4.41,12L8,15.58V18.41L1.58,12Z" />
+                                </svg>
+                                {{ __('messages.embed') }}
+                            </button>
+                        </a>
                         <a href="{{ route('event.show_import', ['subdomain' => $role->subdomain]) }}" class="w-full md:w-auto">
                             <button type="button" class="w-full inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                                 <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
