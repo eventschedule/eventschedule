@@ -179,7 +179,8 @@
                 </div>
             </div>
 
-            <div class="mt-4 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3 flex-shrink-0 md:ml-4 md:mt-0">
+            {{-- Desktop buttons (hidden on mobile) --}}
+            <div class="mt-4 hidden sm:flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3 flex-shrink-0 md:ml-4 md:mt-0">
                 <span class="block">
                     <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}">
                         <button type="button"
@@ -208,6 +209,56 @@
                         </button>
                     </a>
                 </span>
+            </div>
+
+            {{-- Mobile popup menu (visible only on mobile) --}}
+            <div class="mt-4 sm:hidden">
+                <div class="relative inline-block text-left w-full">
+                    <button type="button" onclick="onPopUpClick('role-actions-pop-up-menu', event)" class="inline-flex w-full justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="role-actions-menu-button" aria-expanded="true" aria-haspopup="true">
+                        {{ __('messages.actions') }}
+                        <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <div id="role-actions-pop-up-menu" class="pop-up-menu hidden absolute right-0 z-10 mt-2 w-64 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="role-actions-menu-button" tabindex="-1">
+                        <div class="py-1" role="none" onclick="onPopUpClick('role-actions-pop-up-menu', event)">
+                            <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
+                                <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
+                                </svg>
+                                <div>
+                                    {{ __('messages.edit_' . strtolower($role->type)) }}
+                                </div>
+                            </a>
+                            <a href="{{ route('role.view_guest', (now()->year == $year && now()->month == $month) ? ['subdomain' => $role->subdomain] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'month' => $month] : ['subdomain' => $role->subdomain, 'year' => $year, 'month' => $month])) }}" target="_blank" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
+                                <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
+                                </svg>
+                                <div>
+                                    {{ __('messages.view_' . strtolower($role->type)) }}
+                                </div>
+                            </a>
+                            @if ($tab == 'schedule')
+                            <a href="#" onclick="openEmbedModal()" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
+                                <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M12.89,3L14.85,3.4L11.11,21L9.15,20.6L12.89,3M19.59,12L16,8.41V5.58L22.42,12L16,18.41V15.58L19.59,12M1.58,12L8,5.58V8.41L4.41,12L8,15.58V18.41L1.58,12Z" />
+                                </svg>
+                                <div>
+                                    {{ __('messages.embed') }}
+                                </div>
+                            </a>
+                            <a href="{{ route('event.show_import', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
+                                <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M14,12L10,8V11H2V13H10V16M20,18V6C20,4.89 19.1,4 18,4H6A2,2 0 0,0 4,6V9H6V6H18V18H6V15H4V18A2,2 0 0,0 6,20H18A2,2 0 0,0 20,18Z" />
+                                </svg>
+                                <div>
+                                    {{ __('messages.import') }}
+                                </div>
+                            </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
