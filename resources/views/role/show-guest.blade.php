@@ -87,8 +87,8 @@
                 </div>
               </div>
               @endif
-              
-              @if ($role->isCurator() && $role->is_open)
+                            
+              @if (config('app.hosted') && $role->isCurator() && $role->is_open)
               <a
                 href="{{ route('role.request', ['subdomain' => $role->subdomain]) }}"
                 class="inline-flex items-center justify-center flex-shrink-0"
@@ -103,7 +103,7 @@
               </a>
               @endif
               
-                @if (!auth()->user() || !auth()->user()->isMember($role->subdomain))
+                @if (config('app.hosted') && (!auth()->user() || !auth()->user()->isMember($role->subdomain)))
                 <a
                   href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
                   class="inline-flex items-center justify-center flex-shrink-0 {{ $role->isCurator() && $role->is_open ? 'hidden' : '' }}"
