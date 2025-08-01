@@ -87,6 +87,17 @@
             toggleCustomImageInput();
             updateHeaderNavButtons();
             toggleCustomHeaderInput();
+            
+            // Handle accept_requests checkbox
+            const acceptRequestsCheckbox = document.querySelector('input[name="accept_requests"][type="checkbox"]');
+            const requireApprovalSection = document.getElementById('require_approval_section');
+
+            if (acceptRequestsCheckbox && requireApprovalSection) {
+                requireApprovalSection.style.display = acceptRequestsCheckbox.checked ? 'block' : 'none';                
+                acceptRequestsCheckbox.addEventListener('change', function() {
+                    requireApprovalSection.style.display = this.checked ? 'block' : 'none';
+                });
+            }
 
             function previewImage(input, previewId) {
                 const preview = document.getElementById(previewId);
@@ -946,8 +957,7 @@
                             <x-input-error class="mt-2" :messages="$errors->get('use_24_hour_time')" />
                         </div>
 
-                        @if (config('app.hosted'))
-                        @if ($role->isVenue() || $role->isCurator())
+                        @if (config('app.hosted') && ($role->isVenue() || $role->isCurator()))
                         <div class="mb-6">
                             <x-checkbox name="accept_requests"
                                 label="{{ __('messages.accept_requests') }}"
@@ -955,14 +965,13 @@
                                 data-custom-attribute="value" />
                             <x-input-error class="mt-2" :messages="$errors->get('accept_requests')" />
                         </div>
-                        <div class="mb-6" v-if="accept_requests">
+                        <div class="mb-6" id="require_approval_section">
                             <x-checkbox name="is_open"
                                 label="{{ __('messages.require_approval') }}"
                                 checked="{{ ! old('is_open', $role->is_open) }}"
                                 data-custom-attribute="value" />
                             <x-input-error class="mt-2" :messages="$errors->get('is_open')" />
                         </div>
-                        @endif
                         @endif
 
                         <!--
