@@ -104,7 +104,7 @@
             @endif
 
             {{-- Primary Actions Container --}}
-            <div class="flex flex-col md:flex-row md:items-center gap-2 w-full md:w-auto">
+            <div class="flex flex-col md:flex-row md:items-center gap-3 w-full md:w-auto">
                 @if ($route == 'admin' && $role->email_verified_at)
                     @if ($tab == 'schedule')
                         <a href="#" onclick="openEmbedModal()" class="w-full md:w-auto">
@@ -116,7 +116,7 @@
                             </button>
                         </a>
                         <a href="{{ route('event.show_import', ['subdomain' => $role->subdomain]) }}" class="w-full md:w-auto">
-                            <button type="button" class="w-full inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                            <button type="button" class="w-full md:w-auto inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                                 <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M14,12L10,8V11H2V13H10V16M20,18V6C20,4.89 19.1,4 18,4H6A2,2 0 0,0 4,6V9H6V6H18V18H6V15H4V18A2,2 0 0,0 6,20H18A2,2 0 0,0 20,18Z" />
                                 </svg>
