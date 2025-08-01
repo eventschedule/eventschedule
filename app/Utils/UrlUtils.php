@@ -31,7 +31,10 @@ class UrlUtils
     public static function clean($url)
     {
         $pattern = '/^(https?:\/\/)?(www\.)?/';
-        return preg_replace($pattern, '', $url);
+
+        $url = preg_replace($pattern, '', $url);
+
+        return rtrim($url, '/');
     }
 
     public static function cleanSlug($slug)
