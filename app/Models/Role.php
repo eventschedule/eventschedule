@@ -558,7 +558,7 @@ class Role extends Model implements MustVerifyEmail
 
     public function isWhiteLabeled()
     {
-        return true;
+        return false;
     }
 
     public function showBranding()
