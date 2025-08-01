@@ -292,19 +292,17 @@ class EventRepo
             $event->save();
         }
 
-        /*
         if (config('app.hosted')) {
             foreach ($roles as $role) {
                 if ($event->wasRecentlyCreated && ! $role->isClaimed() && $role->is_subscribed && $role->email) {
                     if ($role->isVenue()) {
-                        Mail::to($role->email)->send(new ClaimVenue($event));
+                        // Mail::to($role->email)->send(new ClaimVenue($event));
                     } elseif ($role->isTalent()) {
                         Mail::to($role->email)->send(new ClaimRole($event));
                     }
                 }
             }
         }
-        */
 
         if ($event->tickets_enabled) {
             $ticketData = $request->input('tickets', []);
