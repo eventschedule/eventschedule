@@ -573,7 +573,7 @@ class Role extends Model implements MustVerifyEmail
     public function acceptEventRequests()
     {
         if ($this->isClaimed()) {
-            return $this->accept_requests;
+            return $this->accept_requests || $this->is_open;
         }
 
         return true;

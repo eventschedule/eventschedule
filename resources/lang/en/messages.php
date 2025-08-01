@@ -535,4 +535,5 @@ return [
     'no_events_found' => 'No events found',
     'url' => 'URL',
     'skip' => 'Skip',
+    'require_approval' => 'Require Approval',
 ];

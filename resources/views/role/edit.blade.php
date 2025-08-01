@@ -946,7 +946,8 @@
                             <x-input-error class="mt-2" :messages="$errors->get('use_24_hour_time')" />
                         </div>
 
-                        @if ($role->isVenue() && config('app.hosted'))
+                        @if (config('app.hosted'))
+                        @if ($role->isVenue() || $role->isCurator())
                         <div class="mb-6">
                             <x-checkbox name="accept_requests"
                                 label="{{ __('messages.accept_requests') }}"
@@ -954,17 +955,14 @@
                                 data-custom-attribute="value" />
                             <x-input-error class="mt-2" :messages="$errors->get('accept_requests')" />
                         </div>
-
-                        @elseif ($role->isCurator())
-
-                        <div class="mb-6">
+                        <div class="mb-6" v-if="accept_requests">
                             <x-checkbox name="is_open"
-                                label="{{ __('messages.allow_everyone_to_add_events') }}"
-                                checked="{{ old('is_open', $role->is_open) }}"
+                                label="{{ __('messages.require_approval') }}"
+                                checked="{{ ! old('is_open', $role->is_open) }}"
                                 data-custom-attribute="value" />
                             <x-input-error class="mt-2" :messages="$errors->get('is_open')" />
                         </div>
-
+                        @endif
                         @endif
 
                         <!--

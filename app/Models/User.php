@@ -148,7 +148,7 @@ class User extends Authenticatable implements MustVerifyEmail
                                         ->where('user_id', $this->id)
                                         ->where('level', 'follower');
                             })
-                            ->where('is_open', true);
+                            ->where('accept_requests', true);
                         });
                     })
                     ->orderBy('name')
