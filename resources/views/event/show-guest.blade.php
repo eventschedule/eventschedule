@@ -348,7 +348,7 @@
                 </h3>
                 @endif
               </div>
-              @if ($each->isClaimed())
+              @if ($each->isClaimed() && config('app.hosted'))
               <a
                 href="{{ auth()->user() && auth()->user()->isMember($each->subdomain)
                   ? config('app.url') . route('role.view_admin', ['subdomain' => $each->subdomain, 'tab' => 'schedule'], false) 
