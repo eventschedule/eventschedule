@@ -536,4 +536,5 @@ return [
     'url' => 'URL',
     'skip' => 'Skip',
     'require_approval' => 'Require Approval',
+    'actions' => 'Actions',
 ];
