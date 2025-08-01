@@ -134,36 +134,7 @@
         {{ isset($head) ? $head : '' }}
     </x-slot>
     
-    @if (! request()->embed && $role->showBranding())
-        <header class="bg-[#f9fafb] dark:bg-[#151B26]">
-            <div
-            class="container mx-auto flex flex-row justify-between items-center py-7 pr-5"
-            >
-                <a href="https://www.eventschedule.com" target="_blank">
-                    <x-application-logo />
-                </a> 
-                <div class="flex flex-row items-center gap-x-3 md:gap-x-12">
-                    @if ($role->language_code != 'en')
-                        <div class="flex items-center rounded-full bg-gray-100 dark:bg-gray-800 p-1 text-sm" translate="no">
-                            @if(session()->has('translate'))
-                                <span class="bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm px-3 py-1.5 rounded-full font-medium">EN</span>
-                                <a href="{{ request()->url() }}?lang={{ $role->language_code }}" 
-                                   class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 px-3 py-1.5 rounded-full font-medium transition-all duration-200">
-                                    {{ strtoupper($role->language_code) }}
-                                </a>
-                            @else
-                                <a href="{{ request()->url() }}?lang=en" 
-                                   class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 px-3 py-1.5 rounded-full font-medium transition-all duration-200">
-                                    EN
-                                </a>
-                                <span class="bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm px-3 py-1.5 rounded-full font-medium">{{ strtoupper($role->language_code) }}</span>
-                            @endif
-                        </div>
-                    @endif            
-                </div>
-            </div>
-        </header>
-    @elseif (! request()->embed && $role->language_code != 'en' && ! ($event && $event->exists))
+    @if (! request()->embed && $role->language_code != 'en' && ! ($event && $event->exists))
         <div class="container mx-auto flex justify-end pr-5 pt-4">
             <div class="flex items-center rounded-full bg-gray-100 dark:bg-gray-800 p-1 text-sm shadow-md z-50" translate="no">
                 @if(session()->has('translate'))
