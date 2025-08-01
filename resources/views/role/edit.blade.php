@@ -968,9 +968,9 @@
                         <div class="mb-6" id="require_approval_section">
                             <x-checkbox name="require_approval"
                                 label="{{ __('messages.require_approval') }}"
-                                checked="{{ old('require_approval', $role->require_approval) }}"
+                                checked="{{ old('require_approval', $role->exists ? $role->require_approval : true) }}"
                                 data-custom-attribute="value" />
-                            <x-input-error class="mt-2" :messages="$errors->get('is_open')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('require_approval')" />
                         </div>
                         @endif
 
