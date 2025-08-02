@@ -490,7 +490,7 @@ return [
     'no_tickets' => 'Aucun billet',
     'no_tickets_description' => 'Aucun billet trouvé. Une fois que vous achetez un billet, il apparaîtra ici.',
     'verification_link_sent' => 'Un lien de vérification a été envoyé à :email.',
-    'import_event_help' => 'Note : les données sont partagées avec :link pour analyser les détails de l\'événement.',
+    'import_event_help' => 'Les données sont partagées avec :link pour analyser les détails de l\'événement.',
     'auto_import_settings' => 'Paramètres d\'Importation Automatique',
     'import_urls' => 'URLs d\'Importation',
     'import_cities' => 'Importer des Villes',
