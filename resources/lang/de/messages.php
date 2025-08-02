@@ -494,7 +494,7 @@ return [
     'no_tickets' => 'Keine Tickets',
     'no_tickets_description' => 'Keine Tickets gefunden. Sobald Sie ein Ticket kaufen, wird es hier angezeigt.',
     'verification_link_sent' => 'Ein Bestätigungslink wurde an :email gesendet.',
-    'import_event_help' => 'Hinweis: Daten werden mit :link geteilt, um die Veranstaltungsdetails zu analysieren.',
+    'import_event_help' => 'Daten werden mit :link geteilt, um die Veranstaltungsdetails zu analysieren.',
     'auto_import_settings' => 'Automatische Importeinstellungen',
     'import_urls' => 'Import-URLs',
     'import_cities' => 'Städte importieren',
