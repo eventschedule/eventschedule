@@ -180,7 +180,7 @@
             </div>
 
             {{-- Desktop buttons (hidden on mobile) --}}
-            <div class="mt-4 hidden sm:flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3 flex-shrink-0 md:ml-4 md:mt-0">
+            <div class="mt-4 hidden md:flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3 flex-shrink-0 md:ml-4 md:mt-0">
                 <span class="block">
                     <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}">
                         <button type="button"
@@ -212,7 +212,7 @@
             </div>
 
             {{-- Mobile popup menu (visible only on mobile) --}}
-            <div class="mt-4 sm:hidden">
+            <div class="mt-4 md:hidden">
                 <div class="relative inline-block text-left w-full">
                     <button type="button" onclick="onPopUpClick('role-actions-pop-up-menu', event)" class="inline-flex w-full justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="role-actions-menu-button" aria-expanded="true" aria-haspopup="true">
                         {{ __('messages.actions') }}
