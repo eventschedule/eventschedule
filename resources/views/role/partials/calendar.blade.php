@@ -85,7 +85,7 @@
 
             {{-- Schedule Select --}}
             @if(isset($role) && $role->groups && $role->groups->count() > 1)
-                <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 text-sm w-full md:w-auto flex-1 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
+                <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 text-sm w-full md:w-auto flex-1 hover:bg-gray-50 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
                     <option value="">{{ __('messages.all_schedules') }}</option>
                     @foreach($role->groups as $group)
                         <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
@@ -95,7 +95,7 @@
 
             {{-- Category Select --}}
             @if(count($uniqueCategoryIds ?? []) > 1)
-                <select v-model="selectedCategory" class="border-gray-300 rounded-md shadow-sm h-9 text-sm w-full md:w-auto flex-1 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
+                <select v-model="selectedCategory" class="border-gray-300 rounded-md shadow-sm h-9 text-sm w-full md:w-auto flex-1 hover:bg-gray-50 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
                     <option value="">{{ __('messages.all_categories') }}</option>
                     <option v-for="category in availableCategories" :key="category.id" :value="category.id" v-text="category.name"></option>
                 </select>

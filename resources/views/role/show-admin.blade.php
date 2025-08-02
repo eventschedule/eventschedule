@@ -297,7 +297,7 @@
         <div class="sm:hidden">
             <label for="current-tab" class="sr-only">{{ __('messages.select_a_tab') }}</label>
             <select id="current-tab" name="current-tab" onchange="onTabChange()"
-                class="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-[#4E81FA]">
+                class="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:ring-2 focus:ring-inset focus:ring-[#4E81FA]">
                 <option value="schedule" {{ $tab == 'schedule' ? 'selected' : '' }}>{{ __('messages.schedule') }}</option>
                 @if ($role->isCurator())
                 <option value="videos" {{ $tab == 'videos' ? 'selected' : '' }}>
