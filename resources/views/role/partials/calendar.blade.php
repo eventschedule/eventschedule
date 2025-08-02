@@ -83,23 +83,26 @@
         {{-- All Controls Wrapper: Groups all interactive elements. Stacks on mobile, row on desktop. --}}
         <div class="flex flex-col md:flex-row md:items-center gap-3">
 
-            {{-- Schedule Select --}}
-            @if(isset($role) && $role->groups && $role->groups->count() > 1)
-                <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 text-sm w-full md:w-auto flex-1 hover:bg-gray-50 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
-                    <option value="">{{ __('messages.all_schedules') }}</option>
-                    @foreach($role->groups as $group)
-                        <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
-                    @endforeach
-                </select>
-            @endif
+            {{-- Schedule and Category Selects Container --}}
+            <div class="flex flex-row gap-2 w-full md:w-auto">
+                {{-- Schedule Select --}}
+                @if(isset($role) && $role->groups && $role->groups->count() > 1)
+                    <select v-model="selectedGroup" class="border-gray-300 rounded-md shadow-sm h-9 text-sm flex-1 hover:bg-gray-50 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
+                        <option value="">{{ __('messages.all_schedules') }}</option>
+                        @foreach($role->groups as $group)
+                            <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
+                        @endforeach
+                    </select>
+                @endif
 
-            {{-- Category Select --}}
-            @if(count($uniqueCategoryIds ?? []) > 1)
-                <select v-model="selectedCategory" class="border-gray-300 rounded-md shadow-sm h-9 text-sm w-full md:w-auto flex-1 hover:bg-gray-50 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
-                    <option value="">{{ __('messages.all_categories') }}</option>
-                    <option v-for="category in availableCategories" :key="category.id" :value="category.id" v-text="category.name"></option>
-                </select>
-            @endif
+                {{-- Category Select --}}
+                @if(count($uniqueCategoryIds ?? []) > 1)
+                    <select v-model="selectedCategory" class="border-gray-300 rounded-md shadow-sm h-9 text-sm flex-1 hover:bg-gray-50 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
+                        <option value="">{{ __('messages.all_categories') }}</option>
+                        <option v-for="category in availableCategories" :key="category.id" :value="category.id" v-text="category.name"></option>
+                    </select>
+                @endif
+            </div>
 
                         {{-- Save Button --}}
             @if ($route == 'admin' && $role->email_verified_at)
