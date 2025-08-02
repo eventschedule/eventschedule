@@ -1149,12 +1149,7 @@
                     <x-primary-button>{{ __('messages.save') }}</x-primary-button>
                     <x-cancel-button></x-cancel-button>
                 </div>
-                <div>
-                    @if ($role->exists && $role->user_id == $user->id)
-                    <x-delete-button :url="route('role.delete', ['subdomain' => $role->subdomain])">
-                    </x-delete-button>
-                    @endif
-                </div>
+
             </div>
 
         </div>

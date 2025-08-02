@@ -259,6 +259,16 @@
                                 </div>
                             </a>
                             @endif
+                            @if ($role->exists && $role->user_id == auth()->user()->id)
+                            <a href="#" onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete', ['subdomain' => $role->subdomain]) }}'; } return false;" class="group flex items-center px-4 py-2 text-sm text-red-600 hover:text-red-700" role="menuitem" tabindex="-1">
+                                <svg class="mr-3 h-5 w-5 text-red-400 group-hover:text-red-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+                                </svg>
+                                <div>
+                                    {{ __('messages.delete') }}
+                                </div>
+                            </a>
+                            @endif
                         </div>
                     </div>
                 </div>
