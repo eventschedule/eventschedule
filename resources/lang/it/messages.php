@@ -526,4 +526,10 @@ return [
     'videos_cleared' => 'Video cancellati con successo.',
     'clear_videos' => 'Cancella video',
     'are_you_sure_clear_videos' => 'Sei sicuro di voler cancellare tutti i video per i ruoli non reclamati in questo evento?',
+    'individual_quantities' => 'Quantità Individuali',
+    'individual_quantities_help' => 'Ogni tipo di biglietto viene contato separatamente',
+    'combined_total' => 'Totale Combinato',
+    'combined_total_help' => 'Tutti i tipi di biglietti sono combinati in un unico pool',
+    'require_approval' => 'Richiede Approvazione',
+    'actions' => 'Azioni',
 ];

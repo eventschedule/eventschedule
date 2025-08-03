@@ -526,4 +526,10 @@ return [
     'videos_cleared' => 'Videos eliminados exitosamente.',
     'clear_videos' => 'Limpiar videos',
     'are_you_sure_clear_videos' => '¿Estás seguro de que deseas limpiar todos los videos para roles no reclamados en este evento?',
+    'individual_quantities' => 'Cantidades Individuales',
+    'individual_quantities_help' => 'Cada tipo de entrada se cuenta por separado',
+    'combined_total' => 'Total Combinado',
+    'combined_total_help' => 'Todos los tipos de entradas se combinan en un solo grupo',
+    'require_approval' => 'Requiere Aprobación',
+    'actions' => 'Acciones',
 ];

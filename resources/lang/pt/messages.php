@@ -524,4 +524,10 @@ return [
     'videos_cleared' => 'Vídeos limpos com sucesso.',
     'clear_videos' => 'Limpar vídeos',
     'are_you_sure_clear_videos' => 'Tem certeza de que deseja limpar todos os vídeos para papéis não reivindicados neste evento?',
+    'individual_quantities' => 'Quantidades Individuais',
+    'individual_quantities_help' => 'Cada tipo de ingresso é contado separadamente',
+    'combined_total' => 'Total Combinado',
+    'combined_total_help' => 'Todos os tipos de ingressos são combinados em um único pool',
+    'require_approval' => 'Requer Aprovação',
+    'actions' => 'Ações',
 ];

@@ -527,4 +527,10 @@ return [
     'videos_cleared' => 'تم مسح الفيديوهات بنجاح.',
     'clear_videos' => 'مسح الفيديوهات',
     'are_you_sure_clear_videos' => 'هل أنت متأكد من أنك تريد مسح جميع الفيديوهات للأدوار غير المطالب بها في هذا الحدث؟',
+    'individual_quantities' => 'الكميات الفردية',
+    'individual_quantities_help' => 'يتم حساب كل نوع تذكرة بشكل منفصل',
+    'combined_total' => 'المجموع المشترك',
+    'combined_total_help' => 'جميع أنواع التذاكر مجمعة في مجموعة واحدة',
+    'require_approval' => 'يتطلب موافقة',
+    'actions' => 'الإجراءات',
 ];

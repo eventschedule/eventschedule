@@ -522,4 +522,10 @@ return [
     'videos_cleared' => 'הסרטונים נוקו בהצלחה.',
     'clear_videos' => 'נקה סרטונים',
     'are_you_sure_clear_videos' => 'האם אתה בטוח שברצונך לנקות את כל הסרטונים לתפקידים שלא נטענו באירוע זה?',
+    'individual_quantities' => 'כמויות בודדות',
+    'individual_quantities_help' => 'כל סוג כרטיס נספר בנפרד',
+    'combined_total' => 'סך הכל משולב',
+    'combined_total_help' => 'כל סוגי הכרטיסים משולבים בבריכה אחת',
+    'require_approval' => 'דורש אישור',
+    'actions' => 'פעולות',
 ];
