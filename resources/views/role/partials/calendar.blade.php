@@ -71,7 +71,7 @@
         }
     }
 @endphp
-<header class="py-4 {{ (isset($force_mobile) && $force_mobile) ? '' : '' }}">
+<header class="py-4 {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }}">
     {{-- Main container: Stacks content on mobile, aligns in a row on desktop. --}}
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 
