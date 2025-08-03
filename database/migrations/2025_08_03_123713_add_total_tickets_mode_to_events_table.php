@@ -14,6 +14,10 @@ return new class extends Migration
         Schema::table('events', function (Blueprint $table) {
             $table->enum('total_tickets_mode', ['individual', 'combined'])->default('individual')->after('ticket_notes');
         });
+
+        Schema::table('roles', function (Blueprint $table) {
+            $table->text('email_settings')->nullable();
+        });
     }
 
     /**
@@ -23,6 +27,10 @@ return new class extends Migration
     {
         Schema::table('events', function (Blueprint $table) {
             $table->dropColumn('total_tickets_mode');
+        });
+
+        Schema::table('roles', function (Blueprint $table) {
+            $table->dropColumn('email_settings');
         });
     }
 };
