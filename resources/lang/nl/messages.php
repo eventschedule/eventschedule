@@ -523,4 +523,10 @@ return [
     'videos_cleared' => 'Video\'s succesvol gewist.',
     'clear_videos' => 'Video\'s wissen',
     'are_you_sure_clear_videos' => 'Weet je zeker dat je alle video\'s voor niet-opgeëiste rollen in dit evenement wilt wissen?',
+    'individual_quantities' => 'Individuele Hoeveelheden',
+    'individual_quantities_help' => 'Elk tickettype wordt apart geteld',
+    'combined_total' => 'Gecombineerd Totaal',
+    'combined_total_help' => 'Alle tickettypes worden gecombineerd in één pool',
+    'require_approval' => 'Goedkeuring Vereist',
+    'actions' => 'Acties',
 ];

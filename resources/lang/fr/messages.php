@@ -526,4 +526,10 @@ return [
     'videos_cleared' => 'Vidéos effacées avec succès.',
     'clear_videos' => 'Effacer les vidéos',
     'are_you_sure_clear_videos' => 'Êtes-vous sûr de vouloir effacer toutes les vidéos pour les rôles non réclamés dans cet événement ?',
+    'individual_quantities' => 'Quantités Individuelles',
+    'individual_quantities_help' => 'Chaque type de billet est compté séparément',
+    'combined_total' => 'Total Combiné',
+    'combined_total_help' => 'Tous les types de billets sont combinés dans un seul pool',
+    'require_approval' => 'Approbation Requise',
+    'actions' => 'Actions',
 ];

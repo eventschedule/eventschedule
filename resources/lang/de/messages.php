@@ -530,4 +530,10 @@ return [
     'videos_cleared' => 'Videos erfolgreich gelöscht.',
     'clear_videos' => 'Videos löschen',
     'are_you_sure_clear_videos' => 'Sind Sie sicher, dass Sie alle Videos für nicht beanspruchte Rollen in dieser Veranstaltung löschen möchten?',
+    'individual_quantities' => 'Einzelne Mengen',
+    'individual_quantities_help' => 'Jeder Tickettyp wird separat gezählt',
+    'combined_total' => 'Kombinierte Gesamtmenge',
+    'combined_total_help' => 'Alle Tickettypen werden in einen einzigen Pool kombiniert',
+    'require_approval' => 'Genehmigung erforderlich',
+    'actions' => 'Aktionen',
 ];
