@@ -244,17 +244,19 @@
                         </div>
                         <ol class="mt-4 divide-y divide-gray-100 text-sm leading-6 md:col-span-7 xl:col-span-8">
                             <li v-for="event in getEventsForDate('{{ $currentDate->format('Y-m-d') }}')" :key="event.id" 
-                                class="relative group {{ (isset($role) && $role->isRtl()) ? 'hover:pl-8' : 'hover:pr-8' }} hover:break-all break-words" v-show="isEventVisible(event)">
+                                class="relative group" 
+                                :class="event.can_edit ? '{{ (isset($role) && $role->isRtl()) ? 'hover:pl-8' : 'hover:pr-8' }}' : ''"
+                                v-show="isEventVisible(event)">
                                 <a :href="getEventUrl(event, '{{ $currentDate->format('Y-m-d') }}')"
                                     class="flex has-tooltip" 
                                     :data-tooltip="getEventTooltip(event)"
                                     @click.stop {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
-                                    <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900 {{ (isset($role) && $role->isRtl()) ? 'rtl' : '' }}">
+                                    <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900 {{ (isset($role) && $role->isRtl()) ? 'rtl' : '' }} truncate">
                                         <span :class="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'" 
-                                              class="hover:underline" v-text="getEventDisplayName(event)">
+                                              class="hover:underline truncate" v-text="getEventDisplayName(event)">
                                         </span>
                                         <span v-if="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1" 
-                                              class="text-gray-400" v-text="getEventTime(event)">
+                                              class="text-gray-400 truncate" v-text="getEventTime(event)">
                                         </span>
                                     </p>
                                 </a>
