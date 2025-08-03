@@ -24,6 +24,7 @@ class Event extends Model
         'tickets_enabled',
         'ticket_currency_code',
         'ticket_notes',
+        'total_tickets_mode',
         'payment_method',
         'payment_instructions',
         'expire_unpaid_tickets',
@@ -627,5 +628,37 @@ class Event extends Model
         });
 
         return $data;
+    }
+
+    public function hasSameTicketQuantities()
+    {
+        $tickets = $this->tickets;
+        if ($tickets->count() <= 1) {
+            return false;
+        }
+
+        $quantities = $tickets->pluck('quantity')->filter(function($qty) {
+            return $qty > 0;
+        })->unique();
+
+        return $quantities->count() === 1;
+    }
+
+    public function getSameTicketQuantity()
+    {
+        if (!$this->hasSameTicketQuantities()) {
+            return null;
+        }
+
+        return $this->tickets->first()->quantity;
+    }
+
+    public function getTotalTicketQuantity()
+    {
+        // For combined mode, the total should be the same as the individual quantity
+        if ($this->total_tickets_mode === 'combined' && $this->hasSameTicketQuantities()) {
+            return $this->getSameTicketQuantity();
+        }
+        return $this->tickets->sum('quantity');
     }
 }

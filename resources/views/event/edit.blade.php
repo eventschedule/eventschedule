@@ -885,6 +885,34 @@
                                         </div>
                                     </div>
 
+                                    <!-- Total Tickets Mode Selection -->
+                                    <div v-if="hasSameTicketQuantities && tickets.length > 1" class="mt-6 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
+                                        <div class="space-y-3">
+                                            <div class="flex items-center">
+                                                <input id="total_tickets_individual" name="total_tickets_mode" type="radio" 
+                                                    value="individual" v-model="event.total_tickets_mode"
+                                                    class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300">
+                                                <label for="total_tickets_individual" class="ml-3 block text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                    {{ __('messages.individual_quantities') }} (@{{ getTotalTicketQuantity }} total)
+                                                    <p class="text-xs text-gray-600 dark:text-gray-400">
+                                                        {{ __('messages.individual_quantities_help') }}
+                                                    </p>
+                                                </label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input id="total_tickets_combined" name="total_tickets_mode" type="radio" 
+                                                    value="combined" v-model="event.total_tickets_mode"
+                                                    class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300">
+                                                <label for="total_tickets_combined" class="ml-3 block text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                    {{ __('messages.combined_total') }} (@{{ getCombinedTotalQuantity }} total)
+                                                    <p class="text-xs text-gray-600 dark:text-gray-400">
+                                                        {{ __('messages.combined_total_help') }}
+                                                    </p>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <x-secondary-button @click="addTicket" type="button" class="mt-4">
                                         {{ __('messages.add_type') }}
                                     </x-secondary-button>
@@ -983,6 +1011,7 @@
         event: {
           ...@json($event),
           tickets_enabled: {{ $event->tickets_enabled ? 'true' : 'false' }},
+          total_tickets_mode: @json($event->total_tickets_mode ?? 'individual'),
         },
         venues: @json($venues),
         members: @json($members ?? []),
@@ -1363,6 +1392,39 @@
       },
       hasLimitedPaidTickets() {
         return this.tickets.some(ticket => ticket.price > 0 && ticket.quantity > 0);
+      },
+      hasSameTicketQuantities() {
+        if (this.tickets.length <= 1) {
+          return false;
+        }
+        
+        // Check that all tickets have quantities set
+        const ticketsWithQuantities = this.tickets.filter(ticket => ticket.quantity > 0);
+        if (ticketsWithQuantities.length !== this.tickets.length) {
+          return false;
+        }
+        
+        // Check that all quantities are the same
+        const quantities = ticketsWithQuantities.map(ticket => ticket.quantity);
+        return new Set(quantities).size === 1;
+      },
+      getSameTicketQuantity() {
+        if (!this.hasSameTicketQuantities) {
+          return null;
+        }
+        return this.tickets.find(ticket => ticket.quantity > 0).quantity;
+      },
+      getTotalTicketQuantity() {
+        // Always return the sum of all quantities for display purposes
+        return this.tickets.reduce((total, ticket) => total + (ticket.quantity || 0), 0);
+      },
+      getCombinedTotalQuantity() {
+        // For combined mode, the total should be the same as the individual quantity
+        // since we're treating it as a single pool of tickets
+        if (this.hasSameTicketQuantities) {
+          return this.getSameTicketQuantity;
+        }
+        return this.tickets.reduce((total, ticket) => total + (ticket.quantity || 0), 0);
       }
     },
     watch: {

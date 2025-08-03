@@ -143,6 +143,7 @@ class EventController extends Controller
             $event->payment_instructions = $defaultTickets['payment_instructions'] ?? null;
             $event->expire_unpaid_tickets = $defaultTickets['expire_unpaid_tickets'] ?? false;
             $event->ticket_notes = $defaultTickets['ticket_notes'] ?? null;
+            $event->total_tickets_mode = $defaultTickets['total_tickets_mode'] ?? 'individual';
             $event->tickets = $defaultTickets['tickets'] ?? [new Ticket()];
         } else {
             $event->ticket_currency_code = 'USD';
@@ -337,6 +338,7 @@ class EventController extends Controller
                 'payment_instructions' => $event->payment_instructions,
                 'expire_unpaid_tickets' => $event->expire_unpaid_tickets,
                 'ticket_notes' => $event->ticket_notes,
+                'total_tickets_mode' => $event->total_tickets_mode,
                 'tickets' => $event->tickets->map(function($ticket) {
                     return [
                         'type' => $ticket->type,
@@ -439,6 +441,7 @@ class EventController extends Controller
                 'payment_instructions' => $event->payment_instructions,
                 'expire_unpaid_tickets' => $event->expire_unpaid_tickets,
                 'ticket_notes' => $event->ticket_notes,
+                'total_tickets_mode' => $event->total_tickets_mode,
                 'tickets' => $event->tickets->map(function($ticket) {
                     return [
                         'type' => $ticket->type,

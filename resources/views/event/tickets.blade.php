@@ -16,6 +16,7 @@
                     name: @json(old('name', auth()->check() ? auth()->user()->name : '')),
                     email: @json(old('email', auth()->check() ? auth()->user()->email : '')),
                     password: '',
+                    totalTicketsMode: @json($event->total_tickets_mode ?? 'individual'),
                 };
             },
             created() {
@@ -36,6 +37,25 @@
                         this.name.trim() !== '' &&
                         this.email.trim() !== '';
                     return hasValidForm;
+                },
+                isCombinedMode() {
+                    return this.totalTicketsMode === 'combined';
+                },
+                totalSelectedTickets() {
+                    return this.tickets.reduce((total, ticket) => total + ticket.selectedQty, 0);
+                },
+                totalAvailableTickets() {
+                    if (this.isCombinedMode) {
+                        // In combined mode, all tickets have the same quantity
+                        return this.tickets[0]?.quantity || 0;
+                    }
+                    return this.tickets.reduce((total, ticket) => total + ticket.quantity, 0);
+                },
+                remainingTickets() {
+                    if (this.isCombinedMode) {
+                        return this.totalAvailableTickets - this.totalSelectedTickets;
+                    }
+                    return null;
                 }
             },
             methods: {
@@ -50,8 +70,38 @@
                         e.preventDefault();
                         alert('Please select at least one ticket');
                     }
+                },
+                getAvailableQuantity(ticket) {
+                    if (!this.isCombinedMode) {
+                        return ticket.quantity;
+                    }
+                    
+                    // In combined mode, calculate available based on other selections
+                    const otherSelected = this.tickets
+                        .filter(t => t.id !== ticket.id)
+                        .reduce((total, t) => total + t.selectedQty, 0);
+                    
+                    return Math.max(0, this.totalAvailableTickets - otherSelected);
+                },
+                updateTicketQuantities() {
+                    if (this.isCombinedMode) {
+                        this.tickets.forEach(ticket => {
+                            const available = this.getAvailableQuantity(ticket);
+                            if (ticket.selectedQty > available) {
+                                ticket.selectedQty = available;
+                            }
+                        });
+                    }
                 }
-            }
+            },
+            watch: {
+                tickets: {
+                    handler() {
+                        this.updateTicketQuantities();
+                    },
+                    deep: true
+                }
+            },
         }).mount('#ticket-selector');
     });
 </script>
@@ -99,7 +149,6 @@
         </div>
 
     
-
         <div v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-8">
             <div class="flex items-center justify-between">
                 <div>
@@ -108,15 +157,16 @@
                     <p :class="{'text-lg': tickets.length === 1, 'text-sm': tickets.length > 1}" class="font-medium">@{{ formatPrice(ticket.price) }}</p>
                 </div>
                 <div>
-                    <p v-if="ticket.quantity === 0" class="text-lg font-medium text-gray-500">{{ __('messages.sold_out') }}</p>
+                    <p v-if="getAvailableQuantity(ticket) === 0" class="text-lg font-medium text-gray-500">{{ __('messages.sold_out') }}</p>
                     <p v-else>
                     <select 
                         v-model="ticket.selectedQty"
+                        @change="updateTicketQuantities"
                         class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         :name="`tickets[${ticket.id}]`" :id="`ticket-${index}`"
                     >
                         <option value="0">0</option>
-                        <template v-for="n in ticket.quantity">
+                        <template v-for="n in getAvailableQuantity(ticket)">
                             <option :value="n" :selected="ticket.selectedQty === n">@{{ n }}</option>
                             </template>
                         </select>

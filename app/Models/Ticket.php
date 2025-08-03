@@ -51,7 +51,19 @@ class Ticket extends Model
 
         $sold = $this->sold ? json_decode($this->sold, true) : [];
         $sold = $sold[$date] ?? 0;
-        $data['quantity'] = $this->quantity > 0 ? max(0, min(20, $this->quantity - $sold)) : 20;
+        
+        // Handle combined mode logic
+        if ($this->event && $this->event->total_tickets_mode === 'combined' && $this->event->hasSameTicketQuantities()) {
+            $totalSold = $this->event->tickets->sum(function($ticket) use ($date) {
+                $ticketSold = $ticket->sold ? json_decode($ticket->sold, true) : [];
+                return $ticketSold[$date] ?? 0;
+            });
+            // In combined mode, the total quantity is the same as individual quantity
+            $totalQuantity = $this->event->getSameTicketQuantity();
+            $data['quantity'] = $totalQuantity > 0 ? max(0, min(20, $totalQuantity - $totalSold)) : 20;
+        } else {
+            $data['quantity'] = $this->quantity > 0 ? max(0, min(20, $this->quantity - $sold)) : 20;
+        }
 
         return $data;
     }

@@ -114,12 +114,29 @@ class TicketController extends Controller
                 }
 
                 if ($ticketModel->quantity > 0) {
-                    $sold = json_decode($ticketModel->sold, true);
-                    $soldCount = $sold[$request->event_date] ?? 0;
-                    $remainingTickets = $ticketModel->quantity - $soldCount;
+                    // Handle combined mode logic
+                    if ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
+                        $totalSold = $event->tickets->sum(function($ticket) use ($request) {
+                            $ticketSold = $ticket->sold ? json_decode($ticket->sold, true) : [];
+                            return $ticketSold[$request->event_date] ?? 0;
+                        });
+                        // In combined mode, the total quantity is the same as individual quantity
+                        $totalQuantity = $event->getSameTicketQuantity();
+                        $remainingTickets = $totalQuantity - $totalSold;
+                        
+                        // Check if the total requested quantity exceeds remaining tickets
+                        $totalRequested = array_sum($request->tickets);
+                        if ($totalRequested > $remainingTickets) {
+                            return back()->with('error', __('messages.tickets_not_available'));
+                        }
+                    } else {
+                        $sold = json_decode($ticketModel->sold, true);
+                        $soldCount = $sold[$request->event_date] ?? 0;
+                        $remainingTickets = $ticketModel->quantity - $soldCount;
 
-                    if ($quantity > $remainingTickets) {
-                        return back()->with('error', __('messages.tickets_not_available'));
+                        if ($quantity > $remainingTickets) {
+                            return back()->with('error', __('messages.tickets_not_available'));
+                        }
                     }
                 }
             }
