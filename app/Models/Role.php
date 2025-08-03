@@ -59,6 +59,15 @@ class Role extends Model implements MustVerifyEmail
         'import_config',
     ];
 
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'email_settings',
+    ];
+
     protected static function boot()
     {
         parent::boot();
