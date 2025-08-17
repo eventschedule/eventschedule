@@ -278,7 +278,7 @@ class Event extends Model
         if ($this->days_of_week) {            
             $afterStartDate = Carbon::parse($this->localStartsAt())->isSameDay($date) || Carbon::parse($this->localStartsAt())->lessThanOrEqualTo($date);
             $dayOfWeek = $date->dayOfWeek;
-            return $afterStartDate && $this->days_of_week[$dayOfWeek];
+            return $afterStartDate && $this->days_of_week[$dayOfWeek] === '1';
         } else {
             return Carbon::parse($this->localStartsAt())->isSameDay($date);
         }

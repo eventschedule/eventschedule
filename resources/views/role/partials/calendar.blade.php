@@ -33,6 +33,10 @@
             $checkDate->addDay();
         }
     }
+    
+    if (count($eventsMap) > 0) {
+        $sampleDate = array_keys($eventsMap)[0];
+    }
     $uniqueGroupIds = array_unique($eventGroupIds);
     $uniqueCategoryIds = array_unique($eventCategoryIds);
 
@@ -57,6 +61,14 @@
                 ? (isset($role) ? config('app.url') . route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)], false) : config('app.url') . route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($event->id)], false))
                 : null,
         ];
+    }
+
+    // Also pass the pre-calculated events map to Vue
+    $eventsMapForVue = [];
+    foreach ($eventsMap as $date => $eventsForDate) {
+        $eventsMapForVue[$date] = array_map(function($event) {
+            return \App\Utils\UrlUtils::encodeId($event->id);
+        }, $eventsForDate);
     }
 
     // Prepare groups data for Vue
@@ -360,6 +372,7 @@ const calendarApp = createApp({
             selectedGroup: '{{ isset($selectedGroup) ? $selectedGroup->slug : "" }}',
             selectedCategory: '{{ $category ?? "" }}',
             allEvents: @json($eventsForVue),
+            eventsMap: @json($eventsMapForVue),
             groups: @json($groupsForVue),
             categories: @json(get_translated_categories()),
             startOfMonth: '{{ $startOfMonth->format('Y-m-d') }}',
@@ -423,9 +436,14 @@ const calendarApp = createApp({
     },
     methods: {
         getEventsForDate(dateStr) {
-            return this.filteredEvents.filter(event => {
-                return this.eventMatchesDate(event, dateStr);
-            });
+            // Use the pre-calculated events map from the backend
+            if (this.eventsMap[dateStr]) {
+                const eventIds = this.eventsMap[dateStr];
+                return this.filteredEvents.filter(event => {
+                    return eventIds.includes(event.id);
+                });
+            }
+            return [];
         },
         eventMatchesDate(event, dateStr) {
             // Convert dateStr to Date object for comparison
@@ -441,6 +459,15 @@ const calendarApp = createApp({
                 const eventDate = new Date(event.starts_at);
                 return eventDate.toDateString() === checkDate.toDateString();
             } else if (event.days_of_week) {
+                // For recurring events, check if the date is on or after the start date
+                // and if the day of the week matches
+                if (event.starts_at) {
+                    const eventStartDate = new Date(event.starts_at);
+                    if (checkDate < eventStartDate) {
+                        return false;
+                    }
+                }
+                
                 const dayOfWeek = checkDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
                 return event.days_of_week[dayOfWeek] === '1';
             }
