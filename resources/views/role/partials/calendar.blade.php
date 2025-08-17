@@ -287,7 +287,7 @@
         </div>
         @if (! isset($embed) || ! $embed)
         <div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">
-            <div v-if="filteredEvents.length">
+            <div v-if="mobileEventsList.length">
                 <div class="mb-4 text-center">
                     <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden">
                         {{ __('messages.show_past_events') }}
@@ -295,11 +295,11 @@
                 </div>
                 <ol id="mobileEventsList"
                     class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow ring-1 ring-black ring-opacity-5">
-                    <template v-for="event in filteredEvents" :key="'mobile-' + event.id">
-                        <a v-if="isEventVisible(event)" :href="getEventUrl(event, getEventDate(event))" 
+                    <template v-for="event in mobileEventsList" :key="'mobile-' + event.uniqueKey">
+                        <a v-if="isEventVisible(event)" :href="getEventUrl(event, event.occurrenceDate)" 
                            {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}>
                             <li class="relative flex items-center py-6 px-4 {{ (isset($force_mobile) && $force_mobile) ? '' : 'xl:static' }} event-item {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'space-x-reverse' : '' }} space-x-6"
-                                :class="isPastEvent(getEventDate(event)) ? 'past-event hidden' : ''">
+                                :class="isPastEvent(event.occurrenceDate) ? 'past-event hidden' : ''">
                                 <div class="flex-auto pl-4">
                                     <h3 class="{{ (isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pl-16' : 'pr-16') }} font-semibold text-gray-900" v-text="event.name">
                                     </h3>
@@ -315,8 +315,8 @@
                                                 </svg>
                                             </dt>
                                             <dd>
-                                                <time :datetime="getEventDate(event)">
-                                                    <span v-text="getEventDisplayDate(event)"></span> • <span v-text="getEventTime(event)"></span>
+                                                <time :datetime="event.occurrenceDate">
+                                                    <span v-text="formatMobileDate(event.occurrenceDate)"></span> • <span v-text="getEventTime(event)"></span>
                                                 </time>
                                             </dd>
                                         </div>
@@ -421,6 +421,42 @@ const calendarApp = createApp({
                 id: id,
                 name: this.categories[id] || `Category ${id}`
             })).sort((a, b) => a.name.localeCompare(b.name));
+        },
+        mobileEventsList() {
+            // Create a mobile-friendly events list that includes all occurrences of recurring events
+            const mobileEvents = [];
+            
+            // Process each date in the events map
+            Object.keys(this.eventsMap).forEach(dateStr => {
+                const eventIds = this.eventsMap[dateStr];
+                
+                // Get the events for this date
+                const eventsForDate = this.filteredEvents.filter(event => {
+                    return eventIds.includes(event.id);
+                });
+                
+                // Add each event with its occurrence date
+                eventsForDate.forEach(event => {
+                    mobileEvents.push({
+                        ...event,
+                        occurrenceDate: dateStr,
+                        // Create a unique key for recurring events
+                        uniqueKey: event.days_of_week ? `${event.id}-${dateStr}` : event.id
+                    });
+                });
+            });
+            
+            // Sort by date, then by time
+            return mobileEvents.sort((a, b) => {
+                const dateComparison = a.occurrenceDate.localeCompare(b.occurrenceDate);
+                if (dateComparison !== 0) return dateComparison;
+                
+                // If same date, sort by time
+                if (a.local_starts_at && b.local_starts_at) {
+                    return new Date(a.local_starts_at) - new Date(b.local_starts_at);
+                }
+                return 0;
+            });
         }
     },
     watch: {
@@ -566,6 +602,18 @@ const calendarApp = createApp({
             if (!date) return '';
             
             const eventDate = new Date(date);
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const day = eventDate.getDate();
+            const suffix = this.getDaySuffix(day);
+            const month = monthNames[eventDate.getMonth()];
+            
+            return `${month} ${day}${suffix}`;
+        },
+        formatMobileDate(dateStr) {
+            if (!dateStr) return '';
+            
+            const eventDate = new Date(dateStr);
             const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
                               'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             const day = eventDate.getDate();
