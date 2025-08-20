@@ -31,6 +31,10 @@ if (config('app.hosted')) {
     Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app).*'])->group(function () {
         Route::get('/request', [RoleController::class, 'request'])->name('role.request');
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
+        Route::get('/guest-import', [EventController::class, 'showGuestImport'])->name('event.guest_import');
+        Route::post('/guest-import', [EventController::class, 'guestImport'])->name('event.guest_import');
+        Route::post('/guest-parse', [EventController::class, 'guestParse'])->name('event.guest_parse');
+        Route::post('/guest-upload-image', [EventController::class, 'guestUploadImage'])->name('event.guest_upload_image');    
         Route::post('/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
         Route::get('/checkout/success/{sale_id}/{date}', [TicketController::class, 'success'])->name('checkout.success');
         Route::get('/checkout/cancel/{sale_id}/{date}', [TicketController::class, 'cancel'])->name('checkout.cancel');
