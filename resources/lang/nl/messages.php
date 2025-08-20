@@ -489,7 +489,6 @@ return [
     'no_tickets' => 'Geen tickets',
     'no_tickets_description' => 'Geen tickets gevonden. Zodra je een ticket koopt, verschijnt het hier.',
     'verification_link_sent' => 'Een verificatielink is verzonden naar :email.',
-    'import_event_help' => 'Gegevens worden gedeeld met :link om de evenementdetails te analyseren.',
     'auto_import_settings' => 'Automatische Import Instellingen',
     'import_urls' => 'Import URLs',
     'import_cities' => 'Importeer Steden',

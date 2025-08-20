@@ -488,7 +488,6 @@ return [
     'no_tickets' => 'אין כרטיסים',
     'no_tickets_description' => 'לא נמצאו כרטיסים. ברגע שתקנה כרטיס, הוא יופיע כאן.',
     'verification_link_sent' => 'קישור אימות נשלח ל:email.',
-    'import_event_help' => 'הערה: הנתונים משותפים עם :link כדי לנתח את פרטי האירוע.',
     'auto_import_settings' => 'הגדרות ייבוא אוטומטי',
     'import_urls' => 'כתובות URL לייבוא',
     'import_cities' => 'ייבוא ערים',

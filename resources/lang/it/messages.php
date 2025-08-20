@@ -492,7 +492,6 @@ return [
     'no_tickets' => 'Nessun biglietto',
     'no_tickets_description' => 'Nessun biglietto trovato. Una volta acquistato un biglietto, apparirà qui.',
     'verification_link_sent' => 'Un link di verifica è stato inviato a :email.',
-    'import_event_help' => 'I dati sono condivisi con :link per analizzare i dettagli dell\'evento.',
     'auto_import_settings' => 'Impostazioni di Importazione Automatica',
     'import_urls' => 'URL di Importazione',
     'import_cities' => 'Importa Città',
