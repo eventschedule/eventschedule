@@ -510,7 +510,19 @@ class EventController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        return view('event.import', ['role' => $role]);
+        return view('event.admin-import', ['role' => $role]);
+    }
+
+    public function showGuestImport(Request $request, $subdomain)
+    {
+        // Check if there's a pending request in session
+        if (!session('pending_request') || session('pending_request') !== $subdomain) {
+            abort(404);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        return view('event.guest-import', ['role' => $role, 'isGuest' => true]);
     }
 
     public function parse(Request $request, $subdomain)
@@ -519,6 +531,28 @@ class EventController extends Controller
         $file = null;
 
         
+        // Handle image data if provided
+        if ($request->hasFile('details_image')) {
+            $file = $request->file('details_image');
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $parsed = GeminiUtils::parseEvent($role, $details, $file);
+
+        return response()->json($parsed);
+    }
+
+    public function guestParse(Request $request, $subdomain)
+    {
+        // Check if there's a pending request in session
+        if (!session('pending_request') || session('pending_request') !== $subdomain) {
+            abort(404);
+        }
+
+        $details = request()->input('event_details');
+        $file = null;
+
         // Handle image data if provided
         if ($request->hasFile('details_image')) {
             $file = $request->file('details_image');
@@ -558,8 +592,54 @@ class EventController extends Controller
         ]);
     }
 
+    public function guestImport(Request $request, $subdomain)
+    {
+        // Check if there's a pending request in session
+        if (!session('pending_request') || session('pending_request') !== $subdomain) {
+            abort(404);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+                
+        $event = $this->eventRepo->saveEvent($role, $request, null);
+
+        if ($request->social_image) {
+            $file = new \Illuminate\Http\UploadedFile($request->social_image, basename($request->social_image));
+            $filename = strtolower('flyer_' . Str::random(32)) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+
+            $event->flyer_image_url = $filename;
+            $event->save();
+        }
+
+        // Clear the pending request session
+        session()->forget('pending_request');
+
+        return response()->json([
+            'success' => true,
+            'event' => [
+                'view_url' => $event->getGuestUrl($subdomain),
+                'message' => __('messages.event_created_guest'),
+            ]
+        ]);
+    }
+
     public function uploadImage(Request $request, $subdomain)
     {
+        $file = $request->file('image');
+        $filename = '/tmp/event_' . strtolower(Str::random(32)) . '.' . $file->getClientOriginalExtension();
+        move_uploaded_file($file->getPathname(), $filename);
+
+        return response()->json(['success' => true, 'filename' => $filename]);
+    }
+
+    public function guestUploadImage(Request $request, $subdomain)
+    {
+        // Check if there's a pending request in session
+        if (!session('pending_request') || session('pending_request') !== $subdomain) {
+            abort(404);
+        }
+
         $file = $request->file('image');
         $filename = '/tmp/event_' . strtolower(Str::random(32)) . '.' . $file->getClientOriginalExtension();
         move_uploaded_file($file->getPathname(), $filename);

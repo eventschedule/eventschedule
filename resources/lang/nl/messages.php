@@ -177,6 +177,8 @@ return [
     'expire_unpaid_tickets' => 'Niet-betaalde tickets laten verlopen',
     'after_number_of_hours' => 'Na aantal uren',
     'create_account' => 'Account aanmaken',
+    'continue_as_guest' => 'Doorgaan als Gast',
+    'event_created_guest' => 'Evenement succesvol aangemaakt! Je kunt het nu bekijken in de agenda.',
     'sold' => 'Verkocht',
     'sold_out' => 'Uitverkocht',
     'event' => 'Evenement',

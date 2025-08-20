@@ -99,6 +99,8 @@ return [
     'date' => 'Date',
     'social_links' => 'Social Links',
     'create_account' => 'Create Account',
+    'continue_as_guest' => 'Continue as Guest',
+    'event_created_guest' => 'Event created successfully! You can now view it on the schedule.',
     'create_schedule' => 'Create Schedule',
     'create_event' => 'Create Event',
     'add' => 'Add',
@@ -541,4 +543,5 @@ return [
     'skip' => 'Skip',
     'require_approval' => 'Require Approval',
     'actions' => 'Actions',
+    'or' => 'or',
 ];

@@ -178,6 +178,8 @@ return [
     'expire_unpaid_tickets' => 'Expirar ingressos não pagos',
     'after_number_of_hours' => 'Após um número de horas',
     'create_account' => 'Criar conta',
+    'continue_as_guest' => 'Continuar como Convidado',
+    'event_created_guest' => 'Evento criado com sucesso! Agora você pode vê-lo na agenda.',
     'sold' => 'Vendido',
     'sold_out' => 'Esgotado',
     'event' => 'Evento',

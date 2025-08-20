@@ -317,6 +317,8 @@ return [
     'expire_unpaid_tickets' => 'انتهاء صلاحية التذاكر غير المدفوعة',
     'after_number_of_hours' => 'بعد عدد من الساعات',
     'create_account' => 'إنشاء حساب',
+    'continue_as_guest' => 'المتابعة كضيف',
+    'event_created_guest' => 'تم إنشاء الحدث بنجاح! يمكنك الآن مشاهدته في الجدول الزمني.',
     'sold' => 'تم البيع',
     'sold_out' => 'نفذت الكمية',
     'event' => 'الحدث',

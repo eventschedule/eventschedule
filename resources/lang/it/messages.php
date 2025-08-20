@@ -180,6 +180,8 @@ return [
     'expire_unpaid_tickets' => 'Scadenza dei biglietti non pagati',
     'after_number_of_hours' => 'Dopo un numero di ore',
     'create_account' => 'Crea account',
+    'continue_as_guest' => 'Continua come Ospite',
+    'event_created_guest' => 'Evento creato con successo! Ora puoi vederlo nel programma.',
     'sold' => 'Venduto',
     'sold_out' => 'Esaurito',
     'event' => 'Evento',
