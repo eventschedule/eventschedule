@@ -177,6 +177,10 @@ if (config('app.hosted')) {
 } else {
     Route::get('/{subdomain}/request', [RoleController::class, 'request'])->name('role.request');
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
+    Route::get('/{subdomain}/guest-import', [EventController::class, 'showGuestImport'])->name('event.guest_import');
+    Route::post('/{subdomain}/guest-import', [EventController::class, 'guestImport'])->name('event.guest_import');
+    Route::post('/{subdomain}/guest-parse', [EventController::class, 'guestParse'])->name('event.guest_parse');
+    Route::post('/{subdomain}/guest-upload-image', [EventController::class, 'guestUploadImage'])->name('event.guest_upload_image');
     Route::post('/{subdomain}/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
     Route::get('/{subdomain}/checkout/success/{sale_id}', [TicketController::class, 'success'])->name('checkout.success');
     Route::get('/{subdomain}/checkout/cancel/{sale_id}', [TicketController::class, 'cancel'])->name('checkout.cancel');

@@ -319,6 +319,8 @@ return [
     'expire_unpaid_tickets' => 'Unbezahlte Tickets verfallen lassen',
     'after_number_of_hours' => 'Nach Anzahl der Stunden',
     'create_account' => 'Konto erstellen',
+    'continue_as_guest' => 'Als Gast fortfahren',
+    'event_created_guest' => 'Veranstaltung erfolgreich erstellt! Sie können sie jetzt im Zeitplan ansehen.',
     'sold' => 'Verkauft',
     'sold_out' => 'Ausverkauft',
     'event' => 'Veranstaltung',

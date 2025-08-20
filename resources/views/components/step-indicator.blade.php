@@ -79,10 +79,32 @@
                     <div class="text-sm font-semibold {{ $stepNumber <= $currentStep ? 'text-gray-900' : 'text-gray-500' }} transition-colors duration-300 leading-tight">
                         {{ __($steps[$stepNumber]['title']) }}
                     </div>
+                    
                 </div>
             </div>
-        @endfor
+        @endfor        
     </div>
+
+
+    <!-- Continue as Guest option for step 1 -->
+    @if (session('pending_request') && ! auth()->user())
+    <div class="mt-6 mb-2 flex items-start justify-center space-x-6 relative z-10">
+        <div class="flex flex-col items-center">
+            <!-- Or divider -->
+            <div class="flex items-center mb-5 w-full min-w-72">
+                <div class="flex-1 border-t border-gray-300"></div>
+                <span class="px-3 text-xs text-gray-500 font-medium">{{ __('messages.or') }}</span>
+                <div class="flex-1 border-t border-gray-300"></div>
+            </div>
+            
+            <a href="{{ route('event.guest_import', ['subdomain' => session('pending_request')]) }}" 
+                class="w-full inline-flex items-center justify-center px-3 py-2 text-xs font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 hover:text-blue-700 transition-colors duration-200">
+                {{ __('messages.continue_as_guest') }}
+            </a>
+        </div>
+    </div>
+    @endif
+
     
 </div>
 

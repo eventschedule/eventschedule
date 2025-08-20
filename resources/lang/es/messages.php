@@ -316,6 +316,8 @@ return [
     'expire_unpaid_tickets' => 'Expirar entradas no pagadas',
     'after_number_of_hours' => 'Después de un número de horas',
     'create_account' => 'Crear cuenta',
+    'continue_as_guest' => 'Continuar como Invitado',
+    'event_created_guest' => '¡Evento creado exitosamente! Ahora puedes verlo en el horario.',
     'sold' => 'Vendido',
     'sold_out' => 'Agotado',
     'event' => 'Evento',

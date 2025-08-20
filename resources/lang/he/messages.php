@@ -173,6 +173,8 @@ return [
     'expire_unpaid_tickets' => 'פג תוקף הכרטיסים שלא שולמו',
     'after_number_of_hours' => 'לאחר מספר שעות',
     'create_account' => 'צור חשבון',
+    'continue_as_guest' => 'המשך כאורח',
+    'event_created_guest' => 'האירוע נוצר בהצלחה! עכשיו תוכל לראות אותו בלוח הזמנים.',
     'sold' => 'נמכר',
     'sold_out' => 'אזל מהמלאי',
     'event' => 'אירוע',
