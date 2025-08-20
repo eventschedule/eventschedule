@@ -30,6 +30,10 @@ class EventRepo
             $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
         }
 
+        if (! $user) {
+            $user = $currentRole->user;
+        }
+
         if ($request->venue_address1) {
             if (! $venue) {
                 $venue = new Role;
@@ -254,7 +258,7 @@ class EventRepo
         $curatorGroups = $request->input('curator_groups', []);
         
         foreach ($roles as $role) {
-            if ($user->isMember($role->subdomain) || ($role->accept_requests && ! $role->require_approval)) {
+            if ((auth()->user() && $user->isMember($role->subdomain)) || ($role->accept_requests && ! $role->require_approval)) {
                 $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);            
             }
                         

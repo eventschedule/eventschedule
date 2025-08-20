@@ -626,7 +626,7 @@
                     const eventName = parsed.event_name;
                     
                     // Send request to server
-                    const response = await fetch('{{ route("event.import", ["subdomain" => $role->subdomain]) }}', {
+                    const response = await fetch('{{ isset($isGuest) && $isGuest ? route("event.guest_import", ["subdomain" => $role->subdomain]) : route("event.import", ["subdomain" => $role->subdomain]) }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
