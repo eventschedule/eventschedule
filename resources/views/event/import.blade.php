@@ -44,9 +44,9 @@
             <div class="max-w-none">
                 <!-- Main desktop grid -->
                 <div class="lg:grid lg:grid-cols-2 lg:gap-6">
-                    <!-- Left column: Textarea and Form -->
+                    <!-- Left column: Combined Textarea and Image -->
                     <div>
-                        <!-- Textarea section -->
+                        <!-- Combined textarea and image section -->
                         <div class="lg:mb-0 mb-4">
                             <x-input-label for="event_details" :value="__('messages.event_details')" />
                             <div class="relative">
@@ -56,8 +56,51 @@
                                     v-model="eventDetails"
                                     v-bind:readonly="savedEvent"
                                     @input="handleInputChange"
-                                    @paste="handlePaste" autofocus {{ config('services.google.gemini_key') ? '' : 'disabled' }}
-                                    class="mt-1 block w-full pr-12 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
+                                    @paste="handlePaste" 
+                                    @dragover.prevent="dragOverDetails"
+                                    @dragleave.prevent="dragLeaveDetails"
+                                    @drop.prevent="handleDetailsImageDrop"
+                                    autofocus {{ config('services.google.gemini_key') ? '' : 'disabled' }}
+                                    :class="['mt-1 block w-full pr-24 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm transition-all duration-200', 
+                                        isDraggingDetails ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 ring-2 ring-blue-200 dark:ring-blue-800' : '']"
+                                    placeholder="{{ __('messages.drag_drop_image_or_type_text') }}"></textarea>
+                                
+                                <!-- Image preview overlay -->
+                                <div v-if="detailsImage" 
+                                     class="absolute bottom-3 left-3 w-16 h-16 rounded-md overflow-hidden border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm">
+                                    <img v-if="detailsImageUrl" 
+                                         :src="detailsImageUrl" 
+                                         class="object-cover w-full h-full" 
+                                         alt="Event details image preview">
+                                    <div v-else class="flex items-center justify-center h-full text-gray-400">
+                                        <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                                            <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </div>
+                                    
+                                    <!-- Remove image button -->
+                                    <button 
+                                        @click="removeDetailsImage"
+                                        type="button"
+                                        class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-colors"
+                                        title="{{ __('messages.remove_image') }}">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                
+                                <!-- Plus icon button for file picker -->
+                                <button 
+                                    v-if="!detailsImage"
+                                    type="button"
+                                    @click="openDetailsFileSelector"
+                                    class="absolute right-16 bottom-3 p-2 rounded-md bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-600 dark:text-gray-400 transition-colors"
+                                    title="{{ __('messages.add_image') }}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                </button>
                                 
                                 <!-- Submit button with up arrow -->
                                 <button 
@@ -76,6 +119,14 @@
                                 </button>
                             </div>
                             <x-input-error class="mt-2" :messages="$errors->get('event_details')" />
+
+                            <!-- Image attached indicator -->
+                            <div v-if="detailsImage" class="mt-2 flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <span>{{ __('messages.image_attached') }} - {{ __('messages.continue_typing') }}</span>
+                            </div>
 
                             @if (! config('services.google.gemini_key'))
                                 <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
@@ -103,67 +154,52 @@
                         </div>
                     </div>
 
-                    <!-- Right column: Image drop zone for event details -->
+                    <!-- Right column: Instructions and help -->
                     <div class="mb-4 lg:mb-0">
-                        <div v-if="detailsImage"
-                                class="relative rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800" style="min-height: 200px;">
-                            <img v-if="detailsImageUrl" :src="detailsImageUrl" class="object-contain w-full h-full" alt="Event details image">
-                            <div v-else class="flex items-center justify-center h-full text-gray-500">
-                                <span>Image preview not available</span>
+                        <div class="p-6 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+                                {{ __('messages.how_to_import') }}
+                            </h3>
+                            <div class="space-y-3 text-sm text-gray-600 dark:text-gray-400">
+                                <div class="flex items-start gap-3">
+                                    <div class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-medium">
+                                        1
+                                    </div>
+                                    <p>{{ __('messages.type_or_paste_event_details') }}</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <div class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-medium">
+                                        2
+                                    </div>
+                                    <p>{{ __('messages.or_drag_drop_image') }}</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <div class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-medium">
+                                        3
+                                    </div>
+                                    <p>{{ __('messages.click_submit_to_parse') }}</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <div class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-medium">
+                                        4
+                                    </div>
+                                    <p>{{ __('messages.review_and_save_events') }}</p>
+                                </div>
                             </div>
                             
-                            <!-- Remove image button -->
-                            <button v-if="!isLoading"
-                                    @click="removeDetailsImage()"
-                                    type="button"
-                                    class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <!-- Drop zone -->
-                        <div v-else
-                                @dragover.prevent="dragOverDetails"
-                                @dragleave.prevent="dragLeaveDetails"
-                                @drop.prevent="handleDetailsImageDrop"
-                                @click="openDetailsFileSelector"
-                                v-bind:class="['flex items-center justify-center rounded-lg border-2 border-dashed cursor-pointer', 
-                                        isDraggingDetails ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-300 dark:border-gray-600']"
-                                style="min-height: 200px;">
-                            <div class="text-center py-10">
-                                <!-- Show loading spinner when uploading -->
-                                <template v-if="isUploadingDetailsImage">
-                                    <div class="relative mx-auto w-12 h-12">
-                                        <div class="w-12 h-12 rounded-full bg-blue-500/30"></div>
-                                        <div class="absolute top-0 left-0 w-12 h-12 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"></div>
-                                    </div>
-                                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                        {{ __('messages.uploading') }}...
-                                    </p>
-                                </template>
-                                <!-- Default upload icon and text -->
-                                <template v-else>
-                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-md">
+                                <div class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                        {{ __('messages.drag_drop_image') }}
-                                    </p>
-                                    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                                        {{ __('messages.or_paste_from_clipboard') }}
-                                    </p>
-                                </template>
+                                    <div class="text-sm text-blue-800 dark:text-blue-200">
+                                        <p class="font-medium mb-1">{{ __('messages.tip') }}</p>
+                                        <p>{{ __('messages.you_can_combine_text_and_images') }}</p>
+                                        <p class="mt-1 text-xs">{{ __('messages.drag_over_textarea') }}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                        <!-- Hidden file input -->
-                        <input type="file"
-                                ref="detailsFileInput"
-                                @change="handleDetailsFileSelect"
-                                accept="image/*"
-                                class="hidden">
                     </div>
                 </div>
 
@@ -197,6 +233,13 @@
             </div>
         </div>
         </div>
+
+        <!-- Hidden file input for details image -->
+        <input type="file"
+                ref="detailsFileInput"
+                @change="handleDetailsFileSelect"
+                accept="image/*"
+                class="hidden">
 
         <!-- Events cards - Moved outside the main div -->
         <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="space-y-6">
@@ -1095,12 +1138,15 @@
                 try {
                     this.detailsImage = file;
                     
-                    // Use FileReader to create a data URL instead of a blob URL
+                    // Use FileReader to create a data URL for preview
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         this.detailsImageUrl = e.target.result; // This will be a data URL
                     };
                     reader.readAsDataURL(file);
+                    
+                    // Clear any previous error messages
+                    this.errorMessage = null;
                     
                     // Don't auto-submit - user must click the submit button
                 } catch (error) {
