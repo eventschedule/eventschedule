@@ -1,6 +1,7 @@
 <script src="{{ asset('js/vue.global.prod.js') }}"></script>
 
 <div class="flex items-center justify-between pt-2 my-4">
+    @if (auth()->user())
     @if (is_rtl())
         <!-- RTL Layout: Cancel button on left, title on right -->
         <div class="flex items-center gap-3">
@@ -13,11 +14,6 @@
             <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100x sm:truncate sm:text-2xl sm:tracking-tight">
                 {{ __('messages.import_event') }}
             </h2>
-            @if (isset($isGuest) && $isGuest)
-                <h3 class="text-gray-500 dark:text-gray-400">
-                    {{ $role->name }}
-                </h3>
-            @endif
         </div>
     @else
         <!-- LTR Layout: Title on left, cancel button on right -->
@@ -25,11 +21,6 @@
             <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100x sm:truncate sm:text-2xl sm:tracking-tight">
                 {{ __('messages.import_event') }}
             </h2>
-            @if (isset($isGuest) && $isGuest)
-                <h3 class="text-gray-500 dark:text-gray-400">
-                    {{ $role->name }}
-                </h3>
-            @endif
         </div>
 
         <div class="flex items-center gap-3">
@@ -37,6 +28,7 @@
                 {{ __('messages.cancel') }}
             </button>
         </div>
+    @endif
     @endif
 </div>
 
