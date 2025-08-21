@@ -533,9 +533,14 @@
                 
                 // If createAccount is checked, also validate user fields
                 if (this.createAccount) {
+                    // Email validation regex
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    const isEmailValid = emailRegex.test(this.userEmail.trim());
+                    
                     return eventFieldsValid && 
                            this.userName.trim() && 
                            this.userEmail.trim() && 
+                           isEmailValid &&
                            this.userPassword;
                 }
                 
