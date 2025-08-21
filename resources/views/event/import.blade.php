@@ -41,14 +41,12 @@
 
         <div v-if="!preview || !preview.parsed || preview.parsed.length === 0">
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg">
-            <div class="max-w-none">
-                <!-- Main desktop grid -->
-                <div class="lg:grid lg:grid-cols-2 lg:gap-6">
-                    <!-- Left column: Combined Textarea and Image -->
-                    <div>
+            <div class="max-w-3xl mx-auto">
+                <!-- Centered single column layout -->
+                <div class="flex justify-center">
+                    <div class="w-full max-w-2xl md:max-w-xl lg:max-w-2xl">
                         <!-- Combined textarea and image section -->
-                        <div class="lg:mb-0 mb-4">
-                            <x-input-label for="event_details" :value="__('messages.event_details')" />
+                        <div class="mb-4">
                             <div class="relative">
                                 <textarea id="event_details" 
                                     ref="eventDetails"
@@ -164,11 +162,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Right column: Instructions and help -->
-                    <div class="mb-4 lg:mb-0">
-                        <!-- Help section removed as requested -->
                     </div>
                 </div>
 
