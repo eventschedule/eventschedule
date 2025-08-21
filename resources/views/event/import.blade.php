@@ -46,12 +46,12 @@
                 <div class="flex justify-center">
                     <div class="w-full max-w-2xl md:max-w-xl lg:max-w-2xl">
                         <!-- Combined textarea and image section -->
-                        <div class="mb-4">
+                        <div class="mb-1">
                             <div class="relative">
                                 <textarea id="event_details" 
                                     ref="eventDetails"
                                     name="event_details" 
-                                    rows="6"
+                                    rows="7"
                                     v-model="eventDetails"
                                     v-bind:readonly="savedEvent"
                                     @input="handleInputChange"
@@ -110,10 +110,13 @@
                                 
                                 <!-- Plus icon button for file picker -->
                                 <button 
-                                    v-if="!detailsImage"
                                     type="button"
                                     @click="openDetailsFileSelector"
-                                    class="absolute right-16 bottom-3 p-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white transition-colors"
+                                    :disabled="isLoading || detailsImage"
+                                    :class="['absolute right-16 bottom-3 p-2 rounded-md transition-colors', 
+                                        (isLoading || detailsImage)
+                                            ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed' 
+                                            : 'bg-blue-500 hover:bg-blue-600 text-white cursor-pointer']"
                                     title="{{ __('messages.add_image') }}">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -122,12 +125,11 @@
                                 
                                 <!-- Submit button with up arrow -->
                                 <button 
-                                    v-if="!isLoading"
                                     type="button"
                                     @click="handleSubmit"
-                                    :disabled="!canSubmit"
+                                    :disabled="!canSubmit || isLoading"
                                     :class="['absolute right-5 bottom-3 p-2 rounded-md transition-all duration-200', 
-                                        canSubmit 
+                                        canSubmit && !isLoading
                                             ? 'bg-blue-500 hover:bg-blue-600 text-white cursor-pointer' 
                                             : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed']"
                                     title="{{ __('messages.submit') }}">
