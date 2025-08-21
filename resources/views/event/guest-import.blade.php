@@ -6,7 +6,7 @@
 
   <main>
     <div>
-      <div class="container mx-auto pt-7 pb-20 px-5">
+      <div class="container mx-auto pt-7 pb-20 px-5 max-w-2xl">
         <div class="bg-white dark:bg-gray-800 mb-4 {{ !$role->header_image && !$role->header_image_url && $role->profile_image_url ? 'pt-16' : '' }} rounded-lg shadow-md">
           <div
             class="relative before:block before:absolute before:bg-[#00000033] before:-inset-0"
