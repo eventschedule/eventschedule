@@ -64,7 +64,7 @@
                                     type="button"
                                     @click="handleSubmit"
                                     :disabled="!canSubmit"
-                                    :class="['absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-md transition-all duration-200', 
+                                    :class="['absolute right-5 bottom-3 p-2 rounded-md transition-all duration-200', 
                                         canSubmit 
                                             ? 'bg-blue-500 hover:bg-blue-600 text-white cursor-pointer' 
                                             : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed']"
