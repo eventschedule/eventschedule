@@ -39,7 +39,8 @@
 
     @csrf
 
-        <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg">
+        <div v-if="!preview || !preview.parsed || preview.parsed.length === 0">
+            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg">
             <div class="max-w-none">
                 <!-- Main desktop grid -->
                 <div class="lg:grid lg:grid-cols-2 lg:gap-6">
@@ -82,39 +83,12 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 mt-4">
-                            @if (auth()->user() && auth()->user()->isAdmin())
-                            <div class="flex items-center mb-3 sm:mb-0">
-                                <input type="checkbox" 
-                                        id="show_all_fields" 
-                                        v-model="showAllFields" 
-                                        @change="saveShowAllFieldsPreference"
-                                        class="rounded border-gray-300 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
-                                <label for="show_all_fields" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                    {{ __('messages.show_all_fields') }}
-                                </label>
-                            </div>
-                            @else
-                            <div></div>
-                            @endif
-
-                            <!-- Action buttons - now includes Save All -->
-                            <div class="flex gap-2 self-end sm:self-auto">
-                                <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                                    {{ __('messages.clear') }}
-                                </button>
-                                <button @click="handleSaveAll" v-if="{{ request()->has('automate') ? 'true' : 'false' }} || preview.parsed.length > 1" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                                    {{ __('messages.save_all') }}
-                                </button>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Right column: Image drop zone for event details -->
                     <div class="mb-4 lg:mb-0">
                         <div v-if="detailsImage"
-                                class="relative h-full rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                                class="relative rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800" style="min-height: 200px;">
                             <img v-if="detailsImageUrl" :src="detailsImageUrl" class="object-contain w-full h-full" alt="Event details image">
                             <div v-else class="flex items-center justify-center h-full text-gray-500">
                                 <span>Image preview not available</span>
@@ -136,8 +110,9 @@
                                 @dragleave.prevent="dragLeaveDetails"
                                 @drop.prevent="handleDetailsImageDrop"
                                 @click="openDetailsFileSelector"
-                                v-bind:class="['h-full flex items-center justify-center rounded-lg border-2 border-dashed cursor-pointer', 
-                                        isDraggingDetails ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-300 dark:border-gray-600']">
+                                v-bind:class="['flex items-center justify-center rounded-lg border-2 border-dashed cursor-pointer', 
+                                        isDraggingDetails ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-300 dark:border-gray-600']"
+                                style="min-height: 200px;">
                             <div class="text-center py-10">
                                 <!-- Show loading spinner when uploading -->
                                 <template v-if="isUploadingDetailsImage">
@@ -174,6 +149,34 @@
                 </div>
 
             </div>
+        </div>
+
+        <!-- Show All Fields and Save All buttons when events are parsed -->
+        <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg mb-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                @if (auth()->user() && auth()->user()->isAdmin())
+                <div class="flex items-center mb-3 sm:mb-0">
+                    <input type="checkbox" 
+                            id="show_all_fields" 
+                            v-model="showAllFields" 
+                            @change="saveShowAllFieldsPreference"
+                            class="rounded border-gray-300 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                    <label for="show_all_fields" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                        {{ __('messages.show_all_fields') }}
+                    </label>
+                </div>
+                @else
+                <div></div>
+                @endif
+
+                <!-- Action buttons - now includes Save All -->
+                <div class="flex gap-2 self-end sm:self-auto">
+                    <button @click="handleSaveAll" v-if="{{ request()->has('automate') ? 'true' : 'false' }} || preview.parsed.length > 1" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                        {{ __('messages.save_all') }}
+                    </button>
+                </div>
+            </div>
+        </div>
         </div>
 
         <!-- Events cards - Moved outside the main div -->
@@ -267,6 +270,9 @@
                                 <button @click="handleRemoveEvent(idx)" v-if="preview.parsed.length > 1" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                                     {{ __('messages.remove') }}
                                 </button>
+                                <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                    {{ __('messages.clear') }}
+                                </button>
                                 <button @click="handleSave(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
                                     {{ __('messages.save') }}
                                 </button>
@@ -356,7 +362,6 @@
                 </div>
             </div>
         </div>
-    </div>
 
 </form>
 
