@@ -1,6 +1,6 @@
 <script src="{{ asset('js/vue.global.prod.js') }}"></script>
 
-<div class="flex items-center justify-between pt-2 my-4">
+<div class="flex justify-between items-center gap-6 my-6">
     @if (auth()->user())
     @if (is_rtl())
         <!-- RTL Layout: Cancel button on left, title on right -->
