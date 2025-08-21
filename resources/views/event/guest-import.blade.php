@@ -37,7 +37,7 @@
             <div style="height: 42px;"></div>
             @endif
     
-            <div class="flex flex-col flex-row justify-between items-center gap-6 mb-5">
+            <div class="flex justify-between items-center gap-6 mb-5">
             @if (is_rtl())
                 <!-- RTL Layout: Cancel button on left, title on right -->
                 <div class="flex items-center gap-3">
