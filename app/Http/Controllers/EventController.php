@@ -531,7 +531,6 @@ class EventController extends Controller
                     session()->put('translate', true);
                 } else {
                     session()->forget('translate');
-                    return redirect(request()->url());
                 }
             } else {
                 // If invalid language code, redirect to the same URL without the lang parameter
