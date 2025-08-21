@@ -7,7 +7,7 @@
   <main>
     <div>
       <div class="container mx-auto pt-7 pb-10 px-5">
-        <div class="bg-[#F5F9FE] rounded-2xl mb-6 {{ !$role->header_image && !$role->header_image_url && $role->profile_image_url ? 'pt-16' : '' }}">
+        <div class="bg-[#F5F9FE] rounded-xl mb-6 {{ !$role->header_image && !$role->header_image_url && $role->profile_image_url ? 'pt-16' : '' }}">
           <div
             class="relative before:block before:absolute before:bg-[#00000033] before:-inset-0"
           >
@@ -26,9 +26,9 @@
           </div>
           <div class="px-6 lg:px-16 pb-4 relative z-10">
             @if ($role->profile_image_url)
-            <div class="rounded-2xl w-[130px] h-[130px] -mt-[100px] -ml-2 mb-6 bg-[#F5F9FE] flex items-center justify-center">
+            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] -ml-2 mb-6 bg-[#F5F9FE] flex items-center justify-center">
               <img
-                class="rounded-2xl w-[120px] h-[120px] object-cover"
+                class="rounded-lg w-[120px] h-[120px] object-cover"
                 src="{{ $role->profile_image_url }}"
                 alt="person"
               />
@@ -282,7 +282,7 @@
         @foreach($upcomingEventsWithVideos as $eventData)
           <!-- Event: {{ $eventData['event']->name }} - {{ $eventData['event']->starts_at }} -->
         @endforeach
-        <div class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6">
+        <div class="bg-[#F5F9FE] rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6">
           <!-- Carousel Container -->
           <div class="relative group">
             <!-- Carousel Track -->
@@ -341,7 +341,7 @@
 
         @if($role->translatedDescription())
         <div
-          class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-6 flex flex-col gap-4 mb-6 {{ $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}"
+          class="bg-[#F5F9FE] rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-4 mb-6 {{ $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}"
         >
           <div class="text-[32px] font-semibold leading-10 text-[#151B26]">
             {{ __('messages.about') }}
@@ -353,7 +353,7 @@
         @endif
 
       <div 
-        class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6"
+        class="bg-[#F5F9FE] rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6"
       >  
         @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule')])
       </div>
@@ -369,7 +369,7 @@
         @endphp
         @if ($videoCount > 0)
           <div
-              class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6"
+              class="bg-[#F5F9FE] rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6"
             >
               <div class="grid grid-cols-1 md:grid-cols-{{ $gridCols }} gap-8">
               @foreach ($videoLinks as $link)
@@ -386,7 +386,7 @@
 
       @if ($role->social_links && $role->social_links != '[]')
       <div 
-        class="bg-[#F5F9FE] rounded-2xl px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6"
+        class="bg-[#F5F9FE] rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6"
       >
         <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] mb-6">
           {{ __('messages.social_media') }}
