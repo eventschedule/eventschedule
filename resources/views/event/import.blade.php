@@ -61,6 +61,7 @@
                                 
                                 <!-- Submit button with up arrow -->
                                 <button 
+                                    v-if="!isLoading"
                                     type="button"
                                     @click="handleSubmit"
                                     :disabled="!canSubmit"
@@ -112,7 +113,8 @@
                             </div>
                             
                             <!-- Remove image button -->
-                            <button @click="removeDetailsImage()"
+                            <button v-if="!isLoading"
+                                    @click="removeDetailsImage()"
                                     type="button"
                                     class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -324,7 +326,8 @@
                                         alt="Event preview image">
                                 
                                 <!-- Remove image button -->
-                                <button @click="removeImage(idx)" 
+                                <button v-if="!isLoading"
+                                        @click="removeImage(idx)" 
                                         type="button"
                                         v-bind:disabled="savedEvents[idx]"
                                         class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
