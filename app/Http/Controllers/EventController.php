@@ -522,6 +522,10 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
+        if ($request->lang) {
+            \App::setLocale($request->lang);                    
+        }
+
         return view('event.guest-import', ['role' => $role, 'isGuest' => true]);
     }
 
