@@ -130,32 +130,6 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|availability|requests|profile|followers|team|plan|videos');
 
     Route::post('/{subdomain}/upload_image', [EventController::class, 'uploadImage'])->name('event.upload_image');
-    Route::get('/tmp/event-image/{filename?}', function ($filename = null) {
-        if (!$filename) {
-            abort(404);
-        }
-        
-        // Prevent path traversal attacks
-        $filename = basename($filename);
-        
-        // Only allow alphanumeric characters, hyphens, underscores, and dots
-        if (!preg_match('/^[a-zA-Z0-9._-]+$/', $filename)) {
-            abort(404);
-        }
-        
-        // Ensure filename starts with 'event_' prefix for security
-        if (!str_starts_with($filename, 'event_')) {
-            abort(404);
-        }
-    
-        $path = '/tmp/' . $filename;
-        
-        if (file_exists($path)) {
-            return response()->file($path);
-        }
-
-        abort(404);
-    })->name('event.tmp_image');
 
     Route::get('/api/documentation', function () {
         return view('api.documentation');
@@ -173,6 +147,33 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::delete('/admin/blog/{blogPost}', [BlogController::class, 'destroy'])->name('blog.destroy');
     Route::post('/admin/blog/generate-content', [BlogController::class, 'generateContent'])->name('blog.generate-content');
 });
+
+Route::get('/tmp/event-image/{filename?}', function ($filename = null) {
+    if (!$filename) {
+        abort(404);
+    }
+    
+    // Prevent path traversal attacks
+    $filename = basename($filename);
+    
+    // Only allow alphanumeric characters, hyphens, underscores, and dots
+    if (!preg_match('/^[a-zA-Z0-9._-]+$/', $filename)) {
+        abort(404);
+    }
+    
+    // Ensure filename starts with 'event_' prefix for security
+    if (!str_starts_with($filename, 'event_')) {
+        abort(404);
+    }
+
+    $path = '/tmp/' . $filename;
+    
+    if (file_exists($path)) {
+        return response()->file($path);
+    }
+
+    abort(404);
+})->name('event.tmp_image');
 
 if (config('app.hosted')) {
     Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app).*'])->group(function () {
