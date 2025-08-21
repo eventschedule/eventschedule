@@ -179,11 +179,11 @@
         <!-- Events cards - Moved outside the main div -->
         <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="space-y-6">
             <div v-for="(event, idx) in preview.parsed" :key="idx" 
-                    :class="['p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg', 
+                    :class="['p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg mt-4', 
                             savedEvents[idx] ? 'border-2 border-green-500 dark:border-green-600' : '']">
                 
                 <!-- Card header -->
-                <div v-if="savedEvents[idx] || saveErrors[idx]" :class="['px-4 py-3 -m-4 sm:-m-8 mb-4 sm:mb-8 flex justify-between items-center rounded-t-lg', 
+                <div v-if="savedEvents[idx] || saveErrors[idx]" :class="['px-4 py-3 -m-4 sm:-m-8 mt-4 sm:mb-4 flex justify-between items-center rounded-t-lg', 
                                 savedEvents[idx] ? 'bg-green-50 dark:bg-green-900/30' : 'bg-red-50 dark:bg-red-900/30']">
                     <h3 class="font-medium text-lg">
                         <span v-if="savedEvents[idx]" class="ml-2 text-sm text-green-600 dark:text-green-400">
