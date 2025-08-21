@@ -51,15 +51,18 @@
                             <x-input-label for="event_details" :value="__('messages.event_details')" />
                             <div class="relative">
                                 <textarea id="event_details" 
+                                    ref="eventDetails"
                                     name="event_details" 
                                     rows="6"
                                     v-model="eventDetails"
                                     v-bind:readonly="savedEvent"
                                     @input="handleInputChange"
                                     @paste="handlePaste" 
+                                    @dragenter.prevent="dragEnterDetails"
                                     @dragover.prevent="dragOverDetails"
                                     @dragleave.prevent="dragLeaveDetails"
                                     @drop.prevent="handleDetailsImageDrop"
+                                    @dragend="dragEndDetails"
                                     autofocus {{ config('services.google.gemini_key') ? '' : 'disabled' }}
                                     :class="['mt-1 block w-full pr-24 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm transition-all duration-200', 
                                         isDraggingDetails ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 ring-2 ring-blue-200 dark:ring-blue-800' : '']"
@@ -67,6 +70,11 @@
                                 
                                 <!-- Drop message overlay for textarea -->
                                 <div v-if="isDraggingDetails" 
+                                     @dragenter.prevent="dragEnterDetails"
+                                     @dragover.prevent="dragOverDetails"
+                                     @dragleave.prevent="dragLeaveDetails"
+                                     @drop.prevent="handleDetailsImageDrop"
+                                     @dragend="dragEndDetails"
                                      class="absolute inset-0 flex items-center justify-center bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-500 rounded-md z-10">
                                     <div class="text-center">
                                         <svg class="mx-auto h-8 w-8 text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -438,6 +446,8 @@
                 saveErrors: [],
                 isDragging: false,
                 isDraggingDetails: false,
+                dragCounter: 0,
+                dragTimeout: null,
                 showAllFields: false,
                 isCurator: {{ $role->isCurator() ? 'true' : 'false' }},
                 detailsImage: null,
@@ -457,11 +467,21 @@
             
             // Add clipboard paste event listener
             document.addEventListener('paste', this.handleClipboardPaste)
+            
+            // Add global drag end event listener to handle cancelled drag operations
+            document.addEventListener('dragend', this.handleGlobalDragEnd)
         },
         
         beforeUnmount() {
-            // Clean up event listener when component is destroyed
+            // Clean up event listeners when component is destroyed
             document.removeEventListener('paste', this.handleClipboardPaste)
+            document.removeEventListener('dragend', this.handleGlobalDragEnd)
+            
+            // Clear any pending timeouts
+            if (this.dragTimeout) {
+                clearTimeout(this.dragTimeout);
+                this.dragTimeout = null;
+            }
         },
 
         updated() {
@@ -1062,12 +1082,53 @@
 
             dragOverDetails(e) {
                 e.preventDefault();
-                this.isDraggingDetails = true;
+                // Don't change state here, just prevent default
+            },
+
+            dragEnterDetails(e) {
+                e.preventDefault();
+                // Only increment counter if we're entering the main textarea area
+                // Avoid counting when entering child elements like buttons or image previews
+                if (e.target === this.$refs.eventDetails) {
+                    this.dragCounter++;
+                    this.isDraggingDetails = true;
+                }
             },
 
             dragLeaveDetails(e) {
                 e.preventDefault();
+                this.dragCounter--;
+                // Only hide the drop zone when we've actually left the entire drop area
+                if (this.dragCounter <= 0) {
+                    this.dragCounter = 0;
+                    // Add a small delay to prevent flickering
+                    if (this.dragTimeout) {
+                        clearTimeout(this.dragTimeout);
+                    }
+                    this.dragTimeout = setTimeout(() => {
+                        this.isDraggingDetails = false;
+                    }, 50);
+                }
+            },
+
+            dragEndDetails(e) {
+                // Reset drag state when drag operation ends
                 this.isDraggingDetails = false;
+                this.dragCounter = 0;
+                if (this.dragTimeout) {
+                    clearTimeout(this.dragTimeout);
+                    this.dragTimeout = null;
+                }
+            },
+
+            handleGlobalDragEnd(e) {
+                // Reset drag state when any drag operation ends globally
+                this.isDraggingDetails = false;
+                this.dragCounter = 0;
+                if (this.dragTimeout) {
+                    clearTimeout(this.dragTimeout);
+                    this.dragTimeout = null;
+                }
             },
 
             openDetailsFileSelector() {
@@ -1086,6 +1147,11 @@
 
             async handleDetailsImageDrop(e) {
                 this.isDraggingDetails = false;
+                this.dragCounter = 0;
+                if (this.dragTimeout) {
+                    clearTimeout(this.dragTimeout);
+                    this.dragTimeout = null;
+                }
                 const files = e.dataTransfer.files;
                 if (files.length > 0) {
                     await this.uploadDetailsImage(files[0]);
