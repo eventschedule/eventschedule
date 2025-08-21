@@ -49,14 +49,31 @@
                         <!-- Textarea section -->
                         <div class="lg:mb-0 mb-4">
                             <x-input-label for="event_details" :value="__('messages.event_details')" />
-                            <textarea id="event_details" 
-                                name="event_details" 
-                                rows="6"
-                                v-model="eventDetails"
-                                v-bind:readonly="savedEvent"
-                                @input="debouncedPreview"
-                                @paste="handlePaste" autofocus {{ config('services.google.gemini_key') ? '' : 'disabled' }}
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
+                            <div class="relative">
+                                <textarea id="event_details" 
+                                    name="event_details" 
+                                    rows="6"
+                                    v-model="eventDetails"
+                                    v-bind:readonly="savedEvent"
+                                    @input="handleInputChange"
+                                    @paste="handlePaste" autofocus {{ config('services.google.gemini_key') ? '' : 'disabled' }}
+                                    class="mt-1 block w-full pr-12 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
+                                
+                                <!-- Submit button with up arrow -->
+                                <button 
+                                    type="button"
+                                    @click="handleSubmit"
+                                    :disabled="!canSubmit"
+                                    :class="['absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-md transition-all duration-200', 
+                                        canSubmit 
+                                            ? 'bg-blue-500 hover:bg-blue-600 text-white cursor-pointer' 
+                                            : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed']"
+                                    title="{{ __('messages.submit') }}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                    </svg>
+                                </button>
+                            </div>
                             <x-input-error class="mt-2" :messages="$errors->get('event_details')" />
 
                             @if (! config('services.google.gemini_key'))
@@ -399,13 +416,7 @@
 
     const { createApp } = Vue
 
-    function debounce(fn, delay) {
-        let timeoutId
-        return function (...args) {
-            clearTimeout(timeoutId)
-            timeoutId = setTimeout(() => fn.apply(this, args), delay)
-        }
-    }
+
 
     createApp({
         data() {
@@ -429,8 +440,13 @@
             }
         },
 
+        computed: {
+            canSubmit() {
+                return this.eventDetails.trim() || this.detailsImage;
+            }
+        },
+
         created() {
-            this.debouncedPreview = debounce(this.fetchPreview, 500)
             this.loadShowAllFieldsPreference()
             
             // Add clipboard paste event listener
@@ -450,6 +466,17 @@
         },
 
         methods: {
+            handleInputChange() {
+                // Just update the model, don't auto-submit
+                // The submit button will be enabled/disabled based on canSubmit computed property
+            },
+
+            handleSubmit() {
+                if (this.canSubmit) {
+                    this.fetchPreview();
+                }
+            },
+
             async fetchPreview() {
                 if (!this.eventDetails.trim() && !this.detailsImage) {
                     this.preview = null;
@@ -563,14 +590,13 @@
             },
             
             handlePaste(event) {
-                // Prevent the debounced preview from firing
+                // Prevent the default paste behavior
                 event.preventDefault()
                 // Get the pasted text
                 const pastedText = event.clipboardData.getData('text')
                 // Update the model manually
                 this.eventDetails = pastedText
-                // Call preview immediately
-                this.fetchPreview()
+                // Don't auto-submit - user must click the submit button
             },
 
             handleEdit(idx) {
@@ -1073,7 +1099,7 @@
                     };
                     reader.readAsDataURL(file);
                     
-                    await this.fetchPreview();
+                    // Don't auto-submit - user must click the submit button
                 } catch (error) {
                     console.error('Error uploading details image:', error);
                     this.errorMessage = error.message || '{{ __("messages.error_uploading_image") }}';
@@ -1087,7 +1113,7 @@
                 this.detailsImage = null;
                 this.detailsImageUrl = null;
                 this.errorMessage = null; // Clear any error messages when removing the image
-                this.fetchPreview();
+                // Don't auto-submit - user must click the submit button
             },
 
             getDetailsImageUrl() {

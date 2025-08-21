@@ -55,6 +55,7 @@ return [
     'unlisted' => 'Nicht gelistet',
     'public' => 'Öffentlich',
     'save' => 'Speichern',
+    'submit' => 'Absenden',
     'profile' => 'Profil',
     'there_was_a_problem' => 'Es gab ein Problem',
     'delete_account' => 'Konto löschen',
