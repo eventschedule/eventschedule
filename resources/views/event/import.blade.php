@@ -173,7 +173,7 @@
         <!-- Show All Fields and Save All buttons when events are parsed -->
         <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg mb-4">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                @if (auth()->user() && auth()->user()->isAdmin())
+                @if (auth()->user() && auth()->user()->isAdmin() && !isset($isGuest))
                 <div class="flex items-center mb-3 sm:mb-0">
                     <input type="checkbox" 
                             id="show_all_fields" 
@@ -190,7 +190,7 @@
 
                 <!-- Action buttons - now includes Save All -->
                 <div class="flex gap-2 self-end sm:self-auto">
-                    <button @click="handleSaveAll" v-if="{{ request()->has('automate') ? 'true' : 'false' }} || preview.parsed.length > 1" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                    <button @click="handleSaveAll" v-if="({{ request()->has('automate') ? 'true' : 'false' }} || preview.parsed.length > 1) && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
                         {{ __('messages.save_all') }}
                     </button>
                 </div>
@@ -285,7 +285,7 @@
                         <!-- Add buttons at the bottom of the left column -->
                         <div class="mt-6 flex justify-end gap-2">
                             <template v-if="savedEvents[idx]">
-                                <button v-if="!savedEventData[idx]?.is_curated" @click="handleEdit(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                <button v-if="!savedEventData[idx]?.is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" @click="handleEdit(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
                                     {{ __('messages.edit') }}
                                 </button>
                                 <button @click="handleView(idx)" type="button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
@@ -293,7 +293,7 @@
                                 </button>
                             </template>
                             <template v-else>
-                                <button @click="handleRemoveEvent(idx)" v-if="preview.parsed.length > 1" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                <button @click="handleRemoveEvent(idx)" v-if="preview.parsed.length > 1 && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                                     {{ __('messages.remove') }}
                                 </button>
                                 <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
@@ -303,7 +303,7 @@
                                     {{ __('messages.save') }}
                                 </button>
                                 <!--
-                                <button v-if="isCurator && preview.parsed[idx].event_url && !preview.parsed[idx].is_curated" 
+                                <button v-if="isCurator && preview.parsed[idx].event_url && !preview.parsed[idx].is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" 
                                         @click="handleCurate(idx)" 
                                         type="button" 
                                         class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
@@ -315,7 +315,7 @@
 
 
                         <!-- JSON preview with border matching textarea -->
-                        <div v-if="showAllFields" class="mt-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm overflow-auto bg-gray-50 dark:bg-gray-900">
+                        <div v-if="showAllFields && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" class="mt-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm overflow-auto bg-gray-50 dark:bg-gray-900">
                             <pre class="p-4 text-xs text-gray-800 dark:text-gray-200">@{{ JSON.stringify(preview.parsed[idx], null, 2) }}</pre>
                         </div>
                         
@@ -447,7 +447,7 @@
                 dragStartTime: 0,
                 isDragActive: false,
                 showAllFields: false,
-                isCurator: {{ $role->isCurator() ? 'true' : 'false' }},
+                isCurator: {{ isset($isGuest) && $isGuest ? 'false' : ($role->isCurator() ? 'true' : 'false') }},
                 detailsImage: null,
                 detailsImageUrl: null,
                 currentRequestId: null,
@@ -591,6 +591,11 @@
                         data = { parsed: data };
                     }
 
+                    // For guest users, only show the first event if multiple are parsed
+                    if ({{ isset($isGuest) && $isGuest ? 'true' : 'false' }} && data.parsed && data.parsed.length > 1) {
+                        data.parsed = [data.parsed[0]];
+                    }
+
                     // Now that we have valid data and this is still the latest request, update the preview
                     this.preview = data;
                     
@@ -630,6 +635,11 @@
             },
 
             handleEdit(idx) {
+                // For guest users, don't allow editing events
+                if ({{ isset($isGuest) && $isGuest ? 'true' : 'false' }}) {
+                    return;
+                }
+                
                 if (this.savedEvents[idx] && this.savedEventData[idx]) {
                     window.open(this.savedEventData[idx].edit_url, '_blank');
                 }
@@ -637,7 +647,13 @@
 
             handleView(idx) {
                 if (this.savedEvents[idx] && this.savedEventData[idx]) {
-                    window.open(this.savedEventData[idx].view_url, '_blank');
+                    if ({{ isset($isGuest) && $isGuest ? 'true' : 'false' }}) {
+                        // For guest users, redirect to the view URL
+                        window.location.href = this.savedEventData[idx].view_url;
+                    } else {
+                        // For authenticated users, open in new tab
+                        window.open(this.savedEventData[idx].view_url, '_blank');
+                    }
                 }
             },
 
@@ -724,7 +740,7 @@
                             description: this.eventDetails ? this.eventDetails : parsed.event_details,
                             social_image: parsed.social_image,
                             registration_url: parsed.registration_url,
-                            @if ($role->isCurator())
+                            @if ($role->isCurator() && !isset($isGuest))
                                 curators: ['{{ \App\Utils\UrlUtils::encodeId($role->id) }}'],
                             @endif
                         })
@@ -742,16 +758,21 @@
                     this.savedEvents[idx] = true;
                     this.savedEventData[idx] = data.event; // Store the event object with view_url and edit_url
                     
-                    // Show success message
-                    Toastify({
-                        text: '{{ __("messages.event_created") }}',
-                        duration: 3000,
-                        position: 'center',
-                        stopOnFocus: true,
-                        style: {
-                            background: '#4BB543',
-                        }
-                    }).showToast();
+                    // For guest users, automatically redirect to view the event
+                    if ({{ isset($isGuest) && $isGuest ? 'true' : 'false' }} && data.event.view_url) {
+                        window.location.href = data.event.view_url;
+                    } else {
+                        // Show success message for non-guest users
+                        Toastify({
+                            text: '{{ __("messages.event_created") }}',
+                            duration: 3000,
+                            position: 'center',
+                            stopOnFocus: true,
+                            style: {
+                                background: '#4BB543',
+                            }
+                        }).showToast();
+                    }
                     
                 } catch (error) {
                     console.error('Error saving event:', error);
@@ -879,6 +900,11 @@
             },
 
             handleRemoveEvent(idx) {
+                // For guest users, don't allow removing events since they only see one
+                if ({{ isset($isGuest) && $isGuest ? 'true' : 'false' }}) {
+                    return;
+                }
+                
                 if (confirm('{{ __("messages.confirm_remove_event") }}')) {
                     // Remove the event from the parsed array
                     this.preview.parsed.splice(idx, 1);
@@ -910,6 +936,11 @@
             },
 
             async handleCurate(idx) {
+                // For guest users, don't allow curating events
+                if ({{ isset($isGuest) && $isGuest ? 'true' : 'false' }}) {
+                    return;
+                }
+                
                 // Reset error state for this event
                 this.saveErrors[idx] = false;
                 
@@ -959,6 +990,11 @@
             },
 
             async handleSaveAll() {
+                // For guest users, don't allow save all since they only see one event
+                if ({{ isset($isGuest) && $isGuest ? 'true' : 'false' }}) {
+                    return;
+                }
+                
                 // Check if there are any events to save
                 if (!this.preview?.parsed || this.preview.parsed.length === 0) {
                     return;
@@ -993,7 +1029,8 @@
                         // If event has a curate button and is not already curated, curate it
                         if (this.isCurator && 
                             this.preview.parsed[idx].event_url && 
-                            !this.preview.parsed[idx].is_curated) {
+                            !this.preview.parsed[idx].is_curated &&
+                            !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}) {
                             await this.handleCurate(idx);
                         } else {
                             // Otherwise save it normally
@@ -1025,7 +1062,7 @@
                         message += ` ({{ __("messages.events_skipped") }}`.replace('{skipped}', skippedCount) + ')';
                     }
                 }
-                
+
                 Toastify({
                     text: message,
                     duration: 3000,
