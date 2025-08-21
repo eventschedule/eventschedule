@@ -288,7 +288,7 @@
                                 <button v-if="!savedEventData[idx]?.is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" @click="handleEdit(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
                                     {{ __('messages.edit') }}
                                 </button>
-                                <button @click="handleView(idx)" type="button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
+                                <button v-if="{{ auth()->check() ? 'true' : 'false' }}" @click="handleView(idx)" type="button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
                                     {{ __('messages.view') }}
                                 </button>
                             </template>
@@ -299,8 +299,21 @@
                                 <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                                     {{ __('messages.clear') }}
                                 </button>
-                                <button @click="handleSave(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                                    {{ __('messages.save') }}
+                                <button @click="handleSave(idx)" 
+                                        type="button" 
+                                        :disabled="savingEvents[idx]"
+                                        :class="['px-4 py-2 rounded-md transition-colors', 
+                                            savingEvents[idx] 
+                                                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                                                : 'bg-blue-500 text-white hover:bg-blue-600']">
+                                    <span v-if="savingEvents[idx]" class="inline-flex items-center">
+                                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        {{ __('messages.saving') }}
+                                    </span>
+                                    <span v-else>{{ __('messages.save') }}</span>
                                 </button>
                                 <!--
                                 <button v-if="isCurator && preview.parsed[idx].event_url && !preview.parsed[idx].is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" 
@@ -451,6 +464,7 @@
                 detailsImage: null,
                 detailsImageUrl: null,
                 currentRequestId: null,
+                savingEvents: [], // Track which events are currently being saved
             }
         },
 
@@ -604,6 +618,7 @@
                         this.savedEvents = new Array(this.preview.parsed.length).fill(false);
                         this.savedEventData = new Array(this.preview.parsed.length).fill(null);
                         this.saveErrors = new Array(this.preview.parsed.length).fill(false);
+                        this.savingEvents = new Array(this.preview.parsed.length).fill(false);
                     }
                     
                     // Initialize datepickers after preview is loaded
@@ -661,6 +676,8 @@
                 this.errorMessage = null;
                 // Reset error state for this event
                 this.saveErrors[idx] = false;
+                // Set saving state for this event
+                this.savingEvents[idx] = true;
                 
                 try {
                     // Get data from the Vue model
@@ -779,6 +796,9 @@
                     this.errorMessage = error.message;
                     // Set error state for this event
                     this.saveErrors[idx] = error.message || 'An error occurred while saving the event';
+                } finally {
+                    // Clear saving state for this event
+                    this.savingEvents[idx] = false;
                 }
             },
 
@@ -804,6 +824,7 @@
                 this.preview = null;
                 this.savedEvents = [];
                 this.savedEventData = [];
+                this.savingEvents = [];
                 this.errorMessage = null;
                 this.$nextTick(() => {
                     document.getElementById('event_details').focus();
@@ -911,6 +932,8 @@
                     // Remove the corresponding entry in savedEvents array
                     this.savedEvents.splice(idx, 1);
                     this.savedEventData.splice(idx, 1);
+                    // Remove the corresponding entry in savingEvents array
+                    this.savingEvents.splice(idx, 1);
                     
                     // If no events left, clear the preview
                     if (this.preview.parsed.length === 0) {
@@ -943,6 +966,8 @@
                 
                 // Reset error state for this event
                 this.saveErrors[idx] = false;
+                // Set saving state for this event
+                this.savingEvents[idx] = true;
                 
                 if (!this.preview?.parsed?.[idx]?.event_url) {
                     return;
@@ -986,6 +1011,9 @@
                     this.errorMessage = error.message || '{{ __("messages.error_curating_event") }}';
                     // Set error state for this event
                     this.saveErrors[idx] = error.message || '{{ __("messages.error_curating_event") }}';
+                } finally {
+                    // Clear saving state for this event
+                    this.savingEvents[idx] = false;
                 }
             },
 
@@ -1010,6 +1038,13 @@
                 let successCount = 0;
                 let errorCount = 0;
                 let skippedCount = 0;
+                
+                // Set saving state for all events that will be processed
+                for (let idx = 0; idx < this.preview.parsed.length; idx++) {
+                    if (!this.savedEvents[idx] && !this.preview.parsed[idx].event_url) {
+                        this.savingEvents[idx] = true;
+                    }
+                }
                 
                 // Loop through all events
                 for (let idx = 0; idx < this.preview.parsed.length; idx++) {
@@ -1078,6 +1113,11 @@
                 if (saveAllButton) {
                     saveAllButton.disabled = false;
                     saveAllButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+                
+                // Clear saving state for all events
+                for (let idx = 0; idx < this.preview.parsed.length; idx++) {
+                    this.savingEvents[idx] = false;
                 }
             },
 

@@ -55,6 +55,7 @@ return [
     'unlisted' => 'Unlisted',
     'public' => 'Public',
     'save' => 'Save',
+    'saving' => 'Saving...',
     'submit' => 'Submit',
     'profile' => 'Profile',
     'there_was_a_problem' => 'There was a problem',
