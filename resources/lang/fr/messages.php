@@ -534,4 +534,5 @@ return [
     'combined_total_help' => 'Tous les types de billets sont combinés dans un seul pool',
     'require_approval' => 'Approbation Requise',
     'actions' => 'Actions',
+    'event_pending_review' => 'Cet événement sera ajouté au calendrier une fois qu\'il aura été examiné',
 ];

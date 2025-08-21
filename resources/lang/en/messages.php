@@ -558,4 +558,5 @@ return [
     'tip' => 'Tip',
     'you_can_combine_text_and_images' => 'You can combine text and images - the system will extract information from both sources',
     'drag_over_textarea' => 'Drag images directly over the text area to attach them',
+    'event_pending_review' => 'This event will be added to the schedule once it has been reviewed',
 ];
