@@ -524,10 +524,23 @@
             },
             
             canCreateAccount() {
-                if (!this.createAccount) return true;
-                return this.userName.trim() && 
-                       this.userEmail.trim() && 
-                       this.userPassword;
+                // Always check event fields regardless of createAccount status
+                const eventFieldsValid = this.preview?.parsed?.every(event => 
+                    event.event_name?.trim() && 
+                    event.event_address?.trim() && 
+                    event.event_date_time
+                ) || false;
+                
+                // If createAccount is checked, also validate user fields
+                if (this.createAccount) {
+                    return eventFieldsValid && 
+                           this.userName.trim() && 
+                           this.userEmail.trim() && 
+                           this.userPassword;
+                }
+                
+                // If createAccount is not checked, only validate event fields
+                return eventFieldsValid;
             }
         },
 
