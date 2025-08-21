@@ -47,6 +47,7 @@
                     </button>
                 </div>
                 -->
+                <div></div>
                 
                 <div class="text-right">
                     <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
@@ -66,6 +67,8 @@
                         {{ $role->name }}
                     </h3>
                 </div>
+
+                <div></div>
 
                 <!--
                 <div class="flex items-center gap-3">
