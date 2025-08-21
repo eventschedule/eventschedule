@@ -69,13 +69,14 @@
                                     placeholder="{{ __('messages.drag_drop_image_or_type_text') }}"></textarea>
                                 
                                 <!-- Drop message overlay for textarea -->
-                                <div v-if="isDraggingDetails" 
+                                <div v-show="isDraggingDetails" 
                                      @dragenter.prevent="dragEnterDetails"
                                      @dragover.prevent="dragOverDetails"
                                      @dragleave.prevent="dragLeaveDetails"
                                      @drop.prevent="handleDetailsImageDrop"
                                      @dragend="dragEndDetails"
-                                     class="absolute inset-0 flex items-center justify-center bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-500 rounded-md z-10">
+                                     class="absolute inset-0 flex items-center justify-center bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-500 rounded-md z-10 transition-all duration-200 ease-in-out"
+                                     :class="{ 'opacity-100 scale-100': isDraggingDetails, 'opacity-0 scale-95': !isDraggingDetails }">
                                     <div class="text-center">
                                         <svg class="mx-auto h-8 w-8 text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
@@ -448,6 +449,8 @@
                 isDraggingDetails: false,
                 dragCounter: 0,
                 dragTimeout: null,
+                dragStartTime: 0,
+                isDragActive: false,
                 showAllFields: false,
                 isCurator: {{ $role->isCurator() ? 'true' : 'false' }},
                 detailsImage: null,
@@ -468,14 +471,20 @@
             // Add clipboard paste event listener
             document.addEventListener('paste', this.handleClipboardPaste)
             
-            // Add global drag end event listener to handle cancelled drag operations
+            // Add global drag event listeners
             document.addEventListener('dragend', this.handleGlobalDragEnd)
+            document.addEventListener('dragstart', this.handleGlobalDragStart)
+            
+            // Add mouse move listener to track when we're actually outside the drop zone
+            document.addEventListener('mousemove', this.handleMouseMove)
         },
         
         beforeUnmount() {
             // Clean up event listeners when component is destroyed
             document.removeEventListener('paste', this.handleClipboardPaste)
             document.removeEventListener('dragend', this.handleGlobalDragEnd)
+            document.removeEventListener('dragstart', this.handleGlobalDragStart)
+            document.removeEventListener('mousemove', this.handleMouseMove)
             
             // Clear any pending timeouts
             if (this.dragTimeout) {
@@ -1087,47 +1096,95 @@
 
             dragEnterDetails(e) {
                 e.preventDefault();
-                // Only increment counter if we're entering the main textarea area
-                // Avoid counting when entering child elements like buttons or image previews
+                e.stopPropagation();
+                
+                // Only handle drag enter on the main textarea
                 if (e.target === this.$refs.eventDetails) {
-                    this.dragCounter++;
+                    // Clear any existing timeout when re-entering
+                    if (this.dragTimeout) {
+                        clearTimeout(this.dragTimeout);
+                        this.dragTimeout = null;
+                    }
                     this.isDraggingDetails = true;
+                    this.isDragActive = true;
                 }
             },
 
             dragLeaveDetails(e) {
                 e.preventDefault();
-                this.dragCounter--;
-                // Only hide the drop zone when we've actually left the entire drop area
-                if (this.dragCounter <= 0) {
-                    this.dragCounter = 0;
-                    // Add a small delay to prevent flickering
-                    if (this.dragTimeout) {
-                        clearTimeout(this.dragTimeout);
-                    }
-                    this.dragTimeout = setTimeout(() => {
-                        this.isDraggingDetails = false;
-                    }, 50);
+                e.stopPropagation();
+                
+                // Don't immediately hide - let the timeout handle it
+                // This prevents flickering when moving over child elements
+            },
+
+            dragOverDetails(e) {
+                e.preventDefault();
+                // Keep the drop zone visible while dragging over
+                if (!this.isDraggingDetails) {
+                    this.isDraggingDetails = true;
                 }
             },
 
             dragEndDetails(e) {
                 // Reset drag state when drag operation ends
+                this.resetDragState();
+            },
+
+            handleGlobalDragEnd(e) {
+                // Reset drag state when any drag operation ends globally
+                this.resetDragState();
+            },
+
+            resetDragState() {
                 this.isDraggingDetails = false;
-                this.dragCounter = 0;
+                this.isDragActive = false;
+                this.dragStartTime = 0;
                 if (this.dragTimeout) {
                     clearTimeout(this.dragTimeout);
                     this.dragTimeout = null;
                 }
             },
 
-            handleGlobalDragEnd(e) {
-                // Reset drag state when any drag operation ends globally
-                this.isDraggingDetails = false;
-                this.dragCounter = 0;
-                if (this.dragTimeout) {
-                    clearTimeout(this.dragTimeout);
-                    this.dragTimeout = null;
+            handleGlobalDragStart(e) {
+                // Track when a global drag operation starts
+                this.isDragActive = true;
+            },
+
+            handleMouseMove(e) {
+                // Only track mouse movement if we're in a drag operation
+                if (!this.isDragActive || !this.isDraggingDetails) {
+                    return;
+                }
+
+                // Check if mouse is outside the drop zone with some tolerance
+                const dropZone = this.$refs.eventDetails;
+                if (dropZone) {
+                    const rect = dropZone.getBoundingClientRect();
+                    const tolerance = 10; // 10px tolerance to prevent edge flickering
+                    const isOutside = e.clientX < (rect.left - tolerance) || 
+                                    e.clientX > (rect.right + tolerance) || 
+                                    e.clientY < (rect.top - tolerance) || 
+                                    e.clientY > (rect.bottom + tolerance);
+                    
+                    if (isOutside) {
+                        // Use a longer delay to prevent flickering
+                        if (this.dragTimeout) {
+                            clearTimeout(this.dragTimeout);
+                        }
+                        this.dragTimeout = setTimeout(() => {
+                            // Double-check that we're still outside before hiding
+                            const currentRect = dropZone.getBoundingClientRect();
+                            const stillOutside = e.clientX < (currentRect.left - tolerance) || 
+                                              e.clientX > (currentRect.right + tolerance) || 
+                                              e.clientY < (currentRect.top - tolerance) || 
+                                              e.clientY > (currentRect.bottom + tolerance);
+                            
+                            if (stillOutside) {
+                                this.isDraggingDetails = false;
+                            }
+                        }, 300); // Increased delay for more stability
+                    }
                 }
             },
 
@@ -1146,12 +1203,7 @@
             },
 
             async handleDetailsImageDrop(e) {
-                this.isDraggingDetails = false;
-                this.dragCounter = 0;
-                if (this.dragTimeout) {
-                    clearTimeout(this.dragTimeout);
-                    this.dragTimeout = null;
-                }
+                this.resetDragState();
                 const files = e.dataTransfer.files;
                 if (files.length > 0) {
                     await this.uploadDetailsImage(files[0]);
