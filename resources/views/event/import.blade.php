@@ -41,7 +41,7 @@
 
     <div class="py-5">
         <div class="max-w-7xl mx-auto space-y-6">
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg">
                 <div class="max-w-none">
                     <!-- Main desktop grid -->
                     <div class="lg:grid lg:grid-cols-2 lg:gap-6">

@@ -112,7 +112,7 @@
             <!-- CTA Card -->
             <div class="mb-8">
                 <a href="https://www.eventschedule.com" class="block group">
-                    <div class="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 rounded-2xl p-6 shadow-md transform transition-all duration-300 group-hover:shadow-lg" style="--tw-scale-x: 1; --tw-scale-y: 1;">
+                    <div class="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 rounded-lg p-6 shadow-md transform transition-all duration-300 group-hover:shadow-lg" style="--tw-scale-x: 1; --tw-scale-y: 1;">
                         <style>
                             .group:hover .bg-gradient-to-r {
                                 transform: scale(1.03);
@@ -132,11 +132,11 @@
                 <div class="mb-8">
                     <img src="{{ $post->featured_image_url }}" 
                          alt="{{ $post->title }}" 
-                         class="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-2xl shadow-lg">
+                         class="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-lg shadow-lg">
                 </div>
             @endif
             
-            <div class="bg-white border border-blue-100 rounded-2xl shadow-sm p-8">
+            <div class="bg-white border border-blue-100 rounded-lg shadow-sm p-8">
                 <!-- Content -->
                 <div class="prose prose-lg max-w-none" style="font-size: 1.125rem;">
                     <style>

@@ -16,7 +16,7 @@
         >
           @if ($role && $role->profile_image_url)
             <img
-              class="w-[109px] mb-[18px] rounded-2xl object-cover"
+              class="w-[109px] mb-[18px] rounded-lg object-cover"
               src="{{ $role->profile_image_url }}"
               alt="Logo"
             />

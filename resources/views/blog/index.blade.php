@@ -34,7 +34,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
             <!-- Selected Tag Display -->
             @if(request('tag'))
-                <div class="mb-6 bg-white border border-blue-200 rounded-2xl shadow-sm p-4">
+                <div class="mb-6 bg-white border border-blue-200 rounded-lg shadow-sm p-4">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <span class="text-sm text-gray-600">Filtered by:</span>
@@ -59,7 +59,7 @@
                     @if($posts->count() > 0)
                         @foreach($posts as $post)
                             <a href="{{ route('blog.show', $post->slug) }}" class="block group">
-                                <div class="bg-white border border-blue-100 rounded-2xl shadow-sm p-6 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100/50 hover:-translate-y-1 hover:border-blue-200 cursor-pointer">
+                                <div class="bg-white border border-blue-100 rounded-lg shadow-sm p-6 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100/50 hover:-translate-y-1 hover:border-blue-200 cursor-pointer">
                                     @if($post->featured_image_url)
                                         <div class="mb-4 overflow-hidden rounded-lg">
                                             <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105">
@@ -109,7 +109,7 @@
                 <!-- Sidebar -->
                 <div class="space-y-6">
                     @if($allTags->count() > 0)
-                        <div class="bg-white border border-blue-100 rounded-2xl shadow-sm p-6">
+                        <div class="bg-white border border-blue-100 rounded-lg shadow-sm p-6">
                             <h3 class="text-lg font-semibold text-gray-900 mb-4">Tags</h3>
                             <div class="flex flex-wrap gap-2" id="tags-container">
                                 @foreach($allTags->take(20) as $tag)
@@ -140,7 +140,7 @@
                         </div>
                     @endif
                     @if($archives->count() > 0)
-                        <div class="bg-white border border-blue-100 rounded-2xl shadow-sm p-6">
+                        <div class="bg-white border border-blue-100 rounded-lg shadow-sm p-6">
                             <h3 class="text-lg font-semibold text-gray-900 mb-4">Archives</h3>
                             <div class="space-y-2">
                                 @foreach($archives as $archive)
@@ -153,7 +153,7 @@
                         </div>
                     @endif
                     <!-- About -->
-                    <div class="bg-blue-100 border border-blue-200 rounded-2xl shadow-sm p-6">
+                    <div class="bg-blue-100 border border-blue-200 rounded-lg shadow-sm p-6">
                         <h3 class="text-lg font-semibold text-blue-900 mb-2">About Our Blog</h3>
                         <p class="text-sm text-blue-900">
                             Stay updated with the latest tips, news, and insights about event scheduling and ticketing. 

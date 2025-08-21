@@ -24,12 +24,12 @@
             {{-- Profile Image --}}
             @if ($role->isVenue() || $role->isCurator())
                 @if ($event->role() && $event->role()->profile_image_url)
-                    <img class="mx-auto rounded-2xl h-24 w-24 object-cover mb-4" src="{{ $event->role()->profile_image_url }}" alt="Profile Image">
+                    <img class="mx-auto rounded-lg h-24 w-24 object-cover mb-4" src="{{ $event->role()->profile_image_url }}" alt="Profile Image">
                 @endif
                 <a href="{{ $event->role() ? $event->role()->getGuestUrl() : '#' }}" target="_blank" class="text-lg font-bold text-gray-900 mb-1 hover:text-blue-600 hover:underline">{{ $event->role() ? $event->role()->name : $event->translatedName() }}</a>
             @else
                 @if ($event->venue && $event->venue->profile_image_url)
-                    <img class="mx-auto rounded-2xl h-24 w-24 object-cover mb-4" src="{{ $event->venue->profile_image_url }}" alt="Profile Image">
+                    <img class="mx-auto rounded-lg h-24 w-24 object-cover mb-4" src="{{ $event->venue->profile_image_url }}" alt="Profile Image">
                 @endif
                 <a href="{{ $event->venue ? $event->venue->getGuestUrl() : '#' }}" target="_blank" class="text-lg font-bold text-gray-900 mb-1 hover:text-blue-600 hover:underline">{{ $event->venue ? $event->venue->name : $event->translatedName() }}</a>
             @endif
