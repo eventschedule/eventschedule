@@ -1,7 +1,7 @@
 <script src="{{ asset('js/vue.global.prod.js') }}"></script>
 
-<div class="flex justify-between items-center gap-6 my-6">
-    @if (auth()->user())
+@if (auth()->user())
+<div class="flex justify-between items-center gap-6 my-6 pb-2">
     @if (is_rtl())
         <!-- RTL Layout: Cancel button on left, title on right -->
         <div class="flex items-center gap-3">
@@ -29,8 +29,8 @@
             </button>
         </div>
     @endif
-    @endif
 </div>
+@endif
 
 <form method="post"
     action="{{ isset($isGuest) && $isGuest ? route('event.guest_import', ['subdomain' => $role->subdomain]) : route('event.import', ['subdomain' => $role->subdomain]) }}"
@@ -39,93 +39,272 @@
 
     @csrf
 
-    <div class="py-5">
-        <div class="max-w-7xl mx-auto space-y-6">
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg">
-                <div class="max-w-none">
-                    <!-- Main desktop grid -->
-                    <div class="lg:grid lg:grid-cols-2 lg:gap-6">
-                        <!-- Left column: Textarea and Form -->
-                        <div>
-                            <!-- Textarea section -->
-                            <div class="lg:mb-0 mb-4">
-                                <x-input-label for="event_details" :value="__('messages.event_details')" />
-                                <textarea id="event_details" 
-                                    name="event_details" 
-                                    rows="6"
-                                    v-model="eventDetails"
-                                    v-bind:readonly="savedEvent"
-                                    @input="debouncedPreview"
-                                    @paste="handlePaste" autofocus {{ config('services.google.gemini_key') ? '' : 'disabled' }}
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
-                                <x-input-error class="mt-2" :messages="$errors->get('event_details')" />
+        <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg">
+            <div class="max-w-none">
+                <!-- Main desktop grid -->
+                <div class="lg:grid lg:grid-cols-2 lg:gap-6">
+                    <!-- Left column: Textarea and Form -->
+                    <div>
+                        <!-- Textarea section -->
+                        <div class="lg:mb-0 mb-4">
+                            <x-input-label for="event_details" :value="__('messages.event_details')" />
+                            <textarea id="event_details" 
+                                name="event_details" 
+                                rows="6"
+                                v-model="eventDetails"
+                                v-bind:readonly="savedEvent"
+                                @input="debouncedPreview"
+                                @paste="handlePaste" autofocus {{ config('services.google.gemini_key') ? '' : 'disabled' }}
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
+                            <x-input-error class="mt-2" :messages="$errors->get('event_details')" />
 
-                                @if (! config('services.google.gemini_key'))
-                                    <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                        {{ __('messages.gemini_key_required') }}
-                                    </div>
-                                @endif
-
-                                <!-- Error message display -->
-                                <div v-if="errorMessage" class="mt-4 p-3 text-sm text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded-md">
-                                    @{{ errorMessage }}
+                            @if (! config('services.google.gemini_key'))
+                                <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                    {{ __('messages.gemini_key_required') }}
                                 </div>
+                            @endif
 
-                                <div v-if="isLoading" class="mt-4 flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                                    <div class="relative">
-                                        <div class="w-4 h-4 rounded-full bg-blue-500/30"></div>
-                                        <div class="absolute top-0 left-0 w-4 h-4 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"></div>
-                                    </div>
-                                    <div class="inline-flex items-center">
-                                        <span class="animate-pulse">
-                                            {{ __('messages.loading') }}
-                                        </span>
-                                        <span class="ml-1 inline-flex animate-[ellipsis_1.5s_steps(4,end)_infinite]">...</span>
-                                    </div>
-                                </div>
+                            <!-- Error message display -->
+                            <div v-if="errorMessage" class="mt-4 p-3 text-sm text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded-md">
+                                @{{ errorMessage }}
                             </div>
 
-                            <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 mt-4">
-                                @if (auth()->user() && auth()->user()->isAdmin())
-                                <div class="flex items-center mb-3 sm:mb-0">
-                                    <input type="checkbox" 
-                                            id="show_all_fields" 
-                                            v-model="showAllFields" 
-                                            @change="saveShowAllFieldsPreference"
-                                            class="rounded border-gray-300 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
-                                    <label for="show_all_fields" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                        {{ __('messages.show_all_fields') }}
-                                    </label>
+                            <div v-if="isLoading" class="mt-4 flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+                                <div class="relative">
+                                    <div class="w-4 h-4 rounded-full bg-blue-500/30"></div>
+                                    <div class="absolute top-0 left-0 w-4 h-4 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"></div>
                                 </div>
-                                @else
-                                <div></div>
-                                @endif
-
-                                <!-- Action buttons - now includes Save All -->
-                                <div class="flex gap-2 self-end sm:self-auto">
-                                    <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                                        {{ __('messages.clear') }}
-                                    </button>
-                                    <button @click="handleSaveAll" v-if="{{ request()->has('automate') ? 'true' : 'false' }} || preview.parsed.length > 1" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                                        {{ __('messages.save_all') }}
-                                    </button>
+                                <div class="inline-flex items-center">
+                                    <span class="animate-pulse">
+                                        {{ __('messages.loading') }}
+                                    </span>
+                                    <span class="ml-1 inline-flex animate-[ellipsis_1.5s_steps(4,end)_infinite]">...</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Right column: Image drop zone for event details -->
-                        <div class="mb-4 lg:mb-0">
-                            <div v-if="detailsImage"
-                                    class="relative h-full rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-                                <img v-if="detailsImageUrl" :src="detailsImageUrl" class="object-contain w-full h-full" alt="Event details image">
-                                <div v-else class="flex items-center justify-center h-full text-gray-500">
-                                    <span>Image preview not available</span>
-                                </div>
+                        <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 mt-4">
+                            @if (auth()->user() && auth()->user()->isAdmin())
+                            <div class="flex items-center mb-3 sm:mb-0">
+                                <input type="checkbox" 
+                                        id="show_all_fields" 
+                                        v-model="showAllFields" 
+                                        @change="saveShowAllFieldsPreference"
+                                        class="rounded border-gray-300 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                                <label for="show_all_fields" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                    {{ __('messages.show_all_fields') }}
+                                </label>
+                            </div>
+                            @else
+                            <div></div>
+                            @endif
+
+                            <!-- Action buttons - now includes Save All -->
+                            <div class="flex gap-2 self-end sm:self-auto">
+                                <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                    {{ __('messages.clear') }}
+                                </button>
+                                <button @click="handleSaveAll" v-if="{{ request()->has('automate') ? 'true' : 'false' }} || preview.parsed.length > 1" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                    {{ __('messages.save_all') }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right column: Image drop zone for event details -->
+                    <div class="mb-4 lg:mb-0">
+                        <div v-if="detailsImage"
+                                class="relative h-full rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                            <img v-if="detailsImageUrl" :src="detailsImageUrl" class="object-contain w-full h-full" alt="Event details image">
+                            <div v-else class="flex items-center justify-center h-full text-gray-500">
+                                <span>Image preview not available</span>
+                            </div>
+                            
+                            <!-- Remove image button -->
+                            <button @click="removeDetailsImage()"
+                                    type="button"
+                                    class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Drop zone -->
+                        <div v-else
+                                @dragover.prevent="dragOverDetails"
+                                @dragleave.prevent="dragLeaveDetails"
+                                @drop.prevent="handleDetailsImageDrop"
+                                @click="openDetailsFileSelector"
+                                v-bind:class="['h-full flex items-center justify-center rounded-lg border-2 border-dashed cursor-pointer', 
+                                        isDraggingDetails ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-300 dark:border-gray-600']">
+                            <div class="text-center py-10">
+                                <!-- Show loading spinner when uploading -->
+                                <template v-if="isUploadingDetailsImage">
+                                    <div class="relative mx-auto w-12 h-12">
+                                        <div class="w-12 h-12 rounded-full bg-blue-500/30"></div>
+                                        <div class="absolute top-0 left-0 w-12 h-12 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"></div>
+                                    </div>
+                                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                        {{ __('messages.uploading') }}...
+                                    </p>
+                                </template>
+                                <!-- Default upload icon and text -->
+                                <template v-else>
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                        {{ __('messages.drag_drop_image') }}
+                                    </p>
+                                    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                                        {{ __('messages.or_paste_from_clipboard') }}
+                                    </p>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Hidden file input -->
+                        <input type="file"
+                                ref="detailsFileInput"
+                                @change="handleDetailsFileSelect"
+                                accept="image/*"
+                                class="hidden">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Events cards - Moved outside the main div -->
+        <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="space-y-6">
+            <div v-for="(event, idx) in preview.parsed" :key="idx" 
+                    :class="['p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg', 
+                            savedEvents[idx] ? 'border-2 border-green-500 dark:border-green-600' : '']">
+                
+                <!-- Card header -->
+                <div v-if="savedEvents[idx] || saveErrors[idx]" :class="['px-4 py-3 -m-4 sm:-m-8 mb-4 sm:mb-8 flex justify-between items-center rounded-t-lg', 
+                                savedEvents[idx] ? 'bg-green-50 dark:bg-green-900/30' : 'bg-red-50 dark:bg-red-900/30']">
+                    <h3 class="font-medium text-lg">
+                        <span v-if="savedEvents[idx]" class="ml-2 text-sm text-green-600 dark:text-green-400">
+                            <svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            {{ __('messages.saved') }}
+                        </span>
+                        <span v-else-if="saveErrors[idx]" class="ml-2 text-sm text-red-600 dark:text-red-400">
+                            <svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            {{ __('messages.error') }}: @{{ saveErrors[idx] }}
+                        </span>
+                    </h3>                            
+                </div>
+                
+                <!-- Card body -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Left column: Form fields -->
+                    <div class="space-y-4">
+                        <!-- Show matching event if found for this specific event -->
+                        <div v-if="preview.parsed[idx].event_url" class="p-3 text-sm bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 rounded-md">
+                            {{ __('messages.similar_event_found') }} - 
+                            <a :href="preview.parsed[idx].event_url" 
+                                target="_blank" 
+                                class="underline hover:text-yellow-600 dark:hover:text-yellow-300">
+                                {{ __('messages.view_event') }}
+                            </a>
+                        </div>
+                        
+                        <div>
+                            <x-input-label for="name_@{{ idx }}" :value="__('messages.event_name')" />
+                            <x-text-input id="name_@{{ idx }}" 
+                                name="name_@{{ idx }}" 
+                                type="text" 
+                                class="mt-1 block w-full" 
+                                v-model="preview.parsed[idx].event_name"
+                                v-bind:readonly="savedEvents[idx]"
+                                required />
+                        </div>
+
+                        <div>
+                            <x-input-label for="venue_address1_@{{ idx }}" :value="__('messages.address')" />
+                            <x-text-input id="venue_address1_@{{ idx }}" 
+                                name="venue_address1_@{{ idx }}" 
+                                type="text" 
+                                class="mt-1 block w-full" 
+                                v-model="preview.parsed[idx].event_address"
+                                v-bind:readonly="preview.parsed[idx].venue_id || savedEvents[idx]"
+                                placeholder="{{ $role->isCurator() ? $role->city : '' }}"
+                                required
+                                autocomplete="off" />
+                        </div>
+
+                        <div>
+                            <label for="starts_at_@{{ idx }}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">
+                                {{ __('messages.date_and_time') }}
+                            </label>
+                            <input id="starts_at_@{{ idx }}" 
+                                    name="starts_at_@{{ idx }}" 
+                                    type="text" 
+                                    :class="'mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm datepicker_' + idx"
+                                    v-bind:readonly="savedEvents[idx]"
+                                    v-model="preview.parsed[idx].event_date_time"
+                                    required 
+                                    autocomplete="off" />
+                        </div>
+
+                        <!-- Add buttons at the bottom of the left column -->
+                        <div class="mt-6 flex justify-end gap-2">
+                            <template v-if="savedEvents[idx]">
+                                <button v-if="!savedEventData[idx]?.is_curated" @click="handleEdit(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                    {{ __('messages.edit') }}
+                                </button>
+                                <button @click="handleView(idx)" type="button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
+                                    {{ __('messages.view') }}
+                                </button>
+                            </template>
+                            <template v-else>
+                                <button @click="handleRemoveEvent(idx)" v-if="preview.parsed.length > 1" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                    {{ __('messages.remove') }}
+                                </button>
+                                <button @click="handleSave(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                    {{ __('messages.save') }}
+                                </button>
+                                <!--
+                                <button v-if="isCurator && preview.parsed[idx].event_url && !preview.parsed[idx].is_curated" 
+                                        @click="handleCurate(idx)" 
+                                        type="button" 
+                                        class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
+                                    {{ __('messages.curate') }}
+                                </button>
+                                -->
+                            </template>
+                        </div>
+
+
+                        <!-- JSON preview with border matching textarea -->
+                        <div v-if="showAllFields" class="mt-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm overflow-auto bg-gray-50 dark:bg-gray-900">
+                            <pre class="p-4 text-xs text-gray-800 dark:text-gray-200">@{{ JSON.stringify(preview.parsed[idx], null, 2) }}</pre>
+                        </div>
+                        
+
+                    </div>
+                    
+                    <!-- Right column: Image -->
+                    <div class="flex flex-col">
+                        <div class="relative h-full flex flex-col">
+                            <!-- Image preview -->
+                            <div v-if="preview.parsed[idx].social_image" 
+                                    class="flex-grow rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                                <img v-bind:src="getSocialImageUrl(preview.parsed[idx].social_image)" 
+                                        class="object-contain w-full h-full" 
+                                        alt="Event preview image">
                                 
                                 <!-- Remove image button -->
-                                <button @click="removeDetailsImage()"
+                                <button @click="removeImage(idx)" 
                                         type="button"
-                                        class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none">
+                                        v-bind:disabled="savedEvents[idx]"
+                                        class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
@@ -133,16 +312,16 @@
                             </div>
 
                             <!-- Drop zone -->
-                            <div v-else
-                                    @dragover.prevent="dragOverDetails"
-                                    @dragleave.prevent="dragLeaveDetails"
-                                    @drop.prevent="handleDetailsImageDrop"
-                                    @click="openDetailsFileSelector"
-                                    v-bind:class="['h-full flex items-center justify-center rounded-lg border-2 border-dashed cursor-pointer', 
-                                            isDraggingDetails ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-300 dark:border-gray-600']">
+                            <div v-else-if="!savedEvents[idx]"
+                                    @dragover.prevent="dragOver"
+                                    @dragleave.prevent="dragLeave"
+                                    @drop.prevent="(e) => handleDrop(e, idx)"
+                                    @click="() => openFileSelector(idx)"
+                                    v-bind:class="['flex-grow flex items-center justify-center rounded-lg border-2 border-dashed cursor-pointer', 
+                                            isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-300 dark:border-gray-600']">
                                 <div class="text-center py-10">
                                     <!-- Show loading spinner when uploading -->
-                                    <template v-if="isUploadingDetailsImage">
+                                    <template v-if="isUploadingImage === idx">
                                         <div class="relative mx-auto w-12 h-12">
                                             <div class="w-12 h-12 rounded-full bg-blue-500/30"></div>
                                             <div class="absolute top-0 left-0 w-12 h-12 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"></div>
@@ -167,193 +346,11 @@
                             </div>
 
                             <!-- Hidden file input -->
-                            <input type="file"
-                                    ref="detailsFileInput"
-                                    @change="handleDetailsFileSelect"
+                            <input type="file" 
+                                    v-bind:ref="'fileInput_' + idx"
+                                    @change="(e) => handleFileSelect(e, idx)"
                                     accept="image/*"
                                     class="hidden">
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-            <!-- Events cards - Moved outside the main div -->
-            <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="space-y-6">
-                <div v-for="(event, idx) in preview.parsed" :key="idx" 
-                        :class="['p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg', 
-                                savedEvents[idx] ? 'border-2 border-green-500 dark:border-green-600' : '']">
-                    
-                    <!-- Card header -->
-                    <div v-if="savedEvents[idx] || saveErrors[idx]" :class="['px-4 py-3 -m-4 sm:-m-8 mb-4 sm:mb-8 flex justify-between items-center rounded-t-lg', 
-                                    savedEvents[idx] ? 'bg-green-50 dark:bg-green-900/30' : 'bg-red-50 dark:bg-red-900/30']">
-                        <h3 class="font-medium text-lg">
-                            <span v-if="savedEvents[idx]" class="ml-2 text-sm text-green-600 dark:text-green-400">
-                                <svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                {{ __('messages.saved') }}
-                            </span>
-                            <span v-else-if="saveErrors[idx]" class="ml-2 text-sm text-red-600 dark:text-red-400">
-                                <svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                                {{ __('messages.error') }}: @{{ saveErrors[idx] }}
-                            </span>
-                        </h3>                            
-                    </div>
-                    
-                    <!-- Card body -->
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <!-- Left column: Form fields -->
-                        <div class="space-y-4">
-                            <!-- Show matching event if found for this specific event -->
-                            <div v-if="preview.parsed[idx].event_url" class="p-3 text-sm bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 rounded-md">
-                                {{ __('messages.similar_event_found') }} - 
-                                <a :href="preview.parsed[idx].event_url" 
-                                    target="_blank" 
-                                    class="underline hover:text-yellow-600 dark:hover:text-yellow-300">
-                                    {{ __('messages.view_event') }}
-                                </a>
-                            </div>
-                            
-                            <div>
-                                <x-input-label for="name_@{{ idx }}" :value="__('messages.event_name')" />
-                                <x-text-input id="name_@{{ idx }}" 
-                                    name="name_@{{ idx }}" 
-                                    type="text" 
-                                    class="mt-1 block w-full" 
-                                    v-model="preview.parsed[idx].event_name"
-                                    v-bind:readonly="savedEvents[idx]"
-                                    required />
-                            </div>
-
-                            <div>
-                                <x-input-label for="venue_address1_@{{ idx }}" :value="__('messages.address')" />
-                                <x-text-input id="venue_address1_@{{ idx }}" 
-                                    name="venue_address1_@{{ idx }}" 
-                                    type="text" 
-                                    class="mt-1 block w-full" 
-                                    v-model="preview.parsed[idx].event_address"
-                                    v-bind:readonly="preview.parsed[idx].venue_id || savedEvents[idx]"
-                                    placeholder="{{ $role->isCurator() ? $role->city : '' }}"
-                                    required
-                                    autocomplete="off" />
-                            </div>
-
-                            <div>
-                                <label for="starts_at_@{{ idx }}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">
-                                    {{ __('messages.date_and_time') }}
-                                </label>
-                                <input id="starts_at_@{{ idx }}" 
-                                        name="starts_at_@{{ idx }}" 
-                                        type="text" 
-                                        :class="'mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm datepicker_' + idx"
-                                        v-bind:readonly="savedEvents[idx]"
-                                        v-model="preview.parsed[idx].event_date_time"
-                                        required 
-                                        autocomplete="off" />
-                            </div>
-
-                            <!-- Add buttons at the bottom of the left column -->
-                            <div class="mt-6 flex justify-end gap-2">
-                                <template v-if="savedEvents[idx]">
-                                    <button v-if="!savedEventData[idx]?.is_curated" @click="handleEdit(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                                        {{ __('messages.edit') }}
-                                    </button>
-                                    <button @click="handleView(idx)" type="button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
-                                        {{ __('messages.view') }}
-                                    </button>
-                                </template>
-                                <template v-else>
-                                    <button @click="handleRemoveEvent(idx)" v-if="preview.parsed.length > 1" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                                        {{ __('messages.remove') }}
-                                    </button>
-                                    <button @click="handleSave(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                                        {{ __('messages.save') }}
-                                    </button>
-                                    <!--
-                                    <button v-if="isCurator && preview.parsed[idx].event_url && !preview.parsed[idx].is_curated" 
-                                            @click="handleCurate(idx)" 
-                                            type="button" 
-                                            class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
-                                        {{ __('messages.curate') }}
-                                    </button>
-                                    -->
-                                </template>
-                            </div>
-
-
-                            <!-- JSON preview with border matching textarea -->
-                            <div v-if="showAllFields" class="mt-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm overflow-auto bg-gray-50 dark:bg-gray-900">
-                                <pre class="p-4 text-xs text-gray-800 dark:text-gray-200">@{{ JSON.stringify(preview.parsed[idx], null, 2) }}</pre>
-                            </div>
-                            
-
-                        </div>
-                        
-                        <!-- Right column: Image -->
-                        <div class="flex flex-col">
-                            <div class="relative h-full flex flex-col">
-                                <!-- Image preview -->
-                                <div v-if="preview.parsed[idx].social_image" 
-                                        class="flex-grow rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-                                    <img v-bind:src="getSocialImageUrl(preview.parsed[idx].social_image)" 
-                                            class="object-contain w-full h-full" 
-                                            alt="Event preview image">
-                                    
-                                    <!-- Remove image button -->
-                                    <button @click="removeImage(idx)" 
-                                            type="button"
-                                            v-bind:disabled="savedEvents[idx]"
-                                            class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <!-- Drop zone -->
-                                <div v-else-if="!savedEvents[idx]"
-                                        @dragover.prevent="dragOver"
-                                        @dragleave.prevent="dragLeave"
-                                        @drop.prevent="(e) => handleDrop(e, idx)"
-                                        @click="() => openFileSelector(idx)"
-                                        v-bind:class="['flex-grow flex items-center justify-center rounded-lg border-2 border-dashed cursor-pointer', 
-                                                isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-300 dark:border-gray-600']">
-                                    <div class="text-center py-10">
-                                        <!-- Show loading spinner when uploading -->
-                                        <template v-if="isUploadingImage === idx">
-                                            <div class="relative mx-auto w-12 h-12">
-                                                <div class="w-12 h-12 rounded-full bg-blue-500/30"></div>
-                                                <div class="absolute top-0 left-0 w-12 h-12 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"></div>
-                                            </div>
-                                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                                {{ __('messages.uploading') }}...
-                                            </p>
-                                        </template>
-                                        <!-- Default upload icon and text -->
-                                        <template v-else>
-                                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                            </svg>
-                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                                {{ __('messages.drag_drop_image') }}
-                                            </p>
-                                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                                                {{ __('messages.or_paste_from_clipboard') }}
-                                            </p>
-                                        </template>
-                                    </div>
-                                </div>
-
-                                <!-- Hidden file input -->
-                                <input type="file" 
-                                        v-bind:ref="'fileInput_' + idx"
-                                        @change="(e) => handleFileSelect(e, idx)"
-                                        accept="image/*"
-                                        class="hidden">
-                            </div>
                         </div>
                     </div>
                 </div>
