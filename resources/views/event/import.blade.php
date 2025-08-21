@@ -282,6 +282,52 @@
                                     autocomplete="off" />
                         </div>
 
+                        <!-- Account creation checkbox for guest users -->
+                        @if(isset($isGuest) && $isGuest)
+                        <div class="flex items-center">
+                            <input type="checkbox" 
+                                    id="create_account_@{{ idx }}" 
+                                    name="create_account_@{{ idx }}" 
+                                    v-model="createAccount"
+                                    class="rounded border-gray-300 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                            <label for="create_account_@{{ idx }}" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {{ __('messages.create_account') }}
+                            </label>
+                        </div>
+                        
+                        <div v-if="createAccount" class="space-y-4">
+                            <div>
+                                <x-input-label for="name_@{{ idx }}" :value="__('messages.name')" />
+                                <x-text-input id="name_@{{ idx }}" 
+                                    name="name_@{{ idx }}" 
+                                    type="text" 
+                                    class="mt-1 block w-full" 
+                                    v-model="userName"
+                                    required />
+                            </div>
+                            
+                            <div>
+                                <x-input-label for="email_@{{ idx }}" :value="__('messages.email')" />
+                                <x-text-input id="email_@{{ idx }}" 
+                                    name="email_@{{ idx }}" 
+                                    type="email" 
+                                    class="mt-1 block w-full" 
+                                    v-model="userEmail"
+                                    required />
+                            </div>
+                            
+                            <div>
+                                <x-input-label for="password_@{{ idx }}" :value="__('messages.password')" />
+                                <x-text-input id="password_@{{ idx }}" 
+                                    name="password_@{{ idx }}" 
+                                    type="password" 
+                                    class="mt-1 block w-full" 
+                                    v-model="userPassword"
+                                    required />
+                            </div>
+                        </div>
+                        @endif
+
                         <!-- Add buttons at the bottom of the left column -->
                         <div class="mt-6 flex justify-end gap-2">
                             <template v-if="savedEvents[idx]">
@@ -301,9 +347,9 @@
                                 </button>
                                 <button @click="handleSave(idx)" 
                                         type="button" 
-                                        :disabled="savingEvents[idx]"
+                                        :disabled="savingEvents[idx] || !canCreateAccount"
                                         :class="['px-4 py-2 rounded-md transition-colors', 
-                                            savingEvents[idx] 
+                                            (savingEvents[idx] || !canCreateAccount)
                                                 ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
                                                 : 'bg-blue-500 text-white hover:bg-blue-600']">
                                     <span v-if="savingEvents[idx]" class="inline-flex items-center">
@@ -465,12 +511,23 @@
                 detailsImageUrl: null,
                 currentRequestId: null,
                 savingEvents: [], // Track which events are currently being saved
+                createAccount: false, // New data property for guest user account creation
+                userName: '',
+                userEmail: '',
+                userPassword: '',
             }
         },
 
         computed: {
             canSubmit() {
                 return this.eventDetails.trim() || this.detailsImage;
+            },
+            
+            canCreateAccount() {
+                if (!this.createAccount) return true;
+                return this.userName.trim() && 
+                       this.userEmail.trim() && 
+                       this.userPassword;
             }
         },
 
@@ -760,6 +817,13 @@
                             @if ($role->isCurator() && !isset($isGuest))
                                 curators: ['{{ \App\Utils\UrlUtils::encodeId($role->id) }}'],
                             @endif
+                            // User creation data for guest users
+                            ...({{ isset($isGuest) && $isGuest ? 'true' : 'false' }} && this.createAccount ? {
+                                create_account: true,
+                                name: this.userName,
+                                email: this.userEmail,
+                                password: this.userPassword
+                            } : {})
                         })
                     });
                     
@@ -826,6 +890,11 @@
                 this.savedEventData = [];
                 this.savingEvents = [];
                 this.errorMessage = null;
+                // Clear user creation fields
+                this.createAccount = false;
+                this.userName = '';
+                this.userEmail = '';
+                this.userPassword = '';
                 this.$nextTick(() => {
                     document.getElementById('event_details').focus();
                 });

@@ -24,6 +24,9 @@ use Carbon\Carbon;
 use App\Repos\EventRepo;
 use App\Http\Requests\EventCreateRequest;
 use App\Http\Requests\EventUpdateRequest;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use App\Rules\NoFakeEmail;
 
 class EventController extends Controller
 {
@@ -635,6 +638,11 @@ class EventController extends Controller
             $event->save();
         }
 
+        // Handle user creation if requested
+        if ($request->input('create_account')) {
+            $this->createAndLoginUser($request);
+        }
+
         // Clear the pending request session
         session()->forget('pending_request');
 
@@ -645,6 +653,40 @@ class EventController extends Controller
                 'message' => __('messages.event_created_guest'),
             ]
         ]);
+    }
+
+    /**
+     * Create a new user and log them in
+     */
+    private function createAndLoginUser(Request $request)
+    {
+        // Validate user creation data
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => array_merge(
+                ['required', 'string', 'email', 'max:255', 'unique:users'],
+                config('app.hosted') ? [new NoFakeEmail] : []
+            ),
+            'password' => ['required', 'string', 'min:8'],
+        ]);
+
+        // Create the user
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'timezone' => 'America/New_York', // Default timezone
+            'language_code' => 'en', // Default language
+        ]);
+
+        // Mark email as verified for guest users (they're already using the system)
+        $user->email_verified_at = now();
+        $user->save();
+
+        // Log the user in
+        Auth::login($user);
+
+        return $user;
     }
 
     public function uploadImage(Request $request, $subdomain)
