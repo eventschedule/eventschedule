@@ -1,6 +1,16 @@
 <x-app-guest-layout :role="$role" :event="$event" :date="$date" :fonts="$fonts">
 
   <main>
+    @if ($event && $event->roles->where('id', $role->id)->first() && $event->roles->where('id', $role->id)->first()->pivot->is_accepted === null)
+      <div class="w-full bg-amber-50 border-b border-amber-200 py-4">
+        <div class="container mx-auto px-5">
+          <div class="flex items-center justify-center text-amber-800">
+            <span class="text-sm font-medium">{{ __('messages.event_pending_review') }}</span>
+          </div>
+        </div>
+      </div>
+    @endif
+
     <div
       class="bg-center bg-cover relative before:bg-[#1B212B80] before:absolute before:inset-0 before:z-0"
     >
@@ -69,7 +79,7 @@
                 @endif
               >
                   <button type="button" 
-                        class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                        class="min-w-[180px] inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
                     {{ $event->registration_url ? __('messages.view_event') : __('messages.buy_tickets') }}
                 </button>            
               </a>
