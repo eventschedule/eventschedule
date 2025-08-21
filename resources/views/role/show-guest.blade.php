@@ -268,9 +268,8 @@
 
         @if($upcomingEventsWithVideos && $upcomingEventsWithVideos->count() > 0)
         @php
-          $isRtl = $role->isRtl() && ! session()->has('translate');
           // For RTL, we need to reverse the order of videos to show earliest first
-          if ($isRtl) {
+          if (is_rtl()) {
             // For RTL, we want earliest events first, so we don't reverse the collection
             // But we do need to reverse the video roles within each event to show earliest videos first
             $upcomingEventsWithVideos = $upcomingEventsWithVideos->map(function($eventData) {
