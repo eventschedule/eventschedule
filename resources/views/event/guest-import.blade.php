@@ -26,7 +26,7 @@
           </div>
           <div class="px-4 sm:px-8 pb-4 relative z-10">
             @if ($role->profile_image_url)
-            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] -ml-2 mb-6 bg-white dark:bg-gray-800 flex items-center justify-center">
+            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] -ml-1 mb-6 bg-white dark:bg-gray-800 flex items-center justify-center">
               <img
                 class="rounded-lg w-[120px] h-[120px] object-cover"
                 src="{{ $role->profile_image_url }}"
