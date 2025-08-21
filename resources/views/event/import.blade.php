@@ -65,6 +65,17 @@
                                         isDraggingDetails ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 ring-2 ring-blue-200 dark:ring-blue-800' : '']"
                                     placeholder="{{ __('messages.drag_drop_image_or_type_text') }}"></textarea>
                                 
+                                <!-- Drop message overlay for textarea -->
+                                <div v-if="isDraggingDetails" 
+                                     class="absolute inset-0 flex items-center justify-center bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-500 rounded-md z-10">
+                                    <div class="text-center">
+                                        <svg class="mx-auto h-8 w-8 text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                        </svg>
+                                        <p class="text-blue-700 dark:text-blue-300 font-medium">Drop files here</p>
+                                    </div>
+                                </div>
+                                
                                 <!-- Image preview overlay -->
                                 <div v-if="detailsImage" 
                                      class="absolute bottom-3 left-3 w-16 h-16 rounded-md overflow-hidden border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm">
@@ -95,7 +106,7 @@
                                     v-if="!detailsImage"
                                     type="button"
                                     @click="openDetailsFileSelector"
-                                    class="absolute right-16 bottom-3 p-2 rounded-md bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-600 dark:text-gray-400 transition-colors"
+                                    class="absolute right-16 bottom-3 p-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white transition-colors"
                                     title="{{ __('messages.add_image') }}">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -119,14 +130,6 @@
                                 </button>
                             </div>
                             <x-input-error class="mt-2" :messages="$errors->get('event_details')" />
-
-                            <!-- Image attached indicator -->
-                            <div v-if="detailsImage" class="mt-2 flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <span>{{ __('messages.image_attached') }} - {{ __('messages.continue_typing') }}</span>
-                            </div>
 
                             @if (! config('services.google.gemini_key'))
                                 <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
@@ -156,50 +159,7 @@
 
                     <!-- Right column: Instructions and help -->
                     <div class="mb-4 lg:mb-0">
-                        <div class="p-6 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-                                {{ __('messages.how_to_import') }}
-                            </h3>
-                            <div class="space-y-3 text-sm text-gray-600 dark:text-gray-400">
-                                <div class="flex items-start gap-3">
-                                    <div class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-medium">
-                                        1
-                                    </div>
-                                    <p>{{ __('messages.type_or_paste_event_details') }}</p>
-                                </div>
-                                <div class="flex items-start gap-3">
-                                    <div class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-medium">
-                                        2
-                                    </div>
-                                    <p>{{ __('messages.or_drag_drop_image') }}</p>
-                                </div>
-                                <div class="flex items-start gap-3">
-                                    <div class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-medium">
-                                        3
-                                    </div>
-                                    <p>{{ __('messages.click_submit_to_parse') }}</p>
-                                </div>
-                                <div class="flex items-start gap-3">
-                                    <div class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-medium">
-                                        4
-                                    </div>
-                                    <p>{{ __('messages.review_and_save_events') }}</p>
-                                </div>
-                            </div>
-                            
-                            <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-md">
-                                <div class="flex items-start gap-2">
-                                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <div class="text-sm text-blue-800 dark:text-blue-200">
-                                        <p class="font-medium mb-1">{{ __('messages.tip') }}</p>
-                                        <p>{{ __('messages.you_can_combine_text_and_images') }}</p>
-                                        <p class="mt-1 text-xs">{{ __('messages.drag_over_textarea') }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- Help section removed as requested -->
                     </div>
                 </div>
 
@@ -1101,10 +1061,12 @@
             },
 
             dragOverDetails(e) {
+                e.preventDefault();
                 this.isDraggingDetails = true;
             },
 
             dragLeaveDetails(e) {
+                e.preventDefault();
                 this.isDraggingDetails = false;
             },
 
@@ -1117,6 +1079,9 @@
                 if (files.length > 0) {
                     await this.uploadDetailsImage(files[0]);
                 }
+                
+                // Reset the file input to allow selecting the same file again
+                e.target.value = '';
             },
 
             async handleDetailsImageDrop(e) {
@@ -1152,6 +1117,9 @@
                 } catch (error) {
                     console.error('Error uploading details image:', error);
                     this.errorMessage = error.message || '{{ __("messages.error_uploading_image") }}';
+                    // Reset the image state on error
+                    this.detailsImage = null;
+                    this.detailsImageUrl = null;
                 } finally {
                     this.isUploadingDetailsImage = false;
                 }
@@ -1162,6 +1130,12 @@
                 this.detailsImage = null;
                 this.detailsImageUrl = null;
                 this.errorMessage = null; // Clear any error messages when removing the image
+                
+                // Reset the file input to allow selecting the same file again
+                if (this.$refs.detailsFileInput) {
+                    this.$refs.detailsFileInput.value = '';
+                }
+                
                 // Don't auto-submit - user must click the submit button
             },
 
