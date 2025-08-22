@@ -461,10 +461,10 @@
                         <!-- Videos grid - Now in two columns if there's room -->
                         <div v-else-if="performer.videos && performer.videos.length > 0" class="space-y-3">
                             <div class="text-xs text-gray-600 dark:text-gray-400 mb-2">
-                                {{ __('messages.select_video') }} ({{ __('messages.max_2_videos') }})
+                                {{ __('messages.select_video') }} ({{ __('messages.max_2_videos') }}) - Showing up to 6 results
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2 -mx-3">
-                                <div v-for="video in performer.videos" :key="video.id" 
+                                <div v-for="video in performer.videos.slice(0, 6)" :key="video.id" 
                                         class="border rounded-lg p-2 cursor-pointer hover:border-blue-300 transition-colors relative"
                                         :class="isVideoSelected(idx, performerIdx, video) ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-200 dark:border-gray-600'"
                                         @click="selectVideo(idx, performerIdx, video)">
