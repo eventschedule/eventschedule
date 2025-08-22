@@ -374,18 +374,8 @@
 
                         <!-- YouTube Videos Section for Talent -->
                         <div v-if="preview.parsed[idx].performers && preview.parsed[idx].performers.length > 0" class="mt-6">
-                            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.talent_videos') }}</h4>
                             <div v-for="(performer, performerIdx) in preview.parsed[idx].performers" :key="performerIdx" class="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                <div class="flex items-center justify-between mb-2">
-                                    <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100">@{{ performer.name }}</h5>
-                                    <button v-if="!performer.searching && !performer.videos" 
-                                            @click="searchVideos(idx, performerIdx)" 
-                                            type="button" 
-                                            class="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
-                                        {{ __('messages.search_videos') }}
-                                    </button>
-                                </div>
-                                
+
                                 <!-- Loading state -->
                                 <div v-if="performer.searching" class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
                                     <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-500"></div>
@@ -397,7 +387,7 @@
                                     <div class="text-xs text-gray-600 dark:text-gray-400 mb-2">
                                         {{ __('messages.select_video') }} ({{ __('messages.max_2_videos') }})
                                     </div>
-                                    <div class="grid grid-cols-1 gap-2">
+                                    <div class="grid grid-cols-1 gap-2 -mx-3">
                                         <div v-for="video in performer.videos" :key="video.id" 
                                                 class="border rounded-lg p-2 cursor-pointer hover:border-blue-300 transition-colors relative"
                                                 :class="isVideoSelected(idx, performerIdx, video) ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-200 dark:border-gray-600'"
@@ -450,11 +440,6 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    
-                                    <!-- Selected videos count -->
-                                    <div v-if="performer.selectedVideos && performer.selectedVideos.length > 0" class="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                                        {{ __('messages.selected_videos') }}: @{{ performer.selectedVideos.length }}/2
                                     </div>
                                 </div>
                                 
@@ -794,20 +779,25 @@
                         this.saveErrors = new Array(this.preview.parsed.length).fill(false);
                         this.savingEvents = new Array(this.preview.parsed.length).fill(false);
                         
-                        // Initialize video properties for performers
-                        this.preview.parsed.forEach(event => {
-                            if (event.performers && Array.isArray(event.performers)) {
-                                event.performers.forEach(performer => {
-                                    // Initialize video-related properties using Object.assign for reactivity
-                                    Object.assign(performer, {
-                                        videos: null,
-                                        selectedVideos: [],
-                                        searching: false,
-                                        error: null
-                                    });
+                                            // Initialize video properties for performers and automatically search for videos
+                    this.preview.parsed.forEach((event, eventIdx) => {
+                        if (event.performers && Array.isArray(event.performers)) {
+                            event.performers.forEach((performer, performerIdx) => {
+                                // Initialize video-related properties using Object.assign for reactivity
+                                Object.assign(performer, {
+                                    videos: null,
+                                    selectedVideos: [],
+                                    searching: false,
+                                    error: null
                                 });
-                            }
-                        });
+                                
+                                // Automatically search for videos for this performer
+                                this.$nextTick(() => {
+                                    this.searchVideos(eventIdx, performerIdx);
+                                });
+                            });
+                        }
+                    });
                     }
                     
                     // Initialize datepickers after preview is loaded
