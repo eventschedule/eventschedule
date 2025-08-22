@@ -1813,6 +1813,66 @@ class RoleController extends Controller
         }
     }
 
+    public function guestSearchYouTube(Request $request, $subdomain)
+    {
+        // For guest users, we don't require authentication but we do validate the subdomain
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        
+        $query = $request->get('q');
+        
+        if (empty($query)) {
+            return response()->json(['success' => false, 'message' => __('messages.query_required')]);
+        }
+
+        // Check if YouTube API key is configured
+        $apiKey = config('services.google.backend');
+        if (!$apiKey) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'YouTube API key not configured. Please contact the administrator.'
+            ]);
+        }
+
+        try {
+            \Log::info('Guest YouTube search started', [
+                'query' => $query,
+                'subdomain' => $subdomain,
+                'api_key_exists' => !empty($apiKey)
+            ]);
+            
+            $videos = \App\Utils\GeminiUtils::searchYouTube($query);
+            
+            \Log::info('Guest YouTube search completed', [
+                'query' => $query,
+                'videos_count' => is_array($videos) ? count($videos) : 'not_array',
+                'videos_type' => gettype($videos)
+            ]);
+            
+            if (empty($videos)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No videos found for "' . $query . '". Please try a different search term.'
+                ]);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'videos' => $videos
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Guest YouTube search error: ' . $e->getMessage(), [
+                'query' => $query,
+                'subdomain' => $subdomain,
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.error_searching_videos') . ': ' . $e->getMessage()
+            ]);
+        }
+    }
+
     public function saveVideo(Request $request, $subdomain)
     {
         if (!auth()->user()->isMember($subdomain)) {
