@@ -601,31 +601,15 @@ class GeminiUtils
         curl_close($ch);
         
         if ($response === false || $httpCode !== 200) {
-            \Log::error('YouTube API search failed', [
-                'http_code' => $httpCode,
-                'response' => $response,
-                'query' => $query
-            ]);
             return [];
         }
         
         $data = json_decode($response, true);
 
         if (!isset($data['items']) || !is_array($data['items'])) {
-            \Log::warning('YouTube API search returned invalid data', [
-                'data' => $data,
-                'query' => $query
-            ]);
             return [];
         }
         
-        \Log::info('YouTube API search results', [
-            'query' => $query,
-            'query_encoded' => urlencode($query),
-            'items_count' => count($data['items']),
-            'search_url' => $searchUrl
-        ]);
-
         $videos = [];
         $videoIds = [];
         
