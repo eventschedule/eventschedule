@@ -329,7 +329,7 @@
                         @endif
 
                         <!-- Add buttons at the bottom of the left column -->
-                        <div class="mt-6 flex justify-end gap-2">
+                        <div class="mt-10 flex justify-end gap-2">
                             <template v-if="savedEvents[idx]">
                                 <button v-if="!savedEventData[idx]?.is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" @click="handleEdit(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
                                     {{ __('messages.edit') }}
@@ -339,10 +339,10 @@
                                 </button>
                             </template>
                             <template v-else>
-                                <button @click="handleRemoveEvent(idx)" v-if="preview.parsed.length > 1 && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                <button @click="handleRemoveEvent(idx)" v-if="preview.parsed.length > 1" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                                     {{ __('messages.remove') }}
                                 </button>
-                                <button @click="handleClear" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                <button @click="handleClear" type="button" v-if="preview.parsed.length == 1" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                                     {{ __('messages.clear') }}
                                 </button>
                                 <button @click="handleSave(idx)" 
@@ -450,7 +450,7 @@
 
                 <!-- YouTube Videos Section for Talent - Now below the form and image -->
                 <div v-if="preview.parsed[idx].performers && preview.parsed[idx].performers.length > 0" class="mt-6">
-                    <div v-for="(performer, performerIdx) in preview.parsed[idx].performers" :key="performerIdx" class="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div v-for="(performer, performerIdx) in preview.parsed[idx].performers" :key="performerIdx" class="my-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
 
                         <!-- Loading state -->
                         <div v-if="performer.searching" class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
@@ -461,9 +461,9 @@
                         <!-- Videos grid - Now in two columns if there's room -->
                         <div v-else-if="performer.videos && performer.videos.length > 0" class="space-y-3">
                             <div class="text-xs text-gray-600 dark:text-gray-400 mb-2">
-                                {{ __('messages.select_video') }} ({{ __('messages.max_2_videos') }}) - Showing up to 6 results
+                                {{ __('messages.select_videos') }}
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 -mx-3">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 -mx-3 p-3">
                                 <div v-for="video in performer.videos.slice(0, 6)" :key="video.id" 
                                         class="border rounded-lg p-2 cursor-pointer hover:border-blue-300 transition-colors relative"
                                         :class="isVideoSelected(idx, performerIdx, video) ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-200 dark:border-gray-600'"
@@ -520,14 +520,11 @@
                         </div>
                         
                         <!-- Error state -->
+                        @if (auth()->user() && auth()->user()->isAdmin())
                         <div v-else-if="performer.error" class="text-xs text-red-600 dark:text-red-400">
                             @{{ performer.error }}
                         </div>
-                        
-                        <!-- No videos found -->
-                        <div v-else-if="performer.videos && performer.videos.length === 0" class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ __('messages.no_videos_found') }}
-                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
