@@ -1,16 +1,30 @@
 <x-app-guest-layout :role="$role" :event="$event" :date="$date" :fonts="$fonts">
 
   <main>
-    @if ($event && $event->roles->where('id', $role->id)->first() && $event->roles->where('id', $role->id)->first()->pivot->is_accepted === null)
-      <div class="w-full bg-amber-50 border-b border-amber-200 py-4">
-        <div class="container mx-auto px-5">
-          <div class="flex items-center justify-center text-amber-800">
-            <span class="text-sm font-medium">{{ __('messages.event_pending_review') }}</span>
-          </div>
-        </div>
-      </div>
-    @endif
+    @php
+      $eventRole = $event->roles->where('id', $role->id)->first();
+      $eventIsAccepted = $eventRole->pivot->is_accepted;
+    @endphp
+  
 
+  @if ($eventIsAccepted === null)
+  <div class="w-full bg-amber-50 border-b border-amber-200 py-4">
+    <div class="container mx-auto px-5">
+      <div class="flex items-center justify-center text-amber-800">
+        <span class="text-sm font-medium">{{ __('messages.event_pending_review') }}</span>
+      </div>
+    </div>
+  </div>
+  @elseif (! $eventIsAccepted)
+  <div class="w-full bg-red-50 border-b border-red-200 py-4">
+    <div class="container mx-auto px-5">
+      <div class="flex items-center justify-center text-red-800">
+        <span class="text-sm font-medium">{{ __('messages.event_rejected') }}</span>
+      </div>
+    </div>
+  </div>
+  @endif
+    
     <div
       class="bg-center bg-cover relative before:bg-[#1B212B80] before:absolute before:inset-0 before:z-0"
     >
