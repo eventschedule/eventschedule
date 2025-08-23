@@ -518,10 +518,7 @@ class EventController extends Controller
 
     public function showGuestImport(Request $request, $subdomain)
     {
-        // Check if there's a pending request in session
-        if (!session('pending_request') || session('pending_request') !== $subdomain) {
-            abort(404);
-        }
+        session()->put('pending_request', $subdomain);
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
