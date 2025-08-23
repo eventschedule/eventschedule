@@ -62,8 +62,11 @@
                                     @drop.prevent="handleDetailsImageDrop"
                                     @dragend="dragEndDetails"
                                     autofocus {{ config('services.google.gemini_key') ? '' : 'disabled' }}
-                                    :class="['mt-1 block w-full pr-24 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm transition-all duration-200', 
+                                    :class="['mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm transition-all duration-200', 
+                                        {{ is_rtl() ? "'pl-24'" : "'pr-24'" }},
                                         isDraggingDetails ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 ring-2 ring-blue-200 dark:ring-blue-800' : '']"
+                                    :dir="{{ is_rtl() ? "'rtl'" : "'ltr'" }}"
+                                    :style="{{ is_rtl() ? "'text-align: right;'" : "'text-align: left;'" }}"
                                     placeholder="{{ __('messages.drag_drop_image_or_type_text') }}"></textarea>
                                 
                                 <!-- Drop message overlay for textarea -->
@@ -85,7 +88,8 @@
                                 
                                 <!-- Image preview overlay -->
                                 <div v-if="detailsImage" 
-                                     class="absolute bottom-3 left-3 w-16 h-16 rounded-md overflow-hidden border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm">
+                                     :class="['absolute bottom-3 w-16 h-16 rounded-md overflow-hidden border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm', 
+                                         {{ is_rtl() ? "'right-3'" : "'left-3'" }}]">
                                     <img v-if="detailsImageUrl" 
                                          :src="detailsImageUrl" 
                                          class="object-cover w-full h-full" 
@@ -100,7 +104,8 @@
                                     <button 
                                         @click="removeDetailsImage"
                                         type="button"
-                                        class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-colors"
+                                        :class="['absolute -top-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-colors', 
+                                            {{ is_rtl() ? "'-left-1'" : "'-right-1'" }}]"
                                         title="{{ __('messages.remove_image') }}">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -113,7 +118,8 @@
                                     type="button"
                                     @click="openDetailsFileSelector"
                                     :disabled="isLoading || detailsImage"
-                                    :class="['absolute right-16 bottom-3 p-2 rounded-md transition-all duration-200 shadow-md', 
+                                    :class="['absolute p-2 rounded-md transition-all duration-200 shadow-md', 
+                                        {{ is_rtl() ? "'left-16'" : "'right-16'" }} + ' bottom-3',
                                         (isLoading || detailsImage)
                                             ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed border border-gray-400 dark:border-gray-500' 
                                             : 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white cursor-pointer border border-blue-400/30 hover:border-blue-300/50 shadow-lg hover:shadow-xl']"
@@ -128,7 +134,8 @@
                                     type="button"
                                     @click="handleSubmit"
                                     :disabled="!canSubmit || isLoading"
-                                    :class="['absolute right-5 bottom-3 p-2 rounded-md transition-all duration-200 shadow-md', 
+                                    :class="['absolute p-2 rounded-md transition-all duration-200 shadow-md', 
+                                        {{ is_rtl() ? "'left-5'" : "'right-5'" }} + ' bottom-3',
                                         canSubmit && !isLoading
                                             ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white cursor-pointer border border-blue-400/30 hover:border-blue-300/50 shadow-lg hover:shadow-xl' 
                                             : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed border border-gray-400 dark:border-gray-500']"
@@ -245,18 +252,20 @@
                         </div>
                         
                         <div>
-                            <x-input-label for="name_@{{ idx }}" :value="__('messages.event_name')" />
+                            <x-input-label for="name_@{{ idx }}" :value="__('messages.event_name')" :class="{{ is_rtl() ? "'text-right'" : "'text-left'" }}" />
                             <x-text-input id="name_@{{ idx }}" 
                                 name="name_@{{ idx }}" 
                                 type="text" 
                                 class="mt-1 block w-full" 
                                 v-model="preview.parsed[idx].event_name"
                                 v-bind:readonly="savedEvents[idx]"
+                                :dir="{{ is_rtl() ? "'rtl'" : "'ltr'" }}"
+                                :style="{{ is_rtl() ? "'text-align: right;'" : "'text-align: left;'" }}"
                                 required />
                         </div>
 
                         <div>
-                            <x-input-label for="venue_address1_@{{ idx }}" :value="__('messages.address')" />
+                            <x-input-label for="venue_address1_@{{ idx }}" :value="__('messages.address')" :class="{{ is_rtl() ? "'text-right'" : "'text-left'" }}" />
                             <x-text-input id="venue_address1_@{{ idx }}" 
                                 name="venue_address1_@{{ idx }}" 
                                 type="text" 
@@ -264,6 +273,8 @@
                                 v-model="preview.parsed[idx].event_address"
                                 v-bind:readonly="preview.parsed[idx].venue_id || savedEvents[idx]"
                                 placeholder="{{ $role->isCurator() ? $role->city : '' }}"
+                                :dir="{{ is_rtl() ? "'rtl'" : "'ltr'" }}"
+                                :style="{{ is_rtl() ? "'text-align: right;'" : "'text-align: left;'" }}"
                                 required
                                 autocomplete="off" />
                         </div>
@@ -297,32 +308,38 @@
                         
                         <div v-if="createAccount" class="space-y-4">
                             <div>
-                                <x-input-label for="name_@{{ idx }}" :value="__('messages.name')" />
+                                <x-input-label for="name_@{{ idx }}" :value="__('messages.name')" :class="{{ is_rtl() ? "'text-right'" : "'text-left'" }}" />
                                 <x-text-input id="name_@{{ idx }}" 
                                     name="name_@{{ idx }}" 
                                     type="text" 
                                     class="mt-1 block w-full" 
                                     v-model="userName"
+                                    :dir="{{ is_rtl() ? "'rtl'" : "'ltr'" }}"
+                                    :style="{{ is_rtl() ? "'text-align: right;'" : "'text-align: left;'" }}"
                                     required />
                             </div>
                             
                             <div>
-                                <x-input-label for="email_@{{ idx }}" :value="__('messages.email')" />
+                                <x-input-label for="email_@{{ idx }}" :value="__('messages.email')" :class="{{ is_rtl() ? "'text-right'" : "'text-left'" }}" />
                                 <x-text-input id="email_@{{ idx }}" 
                                     name="email_@{{ idx }}" 
                                     type="email" 
                                     class="mt-1 block w-full" 
                                     v-model="userEmail"
+                                    :dir="{{ is_rtl() ? "'rtl'" : "'ltr'" }}"
+                                    :style="{{ is_rtl() ? "'text-align: right;'" : "'text-align: left;'" }}"
                                     required />
                             </div>
                             
                             <div>
-                                <x-input-label for="password_@{{ idx }}" :value="__('messages.password')" />
+                                <x-input-label for="password_@{{ idx }}" :value="__('messages.password')" :class="{{ is_rtl() ? "'text-right'" : "'text-left'" }}" />
                                 <x-text-input id="password_@{{ idx }}" 
                                     name="password_@{{ idx }}" 
                                     type="password" 
                                     class="mt-1 block w-full" 
                                     v-model="userPassword"
+                                    :dir="{{ is_rtl() ? "'rtl'" : "'ltr'" }}"
+                                    :style="{{ is_rtl() ? "'text-align: right;'" : "'text-align: left;'" }}"
                                     required />
                             </div>
                         </div>
