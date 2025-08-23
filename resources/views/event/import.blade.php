@@ -252,20 +252,18 @@
                         </div>
                         
                         <div>
-                            <x-input-label for="name_@{{ idx }}" :value="__('messages.event_name')" :class="{{ is_rtl() ? "'text-right'" : "'text-left'" }}" />
+                            <x-input-label for="name_@{{ idx }}" :value="__('messages.event_name')" />
                             <x-text-input id="name_@{{ idx }}" 
                                 name="name_@{{ idx }}" 
                                 type="text" 
                                 class="mt-1 block w-full" 
                                 v-model="preview.parsed[idx].event_name"
                                 v-bind:readonly="savedEvents[idx]"
-                                :dir="{{ is_rtl() ? "'rtl'" : "'ltr'" }}"
-                                :style="{{ is_rtl() ? "'text-align: right;'" : "'text-align: left;'" }}"
                                 required />
                         </div>
 
                         <div>
-                            <x-input-label for="venue_address1_@{{ idx }}" :value="__('messages.address')" :class="{{ is_rtl() ? "'text-right'" : "'text-left'" }}" />
+                            <x-input-label for="venue_address1_@{{ idx }}" :value="__('messages.address')" />
                             <x-text-input id="venue_address1_@{{ idx }}" 
                                 name="venue_address1_@{{ idx }}" 
                                 type="text" 
@@ -273,8 +271,6 @@
                                 v-model="preview.parsed[idx].event_address"
                                 v-bind:readonly="preview.parsed[idx].venue_id || savedEvents[idx]"
                                 placeholder="{{ $role->isCurator() ? $role->city : '' }}"
-                                :dir="{{ is_rtl() ? "'rtl'" : "'ltr'" }}"
-                                :style="{{ is_rtl() ? "'text-align: right;'" : "'text-align: left;'" }}"
                                 required
                                 autocomplete="off" />
                         </div>
@@ -308,38 +304,32 @@
                         
                         <div v-if="createAccount" class="space-y-4">
                             <div>
-                                <x-input-label for="name_@{{ idx }}" :value="__('messages.name')" :class="{{ is_rtl() ? "'text-right'" : "'text-left'" }}" />
+                                <x-input-label for="name_@{{ idx }}" :value="__('messages.name')" />
                                 <x-text-input id="name_@{{ idx }}" 
                                     name="name_@{{ idx }}" 
                                     type="text" 
                                     class="mt-1 block w-full" 
                                     v-model="userName"
-                                    :dir="{{ is_rtl() ? "'rtl'" : "'ltr'" }}"
-                                    :style="{{ is_rtl() ? "'text-align: right;'" : "'text-align: left;'" }}"
                                     required />
                             </div>
                             
                             <div>
-                                <x-input-label for="email_@{{ idx }}" :value="__('messages.email')" :class="{{ is_rtl() ? "'text-right'" : "'text-left'" }}" />
+                                <x-input-label for="email_@{{ idx }}" :value="__('messages.email')" />
                                 <x-text-input id="email_@{{ idx }}" 
                                     name="email_@{{ idx }}" 
                                     type="email" 
                                     class="mt-1 block w-full" 
                                     v-model="userEmail"
-                                    :dir="{{ is_rtl() ? "'rtl'" : "'ltr'" }}"
-                                    :style="{{ is_rtl() ? "'text-align: right;'" : "'text-align: left;'" }}"
                                     required />
                             </div>
                             
                             <div>
-                                <x-input-label for="password_@{{ idx }}" :value="__('messages.password')" :class="{{ is_rtl() ? "'text-right'" : "'text-left'" }}" />
+                                <x-input-label for="password_@{{ idx }}" :value="__('messages.password')" />
                                 <x-text-input id="password_@{{ idx }}" 
                                     name="password_@{{ idx }}" 
                                     type="password" 
                                     class="mt-1 block w-full" 
                                     v-model="userPassword"
-                                    :dir="{{ is_rtl() ? "'rtl'" : "'ltr'" }}"
-                                    :style="{{ is_rtl() ? "'text-align: right;'" : "'text-align: left;'" }}"
                                     required />
                             </div>
                         </div>
