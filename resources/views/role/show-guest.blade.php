@@ -1,5 +1,9 @@
 <x-app-guest-layout :role="$role" :fonts="$fonts">
 
+  @php
+   $isRtl = is_rtl();
+  @endphp
+
   @if ($role->profile_image_url && ! $role->header_image && ! $role->header_image && $role->language_code == 'en')
   <div class="pt-8"></div>
   @endif
@@ -278,9 +282,7 @@
             });
           }
         @endphp
-        <!-- Debug: RTL = {{ $isRtl ? 'true' : 'false' }}, Role language = {{ $role->language_code }}, Event count = {{ $upcomingEventsWithVideos->count() }} -->
         @foreach($upcomingEventsWithVideos as $eventData)
-          <!-- Event: {{ $eventData['event']->name }} - {{ $eventData['event']->starts_at }} -->
         @endforeach
         <div class="bg-[#F5F9FE] rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6">
           <!-- Carousel Container -->
