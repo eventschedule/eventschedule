@@ -113,10 +113,10 @@
                                     type="button"
                                     @click="openDetailsFileSelector"
                                     :disabled="isLoading || detailsImage"
-                                    :class="['absolute right-16 bottom-3 p-2 rounded-md transition-colors', 
+                                    :class="['absolute right-16 bottom-3 p-2 rounded-md transition-all duration-200 shadow-md', 
                                         (isLoading || detailsImage)
-                                            ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed' 
-                                            : 'bg-blue-500 hover:bg-blue-600 text-white cursor-pointer']"
+                                            ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed border border-gray-400 dark:border-gray-500' 
+                                            : 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white cursor-pointer border border-blue-400/30 hover:border-blue-300/50 shadow-lg hover:shadow-xl']"
                                     title="{{ __('messages.add_image') }}">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -128,10 +128,10 @@
                                     type="button"
                                     @click="handleSubmit"
                                     :disabled="!canSubmit || isLoading"
-                                    :class="['absolute right-5 bottom-3 p-2 rounded-md transition-all duration-200', 
+                                    :class="['absolute right-5 bottom-3 p-2 rounded-md transition-all duration-200 shadow-md', 
                                         canSubmit && !isLoading
-                                            ? 'bg-blue-500 hover:bg-blue-600 text-white cursor-pointer' 
-                                            : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed']"
+                                            ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white cursor-pointer border border-blue-400/30 hover:border-blue-300/50 shadow-lg hover:shadow-xl' 
+                                            : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed border border-gray-400 dark:border-gray-500']"
                                     title="{{ __('messages.submit') }}">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
