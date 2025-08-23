@@ -823,12 +823,29 @@
             },
             
             handlePaste(event) {
-                // Prevent the default paste behavior
-                event.preventDefault()
+                // Check if clipboard has image data
+                if (event.clipboardData && event.clipboardData.items) {
+                    const items = event.clipboardData.items;
+                    
+                    for (let i = 0; i < items.length; i++) {
+                        if (items[i].type.indexOf('image') !== -1) {
+                            const file = items[i].getAsFile();
+                            if (file) {
+                                event.preventDefault(); // Prevent default paste behavior
+                                // Upload the image as if it was selected
+                                this.uploadDetailsImage(file);
+                                return; // Exit early since we handled the image
+                            }
+                        }
+                    }
+                }
+                
+                // If no image data, handle as text paste
+                event.preventDefault();
                 // Get the pasted text
-                const pastedText = event.clipboardData.getData('text')
+                const pastedText = event.clipboardData.getData('text');
                 // Update the model manually
-                this.eventDetails = pastedText
+                this.eventDetails = pastedText;
                 // Don't auto-submit - user must click the submit button
             },
 
