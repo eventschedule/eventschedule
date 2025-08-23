@@ -561,4 +561,5 @@ return [
     'event_rejected' => 'An admin has declined to add this event to the schedule',
     'select_video' => 'Select a video',
     'video_selected' => 'Video selected',
+    'no_videos_found' => 'No videos found',
 ];

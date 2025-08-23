@@ -537,6 +537,7 @@ return [
     'require_approval' => 'Approbation Requise',
     'actions' => 'Actions',
     'event_pending_review' => 'Cet événement sera ajouté au calendrier une fois qu\'il aura été examiné',
+    'event_rejected' => 'Un administrateur a refusé d\'ajouter cet événement au programme',
     'or' => 'ou',
     'drag_drop_image_or_type_text' => 'Tapez les détails de l\'événement ou glissez-déposez une image ici...',
     'image_attached' => 'Image jointe',
