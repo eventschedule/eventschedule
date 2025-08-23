@@ -11,7 +11,7 @@
   <main>
     <div>
       <div class="container mx-auto pt-7 pb-10 px-5">
-        <div class="bg-[#F5F9FE] rounded-xl mb-6 {{ !$role->header_image && !$role->header_image_url && $role->profile_image_url ? 'pt-16' : '' }}">
+        <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-xl mb-6 {{ !$role->header_image && !$role->header_image_url && $role->profile_image_url ? 'pt-16' : '' }}">
           <div
             class="relative before:block before:absolute before:bg-[#00000033] before:-inset-0"
           >
@@ -30,7 +30,7 @@
           </div>
           <div class="px-6 lg:px-16 pb-4 relative z-10">
             @if ($role->profile_image_url)
-            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] -ml-2 mb-6 bg-[#F5F9FE] flex items-center justify-center">
+            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] -ml-2 mb-6 bg-[#F5F9FE] dark:bg-gray-800 flex items-center justify-center">
               <img
                 class="rounded-lg w-[120px] h-[120px] object-cover"
                 src="{{ $role->profile_image_url }}"
@@ -42,7 +42,7 @@
             @endif
             <div class="flex flex-row justify-between items-start gap-6 mb-5">
               <div>
-                <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] mb-2">
+                <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2">
                   {{ $role->translatedName() }}
                 </h3>
                 @if (auth()->user() && auth()->user()->isMember($role->subdomain))
@@ -284,7 +284,7 @@
         @endphp
         @foreach($upcomingEventsWithVideos as $eventData)
         @endforeach
-        <div class="bg-[#F5F9FE] rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6">
+        <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6">
           <!-- Carousel Container -->
           <div class="relative group">
             <!-- Carousel Track -->
@@ -343,19 +343,19 @@
 
         @if($role->translatedDescription())
         <div
-          class="bg-[#F5F9FE] rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-4 mb-6 {{ $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}"
+          class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-4 mb-6 {{ $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}"
         >
-          <div class="text-[32px] font-semibold leading-10 text-[#151B26]">
+          <div class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100">
             {{ __('messages.about') }}
           </div>
-          <div class="text-[#33383C] text-base custom-content">
+          <div class="text-[#33383C] dark:text-gray-300 text-base custom-content">
             {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
           </div>
         </div>
         @endif
 
       <div 
-        class="bg-[#F5F9FE] rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6"
+        class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6"
       >  
         @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule')])
       </div>
@@ -371,7 +371,7 @@
         @endphp
         @if ($videoCount > 0)
           <div
-              class="bg-[#F5F9FE] rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6"
+              class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6"
             >
               <div class="grid grid-cols-1 md:grid-cols-{{ $gridCols }} gap-8">
               @foreach ($videoLinks as $link)
@@ -388,9 +388,9 @@
 
       @if ($role->social_links && $role->social_links != '[]')
       <div 
-        class="bg-[#F5F9FE] rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6"
+        class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6"
       >
-        <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] mb-6">
+        <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-6">
           {{ __('messages.social_media') }}
         </h3>
         <div class="flex flex-row gap-4 items-center">

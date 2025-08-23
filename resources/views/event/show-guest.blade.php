@@ -278,13 +278,13 @@
     >
       <div class="flex flex-col gap-10">
         @if (request()->get('tickets') === 'true' && $event->isPro())
-        <div class="flex flex-col xl:flex-row gap-10 bg-[#F5F9FE] rounded-lg px-5 py-10 sm:p-10 mb-4">
+        <div class="flex flex-col xl:flex-row gap-10 bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-5 py-10 sm:p-10 mb-4">
           <div class="flex-1">
             <div class="flex flex-col gap-4">
-              <h4 class="text-[28px] leading-snug text-black">
+              <h4 class="text-[28px] leading-snug text-black dark:text-gray-100">
                 {{ __('messages.buy_tickets') }}
               </h4>
-              <p class="text-base text-black">
+              <p class="text-base text-black dark:text-gray-300">
                 @include('event.tickets', ['event' => $event, 'subdomain' => $subdomain])
               </p>
             </div>
@@ -298,13 +298,13 @@
         @else
         <div>
         @if ($translation ? $translation->description_translated : $event->translatedDescription())
-          <div class="bg-[#F5F9FE] rounded-lg px-5 py-8 sm:p-8 mb-6 flex flex-col gap-4 {{ $role->isRtl() || ($translation && $translation->role->isRtl()) ? 'rtl' : '' }}">
+          <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-5 py-8 sm:p-8 mb-6 flex flex-col gap-4 {{ $role->isRtl() || ($translation && $translation->role->isRtl()) ? 'rtl' : '' }}">
             <h2
-              class="text-[#151B26] text-[40px] sm:text-{52px} leading-snug font-semibold"
+              class="text-[#151B26] dark:text-gray-100 text-[40px] sm:text-{52px} leading-snug font-semibold"
             >
               {{ __('messages.event_details') }}
             </h2>
-            <div class="text-[#33383C] text-base custom-content">
+            <div class="text-[#33383C] dark:text-gray-300 text-base custom-content">
               {!! \App\Utils\UrlUtils::convertUrlsToLinks($translation ? $translation->description_translated : $event->translatedDescription()) !!}
             </div>
           </div>
@@ -314,7 +314,7 @@
             @if (! $each->isClaimed() && ! $each->getFirstVideoUrl())
               @continue       
             @endif
-          <div class="bg-[#F5F9FE] rounded-lg px-5 py-8 sm:p-8 mb-6 flex flex-col gap-4" 
+          <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-5 py-8 sm:p-8 mb-6 flex flex-col gap-4" 
             style="font-family: {{ $each->isClaimed() ? $each->font_family : $otherRole->font_family }}, sans-serif;"
           >
             <div
@@ -356,7 +356,7 @@
                   href="{{ $memberUrl }}"
                   class="text-base text-[#151B26] hover:underline cursor-pointer duration-300"
                 >                
-                  <h3 class="text-[28px] font-semibold leading-10 text-[#151B26]">
+                  <h3 class="text-[28px] font-semibold leading-10 text-[#151B26] dark:text-gray-100">
                     {{ $each->name }}
                   </h3>
                 </a>
@@ -367,7 +367,7 @@
                   class="rounded-lg w-[56px] h-[56px]"
                 />
                 @endif
-                <h3 class="text-[28px] font-semibold leading-10 text-[#151B26]">
+                <h3 class="text-[28px] font-semibold leading-10 text-[#151B26] dark:text-gray-100">
                   {{ $each->translatedName() }}
                 </h3>
                 @endif
@@ -417,7 +417,7 @@
               </div>
             </div>
             -->
-            <div class="text-base text-[#33383C] custom-content {{ $role->isRtl() ? 'rtl' : '' }}">
+            <div class="text-base text-[#33383C] dark:text-gray-300 custom-content {{ $role->isRtl() ? 'rtl' : '' }}">
               {!! \App\Utils\UrlUtils::convertUrlsToLinks($each->description_html) !!}
             </div>
             @if ($each->youtube_links)
@@ -446,7 +446,7 @@
           @endforeach
 
           @if ($event->flyer_image_url)
-          <div class="bg-[#F5F9FE] rounded-lg px-5 py-8 sm:p-8 mb-6 flex flex-col gap-4">
+          <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-5 py-8 sm:p-8 mb-6 flex flex-col gap-4">
             <img src="{{ $event->flyer_image_url }}" class="block"/>
           </div>
           @endif
@@ -559,8 +559,8 @@
         @endif
 
         @if ($event->tickets_enabled && $event->isPro())
-        <div class="p-6 rounded-xl flex flex-col gap-6 bg-[#F5F9FE] {{ $role->isRtl() ? 'rtl' : '' }}">
-          <h4 class="text-[#151B26] text-[24px] leading-snug font-semibold">
+        <div class="p-6 rounded-xl flex flex-col gap-6 bg-[#F5F9FE] dark:bg-gray-800 {{ $role->isRtl() ? 'rtl' : '' }}">
+          <h4 class="text-[#151B26] dark:text-gray-100 text-[24px] leading-snug font-semibold">
             {{ __('messages.add_to_calendar') }}
           </h4>
           <div class="flex flex-row gap-3">          
@@ -583,8 +583,8 @@
         </div>
         @endif
 
-        <div class="p-6 rounded-xl flex flex-col gap-6 bg-[#F5F9FE] {{ $role->isRtl() ? 'rtl' : '' }}">
-          <h4 class="text-[24px] leading-snug font-semibold text-gray-900">
+        <div class="p-6 rounded-xl flex flex-col gap-6 bg-[#F5F9FE] dark:bg-gray-800 {{ $role->isRtl() ? 'rtl' : '' }}">
+          <h4 class="text-[24px] leading-snug font-semibold text-gray-900 dark:text-gray-100">
             {{ __('messages.create_your_own_event_schedule') }}
           </h4>
           <a href="https://www.eventschedule.com" target="_blank">
@@ -602,7 +602,7 @@
         </div>
 
         <!-- Calendar section moved here and modified to show mobile view -->
-        <div class="p-6 rounded-xl flex flex-col gap-6 bg-[#F5F9FE] {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div class="p-6 rounded-xl flex flex-col gap-6 bg-[#F5F9FE] dark:bg-gray-800 {{ $role->isRtl() ? 'rtl' : '' }}">
           <div class="w-full">
             @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule'), 'force_mobile' => true])
           </div>
