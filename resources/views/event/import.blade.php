@@ -1569,15 +1569,9 @@
                         ? `{{ route('role.guest_search_youtube', ['subdomain' => $role->subdomain]) }}`
                         : `{{ route('role.search_youtube', ['subdomain' => $role->subdomain]) }}`;
                     
-                    console.log('Searching YouTube with endpoint:', endpoint);
-                    console.log('Query:', performer.name);
                     
-                    const response = await fetch(`${endpoint}?q=${encodeURIComponent(performer.name)}`);
-                    console.log('Response status:', response.status);
-                    console.log('Response headers:', response.headers);
-                    
+                    const response = await fetch(`${endpoint}?q=${encodeURIComponent(performer.name)}`);                    
                     const data = await response.json();
-                    console.log('Response data:', data);
                     
                     if (data.success && data.videos) {
                         performer.videos = data.videos;

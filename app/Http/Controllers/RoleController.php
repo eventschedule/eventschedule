@@ -1834,19 +1834,7 @@ class RoleController extends Controller
         }
 
         try {
-            \Log::info('Guest YouTube search started', [
-                'query' => $query,
-                'subdomain' => $subdomain,
-                'api_key_exists' => !empty($apiKey)
-            ]);
-            
             $videos = \App\Utils\GeminiUtils::searchYouTube($query);
-            
-            \Log::info('Guest YouTube search completed', [
-                'query' => $query,
-                'videos_count' => is_array($videos) ? count($videos) : 'not_array',
-                'videos_type' => gettype($videos)
-            ]);
             
             if (empty($videos)) {
                 return response()->json([
@@ -1860,11 +1848,6 @@ class RoleController extends Controller
                 'videos' => $videos
             ]);
         } catch (\Exception $e) {
-            \Log::error('Guest YouTube search error: ' . $e->getMessage(), [
-                'query' => $query,
-                'subdomain' => $subdomain,
-                'trace' => $e->getTraceAsString()
-            ]);
             
             return response()->json([
                 'success' => false,
