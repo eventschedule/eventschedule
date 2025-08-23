@@ -110,7 +110,7 @@ class UrlUtils
     public static function getUrlInfo($url)
     {
         // Validate and sanitize URL
-        if (!self::isUrlSafe($url)) {
+        if (! self::isUrlSafe($url)) {
             return null;
         }
         

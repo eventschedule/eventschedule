@@ -559,5 +559,6 @@ return [
     'drag_over_textarea' => 'Drag images directly over the text area to attach them',
     'event_pending_review' => 'This event is pending review by an admin',
     'event_rejected' => 'An admin has declined to add this event to the schedule',
-    'select_videos' => 'Select up to 2 videos',
+    'select_video' => 'Select a video',
+    'video_selected' => 'Video selected',
 ];

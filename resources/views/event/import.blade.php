@@ -461,7 +461,7 @@
                         <!-- Videos grid - Now in two columns if there's room -->
                         <div v-else-if="performer.videos && performer.videos.length > 0" class="space-y-3">
                             <div class="text-xs text-gray-600 dark:text-gray-400 mb-2">
-                                {{ __('messages.select_videos') }}
+                                {{ __('messages.select_video') }}
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2 -mx-3 p-3">
                                 <div v-for="video in performer.videos.slice(0, 6)" :key="video.id" 
@@ -776,14 +776,14 @@
                         this.saveErrors = new Array(this.preview.parsed.length).fill(false);
                         this.savingEvents = new Array(this.preview.parsed.length).fill(false);
                         
-                                            // Initialize video properties for performers and automatically search for videos
+                    // Initialize video properties for performers and automatically search for videos
                     this.preview.parsed.forEach((event, eventIdx) => {
                         if (event.performers && Array.isArray(event.performers)) {
                             event.performers.forEach((performer, performerIdx) => {
                                 // Initialize video-related properties using Object.assign for reactivity
                                 Object.assign(performer, {
                                     videos: null,
-                                    selectedVideos: [],
+                                    selectedVideos: [], // Will contain at most one video
                                     searching: false,
                                     error: null
                                 });
@@ -891,10 +891,7 @@
                             
                             // Add selected videos if any
                             if (performer.selectedVideos && performer.selectedVideos.length > 0) {
-                                memberData.videos = performer.selectedVideos.map(video => ({
-                                    url: video.url,
-                                    title: video.title
-                                }));
+                                memberData.youtube_url = performer.selectedVideos[0].url; // Only send one video URL
                             }
                             
                             members[`new_talent_${index}`] = memberData;
@@ -1561,7 +1558,7 @@
                     Object.assign(performer, { videos: [] });
                 }
                 if (!performer.selectedVideos) {
-                    Object.assign(performer, { selectedVideos: [] });
+                    Object.assign(performer, { selectedVideos: [] }); // Will contain at most one video
                 }
                 
                 performer.searching = true;
@@ -1585,7 +1582,7 @@
                     if (data.success && data.videos) {
                         performer.videos = data.videos;
                         // Don't auto-select videos - let user choose
-                        performer.selectedVideos = [];
+                        performer.selectedVideos = []; // Reset to empty array
                     } else {
                         performer.error = data.message || '{{ __("messages.no_videos_found") }}';
                     }
@@ -1600,7 +1597,7 @@
             isVideoSelected(eventIdx, performerIdx, video) {
                 const event = this.preview.parsed[eventIdx];
                 const performer = event.performers[performerIdx];
-                return performer && performer.selectedVideos && performer.selectedVideos.some(v => v.id === video.id);
+                return performer && performer.selectedVideos && performer.selectedVideos.length > 0 && performer.selectedVideos[0].id === video.id;
             },
 
             selectVideo(eventIdx, performerIdx, video) {
@@ -1618,10 +1615,8 @@
                     // Remove video if already selected
                     performer.selectedVideos.splice(index, 1);
                 } else {
-                    // Add video if not already selected and under limit
-                    if (performer.selectedVideos.length < 2) {
-                        performer.selectedVideos.push(video);
-                    }
+                    // Replace any existing video with the new one (only allow one)
+                    performer.selectedVideos = [video];
                 }
             },
         }
