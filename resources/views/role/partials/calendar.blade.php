@@ -88,7 +88,7 @@
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 
         {{-- Month and Year Title: Always visible and positioned first. --}}
-        <h1 class="text-lg font-semibold leading-6 flex-shrink-0 hidden md:block">
+        <h1 class="text-lg font-semibold leading-6 flex-shrink-0 hidden md:block text-gray-900 dark:text-gray-100">
             <time datetime="{{ sprintf('%04d-%02d', $year, $month) }}">{{ Carbon\Carbon::create($year, $month, 1)->format('F Y') }}</time>
         </h1>
 
