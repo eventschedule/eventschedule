@@ -283,7 +283,7 @@
                         </div>
 
                         <!-- Account creation checkbox for guest users -->
-                        @if(isset($isGuest) && $isGuest)
+                        @if (isset($isGuest) && $isGuest)
                         <div class="flex items-center">
                             <input type="checkbox" 
                                     id="create_account_@{{ idx }}" 
@@ -329,7 +329,7 @@
                         @endif
 
                         <!-- Add buttons at the bottom of the left column -->
-                        <div class="mt-10 flex justify-end gap-2">
+                        <div class="mt-12 flex justify-end gap-2">
                             <template v-if="savedEvents[idx]">
                                 <button v-if="!savedEventData[idx]?.is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" @click="handleEdit(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
                                     {{ __('messages.edit') }}
