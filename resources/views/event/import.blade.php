@@ -455,6 +455,8 @@
                 <!-- YouTube Videos Section for Talent - Now below the form and image -->
                 <div v-if="preview.parsed[idx].performers && preview.parsed[idx].performers.length > 0" class="mt-6">
                     <div v-for="(performer, performerIdx) in preview.parsed[idx].performers" :key="performerIdx" class="my-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <!-- Only show YouTube video selection for the first performer when there are multiple performers -->
+                        <div v-if="preview.parsed[idx].performers.length === 1 || performerIdx === 0">
 
                         <!-- Loading state -->
                         <div v-if="performer.searching" class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
@@ -529,6 +531,7 @@
                             @{{ performer.error }}
                         </div>
                         @endif
+                        </div>
                     </div>
                 </div>
             </div>
@@ -788,10 +791,12 @@
                                     error: null
                                 });
                                 
-                                // Automatically search for videos for this performer
-                                this.$nextTick(() => {
-                                    this.searchVideos(eventIdx, performerIdx);
-                                });
+                                // Only search for videos for the first performer when there are multiple performers
+                                if (event.performers.length === 1 || performerIdx === 0) {
+                                    this.$nextTick(() => {
+                                        this.searchVideos(eventIdx, performerIdx);
+                                    });
+                                }
                             });
                         }
                     });
