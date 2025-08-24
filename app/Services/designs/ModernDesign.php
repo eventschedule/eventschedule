@@ -71,6 +71,12 @@ class ModernDesign extends AbstractEventDesign
         $this->c['shadow'] = imagecolorallocatealpha($this->im, 0, 0, 0, 100); // ~60% alpha
     }
 
+    // Add extra bold font method for event titles
+    private function fontExtraBold(): string
+    {
+        return $this->fontBold(); // Use the same font file but we'll make it appear bolder
+    }
+
     private function fill(array $rgb): void
     {
         $col = imagecolorallocate($this->im, $rgb[0], $rgb[1], $rgb[2]);
@@ -156,8 +162,8 @@ class ModernDesign extends AbstractEventDesign
                 $day = $dt->format('d');
                 $mon = $this->monthAbbr($dt);
 
-                $this->center($day, 22, $this->fontBold(), 'ink', $pillX + self::DATE_W / 2, $y + 36);
-                $this->center($mon, 12, $this->fontRegular(), 'ink', $pillX + self::DATE_W / 2, $y + 56);
+                $this->center($day, 22, $this->fontBold(), 'ink', $pillX + self::DATE_W / 2, $y + 28);
+                $this->center($mon, 12, $this->fontRegular(), 'ink', $pillX + self::DATE_W / 2, $y + 48);
 
                 // Event text block
                 $left  = $this->rtl ? $x0 : ($x0 + self::DATE_W + self::TEXT_GAP);
@@ -166,7 +172,7 @@ class ModernDesign extends AbstractEventDesign
                 $title = $this->sanitize($event->translatedName() ?: $event->name);
                 $desc  = $this->sanitize($event->translatedDescription() ?: '');
 
-                $this->clampLines($this->vis($this->maybeUpper($title)), 16, $this->fontBold(),   $this->c['ink'],  $left, $y + 26, $right - $left, 1, $this->rtl);
+                $this->clampLines($this->vis($this->maybeUpper($title)), 20, $this->fontExtraBold(),   $this->c['ink'],  $left, $y + 26, $right - $left, 1, $this->rtl);
                 $this->clampLines($this->vis($desc),                      11, $this->fontRegular(),$this->c['grey'], $left, $y + 48, $right - $left, 2, $this->rtl);
 
                 $y += self::ROW_H;
