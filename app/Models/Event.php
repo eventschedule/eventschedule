@@ -295,6 +295,13 @@ class Event extends Model
         return $this->tickets_enabled && $this->isPro();
     }
 
+    public function areTicketsFree()
+    {
+        return $this->tickets->every(function($ticket) {
+            return $ticket->price == 0;
+        });
+    }
+
     public function getImageUrl()
     {
         if ($this->flyer_image_url) {
