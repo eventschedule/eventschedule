@@ -58,12 +58,12 @@ abstract class AbstractEventDesign
         'ar' => ['القادمة','فعاليات','لمزيد من المعلومات زورونا على'],
     ];
 
-    public function __construct(Role $role, Collection $events, string $lang = 'en')
+    public function __construct(Role $role, Collection $events)
     {
         $this->role   = $role;
         $this->events = $events->take(10)->values(); // MAX_EVENTS moved to constant
-        $this->lang   = in_array(strtolower($lang), ['ar','de','en','es','fr','he','it','nl','pt'], true)
-            ? strtolower($lang) : 'en';
+        $this->lang   = in_array(strtolower($role->language_code), ['ar','de','en','es','fr','he','it','nl','pt'], true)
+            ? strtolower($role->language_code) : 'en';
 
         $this->rtl = in_array($this->lang, ['ar','he'], true);
         $this->hasFribidi = function_exists('fribidi_log2vis');

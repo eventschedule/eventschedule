@@ -11,9 +11,9 @@ class EventGraphicGenerator
 {
     private AbstractEventDesign $design;
 
-    public function __construct(Role $role, Collection $events, string $lang = 'en', string $design = 'modern')
+    public function __construct(Role $role, Collection $events, string $design = 'modern')
     {
-        $this->design = $this->createDesign($design, $role, $events, $lang);
+        $this->design = $this->createDesign($design, $role, $events);
     }
 
     public function generate(): string
@@ -21,12 +21,12 @@ class EventGraphicGenerator
         return $this->design->generate();
     }
 
-    private function createDesign(string $design, Role $role, Collection $events, string $lang): AbstractEventDesign
+    private function createDesign(string $design, Role $role, Collection $events): AbstractEventDesign
     {
         return match($design) {
-            'modern' => new ModernDesign($role, $events, $lang),
-            'minimal' => new MinimalDesign($role, $events, $lang),
-            default => new ModernDesign($role, $events, $lang),
+            'modern' => new ModernDesign($role, $events),
+            'minimal' => new MinimalDesign($role, $events),
+            default => new ModernDesign($role, $events),
         };
     }
 
