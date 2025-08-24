@@ -62,9 +62,98 @@ class ModernDesign extends AbstractEventDesign
         $this->c['shadow'] = imagecolorallocatealpha($this->im, 0, 0, 0, 100);
     }
 
+    /**
+     * Smart bold font selection for mixed content
+     */
     private function fontExtraBold(): string
     {
+        // For RTL languages, use smart font selection
+        if ($this->rtl) {
+            return $this->fontBold();
+        }
         return $this->fontBold();
+    }
+
+    /**
+     * Smart text rendering with automatic font selection
+     */
+    private function drawSmartBoldText(string $text, int $size, int $x, int $y, int $color, bool $rtl = false): void
+    {
+        $this->drawSmartText($text, $size, $x, $y, $color, $rtl);
+    }
+
+    /**
+     * Smart clampLines with automatic font selection for mixed content
+     */
+    private function smartClampLines(string $text, int $size, int $color, int $x, int $y, int $maxW, int $maxLines, bool $rtl): int
+    {
+        $words = preg_split('/\s+/u', $text) ?: [];
+        $line = '';
+        $lines = [];
+        
+        foreach ($words as $w) {
+            $try = $line === '' ? $w : "$line $w";
+            if ($this->textW($try, $size, $this->fontBold()) <= $maxW) {
+                $line = $try;
+            } else {
+                if ($line === '') {
+                    $line = $this->truncate($w, $size, $this->fontBold(), $maxW, '', $rtl);
+                }
+                $lines[] = $line;
+                $line = $w;
+                if (count($lines) >= $maxLines) break;
+            }
+        }
+        
+        if ($line !== '' && count($lines) < $maxLines) {
+            $lines[] = $line;
+        }
+        
+        if (count($lines) === $maxLines) {
+            $last = end($lines);
+            $lines[count($lines) - 1] = $this->truncate($last, $size, $this->fontBold(), $maxW, '…', $rtl);
+        }
+        
+        $dy = 0;
+        foreach ($lines as $ln) {
+            $w = $this->textW($ln, $size, $this->fontBold());
+            $drawX = $rtl ? ($x + ($maxW - $w)) : $x;
+            
+            // Use smart text rendering for better font selection
+            $this->drawSmartText($ln, $size, $drawX, $y + $dy, $color, $rtl);
+            $dy += (int) ceil($size * 1.35);
+        }
+        
+        return count($lines);
+    }
+
+    /**
+     * Truncate text to fit within max width
+     */
+    private function truncate(string $text, int $size, string $font, int $maxW, string $ellipsis = '', bool $rtl = false): string
+    {
+        $lo = 0;
+        $hi = mb_strlen($text);
+        $best = '';
+        
+        while ($lo <= $hi) {
+            $mid = intdiv($lo + $hi, 2);
+            
+            if ($this->rtl) {
+                $sub = $ellipsis . mb_substr($text, -$mid);
+            } else {
+                $sub = mb_substr($text, 0, $mid) . $ellipsis;
+            }
+            
+            if ($this->textW($sub, $size, $font) <= $maxW) {
+                $best = $sub;
+                $lo = $mid + 1;
+            } else {
+                $hi = $mid - 1;
+            }
+        }
+        
+        return $best ?: $ellipsis;
     }
 
     private function fill(array $rgb): void
@@ -154,8 +243,8 @@ class ModernDesign extends AbstractEventDesign
                 $title = $this->sanitize($event->translatedName() ?: $event->name);
                 $desc  = $this->sanitize($event->translatedDescription() ?: '');
 
-                $this->clampLines($this->vis($this->maybeUpper($title)), 20, $this->fontExtraBold(), $this->c['ink'],  $left, $y + 26, $right - $left, 1, $this->rtl);
-                $this->clampLines($this->vis($desc),                      11, $this->fontRegular(),$this->c['grey'], $left, $y + 48, $right - $left, 2, $this->rtl);
+                $this->smartClampLines($this->vis($this->maybeUpper($title)), 20, $this->c['ink'],  $left, $y + 26, $right - $left, 1, $this->rtl);
+                $this->smartClampLines($this->vis($desc),                      11, $this->c['grey'], $left, $y + 48, $right - $left, 2, $this->rtl);
 
                 $y += self::ROW_H;
             }
@@ -221,7 +310,13 @@ class ModernDesign extends AbstractEventDesign
         $h = abs($b[7] - $b[1]);
         $x = (int) round($cx - $w / 2);
         $y = (int) round($cy + $h / 2);
-        $this->drawEmojiText($text, $size, $x, $y, $this->c[$colorKey], $font, $this->rtl);
+        
+        // Use smart text rendering for better font selection
+        if ($font === $this->fontBold() || $font === $this->fontExtraBold()) {
+            $this->drawSmartText($text, $size, $x, $y, $this->c[$colorKey], $this->rtl);
+        } else {
+            $this->drawEmojiText($text, $size, $x, $y, $this->c[$colorKey], $font, $this->rtl);
+        }
     }
 
     private function roundRect(int $x1, int $y1, int $x2, int $y2, int $r, int $col): void
