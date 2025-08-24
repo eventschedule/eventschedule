@@ -561,6 +561,9 @@ class GeminiUtils
 
     public static function searchYouTube($query, $maxResults = 6)
     {
+        // Always limit to maximum 6 videos for consistency
+        $maxResults = min($maxResults, 6);
+        
         // Validate query input
         if (empty($query) || strlen($query) > 100) {
             return [];
@@ -687,7 +690,8 @@ class GeminiUtils
             return $b['viewCount'] - $a['viewCount'];
         });
 
-        return $sortedVideos;
+        // Ensure we never return more than 6 videos
+        return array_slice($sortedVideos, 0, 6);
     }
 
     public static function generateBlogPost($topic)
