@@ -12,9 +12,9 @@ abstract class AbstractEventDesign
     private const FONT_LATIN_BOLD    = 'Montserrat-VariableFont_wght.ttf';
     private const FONT_LATIN_REGULAR = 'Montserrat-VariableFont_wght.ttf';
     private const FONT_LATIN_SCRIPT  = 'Pacifico-Regular.ttf';
-    private const FONT_HE_BOLD       = 'NotoSansHebrew-VariableFont_wdth,wght.ttf';
+    private const FONT_HE_BOLD       = 'NotoSansHebrew-Bold.ttf';
     private const FONT_HE_REGULAR    = 'NotoSansHebrew-VariableFont_wdth,wght.ttf';
-    private const FONT_AR_BOLD       = 'NotoSansArabic-VariableFont_wdth,wght.ttf';
+    private const FONT_AR_BOLD       = 'NotoSansArabic-Bold.ttf';
     private const FONT_AR_REGULAR    = 'NotoSansArabic-VariableFont_wdth,wght.ttf';
 
     // Twemoji config
@@ -102,6 +102,52 @@ abstract class AbstractEventDesign
     protected function fontBold(): string   { return $this->lang==='ar'?$this->fontArBold:($this->lang==='he'?$this->fontHeBold:$this->fontLatinBold); }
     protected function fontRegular(): string{ return $this->lang==='ar'?$this->fontArRegular:($this->lang==='he'?$this->fontHeRegular:$this->fontLatinRegular); }
     protected function fontScript(): string { return $this->rtl ? $this->fontBold() : $this->fontLatinScript; }
+
+    /**
+     * Smart font selection for mixed content
+     * Uses appropriate font based on text content and language
+     */
+    protected function smartFontBold(string $text): string
+    {
+        // For non-RTL languages, always use Latin bold
+        if (!$this->rtl) {
+            return $this->fontLatinBold;
+        }
+
+        // For RTL languages, check if text contains Latin characters/symbols
+        if ($this->containsLatinOrSymbols($text)) {
+            return $this->fontLatinBold;
+        }
+
+        // Pure RTL text uses the appropriate RTL bold font
+        return $this->fontBold();
+    }
+
+    /**
+     * Check if text contains Latin characters, numbers, or symbols
+     */
+    private function containsLatinOrSymbols(string $text): bool
+    {
+        // Check for Latin characters (a-z, A-Z)
+        if (preg_match('/[a-zA-Z]/', $text)) {
+            return true;
+        }
+
+        // Check for numbers (0-9)
+        if (preg_match('/[0-9]/', $text)) {
+            return true;
+        }
+
+        // Check for common symbols that might not be in RTL fonts
+        $symbols = ['…', '.', ',', '!', '?', ':', ';', '-', '_', '(', ')', '[', ']', '{', '}', '<', '>', '=', '+', '-', '*', '/', '\\', '|', '&', '%', '$', '#', '@', '~', '`', '^'];
+        foreach ($symbols as $symbol) {
+            if (str_contains($text, $symbol)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     protected function monthAbbr(\Carbon\Carbon $date): string
     {
@@ -217,6 +263,140 @@ abstract class AbstractEventDesign
             }
             $cursorX += $this->textW(' ',$size,$font);
         }
+    }
+
+    /**
+     * Smart text rendering with automatic font selection for mixed content
+     * This method intelligently chooses fonts for different parts of the text
+     */
+    protected function drawSmartText(string $text, int $size, int $x, int $y, int $color, bool $rtlAlign = false): void
+    {
+        $text = $this->rtl ? $this->vis($text) : $text;
+
+        // Split text into segments based on character type
+        $segments = $this->splitTextByFont($text);
+        
+        $cursorX = $x;
+        foreach ($segments as $segment) {
+            $font = $segment['font'];
+            $text = $segment['text'];
+            
+            // Handle emojis in this segment
+            if ($this->containsEmojis($text)) {
+                $this->drawEmojiText($text, $size, $cursorX, $y, $color, $font, $rtlAlign);
+            } else {
+                // Regular text rendering
+                imagettftext($this->im, $size, 0, $cursorX, $y, $color, $font, $text);
+            }
+            
+            // Move cursor to next position
+            $cursorX += $this->textW($text, $size, $font);
+        }
+    }
+
+    /**
+     * Split text into segments based on which font should be used
+     */
+    private function splitTextByFont(string $text): array
+    {
+        $segments = [];
+        $currentFont = null;
+        $currentText = '';
+        
+        $clusters = $this->graphemes($text);
+        
+        foreach ($clusters as $cluster) {
+            // Skip emojis in this pass - they'll be handled separately
+            if ($this->isEmoji($cluster)) {
+                // If we have accumulated text, add it as a segment
+                if ($currentText !== '') {
+                    $segments[] = [
+                        'text' => $currentText,
+                        'font' => $currentFont ?? $this->fontLatinBold
+                    ];
+                    $currentText = '';
+                }
+                
+                // Add emoji as its own segment with current font
+                $segments[] = [
+                    'text' => $cluster,
+                    'font' => $currentFont ?? $this->fontLatinBold
+                ];
+                continue;
+            }
+            
+            // Determine appropriate font for this character
+            $neededFont = $this->getFontForCharacter($cluster);
+            
+            // If font changes, save current segment and start new one
+            if ($currentFont !== $neededFont && $currentText !== '') {
+                $segments[] = [
+                    'text' => $currentText,
+                    'font' => $currentFont
+                ];
+                $currentText = '';
+            }
+            
+            $currentFont = $neededFont;
+            $currentText .= $cluster;
+        }
+        
+        // Add final segment
+        if ($currentText !== '') {
+            $segments[] = [
+                'text' => $currentText,
+                'font' => $currentFont ?? $this->fontLatinBold
+            ];
+        }
+        
+        return $segments;
+    }
+
+    /**
+     * Get the appropriate font for a single character
+     */
+    private function getFontForCharacter(string $char): string
+    {
+        // For non-RTL languages, always use Latin fonts
+        if (!$this->rtl) {
+            return $this->fontLatinBold;
+        }
+        
+        // Check if character is Latin, number, or symbol
+        if ($this->isLatinOrSymbol($char)) {
+            return $this->fontLatinBold;
+        }
+        
+        // RTL characters use appropriate RTL font
+        return $this->fontBold();
+    }
+
+    /**
+     * Check if a single character is Latin, number, or symbol
+     */
+    private function isLatinOrSymbol(string $char): bool
+    {
+        // Latin characters
+        if (preg_match('/[a-zA-Z]/', $char)) {
+            return true;
+        }
+        
+        // Numbers
+        if (preg_match('/[0-9]/', $char)) {
+            return true;
+        }
+        
+        // Common symbols
+        $symbols = ['…', '.', ',', '!', '?', ':', ';', '-', '_', '(', ')', '[', ']', '{', '}', '<', '>', '=', '+', '-', '*', '/', '\\', '|', '&', '%', '$', '#', '@', '~', '`', '^'];
+        return in_array($char, $symbols);
+    }
+
+    /**
+     * Check if text contains emojis
+     */
+    private function containsEmojis(string $text): bool
+    {
+        return (bool) preg_match(self::EMOJI_REGEX, $text);
     }
 
     private function stripEmojisKeepSpaces(string $s): string
