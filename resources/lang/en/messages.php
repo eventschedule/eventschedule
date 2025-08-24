@@ -562,4 +562,5 @@ return [
     'select_video' => 'Select a video',
     'video_selected' => 'Video selected',
     'no_videos_found' => 'No videos found',
+    'get_tickets' => 'Get Tickets',
 ];

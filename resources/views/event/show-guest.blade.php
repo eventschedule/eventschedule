@@ -94,7 +94,7 @@
               >
                   <button type="button" 
                         class="min-w-[180px] inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
-                    {{ $event->registration_url ? __('messages.view_event') : __('messages.buy_tickets') }}
+                    {{ $event->registration_url ? __('messages.view_event') : ($event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets')) }}
                 </button>            
               </a>
             @endif
@@ -282,7 +282,7 @@
           <div class="flex-1">
             <div class="flex flex-col gap-4">
               <h4 class="text-[28px] leading-snug text-black dark:text-gray-100">
-                {{ __('messages.buy_tickets') }}
+                {{ $event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets') }}
               </h4>
               <p class="text-base text-black dark:text-gray-300">
                 @include('event.tickets', ['event' => $event, 'subdomain' => $subdomain])
