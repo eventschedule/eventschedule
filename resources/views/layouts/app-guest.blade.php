@@ -135,7 +135,7 @@
     </x-slot>
     
     @if (! request()->embed && $role->showBranding() && config('app.hosted'))
-        <header class="bg-[#f9fafb] dark:bg-[#151B26]">
+        <header class="bg-[#f9fafb] dark:bg-gray-800">
             <div
             class="container mx-auto flex flex-row justify-between items-center py-7 pr-5"
             >
@@ -186,7 +186,7 @@
     {{ $slot }}
 
     @if (! request()->embed && $role->showBranding())
-    <footer class="bg-[#151B26]">
+    <footer class="bg-gray-800">
       <div
         class="container mx-auto flex flex-row justify-center items-center py-8 px-5"
       >
