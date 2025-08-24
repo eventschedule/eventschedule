@@ -23,8 +23,6 @@ class EventGraphicGenerator
 
     private function createDesign(string $design, Role $role, Collection $events, string $lang): AbstractEventDesign
     {
-        return new MinimalDesign($role, $events, $lang);
-
         return match($design) {
             'modern' => new ModernDesign($role, $events, $lang),
             'minimal' => new MinimalDesign($role, $events, $lang),
