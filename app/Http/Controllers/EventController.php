@@ -621,6 +621,10 @@ class EventController extends Controller
         if (!session('pending_request') || session('pending_request') !== $subdomain) {
             abort(404);
         }
+        // Handle user creation if requested
+        if ($request->input('create_account')) {
+            $this->createAndLoginUser($request);
+        }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
                 
@@ -633,11 +637,6 @@ class EventController extends Controller
 
             $event->flyer_image_url = $filename;
             $event->save();
-        }
-
-        // Handle user creation if requested
-        if ($request->input('create_account')) {
-            $this->createAndLoginUser($request);
         }
 
         // Clear the pending request session
