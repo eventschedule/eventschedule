@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Role;
 use Illuminate\Support\Collection;
+use GdImage;
 
 abstract class AbstractEventDesign
 {
@@ -17,11 +18,9 @@ abstract class AbstractEventDesign
     private const FONT_AR_REGULAR    = 'NotoSansArabic-VariableFont_wdth,wght.ttf';
 
     // Twemoji config
-    // Directory containing PNGs named like "1f44d.png", "2764-fe0f.png", etc.
-    private string $twemojiDir = 'public/twemoji/72x72';     // set in ctor -> public_path('twemoji/72x72')
-    private const EMOJI_SCALE = 1.0;     // relative to font size (1.0 ≈ cap height)
+    private string $twemojiDir = 'public/twemoji/72x72';
+    private const EMOJI_SCALE = 1.0;
 
-    /** Emoji detection (pictographs, flags, dingbats, ZWJ chains, VS16 etc.) */
     private const EMOJI_REGEX = '/[\x{1F1E6}-\x{1F1FF}\x{1F300}-\x{1F6FF}\x{1F700}-\x{1F77F}\x{1F780}-\x{1F7FF}\x{1F800}-\x{1F8FF}\x{1F900}-\x{1F9FF}\x{1FA00}-\x{1FA6F}\x{1FA70}-\x{1FAFF}\x{2600}-\x{26FF}\x{2700}-\x{27BF}\x{200D}\x{FE0F}]/u';
 
     protected $im;
@@ -40,12 +39,14 @@ abstract class AbstractEventDesign
     private string $fontArRegular;
 
     // locale/layout
-    protected string $lang;  // ar|de|en|es|fr|he|it|nl|pt
+    protected string $lang;
     protected bool $rtl;
     private bool $hasFribidi;
     private bool $hasArabicShaper;
 
-    // i18n strings
+    // Track temporary files for cleanup
+    protected array $tempFiles = [];
+
     protected array $i18n = [
         'en' => ['UPCOMING','events','FOR MORE INFORMATION VISIT US AT'],
         'de' => ['KOMMENDE','Events','FÜR WEITERE INFOS BESUCHEN SIE UNS UNTER'],
@@ -61,13 +62,13 @@ abstract class AbstractEventDesign
     public function __construct(Role $role, Collection $events)
     {
         $this->role   = $role;
-        $this->events = $events->take(10)->values(); // MAX_EVENTS moved to constant
+        $this->events = $events->take(10)->values();
         $this->lang   = in_array(strtolower($role->language_code), ['ar','de','en','es','fr','he','it','nl','pt'], true)
             ? strtolower($role->language_code) : 'en';
 
         $this->rtl = in_array($this->lang, ['ar','he'], true);
         $this->hasFribidi = function_exists('fribidi_log2vis');
-        $this->hasArabicShaper = class_exists('\I18N_Arabic'); // optional (composer ar-php/ar-php)
+        $this->hasArabicShaper = class_exists('\I18N_Arabic');
 
         $this->twemojiDir = public_path('twemoji/72x72');
 
@@ -86,7 +87,11 @@ abstract class AbstractEventDesign
         $this->allocateColors();
     }
 
-    public function __destruct() { imagedestroy($this->im); }
+    public function __destruct()
+    {
+        imagedestroy($this->im);
+        $this->cleanupTempFiles();
+    }
 
     abstract public function generate(): string;
     abstract protected function allocateColors(): void;
@@ -94,7 +99,6 @@ abstract class AbstractEventDesign
     abstract public function getWidth(): int;
     abstract public function getHeight(): int;
 
-    // ---------- fonts/locale ----------
     protected function fontBold(): string   { return $this->lang==='ar'?$this->fontArBold:($this->lang==='he'?$this->fontHeBold:$this->fontLatinBold); }
     protected function fontRegular(): string{ return $this->lang==='ar'?$this->fontArRegular:($this->lang==='he'?$this->fontHeRegular:$this->fontLatinRegular); }
     protected function fontScript(): string { return $this->rtl ? $this->fontBold() : $this->fontLatinScript; }
@@ -130,7 +134,6 @@ abstract class AbstractEventDesign
 
     protected function maybeUpper(string $s): string { return $this->rtl ? $s : mb_strtoupper($s); }
 
-    // ---------- draw helpers ----------
     protected function clampLines(string $text,int $size,string $font,int $color,int $x,int $y,int $maxW,int $maxLines,bool $rtl): int
     {
         $words=preg_split('/\s+/u',$text) ?: [];
@@ -165,16 +168,13 @@ abstract class AbstractEventDesign
         return (int)abs($b[2]-$b[0]);
     }
 
-    // ---------- emoji-safe text drawing (Twemoji overlay) ----------
     protected function drawEmojiText(string $text,int $size,int $x,int $y,int $color,string $font,bool $rtlAlign=false): void
     {
         $text = $this->rtl ? $this->vis($text) : $text;
 
-        // Base draw without emojis (replace emoji clusters with spaces to keep advance)
         $plain = $this->stripEmojisKeepSpaces($text);
         imagettftext($this->im,$size,0,$x,$y,$color,$font,$plain);
 
-        // Now overlay each emoji image
         $clusters = $this->graphemes($text);
         $cursorX = $x;
 
@@ -184,7 +184,6 @@ abstract class AbstractEventDesign
                 continue;
             }
             
-            // Debug logging for emoji processing
             error_log("Processing emoji: " . $g . " (hex: " . bin2hex($g) . ")");
             
             $path = $this->twemojiPathFor($g);
@@ -192,36 +191,30 @@ abstract class AbstractEventDesign
                 error_log("Found emoji file: {$path}");
                 $emojiImg = imagecreatefrompng($path);
                 if ($emojiImg !== false) {
-                    // target size ~ font size
                     $target = (int)round($size * self::EMOJI_SCALE);
                     $w = imagesx($emojiImg); $h = imagesy($emojiImg);
                     imagecopyresampled(
                         $this->im, $emojiImg,
-                        (int)$cursorX, $y - $target + 2,   // baseline align
+                        (int)$cursorX, $y - $target + 2,
                         0, 0,
                         $target, $target,
                         $w, $h
                     );
                     imagedestroy($emojiImg);
-                    // Advance by the visual width we just placed
                     $cursorX += $target;
                     error_log("Successfully rendered emoji: {$g}");
                     continue;
                 } else {
-                    // Log error if image couldn't be loaded
                     error_log("Failed to load emoji image: {$path}");
                 }
             } else {
-                // Log missing emoji file for debugging
                 if ($this->isEmoji($g)) {
                     error_log("Emoji file not found for: " . bin2hex($g) . " (text: " . $g . ")");
-                    // Try to show what variations were attempted
                     $cps = $this->codepoints($g);
                     $variations = $this->generateFilenameVariations($cps);
                     error_log("Attempted variations: " . implode(', ', $variations));
                 }
             }
-            // Fallback: just advance by nominal width if image missing
             $cursorX += $this->textW(' ',$size,$font);
         }
     }
@@ -242,14 +235,11 @@ abstract class AbstractEventDesign
         preg_match_all('/./u',$s,$m); return $m[0] ?? [$s];
     }
 
-    // Build Twemoji filename from emoji cluster: hex codepoints joined with '-',
-    // trying multiple variations to find the correct file
     private function twemojiPathFor(string $emoji): ?string
     {
         $cps = $this->codepoints($emoji);
         if (empty($cps)) return null;
 
-        // Try multiple filename variations to find the correct file
         $variations = $this->generateFilenameVariations($cps);
         
         foreach ($variations as $name) {
@@ -266,20 +256,16 @@ abstract class AbstractEventDesign
     {
         $variations = [];
         
-        // Original with all codepoints
         $variations[] = strtolower(implode('-', array_map(fn($cp) => dechex($cp), $codepoints))).'.png';
         
-        // Without FE0F (variation selector)
         $filtered = array_filter($codepoints, fn($cp) => $cp !== 0xFE0F);
         if (count($filtered) !== count($codepoints)) {
             $variations[] = strtolower(implode('-', array_map(fn($cp) => dechex($cp), $filtered))).'.png';
         }
         
-        // Without FE0F but keep ZWJ sequences (200D)
         $filtered = [];
         foreach ($codepoints as $i => $cp) {
             if ($cp === 0xFE0F) {
-                // Skip FE0F unless it's followed by 200D (ZWJ)
                 if ($i + 1 < count($codepoints) && $codepoints[$i + 1] === 0x200D) {
                     $filtered[] = $cp;
                 }
@@ -312,16 +298,14 @@ abstract class AbstractEventDesign
         return $k;
     }
 
-    // ---------- sanitation & bidi ----------
     protected function sanitize(string $s): string
     { 
         $s = trim(mb_convert_encoding(strip_tags($s),'UTF-8','UTF-8'));
         
-        // Remove problematic Unicode characters that can cause visual artifacts
-        $s = preg_replace('/[\x{FFF0}-\x{FFFF}]/u', '', $s); // Remove private use area characters
-        $s = preg_replace('/[\x{2000}-\x{200F}]/u', '', $s); // Remove bidirectional control characters except 200F (RTL mark)
-        $s = preg_replace('/[\x{2028}-\x{202F}]/u', '', $s); // Remove other format characters
-        $s = preg_replace('/[\x{2060}-\x{206F}]/u', '', $s); // Remove other format characters
+        $s = preg_replace('/[\x{FFF0}-\x{FFFF}]/u', '', $s);
+        $s = preg_replace('/[\x{2000}-\x{200F}]/u', '', $s);
+        $s = preg_replace('/[\x{2028}-\x{202F}]/u', '', $s);
+        $s = preg_replace('/[\x{2060}-\x{206F}]/u', '', $s);
         
         return $s;
     }
@@ -330,7 +314,6 @@ abstract class AbstractEventDesign
     {
         if (!$this->rtl) return $s;
 
-        // Protect emojis from FriBidi by temporarily replacing them
         $placeholders=[]; $i=0;
         $s=preg_replace_callback(self::EMOJI_REGEX,function($m) use (&$placeholders,&$i){
             $key="__EMOJI_{$i}__";
@@ -348,10 +331,9 @@ abstract class AbstractEventDesign
         }
         if (!empty($placeholders)) $s=strtr($s,$placeholders);
         
-        // Clean up any remaining problematic Unicode characters that might cause visual artifacts
-        $s = preg_replace('/[\x{FFF0}-\x{FFFF}]/u', '', $s); // Remove private use area characters
-        $s = preg_replace('/[\x{2000}-\x{200F}]/u', '', $s); // Remove bidirectional control characters except 200F (RTL mark)
-        $s = preg_replace('/[\x{2028}-\x{202F}]/u', '', $s); // Remove other format characters
+        $s = preg_replace('/[\x{FFF0}-\x{FFFF}]/u', '', $s);
+        $s = preg_replace('/[\x{2000}-\x{200F}]/u', '', $s);
+        $s = preg_replace('/[\x{2028}-\x{202F}]/u', '', $s);
         
         return $s;
     }
@@ -363,10 +345,8 @@ abstract class AbstractEventDesign
             $mid=intdiv($lo+$hi,2);
             
             if ($this->rtl) {
-                // For RTL: truncate from the end (right side), keep ellipsis at right
                 $sub=$ellipsis.mb_substr($text,-$mid);
             } else {
-                // For LTR: truncate from the beginning (left side), keep ellipsis at right
                 $sub=mb_substr($text,0,$mid).$ellipsis;
             }
             
@@ -374,5 +354,192 @@ abstract class AbstractEventDesign
             else{ $hi=$mid-1; }
         }
         return $best ?: $ellipsis;
+    }
+
+    protected function drawProfileLogo(): void
+    {
+        if (!$this->role->profile_image_url) {
+            return;
+        }
+
+        $logoSize = 80;
+        $logoMargin = 20;
+        
+        if ($this->rtl) {
+            $logoX = $logoMargin;
+        } else {
+            $logoX = $this->getWidth() - $logoMargin - $logoSize;
+        }
+        
+        $logoY = $logoMargin;
+
+        $profileImagePath = $this->getProfileImagePath();
+        if (!$profileImagePath || !file_exists($profileImagePath)) {
+            return;
+        }
+
+        $profileImg = $this->loadImage($profileImagePath);
+        if ($profileImg === false) {
+            return;
+        }
+
+        $origW = imagesx($profileImg);
+        $origH = imagesy($profileImg);
+
+        $this->drawRoundedLogo($profileImg, $logoX, $logoY, $logoSize, $origW, $origH);
+
+        imagedestroy($profileImg);
+    }
+
+    protected function loadImage(string $path): GdImage|false
+    {
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        
+        switch ($extension) {
+            case 'png':
+                return imagecreatefrompng($path);
+            case 'jpg':
+            case 'jpeg':
+                return imagecreatefromjpeg($path);
+            case 'gif':
+                return imagecreatefromgif($path);
+            case 'webp':
+                if (function_exists('imagecreatefromwebp')) {
+                    return imagecreatefromwebp($path);
+                }
+                break;
+        }
+        
+        $imageData = file_get_contents($path);
+        if ($imageData === false) {
+            return false;
+        }
+        
+        $img = imagecreatefromstring($imageData);
+        if ($img !== false) {
+            return $img;
+        }
+        
+        return false;
+    }
+
+    protected function getProfileImagePath(): ?string
+    {
+        $profileUrl = $this->role->getAttributes()['profile_image_url'] ?? null;
+        if (!$profileUrl) {
+            return null;
+        }
+
+        if (config('filesystems.default') == 'local') {
+            return storage_path('app/public/' . $profileUrl);
+        } else {
+            if (filter_var($profileUrl, FILTER_VALIDATE_URL)) {
+                return $this->downloadRemoteImage($profileUrl);
+            } else {
+                $fullUrl = $this->role->profile_image_url;
+                return $this->downloadRemoteImage($fullUrl);
+            }
+        }
+    }
+
+    protected function downloadRemoteImage(string $url): ?string
+    {
+        $tempFile = tempnam(sys_get_temp_dir(), 'profile_logo_');
+        if ($tempFile === false) {
+            return null;
+        }
+
+        $this->tempFiles[] = $tempFile;
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 3,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_USERAGENT => 'EventSchedule/1.0',
+        ]);
+
+        $imageData = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($imageData === false || $httpCode !== 200) {
+            unlink($tempFile);
+            $this->tempFiles = array_filter($this->tempFiles, fn($f) => $f !== $tempFile);
+            return null;
+        }
+
+        if (getimagesizefromstring($imageData) === false) {
+            unlink($tempFile);
+            $this->tempFiles = array_filter($this->tempFiles, fn($f) => $f !== $tempFile);
+            return null;
+        }
+
+        if (file_put_contents($tempFile, $imageData) === false) {
+            unlink($tempFile);
+            $this->tempFiles = array_filter($this->tempFiles, fn($f) => $f !== $tempFile);
+            return null;
+        }
+
+        return $tempFile;
+    }
+
+    protected function drawRoundedLogo(GdImage $sourceImg, int $x, int $y, int $size, int $origW, int $origH): void
+    {
+        $mask = imagecreatetruecolor($size, $size);
+        imagealphablending($mask, false);
+        imagesavealpha($mask, true);
+        
+        $transparent = imagecolorallocatealpha($mask, 0, 0, 0, 127);
+        imagefill($mask, 0, 0, $transparent);
+        
+        $white = imagecolorallocate($mask, 255, 255, 255);
+        $cornerRadius = 12;
+        
+        imagefilledrectangle($mask, $cornerRadius, 0, $size - $cornerRadius - 1, $size - 1, $white);
+        imagefilledrectangle($mask, 0, $cornerRadius, $size - 1, $size - $cornerRadius - 1, $white);
+        
+        imagefilledellipse($mask, $cornerRadius, $cornerRadius, $cornerRadius * 2, $cornerRadius * 2, $white);
+        imagefilledellipse($mask, $size - $cornerRadius - 1, $cornerRadius, $cornerRadius * 2, $cornerRadius * 2, $white);
+        imagefilledellipse($mask, $cornerRadius, $size - $cornerRadius - 1, $cornerRadius * 2, $cornerRadius * 2, $white);
+        imagefilledellipse($mask, $size - $cornerRadius - 1, $size - $cornerRadius - 1, $cornerRadius * 2, $cornerRadius * 2, $white);
+        
+        $dest = imagecreatetruecolor($size, $size);
+        imagealphablending($dest, false);
+        imagesavealpha($dest, true);
+        
+        $transparent = imagecolorallocatealpha($dest, 0, 0, 0, 127);
+        imagefill($dest, 0, 0, $transparent);
+        
+        imagecopyresampled($dest, $sourceImg, 0, 0, 0, 0, $size, $size, $origW, $origH);
+        
+        for ($i = 0; $i < $size; $i++) {
+            for ($j = 0; $j < $size; $j++) {
+                $alpha = imagecolorsforindex($mask, imagecolorat($mask, $i, $j));
+                if ($alpha['red'] == 0) {
+                    $color = imagecolorallocatealpha($dest, 0, 0, 0, 127);
+                    imagesetpixel($dest, $i, $j, $color);
+                }
+            }
+        }
+        
+        imagecopy($this->im, $dest, $x, $y, 0, 0, $size, $size);
+        
+        imagedestroy($mask);
+        imagedestroy($dest);
+    }
+
+    protected function cleanupTempFiles(): void
+    {
+        foreach ($this->tempFiles as $file) {
+            if (file_exists($file)) {
+                unlink($file);
+            }
+        }
+        $this->tempFiles = [];
     }
 }
