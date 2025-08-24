@@ -1760,8 +1760,7 @@ class RoleController extends Controller
         
         foreach ($upcomingEvents as $event) {
             foreach ($event->roles as $eventRole) {
-                //if ($eventRole->isTalent() && (! $eventRole->youtube_links && $eventRole->youtube_links != '[]')) {                    
-                if ($eventRole->isTalent() && (! $eventRole->youtube_links || $eventRole->youtube_links == '[]')) {                    
+                if ($eventRole->isTalent() && (! $eventRole->youtube_links && $eventRole->youtube_links != '[]')) {                    
                     // Check if we already have this role
                     if (!$talentRoles->contains('id', $eventRole->id)) {
                         $talentRoles->push([
@@ -1914,7 +1913,7 @@ class RoleController extends Controller
 
         $request->validate([
             'role_id' => 'required|integer',
-            'videos' => 'required|array|max:2'
+            'videos' => 'array|max:2'
         ]);
 
         // Only validate video details if videos are provided
