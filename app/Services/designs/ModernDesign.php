@@ -4,6 +4,7 @@ namespace App\Services\designs;
 
 use App\Services\AbstractEventDesign;
 use Carbon\Carbon;
+use GdImage;
 
 class ModernDesign extends AbstractEventDesign
 {
@@ -33,8 +34,17 @@ class ModernDesign extends AbstractEventDesign
     private const COL_GAP  = 36;
     private const TEXT_GAP = 18;
 
+    // Track temporary files for cleanup
+    private array $tempFiles = [];
+
     public function getWidth(): int  { return self::WIDTH;  }
     public function getHeight(): int { return self::HEIGHT; }
+
+    public function __destruct()
+    {
+        // Clean up temporary files
+        $this->cleanupTempFiles();
+    }
 
     public function generate(): string
     {
@@ -96,6 +106,9 @@ class ModernDesign extends AbstractEventDesign
             $this->drawEmojiText(mb_strtoupper($company), 12, self::MARGIN, 44, $this->c['ink'], $this->fontRegular());
         }
 
+        // Draw profile logo in top corner
+        $this->drawProfileLogo();
+
         // Big stacked headline: UPCOMING (smaller) / EVENTS (bigger). No year badge.
         [$wordUpcoming, $wordEvents] = $this->i18n[$this->lang];
 
@@ -116,6 +129,166 @@ class ModernDesign extends AbstractEventDesign
             $this->drawEmojiText($up, 54, $x, 112, $this->c['ink'], $this->fontBold());
             $this->drawEmojiText($ev, 96, $x, 190, $this->c['ink'], $this->fontBold());
         }
+    }
+
+    /* ---------- profile logo ---------- */
+    private function drawProfileLogo(): void
+    {
+        // Check if role has a profile image
+        if (!$this->role->profile_image_url) {
+            return;
+        }
+
+        // Logo dimensions and positioning - make it larger
+        $logoSize = 80; // Increased from 60
+        $logoMargin = 20;
+        
+        // Position based on RTL setting
+        if ($this->rtl) {
+            // RTL: top-left corner
+            $logoX = $logoMargin;
+        } else {
+            // LTR: top-right corner
+            $logoX = self::WIDTH - $logoMargin - $logoSize;
+        }
+        
+        $logoY = $logoMargin;
+
+        // Try to load the profile image
+        $profileImagePath = $this->getProfileImagePath();
+        if (!$profileImagePath || !file_exists($profileImagePath)) {
+            return;
+        }
+
+        // Try different methods to load the image
+        $profileImg = $this->loadImage($profileImagePath);
+        if ($profileImg === false) {
+            return;
+        }
+
+        // Get original dimensions
+        $origW = imagesx($profileImg);
+        $origH = imagesy($profileImg);
+
+        // Create a rounded rectangle logo instead of circular
+        $this->drawRoundedLogo($profileImg, $logoX, $logoY, $logoSize, $origW, $origH);
+
+        // Clean up
+        imagedestroy($profileImg);
+    }
+
+    private function loadImage(string $path): GdImage|false
+    {
+        // Get file extension to determine image type
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        
+        switch ($extension) {
+            case 'png':
+                return imagecreatefrompng($path);
+            case 'jpg':
+            case 'jpeg':
+                return imagecreatefromjpeg($path);
+            case 'gif':
+                return imagecreatefromgif($path);
+            case 'webp':
+                if (function_exists('imagecreatefromwebp')) {
+                    return imagecreatefromwebp($path);
+                }
+                break;
+        }
+        
+        // Fallback: try to detect format from file content
+        $imageData = file_get_contents($path);
+        if ($imageData === false) {
+            return false;
+        }
+        
+        // Try to create image from string
+        $img = imagecreatefromstring($imageData);
+        if ($img !== false) {
+            return $img;
+        }
+        
+        return false;
+    }
+
+    private function getProfileImagePath(): ?string
+    {
+        // Get the raw profile_image_url value from the database, not the accessor
+        $profileUrl = $this->role->getAttributes()['profile_image_url'] ?? null;
+        if (!$profileUrl) {
+            return null;
+        }
+
+        // Handle different storage configurations
+        if (config('filesystems.default') == 'local') {
+            // For local storage, the profileUrl is just the filename
+            return storage_path('app/public/' . $profileUrl);
+        } else {
+            // For hosted environments, the profileUrl might be a full URL or just a filename
+            if (filter_var($profileUrl, FILTER_VALIDATE_URL)) {
+                // It's a full URL, download it
+                return $this->downloadRemoteImage($profileUrl);
+            } else {
+                // It's just a filename, try to construct the full URL and download
+                $fullUrl = $this->role->profile_image_url; // Use the accessor to get the full URL
+                return $this->downloadRemoteImage($fullUrl);
+            }
+        }
+    }
+
+    private function downloadRemoteImage(string $url): ?string
+    {
+        // Create a temporary file
+        $tempFile = tempnam(sys_get_temp_dir(), 'profile_logo_');
+        if ($tempFile === false) {
+            return null;
+        }
+
+        // Track the temporary file for cleanup
+        $this->tempFiles[] = $tempFile;
+
+        // Download the image
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 3,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_USERAGENT => 'EventSchedule/1.0',
+        ]);
+
+        $imageData = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($imageData === false || $httpCode !== 200) {
+            unlink($tempFile);
+            // Remove from tracking array
+            $this->tempFiles = array_filter($this->tempFiles, fn($f) => $f !== $tempFile);
+            return null;
+        }
+
+        // Validate that it's actually an image
+        if (getimagesizefromstring($imageData) === false) {
+            unlink($tempFile);
+            // Remove from tracking array
+            $this->tempFiles = array_filter($this->tempFiles, fn($f) => $f !== $tempFile);
+            return null;
+        }
+
+        // Write to temporary file
+        if (file_put_contents($tempFile, $imageData) === false) {
+            unlink($tempFile);
+            // Remove from tracking array
+            $this->tempFiles = array_filter($this->tempFiles, fn($f) => $f !== $tempFile);
+            return null;
+        }
+
+        return $tempFile;
     }
 
     /* ---------- events ---------- */
@@ -208,5 +381,71 @@ class ModernDesign extends AbstractEventDesign
         imagefilledellipse($this->im, $x2 - $r, $y1 + $r, 2 * $r, 2 * $r, $col);
         imagefilledellipse($this->im, $x1 + $r, $y2 - $r, 2 * $r, 2 * $r, $col);
         imagefilledellipse($this->im, $x2 - $r, $y2 - $r, 2 * $r, 2 * $r, $col);
+    }
+
+    private function drawRoundedLogo(GdImage $sourceImg, int $x, int $y, int $size, int $origW, int $origH): void
+    {
+        // Create a rounded rectangle mask
+        $mask = imagecreatetruecolor($size, $size);
+        imagealphablending($mask, false);
+        imagesavealpha($mask, true);
+        
+        // Fill with transparent background
+        $transparent = imagecolorallocatealpha($mask, 0, 0, 0, 127);
+        imagefill($mask, 0, 0, $transparent);
+        
+        // Draw white rounded rectangle with corner radius
+        $white = imagecolorallocate($mask, 255, 255, 255);
+        $cornerRadius = 12; // Rounded corner radius
+        
+        // Fill the main rectangle
+        imagefilledrectangle($mask, $cornerRadius, 0, $size - $cornerRadius - 1, $size - 1, $white);
+        imagefilledrectangle($mask, 0, $cornerRadius, $size - 1, $size - $cornerRadius - 1, $white);
+        
+        // Fill the corners with circles
+        imagefilledellipse($mask, $cornerRadius, $cornerRadius, $cornerRadius * 2, $cornerRadius * 2, $white);
+        imagefilledellipse($mask, $size - $cornerRadius - 1, $cornerRadius, $cornerRadius * 2, $cornerRadius * 2, $white);
+        imagefilledellipse($mask, $cornerRadius, $size - $cornerRadius - 1, $cornerRadius * 2, $cornerRadius * 2, $white);
+        imagefilledellipse($mask, $size - $cornerRadius - 1, $size - $cornerRadius - 1, $cornerRadius * 2, $cornerRadius * 2, $white);
+        
+        // Create destination image with transparency
+        $dest = imagecreatetruecolor($size, $size);
+        imagealphablending($dest, false);
+        imagesavealpha($dest, true);
+        
+        // Fill with transparent background
+        $transparent = imagecolorallocatealpha($dest, 0, 0, 0, 127);
+        imagefill($dest, 0, 0, $transparent);
+        
+        // Copy and resize source image
+        imagecopyresampled($dest, $sourceImg, 0, 0, 0, 0, $size, $size, $origW, $origH);
+        
+        // Apply rounded rectangle mask
+        for ($i = 0; $i < $size; $i++) {
+            for ($j = 0; $j < $size; $j++) {
+                $alpha = imagecolorsforindex($mask, imagecolorat($mask, $i, $j));
+                if ($alpha['red'] == 0) { // Outside rounded rectangle
+                    $color = imagecolorallocatealpha($dest, 0, 0, 0, 127);
+                    imagesetpixel($dest, $i, $j, $color);
+                }
+            }
+        }
+        
+        // Copy to main canvas
+        imagecopy($this->im, $dest, $x, $y, 0, 0, $size, $size);
+        
+        // Clean up
+        imagedestroy($mask);
+        imagedestroy($dest);
+    }
+
+    private function cleanupTempFiles(): void
+    {
+        foreach ($this->tempFiles as $file) {
+            if (file_exists($file)) {
+                unlink($file);
+            }
+        }
+        $this->tempFiles = [];
     }
 }
