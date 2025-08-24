@@ -139,7 +139,7 @@ abstract class AbstractEventDesign
             $try=$line===''?$w:"$line $w";
             if($this->textW($try,$size,$font) <= $maxW){ $line=$try; }
             else{
-                if($line===''){ $line=$this->truncate($w,$size,$font,$maxW); }
+                if($line===''){ $line=$this->truncate($w,$size,$font,$maxW,'',$rtl); }
                 $lines[]=$line; $line=$w;
                 if(count($lines)>=$maxLines) break;
             }
@@ -147,7 +147,7 @@ abstract class AbstractEventDesign
         if($line!=='' && count($lines)<$maxLines) $lines[]=$line;
         if(count($lines)===$maxLines){
             $last=end($lines);
-            $lines[count($lines)-1]=$this->truncate($last,$size,$font,$maxW,'…');
+            $lines[count($lines)-1]=$this->truncate($last,$size,$font,$maxW,'…',$rtl);
         }
         $dy=0;
         foreach($lines as $ln){
@@ -356,12 +356,20 @@ abstract class AbstractEventDesign
         return $s;
     }
 
-    private function truncate(string $text,int $size,string $font,int $maxW,string $ellipsis=''): string
+    private function truncate(string $text,int $size,string $font,int $maxW,string $ellipsis='',bool $rtl=false): string
     {
         $lo=0;$hi=mb_strlen($text);$best='';
         while($lo<=$hi){
             $mid=intdiv($lo+$hi,2);
-            $sub=mb_substr($text,0,$mid).$ellipsis;
+            
+            if ($this->rtl) {
+                // For RTL: truncate from the end (right side), keep ellipsis at right
+                $sub=$ellipsis.mb_substr($text,-$mid);
+            } else {
+                // For LTR: truncate from the beginning (left side), keep ellipsis at right
+                $sub=mb_substr($text,0,$mid).$ellipsis;
+            }
+            
             if($this->textW($sub,$size,$font) <= $maxW){ $best=$sub; $lo=$mid+1; }
             else{ $hi=$mid-1; }
         }
