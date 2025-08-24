@@ -168,6 +168,52 @@ class ModernDesign extends AbstractEventDesign
         $this->center($this->vis($text), 12, $this->fontRegular(), 'footer', self::WIDTH / 2, self::HEIGHT - 28);
     }
 
+    // ---------- profile logo ----------
+    protected function drawProfileLogo(): void
+    {
+        // Check if role has a profile image
+        if (!$this->role->profile_image_url) {
+            return;
+        }
+
+        // Logo dimensions and positioning - make it 50% larger
+        $logoSize = 120; // Increased from 80 (50% larger)
+        $logoMargin = 20;
+        
+        // Position based on RTL setting
+        if ($this->rtl) {
+            // RTL: top-left corner
+            $logoX = $logoMargin;
+        } else {
+            // LTR: top-right corner
+            $logoX = $this->getWidth() - $logoMargin - $logoSize;
+        }
+        
+        $logoY = $logoMargin;
+
+        // Try to load the profile image
+        $profileImagePath = $this->getProfileImagePath();
+        if (!$profileImagePath || !file_exists($profileImagePath)) {
+            return;
+        }
+
+        // Try different methods to load the image
+        $profileImg = $this->loadImage($profileImagePath);
+        if ($profileImg === false) {
+            return;
+        }
+
+        // Get original dimensions
+        $origW = imagesx($profileImg);
+        $origH = imagesy($profileImg);
+
+        // Create a rounded rectangle logo
+        $this->drawRoundedLogo($profileImg, $logoX, $logoY, $logoSize, $origW, $origH);
+
+        // Clean up
+        imagedestroy($profileImg);
+    }
+
     private function center(string $text, int $size, string $font, string $colorKey, float $cx, float $cy): void
     {
         $b = imagettfbbox($size, 0, $font, $text);
