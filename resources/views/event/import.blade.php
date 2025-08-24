@@ -438,9 +438,7 @@
                                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                             {{ __('messages.drag_drop_image') }}
                                         </p>
-                                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                                            {{ __('messages.or_paste_from_clipboard') }}
-                                        </p>
+
                                     </template>
                                 </div>
                             </div>
@@ -637,23 +635,19 @@
             }
         },
 
-        created() {
-            this.loadShowAllFieldsPreference()
-            
-            // Add clipboard paste event listener
-            document.addEventListener('paste', this.handleClipboardPaste)
-            
-            // Add global drag event listeners
-            document.addEventListener('dragend', this.handleGlobalDragEnd)
-            document.addEventListener('dragstart', this.handleGlobalDragStart)
-            
-            // Add mouse move listener to track when we're actually outside the drop zone
-            document.addEventListener('mousemove', this.handleMouseMove)
-        },
+                    created() {
+                this.loadShowAllFieldsPreference()
+                
+                // Add global drag event listeners
+                document.addEventListener('dragend', this.handleGlobalDragEnd)
+                document.addEventListener('dragstart', this.handleGlobalDragStart)
+                
+                // Add mouse move listener to track when we're actually outside the drop zone
+                document.addEventListener('mousemove', this.handleMouseMove)
+            },
         
         beforeUnmount() {
             // Clean up event listeners when component is destroyed
-            document.removeEventListener('paste', this.handleClipboardPaste)
             document.removeEventListener('dragend', this.handleGlobalDragEnd)
             document.removeEventListener('dragstart', this.handleGlobalDragStart)
             document.removeEventListener('mousemove', this.handleMouseMove)
@@ -823,23 +817,7 @@
             },
             
             handlePaste(event) {
-                // Check if clipboard has image data
-                if (event.clipboardData && event.clipboardData.items) {
-                    const items = event.clipboardData.items;
-                    
-                    for (let i = 0; i < items.length; i++) {
-                        if (items[i].type.indexOf('image') !== -1) {
-                            const file = items[i].getAsFile();
-                            if (file) {
-                                event.preventDefault(); // Prevent default paste behavior
-                                // Upload the image as if it was selected
-                                this.uploadDetailsImage(file);
-                                return; // Exit early since we handled the image
-                            }
-                        }
-                    }
-                }
-                
+
                 // If no image data, handle as text paste
                 event.preventDefault();
                 // Get the pasted text
@@ -1088,6 +1066,13 @@
                 if (!file.type.startsWith('image/')) {
                     this.errorMessage = '{{ __("messages.invalid_image_type") }}'
                     return
+                }
+
+                // Check file size (2.5 MB = 2.5 * 1024 * 1024 bytes)
+                const maxSize = 2.5 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    this.errorMessage = '{{ __("messages.image_size_warning") }}';
+                    return;
                 }
 
                 this.isUploadingImage = idx;
@@ -1340,45 +1325,7 @@
                 }
             },
 
-            async handleClipboardPaste(e) {
-                // First check if we're pasting into the event details textarea
-                if (document.activeElement === document.getElementById('event_details')) {
-                    // Let the normal paste event handle this
-                    return;
-                }
-                
-                // Check if clipboard has image data
-                if (e.clipboardData && e.clipboardData.items) {
-                    const items = e.clipboardData.items;
-                    
-                    for (let i = 0; i < items.length; i++) {
-                        if (items[i].type.indexOf('image') !== -1) {
-                            const file = items[i].getAsFile();
-                            if (file) {
-                                e.preventDefault(); // Prevent default paste behavior
-                                
-                                // Check if we have any events to paste to
-                                if (this.preview?.parsed && this.preview.parsed.length > 0) {
-                                    // Find the first event that doesn't have an image and isn't saved
-                                    const idx = this.preview.parsed.findIndex((event, i) => 
-                                        !event.social_image && !this.savedEvents[i]);
-                                    
-                                    if (idx !== -1) {
-                                        await this.uploadImage(file, idx);
-                                        
-                                        break;
-                                    }
-                                } else {
-                                    // No events yet, so paste to the details image
-                                    await this.uploadDetailsImage(file);
-                                                                            
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            },
+
 
             dragOverDetails(e) {
                 e.preventDefault();
@@ -1504,6 +1451,13 @@
             async uploadDetailsImage(file) {
                 if (!file.type.startsWith('image/')) {
                     this.errorMessage = '{{ __("messages.invalid_image_type") }}';
+                    return;
+                }
+
+                // Check file size (2.5 MB = 2.5 * 1024 * 1024 bytes)
+                const maxSize = 2.5 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    this.errorMessage = '{{ __("messages.image_size_warning") }}';
                     return;
                 }
 
