@@ -211,6 +211,7 @@ return [
     'register_curator' => 'Kurator registrieren',
     'deleted_curator' => 'Kurator erfolgreich gelöscht',
     'flyer_image' => 'Flyer-Bild',
+    'events_graphic' => 'Veranstaltungsgrafik',
     'event_added' => 'Veranstaltung erfolgreich hinzugefügt',
     'please_select' => 'Bitte wählen Sie',
     'claim_email_line1' => 'Registrieren Sie sich, um die Veranstaltungsseite anzupassen, oder ignorieren Sie diese E-Mail',

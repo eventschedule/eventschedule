@@ -221,6 +221,7 @@ return [
     'register_curator' => 'Register Curator',
     'deleted_curator' => 'Successfully deleted curator',
     'flyer_image' => 'Flyer Image',
+    'events_graphic' => 'Events Graphic',
     'event_added' => 'Successfully added event',
     'please_select' => 'Please select',
     'claim_email_line1' => 'Sign up to customize the event page or feel free to ignore this email',

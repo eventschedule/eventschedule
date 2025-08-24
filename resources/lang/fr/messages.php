@@ -209,6 +209,7 @@ return [
     'updated_curator' => 'Conservateur mis à jour avec succès',
     'deleted_curator' => 'Conservateur supprimé avec succès',
     'flyer_image' => 'Image du Flyer',
+    'events_graphic' => 'Graphique des Événements',
     'event_added' => 'Événement ajouté avec succès',
     'please_select' => 'Veuillez sélectionner',
     'claim_email_line1' => 'Inscrivez-vous pour personnaliser la page de l\'événement ou ignorez simplement cet e-mail',
