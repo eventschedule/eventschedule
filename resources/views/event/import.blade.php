@@ -606,6 +606,19 @@
             }
         },
 
+        mounted() {
+            // Add keyboard event listener for Ctrl+Enter in textarea
+            const textarea = this.$refs.eventDetails;
+            if (textarea) {
+                textarea.addEventListener('keydown', (event) => {
+                    if (event.ctrlKey && event.key === 'Enter') {
+                        event.preventDefault();
+                        this.handleSubmit();
+                    }
+                });
+            }
+        },
+
         computed: {
             canSubmit() {
                 return this.eventDetails.trim() || this.detailsImage;
