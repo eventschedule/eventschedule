@@ -63,7 +63,6 @@
                                     @dragend="dragEndDetails"
                                     autofocus {{ config('services.google.gemini_key') ? '' : 'disabled' }}
                                     :class="['mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm transition-all duration-200', 
-                                        {{ is_rtl() ? "'pl-24'" : "'pr-24'" }},
                                         isDraggingDetails ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 ring-2 ring-blue-200 dark:ring-blue-800' : '']"
                                     :dir="{{ is_rtl() ? "'rtl'" : "'ltr'" }}"
                                     :style="{{ is_rtl() ? "'text-align: right;'" : "'text-align: left;'" }}"
