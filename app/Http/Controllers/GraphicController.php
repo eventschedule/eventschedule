@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Role;
-use App\Services\EventGraphicGenerator; // <-- Import the new service
+use App\Services\EventGraphicGenerator;
 use Illuminate\Http\Request;
 
 class GraphicController extends Controller
