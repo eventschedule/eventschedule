@@ -7,6 +7,8 @@ use App\Models\Event;
 use App\Services\designs\ModernDesign;
 use App\Services\designs\MinimalDesign;
 use Illuminate\Support\Collection;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 
 class EventGraphicGenerator
 {
@@ -23,6 +25,11 @@ class EventGraphicGenerator
     protected const FLYER_HEIGHT = 480;
     protected const MARGIN = 30;
     protected const CORNER_RADIUS = 8;
+    
+    // QR Code configuration
+    protected const QR_CODE_SIZE = 80;
+    protected const QR_CODE_PADDING = 20;
+    protected const QR_CODE_MARGIN = 2;
     
     // Language and layout
     protected string $lang;
@@ -122,6 +129,11 @@ class EventGraphicGenerator
             'corner_radius' => self::CORNER_RADIUS,
             'total_width' => $this->getWidth(),
             'total_height' => $this->getHeight(),
+            'qr_code_size' => self::QR_CODE_SIZE,
+            'qr_code_padding' => self::QR_CODE_PADDING,
+            'qr_code_margin' => self::QR_CODE_MARGIN,
+            'qr_code_actual_size' => $this->getActualQRCodeSize(),
+            'qr_code_validation' => $this->validateQRCodeFit(),
         ];
     }
     
@@ -359,6 +371,141 @@ class EventGraphicGenerator
         
         // Get the event flyer image
         $this->addEventFlyerImage($event, $x, $y);
+        
+        // Add QR code to the bottom left corner of the flyer
+        $this->addEventQRCode($event, $x, $y);
+    }
+    
+    /**
+     * Calculate standardized QR code position for a flyer
+     * This ensures all QR codes are positioned exactly the same way
+     */
+    protected function calculateQRCodePosition(int $x, int $y): array
+    {
+        // Standard position: bottom left corner with consistent padding
+        $qrX = $x + self::QR_CODE_PADDING;
+        $qrY = $y + self::FLYER_HEIGHT - self::QR_CODE_SIZE - self::QR_CODE_PADDING;
+        
+        // Ensure QR code doesn't go outside flyer boundaries
+        if ($qrX + self::QR_CODE_SIZE > $x + self::FLYER_WIDTH) {
+            $qrX = $x + self::FLYER_WIDTH - self::QR_CODE_SIZE - self::QR_CODE_PADDING;
+        }
+        if ($qrY + self::QR_CODE_SIZE > $y + self::FLYER_HEIGHT) {
+            $qrY = $y + self::FLYER_HEIGHT - self::QR_CODE_SIZE - self::QR_CODE_PADDING;
+        }
+        if ($qrX < $x) {
+            $qrX = $x + self::QR_CODE_PADDING;
+        }
+        if ($qrY < $y) {
+            $qrY = $y + self::QR_CODE_PADDING;
+        }
+        
+        return [
+            'x' => $qrX,
+            'y' => $qrY,
+            'size' => self::QR_CODE_SIZE
+        ];
+    }
+    
+    /**
+     * Generate and add a QR code to the bottom left corner of a flyer
+     */
+    protected function addEventQRCode(Event $event, int $x, int $y): void
+    {
+        try {
+            // Generate the event URL for the QR code
+            $eventUrl = $event->registration_url ?: $event->getGuestUrl($this->role->subdomain);
+            
+            \Log::info("Generating QR code for event {$event->id} with URL: {$eventUrl}");
+            
+            // Create QR code with consistent size
+            $qrCode = QrCode::create($eventUrl)
+                ->setSize(self::QR_CODE_SIZE)
+                ->setMargin(self::QR_CODE_MARGIN);
+            
+            // Create PNG writer and generate QR code image
+            $writer = new PngWriter();
+            $result = $writer->write($qrCode);
+            $qrCodeImageData = $result->getString();
+            
+            // Create image resource from QR code data
+            $qrCodeImage = imagecreatefromstring($qrCodeImageData);
+            if (!$qrCodeImage) {
+                \Log::warning("Failed to create QR code image resource for event {$event->id}");
+                return;
+            }
+            
+            // Get actual QR code dimensions to ensure consistency
+            $actualQRWidth = imagesx($qrCodeImage);
+            $actualQRHeight = imagesy($qrCodeImage);
+            
+            \Log::info("QR code dimensions for event {$event->id}: {$actualQRWidth}x{$actualQRHeight}");
+            
+            // Ensure QR code size is within flyer boundaries
+            $maxQRSize = min(self::FLYER_WIDTH - (self::QR_CODE_PADDING * 2), self::FLYER_HEIGHT - (self::QR_CODE_PADDING * 2));
+            $qrSize = min(self::QR_CODE_SIZE, $maxQRSize);
+            
+            // If the generated QR code is a different size than expected, resize it to ensure consistency
+            if ($actualQRWidth !== $qrSize || $actualQRHeight !== $qrSize) {
+                \Log::info("Resizing QR code from {$actualQRWidth}x{$actualQRHeight} to {$qrSize}x{$qrSize} for consistency");
+                
+                // Create a new image with the exact size we want
+                $resizedQRImage = imagecreatetruecolor($qrSize, $qrSize);
+                if ($resizedQRImage) {
+                    // Enable alpha blending for the resized image
+                    imagealphablending($resizedQRImage, false);
+                    imagesavealpha($resizedQRImage, true);
+                    
+                    // Create transparent background
+                    $transparent = imagecolorallocatealpha($resizedQRImage, 0, 0, 0, 127);
+                    imagefill($resizedQRImage, 0, 0, $transparent);
+                    
+                    // Copy and resize the original QR code to the new image
+                    imagecopyresampled(
+                        $resizedQRImage, $qrCodeImage,
+                        0, 0, 0, 0,
+                        $qrSize, $qrSize,
+                        $actualQRWidth, $actualQRHeight
+                    );
+                    
+                    // Clean up original QR code image
+                    imagedestroy($qrCodeImage);
+                    
+                    // Use the resized image
+                    $qrCodeImage = $resizedQRImage;
+                }
+            }
+            
+            // Calculate standardized QR code position
+            $position = $this->calculateQRCodePosition($x, $y);
+            $qrX = $position['x'];
+            $qrY = $position['y'];
+            $qrSize = $position['size'];
+            
+            \Log::info("QR code final position for event {$event->id}: ({$qrX}, {$qrY}) with size {$qrSize}");
+            
+            // Copy QR code to the main image with consistent size
+            imagecopy(
+                $this->im, 
+                $qrCodeImage, 
+                $qrX, 
+                $qrY, 
+                0, 
+                0, 
+                $qrSize, 
+                $qrSize
+            );
+            
+            // Clean up QR code image resource
+            imagedestroy($qrCodeImage);
+            
+            \Log::info("QR code added successfully to event {$event->id} at position ({$qrX}, {$qrY}) with size {$qrSize}");
+            
+        } catch (\Exception $e) {
+            \Log::error("Error generating QR code for event {$event->id}: " . $e->getMessage());
+            \Log::error("Stack trace: " . $e->getTraceAsString());
+            // Continue without QR code if there's an error
+        }
     }
     
     protected function addEventFlyerImage(Event $event, int $x, int $y): void
@@ -1089,5 +1236,99 @@ class EventGraphicGenerator
         // For now, we'll keep it as a constant, but this method can be used if needed
         // You could add a protected property to override the constant value
         \Log::info("Corner radius change requested to: {$radius} (current: " . self::CORNER_RADIUS . ")");
+    }
+    
+    /**
+     * Get QR code configuration information
+     */
+    public function getQRCodeInfo(): array
+    {
+        return [
+            'size' => self::QR_CODE_SIZE,
+            'padding' => self::QR_CODE_PADDING,
+            'margin' => self::QR_CODE_MARGIN,
+            'position' => 'bottom_left',
+            'description' => 'QR codes are positioned in the bottom left corner of each flyer with padding'
+        ];
+    }
+    
+    /**
+     * Get the current QR code size
+     */
+    public function getQRCodeSize(): int
+    {
+        return self::QR_CODE_SIZE;
+    }
+    
+    /**
+     * Get the current QR code padding
+     */
+    public function getQRCodePadding(): int
+    {
+        return self::QR_CODE_PADDING;
+    }
+    
+    /**
+     * Get the actual QR code size being used (may be smaller than constant if constrained by flyer size)
+     */
+    public function getActualQRCodeSize(): int
+    {
+        $maxQRSize = min(self::FLYER_WIDTH - (self::QR_CODE_PADDING * 2), self::FLYER_HEIGHT - (self::QR_CODE_PADDING * 2));
+        return min(self::QR_CODE_SIZE, $maxQRSize);
+    }
+    
+    /**
+     * Validate that QR codes will fit within flyer boundaries
+     */
+    public function validateQRCodeFit(): array
+    {
+        $maxQRSize = min(self::FLYER_WIDTH - (self::QR_CODE_PADDING * 2), self::FLYER_HEIGHT - (self::QR_CODE_PADDING * 2));
+        $actualSize = min(self::QR_CODE_SIZE, $maxQRSize);
+        $fits = $actualSize >= self::QR_CODE_SIZE;
+        
+        return [
+            'requested_size' => self::QR_CODE_SIZE,
+            'max_available_size' => $maxQRSize,
+            'actual_size' => $actualSize,
+            'fits_within_bounds' => $fits,
+            'flyer_width' => self::FLYER_WIDTH,
+            'flyer_height' => self::FLYER_HEIGHT,
+            'padding' => self::QR_CODE_PADDING
+        ];
+    }
+    
+    /**
+     * Get QR code positioning information for a specific flyer
+     */
+    public function getQRCodePositionForFlyer(int $row, int $col): array
+    {
+        $x = self::MARGIN + ($col * (self::FLYER_WIDTH + self::MARGIN));
+        $y = self::MARGIN + ($row * (self::FLYER_HEIGHT + self::MARGIN));
+        
+        return $this->calculateQRCodePosition($x, $y);
+    }
+    
+    /**
+     * Get detailed QR code configuration and positioning information
+     */
+    public function getDetailedQRCodeInfo(): array
+    {
+        $validation = $this->validateQRCodeFit();
+        $samplePosition = $this->getQRCodePositionForFlyer(0, 0);
+        
+        return [
+            'constants' => [
+                'size' => self::QR_CODE_SIZE,
+                'padding' => self::QR_CODE_PADDING,
+                'margin' => self::QR_CODE_MARGIN,
+            ],
+            'validation' => $validation,
+            'sample_position' => $samplePosition,
+            'flyer_dimensions' => [
+                'width' => self::FLYER_WIDTH,
+                'height' => self::FLYER_HEIGHT,
+            ],
+            'description' => 'QR codes are positioned in the bottom left corner of each flyer with consistent padding and sizing'
+        ];
     }
 }
