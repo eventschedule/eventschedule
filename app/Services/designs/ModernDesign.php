@@ -63,26 +63,6 @@ class ModernDesign extends AbstractEventDesign
     }
 
     /**
-     * Smart bold font selection for mixed content
-     */
-    private function fontExtraBold(): string
-    {
-        // For RTL languages, use smart font selection
-        if ($this->rtl) {
-            return $this->fontBold();
-        }
-        return $this->fontBold();
-    }
-
-    /**
-     * Smart text rendering with automatic font selection
-     */
-    private function drawSmartBoldText(string $text, int $size, int $x, int $y, int $color, bool $rtl = false): void
-    {
-        $this->drawSmartText($text, $size, $x, $y, $color, $rtl);
-    }
-
-    /**
      * Smart clampLines with automatic font selection for mixed content
      */
     private function smartClampLines(string $text, int $size, int $color, int $x, int $y, int $maxW, int $maxLines, bool $rtl): int
@@ -127,34 +107,7 @@ class ModernDesign extends AbstractEventDesign
         return count($lines);
     }
 
-    /**
-     * Truncate text to fit within max width
-     */
-    private function truncate(string $text, int $size, string $font, int $maxW, string $ellipsis = '', bool $rtl = false): string
-    {
-        $lo = 0;
-        $hi = mb_strlen($text);
-        $best = '';
-        
-        while ($lo <= $hi) {
-            $mid = intdiv($lo + $hi, 2);
-            
-            if ($this->rtl) {
-                $sub = $ellipsis . mb_substr($text, -$mid);
-            } else {
-                $sub = mb_substr($text, 0, $mid) . $ellipsis;
-            }
-            
-            if ($this->textW($sub, $size, $font) <= $maxW) {
-                $best = $sub;
-                $lo = $mid + 1;
-            } else {
-                $hi = $mid - 1;
-            }
-        }
-        
-        return $best ?: $ellipsis;
-    }
+
 
     private function fill(array $rgb): void
     {
@@ -312,7 +265,7 @@ class ModernDesign extends AbstractEventDesign
         $y = (int) round($cy + $h / 2);
         
         // Use smart text rendering for better font selection
-        if ($font === $this->fontBold() || $font === $this->fontExtraBold()) {
+        if ($font === $this->fontBold()) {
             $this->drawSmartText($text, $size, $x, $y, $this->c[$colorKey], $this->rtl);
         } else {
             $this->drawEmojiText($text, $size, $x, $y, $this->c[$colorKey], $font, $this->rtl);
