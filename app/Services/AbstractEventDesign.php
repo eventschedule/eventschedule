@@ -518,7 +518,7 @@ abstract class AbstractEventDesign
         return $s;
     }
 
-    private function truncate(string $text,int $size,string $font,int $maxW,string $ellipsis='',bool $rtl=false): string
+    protected function truncate(string $text,int $size,string $font,int $maxW,string $ellipsis='',bool $rtl=false): string
     {
         $lo=0;$hi=mb_strlen($text);$best='';
         while($lo<=$hi){
