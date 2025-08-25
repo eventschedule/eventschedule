@@ -554,4 +554,7 @@ return [
     'event_pending_review' => 'Este evento está pendiente de revisión por un administrador',
     'event_rejected' => 'Un administrador ha rechazado agregar este evento al horario',
     'video_selected' => 'Video seleccionado',
+    'get_tickets' => 'Obtener Entradas',
+    'delete_schedule' => 'Eliminar Horario',
+    'import_events' => 'Importar Eventos',
 ];

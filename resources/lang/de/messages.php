@@ -558,4 +558,7 @@ return [
     'event_pending_review' => 'Diese Veranstaltung wartet auf Überprüfung durch einen Administrator',
     'event_rejected' => 'Ein Administrator hat abgelehnt, diese Veranstaltung zum Zeitplan hinzuzufügen',
     'video_selected' => 'Video ausgewählt',
+    'get_tickets' => 'Tickets kaufen',
+    'delete_schedule' => 'Zeitplan löschen',
+    'import_events' => 'Veranstaltungen importieren',
 ];

@@ -554,4 +554,8 @@ return [
     'event_pending_review' => 'هذا الحدث في انتظار مراجعة من قبل المدير',
     'event_rejected' => 'رفض المدير إضافة هذا الحدث إلى الجدول',
     'video_selected' => 'تم اختيار الفيديو',
+    'events_graphic' => 'رسم بياني للأحداث',
+    'get_tickets' => 'احصل على التذاكر',
+    'delete_schedule' => 'حذف الجدول',
+    'import_events' => 'استيراد الأحداث',
 ];

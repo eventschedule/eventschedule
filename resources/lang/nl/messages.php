@@ -551,4 +551,8 @@ return [
     'event_pending_review' => 'Dit evenement wacht op beoordeling door een beheerder',
     'event_rejected' => 'Een beheerder heeft geweigerd dit evenement toe te voegen aan het schema',
     'video_selected' => 'Video geselecteerd',
+    'events_graphic' => 'Evenementen Grafiek',
+    'get_tickets' => 'Tickets Krijgen',
+    'delete_schedule' => 'Schema Verwijderen',
+    'import_events' => 'Evenementen Importeren',
 ];

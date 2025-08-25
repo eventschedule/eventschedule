@@ -554,4 +554,7 @@ return [
     'you_can_combine_text_and_images' => 'Vous pouvez combiner du texte et des images - le système extraira les informations des deux sources',
     'drag_over_textarea' => 'Glissez les images directement sur la zone de texte pour les joindre',
     'video_selected' => 'Vidéo sélectionnée',
+    'get_tickets' => 'Obtenir des Billets',
+    'delete_schedule' => 'Supprimer le Programme',
+    'import_events' => 'Importer des Événements',
 ];
