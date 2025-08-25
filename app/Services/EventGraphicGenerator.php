@@ -72,11 +72,6 @@ class EventGraphicGenerator
     
     public function generate(): string
     {
-        // Check if we have events to display
-        if ($this->events->isEmpty()) {
-            return $this->generateNoEventsMessage();
-        }
-        
         // Apply background based on role's style
         $this->applyBackground();
         
@@ -89,47 +84,6 @@ class EventGraphicGenerator
         $imageData = ob_get_contents();
         ob_end_clean();
         
-        return $imageData;
-    }
-    
-    protected function generateNoEventsMessage(): string
-    {
-        // Create a simple image with "No upcoming events" message
-        // Use the same dimensions as a single event flyer for consistency
-        $width = self::FLYER_WIDTH;
-        $height = self::FLYER_HEIGHT;
-        $im = imagecreatetruecolor($width, $height);
-        
-        if (!$im) {
-            throw new \RuntimeException('Failed to create image resource for no events message');
-        }
-        
-        // Set background
-        $bgColor = imagecolorallocate($im, 248, 249, 250);
-        imagefill($im, 0, 0, $bgColor);
-        
-        // Add text
-        $text = 'No upcoming events';
-        $fontSize = 20; // Slightly smaller for the smaller dimensions
-        $font = $this->getFontPath('Montserrat-Bold.ttf', '/System/Library/Fonts/Helvetica.ttc');
-        $color = imagecolorallocate($im, 108, 117, 125);
-        
-        // Center text
-        $bbox = imagettfbbox($fontSize, 0, $font, $text);
-        $textWidth = $bbox[2] - $bbox[0];
-        $textHeight = $bbox[1] - $bbox[7];
-        $x = ($width - $textWidth) / 2;
-        $y = ($height + $textHeight) / 2;
-        
-        imagettftext($im, $fontSize, 0, $x, $y, $color, $font, $text);
-        
-        // Output
-        ob_start();
-        imagepng($im);
-        $imageData = ob_get_contents();
-        ob_end_clean();
-        
-        imagedestroy($im);
         return $imageData;
     }
     
@@ -238,8 +192,9 @@ class EventGraphicGenerator
         $bgColor = $this->hexToColor('#f0f0f0'); // Fallback color
         imagefill($this->im, 0, 0, $bgColor);
         
-        // Try to load background image
+        // Try to load background image - handle both local and custom URLs
         if ($this->role->background_image) {
+            // First try local background image from backgrounds folder
             $imagePath = public_path('images/backgrounds/' . $this->role->background_image . '.png');
             if (file_exists($imagePath)) {
                 $bgImage = imagecreatefrompng($imagePath);
@@ -247,8 +202,14 @@ class EventGraphicGenerator
                     // Resize and apply background image
                     $this->applyResizedBackground($bgImage);
                     imagedestroy($bgImage);
+                    return;
                 }
             }
+        }
+        
+        // If no local image or it failed to load, try custom background image URL
+        if ($this->role->background_image_url) {
+            $this->applyCustomBackgroundImage();
         }
     }
     
@@ -298,6 +259,71 @@ class EventGraphicGenerator
         } else {
             // Fallback to original method if temp image creation fails
             imagecopyresampled($this->im, $bgImage, $x, $y, 0, 0, $newWidth, $newHeight, $bgWidth, $bgHeight);
+        }
+    }
+    
+    protected function applyCustomBackgroundImage(): void
+    {
+        \Log::info("Applying custom background image from URL: " . $this->role->background_image_url);
+        
+        try {
+            $imageData = null;
+            
+            // Handle both local and remote images
+            if (filter_var($this->role->background_image_url, FILTER_VALIDATE_URL)) {
+                // Remote image
+                \Log::info("Loading remote background image: " . $this->role->background_image_url);
+                
+                // Disable SSL verification for local development
+                $context = null;
+                if (app()->environment('local') || config('app.disable_ssl_verification', false)) {
+                    $context = stream_context_create([
+                        'ssl' => [
+                            'verify_peer' => false,
+                            'verify_peer_name' => false,
+                        ],
+                        'http' => [
+                            'timeout' => 30,
+                        ]
+                    ]);
+                }
+                
+                $imageData = file_get_contents($this->role->background_image_url, false, $context);
+                if ($imageData === false) {
+                    \Log::info("file_get_contents failed, trying cURL as fallback");
+                    
+                    // Fallback to cURL if file_get_contents fails
+                    $imageData = $this->fetchImageWithCurl($this->role->background_image_url);
+                    
+                    if ($imageData === false) {
+                        \Log::info("Failed to fetch remote background image with both methods: " . $this->role->background_image_url);
+                        return;
+                    }
+                }
+            } else {
+                // Local file path
+                $imagePath = $this->role->background_image_url;
+                if (file_exists($imagePath)) {
+                    $imageData = file_get_contents($imagePath);
+                } else {
+                    \Log::info("Local background image file not found: " . $imagePath);
+                    return;
+                }
+            }
+            
+            if ($imageData) {
+                $bgImage = imagecreatefromstring($imageData);
+                if ($bgImage) {
+                    // Resize and apply background image
+                    $this->applyResizedBackground($bgImage);
+                    imagedestroy($bgImage);
+                    \Log::info("Successfully applied custom background image");
+                } else {
+                    \Log::info("Failed to create image resource from custom background image data");
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error("Error applying custom background image: " . $e->getMessage());
         }
     }
     
