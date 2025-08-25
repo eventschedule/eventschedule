@@ -301,44 +301,10 @@ class EventGraphicGenerator
         // Debug: Check all possible image-related properties
         \Log::info("=== DEBUG EVENT {$event->id} ===");
         \Log::info("Event name: " . $event->name);
-        \Log::info("flyerImageUrl: " . ($event->flyerImageUrl ?? 'NULL'));
-        \Log::info("flyer_image_url: " . ($event->flyer_image_url ?? 'NULL'));
-        \Log::info("getImageUrl(): " . ($event->getImageUrl() ?? 'NULL'));
-        
-        // Check if the property exists and has a value
-        if (property_exists($event, 'flyerImageUrl')) {
-            \Log::info("flyerImageUrl property exists");
-        } else {
-            \Log::info("flyerImageUrl property does NOT exist");
-        }
-        
-        if (property_exists($event, 'flyer_image_url')) {
-            \Log::info("flyer_image_url property exists");
-        } else {
-            \Log::info("flyer_image_url property does NOT exist");
-        }
-        
-        // Try different ways to get the image URL
-        $imageUrl = null;
-        
-        // Method 1: Direct property access
-        if (isset($event->flyerImageUrl) && !empty($event->flyerImageUrl)) {
-            $imageUrl = $event->flyerImageUrl;
-            \Log::info("Using flyerImageUrl: " . $imageUrl);
-        }
-        // Method 2: Check flyer_image_url property
-        elseif (isset($event->flyer_image_url) && !empty($event->flyer_image_url)) {
-            $imageUrl = $event->flyer_image_url;
-            \Log::info("Using flyer_image_url: " . $imageUrl);
-        }
-        // Method 3: Fallback to getImageUrl method
-        else {
-            $imageUrl = $event->getImageUrl();
-            \Log::info("Using getImageUrl(): " . $imageUrl);
-        }
-        
-        \Log::info("Final imageUrl: " . ($imageUrl ?? 'NULL'));
-        
+
+        $imageUrl = $event->flyer_image_url;
+        \Log::info("Image URL: " . $imageUrl);
+                
         if ($imageUrl && $this->isValidImageUrl($imageUrl)) {
             \Log::info("Image URL is valid, attempting to load...");
             // Try to load and display the event image
