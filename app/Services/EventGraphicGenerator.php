@@ -22,6 +22,7 @@ class EventGraphicGenerator
     protected const FLYER_WIDTH = 400;
     protected const FLYER_HEIGHT = 480;
     protected const MARGIN = 30;
+    protected const CORNER_RADIUS = 8;
     
     // Language and layout
     protected string $lang;
@@ -78,11 +79,18 @@ class EventGraphicGenerator
         // Generate individual event flyers
         $this->generateEventFlyers();
         
+        \Log::info("All flyers generated, preparing PNG output...");
+        
         // Output the image
         ob_start();
-        imagepng($this->im);
+        
+        // Ensure PNG transparency is preserved
+        imagepng($this->im, null, 9, PNG_ALL_FILTERS);
+        
         $imageData = ob_get_contents();
         ob_end_clean();
+        
+        \Log::info("PNG output generated, size: " . strlen($imageData) . " bytes");
         
         return $imageData;
     }
@@ -111,6 +119,7 @@ class EventGraphicGenerator
             'flyer_width' => self::FLYER_WIDTH,
             'flyer_height' => self::FLYER_HEIGHT,
             'margin' => self::MARGIN,
+            'corner_radius' => self::CORNER_RADIUS,
             'total_width' => $this->getWidth(),
             'total_height' => $this->getHeight(),
         ];
@@ -485,8 +494,6 @@ class EventGraphicGenerator
         $sourceWidth = imagesx($sourceImage);
         $sourceHeight = imagesy($sourceImage);
         
-        // No background or border - let the image fill the entire flyer area
-        
         // Calculate how to fit the image within the flyer boundaries while maintaining aspect ratio
         $sourceAspectRatio = $sourceWidth / $sourceHeight;
         $flyerAspectRatio = self::FLYER_WIDTH / self::FLYER_HEIGHT;
@@ -517,7 +524,162 @@ class EventGraphicGenerator
             $finalY = $y;
         }
         
-        // For wide images, we need to calculate the source crop area to maintain aspect ratio
+        // Create a temporary image with the resized event image
+        $tempImage = imagecreatetruecolor(self::FLYER_WIDTH, self::FLYER_HEIGHT);
+        if (!$tempImage) {
+            // Fallback to original method if temp image creation fails
+            $this->applyImageWithoutRoundedCorners($sourceImage, $x, $y, $sourceAspectRatio, $flyerAspectRatio);
+            return;
+        }
+        
+        // Enable alpha blending for the temp image
+        imagealphablending($tempImage, false);
+        imagesavealpha($tempImage, true);
+        
+        // Create transparent background
+        $transparent = imagecolorallocatealpha($tempImage, 0, 0, 0, 127);
+        imagefill($tempImage, 0, 0, $transparent);
+        
+        // Copy and resize the source image to the temp image
+        if ($sourceAspectRatio > $flyerAspectRatio) {
+            // Calculate how much of the source image to show (crop left/right)
+            $sourceCropWidth = (int)($sourceHeight * $flyerAspectRatio);
+            $sourceCropX = (int)(($sourceWidth - $sourceCropWidth) / 2);
+            
+            imagecopyresampled(
+                $tempImage, $sourceImage,
+                0, 0, $sourceCropX, 0,
+                self::FLYER_WIDTH, self::FLYER_HEIGHT,
+                $sourceCropWidth, $sourceHeight
+            );
+        } else {
+            // For tall images, crop top/bottom
+            $sourceCropHeight = (int)($sourceWidth / $flyerAspectRatio);
+            $sourceCropY = (int)(($sourceHeight - $sourceCropHeight) / 2);
+            
+            imagecopyresampled(
+                $tempImage, $sourceImage,
+                0, 0, 0, $sourceCropY,
+                self::FLYER_WIDTH, self::FLYER_HEIGHT,
+                $sourceWidth, $sourceCropHeight
+            );
+        }
+        
+        // Apply rounded corners mask
+        $this->applyRoundedCorners($tempImage, self::FLYER_WIDTH, self::FLYER_HEIGHT);
+        
+        // Copy the rounded image to the main canvas
+        imagecopy($this->im, $tempImage, $x, $y, 0, 0, self::FLYER_WIDTH, self::FLYER_HEIGHT);
+        
+        // Clean up temp image
+        imagedestroy($tempImage);
+    }
+    
+    /**
+     * Apply rounded corners to an image using alpha blending
+     */
+    protected function applyRoundedCorners($image, int $width, int $height): void
+    {
+        $cornerRadius = $this->getCornerRadius();
+        
+        \Log::info("Applying rounded corners with radius: {$cornerRadius} to image {$width}x{$height}");
+        
+        // Create a mask for rounded corners
+        $mask = imagecreatetruecolor($width, $height);
+        if (!$mask) {
+            \Log::error("Failed to create mask for rounded corners");
+            return;
+        }
+        
+        // Enable alpha blending for the mask
+        imagealphablending($mask, false);
+        imagesavealpha($mask, true);
+        
+        // Create transparent background
+        $transparent = imagecolorallocatealpha($mask, 0, 0, 0, 127);
+        imagefill($mask, 0, 0, $transparent);
+        
+        // Create white (opaque) color for the mask
+        $white = imagecolorallocate($mask, 255, 255, 255);
+        
+        // Fill the main rectangle area
+        imagefilledrectangle($mask, $cornerRadius, 0, $width - $cornerRadius - 1, $height - 1, $white);
+        imagefilledrectangle($mask, 0, $cornerRadius, $width - 1, $height - $cornerRadius - 1, $white);
+        
+        // Fill the corner areas with circles
+        // Top-left corner
+        imagefilledellipse($mask, $cornerRadius, $cornerRadius, $cornerRadius * 2, $cornerRadius * 2, $white);
+        
+        // Top-right corner
+        imagefilledellipse($mask, $width - $cornerRadius - 1, $cornerRadius, $cornerRadius * 2, $cornerRadius * 2, $white);
+        
+        // Bottom-left corner
+        imagefilledellipse($mask, $cornerRadius, $height - $cornerRadius - 1, $cornerRadius * 2, $cornerRadius * 2, $white);
+        
+        // Bottom-right corner
+        imagefilledellipse($mask, $width - $cornerRadius - 1, $height - $cornerRadius - 1, $cornerRadius * 2, $cornerRadius * 2, $white);
+        
+        \Log::info("Mask created successfully, applying to image...");
+        
+        // Apply the mask to the image
+        $this->applyMaskToImage($image, $mask);
+        
+        \Log::info("Rounded corners applied successfully");
+        
+        // Clean up mask
+        imagedestroy($mask);
+    }
+    
+    /**
+     * Apply a mask to an image to create transparency
+     */
+    protected function applyMaskToImage($image, $mask): void
+    {
+        $width = imagesx($image);
+        $height = imagesy($image);
+        
+        \Log::info("Applying mask to image {$width}x{$height}");
+        
+        $transparentPixels = 0;
+        $totalPixels = 0;
+        
+        for ($y = 0; $y < $height; $y++) {
+            for ($x = 0; $x < $width; $x++) {
+                $totalPixels++;
+                $maskColor = imagecolorat($mask, $x, $y);
+                $imageColor = imagecolorat($image, $x, $y);
+                
+                // Get RGB values from mask (white = 255,255,255, black = 0,0,0)
+                $maskR = ($maskColor >> 16) & 0xFF;
+                $maskG = ($maskColor >> 8) & 0xFF;
+                $maskB = $maskColor & 0xFF;
+                
+                // If mask is black (transparent area), make image transparent
+                if ($maskR < 128 && $maskG < 128 && $maskB < 128) {
+                    // Get RGB values from image
+                    $r = ($imageColor >> 16) & 0xFF;
+                    $g = ($imageColor >> 8) & 0xFF;
+                    $b = $imageColor & 0xFF;
+                    
+                    // Create new color with full transparency
+                    $newColor = imagecolorallocatealpha($image, $r, $g, $b, 127);
+                    imagesetpixel($image, $x, $y, $newColor);
+                    $transparentPixels++;
+                }
+            }
+        }
+        
+        \Log::info("Mask applied: {$transparentPixels} pixels made transparent out of {$totalPixels} total pixels");
+    }
+    
+    /**
+     * Fallback method for applying image without rounded corners
+     */
+    protected function applyImageWithoutRoundedCorners($sourceImage, int $x, int $y, float $sourceAspectRatio, float $flyerAspectRatio): void
+    {
+        $sourceWidth = imagesx($sourceImage);
+        $sourceHeight = imagesy($sourceImage);
+        
         if ($sourceAspectRatio > $flyerAspectRatio) {
             // Calculate how much of the source image to show (crop left/right)
             $sourceCropWidth = (int)($sourceHeight * $flyerAspectRatio);
@@ -546,6 +708,65 @@ class EventGraphicGenerator
     }
     
     protected function createPlaceholderBackground(int $x, int $y): void
+    {
+        // Create a temporary image for the placeholder with rounded corners
+        $tempImage = imagecreatetruecolor(self::FLYER_WIDTH, self::FLYER_HEIGHT);
+        if (!$tempImage) {
+            // Fallback to original method if temp image creation fails
+            $this->createPlaceholderBackgroundWithoutRoundedCorners($x, $y);
+            return;
+        }
+        
+        // Enable alpha blending for the temp image
+        imagealphablending($tempImage, false);
+        imagesavealpha($tempImage, true);
+        
+        // Create transparent background
+        $transparent = imagecolorallocatealpha($tempImage, 0, 0, 0, 127);
+        imagefill($tempImage, 0, 0, $transparent);
+        
+        // Create a more visually appealing placeholder using the role's accent color
+        $bgColor = $this->c['white'];
+        $borderColor = $this->c['accent'];
+        
+        // Fill background
+        imagefilledrectangle($tempImage, 0, 0, self::FLYER_WIDTH, self::FLYER_HEIGHT, $bgColor);
+        
+        // Add accent border
+        imagerectangle($tempImage, 0, 0, self::FLYER_WIDTH, self::FLYER_HEIGHT, $borderColor);
+        
+        // Add subtle shadow effect
+        $shadowColor = imagecolorallocatealpha($tempImage, 0, 0, 0, 40);
+        imagefilledrectangle($tempImage, 2, 2, self::FLYER_WIDTH + 2, self::FLYER_HEIGHT + 2, $shadowColor);
+        
+        // Add a subtle accent color overlay in the top section
+        $accentOverlay = imagecolorallocatealpha($tempImage, 
+            imagecolorsforindex($tempImage, $this->c['accent'])['red'],
+            imagecolorsforindex($tempImage, $this->c['accent'])['green'],
+            imagecolorsforindex($tempImage, $this->c['accent'])['blue'],
+            30 // Very subtle
+        );
+        
+        // Add accent bar at top
+        imagefilledrectangle($tempImage, 0, 0, self::FLYER_WIDTH, 20, $accentOverlay);
+        
+        // Add some decorative elements
+        $this->addPlaceholderDecorationsToImage($tempImage);
+        
+        // Apply rounded corners mask
+        $this->applyRoundedCorners($tempImage, self::FLYER_WIDTH, self::FLYER_HEIGHT);
+        
+        // Copy the rounded placeholder to the main canvas
+        imagecopy($this->im, $tempImage, $x, $y, 0, 0, self::FLYER_WIDTH, self::FLYER_HEIGHT);
+        
+        // Clean up temp image
+        imagedestroy($tempImage);
+    }
+    
+    /**
+     * Fallback method for creating placeholder without rounded corners
+     */
+    protected function createPlaceholderBackgroundWithoutRoundedCorners(int $x, int $y): void
     {
         // Create a more visually appealing placeholder using the role's accent color
         $bgColor = $this->c['white'];
@@ -595,6 +816,33 @@ class EventGraphicGenerator
                 $dotY = $y + 60 + ($j * 45);
                 if ($dotX < $x + self::FLYER_WIDTH - 30 && $dotY < $y + self::FLYER_HEIGHT - 30) {
                     imagefilledellipse($this->im, $dotX, $dotY, 3, 3, $dotColor);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Add placeholder decorations to a temporary image
+     */
+    protected function addPlaceholderDecorationsToImage($image): void
+    {
+        $accentColor = $this->c['accent'];
+        
+        // Add a subtle pattern of small dots
+        $dotColor = imagecolorallocatealpha($image, 
+            imagecolorsforindex($image, $accentColor)['red'],
+            imagecolorsforindex($image, $accentColor)['green'],
+            imagecolorsforindex($image, $accentColor)['blue'],
+            60 // Semi-transparent
+        );
+        
+        // Create a subtle dot pattern
+        for ($i = 0; $i < 8; $i++) {
+            for ($j = 0; $j < 12; $j++) {
+                $dotX = 30 + ($i * 45);
+                $dotY = 60 + ($j * 45);
+                if ($dotX < self::FLYER_WIDTH - 30 && $dotY < self::FLYER_HEIGHT - 30) {
+                    imagefilledellipse($image, $dotX, $dotY, 3, 3, $dotColor);
                 }
             }
         }
@@ -822,5 +1070,24 @@ class EventGraphicGenerator
             'total_height' => $this->getHeight(),
             'aspect_ratio' => round($this->getWidth() / $this->getHeight(), 2)
         ];
+    }
+    
+    /**
+     * Get the current corner radius for rounded flyers
+     */
+    public function getCornerRadius(): int
+    {
+        return self::CORNER_RADIUS;
+    }
+    
+    /**
+     * Set a custom corner radius (useful for testing different values)
+     */
+    public function setCornerRadius(int $radius): void
+    {
+        // Note: This would require making CORNER_RADIUS non-const or using a different approach
+        // For now, we'll keep it as a constant, but this method can be used if needed
+        // You could add a protected property to override the constant value
+        \Log::info("Corner radius change requested to: {$radius} (current: " . self::CORNER_RADIUS . ")");
     }
 }
