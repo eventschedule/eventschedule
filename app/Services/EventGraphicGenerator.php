@@ -15,13 +15,13 @@ class EventGraphicGenerator
     protected $im;
     protected array $c = [];
     
-    // Grid configuration
-    protected const GRID_COLS = 3;
-    protected const GRID_ROWS = 3;
+    // Grid configuration - now dynamic
+    protected int $gridCols;
+    protected int $gridRows;
     protected const MAX_EVENTS = 9;
     protected const FLYER_WIDTH = 400;
-    protected const FLYER_HEIGHT = 480; // Reduced from 600 to 480 (20% shorter)
-    protected const MARGIN = 30; // Balanced spacing between 20 and 40
+    protected const FLYER_HEIGHT = 480;
+    protected const MARGIN = 30;
     
     // Language and layout
     protected string $lang;
@@ -37,14 +37,19 @@ class EventGraphicGenerator
         $this->role = $role;
         $this->events = $events->take(self::MAX_EVENTS)->values();
         
+        // Calculate dynamic grid dimensions based on event count
+        $this->calculateGridDimensions();
+        
         $this->lang = in_array(strtolower($role->language_code), ['ar','de','en','es','fr','he','it','nl','pt'], true)
             ? strtolower($role->language_code) : 'en';
         
         $this->rtl = in_array($this->lang, ['ar','he'], true);
         
-        // Calculate total dimensions
-        $totalWidth = (self::FLYER_WIDTH * self::GRID_COLS) + (self::MARGIN * (self::GRID_COLS + 1));
-        $totalHeight = (self::FLYER_HEIGHT * self::GRID_ROWS) + (self::MARGIN * (self::GRID_ROWS + 1));
+        // Calculate total dimensions based on dynamic grid
+        $totalWidth = (self::FLYER_WIDTH * $this->gridCols) + (self::MARGIN * ($this->gridCols + 1));
+        $totalHeight = (self::FLYER_HEIGHT * $this->gridRows) + (self::MARGIN * ($this->gridRows + 1));
+        
+        \Log::info("Final image dimensions: {$totalWidth}x{$totalHeight} (grid: {$this->gridCols}x{$this->gridRows})");
         
         // Create image
         $this->im = imagecreatetruecolor($totalWidth, $totalHeight);
@@ -90,8 +95,9 @@ class EventGraphicGenerator
     protected function generateNoEventsMessage(): string
     {
         // Create a simple image with "No upcoming events" message
-        $width = 800;
-        $height = 400;
+        // Use the same dimensions as a single event flyer for consistency
+        $width = self::FLYER_WIDTH;
+        $height = self::FLYER_HEIGHT;
         $im = imagecreatetruecolor($width, $height);
         
         if (!$im) {
@@ -104,7 +110,7 @@ class EventGraphicGenerator
         
         // Add text
         $text = 'No upcoming events';
-        $fontSize = 24;
+        $fontSize = 20; // Slightly smaller for the smaller dimensions
         $font = $this->getFontPath('Montserrat-Bold.ttf', '/System/Library/Fonts/Helvetica.ttc');
         $color = imagecolorallocate($im, 108, 117, 125);
         
@@ -129,12 +135,12 @@ class EventGraphicGenerator
     
     public function getWidth(): int
     {
-        return (self::FLYER_WIDTH * self::GRID_COLS) + (self::MARGIN * (self::GRID_COLS + 1));
+        return (self::FLYER_WIDTH * $this->gridCols) + (self::MARGIN * ($this->gridCols + 1));
     }
     
     public function getHeight(): int
     {
-        return (self::FLYER_HEIGHT * self::GRID_ROWS) + (self::MARGIN * (self::GRID_ROWS + 1));
+        return (self::FLYER_HEIGHT * $this->gridRows) + (self::MARGIN * ($this->gridRows + 1));
     }
     
     public function getEventCount(): int
@@ -145,8 +151,8 @@ class EventGraphicGenerator
     public function getGridInfo(): array
     {
         return [
-            'cols' => self::GRID_COLS,
-            'rows' => self::GRID_ROWS,
+            'cols' => $this->gridCols,
+            'rows' => $this->gridRows,
             'max_events' => self::MAX_EVENTS,
             'flyer_width' => self::FLYER_WIDTH,
             'flyer_height' => self::FLYER_HEIGHT,
@@ -277,8 +283,8 @@ class EventGraphicGenerator
         
         $eventIndex = 0;
         
-        for ($row = 0; $row < self::GRID_ROWS && $eventIndex < $this->events->count(); $row++) {
-            for ($col = 0; $col < self::GRID_COLS && $eventIndex < $this->events->count(); $col++) {
+        for ($row = 0; $row < $this->gridRows && $eventIndex < $this->events->count(); $row++) {
+            for ($col = 0; $col < $this->gridCols && $eventIndex < $this->events->count(); $col++) {
                 $event = $this->events[$eventIndex];
                 \Log::info("Processing event {$eventIndex}: ID={$event->id}, Name={$event->name}, Image={$event->flyerImageUrl}");
                 $this->generateSingleFlyer($event, $row, $col);
@@ -669,5 +675,102 @@ class EventGraphicGenerator
         
         // Return a default color if invalid
         return '#f0f0f0';
+    }
+
+    /**
+     * Calculate optimal grid dimensions based on event count
+     * Creates layouts that are visually balanced and have good aspect ratios
+     */
+    protected function calculateGridDimensions(): void
+    {
+        $eventCount = $this->events->count();
+        
+        \Log::info("Calculating grid dimensions for {$eventCount} events");
+        
+        if ($eventCount === 0) {
+            $this->gridCols = 1;
+            $this->gridRows = 1;
+            \Log::info("Grid layout: 1x1 (no events)");
+            return;
+        }
+        
+        if ($eventCount === 1) {
+            $this->gridCols = 1;
+            $this->gridRows = 1;
+            \Log::info("Grid layout: 1x1 (single event)");
+            return;
+        }
+        
+        if ($eventCount === 2) {
+            $this->gridCols = 2;
+            $this->gridRows = 1;
+            \Log::info("Grid layout: 2x1 (two events)");
+            return;
+        }
+        
+        if ($eventCount === 3) {
+            $this->gridCols = 3;
+            $this->gridRows = 1;
+            \Log::info("Grid layout: 3x1 (three events)");
+            return;
+        }
+        
+        if ($eventCount === 4) {
+            $this->gridCols = 2;
+            $this->gridRows = 2;
+            \Log::info("Grid layout: 2x2 (four events)");
+            return;
+        }
+        
+        if ($eventCount === 5) {
+            // 3x2 layout with one empty space - looks better than 2x3
+            $this->gridCols = 3;
+            $this->gridRows = 2;
+            \Log::info("Grid layout: 3x2 (five events)");
+            return;
+        }
+        
+        if ($eventCount === 6) {
+            $this->gridCols = 3;
+            $this->gridRows = 2;
+            \Log::info("Grid layout: 3x2 (six events)");
+            return;
+        }
+        
+        if ($eventCount === 7) {
+            // 3x3 layout with two empty spaces - still looks balanced
+            $this->gridCols = 3;
+            $this->gridRows = 3;
+            \Log::info("Grid layout: 3x3 (seven events)");
+            return;
+        }
+        
+        if ($eventCount === 8) {
+            // 3x3 layout with one empty space
+            $this->gridCols = 3;
+            $this->gridRows = 3;
+            \Log::info("Grid layout: 3x3 (eight events)");
+            return;
+        }
+        
+        // For 9 events, use 3x3 grid
+        $this->gridCols = 3;
+        $this->gridRows = 3;
+        \Log::info("Grid layout: 3x3 (nine events)");
+    }
+    
+    /**
+     * Get current grid layout information
+     */
+    public function getCurrentGridLayout(): array
+    {
+        return [
+            'cols' => $this->gridCols,
+            'rows' => $this->gridRows,
+            'event_count' => $this->events->count(),
+            'total_width' => $this->getWidth(),
+            'total_height' => $this->getHeight(),
+            'aspect_ratio' => round($this->getWidth() / $this->getHeight(), 2)
+        ];
     }
 }
