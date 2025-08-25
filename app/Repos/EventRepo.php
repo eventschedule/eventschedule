@@ -145,7 +145,7 @@ class EventRepo
                         if (! empty($member['youtube_url'])) {
                             $urlInfo = UrlUtils::getUrlInfo($member['youtube_url']);
                             if ($urlInfo !== null) {
-                                $links[] = $urlInfo;
+                                $links = [$urlInfo];
                             }
 
                             $role->youtube_links = json_encode($links);
