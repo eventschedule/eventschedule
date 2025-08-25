@@ -552,4 +552,8 @@ return [
     'event_pending_review' => 'Este evento está aguardando revisão por um administrador',
     'event_rejected' => 'Um administrador recusou adicionar este evento à agenda',
     'video_selected' => 'Vídeo selecionado',
+    'events_graphic' => 'Gráfico de Eventos',
+    'get_tickets' => 'Obter Ingressos',
+    'delete_schedule' => 'Excluir Agenda',
+    'import_events' => 'Importar Eventos',
 ];

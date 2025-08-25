@@ -550,4 +550,8 @@ return [
     'event_pending_review' => 'אירוע זה ממתין לבדיקה על ידי מנהל',
     'event_rejected' => 'מנהל סירב להוסיף אירוע זה ללוח הזמנים',
     'video_selected' => 'הסרטון נבחר',
+    'events_graphic' => 'גרפיקה של אירועים',
+    'get_tickets' => 'קבל כרטיסים',
+    'delete_schedule' => 'מחק לוח זמנים',
+    'import_events' => 'ייבא אירועים',
 ];

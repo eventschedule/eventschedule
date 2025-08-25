@@ -19,13 +19,19 @@ class GraphicController extends Controller
                 $query->where('role_id', $role->id)->where('is_accepted', true);
             })
             ->where('flyer_image_url', '!=', null)
+            /*
+            ->where(function ($query) {
+                $query->where('starts_at', '>=', now())
+                    ->orWhereNotNull('days_of_week');
+            })
+            */
             ->where('starts_at', '>=', now())
             ->orderBy('starts_at')
             ->limit(10)
             ->get();
 
         if ($events->isEmpty()) {
-            abort(404, 'No upcoming events found to generate a graphic.');
+            return redirect()->back()->with('error', __('messages.no_events_found'));
         }
 
         // Use the service to generate the graphic

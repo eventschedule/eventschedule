@@ -554,4 +554,8 @@ return [
     'event_pending_review' => 'Questo evento è in attesa di revisione da parte di un amministratore',
     'event_rejected' => 'Un amministratore ha rifiutato di aggiungere questo evento al programma',
     'video_selected' => 'Video selezionato',
+    'events_graphic' => 'Grafica Eventi',
+    'get_tickets' => 'Ottieni Biglietti',
+    'delete_schedule' => 'Elimina Programma',
+    'import_events' => 'Importa Eventi',
 ];
