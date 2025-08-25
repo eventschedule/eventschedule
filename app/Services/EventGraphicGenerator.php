@@ -23,12 +23,12 @@ class EventGraphicGenerator
     protected const MAX_EVENTS = 9;
     protected const FLYER_WIDTH = 400;
     protected const FLYER_HEIGHT = 480;
-    protected const MARGIN = 30;
-    protected const CORNER_RADIUS = 8;
+    protected const MARGIN = 18;
+    protected const CORNER_RADIUS = 10;
     
     // QR Code configuration
-    protected const QR_CODE_SIZE = 80;
-    protected const QR_CODE_PADDING = 20;
+    protected const QR_CODE_SIZE = 70;
+    protected const QR_CODE_PADDING = 10;
     protected const QR_CODE_MARGIN = 2;
     
     // Language and layout
@@ -408,99 +408,66 @@ class EventGraphicGenerator
     }
     
     /**
-     * Generate and add a QR code to the bottom left corner of a flyer
+     * Generate and add a QR code with a guaranteed consistent size.
      */
     protected function addEventQRCode(Event $event, int $x, int $y): void
     {
         try {
             // Generate the event URL for the QR code
             $eventUrl = $event->registration_url ?: $event->getGuestUrl($this->role->subdomain);
-            
             \Log::info("Generating QR code for event {$event->id} with URL: {$eventUrl}");
-            
-            // Create QR code with consistent size
+
+            // Create QR code without a fixed size; the library will determine the optimal size.
+            // We will resize it to a consistent dimension during the placement step.
             $qrCode = QrCode::create($eventUrl)
-                ->setSize(self::QR_CODE_SIZE)
-                ->setMargin(self::QR_CODE_MARGIN);
-            
-            // Create PNG writer and generate QR code image
+                ->setMargin(self::QR_CODE_MARGIN); // Keep margin for a quiet zone
+
+            // Create PNG writer and generate QR code image data
             $writer = new PngWriter();
             $result = $writer->write($qrCode);
             $qrCodeImageData = $result->getString();
-            
-            // Create image resource from QR code data
+
+            // Create an image resource from the generated QR code data
             $qrCodeImage = imagecreatefromstring($qrCodeImageData);
             if (!$qrCodeImage) {
                 \Log::warning("Failed to create QR code image resource for event {$event->id}");
                 return;
             }
-            
-            // Get actual QR code dimensions to ensure consistency
+
+            // Get the actual dimensions of the generated QR code
             $actualQRWidth = imagesx($qrCodeImage);
             $actualQRHeight = imagesy($qrCodeImage);
-            
-            \Log::info("QR code dimensions for event {$event->id}: {$actualQRWidth}x{$actualQRHeight}");
-            
-            // Ensure QR code size is within flyer boundaries
-            $maxQRSize = min(self::FLYER_WIDTH - (self::QR_CODE_PADDING * 2), self::FLYER_HEIGHT - (self::QR_CODE_PADDING * 2));
-            $qrSize = min(self::QR_CODE_SIZE, $maxQRSize);
-            
-            // If the generated QR code is a different size than expected, resize it to ensure consistency
-            if ($actualQRWidth !== $qrSize || $actualQRHeight !== $qrSize) {
-                \Log::info("Resizing QR code from {$actualQRWidth}x{$actualQRHeight} to {$qrSize}x{$qrSize} for consistency");
-                
-                // Create a new image with the exact size we want
-                $resizedQRImage = imagecreatetruecolor($qrSize, $qrSize);
-                if ($resizedQRImage) {
-                    // Enable alpha blending for the resized image
-                    imagealphablending($resizedQRImage, false);
-                    imagesavealpha($resizedQRImage, true);
-                    
-                    // Create transparent background
-                    $transparent = imagecolorallocatealpha($resizedQRImage, 0, 0, 0, 127);
-                    imagefill($resizedQRImage, 0, 0, $transparent);
-                    
-                    // Copy and resize the original QR code to the new image
-                    imagecopyresampled(
-                        $resizedQRImage, $qrCodeImage,
-                        0, 0, 0, 0,
-                        $qrSize, $qrSize,
-                        $actualQRWidth, $actualQRHeight
-                    );
-                    
-                    // Clean up original QR code image
-                    imagedestroy($qrCodeImage);
-                    
-                    // Use the resized image
-                    $qrCodeImage = $resizedQRImage;
-                }
-            }
-            
-            // Calculate standardized QR code position
+            \Log::info("Generated QR code dimensions for event {$event->id}: {$actualQRWidth}x{$actualQRHeight}");
+
+            // Calculate the standardized position and final size for the QR code
             $position = $this->calculateQRCodePosition($x, $y);
             $qrX = $position['x'];
             $qrY = $position['y'];
-            $qrSize = $position['size'];
-            
-            \Log::info("QR code final position for event {$event->id}: ({$qrX}, {$qrY}) with size {$qrSize}");
-            
-            // Copy QR code to the main image with consistent size
-            imagecopy(
-                $this->im, 
-                $qrCodeImage, 
-                $qrX, 
-                $qrY, 
-                0, 
-                0, 
-                $qrSize, 
-                $qrSize
+            $finalQRSize = $position['size']; // This is our target constant size (e.g., 80px)
+
+            \Log::info("Placing and resizing QR code for event {$event->id} at ({$qrX}, {$qrY}) with final size {$finalQRSize}x{$finalQRSize}");
+
+            // Copy and resample the generated QR code directly onto the main canvas.
+            // This ensures every QR code is rendered at the exact same final size, regardless
+            // of the size generated by the library.
+            imagecopyresampled(
+                $this->im,          // Destination canvas
+                $qrCodeImage,       // Source QR code image
+                $qrX,               // Destination X coordinate
+                $qrY,               // Destination Y coordinate
+                0,                  // Source X coordinate
+                0,                  // Source Y coordinate
+                $finalQRSize,       // Destination width (our standard size)
+                $finalQRSize,       // Destination height (our standard size)
+                $actualQRWidth,     // Source width (original generated size)
+                $actualQRHeight     // Source height (original generated size)
             );
-            
-            // Clean up QR code image resource
+
+            // Clean up the temporary QR code image resource
             imagedestroy($qrCodeImage);
-            
-            \Log::info("QR code added successfully to event {$event->id} at position ({$qrX}, {$qrY}) with size {$qrSize}");
-            
+
+            \Log::info("QR code added successfully to event {$event->id}");
+
         } catch (\Exception $e) {
             \Log::error("Error generating QR code for event {$event->id}: " . $e->getMessage());
             \Log::error("Stack trace: " . $e->getTraceAsString());
