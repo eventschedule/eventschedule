@@ -21,7 +21,7 @@ class EventGraphicGenerator
     protected const MAX_EVENTS = 9;
     protected const FLYER_WIDTH = 400;
     protected const FLYER_HEIGHT = 480; // Reduced from 600 to 480 (20% shorter)
-    protected const MARGIN = 20;
+    protected const MARGIN = 30; // Balanced spacing between 20 and 40
     
     // Language and layout
     protected string $lang;
