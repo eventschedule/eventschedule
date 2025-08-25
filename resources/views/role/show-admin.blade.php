@@ -247,7 +247,7 @@
                                     <path d="M14,12L10,8V11H2V13H10V16M20,18V6C20,4.89 19.1,4 18,4H6A2,2 0 0,0 4,6V9H6V6H18V18H6V15H4V18A2,2 0 0,0 6,20H18A2,2 0 0,0 20,18Z" />
                                 </svg>
                                 <div>
-                                    {{ __('messages.import') }}
+                                    {{ __('messages.import_events') }}
                                 </div>
                             </a>
                             <a href="#" onclick="openEmbedModal()" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
@@ -255,7 +255,7 @@
                                     <path d="M12.89,3L14.85,3.4L11.11,21L9.15,20.6L12.89,3M19.59,12L16,8.41V5.58L22.42,12L16,18.41V15.58L19.59,12M1.58,12L8,5.58V8.41L4.41,12L8,15.58V18.41L1.58,12Z" />
                                 </svg>
                                 <div>
-                                    {{ __('messages.embed') }}
+                                    {{ __('messages.embed_schedule') }}
                                 </div>
                             </a>
                             <a href="{{ route('event.generate_graphic', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
@@ -276,7 +276,7 @@
                                     <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
                                 </svg>
                                 <div>
-                                    {{ __('messages.delete') }}
+                                    {{ __('messages.delete_schedule') }}
                                 </div>
                             </a>
                             @endif

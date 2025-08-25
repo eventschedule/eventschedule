@@ -564,4 +564,7 @@ return [
     'video_selected' => 'Video selected',
     'no_videos_found' => 'No videos found',
     'get_tickets' => 'Get Tickets',
+    'embed_schedule' => 'Embed Schedule',
+    'delete_schedule' => 'Delete Schedule',
+    'import_events' => 'Import Events',
 ];
