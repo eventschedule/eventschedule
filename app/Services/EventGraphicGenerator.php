@@ -274,7 +274,31 @@ class EventGraphicGenerator
         $x = (int)(($targetWidth - $newWidth) / 2);
         $y = (int)(($targetHeight - $newHeight) / 2);
         
-        imagecopyresampled($this->im, $bgImage, $x, $y, 0, 0, $newWidth, $newHeight, $bgWidth, $bgHeight);
+        // Apply 50% alpha transparency to the background image
+        // First, create a temporary image with alpha blending
+        $tempImage = imagecreatetruecolor($newWidth, $newHeight);
+        if ($tempImage) {
+            // Enable alpha blending
+            imagealphablending($tempImage, false);
+            imagesavealpha($tempImage, true);
+            
+            // Create a transparent background
+            $transparent = imagecolorallocatealpha($tempImage, 0, 0, 0, 127);
+            imagefill($tempImage, 0, 0, $transparent);
+            
+            // Copy the resized background image to temp image
+            imagecopyresampled($tempImage, $bgImage, 0, 0, 0, 0, $newWidth, $newHeight, $bgWidth, $bgHeight);
+            
+            // Apply 50% transparency by blending with the main image
+            // We'll use imagecopymerge with 50% opacity
+            imagecopymerge($this->im, $tempImage, $x, $y, 0, 0, $newWidth, $newHeight, 50);
+            
+            // Clean up temp image
+            imagedestroy($tempImage);
+        } else {
+            // Fallback to original method if temp image creation fails
+            imagecopyresampled($this->im, $bgImage, $x, $y, 0, 0, $newWidth, $newHeight, $bgWidth, $bgHeight);
+        }
     }
     
     protected function generateEventFlyers(): void
