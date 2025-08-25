@@ -18,7 +18,7 @@ class GraphicController extends Controller
             ->whereHas('roles', function ($query) use ($role) {
                 $query->where('role_id', $role->id)->where('is_accepted', true);
             })
-            // Removed the flyer_image_url check as it's not used in the graphic
+            ->where('flyer_image_url', '!=', null)
             ->where('starts_at', '>=', now())
             ->orderBy('starts_at')
             ->limit(10)
