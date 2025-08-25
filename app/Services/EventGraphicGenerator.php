@@ -463,13 +463,7 @@ class EventGraphicGenerator
         $sourceWidth = imagesx($sourceImage);
         $sourceHeight = imagesy($sourceImage);
         
-        // Create a clear boundary for each flyer to prevent overlap
-        $bgColor = $this->c['white'];
-        imagefilledrectangle($this->im, $x, $y, $x + self::FLYER_WIDTH, $y + self::FLYER_HEIGHT, $bgColor);
-        
-        // Add a subtle border to clearly define each flyer area
-        $borderColor = $this->c['lightGray'];
-        imagerectangle($this->im, $x, $y, $x + self::FLYER_WIDTH, $y + self::FLYER_HEIGHT, $borderColor);
+        // No background or border - let the image fill the entire flyer area
         
         // Calculate how to fit the image within the flyer boundaries while maintaining aspect ratio
         $sourceAspectRatio = $sourceWidth / $sourceHeight;
