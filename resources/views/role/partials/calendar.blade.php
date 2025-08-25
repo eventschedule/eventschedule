@@ -83,6 +83,8 @@
         }
     }
 @endphp
+
+@if (! request()->graphic)
 <header class="py-4 {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }}">
     {{-- Main container: Stacks content on mobile, aligns in a row on desktop. --}}
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -201,9 +203,15 @@
         </div>
     </div>
 </header>
-
+@endif
 
     <div class="{{ ($tab == 'availability' || (isset($embed) && $embed) || (isset($force_mobile) && $force_mobile)) ? '' : 'hidden' }} shadow-sm ring-1 ring-black ring-opacity-5 md:flex md:flex-auto md:flex-col {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
+        
+        @if (request()->graphic)
+         
+        
+
+        @else
         <div class="{{ $tab == 'availability' ? 'hidden md:block' : '' }} {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }}"> 
             <div
                 class="grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center text-xs font-semibold leading-6 text-gray-700">
@@ -285,6 +293,9 @@
                 </div>
             </div>
         </div>
+        @endif
+
+
         @if (! isset($embed) || ! $embed)
         <div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">
             <div v-if="mobileEventsList.length">
@@ -358,6 +369,7 @@
             </div>
         </div>
         @endif
+
     </div>
 
 <div id="tooltip" class="tooltip"></div>
