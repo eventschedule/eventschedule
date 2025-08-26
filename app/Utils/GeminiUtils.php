@@ -400,22 +400,18 @@ class GeminiUtils
             if ($role->isTalent()) {
                 $data[$key]['talent_id'] = UrlUtils::encodeId($role->id);
             } elseif (! empty($item['performers'])) {
-                
-                $followerRoleIds = RoleUser::whereIn('user_id', [$role->user_id, auth()->user() ? auth()->user()->id : null])
-                                    ->whereIn('level', ['owner', 'follower'])
-                                    ->orderBy('id')->pluck('role_id')->toArray();
-                
+                                
                 foreach ($item['performers'] as $index => $performer) {                    
                     $talent = Role::where('is_deleted', false)
-                        ->where(function($query) use ($performer, $followerRoleIds) {
+                        ->where(function($query) use ($performer) {
                             $query->where('name', $performer['name'])
                                 ->when(! empty($performer['name_en']), function($q) use ($performer) {
                                     $q->orWhere('name_en', $performer['name_en']);
                                 });
                         })
                         ->where('type', 'talent')
-                        ->whereIn('id', $followerRoleIds)
-                        ->orderBy('id')
+                        ->where('country_code', $role->country_code)
+                        ->orderByRaw('CASE WHEN email IS NOT NULL THEN 0 ELSE 1 END')
                         ->first();
 
                     if ($talent) {
