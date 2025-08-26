@@ -554,4 +554,5 @@ return [
     'get_tickets' => 'Tickets Krijgen',
     'delete_schedule' => 'Schema Verwijderen',
     'import_events' => 'Evenementen Importeren',
+    'results_for' => 'Resultaten voor',
 ];

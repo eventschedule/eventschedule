@@ -557,4 +557,5 @@ return [
     'get_tickets' => 'Ottieni Biglietti',
     'delete_schedule' => 'Elimina Programma',
     'import_events' => 'Importa Eventi',
+    'results_for' => 'Risultati per',
 ];

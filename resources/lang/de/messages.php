@@ -560,4 +560,5 @@ return [
     'get_tickets' => 'Tickets kaufen',
     'delete_schedule' => 'Zeitplan löschen',
     'import_events' => 'Veranstaltungen importieren',
+    'results_for' => 'Ergebnisse für',
 ];
