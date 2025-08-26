@@ -232,7 +232,7 @@
                             savedEvents[idx] ? 'border-2 border-green-500 dark:border-green-600' : '']">
                 
                 <!-- Card header -->
-                @if (! auth()->user())
+                @if (auth()->user())
                 <div v-if="savedEvents[idx] || saveErrors[idx]" :class="['px-4 py-3 -m-4 sm:-m-8 mt-4 sm:mb-4 flex justify-between items-center rounded-t-lg', 
                                 savedEvents[idx] ? 'bg-green-50 dark:bg-green-900/30' : 'bg-red-50 dark:bg-red-900/30']">
                     <h3 class="font-medium text-lg">
@@ -471,81 +471,84 @@
                 <!-- YouTube Videos Section for Talent - Now below the form and image -->
                 <div v-if="preview.parsed[idx].performers && preview.parsed[idx].performers.length > 0" class="mt-6">
                     <div v-for="(performer, performerIdx) in preview.parsed[idx].performers" :key="performerIdx" class="my-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    
-                        <!-- Loading state -->
-                        <div v-if="performer.searching" class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-                            <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-500"></div>
-                            <span>{{ __('messages.searching_youtube') }}</span>
-                        </div>
+                        <!-- Only show YouTube video selection for the first performer when there are multiple performers -->
+                        <div v-if="performerIdx === 0 && ! performer.talent_id">
 
-                        <!-- Videos grid - Now in two columns if there's room -->
-                        <div v-else-if="performer.videos && performer.videos.length > 0" class="space-y-3">
-                            <div class="text-sm text-gray-600 dark:text-gray-400 m-2">
-                                {{ __('messages.results_for') }} "@{{ performer.name }}"
+                            <!-- Loading state -->
+                            <div v-if="performer.searching" class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                                <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-500"></div>
+                                <span>{{ __('messages.searching_youtube') }}</span>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 -mx-3 p-3">
-                                <div v-for="video in performer.videos.slice(0, 6)" :key="video.id" 
-                                        class="border rounded-lg p-2 cursor-pointer hover:border-blue-300 transition-colors relative"
-                                        :class="isVideoSelected(idx, performerIdx, video) ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-200 dark:border-gray-600'"
-                                        @click="selectVideo(idx, performerIdx, video)">
-                                    <div class="flex items-center space-x-3">
-                                        <div class="w-16 h-12 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center relative flex-shrink-0">
-                                            <img v-if="video.thumbnail" :src="video.thumbnail" :alt="video.title" class="w-full h-full object-cover rounded">
-                                            <svg v-else class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                            </svg>
-                                        </div>
-                                        
-                                        <div class="flex-1 min-w-0">
-                                            <h6 class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">@{{ video.title }}</h6>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">@{{ video.channelTitle }}</p>
-                                            <div class="flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                                <div class="flex items-center space-x-1">
-                                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                                                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
-                                                    </svg>
-                                                    <span>@{{ formatNumber(video.viewCount) }}</span>
-                                                </div>
-                                                <div class="flex items-center space-x-1">
-                                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
-                                                    </svg>
-                                                    <span>@{{ formatNumber(video.likeCount) }}</span>
+
+                            <!-- Videos grid - Now in two columns if there's room -->
+                            <div v-else-if="performer.videos && performer.videos.length > 0" class="space-y-3">
+                                <div class="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                                    {{ __('messages.results_for') }} "@{{ performer.name }}"
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 -mx-3 p-3">
+                                    <div v-for="video in performer.videos.slice(0, 6)" :key="video.id" 
+                                            class="border rounded-lg p-2 cursor-pointer hover:border-blue-300 transition-colors relative"
+                                            :class="isVideoSelected(idx, performerIdx, video) ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-200 dark:border-gray-600'"
+                                            @click="selectVideo(idx, performerIdx, video)">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-16 h-12 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center relative flex-shrink-0">
+                                                <img v-if="video.thumbnail" :src="video.thumbnail" :alt="video.title" class="w-full h-full object-cover rounded">
+                                                <svg v-else class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                            
+                                            <div class="flex-1 min-w-0">
+                                                <h6 class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">@{{ video.title }}</h6>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">@{{ video.channelTitle }}</p>
+                                                <div class="flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                    <div class="flex items-center space-x-1">
+                                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                                                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                                                        </svg>
+                                                        <span>@{{ formatNumber(video.viewCount) }}</span>
+                                                    </div>
+                                                    <div class="flex items-center space-x-1">
+                                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+                                                        </svg>
+                                                        <span>@{{ formatNumber(video.likeCount) }}</span>
+                                                    </div>
                                                 </div>
                                             </div>
+                                            
+                                            <!-- Watch button -->
+                                            <a :href="video.url" target="_blank" 
+                                                class="inline-flex items-center text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium transition-colors flex-shrink-0"
+                                                @click.stop>
+                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                                </svg>
+                                                Watch
+                                            </a>
                                         </div>
                                         
-                                        <!-- Watch button -->
-                                        <a :href="video.url" target="_blank" 
-                                            class="inline-flex items-center text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium transition-colors flex-shrink-0"
-                                            @click.stop>
-                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                                            </svg>
-                                            Watch
-                                        </a>
-                                    </div>
-                                    
-                                    <!-- Selection indicator -->
-                                    <div v-if="isVideoSelected(idx, performerIdx, video)" class="absolute top-2 right-2">
-                                        <div class="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
-                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                            </svg>
+                                        <!-- Selection indicator -->
+                                        <div v-if="isVideoSelected(idx, performerIdx, video)" class="absolute top-2 right-2">
+                                            <div class="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                                </svg>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <!-- Error state -->
-                        @if (auth()->user() && auth()->user()->isAdmin())
-                        <div v-else-if="performer.error" class="text-xs text-red-600 dark:text-red-400">
-                            @{{ performer.error }}
-                        </div>
-                        @endif
+                            
+                            <!-- Error state -->
+                            @if (auth()->user() && auth()->user()->isAdmin())
+                            <div v-else-if="performer.error" class="text-xs text-red-600 dark:text-red-400">
+                                @{{ performer.error }}
+                            </div>
+                            @endif
 
+                        </div>
                     </div>
                 </div>
             </div>
@@ -823,10 +826,12 @@
                                     error: null
                                 });
                                 
-                                // Search for videos for all performers                                
-                                this.$nextTick(() => {
-                                    this.searchVideos(eventIdx, performerIdx);
-                                });                                
+                                // Only search for videos for the first performer when there are multiple performers
+                                if (performerIdx === 0 && ! performer.talent_id) {
+                                    this.$nextTick(() => {
+                                        this.searchVideos(eventIdx, performerIdx);
+                                    });
+                                }
                             });
                         }
                     });
