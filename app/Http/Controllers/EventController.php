@@ -63,9 +63,11 @@ class EventController extends Controller
                 ->with('message', __('messages.deleted_image'));
     }
 
-    public function clearVideos(Request $request, $subdomain, $hash)
+    public function clearVideos(Request $request, $subdomain, $eventHash, $roleHash)
     {
-        $event_id = UrlUtils::decodeId($hash);
+        $event_id = UrlUtils::decodeId($eventHash);
+        $role_id = UrlUtils::decodeId($roleHash);
+
         $event = Event::findOrFail($event_id);
         $user = $request->user();
 
@@ -76,7 +78,7 @@ class EventController extends Controller
 
         // Clear YouTube videos for unclaimed roles in this event
         foreach ($event->roles as $role) {
-            if (!$role->isClaimed() && $role->youtube_links) {
+            if (!$role->isClaimed() && $role->youtube_links && $role->id == $role_id) {
                 $role->youtube_links = null;
                 $role->save();
             }
