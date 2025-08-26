@@ -504,7 +504,6 @@ return [
     'url' => 'URL',
     'videos' => 'Vídeos',
     'videos_description' => 'Encontre vídeos do YouTube para eventos futuros que ainda não têm vídeos.',
-    'no_talent_roles' => 'Nenhum papel de talento encontrado',
     'all_talent_roles_have_videos' => 'Todos os eventos futuros já têm vídeos do YouTube.',
     'searching_youtube' => 'Pesquisando no YouTube...',
     'select_video' => 'Selecione um vídeo:',
