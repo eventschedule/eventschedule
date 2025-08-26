@@ -480,7 +480,7 @@
 
                         <!-- Videos grid - Now in two columns if there's room -->
                         <div v-else-if="performer.videos && performer.videos.length > 0" class="space-y-3">
-                            <div class="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                            <div class="text-sm text-gray-600 dark:text-gray-400 m-2">
                                 {{ __('messages.results_for') }} "@{{ performer.name }}"
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2 -mx-3 p-3">
