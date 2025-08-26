@@ -566,4 +566,5 @@ return [
     'embed_schedule' => 'Embed Schedule',
     'delete_schedule' => 'Delete Schedule',
     'import_events' => 'Import Events',
+    'results_for' => 'Results for',
 ];

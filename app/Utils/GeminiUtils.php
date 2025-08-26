@@ -604,6 +604,7 @@ class GeminiUtils
         curl_close($ch);
         
         if ($response === false || $httpCode !== 200) {
+            \Log::error('Failed to search YouTube: ' . json_encode($response));
             return [];
         }
         
