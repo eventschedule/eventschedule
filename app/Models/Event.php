@@ -346,7 +346,12 @@ class Event extends Model
     {
         if ($this->event_url) {
             $parsedUrl = parse_url($this->event_url);
-            return $parsedUrl['host'];
+
+            if (isset($parsedUrl['host'])) {
+                return $parsedUrl['host'];
+            } else {
+                return $this->event_url;
+            }
         }
 
         return '';
