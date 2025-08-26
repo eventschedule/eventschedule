@@ -110,7 +110,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::put('/{subdomain}/update_event/{hash}', [EventController::class, 'update'])->name('event.update');
     Route::get('/{subdomain}/delete_event_image', [EventController::class, 'deleteImage'])->name('event.delete_image');
     Route::get('/{subdomain}/events-graphic', [GraphicController::class, 'generateGraphic'])->name('event.generate_graphic');
-    Route::get('/{subdomain}/clear_videos/{hash}', [EventController::class, 'clearVideos'])->name('event.clear_videos');
+    Route::get('/{subdomain}/clear_videos/{event_hash}/{role_hash}', [EventController::class, 'clearVideos'])->name('event.clear_videos');
     Route::get('/{subdomain}/requests/accept_event/{hash}', [EventController::class, 'accept'])->name('event.accept');
     Route::get('/{subdomain}/requests/decline_event/{hash}', [EventController::class, 'decline'])->name('event.decline');
     Route::post('/{subdomain}/profile/update_links', [RoleController::class, 'updateLinks'])->name('role.update_links');
