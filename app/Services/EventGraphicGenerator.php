@@ -57,7 +57,7 @@ class EventGraphicGenerator
         $totalWidth = (self::FLYER_WIDTH * $this->gridCols) + (self::MARGIN * ($this->gridCols + 1));
         $totalHeight = (self::FLYER_HEIGHT * $this->gridRows) + (self::MARGIN * ($this->gridRows + 1));
         
-        \Log::info("Final image dimensions: {$totalWidth}x{$totalHeight} (grid: {$this->gridCols}x{$this->gridRows})");
+
         
         // Create image
         $this->im = imagecreatetruecolor($totalWidth, $totalHeight);
@@ -86,7 +86,7 @@ class EventGraphicGenerator
         // Generate individual event flyers
         $this->generateEventFlyers();
         
-        \Log::info("All flyers generated, preparing PNG output...");
+
         
         // Output the image
         ob_start();
@@ -97,7 +97,7 @@ class EventGraphicGenerator
         $imageData = ob_get_contents();
         ob_end_clean();
         
-        \Log::info("PNG output generated, size: " . strlen($imageData) . " bytes");
+
         
         return $imageData;
     }
@@ -152,23 +152,19 @@ class EventGraphicGenerator
     
     protected function applyBackground(): void
     {
-        \Log::info("Applying background for role: " . $this->role->id . " - background type: " . $this->role->background);
+
         
         switch ($this->role->background) {
             case 'gradient':
-                \Log::info("Applying gradient background with colors: " . ($this->role->background_colors ?? 'none'));
                 $this->applyGradientBackground();
                 break;
             case 'solid':
-                \Log::info("Applying solid background with color: " . ($this->role->background_color ?? 'none'));
                 $this->applySolidBackground();
                 break;
             case 'image':
-                \Log::info("Applying image background: " . ($this->role->background_image ?? 'none'));
                 $this->applyImageBackground();
                 break;
             default:
-                \Log::info("Applying default background (no role background configured)");
                 // Default to a subtle gradient
                 $this->applyDefaultBackground();
                 break;
@@ -285,7 +281,7 @@ class EventGraphicGenerator
     
     protected function applyCustomBackgroundImage(): void
     {
-        \Log::info("Applying custom background image from URL: " . $this->role->background_image_url);
+
         
         try {
             $imageData = null;
@@ -293,7 +289,6 @@ class EventGraphicGenerator
             // Handle both local and remote images
             if (filter_var($this->role->background_image_url, FILTER_VALIDATE_URL)) {
                 // Remote image
-                \Log::info("Loading remote background image: " . $this->role->background_image_url);
                 
                 // Disable SSL verification for local development
                 $context = null;
@@ -311,13 +306,10 @@ class EventGraphicGenerator
                 
                 $imageData = file_get_contents($this->role->background_image_url, false, $context);
                 if ($imageData === false) {
-                    \Log::info("file_get_contents failed, trying cURL as fallback");
-                    
                     // Fallback to cURL if file_get_contents fails
                     $imageData = $this->fetchImageWithCurl($this->role->background_image_url);
                     
                     if ($imageData === false) {
-                        \Log::info("Failed to fetch remote background image with both methods: " . $this->role->background_image_url);
                         return;
                     }
                 }
@@ -327,7 +319,6 @@ class EventGraphicGenerator
                 if (file_exists($imagePath)) {
                     $imageData = file_get_contents($imagePath);
                 } else {
-                    \Log::info("Local background image file not found: " . $imagePath);
                     return;
                 }
             }
@@ -338,26 +329,23 @@ class EventGraphicGenerator
                     // Resize and apply background image
                     $this->applyResizedBackground($bgImage);
                     imagedestroy($bgImage);
-                    \Log::info("Successfully applied custom background image");
-                } else {
-                    \Log::info("Failed to create image resource from custom background image data");
                 }
             }
         } catch (\Exception $e) {
-            \Log::error("Error applying custom background image: " . $e->getMessage());
+            // Error applying custom background image
         }
     }
     
     protected function generateEventFlyers(): void
     {
-        \Log::info("Generating event flyers for " . $this->events->count() . " events");
+
         
         $eventIndex = 0;
         
         for ($row = 0; $row < $this->gridRows && $eventIndex < $this->events->count(); $row++) {
             for ($col = 0; $col < $this->gridCols && $eventIndex < $this->events->count(); $col++) {
                 $event = $this->events[$eventIndex];
-                \Log::info("Processing event {$eventIndex}: ID={$event->id}, Name={$event->name}, Image={$event->flyerImageUrl}");
+
                 $this->generateSingleFlyer($event, $row, $col);
                 $eventIndex++;
             }
@@ -415,7 +403,7 @@ class EventGraphicGenerator
         try {
             // Generate the event URL for the QR code
             $eventUrl = $event->registration_url ?: $event->getGuestUrl($this->role->subdomain);
-            \Log::info("Generating QR code for event {$event->id} with URL: {$eventUrl}");
+
 
             // Create QR code without a fixed size; the library will determine the optimal size.
             // We will resize it to a consistent dimension during the placement step.
@@ -430,14 +418,12 @@ class EventGraphicGenerator
             // Create an image resource from the generated QR code data
             $qrCodeImage = imagecreatefromstring($qrCodeImageData);
             if (!$qrCodeImage) {
-                \Log::warning("Failed to create QR code image resource for event {$event->id}");
                 return;
             }
 
             // Get the actual dimensions of the generated QR code
             $actualQRWidth = imagesx($qrCodeImage);
             $actualQRHeight = imagesy($qrCodeImage);
-            \Log::info("Generated QR code dimensions for event {$event->id}: {$actualQRWidth}x{$actualQRHeight}");
 
             // Calculate the standardized position and final size for the QR code
             $position = $this->calculateQRCodePosition($x, $y);
@@ -445,7 +431,7 @@ class EventGraphicGenerator
             $qrY = $position['y'];
             $finalQRSize = $position['size']; // This is our target constant size (e.g., 80px)
 
-            \Log::info("Placing and resizing QR code for event {$event->id} at ({$qrX}, {$qrY}) with final size {$finalQRSize}x{$finalQRSize}");
+
 
             // Copy and resample the generated QR code directly onto the main canvas.
             // This ensures every QR code is rendered at the exact same final size, regardless
@@ -466,41 +452,29 @@ class EventGraphicGenerator
             // Clean up the temporary QR code image resource
             imagedestroy($qrCodeImage);
 
-            \Log::info("QR code added successfully to event {$event->id}");
+
 
         } catch (\Exception $e) {
-            \Log::error("Error generating QR code for event {$event->id}: " . $e->getMessage());
-            \Log::error("Stack trace: " . $e->getTraceAsString());
             // Continue without QR code if there's an error
         }
     }
     
     protected function addEventFlyerImage(Event $event, int $x, int $y): void
     {
-        // Debug: Check all possible image-related properties
-        \Log::info("=== DEBUG EVENT {$event->id} ===");
-        \Log::info("Event name: " . $event->name);
-
         $imageUrl = $event->flyer_image_url;
-        \Log::info("Image URL: " . $imageUrl);
                 
         if ($imageUrl && $this->isValidImageUrl($imageUrl)) {
-            \Log::info("Image URL is valid, attempting to load...");
             // Try to load and display the event image
             $this->loadAndDisplayEventImage($imageUrl, $x, $y);
         } else {
             // Fallback to a placeholder background if no image
-            \Log::info("Creating placeholder for event {$event->id} - invalid image URL: " . $imageUrl);
             $this->createPlaceholderBackground($x, $y);
         }
-        
-        \Log::info("=== END DEBUG EVENT {$event->id} ===");
     }
     
     protected function loadAndDisplayEventImage(string $imageUrl, int $x, int $y): void
     {
-        \Log::info("=== LOADING IMAGE ===");
-        \Log::info("Image URL: " . $imageUrl);
+
         
         try {
             $sourceImage = null;
@@ -508,7 +482,6 @@ class EventGraphicGenerator
             // Handle both local and remote images
             if (filter_var($imageUrl, FILTER_VALIDATE_URL)) {
                 // Remote image
-                \Log::info("Loading remote image: " . $imageUrl);
                 
                 // Disable SSL verification for local development
                 $context = null;
@@ -526,22 +499,18 @@ class EventGraphicGenerator
                 
                 $imageData = file_get_contents($imageUrl, false, $context);
                 if ($imageData === false) {
-                    \Log::info("file_get_contents failed, trying cURL as fallback");
-                    
                     // Fallback to cURL if file_get_contents fails
                     $imageData = $this->fetchImageWithCurl($imageUrl);
                     
                     if ($imageData === false) {
-                        \Log::info("Failed to fetch remote image with both methods: " . $imageUrl);
                         $this->createPlaceholderBackground($x, $y);
                         return;
                     }
                 }
-                \Log::info("Remote image data size: " . strlen($imageData) . " bytes");
+
                 $sourceImage = imagecreatefromstring($imageData);
             } else {
                 // Local image - try different path variations
-                \Log::info("Loading local image: " . $imageUrl);
                 $possiblePaths = [
                     public_path($imageUrl),
                     public_path('storage/' . $imageUrl),
@@ -549,18 +518,9 @@ class EventGraphicGenerator
                     $imageUrl // Try as absolute path
                 ];
                 
-                \Log::info("Trying possible paths:");
-                foreach ($possiblePaths as $path) {
-                    \Log::info("  - " . $path . " (exists: " . (file_exists($path) ? 'YES' : 'NO') . ")");
-                }
-                
                 $sourceImage = null;
                 foreach ($possiblePaths as $path) {
                     if (file_exists($path)) {
-                        \Log::info("Found local image at: " . $path);
-                        $fileSize = filesize($path);
-                        \Log::info("File size: " . $fileSize . " bytes");
-                        
                         $imageData = file_get_contents($path);
                         $sourceImage = imagecreatefromstring($imageData);
                         
@@ -571,36 +531,29 @@ class EventGraphicGenerator
                 }
                 
                 if (!$sourceImage) {
-                    \Log::info("Failed to load local image from any path: " . $imageUrl);
                     $this->createPlaceholderBackground($x, $y);
                     return;
                 }
             }
             
             if ($sourceImage === false) {
-                \Log::info("Failed to create image resource from: " . $imageUrl);
                 $this->createPlaceholderBackground($x, $y);
                 return;
             }
             
-            \Log::info("Successfully created image resource");
-            \Log::info("Source image dimensions: " . imagesx($sourceImage) . "x" . imagesy($sourceImage));
+
             
             // Resize and display the image
             $this->resizeAndDisplayImage($sourceImage, $x, $y);
             
             // Clean up
             imagedestroy($sourceImage);
-            \Log::info("Image displayed successfully");
+
             
         } catch (\Exception $e) {
-            \Log::info("Exception loading image: " . $e->getMessage());
-            \Log::info("Stack trace: " . $e->getTraceAsString());
             // Fallback to placeholder on any error
             $this->createPlaceholderBackground($x, $y);
         }
-        
-        \Log::info("=== END LOADING IMAGE ===");
     }
     
     protected function resizeAndDisplayImage($sourceImage, int $x, int $y): void
@@ -696,12 +649,11 @@ class EventGraphicGenerator
     {
         $cornerRadius = $this->getCornerRadius();
         
-        \Log::info("Applying rounded corners with radius: {$cornerRadius} to image {$width}x{$height}");
+
         
         // Create a mask for rounded corners
         $mask = imagecreatetruecolor($width, $height);
         if (!$mask) {
-            \Log::error("Failed to create mask for rounded corners");
             return;
         }
         
@@ -733,12 +685,8 @@ class EventGraphicGenerator
         // Bottom-right corner
         imagefilledellipse($mask, $width - $cornerRadius - 1, $height - $cornerRadius - 1, $cornerRadius * 2, $cornerRadius * 2, $white);
         
-        \Log::info("Mask created successfully, applying to image...");
-        
         // Apply the mask to the image
         $this->applyMaskToImage($image, $mask);
-        
-        \Log::info("Rounded corners applied successfully");
         
         // Clean up mask
         imagedestroy($mask);
@@ -752,7 +700,7 @@ class EventGraphicGenerator
         $width = imagesx($image);
         $height = imagesy($image);
         
-        \Log::info("Applying mask to image {$width}x{$height}");
+
         
         $transparentPixels = 0;
         $totalPixels = 0;
@@ -783,7 +731,7 @@ class EventGraphicGenerator
             }
         }
         
-        \Log::info("Mask applied: {$transparentPixels} pixels made transparent out of {$totalPixels} total pixels");
+
     }
     
     /**
@@ -964,17 +912,12 @@ class EventGraphicGenerator
     
     protected function isValidImageUrl(string $url): bool
     {
-        \Log::info("=== VALIDATING IMAGE URL ===");
-        \Log::info("URL to validate: " . $url);
-        
         if (empty($url)) {
-            \Log::info("Empty image URL provided");
             return false;
         }
         
         // Check if it's a valid URL
         if (filter_var($url, FILTER_VALIDATE_URL)) {
-            \Log::info("Valid remote URL: " . $url);
             return true;
         }
         
@@ -986,31 +929,18 @@ class EventGraphicGenerator
             $url // Try as absolute path
         ];
         
-        \Log::info("Checking local paths:");
-        foreach ($possiblePaths as $path) {
-            $exists = file_exists($path);
-            \Log::info("  - " . $path . " (exists: " . ($exists ? 'YES' : 'NO') . ")");
-            if ($exists) {
-                \Log::info("    File size: " . filesize($path) . " bytes");
-                \Log::info("    File permissions: " . substr(sprintf('%o', fileperms($path)), -4));
-            }
-        }
-        
         foreach ($possiblePaths as $path) {
             if (file_exists($path)) {
-                \Log::info("Valid local image found at: " . $path);
                 return true;
             }
         }
         
-        \Log::info("No valid image found for URL: " . $url);
         return false;
     }
     
     protected function fetchImageWithCurl(string $url): string|false
     {
         if (!function_exists('curl_init')) {
-            \Log::info("cURL not available, cannot fetch image");
             return false;
         }
         
@@ -1029,21 +959,17 @@ class EventGraphicGenerator
         curl_close($ch);
         
         if ($error) {
-            \Log::info("cURL error: " . $error);
             return false;
         }
         
         if ($httpCode !== 200) {
-            \Log::info("HTTP error: " . $httpCode);
             return false;
         }
         
         if ($imageData === false || empty($imageData)) {
-            \Log::info("cURL returned empty data");
             return false;
         }
         
-        \Log::info("Successfully fetched image with cURL, size: " . strlen($imageData) . " bytes");
         return $imageData;
     }
     
@@ -1097,40 +1023,35 @@ class EventGraphicGenerator
     {
         $eventCount = $this->events->count();
         
-        \Log::info("Calculating grid dimensions for {$eventCount} events");
+
         
         if ($eventCount === 0) {
             $this->gridCols = 1;
             $this->gridRows = 1;
-            \Log::info("Grid layout: 1x1 (no events)");
             return;
         }
         
         if ($eventCount === 1) {
             $this->gridCols = 1;
             $this->gridRows = 1;
-            \Log::info("Grid layout: 1x1 (single event)");
             return;
         }
         
         if ($eventCount === 2) {
             $this->gridCols = 2;
             $this->gridRows = 1;
-            \Log::info("Grid layout: 2x1 (two events)");
             return;
         }
         
         if ($eventCount === 3) {
             $this->gridCols = 3;
             $this->gridRows = 1;
-            \Log::info("Grid layout: 3x1 (three events)");
             return;
         }
         
         if ($eventCount === 4) {
             $this->gridCols = 2;
             $this->gridRows = 2;
-            \Log::info("Grid layout: 2x2 (four events)");
             return;
         }
         
@@ -1138,14 +1059,12 @@ class EventGraphicGenerator
             // 3x2 layout with one empty space - looks better than 2x3
             $this->gridCols = 3;
             $this->gridRows = 2;
-            \Log::info("Grid layout: 3x2 (five events)");
             return;
         }
         
         if ($eventCount === 6) {
             $this->gridCols = 3;
             $this->gridRows = 2;
-            \Log::info("Grid layout: 3x2 (six events)");
             return;
         }
         
@@ -1153,7 +1072,6 @@ class EventGraphicGenerator
             // 3x3 layout with two empty spaces - still looks balanced
             $this->gridCols = 3;
             $this->gridRows = 3;
-            \Log::info("Grid layout: 3x3 (seven events)");
             return;
         }
         
@@ -1161,14 +1079,12 @@ class EventGraphicGenerator
             // 3x3 layout with one empty space
             $this->gridCols = 3;
             $this->gridRows = 3;
-            \Log::info("Grid layout: 3x3 (eight events)");
             return;
         }
         
         // For 9 events, use 3x3 grid
         $this->gridCols = 3;
         $this->gridRows = 3;
-        \Log::info("Grid layout: 3x3 (nine events)");
     }
     
     /**
@@ -1202,7 +1118,6 @@ class EventGraphicGenerator
         // Note: This would require making CORNER_RADIUS non-const or using a different approach
         // For now, we'll keep it as a constant, but this method can be used if needed
         // You could add a protected property to override the constant value
-        \Log::info("Corner radius change requested to: {$radius} (current: " . self::CORNER_RADIUS . ")");
     }
     
     /**
