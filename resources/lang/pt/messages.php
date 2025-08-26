@@ -555,4 +555,5 @@ return [
     'get_tickets' => 'Obter Ingressos',
     'delete_schedule' => 'Excluir Agenda',
     'import_events' => 'Importar Eventos',
+    'results_for' => 'Resultados para',
 ];

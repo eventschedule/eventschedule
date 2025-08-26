@@ -553,4 +553,5 @@ return [
     'get_tickets' => 'קבל כרטיסים',
     'delete_schedule' => 'מחק לוח זמנים',
     'import_events' => 'ייבא אירועים',
+    'results_for' => 'תוצאות עבור',
 ];
