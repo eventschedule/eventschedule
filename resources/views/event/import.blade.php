@@ -607,13 +607,19 @@
         },
 
         mounted() {
-            // Add keyboard event listener for Ctrl+Enter in textarea
+            // Add keyboard event listener for Enter and Shift+Enter in textarea
             const textarea = this.$refs.eventDetails;
             if (textarea) {
                 textarea.addEventListener('keydown', (event) => {
-                    if (event.ctrlKey && event.key === 'Enter') {
-                        event.preventDefault();
-                        this.handleSubmit();
+                    if (event.key === 'Enter') {
+                        if (event.shiftKey) {
+                            // Shift+Enter: allow default behavior (new line)
+                            return;
+                        } else {
+                            // Enter: submit the form
+                            event.preventDefault();
+                            this.handleSubmit();
+                        }
                     }
                 });
             }
