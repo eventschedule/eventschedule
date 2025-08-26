@@ -180,7 +180,7 @@
         <!-- Show All Fields and Save All buttons when events are parsed -->
         <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg mb-4">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                @if (auth()->user() && auth()->user()->isAdmin() && !isset($isGuest))
+                @if (auth()->user() && auth()->user()->isAdmin())
                 <div class="flex items-center mb-3 sm:mb-0">
                     <input type="checkbox" 
                             id="show_all_fields" 
@@ -205,6 +205,19 @@
         </div>
         </div>
 
+        @if (auth()->user() && auth()->user()->isAdmin())
+        <div class="flex items-center my-4">
+            <input type="checkbox" 
+                    id="show_all_fields" 
+                    v-model="showAllFields" 
+                    @change="saveShowAllFieldsPreference"
+                    class="rounded border-gray-300 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+            <label for="show_all_fields" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                {{ __('messages.show_all_fields') }}
+            </label>
+        </div>
+        @endif
+
         <!-- Hidden file input for details image -->
         <input type="file"
                 ref="detailsFileInput"
@@ -219,6 +232,7 @@
                             savedEvents[idx] ? 'border-2 border-green-500 dark:border-green-600' : '']">
                 
                 <!-- Card header -->
+                @if (! auth()->user())
                 <div v-if="savedEvents[idx] || saveErrors[idx]" :class="['px-4 py-3 -m-4 sm:-m-8 mt-4 sm:mb-4 flex justify-between items-center rounded-t-lg', 
                                 savedEvents[idx] ? 'bg-green-50 dark:bg-green-900/30' : 'bg-red-50 dark:bg-red-900/30']">
                     <h3 class="font-medium text-lg">
@@ -236,6 +250,7 @@
                         </span>
                     </h3>                            
                 </div>
+                @endif
                 
                 <!-- Card body -->
                 <div class="grid md:grid-cols-2 gap-6">
@@ -456,19 +471,17 @@
                 <!-- YouTube Videos Section for Talent - Now below the form and image -->
                 <div v-if="preview.parsed[idx].performers && preview.parsed[idx].performers.length > 0" class="mt-6">
                     <div v-for="(performer, performerIdx) in preview.parsed[idx].performers" :key="performerIdx" class="my-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <!-- Only show YouTube video selection for the first performer when there are multiple performers -->
-                        <div v-if="preview.parsed[idx].performers.length === 1 || performerIdx === 0">
-
+                    
                         <!-- Loading state -->
                         <div v-if="performer.searching" class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
                             <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-500"></div>
                             <span>{{ __('messages.searching_youtube') }}</span>
                         </div>
-                        
+
                         <!-- Videos grid - Now in two columns if there's room -->
                         <div v-else-if="performer.videos && performer.videos.length > 0" class="space-y-3">
                             <div class="text-xs text-gray-600 dark:text-gray-400 mb-2">
-                                {{ __('messages.select_video') }}
+                                {{ __('messages.results_for') }} "@{{ performer.name }}"
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2 -mx-3 p-3">
                                 <div v-for="video in performer.videos.slice(0, 6)" :key="video.id" 
@@ -532,7 +545,7 @@
                             @{{ performer.error }}
                         </div>
                         @endif
-                        </div>
+
                     </div>
                 </div>
             </div>
@@ -810,12 +823,10 @@
                                     error: null
                                 });
                                 
-                                // Only search for videos for the first performer when there are multiple performers
-                                if (event.performers.length === 1 || performerIdx === 0) {
-                                    this.$nextTick(() => {
-                                        this.searchVideos(eventIdx, performerIdx);
-                                    });
-                                }
+                                // Search for videos for all performers                                
+                                this.$nextTick(() => {
+                                    this.searchVideos(eventIdx, performerIdx);
+                                });                                
                             });
                         }
                     });

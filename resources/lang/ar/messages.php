@@ -557,4 +557,5 @@ return [
     'get_tickets' => 'احصل على التذاكر',
     'delete_schedule' => 'حذف الجدول',
     'import_events' => 'استيراد الأحداث',
+    'results_for' => 'النتائج لـ',
 ];
