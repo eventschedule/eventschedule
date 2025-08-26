@@ -35,7 +35,8 @@ if (config('app.hosted')) {
         Route::get('/guest-add', [EventController::class, 'showGuestImport'])->name('event.guest_import');
         Route::post('/guest-add', [EventController::class, 'guestImport'])->name('event.guest_import');
         Route::post('/guest-parse', [EventController::class, 'guestParse'])->name('event.guest_parse');
-        Route::post('/guest-upload-image', [EventController::class, 'guestUploadImage'])->name('event.guest_upload_image');    
+        Route::post('/guest-upload-image', [EventController::class, 'guestUploadImage'])->name('event.guest_upload_image');
+        Route::get('/guest-search-youtube', [RoleController::class, 'guestSearchYouTube'])->name('role.guest_search_youtube');
         Route::post('/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
         Route::get('/checkout/success/{sale_id}/{date}', [TicketController::class, 'success'])->name('checkout.success');
         Route::get('/checkout/cancel/{sale_id}/{date}', [TicketController::class, 'cancel'])->name('checkout.cancel');
