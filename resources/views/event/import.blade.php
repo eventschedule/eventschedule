@@ -56,6 +56,7 @@
                                     v-bind:readonly="savedEvent"
                                     @input="handleInputChange"
                                     @paste="handlePaste" 
+                                    @keydown="handleKeydown"
                                     @dragenter.prevent="dragEnterDetails"
                                     @dragover.prevent="dragOverDetails"
                                     @dragleave.prevent="dragLeaveDetails"
@@ -607,22 +608,7 @@
         },
 
         mounted() {
-            // Add keyboard event listener for Enter and Shift+Enter in textarea
-            const textarea = this.$refs.eventDetails;
-            if (textarea) {
-                textarea.addEventListener('keydown', (event) => {
-                    if (event.key === 'Enter') {
-                        if (event.shiftKey) {
-                            // Shift+Enter: allow default behavior (new line)
-                            return;
-                        } else {
-                            // Enter: submit the form
-                            event.preventDefault();
-                            this.handleSubmit();
-                        }
-                    }
-                });
-            }
+            // Component is mounted and ready
         },
 
         computed: {
@@ -688,6 +674,20 @@
         },
 
         methods: {
+            handleKeydown(event) {
+                // Handle Enter key for form submission
+                if (event.key === 'Enter') {
+                    if (event.shiftKey) {
+                        // Shift+Enter: allow default behavior (new line)
+                        return;
+                    } else {
+                        // Enter: submit the form
+                        event.preventDefault();
+                        this.handleSubmit();
+                    }
+                }
+            },
+
             handleInputChange() {
                 // Just update the model, don't auto-submit
                 // The submit button will be enabled/disabled based on canSubmit computed property
