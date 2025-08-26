@@ -661,14 +661,16 @@
                             <x-input-error class="mt-2" :messages="$errors->get('website')" />
                         </div>
 
-                        @if($role->isCurator())
+                        @if ($role->isCurator())
                         <div class="mb-6">
                             <x-input-label for="city" :value="__('messages.city')" />
                             <x-text-input id="city" name="city" type="text" class="mt-1 block w-full"
                                 :value="old('city', $role->city)" autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('city')" />
                         </div>
+                        @endif
 
+                        @if ($role->isCurator() || $role->isTalent())
                         <div class="mb-6">
                             <x-input-label for="country" :value="__('messages.country')" />
                             <x-text-input id="country" name="country" type="text" class="mt-1 block w-full"
