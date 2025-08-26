@@ -40,8 +40,8 @@
             @else
             <div style="height: 42px;"></div>
             @endif
-            <div class="flex flex-row justify-between items-start gap-6 mb-5">
-              <div>
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-6 mb-5">
+              <div class="text-center sm:text-left">
                 <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2">
                   {{ $role->translatedName() }}
                 </h3>
@@ -55,7 +55,7 @@
                 @endif
               </div>
               
-              <div class="flex flex-row gap-4">              
+              <div class="flex flex-row gap-4 justify-center sm:justify-end">              
               @if (false)
               <!-- Event Search Box -->
               <div class="relative search-container flex-shrink-0">
