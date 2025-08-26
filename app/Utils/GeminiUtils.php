@@ -401,7 +401,7 @@ class GeminiUtils
                 $data[$key]['talent_id'] = UrlUtils::encodeId($role->id);
             } elseif (! empty($item['performers'])) {
                 
-                $followerRoleIds = RoleUser::where('user_id', auth()->user() ? auth()->user()->id : $role->user_id)
+                $followerRoleIds = RoleUser::whereIn('user_id', [$role->user_id, auth()->user() ? auth()->user()->id : null])
                                     ->whereIn('level', ['owner', 'follower'])
                                     ->orderBy('id')->pluck('role_id')->toArray();
                 
