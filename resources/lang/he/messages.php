@@ -502,7 +502,6 @@ return [
     'url' => 'כתובת URL',
     'videos' => 'סרטונים',
     'videos_description' => 'מצא סרטוני YouTube לאירועים קרובים שעדיין אין להם סרטונים.',
-    'no_talent_roles' => 'לא נמצאו תפקידי כישרון',
     'all_talent_roles_have_videos' => 'כל האירועים הקרובים כבר יש להם סרטוני YouTube.',
     'searching_youtube' => 'מחפש ב-YouTube...',
     'select_video' => 'בחר סרטון:',

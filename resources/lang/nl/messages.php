@@ -503,7 +503,6 @@ return [
     'url' => 'URL',
     'videos' => 'Video\'s',
     'videos_description' => 'Vind YouTube video\'s voor aankomende evenementen die nog geen video\'s hebben.',
-    'no_talent_roles' => 'Geen talentrollen gevonden',
     'all_talent_roles_have_videos' => 'Alle aankomende evenementen hebben al YouTube video\'s.',
     'searching_youtube' => 'Zoeken op YouTube...',
     'select_video' => 'Selecteer een video:',

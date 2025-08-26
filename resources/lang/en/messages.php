@@ -261,7 +261,6 @@ return [
     'youtube_videos' => 'YouTube Videos',
     'videos' => 'Videos',
     'videos_description' => 'Find YouTube videos for upcoming events that don\'t have any videos yet.',
-    'no_talent_roles' => 'No talent roles found',
     'all_talent_roles_have_videos' => 'All upcoming events already have YouTube videos.',
     'searching_youtube' => 'Searching YouTube...',
     'save_video' => 'Save Video',

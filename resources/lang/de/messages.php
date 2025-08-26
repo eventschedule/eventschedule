@@ -509,7 +509,6 @@ return [
     'url' => 'URL',
     'videos' => 'Videos',
     'videos_description' => 'Finden Sie YouTube-Videos für bevorstehende Veranstaltungen, die noch keine Videos haben.',
-    'no_talent_roles' => 'Keine Talent-Rollen gefunden',
     'all_talent_roles_have_videos' => 'Alle bevorstehenden Veranstaltungen haben bereits YouTube-Videos.',
     'searching_youtube' => 'YouTube wird durchsucht...',
     'select_video' => 'Wählen Sie ein Video:',

@@ -506,7 +506,6 @@ return [
     'url' => 'URL',
     'videos' => 'Video',
     'videos_description' => 'Trova video YouTube per eventi imminenti che non hanno ancora video.',
-    'no_talent_roles' => 'Nessun ruolo di talento trovato',
     'all_talent_roles_have_videos' => 'Tutti gli eventi imminenti hanno già video YouTube.',
     'searching_youtube' => 'Ricerca su YouTube...',
     'select_video' => 'Seleziona un video:',
