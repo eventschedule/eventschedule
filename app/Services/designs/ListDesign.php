@@ -506,31 +506,137 @@ class ListDesign extends AbstractEventDesign
     
     protected function addEventDetails(Event $event, int $x, int $y): void
     {
-        $currentY = $y + 20;
+        // Calculate text panel dimensions
+        $panelWidth = 520; // Slightly wider for better text spacing
+        $panelHeight = 110; // Slightly taller for better text spacing
+        $panelX = $x - 20; // Slightly more left padding for better visual balance
+        $panelY = $y + 8; // Slightly higher for better vertical centering
         
-        // Event title - use bold font
+        // Create the rounded corner text panel background
+        $this->createTextPanelBackground($panelX, $panelY, $panelWidth, $panelHeight);
+        
+        // Adjust text starting position to be centered within the panel
+        $textStartX = $x;
+        $textStartY = $y + 30; // Better vertical centering within the larger panel
+        
+        // Event title - use bold font with black color
         $title = $event->name ?? 'Untitled Event';
         
         // Debug: log what we're trying to render
         if (in_array($this->lang, ['he', 'ar'])) {
-            error_log("Rendering Hebrew/Arabic text: '{$title}' at ({$x}, {$currentY})");
+            error_log("Rendering Hebrew/Arabic text: '{$title}' at ({$textStartX}, {$textStartY})");
         }
         
-        $this->addText($title, $x, $currentY, self::TITLE_FONT_SIZE, $this->c['font'], 'bold');
-        $currentY += self::LINE_HEIGHT;
+        $this->addText($title, $textStartX, $textStartY, self::TITLE_FONT_SIZE, $this->c['black'], 'bold');
+        $textStartY += self::LINE_HEIGHT;
         
         // Venue
         if ($event->venue) {
             $venue = $event->venue;
-            $this->addText($venue, $x, $currentY, self::VENUE_FONT_SIZE, $this->c['gray'], 'regular');
-            $currentY += self::LINE_HEIGHT;
+            $this->addText($venue, $textStartX, $textStartY, self::VENUE_FONT_SIZE, $this->c['black'], 'regular');
+            $textStartY += self::LINE_HEIGHT;
         }
         
         // Date and time
         if ($event->start_date) {
             $dateTime = $this->formatEventDateTime($event);
-            $this->addText($dateTime, $x, $currentY, self::DATE_FONT_SIZE, $this->c['darkGray'], 'regular');
+            $this->addText($dateTime, $textStartX, $textStartY, self::DATE_FONT_SIZE, $this->c['black'], 'regular');
         }
+    }
+    
+    /**
+     * Create a rounded corner panel background for the text area
+     */
+    protected function createTextPanelBackground(int $x, int $y, int $width, int $height): void
+    {
+        // Create a temporary image for the panel with rounded corners
+        $tempImage = imagecreatetruecolor($width, $height);
+        if (!$tempImage) {
+            // Fallback to simple rectangle if temp image creation fails
+            $this->createSimpleTextPanelBackground($x, $y, $width, $height);
+            return;
+        }
+        
+        // Enable alpha blending for the temp image
+        imagealphablending($tempImage, false);
+        imagesavealpha($tempImage, true);
+        
+        // Create transparent background
+        $transparent = imagecolorallocatealpha($tempImage, 0, 0, 0, 127);
+        imagefill($tempImage, 0, 0, $transparent);
+        
+        // Create panel colors
+        $panelBgColor = imagecolorallocatealpha($tempImage, 255, 255, 255, 0); // White, fully opaque
+        $panelBorderColor = imagecolorallocatealpha($tempImage, 
+            imagecolorsforindex($tempImage, $this->c['accent'])['red'],
+            imagecolorsforindex($tempImage, $this->c['accent'])['green'],
+            imagecolorsforindex($tempImage, $this->c['accent'])['blue'],
+            0 // Fully opaque
+        );
+        
+        // Create subtle shadow colors for depth
+        $shadowColor1 = imagecolorallocatealpha($tempImage, 0, 0, 0, 0); // Black, fully opaque
+        $shadowColor2 = imagecolorallocatealpha($tempImage, 0, 0, 0, 0); // Black, fully opaque
+        
+        // Add layered shadow effect for more depth
+        // Outer shadow (darker, more spread)
+        imagefilledrectangle($tempImage, 3, 3, $width + 3, $height + 3, $shadowColor1);
+        // Inner shadow (lighter, less spread)
+        imagefilledrectangle($tempImage, 1, 1, $width + 1, $height + 1, $shadowColor2);
+        
+        // Fill the main panel background
+        imagefilledrectangle($tempImage, 0, 0, $width, $height, $panelBgColor);
+        
+        // Add subtle accent border with rounded corners effect
+        imagerectangle($tempImage, 0, 0, $width, $height, $panelBorderColor);
+        
+        // Add subtle inner highlight for depth
+        $highlightColor = imagecolorallocatealpha($tempImage, 255, 255, 255, 0); // White highlight
+        imageline($tempImage, 1, 1, $width - 1, 1, $highlightColor); // Top highlight
+        imageline($tempImage, 1, 1, 1, $height - 1, $highlightColor); // Left highlight
+        
+        // Add subtle background pattern for visual interest
+        $this->addSubtleBackgroundPattern($tempImage, $width, $height);
+        
+        // Apply rounded corners mask
+        $this->applyRoundedCorners($tempImage, $width, $height);
+        
+        // Copy the rounded panel to the main canvas
+        imagecopy($this->im, $tempImage, $x, $y, 0, 0, $width, $height);
+        
+        // Clean up temp image
+        imagedestroy($tempImage);
+    }
+    
+    /**
+     * Fallback method for creating simple text panel background
+     */
+    protected function createSimpleTextPanelBackground(int $x, int $y, int $width, int $height): void
+    {
+        // Create panel colors
+        $panelBgColor = $this->c['white'];
+        $panelBorderColor = $this->c['accent'];
+        
+        // Add layered shadow effect for depth
+        $shadowColor = $this->c['black'];
+        // Outer shadow (darker, more spread)
+        imagefilledrectangle($this->im, $x + 3, $y + 3, $x + $width + 3, $y + $height + 3, $shadowColor);
+        // Inner shadow (lighter, less spread)
+        imagefilledrectangle($this->im, $x + 1, $y + 1, $x + $width + 1, $y + $height + 1, $shadowColor);
+        
+        // Fill the main panel background
+        imagefilledrectangle($this->im, $x, $y, $x + $width, $y + $height, $panelBgColor);
+        
+        // Add subtle border
+        imagerectangle($this->im, $x, $y, $x + $width, $y + $height, $panelBorderColor);
+        
+        // Add subtle inner highlight for depth
+        $highlightColor = $this->c['white'];
+        imageline($this->im, $x + 1, $y + 1, $x + $width - 1, $y + 1, $highlightColor); // Top highlight
+        imageline($this->im, $x + 1, $y + 1, $x + 1, $y + $height - 1, $highlightColor); // Left highlight
+        
+        // Add subtle background pattern for visual interest
+        $this->addSubtleBackgroundPatternToMain($x, $y, $width, $height);
     }
     
     protected function addText(string $text, int $x, int $y, int $fontSize, int $color, string $weight = 'regular', bool $isRtl = null): void
@@ -620,6 +726,59 @@ class ListDesign extends AbstractEventDesign
             // Continue without QR code if there's an error
         }
     }
+    
+    /**
+     * Add subtle background pattern for visual interest
+     */
+    protected function addSubtleBackgroundPattern($image, int $width, int $height): void
+    {
+        // Create a very subtle pattern using the accent color with low opacity
+        $patternColor = imagecolorallocatealpha($image, 
+            imagecolorsforindex($image, $this->c['accent'])['red'],
+            imagecolorsforindex($image, $this->c['accent'])['green'],
+            imagecolorsforindex($image, $this->c['accent'])['blue'],
+            127 // 50% transparent
+        );
+        
+        // Create a subtle dot pattern in the background
+        $dotSize = 1;
+        $spacing = 20;
+        
+        for ($i = $spacing; $i < $width - $spacing; $i += $spacing) {
+            for ($j = $spacing; $j < $height - $spacing; $j += $spacing) {
+                // Only add dots in corners and edges for subtle effect
+                if (($i < $spacing * 2 || $i > $width - $spacing * 2) || 
+                    ($j < $spacing * 2 || $j > $height - $spacing * 2)) {
+                    imagefilledellipse($image, $i, $j, $dotSize, $dotSize, $patternColor);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Add subtle background pattern to the main image for fallback method
+     */
+    protected function addSubtleBackgroundPatternToMain(int $x, int $y, int $width, int $height): void
+    {
+        // Create a very subtle pattern using the accent color
+        $patternColor = $this->c['accent'];
+        
+        // Create a subtle dot pattern in the background
+        $dotSize = 1;
+        $spacing = 20;
+        
+        for ($i = $spacing; $i < $width - $spacing; $i += $spacing) {
+            for ($j = $spacing; $j < $height - $spacing; $j += $spacing) {
+                // Only add dots in corners and edges for subtle effect
+                if (($i < $spacing * 2 || $i > $width - $spacing * 2) || 
+                    ($j < $spacing * 2 || $j > $height - $spacing * 2)) {
+                    imagefilledellipse($this->im, $x + $i, $y + $j, $dotSize, $dotSize, $patternColor);
+                }
+            }
+        }
+    }
+    
+
     
     // Public getter methods for list information
     public function getListInfo(): array
