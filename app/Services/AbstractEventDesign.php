@@ -168,9 +168,12 @@ abstract class AbstractEventDesign
                 if (!file_exists($path) || !is_readable($path)) {
                     // Fallback to default fonts if specific language fonts don't exist
                     if (isset($this->fonts['en'][$weight])) {
-                        $this->fonts[$lang][$weight] = $this->fonts['en'][$weight];
+                        $this->fonts[$lang][$weight] = $this->fonts['en']['regular'];
                     }
                 }
+                
+                // Debug: Log font status
+                error_log("Font {$lang} {$weight}: {$path} - exists: " . (file_exists($path) ? 'yes' : 'no') . ", readable: " . (is_readable($path) ? 'yes' : 'no'));
             }
         }
     }
@@ -187,6 +190,8 @@ abstract class AbstractEventDesign
     
     /**
      * Smart font selection that handles mixed content automatically
+     * For mixed content with apostrophes, we need to use the mixed content handler
+     * rather than switching the entire text to English fonts.
      */
     protected function getSmartFontPath(string $text, string $weight = 'regular'): string
     {
@@ -200,9 +205,46 @@ abstract class AbstractEventDesign
             return $this->getFontPath($weight);
         }
         
-        // For mixed content, prefer the role language font as base
+        // For mixed content (including text with apostrophes), prefer the role language font as base
         // The mixed content handler will use appropriate fonts for each segment
         return $this->getFontPath($weight);
+    }
+    
+    /**
+     * Check if text contains apostrophes or other punctuation that should use English font
+     * This is important because Hebrew and Arabic fonts often lack proper apostrophe characters,
+     * so we switch to English fonts for better rendering of these characters.
+     */
+    protected function containsApostrophesOrPunctuation(string $text): bool
+    {
+        // Check for common apostrophes, quotes, and punctuation that are better rendered in English fonts
+        return preg_match('/[\'`´"\x{2032}\x{2033}\x{2034}\x{2035}\x{2036}\x{2037}\x{2039}\x{203A}]/u', $text);
+    }
+    
+    /**
+     * Get optimal Y position for apostrophes to align with Hebrew text
+     */
+    protected function getApostropheYPosition(int $baseY, int $fontSize, string $fontPath): int
+    {
+        if (!function_exists('imagettfbbox') || !file_exists($fontPath)) {
+            // For GD fonts, use a small offset
+            return $baseY + 2;
+        }
+        
+        // Get the bounding box for the apostrophe to determine its height
+        $bbox = imagettfbbox($fontSize, 0, $fontPath, "'");
+        if ($bbox === false) {
+            return $baseY + 2;
+        }
+        
+        // Calculate the height of the apostrophe
+        $apostropheHeight = $bbox[1] - $bbox[7];
+        
+        // Position the apostrophe to align with the x-height of Hebrew text
+        // Hebrew fonts typically have a larger x-height, so we need to adjust
+        $adjustedY = $baseY + (int)($fontSize * 0.15); // 15% of font size downward
+        
+        return $adjustedY;
     }
     
     /**
@@ -225,15 +267,14 @@ abstract class AbstractEventDesign
         // Determine RTL based on language or parameter
         $isRtl = $isRtl ?? $this->rtl;
         
-        // Check if text contains mixed content (Hebrew/Arabic + English)
-        if ($this->containsMixedContent($text)) {
+        // Check if text contains mixed content (Hebrew/Arabic + English) or apostrophes
+        if ($this->containsMixedContent($text) || $this->containsApostrophesOrPunctuation($text)) {
             $this->addMixedContentText($text, $x, $y, $fontSize, $color, $weight, $isRtl);
             return;
         }
         
-        // For single language text, determine language from content, not role
-        $textLang = $this->getTextLanguage($text);
-        $fontPath = $this->getFontPathForLanguage($textLang, $weight);
+        // Use smart font selection for single-language text
+        $fontPath = $this->getSmartFontPath($text, $weight);
         
         // Determine RTL based on text content, not role
         $isRtl = $isRtl ?? $this->isRTLCharacter($text[0] ?? '');
@@ -428,6 +469,8 @@ abstract class AbstractEventDesign
         return $bbox !== false;
     }
     
+
+    
     /**
      * Get font debugging information
      */
@@ -453,6 +496,32 @@ abstract class AbstractEventDesign
         }
         
         return $info;
+    }
+    
+    /**
+     * Debug method to show how text would be segmented
+     */
+    public function debugTextSegmentation(string $text): array
+    {
+        $segments = $this->splitTextByLanguageWithApostrophes($text);
+        $debug = [
+            'original_text' => $text,
+            'segments' => [],
+            'total_segments' => count($segments)
+        ];
+        
+        foreach ($segments as $i => $segment) {
+            $debug['segments'][] = [
+                'index' => $i,
+                'text' => $segment['text'],
+                'language' => $segment['language'],
+                'rtl' => $segment['rtl'],
+                'font_path' => $this->getFontPathForLanguage($segment['language'], 'regular'),
+                'contains_apostrophes' => $this->containsApostrophesOrPunctuation($segment['text'])
+            ];
+        }
+        
+        return $debug;
     }
     
     protected function allocateColors(): void
@@ -931,11 +1000,12 @@ abstract class AbstractEventDesign
      */
     protected function addMixedContentText(string $text, int $x, int $y, int $fontSize, int $color, string $weight, bool $isRtl): void
     {
-        // Split text into segments by language using enhanced segmentation
-        $segments = $this->splitTextByLanguageEnhanced($text);
+        // For now, let's use a simpler approach that ensures Hebrew fonts work
+        // Split text into segments by language using enhanced segmentation with apostrophe handling
+        $segments = $this->splitTextByLanguageWithApostrophes($text);
         
         // Calculate total width for proper positioning
-        $totalWidth = $this->calculateMixedTextWidth($segments, $fontSize, $weight);
+        $totalWidth = $this->calculateMixedTextWidth($segments, $fontSize, $color, $weight);
         
         // Determine starting position based on first character's RTL status
         $firstCharRTL = $this->isRTLCharacter($text[0] ?? '');
@@ -950,18 +1020,31 @@ abstract class AbstractEventDesign
             $segmentLang = $segment['language'];
             $segmentRTL = $segment['rtl'];
             
-            // Get appropriate font for this segment based on content
-            $fontPath = $this->getFontPathForLanguage($segmentLang, $weight);
+            // Force Hebrew text to use Hebrew fonts, English text to use English fonts
+            if ($segmentLang === 'he' || $segmentLang === 'ar') {
+                $fontPath = $this->getFontPathForLanguage($segmentLang, $weight);
+                $adjustedY = $y;
+            } elseif ($this->containsApostrophesOrPunctuation($segmentText)) {
+                // For apostrophes, use English font with much larger downward adjustment
+                $fontPath = $this->fonts['en'][$weight] ?? $this->fonts['en']['regular'];
+                $adjustedY = $y + 15; // Much larger downward adjustment to align with Hebrew text
+            } else {
+                $fontPath = $this->fonts['en'][$weight] ?? $this->fonts['en']['regular'];
+                $adjustedY = $y;
+            }
             
             // Calculate segment width
             $segmentWidth = $this->getTextWidth($segmentText, $fontSize, $fontPath);
             
+            // Debug: Log which font is being used
+            error_log("Segment: '{$segmentText}' using font: {$fontPath}, lang: {$segmentLang}");
+            
             if (file_exists($fontPath) && is_readable($fontPath) && function_exists('imagettftext')) {
                 // Use TTF font for this segment
-                $this->addTextWithTTF($segmentText, $currentX, $y, $fontSize, $color, $fontPath, $segmentRTL);
+                $this->addTextWithTTF($segmentText, $currentX, $adjustedY, $fontSize, $color, $fontPath, $segmentRTL);
             } else {
                 // Fallback to GD fonts
-                $this->addTextWithGDFonts($segmentText, $currentX, $y, $fontSize, $color, $segmentRTL);
+                $this->addTextWithGDFonts($segmentText, $currentX, $adjustedY, $fontSize, $color, $segmentRTL);
             }
             
             // Move to next position
@@ -972,7 +1055,7 @@ abstract class AbstractEventDesign
     /**
      * Calculate total width of mixed content text
      */
-    protected function calculateMixedTextWidth(array $segments, int $fontSize, string $weight): int
+    protected function calculateMixedTextWidth(array $segments, int $fontSize, int $color, string $weight): int
     {
         $totalWidth = 0;
         
@@ -1079,6 +1162,77 @@ abstract class AbstractEventDesign
     }
     
     /**
+     * Enhanced text segmentation that handles apostrophes and punctuation better
+     */
+    protected function splitTextByLanguageWithApostrophes(string $text): array
+    {
+        // First, try to split by language patterns
+        $segments = $this->splitTextByLanguageEnhanced($text);
+        
+        // If we have segments, check if any contain apostrophes and need further splitting
+        if (count($segments) > 1) {
+            $finalSegments = [];
+            foreach ($segments as $segment) {
+                if ($this->containsApostrophesOrPunctuation($segment['text'])) {
+                    // Split this segment further to isolate apostrophes
+                    $subSegments = $this->splitSegmentByApostrophes($segment);
+                    $finalSegments = array_merge($finalSegments, $subSegments);
+                } else {
+                    $finalSegments[] = $segment;
+                }
+            }
+            return $finalSegments;
+        }
+        
+        // If no language patterns found, try to split by apostrophes directly
+        if ($this->containsApostrophesOrPunctuation($text)) {
+            return $this->splitSegmentByApostrophes([
+                'text' => $text,
+                'language' => $this->getTextLanguage($text),
+                'rtl' => $this->isRTLCharacter($text[0] ?? '')
+            ]);
+        }
+        
+        return $segments;
+    }
+    
+    /**
+     * Split a text segment by apostrophes and punctuation
+     */
+    protected function splitSegmentByApostrophes(array $segment): array
+    {
+        $text = $segment['text'];
+        $baseLang = $segment['language'];
+        $baseRTL = $segment['rtl'];
+        
+        // Split by apostrophes and punctuation
+        $parts = preg_split('/([\'`´"\x{2032}\x{2033}\x{2034}\x{2035}\x{2036}\x{2037}\x{2039}\x{203A}])/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+        
+        $segments = [];
+        foreach ($parts as $part) {
+            if (empty($part)) continue;
+            
+            if ($this->containsApostrophesOrPunctuation($part)) {
+                // This is an apostrophe/punctuation - use English font
+                $segments[] = [
+                    'text' => $part,
+                    'language' => 'en',
+                    'rtl' => false
+                ];
+            } else {
+                // This is regular text - use original language font
+                $segments[] = [
+                    'text' => $part,
+                    'language' => $baseLang,
+                    'rtl' => $baseRTL
+                ];
+            }
+        }
+        
+        return $segments;
+    }
+    
+    /**
      * Get the language of a character
      */
     protected function getCharacterLanguage(string $char): string
@@ -1137,6 +1291,34 @@ abstract class AbstractEventDesign
         
         // Final fallback
         return $this->fonts['en']['regular'];
+    }
+    
+    /**
+     * Get baseline offset for a font to ensure proper alignment
+     */
+    protected function getBaselineOffset(int $fontSize, string $fontPath): int
+    {
+        if (!function_exists('imagettfbbox') || !file_exists($fontPath)) {
+            // For GD fonts, use a standard baseline
+            return 0;
+        }
+        
+        // Get the bounding box for a test character to determine baseline
+        $bbox = imagettfbbox($fontSize, 0, $fontPath, 'Ag');
+        if ($bbox === false) {
+            return 0;
+        }
+        
+        // Calculate the baseline offset
+        // The baseline is where the bottom of most letters should align
+        // We use the height of the font to determine proper positioning
+        $fontHeight = $bbox[1] - $bbox[7]; // Total height of the font
+        
+        // For better alignment, we'll use a standard baseline calculation
+        // Most fonts have their baseline at about 80% of the font height from the top
+        $baselineOffset = (int)($fontHeight * 0.2); // 20% from the top
+        
+        return $baselineOffset;
     }
 
     /**
