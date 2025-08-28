@@ -256,6 +256,17 @@ abstract class AbstractEventDesign
     }
     
     /**
+     * Replace problematic characters that don't render well in certain fonts
+     */
+    protected function sanitizeText(string $text): string
+    {
+        // Replace em dashes (—) with regular dashes (-)
+        $text = str_replace(['—', '–', '−'], '-', $text);
+        
+        return $text;
+    }
+
+    /**
      * Add text with TTF font support and RTL handling
      */
     protected function addText(string $text, int $x, int $y, int $fontSize, int $color, string $weight = 'regular', bool $isRtl = null): void
@@ -263,6 +274,9 @@ abstract class AbstractEventDesign
         if (empty($text)) {
             return;
         }
+        
+        // Sanitize text to replace problematic characters
+        $text = $this->sanitizeText($text);
         
         // Determine RTL based on language or parameter
         $isRtl = $isRtl ?? $this->rtl;
@@ -362,6 +376,9 @@ abstract class AbstractEventDesign
         if (empty($text)) {
             return;
         }
+        
+        // Sanitize text to replace problematic characters
+        $text = $this->sanitizeText($text);
         
         $lineHeight = $lineHeight ?? self::DEFAULT_LINE_HEIGHT;
         $currentY = $y;
@@ -853,6 +870,9 @@ abstract class AbstractEventDesign
             return;
         }
         
+        // Sanitize text to replace problematic characters
+        $text = $this->sanitizeText($text);
+        
         $fontPath = $this->getFontPath($weight);
         $textWidth = $this->getTextWidth($text, $fontSize, $fontPath);
         
@@ -883,6 +903,9 @@ abstract class AbstractEventDesign
         if (empty($text)) {
             return;
         }
+        
+        // Sanitize text to replace problematic characters
+        $text = $this->sanitizeText($text);
         
         $lines = $this->splitTextIntoLines($text, $maxWidth, $fontSize, $weight);
         $currentY = $y;
@@ -926,6 +949,9 @@ abstract class AbstractEventDesign
      */
     protected function addTextWithShadow(string $text, int $x, int $y, int $fontSize, int $textColor, int $shadowColor, string $weight = 'regular', int $shadowOffset = 2): void
     {
+        // Sanitize text to replace problematic characters
+        $text = $this->sanitizeText($text);
+        
         // Add shadow first
         $this->addText($text, $x + $shadowOffset, $y + $shadowOffset, $fontSize, $shadowColor, $weight);
         
@@ -938,6 +964,9 @@ abstract class AbstractEventDesign
      */
     protected function addTextWithBackground(string $text, int $x, int $y, int $fontSize, int $textColor, int $bgColor, string $weight = 'regular', int $padding = 5): void
     {
+        // Sanitize text to replace problematic characters
+        $text = $this->sanitizeText($text);
+        
         $fontPath = $this->getFontPath($weight);
         $textWidth = $this->getTextWidth($text, $fontSize, $fontPath);
         $textHeight = $this->getTextHeight($text, $fontSize, $fontPath);
@@ -1000,6 +1029,9 @@ abstract class AbstractEventDesign
      */
     protected function addMixedContentText(string $text, int $x, int $y, int $fontSize, int $color, string $weight, bool $isRtl): void
     {
+        // Sanitize text to replace problematic characters
+        $text = $this->sanitizeText($text);
+        
         // For now, let's use a simpler approach that ensures Hebrew fonts work
         // Split text into segments by language using enhanced segmentation with apostrophe handling
         $segments = $this->splitTextByLanguageWithApostrophes($text);
