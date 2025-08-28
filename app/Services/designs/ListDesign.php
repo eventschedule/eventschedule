@@ -527,6 +527,23 @@ class ListDesign extends AbstractEventDesign
             error_log("Rendering Hebrew/Arabic text: '{$title}' at ({$textStartX}, {$textStartY})");
         }
         
+
+        // Handle multibyte text reversal for title
+        if (mb_strlen($title) > 0) {
+            $truncate = false;
+            if (mb_strlen($title) > 35) {
+                $title = mb_substr($title, 0, 35);
+                $truncate = true;
+            }
+
+            $chars = preg_split('//u', $title, -1, PREG_SPLIT_NO_EMPTY);
+            $title = implode('', array_reverse($chars));
+
+            if ($truncate) {
+                $title = '...' . $title;
+            }
+        }
+
         $this->addText($title, $textStartX, $textStartY, self::TITLE_FONT_SIZE, $this->c['black'], 'bold');
         $textStartY += self::LINE_HEIGHT;
         
