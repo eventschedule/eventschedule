@@ -13,6 +13,14 @@ class GraphicController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
+        //$layout = $request->get('layout', 'grid');
+        $layout = $request->get('layout', 'list');
+        
+        // Validate layout parameter
+        if (!in_array($layout, ['grid', 'list'])) {
+            $layout = 'grid';
+        }
+
         // Get the next 10 events
         $events = Event::with('roles')
             ->whereHas('roles', function ($query) use ($role) {
@@ -34,11 +42,13 @@ class GraphicController extends Controller
             return redirect()->back()->with('error', __('messages.no_events_found'));
         }
 
-        // Use the service to generate the graphic
-        $generator = new EventGraphicGenerator($role, $events);
+        // Use the service to generate the graphic with the specified layout
+        $generator = new EventGraphicGenerator($role, $events, $layout);
         $imageData = $generator->generate();
 
-        $filename = $role->subdomain . '-upcoming-events.png';
+        // Generate filename based on layout
+        $layoutSuffix = $layout === 'list' ? '-list' : '';
+        $filename = $role->subdomain . '-upcoming-events' . $layoutSuffix . '.png';
 
         // Return the image as a response
         return response($imageData)
