@@ -18,9 +18,9 @@ class ListDesign extends AbstractEventDesign
     protected const TEXT_LEFT_MARGIN = 240; // Space for flyer + padding
     
     // Font configuration
-    protected const TITLE_FONT_SIZE = 5;
-    protected const VENUE_FONT_SIZE = 4;
-    protected const DATE_FONT_SIZE = 4;
+    protected const TITLE_FONT_SIZE = 18;
+    protected const VENUE_FONT_SIZE = 14;
+    protected const DATE_FONT_SIZE = 14;
     protected const LINE_HEIGHT = 25;
     
     protected function calculateDimensions(): void
@@ -508,29 +508,35 @@ class ListDesign extends AbstractEventDesign
     {
         $currentY = $y + 20;
         
-        // Event title
+        // Event title - use bold font
         $title = $event->name ?? 'Untitled Event';
-        $this->addText($title, $x, $currentY, self::TITLE_FONT_SIZE, $this->c['font']);
+        
+        // Debug: log what we're trying to render
+        if (in_array($this->lang, ['he', 'ar'])) {
+            error_log("Rendering Hebrew/Arabic text: '{$title}' at ({$x}, {$currentY})");
+        }
+        
+        $this->addText($title, $x, $currentY, self::TITLE_FONT_SIZE, $this->c['font'], 'bold');
         $currentY += self::LINE_HEIGHT;
         
         // Venue
         if ($event->venue) {
             $venue = $event->venue;
-            $this->addText($venue, $x, $currentY, self::VENUE_FONT_SIZE, $this->c['gray']);
+            $this->addText($venue, $x, $currentY, self::VENUE_FONT_SIZE, $this->c['gray'], 'regular');
             $currentY += self::LINE_HEIGHT;
         }
         
         // Date and time
         if ($event->start_date) {
             $dateTime = $this->formatEventDateTime($event);
-            $this->addText($dateTime, $x, $currentY, self::DATE_FONT_SIZE, $this->c['darkGray']);
+            $this->addText($dateTime, $x, $currentY, self::DATE_FONT_SIZE, $this->c['darkGray'], 'regular');
         }
     }
     
-    protected function addText(string $text, int $x, int $y, int $fontSize, int $color): void
+    protected function addText(string $text, int $x, int $y, int $fontSize, int $color, string $weight = 'regular', bool $isRtl = null): void
     {
-        // Simple text rendering using GD's built-in fonts
-        imagestring($this->im, $fontSize, $x, $y, $text, $color);
+        // Use the improved text rendering from AbstractEventDesign
+        parent::addText($text, $x, $y, $fontSize, $color, $weight, $isRtl);
     }
     
     protected function formatEventDateTime(Event $event): string

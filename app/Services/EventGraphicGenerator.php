@@ -190,4 +190,12 @@ class EventGraphicGenerator
     {
         return $this->design;
     }
+    
+    /**
+     * Get font debugging information for troubleshooting
+     */
+    public function getFontDebugInfo(): array
+    {
+        return $this->design->getFontDebugInfo();
+    }
 }
