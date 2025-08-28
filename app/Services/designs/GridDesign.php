@@ -6,12 +6,19 @@ use App\Services\AbstractEventDesign;
 use App\Models\Event;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
+use Carbon\Carbon;
 
 class GridDesign extends AbstractEventDesign
 {
     // Grid-specific configuration
     protected const FLYER_WIDTH = 400;
     protected const FLYER_HEIGHT = 480;
+    
+    // Text configuration for grid flyers
+    protected const TITLE_FONT_SIZE = 16;
+    protected const DATE_FONT_SIZE = 14;
+    protected const TEXT_PADDING = 15;
+    protected const TEXT_BOTTOM_MARGIN = 80; // Space for QR code
     
     // Grid configuration - now dynamic
     protected int $gridCols;
@@ -49,8 +56,78 @@ class GridDesign extends AbstractEventDesign
         // Get the event flyer image
         $this->addEventFlyerImage($event, $x, $y);
         
+        // Add event text overlay
+        $this->addEventTextOverlay($event, $x, $y);
+        
         // Add QR code to the bottom left corner of the flyer
         $this->addEventQRCode($event, $x, $y);
+    }
+    
+    /**
+     * Add event text overlay to the flyer
+     */
+    protected function addEventTextOverlay(Event $event, int $x, int $y): void
+    {
+        // Create a semi-transparent background for text readability
+        $this->addTextBackground($x, $y);
+        
+        // Event title
+        $title = $event->name ?? 'Untitled Event';
+        $titleX = $x + self::TEXT_PADDING;
+        $titleY = $y + self::FLYER_HEIGHT - self::TEXT_BOTTOM_MARGIN + 10;
+        
+        // Use multiline text if title is too long
+        $maxTitleWidth = self::FLYER_WIDTH - (self::TEXT_PADDING * 2);
+        $this->addMultilineText($title, $titleX, $titleY, self::TITLE_FONT_SIZE, $this->c['white'], 'bold', $maxTitleWidth);
+        
+        // Event date
+        if ($event->start_date) {
+            $dateText = $this->formatEventDate($event);
+            $dateX = $titleX;
+            $dateY = $titleY + 25;
+            
+            $this->addText($dateText, $dateX, $dateY, self::DATE_FONT_SIZE, $this->c['lightGray'], 'regular');
+        }
+    }
+    
+    /**
+     * Add a semi-transparent background for text readability
+     */
+    protected function addTextBackground(int $x, int $y): void
+    {
+        $bgHeight = 60;
+        $bgY = $y + self::FLYER_HEIGHT - self::TEXT_BOTTOM_MARGIN;
+        
+        // Create semi-transparent black background
+        $bgColor = imagecolorallocatealpha($this->im, 0, 0, 0, 100);
+        imagefilledrectangle($this->im, $x, $bgY, $x + self::FLYER_WIDTH, $bgY + $bgHeight, $bgColor);
+    }
+    
+    /**
+     * Format event date for display
+     */
+    protected function formatEventDate(Event $event): string
+    {
+        try {
+            $startDate = Carbon::parse($event->start_date);
+            
+            if ($event->end_date) {
+                $endDate = Carbon::parse($event->end_date);
+                
+                if ($startDate->isSameDay($endDate)) {
+                    // Same day event
+                    return $startDate->format('M j, Y');
+                } else {
+                    // Multi-day event
+                    return $startDate->format('M j') . ' - ' . $endDate->format('M j, Y');
+                }
+            } else {
+                // Single date event
+                return $startDate->format('M j, Y');
+            }
+        } catch (\Exception $e) {
+            return 'Date TBD';
+        }
     }
     
     /**

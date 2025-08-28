@@ -27,6 +27,11 @@ abstract class AbstractEventDesign
     protected string $lang;
     protected bool $rtl;
     
+    // Font configuration
+    protected array $fonts = [];
+    protected const DEFAULT_FONT_SIZE = 16;
+    protected const DEFAULT_LINE_HEIGHT = 1.4;
+    
     // Design-specific dimensions
     protected int $totalWidth;
     protected int $totalHeight;
@@ -41,10 +46,16 @@ abstract class AbstractEventDesign
         $this->role = $role;
         $this->events = $events->take(self::MAX_EVENTS)->values();
         
+        // Language code only affects RTL layout direction, not font selection
+        // Fonts are automatically selected based on text content
         $this->lang = in_array(strtolower($role->language_code), ['ar','de','en','es','fr','he','it','nl','pt'], true)
             ? strtolower($role->language_code) : 'en';
         
+        // RTL layout is determined by role language (Hebrew/Arabic = RTL)
         $this->rtl = in_array($this->lang, ['ar','he'], true);
+        
+        // Initialize fonts
+        $this->initializeFonts();
         
         // Calculate dimensions based on design type
         $this->calculateDimensions();
@@ -106,6 +117,342 @@ abstract class AbstractEventDesign
     public function getEventCount(): int
     {
         return $this->events->count();
+    }
+    
+    /**
+     * Initialize TTF fonts for different languages
+     */
+    protected function initializeFonts(): void
+    {
+        // Use absolute paths to avoid Laravel helper function issues
+        $possiblePaths = [
+            __DIR__ . '/../../resources/fonts',
+            dirname(__DIR__, 2) . '/resources/fonts',
+            dirname(dirname(__DIR__)) . '/resources/fonts'
+        ];
+        
+        $fontsPath = null;
+        foreach ($possiblePaths as $path) {
+            if (is_dir($path) && file_exists($path . '/NotoSans-Regular.ttf')) {
+                $fontsPath = $path;
+                break;
+            }
+        }
+        
+        if (!$fontsPath) {
+            // Final fallback: use current directory relative path
+            $fontsPath = __DIR__ . '/../../resources/fonts';
+        }
+        
+        // Default fonts for English and other languages
+        $this->fonts['en'] = [
+            'regular' => $fontsPath . '/NotoSans-Regular.ttf',
+            'bold' => $fontsPath . '/NotoSans-Bold.ttf'
+        ];
+        
+        // Hebrew fonts
+        $this->fonts['he'] = [
+            'regular' => $fontsPath . '/NotoSansHebrew-Regular.ttf',
+            'bold' => $fontsPath . '/NotoSansHebrew-Bold.ttf'
+        ];
+        
+        // Arabic fonts
+        $this->fonts['ar'] = [
+            'regular' => $fontsPath . '/NotoSansArabic-Regular.ttf',
+            'bold' => $fontsPath . '/NotoSansArabic-Bold.ttf'
+        ];
+        
+        // Verify font files exist and are readable
+        foreach ($this->fonts as $lang => $fontSet) {
+            foreach ($fontSet as $weight => $path) {
+                if (!file_exists($path) || !is_readable($path)) {
+                    // Fallback to default fonts if specific language fonts don't exist
+                    if (isset($this->fonts['en'][$weight])) {
+                        $this->fonts[$lang][$weight] = $this->fonts['en'][$weight];
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Get the appropriate font path for the current language and weight
+     * @deprecated Use getFontPathForLanguage() instead - this method is kept for backward compatibility
+     */
+    protected function getFontPath(string $weight = 'regular'): string
+    {
+        // For backward compatibility, use English fonts as default
+        return $this->fonts['en'][$weight] ?? $this->fonts['en']['regular'];
+    }
+    
+    /**
+     * Smart font selection that handles mixed content automatically
+     */
+    protected function getSmartFontPath(string $text, string $weight = 'regular'): string
+    {
+        // If text contains only English characters, use English font
+        if (!$this->containsRTLCharacters($text)) {
+            return $this->fonts['en'][$weight] ?? $this->fonts['en']['regular'];
+        }
+        
+        // If text contains only RTL characters, use role language font
+        if (!$this->containsLTRCharacters($text)) {
+            return $this->getFontPath($weight);
+        }
+        
+        // For mixed content, prefer the role language font as base
+        // The mixed content handler will use appropriate fonts for each segment
+        return $this->getFontPath($weight);
+    }
+    
+    /**
+     * Check if text contains LTR characters (English, etc.)
+     */
+    protected function containsLTRCharacters(string $text): bool
+    {
+        return preg_match('/[a-zA-Z]/', $text);
+    }
+    
+    /**
+     * Add text with TTF font support and RTL handling
+     */
+    protected function addText(string $text, int $x, int $y, int $fontSize, int $color, string $weight = 'regular', bool $isRtl = null): void
+    {
+        if (empty($text)) {
+            return;
+        }
+        
+        // Determine RTL based on language or parameter
+        $isRtl = $isRtl ?? $this->rtl;
+        
+        // Check if text contains mixed content (Hebrew/Arabic + English)
+        if ($this->containsMixedContent($text)) {
+            $this->addMixedContentText($text, $x, $y, $fontSize, $color, $weight, $isRtl);
+            return;
+        }
+        
+        // For single language text, determine language from content, not role
+        $textLang = $this->getTextLanguage($text);
+        $fontPath = $this->getFontPathForLanguage($textLang, $weight);
+        
+        // Determine RTL based on text content, not role
+        $isRtl = $isRtl ?? $this->isRTLCharacter($text[0] ?? '');
+        
+        // If TTF fonts are not available, fall back to GD built-in fonts
+        if (!file_exists($fontPath) || !is_readable($fontPath) || !function_exists('imagettftext')) {
+            $this->addTextWithGDFonts($text, $x, $y, $fontSize, $color, $isRtl);
+            return;
+        }
+        
+        // Use TTF fonts for better quality and language support
+        $this->addTextWithTTF($text, $x, $y, $fontSize, $color, $fontPath, $isRtl);
+    }
+    
+    /**
+     * Add text using TTF fonts with proper RTL support
+     */
+    protected function addTextWithTTF(string $text, int $x, int $y, int $fontSize, int $color, string $fontPath, bool $isRtl): void
+    {
+        // Get text dimensions
+        $bbox = imagettfbbox($fontSize, 0, $fontPath, $text);
+        if ($bbox === false) {
+            // Fallback to GD fonts if TTF fails
+            $this->addTextWithGDFonts($text, $x, $y, $fontSize, $color, $isRtl);
+            return;
+        }
+        
+        $textWidth = $bbox[4] - $bbox[0];
+        $textHeight = $bbox[1] - $bbox[7];
+        
+        // Adjust position for RTL text
+        if ($isRtl) {
+            $x = $x - $textWidth;
+        }
+        
+        // Add text with TTF font
+        $result = imagettftext($this->im, $fontSize, 0, $x, $y + $textHeight, $color, $fontPath, $text);
+        
+        if ($result === false) {
+            // Fallback to GD fonts if TTF rendering fails
+            $this->addTextWithGDFonts($text, $x, $y, $fontSize, $color, $isRtl);
+            return;
+        }
+    }
+    
+    /**
+     * Add text using GD built-in fonts (fallback)
+     */
+    protected function addTextWithGDFonts(string $text, int $x, int $y, int $fontSize, int $color, bool $isRtl): void
+    {
+        // Convert font size to GD font constant
+        $gdFont = $this->getGDFontConstant($fontSize);
+        
+        // Get text dimensions
+        $textWidth = imagefontwidth($gdFont) * strlen($text);
+        $textHeight = imagefontheight($gdFont);
+        
+        // Adjust position for RTL text
+        if ($isRtl) {
+            $x = $x - $textWidth;
+        }
+        
+        // Add text with GD font
+        imagestring($this->im, $gdFont, $x, $y, $text, $color);
+    }
+    
+    /**
+     * Convert font size to GD font constant
+     */
+    protected function getGDFontConstant(int $fontSize): int
+    {
+        // Map font sizes to GD font constants
+        if ($fontSize <= 8) return 1;
+        if ($fontSize <= 12) return 2;
+        if ($fontSize <= 16) return 3;
+        if ($fontSize <= 20) return 4;
+        return 5; // Largest GD font
+    }
+    
+    /**
+     * Add multiline text with proper line breaks and RTL support
+     */
+    protected function addMultilineText(string $text, int $x, int $y, int $fontSize, int $color, string $weight = 'regular', int $maxWidth = 0, float $lineHeight = null): void
+    {
+        if (empty($text)) {
+            return;
+        }
+        
+        $lineHeight = $lineHeight ?? self::DEFAULT_LINE_HEIGHT;
+        $currentY = $y;
+        
+        // Split text into lines
+        $lines = $this->splitTextIntoLines($text, $maxWidth, $fontSize, $weight);
+        
+        foreach ($lines as $line) {
+            $this->addText($line, $x, $currentY, $fontSize, $color, $weight);
+            $currentY += $fontSize * $lineHeight;
+        }
+    }
+    
+    /**
+     * Split text into lines based on width constraints
+     */
+    protected function splitTextIntoLines(string $text, int $maxWidth, int $fontSize, string $weight): array
+    {
+        if ($maxWidth <= 0) {
+            return [$text];
+        }
+        
+        $fontPath = $this->getFontPath($weight);
+        $words = explode(' ', $text);
+        $lines = [];
+        $currentLine = '';
+        
+        foreach ($words as $word) {
+            $testLine = $currentLine . ($currentLine ? ' ' : '') . $word;
+            
+            if ($this->getTextWidth($testLine, $fontSize, $fontPath) <= $maxWidth) {
+                $currentLine = $testLine;
+            } else {
+                if ($currentLine) {
+                    $lines[] = trim($currentLine);
+                }
+                $currentLine = $word;
+            }
+        }
+        
+        if ($currentLine) {
+            $lines[] = trim($currentLine);
+        }
+        
+        return $lines;
+    }
+    
+    /**
+     * Get text width for a given font and size
+     */
+    protected function getTextWidth(string $text, int $fontSize, string $fontPath): int
+    {
+        if (function_exists('imagettfbbox') && file_exists($fontPath)) {
+            $bbox = imagettfbbox($fontSize, 0, $fontPath, $text);
+            if ($bbox !== false) {
+                return $bbox[4] - $bbox[0];
+            }
+        }
+        
+        // Fallback to GD fonts
+        $gdFont = $this->getGDFontConstant($fontSize);
+        return imagefontwidth($gdFont) * strlen($text);
+    }
+    
+    /**
+     * Get text height for a given font and size
+     */
+    protected function getTextHeight(string $text, int $fontSize, string $fontPath): int
+    {
+        if (function_exists('imagettfbbox') && file_exists($fontPath)) {
+            $bbox = imagettfbbox($fontSize, 0, $fontPath, $text);
+            if ($bbox !== false) {
+                return $bbox[1] - $bbox[7];
+            }
+        }
+        
+        // Fallback to GD fonts
+        $gdFont = $this->getGDFontConstant($fontSize);
+        return imagefontheight($gdFont);
+    }
+    
+    /**
+     * Check if TTF fonts are available
+     */
+    protected function isTTFAvailable(): bool
+    {
+        return function_exists('imagettfbbox') && function_exists('imagettftext');
+    }
+    
+    /**
+     * Test if a specific font file is working correctly
+     */
+    protected function testFontFile(string $fontPath): bool
+    {
+        if (!file_exists($fontPath) || !is_readable($fontPath)) {
+            return false;
+        }
+        
+        if (!function_exists('imagettfbbox')) {
+            return false;
+        }
+        
+        // Test with a simple character
+        $bbox = imagettfbbox(12, 0, $fontPath, 'A');
+        return $bbox !== false;
+    }
+    
+    /**
+     * Get font debugging information
+     */
+    public function getFontDebugInfo(): array
+    {
+        $info = [
+            'language' => $this->lang,
+            'rtl' => $this->rtl,
+            'ttf_available' => $this->isTTFAvailable(),
+            'fonts' => []
+        ];
+        
+        foreach ($this->fonts as $lang => $fontSet) {
+            $info['fonts'][$lang] = [];
+            foreach ($fontSet as $weight => $path) {
+                $info['fonts'][$lang][$weight] = [
+                    'path' => $path,
+                    'exists' => file_exists($path),
+                    'readable' => is_readable($path),
+                    'working' => $this->testFontFile($path)
+                ];
+            }
+        }
+        
+        return $info;
     }
     
     protected function allocateColors(): void
@@ -426,5 +773,399 @@ abstract class AbstractEventDesign
     protected function getQRCodeMargin(): int
     {
         return self::QR_CODE_MARGIN;
+    }
+    
+    /**
+     * Center text horizontally within a given width
+     */
+    protected function addCenteredText(string $text, int $centerX, int $y, int $fontSize, int $color, string $weight = 'regular', int $maxWidth = 0): void
+    {
+        if (empty($text)) {
+            return;
+        }
+        
+        $fontPath = $this->getFontPath($weight);
+        $textWidth = $this->getTextWidth($text, $fontSize, $fontPath);
+        
+        // If maxWidth is specified, use multiline text
+        if ($maxWidth > 0) {
+            $lines = $this->splitTextIntoLines($text, $maxWidth, $fontSize, $weight);
+            $totalHeight = count($lines) * $fontSize * self::DEFAULT_LINE_HEIGHT;
+            $startY = $y - ($totalHeight / 2);
+            
+            foreach ($lines as $line) {
+                $lineWidth = $this->getTextWidth($line, $fontSize, $fontPath);
+                $lineX = $centerX - ($lineWidth / 2);
+                $this->addText($line, $lineX, $startY, $fontSize, $color, $weight);
+                $startY += $fontSize * self::DEFAULT_LINE_HEIGHT;
+            }
+        } else {
+            // Single line centered text
+            $x = $centerX - ($textWidth / 2);
+            $this->addText($text, $x, $y, $fontSize, $color, $weight);
+        }
+    }
+    
+    /**
+     * Add text with automatic wrapping and RTL support
+     */
+    protected function addWrappedText(string $text, int $x, int $y, int $fontSize, int $color, int $maxWidth, string $weight = 'regular', string $alignment = 'left'): void
+    {
+        if (empty($text)) {
+            return;
+        }
+        
+        $lines = $this->splitTextIntoLines($text, $maxWidth, $fontSize, $weight);
+        $currentY = $y;
+        
+        foreach ($lines as $line) {
+            $lineX = $x;
+            
+            // Handle alignment
+            if ($alignment === 'center') {
+                $lineWidth = $this->getTextWidth($line, $fontSize, $this->getFontPath($weight));
+                $lineX = $x + ($maxWidth - $lineWidth) / 2;
+            } elseif ($alignment === 'right' || $this->rtl) {
+                $lineWidth = $this->getTextWidth($line, $fontSize, $this->getFontPath($weight));
+                $lineX = $x + $maxWidth - $lineWidth;
+            }
+            
+            $this->addText($line, $lineX, $currentY, $fontSize, $color, $weight);
+            $currentY += $fontSize * self::DEFAULT_LINE_HEIGHT;
+        }
+    }
+    
+    /**
+     * Get the best font size for a given text and width constraint
+     */
+    protected function getOptimalFontSize(string $text, int $maxWidth, int $maxFontSize = 24, int $minFontSize = 8, string $weight = 'regular'): int
+    {
+        $fontPath = $this->getFontPath($weight);
+        
+        for ($size = $maxFontSize; $size >= $minFontSize; $size--) {
+            $textWidth = $this->getTextWidth($text, $size, $fontPath);
+            if ($textWidth <= $maxWidth) {
+                return $size;
+            }
+        }
+        
+        return $minFontSize;
+    }
+    
+    /**
+     * Add text with a drop shadow effect
+     */
+    protected function addTextWithShadow(string $text, int $x, int $y, int $fontSize, int $textColor, int $shadowColor, string $weight = 'regular', int $shadowOffset = 2): void
+    {
+        // Add shadow first
+        $this->addText($text, $x + $shadowOffset, $y + $shadowOffset, $fontSize, $shadowColor, $weight);
+        
+        // Add main text on top
+        $this->addText($text, $x, $y, $fontSize, $textColor, $weight);
+    }
+    
+    /**
+     * Add text with a background for better readability
+     */
+    protected function addTextWithBackground(string $text, int $x, int $y, int $fontSize, int $textColor, int $bgColor, string $weight = 'regular', int $padding = 5): void
+    {
+        $fontPath = $this->getFontPath($weight);
+        $textWidth = $this->getTextWidth($text, $fontSize, $fontPath);
+        $textHeight = $this->getTextHeight($text, $fontSize, $fontPath);
+        
+        // Draw background rectangle
+        $bgX = $x - $padding;
+        $bgY = $y - $textHeight - $padding;
+        $bgWidth = $textWidth + ($padding * 2);
+        $bgHeight = $textHeight + ($padding * 2);
+        
+        imagefilledrectangle($this->im, $bgX, $bgY, $bgX + $bgWidth, $bgY + $bgHeight, $bgColor);
+        
+        // Add text on top
+        $this->addText($text, $x, $y, $fontSize, $textColor, $weight);
+    }
+    
+    /**
+     * Check if text contains RTL characters
+     */
+    protected function containsRTLCharacters(string $text): bool
+    {
+        // Check for Hebrew, Arabic, and other RTL characters
+        return preg_match('/[\x{0590}-\x{05FF}\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{08A0}-\x{08FF}\x{FB50}-\x{FDFF}\x{FE70}-\x{FEFF}]/u', $text);
+    }
+    
+    /**
+     * Get text direction for mixed content
+     */
+    protected function getTextDirection(string $text): string
+    {
+        if ($this->containsRTLCharacters($text)) {
+            return 'rtl';
+        }
+        return 'ltr';
+    }
+    
+    /**
+     * Reverse text for RTL display
+     */
+    protected function reverseText(string $text): string
+    {
+        // Split by words and reverse order for RTL
+        $words = explode(' ', $text);
+        return implode(' ', array_reverse($words));
+    }
+
+    /**
+     * Check if text contains mixed content (Hebrew/Arabic + English)
+     */
+    protected function containsMixedContent(string $text): bool
+    {
+        $hasRTL = $this->containsRTLCharacters($text);
+        $hasLTR = preg_match('/[a-zA-Z]/', $text);
+        
+        return $hasRTL && $hasLTR;
+    }
+    
+    /**
+     * Add text with mixed content using appropriate fonts for each part
+     */
+    protected function addMixedContentText(string $text, int $x, int $y, int $fontSize, int $color, string $weight, bool $isRtl): void
+    {
+        // Split text into segments by language using enhanced segmentation
+        $segments = $this->splitTextByLanguageEnhanced($text);
+        
+        // Calculate total width for proper positioning
+        $totalWidth = $this->calculateMixedTextWidth($segments, $fontSize, $weight);
+        
+        // Determine starting position based on first character's RTL status
+        $firstCharRTL = $this->isRTLCharacter($text[0] ?? '');
+        if ($firstCharRTL) {
+            $currentX = $x - $totalWidth;
+        } else {
+            $currentX = $x;
+        }
+        
+        foreach ($segments as $segment) {
+            $segmentText = $segment['text'];
+            $segmentLang = $segment['language'];
+            $segmentRTL = $segment['rtl'];
+            
+            // Get appropriate font for this segment based on content
+            $fontPath = $this->getFontPathForLanguage($segmentLang, $weight);
+            
+            // Calculate segment width
+            $segmentWidth = $this->getTextWidth($segmentText, $fontSize, $fontPath);
+            
+            if (file_exists($fontPath) && is_readable($fontPath) && function_exists('imagettftext')) {
+                // Use TTF font for this segment
+                $this->addTextWithTTF($segmentText, $currentX, $y, $fontSize, $color, $fontPath, $segmentRTL);
+            } else {
+                // Fallback to GD fonts
+                $this->addTextWithGDFonts($segmentText, $currentX, $y, $fontSize, $color, $segmentRTL);
+            }
+            
+            // Move to next position
+            $currentX += $segmentWidth;
+        }
+    }
+    
+    /**
+     * Calculate total width of mixed content text
+     */
+    protected function calculateMixedTextWidth(array $segments, int $fontSize, string $weight): int
+    {
+        $totalWidth = 0;
+        
+        foreach ($segments as $segment) {
+            $fontPath = $this->getFontPathForLanguage($segment['language'], $weight);
+            $segmentWidth = $this->getTextWidth($segment['text'], $fontSize, $fontPath);
+            $totalWidth += $segmentWidth;
+        }
+        
+        return $totalWidth;
+    }
+    
+    /**
+     * Split text into segments by language
+     */
+    protected function splitTextByLanguage(string $text): array
+    {
+        $segments = [];
+        $currentSegment = '';
+        $currentLang = null;
+        $currentRTL = null;
+        
+        $chars = mb_str_split($text);
+        
+        foreach ($chars as $char) {
+            $charLang = $this->getCharacterLanguage($char);
+            $charRTL = $this->isRTLCharacter($char);
+            
+            // If language changes, save current segment and start new one
+            if ($currentLang !== $charLang) {
+                if (!empty($currentSegment)) {
+                    $segments[] = [
+                        'text' => $currentSegment,
+                        'language' => $currentLang,
+                        'rtl' => $currentRTL
+                    ];
+                }
+                
+                $currentSegment = $char;
+                $currentLang = $charLang;
+                $currentRTL = $charRTL;
+            } else {
+                $currentSegment .= $char;
+            }
+        }
+        
+        // Add the last segment
+        if (!empty($currentSegment)) {
+            $segments[] = [
+                'text' => $currentSegment,
+                'language' => $currentLang,
+                'rtl' => $currentRTL
+            ];
+        }
+        
+        return $segments;
+    }
+    
+    /**
+     * Enhanced text segmentation that handles common mixed content patterns
+     */
+    protected function splitTextByLanguageEnhanced(string $text): array
+    {
+        // Handle common patterns first
+        $patterns = [
+            // Hebrew + English pattern: "אירוע מוזיקה Evening Music"
+            '/([\x{0590}-\x{05FF}\s]+)([a-zA-Z\s]+)/u' => ['he', 'en'],
+            // Arabic + English pattern: "مهرجان الموسيقى Music Festival"
+            '/([\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{08A0}-\x{08FF}\x{FB50}-\x{FDFF}\x{FE70}-\x{FEFF}\s]+)([a-zA-Z\s]+)/u' => ['ar', 'en'],
+            // English + Hebrew pattern: "Music Event אירוע מוזיקה"
+            '/([a-zA-Z\s]+)([\x{0590}-\x{05FF}\s]+)/u' => ['en', 'he'],
+            // English + Arabic pattern: "Music Festival مهرجان الموسيقى"
+            '/([a-zA-Z\s]+)([\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{08A0}-\x{08FF}\x{FB50}-\x{FDFF}\x{FE70}-\x{FEFF}\s]+)/u' => ['en', 'ar']
+        ];
+        
+        foreach ($patterns as $pattern => $languages) {
+            if (preg_match($pattern, $text, $matches)) {
+                $segments = [];
+                
+                // Add first language segment
+                if (!empty(trim($matches[1]))) {
+                    $segments[] = [
+                        'text' => trim($matches[1]),
+                        'language' => $languages[0],
+                        'rtl' => in_array($languages[0], ['he', 'ar'])
+                    ];
+                }
+                
+                // Add second language segment
+                if (!empty(trim($matches[2]))) {
+                    $segments[] = [
+                        'text' => trim($matches[2]),
+                        'language' => $languages[1],
+                        'rtl' => in_array($languages[1], ['he', 'ar'])
+                    ];
+                }
+                
+                return $segments;
+            }
+        }
+        
+        // If no patterns match, fall back to character-by-character segmentation
+        return $this->splitTextByLanguage($text);
+    }
+    
+    /**
+     * Get the language of a character
+     */
+    protected function getCharacterLanguage(string $char): string
+    {
+        if ($this->isHebrewCharacter($char)) {
+            return 'he';
+        } elseif ($this->isArabicCharacter($char)) {
+            return 'ar';
+        } else {
+            return 'en';
+        }
+    }
+    
+    /**
+     * Check if character is Hebrew
+     */
+    protected function isHebrewCharacter(string $char): bool
+    {
+        return preg_match('/[\x{0590}-\x{05FF}]/u', $char);
+    }
+    
+    /**
+     * Check if character is Arabic
+     */
+    protected function isArabicCharacter(string $char): bool
+    {
+        return preg_match('/[\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{08A0}-\x{08FF}\x{FB50}-\x{FDFF}\x{FE70}-\x{FEFF}]/u', $char);
+    }
+    
+    /**
+     * Check if character is RTL
+     */
+    protected function isRTLCharacter(string $char): bool
+    {
+        return $this->isHebrewCharacter($char) || $this->isArabicCharacter($char);
+    }
+    
+    /**
+     * Get font path for a specific language
+     */
+    protected function getFontPathForLanguage(string $lang, string $weight): string
+    {
+        if (isset($this->fonts[$lang][$weight])) {
+            return $this->fonts[$lang][$weight];
+        }
+        
+        // Fallback to regular weight
+        if (isset($this->fonts[$lang]['regular'])) {
+            return $this->fonts[$lang]['regular'];
+        }
+        
+        // Fallback to English fonts
+        if (isset($this->fonts['en'][$weight])) {
+            return $this->fonts['en'][$weight];
+        }
+        
+        // Final fallback
+        return $this->fonts['en']['regular'];
+    }
+
+    /**
+     * Get the language of the text content (not the role language)
+     */
+    protected function getTextLanguage(string $text): string
+    {
+        if ($this->containsHebrewCharacters($text)) {
+            return 'he';
+        } elseif ($this->containsArabicCharacters($text)) {
+            return 'ar';
+        } else {
+            return 'en';
+        }
+    }
+    
+    /**
+     * Check if text contains Hebrew characters
+     */
+    protected function containsHebrewCharacters(string $text): bool
+    {
+        return preg_match('/[\x{0590}-\x{05FF}]/u', $text);
+    }
+    
+    /**
+     * Check if text contains Arabic characters
+     */
+    protected function containsArabicCharacters(string $text): bool
+    {
+        return preg_match('/[\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{08A0}-\x{08FF}\x{FB50}-\x{FDFF}\x{FE70}-\x{FEFF}]/u', $text);
     }
 }
