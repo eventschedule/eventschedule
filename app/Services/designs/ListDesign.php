@@ -391,16 +391,16 @@ class ListDesign extends AbstractEventDesign
         // Add accent border
         imagerectangle($tempImage, 0, 0, self::FLYER_WIDTH, self::FLYER_HEIGHT, $borderColor);
         
-        // Add subtle shadow effect
-        $shadowColor = imagecolorallocatealpha($tempImage, 0, 0, 0, 40);
+        // Add subtle shadow effect - make it fully opaque for better readability
+        $shadowColor = imagecolorallocatealpha($tempImage, 0, 0, 0, 0); // Fully opaque black
         imagefilledrectangle($tempImage, 2, 2, self::FLYER_WIDTH + 2, self::FLYER_HEIGHT + 2, $shadowColor);
         
-        // Add a subtle accent color overlay in the top section
+        // Add a subtle accent color overlay in the top section - make it fully opaque
         $accentOverlay = imagecolorallocatealpha($tempImage, 
             imagecolorsforindex($tempImage, $this->c['accent'])['red'],
             imagecolorsforindex($tempImage, $this->c['accent'])['green'],
             imagecolorsforindex($tempImage, $this->c['accent'])['blue'],
-            30 // Very subtle
+            0 // Fully opaque
         );
         
         // Add accent bar at top
@@ -434,16 +434,16 @@ class ListDesign extends AbstractEventDesign
         // Add accent border
         imagerectangle($this->im, $x, $y, $x + self::FLYER_WIDTH, $y + self::FLYER_HEIGHT, $borderColor);
         
-        // Add subtle shadow effect
-        $shadowColor = imagecolorallocatealpha($this->im, 0, 0, 0, 40);
+        // Add subtle shadow effect - make it fully opaque for better readability
+        $shadowColor = imagecolorallocatealpha($this->im, 0, 0, 0, 0); // Fully opaque black
         imagefilledrectangle($this->im, $x + 2, $y + 2, $x + self::FLYER_WIDTH + 2, $y + self::FLYER_HEIGHT + 2, $shadowColor);
         
-        // Add a subtle accent color overlay in the top section
+        // Add a subtle accent color overlay in the top section - make it fully opaque
         $accentOverlay = imagecolorallocatealpha($this->im, 
             imagecolorsforindex($this->im, $this->c['accent'])['red'],
             imagecolorsforindex($this->im, $this->c['accent'])['green'],
             imagecolorsforindex($this->im, $this->c['accent'])['blue'],
-            30 // Very subtle
+            0 // Fully opaque
         );
         
         // Add accent bar at top
@@ -457,12 +457,12 @@ class ListDesign extends AbstractEventDesign
     {
         $accentColor = $this->c['accent'];
         
-        // Add a subtle pattern of small dots
+        // Add a subtle pattern of small dots - make them fully opaque for better visibility
         $dotColor = imagecolorallocatealpha($this->im, 
             imagecolorsforindex($this->im, $accentColor)['red'],
             imagecolorsforindex($this->im, $accentColor)['green'],
             imagecolorsforindex($this->im, $accentColor)['blue'],
-            60 // Semi-transparent
+            0 // Fully opaque
         );
         
         // Create a subtle dot pattern
@@ -484,12 +484,12 @@ class ListDesign extends AbstractEventDesign
     {
         $accentColor = $this->c['accent'];
         
-        // Add a subtle pattern of small dots
+        // Add a subtle pattern of small dots - make them fully opaque for better visibility
         $dotColor = imagecolorallocatealpha($image, 
             imagecolorsforindex($image, $accentColor)['red'],
             imagecolorsforindex($image, $accentColor)['green'],
             imagecolorsforindex($image, $accentColor)['blue'],
-            60 // Semi-transparent
+            0 // Fully opaque
         );
         
         // Create a subtle dot pattern

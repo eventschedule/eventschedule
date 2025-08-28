@@ -56,8 +56,8 @@ class GridDesign extends AbstractEventDesign
         // Get the event flyer image
         $this->addEventFlyerImage($event, $x, $y);
         
-        // Add event text overlay
-        $this->addEventTextOverlay($event, $x, $y);
+        // Remove text overlay - just show the flyers
+        // $this->addEventTextOverlay($event, $x, $y);
         
         // Add QR code to the bottom left corner of the flyer
         $this->addEventQRCode($event, $x, $y);
@@ -65,9 +65,13 @@ class GridDesign extends AbstractEventDesign
     
     /**
      * Add event text overlay to the flyer
+     * @deprecated Text overlay removed - flyers are shown without text
      */
     protected function addEventTextOverlay(Event $event, int $x, int $y): void
     {
+        // Text overlay functionality removed - just show flyers
+        return;
+        
         // Create a semi-transparent background for text readability
         $this->addTextBackground($x, $y);
         
@@ -92,9 +96,13 @@ class GridDesign extends AbstractEventDesign
     
     /**
      * Add a semi-transparent background for text readability
+     * @deprecated Text background removed - flyers are shown without text
      */
     protected function addTextBackground(int $x, int $y): void
     {
+        // Text background functionality removed
+        return;
+        
         $bgHeight = 60;
         $bgY = $y + self::FLYER_HEIGHT - self::TEXT_BOTTOM_MARGIN;
         
