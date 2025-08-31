@@ -2,7 +2,7 @@
     <div class="max-w-7xl mx-auto">
 
         @if($role->profile_image_url)
-            <div class="flex justify-center pb-8">
+            <div class="flex justify-center pb-6">
                 <img src="{{ $role->profile_image_url }}" 
                         alt="{{ $role->translatedName() }}" 
                         class="w-24 h-24 rounded-lg object-cover shadow-lg">
@@ -98,12 +98,14 @@
             @endforeach
         </div>
 
-        <div class="text-center pt-8 pb-16">
-            <div class="flex items-center justify-center gap-4">
-                <p class="text-white text-xl font-bold">
-                    {{ \App\Utils\UrlUtils::clean($role->website) }}
-                </p>
+        @if($role->website)
+            <div class="text-center pt-8 pb-16">
+                <div class="flex items-center justify-center gap-4">
+                    <p class="text-white text-xl font-bold">
+                        {{ \App\Utils\UrlUtils::clean($role->website) }}
+                    </p>
+                </div>
             </div>
-        </div>
+        @endif
     </div>
 </div>
