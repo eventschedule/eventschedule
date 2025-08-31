@@ -245,8 +245,10 @@ class Event extends Model
         $role = false;
         $enable24 = false;
 
-        if ($subdomain) {
-            $role = Role::subdomain($subdomain)->first();
+        if ($subdomain) {            
+            $role = $this->roles->first(function($role) use ($subdomain) {
+                return $role->subdomain == $subdomain;
+            });
             $enable24 = $role->use_24_hour_time;
         }
                 
