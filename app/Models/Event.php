@@ -256,8 +256,16 @@ class Event extends Model
 
         $startAt = $this->getStartDateTime($date, true);
         
-        $format = $pretty ? ($enable24 ? 'l, F jS • H:i' : 'l, F jS • g:i A') : 'Y-m-d H:i:s';
-        $value = $startAt->format($format);
+        $format = $pretty ? ($enable24 ? 'D, M jS • H:i' : 'D, M jS • g:i A') : 'Y-m-d H:i:s';
+        
+        // Set locale for date translation if pretty is true and role has language_code
+        if ($pretty && $role && $role->language_code) {
+            $startAt->setLocale($role->language_code);
+            $localizedFormat = $enable24 ? 'l, j F • H:i' : 'l, j F • g:i A';
+            $value = $startAt->translatedFormat($localizedFormat);
+        } else {
+            $value = $startAt->format($format);
+        }
         
         if ($endTime && $this->duration > 0) {
             $startDate = $startAt->format('Y-m-d');
@@ -267,7 +275,12 @@ class Event extends Model
             if ($startDate == $endDate) {
                 $value .= ' ' . __('messages.to') . ' ' . $startAt->format($enable24 ? 'H:i' : 'g:i A');
             } else {
-                $value = $value . '<br/>' . __('messages.to') . '<br/>' . $startAt->format($format);
+                if ($pretty && $role && $role->language_code) {
+                    $localizedFormat = $enable24 ? 'l, j F • H:i' : 'l, j F • g:i A';
+                    $value = $value . '<br/>' . __('messages.to') . '<br/>' . $startAt->translatedFormat($localizedFormat);
+                } else {
+                    $value = $value . '<br/>' . __('messages.to') . '<br/>' . $startAt->format($format);
+                }
             }
         }
 
