@@ -28,8 +28,8 @@
                         
                         <!-- Venue and Date/Time -->
                         <p class="text-lg text-gray-700">
-                            {{ $event->venue_name ?? 'No venue specified' }} • 
-                            {{ $event->start_date ? $event->start_date->format('M j, Y g:i A') : 'Date TBD' }}
+                            {{ $event->getVenueDisplayName() ?? 'No venue specified' }} | 
+                            {{ $event->localStartsAt(true) }}
                         </p>
                     </div>
                 </div>
