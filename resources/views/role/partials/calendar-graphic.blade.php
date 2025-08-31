@@ -16,7 +16,7 @@
                     <!-- Event Image -->
                     <div class="w-80 h-64 overflow-hidden rounded-lg">
                         <img src="{{ $event->getImageUrl() }}" alt="{{ $event->translatedName() }}" 
-                             class="w-full h-full object-cover">
+                             class="w-full h-full object-contain">
                     </div>
                     
                     <!-- Event Details Panel -->
@@ -28,7 +28,10 @@
                         
                         <!-- Venue and Date/Time -->
                         <p class="text-lg text-gray-700">
-                            {{ $event->getVenueDisplayName() ?? 'No venue specified' }} | 
+                            {{ $event->getVenueDisplayName() ?? 'No venue specified' }}
+                        </p>
+                        
+                        <p class="text-lg text-gray-700 mt-1">
                             {{ $event->localStartsAt(true) }}
                         </p>
                     </div>
