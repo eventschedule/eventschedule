@@ -31,7 +31,7 @@
                             <!-- Gradient Overlay -->
                             <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                         </div>
-                        
+
                         <!-- Event Details Section -->
                         <div class="flex-1 p-8 flex flex-col justify-between min-w-0">
                             <!-- Event Info -->
@@ -43,6 +43,9 @@
                                         {{ $event->translatedName() }}
                                     </h3>
                                 </div>
+
+                                <hr class="border-gray-200"/>
+                    
                                 
                                 <!-- Venue -->
                                 <div class="pt-1 flex items-center space-x-3 {{ is_rtl() ? 'space-x-reverse' : '' }}">
