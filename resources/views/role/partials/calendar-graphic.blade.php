@@ -14,7 +14,7 @@
             @foreach($displayEvents as $index => $event)
                 <div class="flex {{ is_rtl() ? 'flex-row-reverse' : 'flex-row' }} gap-6">
                     <!-- Event Image -->
-                    <div class="w-40 h-40 overflow-hidden">
+                    <div class="w-40 h-40">
                         <img src="{{ $event->getImageUrl() }}" alt="{{ $event->translatedName() }}" 
                              class="w-full h-full object-contain object-center">
                     </div>
@@ -24,19 +24,36 @@
                         <!-- Event Name - Limited to 1 line -->
                         <h3 class="text-2xl font-bold text-gray-900 truncate" title="{{ $event->translatedName() }}">
                             {{ $event->translatedName() }}
-                        </h3>
-                        
-                        <!-- Venue and Date/Time -->
+                        </h3>                        
+                
                         <p class="text-lg text-gray-700 mt-2">
                             {{ $event->getVenueDisplayName() ?? 'No venue specified' }}
                         </p>
                         
                         <p class="text-lg text-gray-700 mt-1">
                             {{ $event->localStartsAt(true) }}
-                        </p>
+                        </p>                        
                     </div>
 
+                    <div class="w-40 h-40">
+                        @php
+                            $qrCode = Endroid\QrCode\QrCode::create($event->getGuestUrl($role->subdomain))
+                                ->setSize(200)
+                                ->setMargin(10);
 
+                            $writer = new Endroid\QrCode\Writer\PngWriter();
+                            $result = $writer->write($qrCode);
+                            
+                            // Convert to base64 data URI for display in img tag
+                            $base64 = base64_encode($result->getString());
+                            $mimeType = $result->getMimeType();
+                            $dataUri = "data:{$mimeType};base64,{$base64}";
+                        @endphp
+
+                        
+                        <img src="{{ $dataUri }}" alt="QR Code for {{ $event->title }}" 
+                            class="w-full h-full object-contain object-center">                                            
+                    </div>
                 </div>
             @endforeach
         </div>
