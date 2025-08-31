@@ -11,7 +11,7 @@
             @endphp
 
             @foreach($displayEvents as $index => $event)
-                <div class="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-[1.02] transition-all duration-300 hover:shadow-2xl">
+                <div class="bg-white rounded-lg shadow-xl overflow-hidden transform hover:scale-[1.02] transition-all duration-300 hover:shadow-2xl">
                     <div class="flex {{ is_rtl() ? 'flex-row-reverse' : 'flex-row' }} min-h-0">
                         
                         <!-- Event Image Section -->
