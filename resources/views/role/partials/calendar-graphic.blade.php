@@ -44,9 +44,6 @@
                                     </h3>
                                 </div>
 
-                                <hr class="border-gray-200"/>
-                    
-                                
                                 <!-- Venue -->
                                 <div class="pt-1 flex items-center space-x-3 {{ is_rtl() ? 'space-x-reverse' : '' }}">
                                     <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
