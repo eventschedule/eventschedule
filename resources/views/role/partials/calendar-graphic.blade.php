@@ -14,9 +14,9 @@
             @foreach($displayEvents as $index => $event)
                 <div class="flex {{ is_rtl() ? 'flex-row-reverse' : 'flex-row' }} gap-6">
                     <!-- Event Image -->
-                    <div class="w-40 h-40 overflow-hidden rounded-lg">
+                    <div class="w-40 h-40 overflow-hidden">
                         <img src="{{ $event->getImageUrl() }}" alt="{{ $event->translatedName() }}" 
-                             class="w-full h-full object-contain">
+                             class="w-full h-full object-contain object-center">
                     </div>
                     
                     <!-- Event Details Panel -->
@@ -36,7 +36,7 @@
                         </p>
                     </div>
 
-                    
+
                 </div>
             @endforeach
         </div>
