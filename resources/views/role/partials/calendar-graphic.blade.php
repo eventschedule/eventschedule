@@ -13,8 +13,9 @@
             @foreach($displayEvents as $index => $event)
                 <div class="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-[1.02] transition-all duration-300 hover:shadow-2xl">
                     <div class="flex {{ is_rtl() ? 'flex-row-reverse' : 'flex-row' }} min-h-0">
+                        
                         <!-- Event Image Section -->
-                        <div class="w-64 h-64 flex-shrink-0 relative overflow-hidden">
+                        <div class="w-52 h-52 flex-shrink-0 relative overflow-hidden">
                             <img src="{{ $event->getImageUrl() }}" 
                                  alt="{{ $event->translatedName() }}" 
                                  class="w-full h-full object-cover object-center">
@@ -28,7 +29,7 @@
                             <div class="space-y-4">
                                 <!-- Event Name -->
                                 <div>
-                                    <h3 class="text-3xl font-bold text-gray-900 leading-tight" 
+                                    <h3 class="text-3xl font-bold text-gray-900 leading-tight truncate" 
                                         title="{{ $event->translatedName() }}">
                                         {{ $event->translatedName() }}
                                     </h3>
@@ -43,7 +44,7 @@
                                         </svg>
                                     </div>
                                     <p class="text-lg text-gray-700 font-medium">
-                                        {{ $event->getVenueDisplayName() ?? 'No venue specified' }}
+                                        {{ $event->getVenueDisplayName() }}
                                     </p>
                                 </div>
                                 
