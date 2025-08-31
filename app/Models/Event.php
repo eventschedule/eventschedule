@@ -241,12 +241,17 @@ class Event extends Model
             return '';
         }
 
+        $subdomain = request()->subdomain;
+        $role = false;
         $enable24 = false;
 
+        if ($subdomain) {
+            $role = Role::subdomain($subdomain)->first();
+            $enable24 = $role->use_24_hour_time;
+        }
+                
         if ($user = auth()->user()) {
-            //    
-        } else if ($this->venue) {
-            $enable24 = $this->venue->use_24_hour_time;
+            // TODO once we track on user
         }
 
         $startAt = $this->getStartDateTime($date, true);
