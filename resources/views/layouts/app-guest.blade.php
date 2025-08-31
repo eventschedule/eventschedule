@@ -106,7 +106,6 @@
                     @endif
                     background-size: cover;
                     background-position: center;
-                    background-repeat: no-repeat;
                     height: 100%;
                     margin: 0;
                 @endif
@@ -119,11 +118,10 @@
                     @if ($role->background_image)
                         background-image: url("{{ asset('images/backgrounds/' . $role->background_image . '.png') }}");
                     @else
-                        background-image: url("{{ $role->background_image_url }}");
+                        background-image: url("{{ $role->background_image_url }}");                    
                     @endif
                     background-size: cover;
                     background-position: center;
-                    background-repeat: no-repeat;
                     height: 100%;
                     margin: 0;
                 @endif
