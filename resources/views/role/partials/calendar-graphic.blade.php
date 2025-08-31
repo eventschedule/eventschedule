@@ -1,7 +1,7 @@
 <div class="min-h-screen p-8">
     <div class="max-w-7xl mx-auto">
         <!-- Events Grid -->
-        <div class="grid gap-8 mb-12">
+        <div class="grid gap-5">
             @php
                 // Filter out events without flyers/images
                 $eventsWithFlyers = collect($events)->filter(function($event) {
@@ -28,7 +28,7 @@
                             <!-- Event Info -->
                             <div class="space-y-4">
                                 <!-- Event Name -->
-                                <div>
+                                <div class="pt-1">
                                     <h3 class="text-3xl font-bold text-gray-900 leading-tight truncate" 
                                         title="{{ $event->translatedName() }}">
                                         {{ $event->translatedName() }}
@@ -36,7 +36,7 @@
                                 </div>
                                 
                                 <!-- Venue -->
-                                <div class="flex items-center space-x-3 {{ is_rtl() ? 'space-x-reverse' : '' }}">
+                                <div class="pt-1 flex items-center space-x-3 {{ is_rtl() ? 'space-x-reverse' : '' }}">
                                     <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                                         <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
@@ -63,7 +63,7 @@
                         </div>
 
                         <!-- QR Code Section -->
-                        <div class="w-48 h-48 flex-shrink-0 p-6 bg-gray-50 flex items-center justify-center">
+                        <div class="w-42 h-52 flex-shrink-0 p-6 bg-gray-50 flex items-center justify-center">
                             @php
                                 $qrCode = Endroid\QrCode\QrCode::create($event->getGuestUrl($role->subdomain))
                                     ->setSize(200)
