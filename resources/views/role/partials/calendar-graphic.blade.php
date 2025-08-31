@@ -20,14 +20,14 @@
                     </div>
                     
                     <!-- Event Details Panel -->
-                    <div class="flex-1 bg-white border border-gray-200 rounded-lg p-6">
+                    <div class="flex-1 bg-white border border-gray-200 rounded-lg p-6 min-w-0">
                         <!-- Event Name - Limited to 1 line -->
-                        <h3 class="text-2xl font-bold text-gray-900 mb-3 truncate" title="{{ $event->translatedName() }}">
+                        <h3 class="text-2xl font-bold text-gray-900 truncate" title="{{ $event->translatedName() }}">
                             {{ $event->translatedName() }}
                         </h3>
                         
                         <!-- Venue and Date/Time -->
-                        <p class="text-lg text-gray-700">
+                        <p class="text-lg text-gray-700 mt-2">
                             {{ $event->getVenueDisplayName() ?? 'No venue specified' }}
                         </p>
                         
