@@ -209,13 +209,7 @@ class RoleController extends Controller
             return redirect(config('app.url'), );
         }
 
-        if ($request->tid) {
-            $translation = EventRole::where('id', UrlUtils::decodeId($request->tid))->firstOrFail();
-            // Validate the language code from database before setting it
-            if (is_valid_language_code($translation->role->language_code)) {
-                app()->setLocale($translation->role->language_code);
-            }
-        } else if ($request->lang) {
+        if ($request->lang) {
             // Validate the language code before setting it
             if (is_valid_language_code($request->lang)) {
                 app()->setLocale($request->lang);
