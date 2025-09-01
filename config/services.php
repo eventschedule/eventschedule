@@ -51,4 +51,8 @@ return [
         'api_key' => env('INVOICENINJA_API_KEY'),
     ],
 
+    'capturekit' => [
+        'key' => env('CAPTURE_KIT_ACCESS_KEY'),
+    ],
+
 ];

@@ -65,7 +65,7 @@
         @else
 
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                <a href="https://invoiceninja.com/partner-perks/event-schedule" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">
+                <a href="https://invoiceninja.com/partner-perks/event-schedule/" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">
                     {{ __('messages.invoiceninja_offer') }}
                 </a>  
             </p>
