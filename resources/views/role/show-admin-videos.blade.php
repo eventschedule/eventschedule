@@ -95,9 +95,6 @@
                             
                             <div v-if="role.selectedVideos && role.selectedVideos.length > 0" class="mt-4">
                                 <div class="flex items-center justify-between">
-                                    <div class="text-sm text-gray-600">
-                                        {{ __('messages.selected_videos') }}: @{{ role.selectedVideos.length }}/2
-                                    </div>
                                     <div class="flex items-center space-x-3">
                                         <button @click="skipRole(role)" 
                                                 class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
@@ -201,10 +198,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     if (data.success && data.videos) {
                         role.videos = data.videos;
-                        // Auto-select the first two videos
-                        if (data.videos.length >= 2) {
-                            role.selectedVideos = data.videos.slice(0, 2);
-                        } else if (data.videos.length === 1) {
+                                                // Auto-select the first video
+                        if (data.videos.length >= 1) {
                             role.selectedVideos = [data.videos[0]];
                         }
                     } else {
@@ -233,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     role.selectedVideos.splice(index, 1);
                 } else {
                     // Add video if not already selected and under limit
-                    if (role.selectedVideos.length < 2) {
+                    if (role.selectedVideos.length < 1) {
                         role.selectedVideos.push(video);
                     }
                 }
