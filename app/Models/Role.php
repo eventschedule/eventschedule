@@ -57,6 +57,8 @@ class Role extends Model implements MustVerifyEmail
         'show_email',
         'require_approval',
         'import_config',
+        'custom_domain',
+        'event_layout',
     ];
 
     /**
