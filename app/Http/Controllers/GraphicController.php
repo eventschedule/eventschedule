@@ -13,8 +13,8 @@ class GraphicController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        //$layout = $request->get('layout', 'grid');
-        $layout = $request->get('layout', 'list');
+        $layout = $request->get('layout', 'grid');
+        //$layout = $request->get('layout', 'list');
         
         // Validate layout parameter
         if (!in_array($layout, ['grid', 'list'])) {
@@ -26,14 +26,9 @@ class GraphicController extends Controller
             ->whereHas('roles', function ($query) use ($role) {
                 $query->where('role_id', $role->id)->where('is_accepted', true);
             })
-            ->where('flyer_image_url', '!=', null)
-            /*
-            ->where(function ($query) {
-                $query->where('starts_at', '>=', now())
-                    ->orWhereNotNull('days_of_week');
-            })
-            */
             ->where('starts_at', '>=', now())
+            ->where('flyer_image_url', '!=', null)
+            ->where('days_of_week', '!=', null)
             ->orderBy('starts_at')
             ->limit(10)
             ->get();
