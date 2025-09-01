@@ -145,7 +145,7 @@
             <div class="flex flex-col sm:flex-row gap-4 items-center">
               @if($role->phone)
               <div              
-                class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] fill-[#33383C] hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-[#33383C]"
+                class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] dark:text-gray-300 fill-[#33383C] dark:fill-gray-300 hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-[#33383C] dark:sm:after:bg-gray-300"
               >
                 <svg
                   width="24"
@@ -164,7 +164,7 @@
               @endif
               @if($role->email && $role->show_email)
               <div
-                class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] fill-[#33383C] hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px]"
+                class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] dark:text-gray-300 fill-[#33383C] dark:fill-gray-300 hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-[#33383C] dark:sm:after:bg-gray-300"
               >
                 <svg
                   width="24"
@@ -185,7 +185,7 @@
               @endif
               @if($role->website)
               <div
-                class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] fill-[#33383C] hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px]"
+                class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] dark:text-gray-300 fill-[#33383C] dark:fill-gray-300 hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-[#33383C] dark:sm:after:bg-gray-300"
               >
                 <svg
                   width="24"
@@ -208,7 +208,7 @@
                     d="M12.0001 2C12.831 2 13.5708 2.36421 14.1793 2.92113C14.7849 3.47525 15.2966 4.24878 15.7104 5.16315C16.1267 6.08292 16.4501 7.15868 16.669 8.32612C16.8445 9.26194 16.9512 10.2485 16.9868 11.25H21.9724C21.5889 6.07745 17.2707 2 12.0001 2Z"
                   />
                   <path
-                    d="M16.669 15.6739C16.4501 16.8413 16.1267 17.9171 15.7104 18.8368C15.2966 19.7512 14.7849 20.5247 14.1793 21.0789C13.5708 21.6358 12.831 22 12.0001 22C17.2707 22 21.5889 17.9226 21.9724 12.75H16.9868C16.9512 13.7515 16.8445 14.7381 16.669 15.6739Z"
+                    d="M16.669 15.6739C16.4501 16.8413 16.1267 17.9171 15.7104 18.8368C15.2966 19.7512 14.7849 20.5247 14.1793 21.0789C13.5708 21.6358 12.831 22 12.0001 22C17.2707 22 21.5889 17.9226 21.9724 12.75H16.9868C16.9512 13.6778 16.8445 14.7381 16.669 15.6739Z"
                   />
                 </svg>
                 <a href="{{ $role->website }}" class="hover:underline text-sm" target="_blank">{{ App\Utils\UrlUtils::clean($role->website) }}</a>
@@ -216,7 +216,7 @@
               @endif
               @if($role->isVenue())
               <div
-                class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] fill-[#33383C] hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px]"
+                class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] dark:text-gray-300 fill-[#33383C] dark:fill-gray-300 hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-[#33383C] dark:sm:after:bg-gray-300"
               >
                 <svg
                   width="24"
