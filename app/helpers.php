@@ -91,6 +91,8 @@ if (!function_exists('is_rtl')) {
             return false;
         }
 
-        return in_array(auth()->user() ? auth()->user()->language_code : request()->lang, ['ar', 'he']);
+        $locale = app()->getLocale();
+
+        return in_array($locale, ['ar', 'he']);
     }
 }
