@@ -473,6 +473,15 @@
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                         </div>
 
+                        @if ($role->name_en)
+                        <div class="mb-6">
+                            <x-input-label for="name_en" :value="__('messages.name_en')" />
+                            <x-text-input id="name_en" name="name_en" type="text" class="mt-1 block w-full"
+                                :value="old('name_en', $role->name_en)" />
+                            <x-input-error class="mt-2" :messages="$errors->get('name_en')" />
+                        </div>
+                        @endif
+
                         <div class="mb-6">
                             <x-input-label for="description" :value="__('messages.description')" />
                             <textarea id="description" name="description"
