@@ -80,7 +80,7 @@ trait AccountSetupTrait
      */
     protected function createTestEventWithTickets(Browser $browser, string $talentName = 'Talent', string $venueName = 'Venue', string $eventName = 'Test Event'): void
     {
-        $browser->visit('/' . strtolower(str_replace(' ', '-', $talentName)) . '/add_event?date=' . date('Y-m-d', strtotime('+3 days')))
+        $browser->visit('/' . strtolower(str_replace(' ', '-', $talentName)) . '/add-event?date=' . date('Y-m-d', strtotime('+3 days')))
                 ->select('#selected_venue')
                 ->type('name', $eventName)
                 ->scrollIntoView('input[name="tickets_enabled"]')

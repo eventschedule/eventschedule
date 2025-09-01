@@ -724,6 +724,8 @@
                             </div>
                             -->
 
+                            
+
                             <div class="mb-6">
                                 <x-input-label :value="__('messages.background')" />
                                 <div class="mt-2 space-y-2">
