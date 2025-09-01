@@ -61,7 +61,7 @@
                         {{ __('messages.add_event') }}
                     </h2>
                     <h3 class="text-gray-700 dark:text-gray-300">
-                        {{ $role->name }}
+                        {{ $role->getDisplayName(true) }}
                     </h3>
                 </div>
 
