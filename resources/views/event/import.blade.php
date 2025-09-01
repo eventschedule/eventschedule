@@ -634,11 +634,16 @@
             
             canCreateAccount() {
                 // Always check event fields regardless of createAccount status
-                const eventFieldsValid = this.preview?.parsed?.every(event => 
-                    event.event_name?.trim() && 
-                    event.event_address?.trim() && 
-                    event.event_date_time
-                ) || false;
+                const eventFieldsValid = this.preview?.parsed?.every(event => {
+                    const hasName = event.event_name?.trim();
+                    const hasDate = event.event_date_time;
+                    
+                    // For address validation: if it's empty but there's a placeholder (city), consider it valid
+                    const hasAddress = event.event_address?.trim() || 
+                                     ({{ $role->isCurator() ? 'true' : 'false' }} && '{{ $role->city }}');
+                    
+                    return hasName && hasAddress && hasDate;
+                }) || false;
                 
                 // If createAccount is checked, also validate user fields
                 if (this.createAccount) {
