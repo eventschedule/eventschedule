@@ -98,11 +98,15 @@
             @endforeach
         </div>
 
-        @if($role->website)
+        @if($role->website || $role->custom_domain)
             <div class="text-center pt-8 pb-16">
                 <div class="flex items-center justify-center gap-4">
                     <p class="text-white text-xl font-bold">
-                        {{ \App\Utils\UrlUtils::clean($role->website) }}
+                        @if ($role->custom_domain)
+                            {{ \App\Utils\UrlUtils::clean($role->custom_domain) }}
+                        @else
+                            {{ \App\Utils\UrlUtils::clean($role->website) }}
+                        @endif
                     </p>
                 </div>
             </div>
