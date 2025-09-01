@@ -143,9 +143,18 @@
             </div>
             -->
             <div class="flex flex-col sm:flex-row gap-4 items-center">
+              @php
+                $contactItems = [];
+                if($role->phone) $contactItems[] = 'phone';
+                if($role->email && $role->show_email) $contactItems[] = 'email';
+                if($role->website) $contactItems[] = 'website';
+                if($role->isVenue()) $contactItems[] = 'venue';
+                $totalItems = count($contactItems);
+              @endphp
+              
               @if($role->phone)
               <div              
-                class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] dark:text-gray-300 fill-[#33383C] dark:fill-gray-300 hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-[#33383C] dark:sm:after:bg-gray-300"
+                class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] dark:text-gray-300 fill-[#33383C] dark:fill-gray-300 hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 {{ $totalItems > 1 ? 'sm:after:content-[\'\'] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-[#33383C] dark:sm:after:bg-gray-300' : '' }}"
               >
                 <svg
                   width="24"
@@ -164,7 +173,7 @@
               @endif
               @if($role->email && $role->show_email)
               <div
-                class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] dark:text-gray-300 fill-[#33383C] dark:fill-gray-300 hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-[#33383C] dark:sm:after:bg-gray-300"
+                class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] dark:text-gray-300 fill-[#33383C] dark:fill-gray-300 hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 {{ $totalItems > 2 ? 'sm:after:content-[\'\'] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-[#33383C] dark:sm:after:bg-gray-300' : '' }}"
               >
                 <svg
                   width="24"
@@ -185,7 +194,7 @@
               @endif
               @if($role->website)
               <div
-                class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] dark:text-gray-300 fill-[#33383C] dark:fill-gray-300 hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-[#33383C] dark:sm:after:bg-gray-300"
+                class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] dark:text-gray-300 fill-[#33383C] dark:fill-gray-300 hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 {{ $totalItems > 3 ? 'sm:after:content-[\'\'] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-[#33383C] dark:sm:after:bg-gray-300' : '' }}"
               >
                 <svg
                   width="24"
@@ -216,7 +225,7 @@
               @endif
               @if($role->isVenue())
               <div
-                class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] dark:text-gray-300 fill-[#33383C] dark:fill-gray-300 hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-[#33383C] dark:sm:after:bg-gray-300"
+                class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] dark:text-gray-300 fill-[#33383C] dark:fill-gray-300 hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4"
               >
                 <svg
                   width="24"
