@@ -88,6 +88,8 @@ class GraphicController extends Controller
         return response($imageData)
             ->header('Content-Type', 'image/png')
             ->header('Content-Disposition', "attachment; filename=\"{$filename}\"")
-            ->header('Cache-Control', 'public, max-age=3600');
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 }
