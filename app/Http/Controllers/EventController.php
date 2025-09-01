@@ -709,4 +709,18 @@ class EventController extends Controller
 
         return response()->json(['success' => true, 'filename' => $filename]);
     }
+
+    /**
+     * Clear the pending_request session and redirect back to the current URL
+     */
+    public function clearPendingRequest(Request $request)
+    {
+        // Clear the pending request session
+        session()->forget('pending_request');
+        
+        // Get the redirect URL from the form, or fall back to the current URL
+        $redirectUrl = $request->input('redirect_url', url()->current());
+        
+        return redirect($redirectUrl);
+    }
 }
