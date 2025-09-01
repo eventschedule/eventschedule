@@ -63,7 +63,7 @@ class GeneralTest extends DuskTestCase
                     ->assertSee('google.com');
 
             // Create/edit event
-            $browser->visit('/talent/add_event?date=' . date('Y-m-d'))
+            $browser->visit('/talent/add-event?date=' . date('Y-m-d'))
                     ->select('#selected_venue')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
@@ -71,7 +71,7 @@ class GeneralTest extends DuskTestCase
                     ->assertSee('Venue');
             
             // Create/edit event
-            $browser->visit('/venue/add_event?date=' . date('Y-m-d'))
+            $browser->visit('/venue/add-event?date=' . date('Y-m-d'))
                     ->select('#selected_member')
                     ->type('name', 'Venue Event')
                     ->scrollIntoView('button[type="submit"]')

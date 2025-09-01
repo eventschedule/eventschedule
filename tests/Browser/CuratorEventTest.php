@@ -57,13 +57,13 @@ class CuratorEventTest extends DuskTestCase
             $browser->visit('/curator1')
                     ->waitForText('Add Event', 5)
                     ->clickLink('Add Event')
-                    ->waitForLocation('/talent/add_event', 5);
+                    ->waitForLocation('/talent/add-event', 5);
             
             // Follow second curator
             $browser->visit('/curator2')
                     ->waitForText('Add Event', 5)
                     ->clickLink('Add Event')
-                    ->waitForLocation('/talent/add_event', 5);
+                    ->waitForLocation('/talent/add-event', 5);
 
             // Create an event that will be added to both curator roles
             $this->createEventForBothCurators($browser);
@@ -116,7 +116,7 @@ class CuratorEventTest extends DuskTestCase
     protected function createEventForBothCurators(Browser $browser): void
     {
         // Create an event and add it to both curators
-        $browser->visit('/talent/add_event?date=' . date('Y-m-d'))
+        $browser->visit('/talent/add-event?date=' . date('Y-m-d'))
                 ->select('#selected_venue')
                 ->type('duration', '2')
                 
