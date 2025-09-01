@@ -21,8 +21,7 @@
 
             @foreach($displayEvents as $index => $event)
                 <div class="bg-white rounded-lg shadow-xl overflow-hidden transform hover:scale-[1.02] transition-all duration-300 hover:shadow-2xl">
-                    <!-- <div class="flex {{ is_rtl() ? 'flex-row-reverse' : 'flex-row' }} min-h-0"> -->
-                    <div class="flex flex-row-reverse min-h-0">
+                    <div class="flex {{ is_rtl() ? 'flex-row' : 'flex-row-reverse' }} min-h-0">
 
                         <!-- Event Image Section -->
                         <div class="w-52 h-52 flex-shrink-0 relative overflow-hidden">
