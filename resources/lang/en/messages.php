@@ -567,4 +567,5 @@ return [
     'delete_schedule' => 'Delete Schedule',
     'import_events' => 'Import Events',
     'results_for' => 'Results for',
+    'name_en' => 'Name (English)',
 ];
