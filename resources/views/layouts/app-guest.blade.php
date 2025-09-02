@@ -199,7 +199,7 @@
     @if (! request()->embed && $role->showBranding())
     <footer class="bg-gray-800">
       <div
-        class="container mx-auto flex flex-row justify-center items-center py-8 px-5"
+        class="container mx-auto flex flex-row justify-center items-center py-5 px-5"
       >
         <p class="text-[#F5F9FE] text-base text-center">
             <!-- Per the AAL license, please do not remove the link to Event Schedule -->
