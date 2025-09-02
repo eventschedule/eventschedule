@@ -700,9 +700,8 @@
                         {{ __('messages.schedule_style') }}
                     </h2>
 
-                    <!--
                     <div class="mb-6">
-                        <x-input-label :value="__('messages.event_layout')" />
+                        <x-input-label :value="__('messages.layout')" />
                         <div class="mt-2 space-y-2">
                             @foreach(['calendar', 'list', 'grid'] as $layout)
                             <div class="flex items-center">
@@ -720,8 +719,8 @@
                         </div>
                         <x-input-error class="mt-2" :messages="$errors->get('event_layout')" />
                     </div>
-                    -->
-                    
+
+
                     <div class="flex flex-col xl:flex-row xl:gap-12">
                         <div class="w-full lg:w-1/2">
                             <!--
