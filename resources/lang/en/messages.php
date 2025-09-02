@@ -568,4 +568,8 @@ return [
     'import_events' => 'Import Events',
     'results_for' => 'Results for',
     'name_en' => 'Name (English)',
+    'layout' => 'Layout',
+    'calendar' => 'Calendar',
+    'grid' => 'Grid',
+    'list' => 'List',
 ];
