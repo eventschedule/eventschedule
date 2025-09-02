@@ -1,5 +1,16 @@
 <script src="{{ asset('js/vue.global.prod.js') }}"></script>
 
+<style>
+    #event-import-app {
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+    
+    #event-import-app.loaded {
+        opacity: 1;
+    }
+</style>
+
 <form method="post"
     action="{{ isset($isGuest) && $isGuest ? route('event.guest_import', ['subdomain' => $role->subdomain]) : route('event.import', ['subdomain' => $role->subdomain]) }}"
     enctype="multipart/form-data"
@@ -593,6 +604,10 @@
 
         mounted() {
             // Component is mounted and ready
+            // Show the form now that Vue.js has loaded
+            this.$nextTick(() => {
+                document.getElementById('event-import-app').classList.add('loaded');
+            });
         },
 
         computed: {
