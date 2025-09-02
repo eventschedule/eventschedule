@@ -703,7 +703,7 @@
                     <div class="mb-6">
                         <x-input-label :value="__('messages.layout')" />
                         <div class="mt-2 space-y-2">
-                            @foreach(['calendar', 'list', 'grid'] as $layout)
+                            @foreach(['calendar', 'list'] as $layout)
                             <div class="flex items-center">
                                 <input type="radio" 
                                     id="event_layout_{{ $layout }}" 
