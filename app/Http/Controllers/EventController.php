@@ -520,7 +520,9 @@ class EventController extends Controller
 
     public function showGuestImport(Request $request, $subdomain)
     {
-        session()->put('pending_request', $subdomain);
+        if (! auth()->check()) {
+            session()->put('pending_request', $subdomain);
+        }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
@@ -570,11 +572,6 @@ class EventController extends Controller
 
     public function guestParse(Request $request, $subdomain)
     {
-        // Check if there's a pending request in session
-        if (!session('pending_request') || session('pending_request') !== $subdomain) {
-            abort(404);
-        }
-
         $details = request()->input('event_details');
         $file = null;
 
@@ -619,10 +616,6 @@ class EventController extends Controller
 
     public function guestImport(Request $request, $subdomain)
     {
-        // Check if there's a pending request in session
-        if (!session('pending_request') || session('pending_request') !== $subdomain) {
-            abort(404);
-        }
         // Handle user creation if requested
         if ($request->input('create_account')) {
             $this->createAndLoginUser($request);
@@ -698,11 +691,6 @@ class EventController extends Controller
 
     public function guestUploadImage(Request $request, $subdomain)
     {
-        // Check if there's a pending request in session
-        if (!session('pending_request') || session('pending_request') !== $subdomain) {
-            abort(404);
-        }
-
         $file = $request->file('image');
         $filename = '/tmp/event_' . strtolower(Str::random(32)) . '.' . $file->getClientOriginalExtension();
         move_uploaded_file($file->getPathname(), $filename);

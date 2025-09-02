@@ -24,6 +24,7 @@ class HomeController extends Controller
     public function home(Request $request)
     {
         $subdomain = session('pending_follow');
+        
         if (! $subdomain) {
             $subdomain = session('pending_request');
         }
