@@ -116,36 +116,26 @@
                     background-color: {{ $role->background_color }} !important;
                 @elseif ($role->background == 'image')
                     @if ($role->background_image)
-                        background-image: url("{{ asset('images/backgrounds/' . $role->background_image . '.png') }}");
+                        background-image:
+                            @if (request()->graphic)
+                                linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
+                            @endif
+                        url("{{ asset('images/backgrounds/' . $role->background_image . '.png') }}");
                     @else
-                        background-image: url("{{ $role->background_image_url }}");                    
+                        background-image: 
+                            @if (request()->graphic)
+                                linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
+                            @endif
+                        url("{{ $role->background_image_url }}");
                     @endif
                     background-size: cover;
                     background-position: center;
                     height: 100%;
-                    margin: 0;
+                    margin: 0;            
                 @endif
             @endif
         }
 
-        @if (request()->graphic)
-            body::before {
-                content: '';
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(255, 255, 255, 0.5);
-                z-index: 1;
-                pointer-events: none;
-            }
-            body > * {
-                position: relative;
-                z-index: 2;
-            }
-        @endif
-        
         </style>
 
         {{ isset($head) ? $head : '' }}
