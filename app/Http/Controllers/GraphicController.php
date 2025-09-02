@@ -39,7 +39,7 @@ class GraphicController extends Controller
 
         if (config('services.capturekit.key') && (! config('app.hosted') || $role->id == 19)) {
             $url = $role->getGuestUrl($role->subdomain) . '?embed=true&graphic=true';
-            $url = 'https://api.capturekit.dev/capture?&access_key=' . config('services.capturekit.key') . '&full_page=true&url=' . urlencode($url);
+            $url = 'https://api.capturekit.dev/capture?&access_key=' . config('services.capturekit.key') . '&viewport_width=950&full_page=true&url=' . urlencode($url);
             
             $ch = curl_init();
             curl_setopt_array($ch, [
