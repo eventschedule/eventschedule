@@ -2,12 +2,11 @@
 
 <style>
     #event-import-app {
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out;
+        visibility: hidden;
     }
     
     #event-import-app.loaded {
-        opacity: 1;
+        visibility: visible;
     }
 </style>
 
