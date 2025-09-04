@@ -1247,15 +1247,25 @@
                         // Update the is_curated flag in the preview data
                         this.preview.parsed[idx].is_curated = true;
                         
-                        Toastify({
-                            text: '{{ __("messages.event_added_to_schedule") }}',
-                            duration: 3000,
-                            position: 'center',
-                            stopOnFocus: true,
-                            style: {
-                                background: '#4BB543',
+                        const eventUrl = data.event_url || this.preview.parsed[idx].event_url;
+                        
+                        // For guest users, redirect immediately without toast
+                        if ({{ isset($isGuest) && $isGuest ? 'true' : 'false' }}) {
+                            if (eventUrl) {
+                                window.location.href = eventUrl;
                             }
-                        }).showToast();
+                        } else {
+                            // For non-guest users, show toast and redirect after delay
+                            Toastify({
+                                text: '{{ __("messages.event_added_to_schedule") }}',
+                                duration: 3000,
+                                position: 'center',
+                                stopOnFocus: true,
+                                style: {
+                                    background: '#4BB543',
+                                }
+                            }).showToast();
+                        }
                     } else {
                         throw new Error(data.message || '{{ __("messages.error_adding_event") }}');
                     }
