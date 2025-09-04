@@ -191,7 +191,7 @@ class Role extends Model implements MustVerifyEmail
                     ->withTimestamps()
                     ->withPivot('level')
                     ->where('level', 'follower')
-                    ->orderBy('name');
+                    ->orderBy('pivot_created_at', 'desc');
     }    
 
     public function venueEvents()
