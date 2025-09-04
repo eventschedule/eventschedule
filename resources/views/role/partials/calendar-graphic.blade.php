@@ -99,9 +99,9 @@
         </div>
 
         @if($role->website || $role->custom_domain)
-            <div class="text-center pt-8">
+            <div class="text-center pt-10">
                 <div class="flex items-center justify-center gap-4">
-                    <p class="text-white text-xl font-bold">
+                    <p class="text-white text-2xl font-bold">
                         @if ($role->custom_domain)
                             {{ \App\Utils\UrlUtils::clean($role->custom_domain) }}
                         @else
