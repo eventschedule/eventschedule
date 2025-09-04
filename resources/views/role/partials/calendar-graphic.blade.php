@@ -13,10 +13,10 @@
         <div class="grid gap-5">
             @php
                 // Filter out events without flyers/images
-                $eventsWithFlyers = collect($events)->filter(function($event) {
-                    return $event->getImageUrl();
+                $displayEvents = collect($events)->filter(function($event) {
+                    return $event->getImageUrl() && $event->starts_at > now();
                 });
-                $displayEvents = $eventsWithFlyers->take(9);
+                $displayEvents = $displayEvents->take(9);
             @endphp
 
             @foreach($displayEvents as $index => $event)
