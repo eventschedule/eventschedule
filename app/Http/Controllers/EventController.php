@@ -481,23 +481,45 @@ class EventController extends Controller
 
     public function curate(Request $request, $subdomain, $hash)
     {
-        return redirect()->back()->with('error', __('messages.not_authorized'));
-
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-        $role->events()->attach($event->id);
+        
+        // Check if the user is authorized to curate events for this role
+        if ((!auth()->user() || !auth()->user()->isMember($subdomain)) && ! $role->acceptEventRequests()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('messages.not_authorized')
+                ], 403);
+            }
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        // Check if the event is already curated by this role
+        if ($role->events()->where('event_id', $event->id)->exists()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('messages.event_already_curated')
+                ], 400);
+            }
+            return redirect()->back()->with('error', __('messages.event_already_curated'));
+        }
+
+        // Add the event to the curator's schedule
+        $role->events()->attach($event->id, ['is_accepted' => auth()->user() && auth()->user()->isMember($subdomain) ? true : null]);
     
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => __('messages.curate_event'),
+                'message' => __('messages.event_added_to_schedule'),
                 'event_url' => $event->getGuestUrl($subdomain),
             ]);
         }
 
-        return back()->with('message', __('messages.curate_event'));
+        return back()->with('message', __('messages.event_added_to_schedule'));
     }
 
     public function uncurate(Request $request, $subdomain, $hash)
