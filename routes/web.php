@@ -37,6 +37,7 @@ if (config('app.hosted')) {
         Route::post('/guest-parse', [EventController::class, 'guestParse'])->name('event.guest_parse');
         Route::post('/guest-upload-image', [EventController::class, 'guestUploadImage'])->name('event.guest_upload_image');
         Route::get('/guest-search-youtube', [RoleController::class, 'guestSearchYouTube'])->name('role.guest_search_youtube');
+        Route::get('/curate-event/{hash}', [EventController::class, 'curate'])->name('event.curate');
         Route::post('/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
         Route::get('/checkout/success/{sale_id}/{date}', [TicketController::class, 'success'])->name('checkout.success');
         Route::get('/checkout/cancel/{sale_id}/{date}', [TicketController::class, 'cancel'])->name('checkout.cancel');
@@ -121,7 +122,6 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/team/add-member', [RoleController::class, 'createMember'])->name('role.create_member');
     Route::post('/{subdomain}/team/add-member', [RoleController::class, 'storeMember'])->name('role.store_member');
     Route::get('/{subdomain}/team/remove-member/{hash}', [RoleController::class, 'removeMember'])->name('role.remove_member');
-    Route::get('/{subdomain}/curate-event/{hash}', [EventController::class, 'curate'])->name('event.curate');
     Route::delete('/{subdomain}/uncurate-event/{hash}', [EventController::class, 'uncurate'])->name('event.uncurate');
     Route::get('/{subdomain}/import', [EventController::class, 'showImport'])->name('event.show_import');
     Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse');    
@@ -191,6 +191,7 @@ if (config('app.hosted')) {
     Route::post('/{subdomain}/guest-parse', [EventController::class, 'guestParse'])->name('event.guest_parse');
     Route::post('/{subdomain}/guest-upload-image', [EventController::class, 'guestUploadImage'])->name('event.guest_upload_image');
     Route::get('/{subdomain}/guest-search-youtube', [RoleController::class, 'guestSearchYouTube'])->name('role.guest_search_youtube');
+    Route::get('/{subdomain}/curate-event/{hash}', [EventController::class, 'curate'])->name('event.curate');
     Route::post('/{subdomain}/checkout', [TicketController::class, 'checkout'])->name('event.checkout');
     Route::get('/{subdomain}/checkout/success/{sale_id}', [TicketController::class, 'success'])->name('checkout.success');
     Route::get('/{subdomain}/checkout/cancel/{sale_id}', [TicketController::class, 'cancel'])->name('checkout.cancel');

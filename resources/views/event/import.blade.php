@@ -236,12 +236,34 @@
                     <div class="space-y-4">
                         <!-- Show matching event if found for this specific event -->
                         <div v-if="preview.parsed[idx].event_url" class="p-3 text-sm bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 rounded-md">
-                            {{ __('messages.similar_event_found') }} - 
-                            <a :href="preview.parsed[idx].event_url" 
-                                target="_blank" 
-                                class="underline hover:text-yellow-600 dark:hover:text-yellow-300">
-                                {{ __('messages.view_event') }}
-                            </a>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    {{ __('messages.similar_event_found') }} - 
+                                    <a :href="preview.parsed[idx].event_url" 
+                                        target="_blank" 
+                                        class="underline hover:text-yellow-600 dark:hover:text-yellow-300">
+                                        {{ __('messages.view_event') }}
+                                    </a>
+                                </div>
+                                <!-- Show Select button if event hasn't been added to curator schedule -->
+                                <button v-if="isCurator && !preview.parsed[idx].is_curated" 
+                                        @click="handleSelect(idx)" 
+                                        type="button" 
+                                        :disabled="savingEvents[idx]"
+                                        :class="['px-3 py-1 text-xs rounded-md transition-colors', 
+                                            savingEvents[idx]
+                                                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                                                : 'bg-green-500 text-white hover:bg-green-600']">
+                                    <span v-if="savingEvents[idx]" class="inline-flex items-center">
+                                        <svg class="animate-spin -ml-1 mr-1 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        {{ __('messages.selecting') }}
+                                    </span>
+                                    <span v-else>{{ __('messages.select') }}</span>
+                                </button>
+                            </div>
                         </div>
                         
                         <div>
@@ -589,7 +611,7 @@
                 dragStartTime: 0,
                 isDragActive: false,
                 showAllFields: false,
-                isCurator: {{ isset($isGuest) && $isGuest ? 'false' : ($role->isCurator() ? 'true' : 'false') }},
+                isCurator: {{ $role->isCurator() ? 'true' : 'false' }},
                 detailsImage: null,
                 detailsImageUrl: null,
                 currentRequestId: null,
@@ -1185,6 +1207,63 @@
                             background: '#4BB543',
                         }
                     }).showToast();
+                }
+            },
+
+            async handleSelect(idx) {
+                // Reset error state for this event
+                this.saveErrors[idx] = false;
+                // Set saving state for this event
+                this.savingEvents[idx] = true;
+                
+                if (!this.preview?.parsed?.[idx]?.event_url) {
+                    return;
+                }
+
+                const hash = this.preview.parsed[idx].event_id;
+
+                try {
+                    const url = @json(route('event.curate', ['subdomain' => $role->subdomain, 'hash' => '--hash--'])).replace('--hash--', hash);
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.savedEvents[idx] = true;
+                        this.savedEventData[idx] = {
+                            view_url: data.event_url || this.preview.parsed[idx].event_url,
+                            is_curated: true
+                        };
+                        
+                        // Update the is_curated flag in the preview data
+                        this.preview.parsed[idx].is_curated = true;
+                        
+                        Toastify({
+                            text: '{{ __("messages.event_added_to_schedule") }}',
+                            duration: 3000,
+                            position: 'center',
+                            stopOnFocus: true,
+                            style: {
+                                background: '#4BB543',
+                            }
+                        }).showToast();
+                    } else {
+                        throw new Error(data.message || '{{ __("messages.error_adding_event") }}');
+                    }
+                } catch (error) {
+                    console.error('Error selecting event:', error);
+                    this.errorMessage = error.message || '{{ __("messages.error_adding_event") }}';
+                    // Set error state for this event
+                    this.saveErrors[idx] = error.message || '{{ __("messages.error_adding_event") }}';
+                } finally {
+                    // Clear saving state for this event
+                    this.savingEvents[idx] = false;
                 }
             },
 
