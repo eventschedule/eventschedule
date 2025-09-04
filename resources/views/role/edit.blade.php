@@ -1159,12 +1159,14 @@
                             <x-input-error class="mt-2" :messages="$errors->get('import_cities')" />
                         </div>
 
+                        @if ($role->exists)
                         <div class="mb-6">
                             <x-secondary-button onclick="testImport()" type="button">
                                 {{ __('messages.test_import') }}
                             </x-secondary-button>
                         </div>
-
+                        @endif
+                        
                     </div>
                 </div>                    
             </div>            
