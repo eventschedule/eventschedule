@@ -283,7 +283,7 @@
                         </div>
 
                         <!-- Account creation checkbox for guest users -->
-                        @if (isset($isGuest) && $isGuest)
+                        @if (isset($isGuest) && $isGuest && ! auth()->check())
                         <div class="flex items-center">
                             <input type="checkbox" 
                                     id="create_account_@{{ idx }}" 
