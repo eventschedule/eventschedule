@@ -142,8 +142,7 @@
               </div>
             </div>
             -->
-            <div class="flex flex-col sm:flex-row gap-4 items-center">
-              @php
+            @php
                 $contactItems = [];
                 if($role->phone) $contactItems[] = 'phone';
                 if($role->email && $role->show_email) $contactItems[] = 'email';
@@ -151,6 +150,9 @@
                 if($role->isVenue()) $contactItems[] = 'venue';
                 $totalItems = count($contactItems);
               @endphp
+
+            @if($totalItems > 0)
+            <div class="flex flex-col sm:flex-row gap-4 pb-4 items-center">
               
               @if($role->phone)
               <div              
@@ -247,6 +249,7 @@
               </div>
               @endif
             </div>
+            @endif
           </div>
         </div>
 
