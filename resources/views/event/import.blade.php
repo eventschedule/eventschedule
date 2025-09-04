@@ -238,31 +238,34 @@
                         <div v-if="preview.parsed[idx].event_url" class="p-3 text-sm bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 rounded-md">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    {{ __('messages.similar_event_found') }} - 
+                                    {{ __('messages.similar_event_found') }}
+                                </div>
+                                <div class="flex gap-2">
+                                    <!-- View button -->
                                     <a :href="preview.parsed[idx].event_url" 
                                         target="_blank" 
-                                        class="underline hover:text-yellow-600 dark:hover:text-yellow-300">
-                                        {{ __('messages.view_event') }}
+                                        class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                        {{ __('messages.view') }}
                                     </a>
+                                    <!-- Show Select button if event hasn't been added to curator schedule -->
+                                    <button v-if="isCurator && !preview.parsed[idx].is_curated" 
+                                            @click="handleSelect(idx)" 
+                                            type="button" 
+                                            :disabled="savingEvents[idx]"
+                                            :class="['px-4 py-2 rounded-md transition-colors', 
+                                                savingEvents[idx]
+                                                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                                                    : 'bg-green-500 text-white hover:bg-green-600']">
+                                        <span v-if="savingEvents[idx]" class="inline-flex items-center">
+                                            <svg class="animate-spin -ml-1 mr-1 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            {{ __('messages.selecting') }}
+                                        </span>
+                                        <span v-else>{{ __('messages.select') }}</span>
+                                    </button>
                                 </div>
-                                <!-- Show Select button if event hasn't been added to curator schedule -->
-                                <button v-if="isCurator && !preview.parsed[idx].is_curated" 
-                                        @click="handleSelect(idx)" 
-                                        type="button" 
-                                        :disabled="savingEvents[idx]"
-                                        :class="['px-3 py-1 text-xs rounded-md transition-colors', 
-                                            savingEvents[idx]
-                                                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-                                                : 'bg-green-500 text-white hover:bg-green-600']">
-                                    <span v-if="savingEvents[idx]" class="inline-flex items-center">
-                                        <svg class="animate-spin -ml-1 mr-1 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        {{ __('messages.selecting') }}
-                                    </span>
-                                    <span v-else>{{ __('messages.select') }}</span>
-                                </button>
                             </div>
                         </div>
                         
