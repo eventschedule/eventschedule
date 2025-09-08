@@ -355,7 +355,7 @@ class GeminiUtils
         }
 
         foreach ($data as $key => $item) {
-            if ($imageData && empty($data[$key]['social_image']) && count($data) == 1) {
+            if ($imageData && empty($data[$key]['social_image'])) {
                 $data[$key]['social_image'] = $filename;
             }
 
