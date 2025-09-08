@@ -52,9 +52,6 @@
                                     {{ __('messages.name') }}
                                 </th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                    {{ __('messages.email') }}
-                                </th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                     {{ __('messages.date') }}
                                 </th>
                             </tr>
@@ -64,9 +61,6 @@
                             <tr class="bg-white hover:bg-gray-50 transition-colors duration-150">
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                                     {{ $follower->name }}
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    <a href="mailto:{{ $follower->email }}">{{ $follower->email }}</a>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     {{ $follower->pivot->created_at->format($role->use_24_hour_time ? 'M jS, Y • g:i' : 'M jS, Y • h:i A') }}
