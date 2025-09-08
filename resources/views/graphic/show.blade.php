@@ -25,12 +25,29 @@
             function downloadImage() {
                 if (!graphicData) return;
                 
-                const link = document.createElement('a');
-                link.href = graphicData.download_url;
-                link.download = '{{ $role->subdomain }}-upcoming-events.png';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                // Get the base64 image data from the loaded image
+                const img = document.getElementById('graphicImage');
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Set canvas dimensions to match image
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                
+                // Draw the image onto the canvas
+                ctx.drawImage(img, 0, 0);
+                
+                // Convert canvas to blob and download
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = '{{ $role->subdomain }}-upcoming-events.png';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                }, 'image/png');
             }
             
             function loadGraphic() {
