@@ -576,4 +576,12 @@ return [
     'calendar' => 'Calendar',
     'grid' => 'Grid',
     'list' => 'List',
+    'copy_image' => 'Copy Image',
+    'download_image' => 'Download Image',
+    'copy_text' => 'Copy Text',
+    'copied' => 'Copied!',
+    'copy_failed' => 'Failed to copy to clipboard',
+    'generating_graphic' => 'Generating graphic',
+    'error_loading_graphic' => 'Error loading graphic',
+    'error' => 'Error',
 ];

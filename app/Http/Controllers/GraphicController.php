@@ -12,9 +12,64 @@ class GraphicController extends Controller
     public function generateGraphic(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
+        $layout = $request->get('layout', 'grid');
+        
+        // Validate layout parameter
+        if (!in_array($layout, ['grid', 'list'])) {
+            $layout = 'grid';
+        }
+
+        return view('graphic.show', compact('role', 'layout'));
+    }
+    
+    public function generateGraphicData(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $layout = $request->get('layout', 'grid');
+        
+        // Validate layout parameter
+        if (!in_array($layout, ['grid', 'list'])) {
+            $layout = 'grid';
+        }
+
+        // Get the next 10 events
+        $events = Event::with('roles')
+            ->whereHas('roles', function ($query) use ($role) {
+                $query->where('role_id', $role->id)->where('is_accepted', true);
+            })
+            ->where('starts_at', '>=', now())
+            ->where('flyer_image_url', '!=', null)
+            ->whereNull('days_of_week')
+            ->orderBy('starts_at')
+            ->limit(10)
+            ->get();
+
+        if ($events->isEmpty()) {
+            return response()->json(['error' => __('messages.no_events_found')], 404);
+        }
+
+        // Generate the graphic
+        $generator = new EventGraphicGenerator($role, $events, $layout);
+        $imageData = $generator->generate();
+        
+        // Convert image data to base64 for display
+        $imageBase64 = base64_encode($imageData);
+        
+        // Generate event text content
+        $eventText = $this->generateEventText($role, $events);
+
+        return response()->json([
+            'image' => $imageBase64,
+            'text' => $eventText,
+            'download_url' => route('event.download_graphic', ['subdomain' => $role->subdomain, 'layout' => $layout])
+        ]);
+    }
+    
+    public function downloadGraphic(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
 
         $layout = $request->get('layout', 'grid');
-        //$layout = $request->get('layout', 'list');
         
         // Validate layout parameter
         if (!in_array($layout, ['grid', 'list'])) {
@@ -92,4 +147,46 @@ class GraphicController extends Controller
             ->header('Pragma', 'no-cache')
             ->header('Expires', '0');
     }
+    
+    private function generateEventText($role, $events)
+    {
+        $text = __('messages.upcoming_events') . ":\n\n";
+        
+        $currentDay = null;
+        foreach ($events as $event) {
+            $startDate = $event->getStartDateTime(null, true);
+            $dayName = $startDate->format('l');
+            $time = $startDate->format('H:i');
+            $dateStr = $startDate->format('d/m');
+            
+            // Group events by day
+            if ($currentDay !== $dayName) {
+                if ($currentDay !== null) {
+                    $text .= "\n";
+                }
+                $currentDay = $dayName;
+            }
+            
+            // Format time and event details
+            if ($startDate->isToday()) {
+                $text .= __('messages.tonight') . " - *{$dayName}* | {$time}\n";
+            } else {
+                $text .= "*{$dayName}* {$dateStr} | {$time}\n";
+            }
+            
+            $text .= "*{$event->translatedName()}*\n";
+            
+            if ($event->venue) {
+                $text .= "{$event->venue->translatedName()}\n";
+            }
+            
+            if ($event->ticket_url) {
+                $text .= "{$event->ticket_url}\n";
+            }
+            
+            $text .= "\n";
+        }
+        
+        return $text;
+    }    
 }
