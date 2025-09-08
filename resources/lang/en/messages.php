@@ -584,4 +584,7 @@ return [
     'generating_graphic' => 'Generating graphic',
     'error_loading_graphic' => 'Error loading graphic',
     'error' => 'Error',
+    'upcoming_events' => 'Upcoming Events',
+    'tonight' => 'Tonight',
+    'permission_denied' => 'Permission denied',
 ];
