@@ -705,13 +705,13 @@
             handleKeydown(event) {
                 // Handle Enter key for form submission
                 if (event.key === 'Enter') {
-                    if (event.shiftKey) {
-                        // Shift+Enter: allow default behavior (new line)
-                        return;
-                    } else {
-                        // Enter: submit the form
+                    if (event.ctrlKey) {
+                        // Ctrl+Enter: submit the form
                         event.preventDefault();
                         this.handleSubmit();
+                    } else {
+                        // Enter: allow default behavior (new line)
+                        return;
                     }
                 }
             },
