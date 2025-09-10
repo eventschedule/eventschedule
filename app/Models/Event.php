@@ -380,7 +380,7 @@ class Event extends Model
         return '';
     }
 
-    public function getGuestUrl($subdomain = false, $date = null)
+    public function getGuestUrl($subdomain = false, $date = null, $useCustomDomain = false)
     {
         $data = $this->getGuestUrlData($subdomain, $date);
 
@@ -389,7 +389,19 @@ class Event extends Model
             return '';
         }
 
-        return route('event.view_guest', $data);
+        // Check if the role has a custom domain
+        $role = $this->roles->first(function($role) use ($data) {
+            return $role->subdomain == $data['subdomain'];
+        });
+
+        if ($role && $role->custom_domain && $useCustomDomain) {
+            $url = route('event.view_guest', $data, false);
+            $url = $role->custom_domain . $url;
+            
+            return explode('?', $url)[0];
+        } else {
+            return route('event.view_guest', $data);
+        }
     }
 
     public function getGuestUrlData($subdomain = false, $date = null)

@@ -156,6 +156,8 @@ return [
     'color' => 'Color',
     'gradient' => 'Gradient',
     'subdomain' => 'Subdomain',
+    'custom_domain' => 'Custom Domain',
+    'custom_domain_help' => 'Enter your custom domain (e.g., https://example.com) to use instead of the subdomain URL',
     'delete_image' => 'Delete Image',
     'deleted_image' => 'Successfully deleted image',
     'try_event_schedule' => 'Create your free schedule at :link',
