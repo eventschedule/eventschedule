@@ -156,8 +156,7 @@ class GraphicController extends Controller
         foreach ($events as $event) {
             $startDate = $event->getStartDateTime(null, true);
             $dayName = $startDate->format('l');
-            $time = $startDate->format('H:i');
-            $dateStr = $startDate->format('d/m');
+            $dateStr = $event->localStartsAt(true);
             
             // Group events by day
             if ($currentDay !== $dayName) {
@@ -169,9 +168,9 @@ class GraphicController extends Controller
             
             // Format time and event details
             if ($startDate->isToday()) {
-                $text .= __('messages.tonight') . " - *{$dayName}* | {$time}\n";
+                $text .= __('messages.tonight') . " - {$dateStr}\n";
             } else {
-                $text .= "*{$dayName}* {$dateStr} | {$time}\n";
+                $text .= "{$dateStr}\n";
             }
             
             $text .= "*{$event->translatedName()}*\n";
