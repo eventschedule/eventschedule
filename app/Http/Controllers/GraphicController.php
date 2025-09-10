@@ -179,9 +179,7 @@ class GraphicController extends Controller
                 $text .= "{$event->venue->translatedName()}\n";
             }
             
-            if ($event->ticket_url) {
-                $text .= "{$event->ticket_url}\n";
-            }
+            $text .= "{$event->getGuestUrl($role->subdomain, null, true)}\n";
             
             $text .= "\n";
         }

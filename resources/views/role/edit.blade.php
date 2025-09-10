@@ -937,15 +937,21 @@
                                 </button>
                             </p>
                         </div>
-                        <div class="mb-6 hidden" id="subdomain-edit">
-                            <x-input-label for="new_subdomain" :value="__('messages.subdomain')" />
-                            <x-text-input id="new_subdomain" name="new_subdomain" type="text" class="mt-1 block w-full"
-                                :value="old('new_subdomain', $role->subdomain)" required minlength="4" maxlength="50"
-                                pattern="[a-z0-9-]+" oninput="this.value = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '')" />
-                            <x-input-error class="mt-2" :messages="$errors->get('new_subdomain')" />
-                            <x-secondary-button type="button" onclick="toggleSubdomainEdit()" class="mt-2">
-                                {{ __('messages.cancel') }}
-                            </x-secondary-button>
+                        <div class="hidden" id="subdomain-edit">
+                            <div class="mb-6">
+                                <x-input-label for="new_subdomain" :value="__('messages.subdomain')" />
+                                <x-text-input id="new_subdomain" name="new_subdomain" type="text" class="mt-1 block w-full"
+                                    :value="old('new_subdomain', $role->subdomain)" required minlength="4" maxlength="50"
+                                    pattern="[a-z0-9-]+" oninput="this.value = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '')" />
+                                <x-input-error class="mt-2" :messages="$errors->get('new_subdomain')" />
+                            </div>
+
+                            <div class="mb-6">
+                                <x-input-label for="custom_domain" :value="__('messages.custom_domain')" />
+                                <x-text-input id="custom_domain" name="custom_domain" type="url" class="mt-1 block w-full"
+                                    :value="old('custom_domain', $role->custom_domain)" />
+                                <x-input-error class="mt-2" :messages="$errors->get('custom_domain')" />
+                            </div>
                         </div>
                         @endif
 
