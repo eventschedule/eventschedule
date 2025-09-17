@@ -2,8 +2,11 @@
 
 namespace App\Notifications;
 
+use App\Models\Event;
+use App\Models\Role;
+use App\Models\User;
+use App\Utils\NotificationUtils;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -11,67 +14,75 @@ class DeletedEventNotification extends Notification
 {
     use Queueable;
 
-    protected $event;
-    protected $user;
+    protected Event $event;
+    protected ?User $actor;
+    protected string $recipientType;
+    protected ?Role $contextRole;
 
-    /**
-     * Create a new notification instance.
-     */
-    public function __construct($event, $user)
+    public function __construct(Event $event, ?User $actor = null, string $recipientType = 'talent', ?Role $contextRole = null)
     {
         $this->event = $event;
-        $this->user = $user;
+        $this->actor = $actor;
+        $this->recipientType = $recipientType;
+        $this->contextRole = $contextRole;
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
     public function via(object $notifiable): array
     {
         return ['mail'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
     public function toMail(object $notifiable): MailMessage
     {
-        $role = $this->event->role();
-        $user = $this->user;
+        $eventName = NotificationUtils::eventDisplayName($this->event);
+        $talentName = optional($this->event->role())->getDisplayName();
+        $venueName = $this->event->getVenueDisplayName();
+        $date = $this->event->localStartsAt(true);
 
-        return (new MailMessage)
-                    ->replyTo($user->email, $user->name)
-                    ->subject(__('messages.event_has_been_deleted'))
-                    ->line(str_replace(
-                        [':name', ':venue', ':user'],
-                        [$role->name, $event->getVenueDisplayName(), $user->name],
-                        __('messages.event_has_been_deleted_details'))
-                    );
+        $subject = __('messages.event_deleted_subject', ['event' => $eventName]);
+
+        $lineKey = $this->recipientType === 'purchaser'
+            ? 'messages.event_deleted_line_purchaser'
+            : 'messages.event_deleted_line';
+
+        $line = __($lineKey, [
+            'talent' => $talentName ?: $eventName,
+            'venue' => $venueName ?: __('messages.event'),
+            'date' => $date ?: __('messages.date_to_be_announced'),
+            'user' => $this->actor?->name ?? config('app.name'),
+        ]);
+
+        $mail = (new MailMessage)
+            ->subject($subject)
+            ->line($line)
+            ->action(__('messages.view_event'), $this->event->getGuestUrl($this->contextRole?->subdomain ?? $this->event->venue?->subdomain));
+
+        if ($this->actor && $this->actor->email) {
+            $mail->replyTo($this->actor->email, $this->actor->name);
+        }
+
+        return $mail;
     }
 
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(object $notifiable): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
-    /**
-     * Get the notification's mail headers.
-     */
     public function toMailHeaders(): array
     {
-        $role = $this->event->role();
+        $subdomain = $this->contextRole?->subdomain
+            ?? $this->event->venue?->subdomain
+            ?? $this->event->role()?->subdomain;
+
+        if (! $subdomain) {
+            return [];
+        }
+
         return [
-            'List-Unsubscribe' => '<' . route('role.unsubscribe', ['subdomain' => $role->subdomain]) . '>',
+            'List-Unsubscribe' => '<' . route('role.unsubscribe', ['subdomain' => $subdomain]) . '>',
             'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
         ];
     }
 }
+

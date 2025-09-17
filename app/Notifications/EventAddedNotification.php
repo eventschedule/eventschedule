@@ -10,7 +10,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class RequestAcceptedNotification extends Notification
+class EventAddedNotification extends Notification
 {
     use Queueable;
 
@@ -35,16 +35,16 @@ class RequestAcceptedNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $eventName = NotificationUtils::eventDisplayName($this->event);
-        $venueName = $this->event->getVenueDisplayName();
         $talentName = optional($this->event->role())->getDisplayName();
+        $venueName = $this->event->getVenueDisplayName();
         $date = $this->event->localStartsAt(true);
 
-        $lineKey = $this->recipientType === 'organizer'
-            ? 'messages.booking_request_accepted_organizer'
-            : 'messages.booking_request_accepted_talent';
+        $lineKey = $this->recipientType === 'purchaser'
+            ? 'messages.event_added_line_purchaser'
+            : 'messages.event_added_line';
 
         $mail = (new MailMessage)
-            ->subject(__('messages.booking_request_accepted_subject'))
+            ->subject(__('messages.event_added_subject', ['event' => $eventName]))
             ->line(__($lineKey, [
                 'talent' => $talentName ?: $eventName,
                 'venue' => $venueName ?: __('messages.event'),
