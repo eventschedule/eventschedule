@@ -779,7 +779,12 @@ class RoleController extends Controller
             // Translate names if role is not in English
             $translations = [];
             if (!empty($groupNames) && $role->language_code !== 'en') {
-                $translations = GeminiUtils::translateGroupNames($groupNames, $role->language_code);
+                try {
+                    $translations = GeminiUtils::translateGroupNames($groupNames, $role->language_code);
+                } catch (\Exception $e) {
+                    \Log::error('Failed to translate group names: ' . $e->getMessage());
+                    // Continue without translations if API fails
+                }
             }
             
             // Create groups with translations
@@ -995,7 +1000,12 @@ class RoleController extends Controller
         // Translate new group names if role is not in English
         $translations = [];
         if (!empty($newGroupNames) && $role->language_code !== 'en') {
-            $translations = GeminiUtils::translateGroupNames($newGroupNames, $role->language_code);
+            try {
+                $translations = GeminiUtils::translateGroupNames($newGroupNames, $role->language_code);
+            } catch (\Exception $e) {
+                \Log::error('Failed to translate group names: ' . $e->getMessage());
+                // Continue without translations if API fails
+            }
         }
 
         foreach ($submittedGroups as $key => $groupData) {

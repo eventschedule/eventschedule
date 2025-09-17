@@ -581,9 +581,12 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        $parsed = GeminiUtils::parseEvent($role, $details, $file);
-
-        return response()->json($parsed);
+        try {
+            $parsed = GeminiUtils::parseEvent($role, $details, $file);
+            return response()->json($parsed);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function guestParse(Request $request, $subdomain)
@@ -598,9 +601,12 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        $parsed = GeminiUtils::parseEvent($role, $details, $file);
-
-        return response()->json($parsed);
+        try {
+            $parsed = GeminiUtils::parseEvent($role, $details, $file);
+            return response()->json($parsed);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function import(Request $request, $subdomain)
