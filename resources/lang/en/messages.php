@@ -591,7 +591,7 @@ return [
     'upcoming_events' => 'Upcoming Events',
     'tonight' => 'Tonight',
     'permission_denied' => 'Permission denied',
-    'create_account_benefits' => 'Create an account to customize your schedule and events',
-    'create_account_link' => ':link to customize your schedule and events',
+    'create_account_benefits' => 'Create an account to manage your profile and be able to edit your events',
+    'create_account_link' => ':link to manage your profile and be able to edit your events',
     'create_an_account' => 'Create an account',
 ];
