@@ -569,4 +569,8 @@ return [
     'upcoming_events' => 'אירועים קרובים',
     'tonight' => 'הערב',
     'permission_denied' => 'הרשאה נדחתה',
+    'selecting' => 'בוחר',
+    'event_added_to_schedule' => 'האירוע נוסף ללוח הזמנים בהצלחה',
+    'error_adding_event' => 'שגיאה בהוספת האירוע',
+    'event_already_curated' => 'האירוע כבר נוצר',
 ];
