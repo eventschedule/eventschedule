@@ -221,12 +221,6 @@ class EventController extends Controller
             }
         }
 
-        if (! $subdomain) {
-            if ($event->venue && $user->isMember($event->venue->subdomain)) {
-                $subdomain = $event->venue->subdomain;
-            }
-        }
-
         return redirect(route('event.edit', ['subdomain' => $subdomain, 'hash' => $hash]));
     }
 
