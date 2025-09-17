@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use App\Listeners\LogSentMessage;
 use App\Models\Setting;
+use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -24,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Event::listen(MessageSent::class, LogSentMessage::class);
+
         if (! config('app.hosted') && empty(config('app.key'))) {
             Artisan::call('key:generate', ['--force' => true]);
         }
