@@ -15,9 +15,12 @@ use Stripe\StripeClient;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use App\Utils\InvoiceNinja;
+use App\Utils\NotificationUtils;
 use App\Rules\NoFakeEmail;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\TicketSaleNotification;
 
 class TicketController extends Controller
 {
@@ -170,7 +173,9 @@ class TicketController extends Controller
 
         $sale->payment_amount = $total;
         $sale->save();
-        
+
+        $this->sendTicketSaleNotifications($sale);
+
         if ($total == 0) {
             $sale->status = 'paid';
             $sale->save();
@@ -508,6 +513,35 @@ class TicketController extends Controller
         }
         
         return back()->with('success', __('messages.action_completed'));
+    }
+
+    private function sendTicketSaleNotifications(Sale $sale): void
+    {
+        $sale->loadMissing(['saleTickets.ticket', 'event.roles.members', 'event.venue.members', 'event.creatorRole.members', 'event.user']);
+
+        $event = $sale->event;
+        $contextRole = $event->venue ?: $event->creatorRole;
+
+        if ($sale->email) {
+            Notification::route('mail', $sale->email)
+                ->notify(new TicketSaleNotification($sale, 'purchaser', $contextRole));
+        }
+
+        $notifiedUserIds = collect();
+        $organizerRoles = collect([$event->creatorRole, $event->venue])->filter();
+
+        foreach ($organizerRoles as $organizerRole) {
+            $members = NotificationUtils::roleMembers($organizerRole);
+
+            if ($members->isNotEmpty()) {
+                Notification::send($members, new TicketSaleNotification($sale, 'organizer', $organizerRole));
+                $notifiedUserIds = $notifiedUserIds->merge($members->pluck('id'));
+            }
+        }
+
+        if ($event->user && $event->user->email && $event->user->is_subscribed !== false && ! $notifiedUserIds->contains($event->user->id)) {
+            Notification::send($event->user, new TicketSaleNotification($sale, 'organizer', $contextRole));
+        }
     }
 
     public function release()
