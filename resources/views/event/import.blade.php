@@ -160,7 +160,9 @@
         <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg mb-4 mt-4">
             <div class="max-w-3xl mx-auto">
                 <div class="flex items-start">
-                    <div class="text-sm text-gray-700 dark:text-gray-300">
+                    <div class="text-sm text-gray-700 dark:text-gray-300" 
+                         dir="{{ is_rtl() ? 'rtl' : 'ltr' }}"
+                         style="{{ is_rtl() ? 'text-align: right;' : 'text-align: left;' }}">
                         <p>{!! nl2br(e($role->request_terms)) !!}</p>
                     </div>
                 </div>
