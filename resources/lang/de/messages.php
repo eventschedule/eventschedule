@@ -584,4 +584,7 @@ return [
     'upcoming_events' => 'Bevorstehende Veranstaltungen',
     'tonight' => 'Heute Abend',
     'permission_denied' => 'Berechtigung verweigert',
+    'create_account_benefits' => 'Erstellen Sie ein Konto, um Ihr Profil zu verwalten und Ihre Veranstaltungen bearbeiten zu können',
+    'create_account_link' => ':link um Ihr Profil zu verwalten und Ihre Veranstaltungen bearbeiten zu können',
+    'create_an_account' => 'Konto erstellen',
 ];

@@ -580,4 +580,7 @@ return [
     'upcoming_events' => 'Próximos Eventos',
     'tonight' => 'Esta Noche',
     'permission_denied' => 'Permiso denegado',
+    'create_account_benefits' => 'Crea una cuenta para gestionar tu perfil y poder editar tus eventos',
+    'create_account_link' => ':link para gestionar tu perfil y poder editar tus eventos',
+    'create_an_account' => 'Crear una cuenta',
 ];

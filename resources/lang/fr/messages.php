@@ -580,4 +580,7 @@ return [
     'upcoming_events' => 'Événements à Venir',
     'tonight' => 'Ce Soir',
     'permission_denied' => 'Permission refusée',
+    'create_account_benefits' => 'Créez un compte pour gérer votre profil et pouvoir modifier vos événements',
+    'create_account_link' => ':link pour gérer votre profil et pouvoir modifier vos événements',
+    'create_an_account' => 'Créer un compte',
 ];

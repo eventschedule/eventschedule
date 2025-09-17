@@ -581,4 +581,7 @@ return [
     'upcoming_events' => 'الأحداث القادمة',
     'tonight' => 'هذه الليلة',
     'permission_denied' => 'تم رفض الإذن',
+    'create_account_benefits' => 'أنشئ حسابًا لإدارة ملفك الشخصي وتتمكن من تعديل أحداثك',
+    'create_account_link' => ':link لإدارة ملفك الشخصي وتتمكن من تعديل أحداثك',
+    'create_an_account' => 'أنشئ حسابًا',
 ];

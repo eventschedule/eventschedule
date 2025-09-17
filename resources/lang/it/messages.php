@@ -581,4 +581,7 @@ return [
     'upcoming_events' => 'Eventi Imminenti',
     'tonight' => 'Stasera',
     'permission_denied' => 'Permesso negato',
+    'create_account_benefits' => 'Crea un account per gestire il tuo profilo e poter modificare i tuoi eventi',
+    'create_account_link' => ':link per gestire il tuo profilo e poter modificare i tuoi eventi',
+    'create_an_account' => 'Crea un account',
 ];
