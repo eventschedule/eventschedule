@@ -24,7 +24,7 @@
                 <div class="flex justify-center">
                     <div class="w-full max-w-2xl md:max-w-xl lg:max-w-2xl">
                         <!-- Status header for guest users -->
-                        @if (isset($isGuest) && $isGuest && auth()->check())
+                        @if (isset($isGuest) && $isGuest && ! auth()->check())
                         <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-md">
                             <p class="text-sm text-blue-800 dark:text-blue-200">
                                 {!! __('messages.create_account_link', ['link' => '<a href="' . route('sign_up') . '" class="font-medium underline hover:no-underline">' . __('messages.create_an_account') . '</a>']) !!}
@@ -332,7 +332,7 @@
                         </div>
 
                         <!-- Account creation checkbox for guest users -->
-                        @if (isset($isGuest) && $isGuest && auth()->check())
+                        @if (isset($isGuest) && $isGuest && ! auth()->check())
                         <div class="flex items-center">
                             <input type="checkbox" 
                                     id="create_account_@{{ idx }}" 
