@@ -1196,6 +1196,111 @@
 
         </div>
 
+        @if (auth()->user()->google_token)
+        <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <h3 class="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
+                {{ __('Google Calendar Integration') }}
+            </h3>
+            <p class="text-sm text-blue-700 dark:text-blue-300 mb-4">
+                {{ __('Sync events between this role and your Google Calendar.') }}
+            </p>
+            
+            <div class="space-y-4">
+                <!-- Calendar Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ __('Select Google Calendar') }}
+                    </label>
+                    <select id="google-calendar-select" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        <option value="">{{ __('Loading calendars...') }}</option>
+                    </select>
+                </div>
+
+                <!-- Sync Direction Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ __('Sync Direction') }}
+                    </label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="radio" 
+                                   name="sync_direction" 
+                                   value="to" 
+                                   {{ $role->sync_direction === 'to' ? 'checked' : '' }}
+                                   class="sync-direction-radio rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                {{ __('To Google Calendar') }} - {{ __('Events from EventSchedule will appear in Google Calendar') }}
+                            </span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" 
+                                   name="sync_direction" 
+                                   value="from" 
+                                   {{ $role->sync_direction === 'from' ? 'checked' : '' }}
+                                   class="sync-direction-radio rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                {{ __('From Google Calendar') }} - {{ __('Events from Google Calendar will appear in EventSchedule') }}
+                            </span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" 
+                                   name="sync_direction" 
+                                   value="both" 
+                                   {{ $role->sync_direction === 'both' ? 'checked' : '' }}
+                                   class="sync-direction-radio rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                {{ __('Bidirectional Sync') }} - {{ __('Events added in either place will appear in both') }}
+                            </span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" 
+                                   name="sync_direction" 
+                                   value="" 
+                                   {{ !$role->sync_direction ? 'checked' : '' }}
+                                   class="sync-direction-radio rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                {{ __('No Sync') }} - {{ __('Disable Google Calendar synchronization') }}
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Manual Sync Options -->
+                <div class="flex space-x-2">
+                    <button type="button" 
+                            onclick="syncToGoogleCalendar()"
+                            class="inline-flex items-center px-3 py-1 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        {{ __('Sync to Google Calendar') }}
+                    </button>
+                    <button type="button" 
+                            onclick="syncFromGoogleCalendar()"
+                            class="inline-flex items-center px-3 py-1 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 focus:bg-purple-700 active:bg-purple-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        {{ __('Sync from Google Calendar') }}
+                    </button>
+                </div>
+
+                <!-- Status Messages -->
+                <div id="sync-status" class="hidden">
+                    <div class="flex items-center text-blue-600 dark:text-blue-400">
+                        <svg class="animate-spin -ml-1 mr-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span class="text-sm">{{ __('Syncing...') }}</span>
+                    </div>
+                </div>
+
+                <div id="sync-results" class="hidden">
+                    <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                        <div class="text-sm text-green-800 dark:text-green-200">
+                            <div id="sync-message"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+
     </form>
 
 </x-app-admin-layout>
@@ -1444,4 +1549,201 @@ function addImportCityField() {
     `;
     container.appendChild(div);
 }
+
+// Google Calendar integration functions
+document.addEventListener('DOMContentLoaded', function() {
+    loadGoogleCalendars();
+});
+
+function loadGoogleCalendars() {
+    fetch('/google-calendar/calendars')
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('google-calendar-select');
+            select.innerHTML = '<option value="">{{ __("Select a calendar...") }}</option>';
+            
+            data.calendars.forEach(calendar => {
+                const option = document.createElement('option');
+                option.value = calendar.id;
+                option.textContent = calendar.summary + (calendar.primary ? ' (Primary)' : '');
+                if (calendar.id === '{{ $role->google_calendar_id }}') {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading calendars:', error);
+            const select = document.getElementById('google-calendar-select');
+            select.innerHTML = '<option value="">{{ __("Error loading calendars") }}</option>';
+        });
+}
+
+function updateCalendarSelection() {
+    const select = document.getElementById('google-calendar-select');
+    const calendarId = select.value;
+    
+    if (!calendarId) return;
+    
+    fetch(`/google-calendar/role/{{ $role->subdomain }}`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ calendar_id: calendarId }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert('Error: ' + data.error);
+        } else {
+            showSyncMessage('Calendar updated successfully');
+        }
+    })
+    .catch(error => {
+        console.error('Error updating calendar:', error);
+        alert('Error updating calendar: ' + error.message);
+    });
+}
+
+function updateSyncDirection() {
+    const selectedDirection = document.querySelector('input[name="sync_direction"]:checked');
+    if (!selectedDirection) {
+        return;
+    }
+
+    showSyncStatus();
+    
+    fetch(`/google-calendar/sync-direction/{{ $role->subdomain }}`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            sync_direction: selectedDirection.value
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideSyncStatus();
+        if (data.error) {
+            showSyncMessage('Error: ' + data.error, 'error');
+        } else {
+            showSyncMessage(data.message);
+            // Update the UI to reflect the change
+            updateSyncDirectionUI(data.sync_direction);
+        }
+    })
+    .catch(error => {
+        hideSyncStatus();
+        showSyncMessage('Error: ' + error.message, 'error');
+    });
+}
+
+function updateSyncDirectionUI(syncDirection) {
+    // Update the radio button selection
+    const radios = document.querySelectorAll('input[name="sync_direction"]');
+    radios.forEach(radio => {
+        radio.checked = radio.value === syncDirection;
+    });
+    
+    // Update any status indicators if needed
+    console.log('Sync direction updated to:', syncDirection);
+}
+
+function syncToGoogleCalendar() {
+    showSyncStatus();
+    
+    fetch('/google-calendar/sync-events', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideSyncStatus();
+        if (data.error) {
+            showSyncMessage('Error: ' + data.error, 'error');
+        } else {
+            showSyncMessage(data.message);
+        }
+    })
+    .catch(error => {
+        hideSyncStatus();
+        showSyncMessage('Error: ' + error.message, 'error');
+    });
+}
+
+function syncFromGoogleCalendar() {
+    showSyncStatus();
+    
+    fetch(`/google-calendar/sync-from-google/{{ $role->subdomain }}`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideSyncStatus();
+        if (data.error) {
+            showSyncMessage('Error: ' + data.error, 'error');
+        } else {
+            showSyncMessage(data.message);
+        }
+    })
+    .catch(error => {
+        hideSyncStatus();
+        showSyncMessage('Error: ' + error.message, 'error');
+    });
+}
+
+function showSyncStatus() {
+    document.getElementById('sync-status').classList.remove('hidden');
+    document.getElementById('sync-results').classList.add('hidden');
+}
+
+function hideSyncStatus() {
+    document.getElementById('sync-status').classList.add('hidden');
+}
+
+function showSyncMessage(message, type = 'success') {
+    const resultsDiv = document.getElementById('sync-results');
+    const messageDiv = document.getElementById('sync-message');
+    
+    messageDiv.textContent = message;
+    
+    if (type === 'error') {
+        resultsDiv.querySelector('.bg-green-50').classList.remove('bg-green-50', 'border-green-200');
+        resultsDiv.querySelector('.bg-green-50').classList.add('bg-red-50', 'border-red-200');
+        resultsDiv.querySelector('.text-green-800').classList.remove('text-green-800');
+        resultsDiv.querySelector('.text-green-800').classList.add('text-red-800');
+    } else {
+        resultsDiv.querySelector('.bg-red-50').classList.remove('bg-red-50', 'border-red-200');
+        resultsDiv.querySelector('.bg-red-50').classList.add('bg-green-50', 'border-green-200');
+        resultsDiv.querySelector('.text-red-800').classList.remove('text-red-800');
+        resultsDiv.querySelector('.text-red-800').classList.add('text-green-800');
+    }
+    
+    resultsDiv.classList.remove('hidden');
+}
+
+// Add event listeners for calendar selection and sync direction changes
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarSelect = document.getElementById('google-calendar-select');
+    if (calendarSelect) {
+        calendarSelect.addEventListener('change', updateCalendarSelection);
+    }
+    
+    // Add event listeners for sync direction radio buttons
+    const syncDirectionRadios = document.querySelectorAll('input[name="sync_direction"]');
+    syncDirectionRadios.forEach(radio => {
+        radio.addEventListener('change', updateSyncDirection);
+    });
+});
 </script>
