@@ -40,6 +40,9 @@ return [
         'maps' => env('MAPS_API_KEY'),
         'analytics' => env('ANALYTICS_ID'),
         'gemini_key' => env('GEMINI_API_KEY'),
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
 
     'stripe' => [

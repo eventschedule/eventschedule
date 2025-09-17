@@ -11,6 +11,8 @@ use App\Http\Controllers\InvoiceNinjaController;
 use App\Http\Controllers\AppController;
 use App\Http\Controllers\Api\ApiSettingsController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\GoogleCalendarController;
+use App\Http\Controllers\GoogleCalendarWebhookController;
 use Illuminate\Support\Facades\Route;
 
 if (config('app.hosted')) {
@@ -61,6 +63,10 @@ Route::post('/clear-pending-request', [EventController::class, 'clearPendingRequ
 Route::post('/stripe/webhook', [StripeController::class, 'webhook'])->name('stripe.webhook')->middleware('throttle:60,1');
 Route::post('/invoiceninja/webhook/{secret}', [InvoiceNinjaController::class, 'webhook'])->name('invoiceninja.webhook')->middleware('throttle:60,1');
 
+// Google Calendar webhook routes (no auth required)
+Route::get('/google-calendar/webhook', [GoogleCalendarWebhookController::class, 'verify'])->name('google.calendar.webhook.verify')->middleware('throttle:10,1');
+Route::post('/google-calendar/webhook', [GoogleCalendarWebhookController::class, 'handle'])->name('google.calendar.webhook.handle')->middleware('throttle:60,1');
+
 Route::get('/release_tickets', [TicketController::class, 'release'])->name('release_tickets')->middleware('throttle:5,1');
 Route::get('/translate_data', [AppController::class, 'translateData'])->name('translate_data')->middleware('throttle:5,1');
 
@@ -91,6 +97,18 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/stripe/complete', [StripeController::class, 'complete'])->name('stripe.complete');
     Route::get('/invoiceninja/unlink', [InvoiceNinjaController::class, 'unlink'])->name('invoiceninja.unlink');
     Route::get('/payment_url/unlink', [ProfileController::class, 'unlinkPaymentUrl'])->name('profile.unlink_payment_url');
+    
+    // Google Calendar routes
+    Route::get('/google-calendar/redirect', [GoogleCalendarController::class, 'redirect'])->name('google.calendar.redirect');
+    Route::get('/google-calendar/callback', [GoogleCalendarController::class, 'callback'])->name('google.calendar.callback');
+    Route::get('/google-calendar/disconnect', [GoogleCalendarController::class, 'disconnect'])->name('google.calendar.disconnect');
+    Route::get('/google-calendar/calendars', [GoogleCalendarController::class, 'getCalendars'])->name('google.calendar.calendars');
+    Route::post('/google-calendar/sync-events', [GoogleCalendarController::class, 'syncEvents'])->name('google.calendar.sync_events');
+    Route::post('/google-calendar/sync-event/{eventId}', [GoogleCalendarController::class, 'syncEvent'])->name('google.calendar.sync_event');
+    Route::delete('/google-calendar/unsync-event/{eventId}', [GoogleCalendarController::class, 'unsyncEvent'])->name('google.calendar.unsync_event');
+    Route::post('/google-calendar/role/{subdomain}', [GoogleCalendarController::class, 'updateRoleCalendar'])->name('google.calendar.update_role');
+    Route::post('/google-calendar/sync-direction/{subdomain}', [GoogleCalendarController::class, 'updateSyncDirection'])->name('google.calendar.sync_direction');
+    Route::post('/google-calendar/sync-from-google/{subdomain}', [GoogleCalendarController::class, 'syncFromGoogleCalendar'])->name('google.calendar.sync_from_google');
     
     Route::get('/scan', [TicketController::class, 'scan'])->name('ticket.scan');
     Route::post('/ticket/view/{event_id}/{secret}', [TicketController::class, 'scanned'])->name('ticket.scanned');

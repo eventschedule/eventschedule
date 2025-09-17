@@ -999,6 +999,55 @@
             </div>
         </div>
 
+        @if ($event->exists && auth()->user()->google_token)
+        <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <h3 class="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
+                {{ __('Google Calendar Sync') }}
+            </h3>
+            <p class="text-sm text-blue-700 dark:text-blue-300 mb-3">
+                {{ __('Sync this event with your Google Calendar.') }}
+            </p>
+            
+            <div class="flex items-center space-x-4">
+                @if ($event->isSyncedToGoogleCalendar())
+                    <div class="flex items-center text-green-600 dark:text-green-400">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-sm">{{ __('Synced to Google Calendar') }}</span>
+                    </div>
+                    <button type="button" 
+                            onclick="unsyncEvent({{ $event->id }})"
+                            class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
+                        {{ __('Remove from Google Calendar') }}
+                    </button>
+                @else
+                    <div class="flex items-center text-gray-500 dark:text-gray-400">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm8 0a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V8zm0 4a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1v-2z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-sm">{{ __('Not synced to Google Calendar') }}</span>
+                    </div>
+                    <button type="button" 
+                            onclick="syncEvent({{ $event->id }})"
+                            class="inline-flex items-center px-3 py-1 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        {{ __('Sync to Google Calendar') }}
+                    </button>
+                @endif
+            </div>
+            
+            <div id="sync-status-{{ $event->id }}" class="hidden mt-3">
+                <div class="flex items-center text-blue-600 dark:text-blue-400">
+                    <svg class="animate-spin -ml-1 mr-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="text-sm">{{ __('Syncing...') }}</span>
+                </div>
+            </div>
+        </div>
+        @endif
+
     </form>
 </div>
 
@@ -1500,6 +1549,63 @@
       this.initializeCuratorGroupSelections();
     }
   }).mount('#app')
+
+  // Google Calendar sync functions
+  function syncEvent(eventId) {
+    const statusDiv = document.getElementById(`sync-status-${eventId}`);
+    statusDiv.classList.remove('hidden');
+    
+    fetch(`/google-calendar/sync-event/${eventId}`, {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(response => response.json())
+    .then(data => {
+      statusDiv.classList.add('hidden');
+      if (data.error) {
+        alert('Error: ' + data.error);
+      } else {
+        location.reload(); // Refresh to show updated sync status
+      }
+    })
+    .catch(error => {
+      statusDiv.classList.add('hidden');
+      alert('Error: ' + error.message);
+    });
+  }
+
+  function unsyncEvent(eventId) {
+    if (!confirm('Are you sure you want to remove this event from Google Calendar?')) {
+      return;
+    }
+    
+    const statusDiv = document.getElementById(`sync-status-${eventId}`);
+    statusDiv.classList.remove('hidden');
+    
+    fetch(`/google-calendar/unsync-event/${eventId}`, {
+      method: 'DELETE',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(response => response.json())
+    .then(data => {
+      statusDiv.classList.add('hidden');
+      if (data.error) {
+        alert('Error: ' + data.error);
+      } else {
+        location.reload(); // Refresh to show updated sync status
+      }
+    })
+    .catch(error => {
+      statusDiv.classList.add('hidden');
+      alert('Error: ' + error.message);
+    });
+  }
 </script>
 
 </x-app-admin-layout>

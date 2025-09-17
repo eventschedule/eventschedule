@@ -8,6 +8,7 @@ use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Jobs\SyncEventToGoogleCalendar;
 
 class Event extends Model
 {
@@ -31,6 +32,7 @@ class Event extends Model
         'registration_url',
         'category_id',
         'creator_role_id',
+        'google_event_id',
     ];
 
     protected $casts = [
@@ -103,6 +105,17 @@ class Event extends Model
                 DB::table('parsed_event_urls')
                     ->where('url', $event->registration_url)
                     ->delete();
+            }
+
+            // Sync deletion to Google Calendar
+            if ($event->google_event_id) {
+                foreach ($event->roles as $role) {
+                    foreach ($role->users as $user) {
+                        if ($user->google_token) {
+                            SyncEventToGoogleCalendar::dispatch($event, $user, 'delete');
+                        }
+                    }
+                }
             }
         });
     }
@@ -707,5 +720,48 @@ class Event extends Model
             return $this->getSameTicketQuantity();
         }
         return $this->tickets->sum('quantity');
+    }
+
+    /**
+     * Sync this event to Google Calendar for all connected users
+     */
+    public function syncToGoogleCalendar($action = 'create')
+    {
+        foreach ($this->roles as $role) {
+            // Only sync to Google if the role is configured to sync to Google
+            if (!$role->syncsToGoogle()) {
+                continue;
+            }
+
+            foreach ($role->users as $user) {
+                if ($user->google_token) {
+                    SyncEventToGoogleCalendar::dispatch($this, $user, $action, $role->getGoogleCalendarId());
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if this event is synced to Google Calendar
+     */
+    public function isSyncedToGoogleCalendar()
+    {
+        return !is_null($this->google_event_id);
+    }
+
+    /**
+     * Get Google Calendar sync status for a specific user
+     */
+    public function getGoogleCalendarSyncStatus(User $user)
+    {
+        if (!$user->google_token) {
+            return 'not_connected';
+        }
+
+        if ($this->isSyncedToGoogleCalendar()) {
+            return 'synced';
+        }
+
+        return 'not_synced';
     }
 }

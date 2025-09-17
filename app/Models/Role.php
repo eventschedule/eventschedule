@@ -59,6 +59,11 @@ class Role extends Model implements MustVerifyEmail
         'import_config',
         'custom_domain',
         'event_layout',
+        'google_calendar_id',
+        'google_webhook_id',
+        'google_webhook_resource_id',
+        'google_webhook_expires_at',
+        'sync_direction',
     ];
 
     /**
@@ -712,5 +717,69 @@ class Role extends Model implements MustVerifyEmail
         
         $config = $this->import_config;
         return !empty($config['urls']) || !empty($config['cities']);
+    }
+
+    /**
+     * Get the Google Calendar ID for this role
+     * Returns the role's specific calendar or the primary calendar
+     */
+    public function getGoogleCalendarId()
+    {
+        return $this->google_calendar_id ?: 'primary';
+    }
+
+    /**
+     * Check if this role has Google Calendar integration enabled
+     */
+    public function hasGoogleCalendarIntegration()
+    {
+        return !is_null($this->google_calendar_id);
+    }
+
+    /**
+     * Check if this role has bidirectional sync enabled
+     */
+    public function hasBidirectionalSync()
+    {
+        return $this->sync_direction === 'both';
+    }
+
+    /**
+     * Check if this role syncs to Google Calendar
+     */
+    public function syncsToGoogle()
+    {
+        return in_array($this->sync_direction, ['to', 'both']);
+    }
+
+    /**
+     * Check if this role syncs from Google Calendar
+     */
+    public function syncsFromGoogle()
+    {
+        return in_array($this->sync_direction, ['from', 'both']);
+    }
+
+    /**
+     * Get the sync direction as a human-readable string
+     */
+    public function getSyncDirectionLabel()
+    {
+        return match($this->sync_direction) {
+            'to' => 'To Google Calendar',
+            'from' => 'From Google Calendar',
+            'both' => 'Bidirectional Sync',
+            default => 'No Sync'
+        };
+    }
+
+    /**
+     * Check if webhook is active and not expired
+     */
+    public function hasActiveWebhook()
+    {
+        return $this->google_webhook_id && 
+               $this->google_webhook_expires_at && 
+               $this->google_webhook_expires_at->isFuture();
     }
 }
