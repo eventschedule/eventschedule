@@ -671,6 +671,17 @@ class Role extends Model implements MustVerifyEmail
         return $value;
     }
 
+    public function translatedRequestTerms()
+    {
+        $value = $this->request_terms;
+
+        if ($this->request_terms_en && (session()->has('translate') || request()->lang == 'en')) {
+            $value = $this->request_terms_en;
+        }
+
+        return $value;
+    }
+
     public function groups()
     {
         return $this->hasMany(\App\Models\Group::class);
