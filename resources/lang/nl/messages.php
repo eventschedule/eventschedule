@@ -578,4 +578,7 @@ return [
     'upcoming_events' => 'Aankomende Evenementen',
     'tonight' => 'Vanavond',
     'permission_denied' => 'Toestemming geweigerd',
+    'create_account_benefits' => 'Maak een account aan om je profiel te beheren en je evenementen te kunnen bewerken',
+    'create_account_link' => ':link om je profiel te beheren en je evenementen te kunnen bewerken',
+    'create_an_account' => 'Account aanmaken',
 ];

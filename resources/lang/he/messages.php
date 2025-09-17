@@ -573,4 +573,7 @@ return [
     'event_added_to_schedule' => 'האירוע נוסף ללוח הזמנים בהצלחה',
     'error_adding_event' => 'שגיאה בהוספת האירוע',
     'event_already_curated' => 'האירוע כבר נוצר',
+    'create_account_benefits' => 'צור חשבון כדי לנהל את הפרופיל שלך ולהיות מסוגל לערוך את האירועים שלך',
+    'create_account_link' => ':link כדי לנהל את הפרופיל שלך ולהיות מסוגל לערוך את האירועים שלך',
+    'create_an_account' => 'צור חשבון',
 ];
