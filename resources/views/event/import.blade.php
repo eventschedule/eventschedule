@@ -163,7 +163,7 @@
                     <div class="text-sm text-gray-700 dark:text-gray-300" 
                          dir="{{ is_rtl() ? 'rtl' : 'ltr' }}"
                          style="{{ is_rtl() ? 'text-align: right;' : 'text-align: left;' }}">
-                        <p>{!! nl2br(e($role->request_terms)) !!}</p>
+                        <p>{!! nl2br(e($role->translatedRequestTerms())) !!}</p>
                     </div>
                 </div>
             </div>
