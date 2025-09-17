@@ -22,6 +22,7 @@ return new class extends Migration
             $table->timestamp('google_webhook_expires_at')->nullable();
             $table->enum('sync_direction', ['to', 'from', 'both'])->nullable();
             $table->text('request_terms')->nullable();
+            $table->text('request_terms_en')->nullable();
         });
     }
 
@@ -43,8 +44,8 @@ return new class extends Migration
                 'sync_direction',
                 'google_calendar_id',
                 'request_terms',
+                'request_terms_en',
             ]);
         });
-
     }
 };
