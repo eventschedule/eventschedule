@@ -64,6 +64,7 @@ class Role extends Model implements MustVerifyEmail
         'google_webhook_resource_id',
         'google_webhook_expires_at',
         'sync_direction',
+        'request_terms',
     ];
 
     /**

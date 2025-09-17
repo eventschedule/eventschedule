@@ -386,6 +386,8 @@ return [
     'note_all_events_are_publicly_listed' => 'Hinweis: Alle Veranstaltungen sind öffentlich aufgeführt',
     'add_to_schedule' => 'Zum Zeitplan hinzufügen',
     'accept_requests' => 'Anfragen akzeptieren',
+    'request_terms' => 'Anfragebedingungen',
+    'enter_request_terms' => 'Geben Sie die Bedingungen für Veranstaltungsanfragen ein...',
     'upgrade_to_pro' => 'Upgrade auf Pro, um Mitglieder hinzuzufügen',
     'member_already_exists' => 'Mitglied existiert bereits',
     'ticket_payment_methods' => 'Ticket-Zahlungsmethoden',

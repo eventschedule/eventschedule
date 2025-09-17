@@ -91,6 +91,8 @@ return [
     'rotation' => 'סיבוב',
     'settings' => 'הגדרות',
     'accept_requests' => 'קבל בקשות',
+    'request_terms' => 'תנאי בקשה',
+    'enter_request_terms' => 'הזן תנאים והגבלות לבקשות אירועים...',
     'use_24_hour_time_format' => 'השתמש בפורמט 24 שעות',
     'no_followers' => 'אין עוקבים',
     'share_your_event_schedule_link' => 'שתף את הקישור או קוד ה-QR שלך כדי לקבל יותר עוקבים',

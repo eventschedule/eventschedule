@@ -91,6 +91,8 @@ return [
     'rotation' => 'Rotation',
     'settings' => 'Paramètres',
     'accept_requests' => 'Accepter les Demandes',
+    'request_terms' => 'Conditions de Demande',
+    'enter_request_terms' => 'Entrez les termes et conditions pour les demandes d\'événements...',
     'use_24_hour_time_format' => 'Utiliser le Format 24 Heures',
     'no_followers' => 'Aucun Abonné',
     'share_your_event_schedule_link' => 'Partagez votre lien ou QR code d\'horaire d\'événement pour obtenir plus d\'abonnés',

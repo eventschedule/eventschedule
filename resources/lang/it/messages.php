@@ -94,6 +94,8 @@ return [
     'unlisted' => 'Non Elencato',
     'public' => 'Pubblico',
     'accept_requests' => 'Accetta Richieste',
+    'request_terms' => 'Termini di Richiesta',
+    'enter_request_terms' => 'Inserisci i termini e le condizioni per le richieste di eventi...',
     'use_24_hour_time_format' => 'Usa il formato orario 24 ore',
     'no_followers' => 'Nessun Follower',
     'share_your_event_schedule_link' => 'Condividi il link o il codice QR del tuo programma per ottenere più follower',

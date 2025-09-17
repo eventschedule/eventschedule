@@ -91,11 +91,19 @@
             // Handle accept_requests checkbox
             const acceptRequestsCheckbox = document.querySelector('input[name="accept_requests"][type="checkbox"]');
             const requireApprovalSection = document.getElementById('require_approval_section');
+            const requestTermsSection = document.getElementById('request_terms_section');
 
             if (acceptRequestsCheckbox && requireApprovalSection) {
                 requireApprovalSection.style.display = acceptRequestsCheckbox.checked ? 'block' : 'none';                
                 acceptRequestsCheckbox.addEventListener('change', function() {
                     requireApprovalSection.style.display = this.checked ? 'block' : 'none';
+                });
+            }
+
+            if (acceptRequestsCheckbox && requestTermsSection) {
+                requestTermsSection.style.display = acceptRequestsCheckbox.checked ? 'block' : 'none';                
+                acceptRequestsCheckbox.addEventListener('change', function() {
+                    requestTermsSection.style.display = this.checked ? 'block' : 'none';
                 });
             }
 
@@ -1012,6 +1020,14 @@
                                 checked="{{ old('require_approval', $role->exists ? $role->require_approval : true) }}"
                                 data-custom-attribute="value" />
                             <x-input-error class="mt-2" :messages="$errors->get('require_approval')" />
+                        </div>
+                        <div class="mb-6" id="request_terms_section">
+                            <x-input-label for="request_terms" :value="__('messages.request_terms')" />
+                            <textarea id="request_terms" name="request_terms"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                rows="4"
+                                placeholder="{{ __('messages.enter_request_terms') }}">{{ old('request_terms', $role->request_terms) }}</textarea>
+                            <x-input-error class="mt-2" :messages="$errors->get('request_terms')" />
                         </div>
                         @endif
 

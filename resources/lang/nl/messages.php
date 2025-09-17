@@ -91,6 +91,8 @@ return [
     'rotation' => 'Rotatie',
     'settings' => 'Instellingen',
     'accept_requests' => 'Accepteer Verzoeken',
+    'request_terms' => 'Verzoek Voorwaarden',
+    'enter_request_terms' => 'Voer voorwaarden in voor evenement verzoeken...',
     'use_24_hour_time_format' => 'Gebruik 24-uurs formaat',
     'no_followers' => 'Geen Volgers',
     'share_your_event_schedule_link' => 'Deel je evenementenschema-link of QR-code om meer volgers te krijgen',
