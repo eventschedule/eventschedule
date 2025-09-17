@@ -384,6 +384,8 @@ return [
     'note_all_events_are_publicly_listed' => 'ملاحظة: جميع الفعاليات متاحة للجمهور',
     'add_to_schedule' => 'إضافة إلى الجدول الزمني',
     'accept_requests' => 'قبول الطلبات',
+    'request_terms' => 'شروط الطلب',
+    'enter_request_terms' => 'أدخل الشروط والأحكام لطلبات الأحداث...',
     'upgrade_to_pro' => 'قم بالترقية إلى النسخة الاحترافية لإضافة أعضاء',
     'member_already_exists' => 'العضو موجود بالفعل',
     'ticket_payment_methods' => 'طرق دفع التذاكر',

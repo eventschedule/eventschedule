@@ -92,6 +92,8 @@ return [
     'rotation' => 'Rotação',
     'settings' => 'Configurações',
     'accept_requests' => 'Aceitar Solicitações',
+    'request_terms' => 'Termos de Solicitação',
+    'enter_request_terms' => 'Digite os termos e condições para solicitações de eventos...',
     'use_24_hour_time_format' => 'Usar formato de 24 horas',
     'no_followers' => 'Sem Seguidores',
     'share_your_event_schedule_link' => 'Compartilhe seu link ou código QR de agenda de eventos para conseguir mais seguidores',

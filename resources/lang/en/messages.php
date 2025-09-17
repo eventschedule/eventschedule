@@ -94,6 +94,8 @@ return [
     'unlisted' => 'Unlisted',
     'public' => 'Public',
     'accept_requests' => 'Accept requests',
+    'request_terms' => 'Request Terms',
+    'enter_request_terms' => 'Enter terms and conditions for event requests...',
     'use_24_hour_time_format' => 'Use 24-hour time format',
     'no_followers' => 'No followers',
     'share_your_event_schedule_link' => 'Share your event schedule link or QR code to get more followers',
