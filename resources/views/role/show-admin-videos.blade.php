@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             async loadTalentRoles() {
                 try {
-                    const response = await fetch(`/{{ $role->subdomain }}/talent-roles-without-videos`);
+                    const response = await fetch(`/{{ $role->subdomain }}/match-videos`);
                     const data = await response.json();
                     this.talentRoles = data.map(role => ({
                         ...role,
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 role.error = null;
                 
                 try {
-                    const response = await fetch(`/{{ $role->subdomain }}/search_youtube?q=${encodeURIComponent(role.name)}`);
+                    const response = await fetch(`/{{ $role->subdomain }}/search-youtube?q=${encodeURIComponent(role.name)}`);
                     const data = await response.json();
                     
                     if (data.success && data.videos) {
