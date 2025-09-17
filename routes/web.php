@@ -81,7 +81,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::post('/store', [RoleController::class, 'store'])->name('role.store');
     Route::get('/search-roles', [RoleController::class, 'search'])->name('role.search');
     Route::get('/search-events/{subdomain}', [RoleController::class, 'searchEvents'])->name('role.search_events');
-    Route::get('/edit-event/{hash}', [EventController::class, 'editAdmin'])->name('event.edit_admin');
+    Route::get('/admin-edit-event/{hash}', [EventController::class, 'editAdmin'])->name('event.edit_admin');
     Route::get('/following', [RoleController::class, 'following'])->name('following');
     Route::get('/tickets', [TicketController::class, 'tickets'])->name('tickets');
     Route::get('/sales', [TicketController::class, 'sales'])->name('sales');
