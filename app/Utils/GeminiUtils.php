@@ -67,6 +67,13 @@ class GeminiUtils
 
         if ($httpCode !== 200) {
             \Log::error("Gemini API error response: " . $response);
+            
+            // Try to extract the specific error message from the response
+            $errorData = json_decode($response, true);
+            if (json_last_error() === JSON_ERROR_NONE && isset($errorData['error']['message'])) {
+                throw new \Exception($errorData['error']['message']);
+            }
+            
             throw new \Exception('Gemini API request failed with status code: ' . $httpCode);
         }
 
