@@ -102,6 +102,9 @@ class Translate extends Command
             ->orWhere(function($query) {
                 $query->whereNotNull('state')
                       ->whereNull('state_en');
+            })->orWhere(function($query) {
+                $query->whereNotNull('request_terms')
+                      ->whereNull('request_terms_en');
             });
         
         if ($roleId) {
@@ -132,6 +135,7 @@ class Translate extends Command
                 $role->address2_en = '';
                 $role->city_en = '';
                 $role->state_en = '';
+                $role->request_terms_en = '';
                 $role->save();
 
                 if ($debug) {
@@ -179,6 +183,13 @@ class Translate extends Command
                 $role->state_en = GeminiUtils::translate($role->state, $role->language_code, 'en');
                 if ($debug) {
                     $this->info("Translated state from {$role->language_code} to en: '{$role->state}' → '{$role->state_en}'");
+                }
+            }
+
+            if ($role->request_terms && !$role->request_terms_en) {
+                $role->request_terms_en = GeminiUtils::translate($role->request_terms, $role->language_code, 'en');
+                if ($debug) {
+                    $this->info("Translated request terms from {$role->language_code} to en: '{$role->request_terms}' → '{$role->request_terms_en}'");
                 }
             }
 
