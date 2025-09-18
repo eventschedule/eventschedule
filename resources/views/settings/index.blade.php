@@ -104,6 +104,35 @@
                     </section>
                 </div>
             </div>
+
+            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                <div class="max-w-3xl">
+                    <section>
+                        <header>
+                            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                                {{ __('messages.application_information') }}
+                            </h2>
+
+                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                {{ __('messages.application_information_description') }}
+                            </p>
+                        </header>
+
+                        <div class="mt-6">
+                            <dl class="divide-y divide-gray-100 dark:divide-gray-700">
+                                <div class="flex flex-col gap-1 py-4 sm:flex-row sm:items-center sm:justify-between">
+                                    <dt class="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                        {{ __('messages.build_number') }}
+                                    </dt>
+                                    <dd class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                                        {{ $buildNumber }}
+                                    </dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </section>
+                </div>
+            </div>
         </div>
     </div>
 </x-app-admin-layout>
