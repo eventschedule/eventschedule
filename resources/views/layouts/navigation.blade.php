@@ -1,3 +1,9 @@
+@php
+    $schedules = isset($schedules) ? $schedules : collect();
+    $venues = isset($venues) ? $venues : collect();
+    $curators = isset($curators) ? $curators : collect();
+@endphp
+
 <a href="https://www.eventschedule.com">
     <div class="flex h-16 pt-2 shrink-0 items-center">
         <img class="h-10 w-auto" src="{{ url('images/light_logo.png') }}"
