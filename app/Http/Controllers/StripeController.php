@@ -19,6 +19,7 @@ class StripeController extends Controller
     {
         $user = auth()->user();
         $accountId = $user->stripe_account_id;
+        $redirectRoute = $user->isAdmin() ? route('settings.integrations') : route('profile.edit');
 
         if (! $accountId) {
             $account = Account::create();
@@ -31,11 +32,11 @@ class StripeController extends Controller
         $link = AccountLink::create([
             'account' => $accountId,
             'return_url' => route('stripe.complete'),
-            'refresh_url' => route('profile.edit'),
+            'refresh_url' => $redirectRoute,
             'type' => 'account_onboarding',
         ]);
 
-        return redirect($link->url);                  
+        return redirect($link->url);
     }
 
     public function unlink()
@@ -45,26 +46,29 @@ class StripeController extends Controller
         $user->stripe_completed_at = null;
         $user->save();
 
-        return redirect()->route('profile.edit')->with('success', __('messages.stripe_unlinked'));
+        $route = $user->isAdmin() ? 'settings.integrations' : 'profile.edit';
+
+        return redirect()->route($route)->with('success', __('messages.stripe_unlinked'));
     }
 
     public function complete()
     {
         $user = auth()->user();
-        
+        $route = $user->isAdmin() ? 'settings.integrations' : 'profile.edit';
+
         if ($user->stripe_account_id) {
             $account = Account::retrieve($user->stripe_account_id);
-            
+
             if ($account->charges_enabled) {
                 $user->stripe_company_name = $account->business_profile->name;
                 $user->stripe_completed_at = now();
                 $user->save();
-                
-                return redirect()->route('profile.edit')->with('success', __('messages.stripe_connected'));
+
+                return redirect()->route($route)->with('success', __('messages.stripe_connected'));
             }
         }
 
-        return redirect()->route('profile.edit')->with('error', __('messages.failed_to_connect_stripe'));
+        return redirect()->route($route)->with('error', __('messages.failed_to_connect_stripe'));
     }
 
     public function webhook(Request $request)

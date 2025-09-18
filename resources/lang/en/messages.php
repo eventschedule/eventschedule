@@ -95,6 +95,8 @@ return [
     'back_to_settings' => 'Back to settings overview',
     'general_settings' => 'General Settings',
     'general_settings_description' => 'Set the base URL used for public links and previews.',
+    'integrations_settings' => 'Integrations & API',
+    'integrations_settings_description' => 'Connect payment providers, manage API access, and sync external calendars.',
     'application_information' => 'Application Information',
     'application_information_description' => 'Review deployment details including the current build number.',
     'build_number' => 'Build Number',

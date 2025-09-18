@@ -49,6 +49,17 @@
                     </section>
                 </div>
             </div>
+
+            @if (! config('app.hosted') && ! config('app.testing'))
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                    <div class="max-w-3xl">
+                        @include('profile.partials.update-app-form', [
+                            'version_installed' => $versionInstalled,
+                            'version_available' => $versionAvailable,
+                        ])
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 </x-app-admin-layout>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use App\Support\MailTemplateManager;
+use Codedge\Updater\UpdaterManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,12 +23,44 @@ class SettingsController extends Controller
         return view('settings.index');
     }
 
-    public function general(Request $request): View
+    public function general(Request $request, UpdaterManager $updater): View
     {
         $this->authorizeAdmin($request->user());
 
+        $versionInstalled = null;
+        $versionAvailable = null;
+
+        if (! config('app.hosted') && ! config('app.testing')) {
+            $versionInstalled = $updater->source()->getVersionInstalled();
+
+            try {
+                if ($request->has('clear_cache')) {
+                    cache()->forget('version_available');
+                }
+
+                $versionAvailable = cache()->remember('version_available', 3600, function () use ($updater) {
+                    \Log::info('Checking for new version');
+
+                    return $updater->source()->getVersionAvailable();
+                });
+            } catch (\Exception $e) {
+                $versionAvailable = 'Error: failed to check version';
+            }
+        }
+
         return view('settings.general', [
             'generalSettings' => $this->getGeneralSettings(),
+            'versionInstalled' => $versionInstalled,
+            'versionAvailable' => $versionAvailable,
+        ]);
+    }
+
+    public function integrations(Request $request): View
+    {
+        $this->authorizeAdmin($request->user());
+
+        return view('settings.integrations', [
+            'user' => $request->user(),
         ]);
     }
 
