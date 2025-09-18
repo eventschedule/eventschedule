@@ -19,6 +19,7 @@ use App\Utils\NotificationUtils;
 use App\Rules\NoFakeEmail;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\TicketSaleNotification;
 
@@ -158,6 +159,18 @@ class TicketController extends Controller
 
         $sale->save();
 
+        Log::info('Ticket checkout created sale', [
+            'sale_id' => $sale->id,
+            'event_id' => $event->id,
+            'event_name' => $event->name,
+            'user_id' => optional($user)->id,
+            'purchaser_email' => $sale->email,
+            'total_tickets' => collect($request->tickets)->sum(),
+            'status' => $sale->status,
+            'payment_method' => $sale->payment_method,
+            'event_date' => $sale->event_date,
+        ]);
+
         foreach($request->tickets as $ticketId => $quantity) {
             if ($quantity > 0) {
                 $sale->saleTickets()->create([
@@ -174,11 +187,23 @@ class TicketController extends Controller
         $sale->payment_amount = $total;
         $sale->save();
 
+        Log::info('Ticket checkout completed sale totals', [
+            'sale_id' => $sale->id,
+            'payment_amount' => $sale->payment_amount,
+            'status' => $sale->status,
+        ]);
+
         $this->sendTicketSaleNotifications($sale);
 
         if ($total == 0) {
             $sale->status = 'paid';
             $sale->save();
+
+            Log::info('Ticket checkout auto-marked sale as paid (zero total)', [
+                'sale_id' => $sale->id,
+                'event_id' => $event->id,
+                'payment_amount' => $sale->payment_amount,
+            ]);
 
             return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
         } else {
@@ -482,9 +507,24 @@ class TicketController extends Controller
         switch ($request->action) {
             case 'mark_paid':
                 if ($sale->status === 'unpaid') {
+                    $previousStatus = $sale->status;
                     $sale->status = 'paid';
                     $sale->transaction_reference = __('messages.manual_payment');
                     $sale->save();
+
+                    Log::info('Sale manually marked as paid', [
+                        'sale_id' => $sale->id,
+                        'event_id' => $sale->event_id,
+                        'previous_status' => $previousStatus,
+                        'actor_id' => $user->id,
+                    ]);
+                } else {
+                    Log::info('Sale mark_paid request ignored', [
+                        'sale_id' => $sale->id,
+                        'event_id' => $sale->event_id,
+                        'current_status' => $sale->status,
+                        'actor_id' => $user->id,
+                    ]);
                 }
                 break;
             
@@ -521,6 +561,13 @@ class TicketController extends Controller
 
         $event = $sale->event;
         $contextRole = $event->venue ?: $event->creatorRole;
+
+        Log::info('Dispatching ticket sale notifications', [
+            'sale_id' => $sale->id,
+            'event_id' => $event->id,
+            'purchaser_email' => $sale->email,
+            'status' => $sale->status,
+        ]);
 
         if ($sale->email) {
             Notification::route('mail', $sale->email)
