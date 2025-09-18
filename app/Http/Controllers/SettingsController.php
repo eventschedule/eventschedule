@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Setting;
+use App\Support\MailTemplateManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -10,7 +11,7 @@ use Illuminate\View\View;
 
 class SettingsController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, MailTemplateManager $mailTemplates): View
     {
         $this->authorizeAdmin($request->user());
 
@@ -39,6 +40,7 @@ class SettingsController extends Controller
                 'ssl' => 'SSL',
             ],
             'buildNumber' => config('app.build_number'),
+            'mailTemplates' => $mailTemplates->all(),
         ]);
     }
 
@@ -79,6 +81,41 @@ class SettingsController extends Controller
         $this->applyMailConfig($mailSettings);
 
         return back()->with('status', 'mail-settings-updated');
+    }
+
+    public function updateMailTemplates(Request $request, MailTemplateManager $mailTemplates): RedirectResponse
+    {
+        $this->authorizeAdmin($request->user());
+
+        $templates = $mailTemplates->all();
+
+        $rules = [];
+
+        foreach ($templates as $template) {
+            $base = 'mail_templates.' . $template['key'];
+
+            if (isset($template['subject'])) {
+                $rules[$base . '.subject'] = ['required', 'string', 'max:255'];
+            }
+
+            if (!empty($template['has_subject_curated']) && isset($template['subject_curated'])) {
+                $rules[$base . '.subject_curated'] = ['required', 'string', 'max:255'];
+            }
+
+            if (isset($template['body'])) {
+                $rules[$base . '.body'] = ['required', 'string'];
+            }
+
+            if (!empty($template['has_body_curated']) && isset($template['body_curated'])) {
+                $rules[$base . '.body_curated'] = ['required', 'string'];
+            }
+        }
+
+        $validated = $request->validate($rules);
+
+        $mailTemplates->updateFromArray($validated['mail_templates'] ?? []);
+
+        return back()->with('status', 'mail-templates-updated');
     }
 
     protected function authorizeAdmin($user): void

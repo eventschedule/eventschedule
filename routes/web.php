@@ -90,6 +90,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::patch('/settings/mail', [SettingsController::class, 'updateMail'])->name('settings.mail.update');
+    Route::patch('/settings/mail-templates', [SettingsController::class, 'updateMailTemplates'])->name('settings.mail_templates.update');
 
     Route::get('/account', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/account', [ProfileController::class, 'update'])->name('profile.update');
