@@ -88,9 +88,13 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/sales', [TicketController::class, 'sales'])->name('sales');
     Route::post('/sales/action/{sale_id}', [TicketController::class, 'handleAction'])->name('sales.action');
     
-    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
-    Route::patch('/settings/mail', [SettingsController::class, 'updateMail'])->name('settings.mail.update');
-    Route::patch('/settings/mail-templates', [SettingsController::class, 'updateMailTemplates'])->name('settings.mail_templates.update');
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::get('/', [SettingsController::class, 'index'])->name('index');
+        Route::get('/email', [SettingsController::class, 'email'])->name('email');
+        Route::get('/email-templates', [SettingsController::class, 'emailTemplates'])->name('email_templates');
+        Route::patch('/email', [SettingsController::class, 'updateMail'])->name('mail.update');
+        Route::patch('/email-templates', [SettingsController::class, 'updateMailTemplates'])->name('mail_templates.update');
+    });
 
     Route::get('/account', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/account', [ProfileController::class, 'update'])->name('profile.update');
