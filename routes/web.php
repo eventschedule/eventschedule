@@ -73,6 +73,8 @@ Route::get('/translate_data', [AppController::class, 'translateData'])->name('tr
 
 Route::get('/ticket/qr_code/{event_id}/{secret}', [TicketController::class, 'qrCode'])->name('ticket.qr_code')->middleware('throttle:100,1');
 Route::get('/ticket/view/{event_id}/{secret}', [TicketController::class, 'view'])->name('ticket.view')->middleware('throttle:100,1');
+Route::get('/ticket/wallet/apple/{event_id}/{secret}', [TicketController::class, 'appleWallet'])->name('ticket.wallet.apple')->middleware('throttle:50,1');
+Route::get('/ticket/wallet/google/{event_id}/{secret}', [TicketController::class, 'googleWallet'])->name('ticket.wallet.google')->middleware('throttle:50,1');
 
 Route::middleware(['auth', 'verified'])->group(function () 
 {

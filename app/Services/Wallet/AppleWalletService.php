@@ -1,0 +1,429 @@
+<?php
+
+namespace App\Services\Wallet;
+
+use App\Models\Event;
+use App\Models\Role;
+use App\Models\Sale;
+use Carbon\Carbon;
+use Illuminate\Support\Str;
+use RuntimeException;
+use ZipArchive;
+
+class AppleWalletService
+{
+    protected bool $enabled;
+    protected ?string $certificatePath;
+    protected ?string $certificatePassword;
+    protected ?string $wwdrCertificatePath;
+    protected ?string $passTypeIdentifier;
+    protected ?string $teamIdentifier;
+    protected string $organizationName;
+    protected string $backgroundColor;
+    protected string $foregroundColor;
+    protected string $labelColor;
+
+    public function __construct()
+    {
+        $config = config('wallet.apple');
+
+        $this->enabled = (bool) ($config['enabled'] ?? false);
+        $this->certificatePath = $config['certificate_path'] ?? null;
+        $this->certificatePassword = $config['certificate_password'] ?? null;
+        $this->wwdrCertificatePath = $config['wwdr_certificate_path'] ?? null;
+        $this->passTypeIdentifier = $config['pass_type_identifier'] ?? null;
+        $this->teamIdentifier = $config['team_identifier'] ?? null;
+        $this->organizationName = $config['organization_name'] ?? config('app.name');
+        $this->backgroundColor = $config['background_color'] ?? 'rgb(78,129,250)';
+        $this->foregroundColor = $config['foreground_color'] ?? 'rgb(255,255,255)';
+        $this->labelColor = $config['label_color'] ?? 'rgb(255,255,255)';
+    }
+
+    public function isConfigured(): bool
+    {
+        if (! $this->enabled) {
+            return false;
+        }
+
+        if (! $this->certificatePath || ! $this->passTypeIdentifier || ! $this->teamIdentifier || ! $this->wwdrCertificatePath) {
+            return false;
+        }
+
+        if (! file_exists($this->certificatePath) || ! file_exists($this->wwdrCertificatePath)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function isAvailableForSale(Sale $sale): bool
+    {
+        return $this->isConfigured() && $sale->status === 'paid';
+    }
+
+    public function generateTicketPass(Sale $sale): string
+    {
+        if (! $this->isAvailableForSale($sale)) {
+            throw new RuntimeException('Apple Wallet is not configured for this sale.');
+        }
+
+        $sale->loadMissing('event.creatorRole', 'event.venue', 'saleTickets.ticket');
+
+        if (! $sale->event) {
+            throw new RuntimeException('Sale event is not available.');
+        }
+
+        $payload = $this->buildPassPayload($sale);
+
+        $baseFiles = [
+            'pass.json' => $this->encodeJson($payload),
+            'icon.png' => $this->createIcon($sale->event, 58),
+            'icon@2x.png' => $this->createIcon($sale->event, 116),
+            'logo.png' => $this->createIcon($sale->event, 160),
+            'logo@2x.png' => $this->createIcon($sale->event, 320),
+        ];
+
+        $manifest = $this->createManifest($baseFiles);
+        $signature = $this->signManifest($manifest);
+
+        return $this->createPackage($baseFiles, $manifest, $signature);
+    }
+
+    protected function buildPassPayload(Sale $sale): array
+    {
+        $event = $sale->event;
+        $startsAt = $this->resolveEventStart($event, $sale->event_date);
+        $relevantDate = $startsAt->copy()->setTimezone('UTC')->format('Y-m-d\TH:i:s\Z');
+        $ticketSummary = $sale->saleTickets->map(function ($saleTicket) {
+            $name = $saleTicket->ticket->type ?: __('messages.ticket');
+
+            return trim($name) . ' x ' . $saleTicket->quantity;
+        })->implode(', ');
+
+        $fields = [
+            'formatVersion' => 1,
+            'passTypeIdentifier' => $this->passTypeIdentifier,
+            'serialNumber' => $this->buildSerialNumber($sale),
+            'teamIdentifier' => $this->teamIdentifier,
+            'organizationName' => $this->organizationName,
+            'description' => $event->name,
+            'logoText' => Str::limit($event->name, 24),
+            'relevantDate' => $relevantDate,
+            'backgroundColor' => $this->backgroundColor,
+            'foregroundColor' => $this->foregroundColor,
+            'labelColor' => $this->labelColor,
+            'barcode' => [
+                'format' => 'PKBarcodeFormatQR',
+                'message' => $sale->secret,
+                'messageEncoding' => 'utf-8',
+            ],
+            'eventTicket' => [
+                'primaryFields' => [
+                    [
+                        'key' => 'event-name',
+                        'label' => __('messages.event'),
+                        'value' => $event->name,
+                    ],
+                ],
+                'secondaryFields' => array_values(array_filter([
+                    [
+                        'key' => 'event-date',
+                        'label' => __('messages.date'),
+                        'value' => $this->formatDisplayDate($event, $sale->event_date),
+                    ],
+                    $sale->name ? [
+                        'key' => 'attendee',
+                        'label' => __('messages.attendee'),
+                        'value' => $sale->name,
+                    ] : null,
+                    $event->venue ? [
+                        'key' => 'venue',
+                        'label' => __('messages.venue'),
+                        'value' => $event->venue->shortAddress() ?: $event->venue->name,
+                    ] : null,
+                ])),
+                'auxiliaryFields' => array_values(array_filter([
+                    [
+                        'key' => 'tickets',
+                        'label' => __('messages.tickets'),
+                        'value' => $ticketSummary ?: $sale->quantity(),
+                    ],
+                    [
+                        'key' => 'order',
+                        'label' => __('messages.order_number'),
+                        'value' => (string) $sale->id,
+                    ],
+                ])),
+                'backFields' => [
+                    [
+                        'key' => 'ticket-url',
+                        'label' => __('messages.ticket'),
+                        'value' => route('ticket.view', [
+                            'event_id' => $event->hashedId(),
+                            'secret' => $sale->secret,
+                        ]),
+                    ],
+                ],
+            ],
+        ];
+
+        $locations = $this->resolveLocations($event);
+
+        if (! empty($locations)) {
+            $fields['locations'] = $locations;
+        }
+
+        return $fields;
+    }
+
+    protected function buildSerialNumber(Sale $sale): string
+    {
+        return strtoupper(substr(hash('sha256', $sale->id . '|' . $sale->secret), 0, 32));
+    }
+
+    protected function resolveEventStart(Event $event, ?string $eventDate): Carbon
+    {
+        $startsAt = $event->getStartDateTime($eventDate);
+        $timezone = $this->resolveTimezone($event);
+
+        return $startsAt->clone()->setTimezone($timezone);
+    }
+
+    protected function resolveTimezone(Event $event): string
+    {
+        return $event->venue?->timezone
+            ?? $event->creatorRole?->timezone
+            ?? config('app.timezone', 'UTC');
+    }
+
+    protected function formatDisplayDate(Event $event, ?string $eventDate): string
+    {
+        return $event->localStartsAt(true, $eventDate) ?: $event->getStartDateTime($eventDate)->format('F j, Y g:i A');
+    }
+
+    /**
+     * @param  array<string, string>  $files
+     * @return array<string, string>
+     */
+    protected function createManifest(array $files): array
+    {
+        $manifest = [];
+
+        foreach ($files as $filename => $contents) {
+            $manifest[$filename] = sha1($contents);
+        }
+
+        return $manifest;
+    }
+
+    /**
+     * @param  array<string, string>  $manifest
+     */
+    protected function signManifest(array $manifest): string
+    {
+        $certificateContents = file_get_contents($this->certificatePath ?? '');
+
+        if ($certificateContents === false) {
+            throw new RuntimeException('Unable to read Apple Wallet certificate.');
+        }
+
+        $certificates = [];
+
+        if (! openssl_pkcs12_read($certificateContents, $certificates, $this->certificatePassword ?? '')) {
+            throw new RuntimeException('Unable to parse Apple Wallet certificate.');
+        }
+
+        $manifestPath = $this->createTempFile($this->encodeJson($manifest));
+        $signaturePath = tempnam(sys_get_temp_dir(), 'pkpass-signature-') ?: throw new RuntimeException('Unable to create signature file.');
+
+        $signingResult = openssl_pkcs7_sign(
+            $manifestPath,
+            $signaturePath,
+            $certificates['cert'] ?? null,
+            $certificates['pkey'] ?? null,
+            [],
+            PKCS7_BINARY | PKCS7_DETACHED,
+            $this->wwdrCertificatePath
+        );
+
+        if (! $signingResult) {
+            @unlink($manifestPath);
+            @unlink($signaturePath);
+            throw new RuntimeException('Unable to sign Apple Wallet manifest.');
+        }
+
+        $signatureContents = file_get_contents($signaturePath);
+
+        @unlink($manifestPath);
+        @unlink($signaturePath);
+
+        if ($signatureContents === false) {
+            throw new RuntimeException('Unable to read Apple Wallet signature.');
+        }
+
+        return $this->convertSignatureToBinary($signatureContents);
+    }
+
+    protected function convertSignatureToBinary(string $signature): string
+    {
+        if (str_contains($signature, '-----BEGIN PKCS7-----')) {
+            $signature = preg_replace('/-----BEGIN PKCS7-----|-----END PKCS7-----|\s+/', '', $signature) ?? '';
+            $signature = base64_decode($signature, true) ?: '';
+        }
+
+        if ($signature === '') {
+            throw new RuntimeException('Invalid Apple Wallet signature content.');
+        }
+
+        return $signature;
+    }
+
+    /**
+     * @param  array<string, string>  $files
+     * @param  array<string, string>  $manifest
+     */
+    protected function createPackage(array $files, array $manifest, string $signature): string
+    {
+        $zipPath = tempnam(sys_get_temp_dir(), 'pkpass-') ?: throw new RuntimeException('Unable to create temporary pass file.');
+        $zip = new ZipArchive();
+
+        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            @unlink($zipPath);
+            throw new RuntimeException('Unable to initialise pass archive.');
+        }
+
+        foreach ($files as $filename => $contents) {
+            $zip->addFromString($filename, $contents);
+        }
+
+        $zip->addFromString('manifest.json', $this->encodeJson($manifest));
+        $zip->addFromString('signature', $signature);
+
+        $zip->close();
+
+        $binary = file_get_contents($zipPath);
+        @unlink($zipPath);
+
+        if ($binary === false) {
+            throw new RuntimeException('Unable to read Apple Wallet package.');
+        }
+
+        return $binary;
+    }
+
+    protected function createIcon(Event $event, int $size): string
+    {
+        $image = imagecreatetruecolor($size, $size);
+
+        if (! $image) {
+            throw new RuntimeException('Unable to create wallet icon image.');
+        }
+
+        imagealphablending($image, true);
+        imagesavealpha($image, true);
+
+        $background = $this->allocateColor($image, $event->creatorRole?->accent_color ?? '#4E81FA');
+        imagefilledrectangle($image, 0, 0, $size, $size, $background);
+
+        $textColor = imagecolorallocatealpha($image, 255, 255, 255, 40);
+        $initials = $this->resolveInitials($event);
+
+        $font = 5;
+        $textWidth = imagefontwidth($font) * strlen($initials);
+        $textHeight = imagefontheight($font);
+        $x = (int) max(0, ($size - $textWidth) / 2);
+        $y = (int) max(0, ($size - $textHeight) / 2);
+
+        imagestring($image, $font, $x, $y, $initials, $textColor);
+
+        ob_start();
+        imagepng($image);
+        $contents = ob_get_clean();
+        imagedestroy($image);
+
+        if ($contents === false) {
+            throw new RuntimeException('Unable to generate wallet icon.');
+        }
+
+        return $contents;
+    }
+
+    protected function resolveInitials(Event $event): string
+    {
+        $words = preg_split('/\s+/', trim($event->name));
+
+        if (! $words || $words === ['']) {
+            return 'E';
+        }
+
+        $initials = collect($words)
+            ->take(2)
+            ->map(fn ($word) => Str::upper(Str::substr($word, 0, 1)))
+            ->implode('');
+
+        return $initials ?: 'E';
+    }
+
+    protected function allocateColor($image, ?string $hexColor)
+    {
+        $hexColor = $hexColor ?: '#4E81FA';
+        $hexColor = ltrim($hexColor, '#');
+
+        if (strlen($hexColor) === 3) {
+            $hexColor = implode('', array_map(fn ($char) => $char . $char, str_split($hexColor)));
+        }
+
+        $rgb = [
+            hexdec(substr($hexColor, 0, 2)),
+            hexdec(substr($hexColor, 2, 2)),
+            hexdec(substr($hexColor, 4, 2)),
+        ];
+
+        return imagecolorallocate($image, $rgb[0], $rgb[1], $rgb[2]);
+    }
+
+    protected function resolveLocations(Event $event): array
+    {
+        $locations = [];
+
+        $role = $event->venue instanceof Role ? $event->venue : $event->creatorRole;
+
+        if ($role && $role->geo_lat && $role->geo_lon) {
+            $locations[] = [
+                'latitude' => (float) $role->geo_lat,
+                'longitude' => (float) $role->geo_lon,
+            ];
+        }
+
+        return $locations;
+    }
+
+    protected function encodeJson(array $data): string
+    {
+        $json = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+        if ($json === false) {
+            throw new RuntimeException('Unable to encode Apple Wallet payload.');
+        }
+
+        return $json;
+    }
+
+    protected function createTempFile(string $contents): string
+    {
+        $path = tempnam(sys_get_temp_dir(), 'pkpass-');
+
+        if ($path === false) {
+            throw new RuntimeException('Unable to create temporary file.');
+        }
+
+        $bytes = file_put_contents($path, $contents);
+
+        if ($bytes === false) {
+            @unlink($path);
+            throw new RuntimeException('Unable to write temporary file.');
+        }
+
+        return $path;
+    }
+}
