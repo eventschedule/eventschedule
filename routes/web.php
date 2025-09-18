@@ -90,8 +90,10 @@ Route::middleware(['auth', 'verified'])->group(function ()
     
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->name('index');
+        Route::get('/general', [SettingsController::class, 'general'])->name('general');
         Route::get('/email', [SettingsController::class, 'email'])->name('email');
         Route::get('/email-templates', [SettingsController::class, 'emailTemplates'])->name('email_templates');
+        Route::patch('/general', [SettingsController::class, 'updateGeneral'])->name('general.update');
         Route::patch('/email', [SettingsController::class, 'updateMail'])->name('mail.update');
         Route::patch('/email-templates', [SettingsController::class, 'updateMailTemplates'])->name('mail_templates.update');
     });

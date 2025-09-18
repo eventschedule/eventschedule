@@ -6,6 +6,7 @@ use App\Models\Setting;
 use App\Support\MailTemplateManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -16,6 +17,15 @@ class SettingsController extends Controller
         $this->authorizeAdmin($request->user());
 
         return view('settings.index');
+    }
+
+    public function general(Request $request): View
+    {
+        $this->authorizeAdmin($request->user());
+
+        return view('settings.general', [
+            'generalSettings' => $this->getGeneralSettings(),
+        ]);
     }
 
     public function email(Request $request): View
@@ -86,6 +96,25 @@ class SettingsController extends Controller
         return redirect()->route('settings.email')->with('status', 'mail-settings-updated');
     }
 
+    public function updateGeneral(Request $request): RedirectResponse
+    {
+        $this->authorizeAdmin($request->user());
+
+        $validated = $request->validate([
+            'public_url' => ['required', 'string', 'max:255', 'url'],
+        ]);
+
+        $publicUrl = $this->sanitizeUrl($validated['public_url']);
+
+        Setting::setGroup('general', [
+            'public_url' => $publicUrl,
+        ]);
+
+        $this->applyGeneralConfig($publicUrl);
+
+        return redirect()->route('settings.general')->with('status', 'general-settings-updated');
+    }
+
     public function updateMailTemplates(Request $request, MailTemplateManager $mailTemplates): RedirectResponse
     {
         $this->authorizeAdmin($request->user());
@@ -137,9 +166,28 @@ class SettingsController extends Controller
         ];
     }
 
+    protected function getGeneralSettings(): array
+    {
+        $storedGeneralSettings = Setting::forGroup('general');
+
+        return [
+            'public_url' => $storedGeneralSettings['public_url'] ?? config('app.url'),
+        ];
+    }
+
     protected function authorizeAdmin($user): void
     {
         abort_unless($user && $user->isAdmin(), 403);
+    }
+
+    protected function applyGeneralConfig(?string $publicUrl): void
+    {
+        if (empty($publicUrl)) {
+            return;
+        }
+
+        config(['app.url' => $publicUrl]);
+        URL::forceRootUrl($publicUrl);
     }
 
     protected function applyMailConfig(array $settings): void
@@ -177,5 +225,12 @@ class SettingsController extends Controller
         $value = is_string($value) ? trim($value) : $value;
 
         return $value === '' ? null : $value;
+    }
+
+    protected function sanitizeUrl(string $url): string
+    {
+        $trimmed = trim($url);
+
+        return rtrim($trimmed, '/');
     }
 }

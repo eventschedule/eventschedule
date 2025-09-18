@@ -63,6 +63,13 @@ class AppServiceProvider extends ServiceProvider
         });
 
         if (Schema::hasTable('settings')) {
+            $generalSettings = Setting::forGroup('general');
+
+            if (!empty($generalSettings['public_url'])) {
+                config(['app.url' => $generalSettings['public_url']]);
+                URL::forceRootUrl($generalSettings['public_url']);
+            }
+
             $mailSettings = Setting::forGroup('mail');
 
             if (!empty($mailSettings)) {
