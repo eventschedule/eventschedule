@@ -4,10 +4,12 @@ namespace App\Notifications;
 
 use App\Models\Role;
 use App\Models\Sale;
+use App\Support\MailTemplateManager;
+use App\Utils\NotificationUtils;
+use App\Utils\UrlUtils;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\Utils\NotificationUtils;
 
 class TicketPaidNotification extends Notification
 {
@@ -37,26 +39,42 @@ class TicketPaidNotification extends Notification
         $amount = $this->sale->payment_amount ?? $this->sale->calculateTotal();
         $currency = $event->ticket_currency_code ?? 'USD';
         $formattedAmount = number_format((float) $amount, 2) . ' ' . $currency;
+        $ticketViewUrl = route('ticket.view', [
+            'event_id' => UrlUtils::encodeId($event->id),
+            'secret' => $this->sale->secret,
+        ]);
 
-        $mail = (new MailMessage)
-            ->subject(__('messages.ticket_paid_subject', ['event' => $eventName]));
+        $templates = app(MailTemplateManager::class);
+        $templateKey = $this->recipientType === 'purchaser'
+            ? 'ticket_paid_purchaser'
+            : 'ticket_paid_organizer';
 
-        if ($this->recipientType === 'purchaser') {
-            $mail->line(__('messages.ticket_paid_line_purchaser', [
-                'event' => $eventName,
-                'date' => $date ?: __('messages.date_to_be_announced'),
-                'amount' => $formattedAmount,
-            ]));
-        } else {
-            $mail->line(__('messages.ticket_paid_line_organizer', [
-                'buyer' => $this->sale->name ?: $this->sale->email,
-                'event' => $eventName,
-                'date' => $date ?: __('messages.date_to_be_announced'),
-                'amount' => $formattedAmount,
-            ]));
-        }
+        $eventDate = $date ?: __('messages.date_to_be_announced');
+        $buyerName = $this->sale->name ?: $this->sale->email;
+        $buyerEmail = $this->sale->email ?? '';
 
-        $mail->action(__('messages.view_event'), $event->getGuestUrl($this->sale->subdomain, $this->sale->event_date));
+        $data = [
+            'event_name' => $eventName,
+            'event_date' => $eventDate,
+            'amount_total' => $formattedAmount,
+            'buyer_name' => $buyerName,
+            'buyer_email' => $buyerEmail,
+            'event_url' => $event->getGuestUrl($this->sale->subdomain, $this->sale->event_date),
+            'ticket_view_url' => $this->recipientType === 'purchaser'
+                ? $ticketViewUrl
+                : $event->getGuestUrl($this->sale->subdomain, $this->sale->event_date),
+            'order_reference' => (string) $this->sale->id,
+            'app_name' => config('app.name'),
+        ];
+
+        $subject = $templates->renderSubject($templateKey, $data);
+        $body = $templates->renderBody($templateKey, $data);
+
+        $mail = (new MailMessage())
+            ->subject($subject)
+            ->markdown('mail.templates.generic', [
+                'body' => $body,
+            ]);
 
         if ($event->user && $event->user->email) {
             $mail->replyTo($event->user->email, $event->user->name);

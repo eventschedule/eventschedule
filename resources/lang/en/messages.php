@@ -91,6 +91,8 @@ return [
     'colors' => 'Colors',
     'rotation' => 'Rotation',
     'settings' => 'Settings',
+    'settings_overview_description' => 'Choose a settings category to update application preferences.',
+    'back_to_settings' => 'Back to settings overview',
     'application_information' => 'Application Information',
     'application_information_description' => 'Review deployment details including the current build number.',
     'build_number' => 'Build Number',

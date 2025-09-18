@@ -11,24 +11,20 @@ use Illuminate\View\View;
 
 class SettingsController extends Controller
 {
-    public function index(Request $request, MailTemplateManager $mailTemplates): View
+    public function index(Request $request): View
     {
         $this->authorizeAdmin($request->user());
 
-        $storedMailSettings = Setting::forGroup('mail');
+        return view('settings.index');
+    }
 
-        $mailSettings = [
-            'mailer' => $storedMailSettings['mailer'] ?? config('mail.default'),
-            'host' => $storedMailSettings['host'] ?? config('mail.mailers.smtp.host'),
-            'port' => $storedMailSettings['port'] ?? config('mail.mailers.smtp.port'),
-            'username' => $storedMailSettings['username'] ?? config('mail.mailers.smtp.username'),
-            'password' => $storedMailSettings['password'] ?? config('mail.mailers.smtp.password'),
-            'encryption' => $storedMailSettings['encryption'] ?? config('mail.mailers.smtp.encryption'),
-            'from_address' => $storedMailSettings['from_address'] ?? config('mail.from.address'),
-            'from_name' => $storedMailSettings['from_name'] ?? config('mail.from.name'),
-        ];
+    public function email(Request $request): View
+    {
+        $this->authorizeAdmin($request->user());
 
-        return view('settings.index', [
+        $mailSettings = $this->getMailSettings();
+
+        return view('settings.email', [
             'mailSettings' => $mailSettings,
             'availableMailers' => [
                 'smtp' => 'SMTP',
@@ -39,7 +35,14 @@ class SettingsController extends Controller
                 'tls' => 'TLS',
                 'ssl' => 'SSL',
             ],
-            'buildNumber' => config('app.build_number'),
+        ]);
+    }
+
+    public function emailTemplates(Request $request, MailTemplateManager $mailTemplates): View
+    {
+        $this->authorizeAdmin($request->user());
+
+        return view('settings.email-templates', [
             'mailTemplates' => $mailTemplates->all(),
         ]);
     }
@@ -80,7 +83,7 @@ class SettingsController extends Controller
 
         $this->applyMailConfig($mailSettings);
 
-        return back()->with('status', 'mail-settings-updated');
+        return redirect()->route('settings.email')->with('status', 'mail-settings-updated');
     }
 
     public function updateMailTemplates(Request $request, MailTemplateManager $mailTemplates): RedirectResponse
@@ -115,7 +118,23 @@ class SettingsController extends Controller
 
         $mailTemplates->updateFromArray($validated['mail_templates'] ?? []);
 
-        return back()->with('status', 'mail-templates-updated');
+        return redirect()->route('settings.email_templates')->with('status', 'mail-templates-updated');
+    }
+
+    protected function getMailSettings(): array
+    {
+        $storedMailSettings = Setting::forGroup('mail');
+
+        return [
+            'mailer' => $storedMailSettings['mailer'] ?? config('mail.default'),
+            'host' => $storedMailSettings['host'] ?? config('mail.mailers.smtp.host'),
+            'port' => $storedMailSettings['port'] ?? config('mail.mailers.smtp.port'),
+            'username' => $storedMailSettings['username'] ?? config('mail.mailers.smtp.username'),
+            'password' => $storedMailSettings['password'] ?? config('mail.mailers.smtp.password'),
+            'encryption' => $storedMailSettings['encryption'] ?? config('mail.mailers.smtp.encryption'),
+            'from_address' => $storedMailSettings['from_address'] ?? config('mail.from.address'),
+            'from_name' => $storedMailSettings['from_name'] ?? config('mail.from.name'),
+        ];
     }
 
     protected function authorizeAdmin($user): void

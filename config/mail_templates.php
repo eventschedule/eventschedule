@@ -70,5 +70,132 @@ MD,
                 ':app_name' => 'The application name configured in settings.',
             ],
         ],
+        'ticket_sale_purchaser' => [
+            'label' => 'Ticket reservation confirmation (purchaser)',
+            'description' => 'Sent to attendees after they reserve tickets for an event.',
+            'subject' => 'Your ticket reservation for :event_name',
+            'body' => <<<'MD'
+# Hello!
+
+:subject_line
+
+- **Event:** :event_name
+- **Date:** :event_date
+- **Tickets:** :ticket_quantity
+
+[View Event](:event_url)
+
+[View Your Tickets](:ticket_view_url)
+
+Thanks,
+:app_name
+MD,
+            'placeholders' => [
+                ':subject_line' => 'The email subject line with placeholders applied.',
+                ':event_name' => 'Name of the event.',
+                ':event_date' => 'Date of the event, or "Date to be announced" when not available.',
+                ':ticket_quantity' => 'Number of tickets reserved in the order.',
+                ':event_url' => 'Public link where the recipient can view the event.',
+                ':ticket_view_url' => 'Private link where the purchaser can view their order and tickets.',
+                ':buyer_name' => 'Name provided by the purchaser.',
+                ':buyer_email' => 'Email address provided by the purchaser.',
+                ':order_reference' => 'Internal reference number for the order.',
+                ':app_name' => 'The application name configured in settings.',
+            ],
+        ],
+        'ticket_sale_organizer' => [
+            'label' => 'Ticket reservation notification (organizer)',
+            'description' => 'Sent to organizers when a new ticket reservation is created.',
+            'subject' => 'New ticket reservation for :event_name',
+            'body' => <<<'MD'
+# Hello!
+
+:subject_line
+
+- **Buyer:** :buyer_name (:buyer_email)
+- **Tickets:** :ticket_quantity
+- **Date:** :event_date
+- **Total:** :amount_total
+- **Order #:** :order_reference
+
+[View Event](:event_url)
+
+Thanks,
+:app_name
+MD,
+            'placeholders' => [
+                ':subject_line' => 'The email subject line with placeholders applied.',
+                ':event_name' => 'Name of the event.',
+                ':event_date' => 'Date of the event, or "Date to be announced" when not available.',
+                ':ticket_quantity' => 'Number of tickets reserved in the order.',
+                ':amount_total' => 'Total amount reserved or paid, including the currency.',
+                ':buyer_name' => 'Name provided by the purchaser.',
+                ':buyer_email' => 'Email address provided by the purchaser.',
+                ':event_url' => 'Public link where the recipient can view the event.',
+                ':order_reference' => 'Internal reference number for the order.',
+                ':app_name' => 'The application name configured in settings.',
+            ],
+        ],
+        'ticket_paid_purchaser' => [
+            'label' => 'Ticket payment confirmation (purchaser)',
+            'description' => 'Sent to attendees after their order is marked as paid.',
+            'subject' => 'Payment received for :event_name',
+            'body' => <<<'MD'
+# Hello!
+
+:subject_line
+
+- **Event:** :event_name
+- **Date:** :event_date
+- **Amount Paid:** :amount_total
+- **Order #:** :order_reference
+
+[View Your Tickets](:ticket_view_url)
+
+Thanks,
+:app_name
+MD,
+            'placeholders' => [
+                ':subject_line' => 'The email subject line with placeholders applied.',
+                ':event_name' => 'Name of the event.',
+                ':event_date' => 'Date of the event, or "Date to be announced" when not available.',
+                ':amount_total' => 'Total amount paid, including the currency.',
+                ':ticket_view_url' => 'Private link where the purchaser can view their order and tickets.',
+                ':order_reference' => 'Internal reference number for the order.',
+                ':app_name' => 'The application name configured in settings.',
+            ],
+        ],
+        'ticket_paid_organizer' => [
+            'label' => 'Ticket payment notification (organizer)',
+            'description' => 'Sent to organizers when an order is marked as paid.',
+            'subject' => 'Ticket payment received for :event_name',
+            'body' => <<<'MD'
+# Hello!
+
+:subject_line
+
+- **Buyer:** :buyer_name (:buyer_email)
+- **Event:** :event_name
+- **Date:** :event_date
+- **Amount Paid:** :amount_total
+- **Order #:** :order_reference
+
+[View Event](:event_url)
+
+Thanks,
+:app_name
+MD,
+            'placeholders' => [
+                ':subject_line' => 'The email subject line with placeholders applied.',
+                ':event_name' => 'Name of the event.',
+                ':event_date' => 'Date of the event, or "Date to be announced" when not available.',
+                ':amount_total' => 'Total amount paid, including the currency.',
+                ':buyer_name' => 'Name provided by the purchaser.',
+                ':buyer_email' => 'Email address provided by the purchaser.',
+                ':event_url' => 'Public link where the recipient can view the event.',
+                ':order_reference' => 'Internal reference number for the order.',
+                ':app_name' => 'The application name configured in settings.',
+            ],
+        ],
     ],
 ];
