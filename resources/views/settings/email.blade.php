@@ -23,7 +23,53 @@
                             </p>
                         </header>
 
-                        <form method="post" action="{{ route('settings.mail.update') }}" class="mt-6 space-y-6">
+                        <form method="post" action="{{ route('settings.mail.update') }}" class="mt-6 space-y-6"
+                            x-data="{
+                                testing: false,
+                                result: null,
+                                async sendTestEmail() {
+                                    this.testing = true;
+                                    this.result = null;
+
+                                    const formData = new FormData(this.$el);
+                                    formData.delete('_method');
+
+                                    try {
+                                        const response = await fetch('{{ route('settings.mail.test') }}', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Accept': 'application/json',
+                                                'X-Requested-With': 'XMLHttpRequest',
+                                            },
+                                            body: formData,
+                                        });
+
+                                        const data = await response.json().catch(() => ({}));
+
+                                        if (response.ok && data.status === 'success') {
+                                            this.result = {
+                                                success: true,
+                                                message: data.message || '{{ __('messages.test_email_sent') }}',
+                                            };
+                                        } else {
+                                            this.result = {
+                                                success: false,
+                                                message: data.message || '{{ __('messages.test_email_failed') }}',
+                                                error: data.error || null,
+                                            };
+                                        }
+                                    } catch (error) {
+                                        this.result = {
+                                            success: false,
+                                            message: '{{ __('messages.test_email_failed') }}',
+                                            error: error.message,
+                                        };
+                                    } finally {
+                                        this.testing = false;
+                                    }
+                                }
+                            }"
+                            x-on:submit="result = null">
                             @csrf
                             @method('patch')
 
@@ -101,13 +147,29 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('mail_from_address')" />
                             </div>
 
-                            <div class="flex items-center gap-4">
+                            <div class="flex flex-wrap items-center gap-4">
                                 <x-primary-button>{{ __('messages.save') }}</x-primary-button>
+
+                                <x-secondary-button type="button" x-on:click="sendTestEmail" x-bind:disabled="testing">
+                                    <span x-text="testing ? '{{ __('messages.sending_test_email') }}' : '{{ __('messages.send_test_email') }}'"
+                                        class="whitespace-nowrap"></span>
+                                </x-secondary-button>
 
                                 @if (session('status') === 'mail-settings-updated')
                                     <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
                                         class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.email_settings_saved') }}</p>
                                 @endif
+                            </div>
+
+                            <div x-cloak x-show="result" x-transition
+                                :class="result?.success ? 'border-green-200 bg-green-50 text-green-700' : 'border-red-200 bg-red-50 text-red-700'"
+                                class="rounded-md border px-4 py-3 text-sm">
+                                <p class="font-medium" x-text="result.message"></p>
+                                <template x-if="!result.success && result.error">
+                                    <p class="mt-2"><span class="font-medium">{{ __('messages.error_details') }}</span>
+                                        <span x-text="result.error"></span>
+                                    </p>
+                                </template>
                             </div>
                         </form>
                     </section>

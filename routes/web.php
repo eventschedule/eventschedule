@@ -95,6 +95,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
         Route::get('/email-templates', [SettingsController::class, 'emailTemplates'])->name('email_templates');
         Route::patch('/general', [SettingsController::class, 'updateGeneral'])->name('general.update');
         Route::patch('/email', [SettingsController::class, 'updateMail'])->name('mail.update');
+        Route::post('/email/test', [SettingsController::class, 'testMail'])->name('mail.test');
         Route::patch('/email-templates', [SettingsController::class, 'updateMailTemplates'])->name('mail_templates.update');
     });
 
