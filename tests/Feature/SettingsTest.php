@@ -30,6 +30,7 @@ class SettingsTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Email Settings');
+        $response->assertSee('General Settings');
     }
 
     public function test_non_admin_cannot_access_settings_page(): void
@@ -61,11 +62,11 @@ class SettingsTest extends TestCase
 
         $response = $this
             ->actingAs($admin)
-            ->patch('/settings/mail', $payload);
+            ->patch('/settings/email', $payload);
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/settings');
+            ->assertRedirect('/settings/email');
 
         $this->assertDatabaseHas('settings', [
             'group' => 'mail',
@@ -86,5 +87,30 @@ class SettingsTest extends TestCase
         $this->assertSame('tls', config('mail.mailers.smtp.encryption'));
         $this->assertSame('no-reply@example.com', config('mail.from.address'));
         $this->assertSame('Event Schedule', config('mail.from.name'));
+    }
+
+    public function test_admin_can_update_general_settings(): void
+    {
+        $admin = User::factory()->create();
+
+        $payload = [
+            'public_url' => 'https://example.org',
+        ];
+
+        $response = $this
+            ->actingAs($admin)
+            ->patch('/settings/general', $payload);
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/settings/general');
+
+        $this->assertDatabaseHas('settings', [
+            'group' => 'general',
+            'key' => 'public_url',
+            'value' => 'https://example.org',
+        ]);
+
+        $this->assertSame('https://example.org', config('app.url'));
     }
 }
