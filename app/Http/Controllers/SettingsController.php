@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use App\Support\MailTemplateManager;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Throwable;
 
 class SettingsController extends Controller
 {
@@ -61,39 +64,58 @@ class SettingsController extends Controller
     {
         $this->authorizeAdmin($request->user());
 
-        $validated = $request->validate([
-            'mail_mailer' => ['required', Rule::in(['smtp', 'log'])],
-            'mail_host' => [Rule::requiredIf($request->mail_mailer === 'smtp'), 'nullable', 'string', 'max:255'],
-            'mail_port' => [Rule::requiredIf($request->mail_mailer === 'smtp'), 'nullable', 'integer', 'between:1,65535'],
-            'mail_username' => ['nullable', 'string', 'max:255'],
-            'mail_password' => ['nullable', 'string', 'max:255'],
-            'mail_encryption' => ['nullable', Rule::in(['tls', 'ssl', ''])],
-            'mail_from_address' => ['required', 'email', 'max:255'],
-            'mail_from_name' => ['required', 'string', 'max:255'],
-        ]);
+        $validated = $this->validateMailSettings($request);
 
-        $currentSettings = Setting::forGroup('mail');
-
-        $password = $request->filled('mail_password')
-            ? trim($validated['mail_password'])
-            : ($currentSettings['password'] ?? config('mail.mailers.smtp.password'));
-
-        $mailSettings = [
-            'mailer' => $validated['mail_mailer'],
-            'host' => $this->nullableTrim($validated['mail_host'] ?? null),
-            'port' => isset($validated['mail_port']) ? (string) $validated['mail_port'] : null,
-            'username' => $this->nullableTrim($validated['mail_username'] ?? null),
-            'password' => $this->nullableTrim($password),
-            'encryption' => $this->nullableTrim($validated['mail_encryption'] ?? null),
-            'from_address' => trim($validated['mail_from_address']),
-            'from_name' => trim($validated['mail_from_name']),
-        ];
+        $mailSettings = $this->buildMailSettings($request, $validated);
 
         Setting::setGroup('mail', $mailSettings);
 
         $this->applyMailConfig($mailSettings);
 
         return redirect()->route('settings.email')->with('status', 'mail-settings-updated');
+    }
+
+    public function testMail(Request $request): JsonResponse
+    {
+        $this->authorizeAdmin($request->user());
+
+        $user = $request->user();
+
+        if (!$user || empty($user->email)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => __('messages.test_email_failed'),
+                'error' => __('messages.test_email_missing_user'),
+            ], 422);
+        }
+
+        $validated = $this->validateMailSettings($request);
+
+        $originalSettings = $this->getMailSettings();
+        $testMailSettings = $this->buildMailSettings($request, $validated);
+
+        $this->applyMailConfig($testMailSettings);
+
+        try {
+            Mail::raw(__('messages.test_email_body'), function ($message) use ($user) {
+                $message->to($user->email)->subject(__('messages.test_email_subject'));
+            });
+
+            return response()->json([
+                'status' => 'success',
+                'message' => __('messages.test_email_sent'),
+            ]);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => __('messages.test_email_failed'),
+                'error' => $exception->getMessage(),
+            ], 500);
+        } finally {
+            $this->applyMailConfig($originalSettings);
+        }
     }
 
     public function updateGeneral(Request $request): RedirectResponse
@@ -232,5 +254,39 @@ class SettingsController extends Controller
         $trimmed = trim($url);
 
         return rtrim($trimmed, '/');
+    }
+
+    protected function validateMailSettings(Request $request): array
+    {
+        return $request->validate([
+            'mail_mailer' => ['required', Rule::in(['smtp', 'log'])],
+            'mail_host' => [Rule::requiredIf($request->mail_mailer === 'smtp'), 'nullable', 'string', 'max:255'],
+            'mail_port' => [Rule::requiredIf($request->mail_mailer === 'smtp'), 'nullable', 'integer', 'between:1,65535'],
+            'mail_username' => ['nullable', 'string', 'max:255'],
+            'mail_password' => ['nullable', 'string', 'max:255'],
+            'mail_encryption' => ['nullable', Rule::in(['tls', 'ssl', ''])],
+            'mail_from_address' => ['required', 'email', 'max:255'],
+            'mail_from_name' => ['required', 'string', 'max:255'],
+        ]);
+    }
+
+    protected function buildMailSettings(Request $request, array $validated): array
+    {
+        $currentSettings = Setting::forGroup('mail');
+
+        $password = $request->filled('mail_password')
+            ? trim($validated['mail_password'])
+            : ($currentSettings['password'] ?? config('mail.mailers.smtp.password'));
+
+        return [
+            'mailer' => $validated['mail_mailer'],
+            'host' => $this->nullableTrim($validated['mail_host'] ?? null),
+            'port' => isset($validated['mail_port']) ? (string) $validated['mail_port'] : null,
+            'username' => $this->nullableTrim($validated['mail_username'] ?? null),
+            'password' => $this->nullableTrim($password),
+            'encryption' => $this->nullableTrim($validated['mail_encryption'] ?? null),
+            'from_address' => trim($validated['mail_from_address']),
+            'from_name' => trim($validated['mail_from_name']),
+        ];
     }
 }
