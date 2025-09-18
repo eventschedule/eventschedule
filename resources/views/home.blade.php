@@ -1,6 +1,11 @@
 <x-app-admin-layout>
+    @php
+        $schedules = isset($schedules) ? $schedules : collect();
+        $venues = isset($venues) ? $venues : collect();
+        $curators = isset($curators) ? $curators : collect();
+    @endphp
     <div class="py-5">
-        
+
         <!-- Get Started Panel -->
         @if($schedules->isEmpty() && $venues->isEmpty() && $curators->isEmpty() && auth()->user()->tickets()->count() === 0)
         <div class="mb-8">
