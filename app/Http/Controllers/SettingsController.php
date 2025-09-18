@@ -38,6 +38,7 @@ class SettingsController extends Controller
                 'tls' => 'TLS',
                 'ssl' => 'SSL',
             ],
+            'buildNumber' => config('app.build_number'),
         ]);
     }
 
