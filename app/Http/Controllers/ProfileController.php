@@ -11,37 +11,17 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use App\Utils\InvoiceNinja;
-use Codedge\Updater\UpdaterManager;
 
 class ProfileController extends Controller
 {
     /**
      * Display the user's profile form.
      */
-    public function edit(Request $request, UpdaterManager $updater): View
+    public function edit(Request $request): View
     {
-        $data = [
+        return view('profile.edit', [
             'user' => $request->user(),
-        ];
-
-        if (! config('app.hosted') && ! config('app.testing')) {
-            $data['version_installed'] = $updater->source()->getVersionInstalled();
-
-            try {
-                if ($request->has('clear_cache')) {
-                    cache()->forget('version_available');
-                }
-
-                $data['version_available'] = cache()->remember('version_available', 3600, function () use ($updater) {
-                    \Log::info('Checking for new version');
-                    return $updater->source()->getVersionAvailable();
-                });            
-            } catch (\Exception $e) {
-                $data['version_available'] = 'Error: failed to check version';
-            }
-        }
-
-        return view('profile.edit', $data);
+        ]);
     }
 
     /**
@@ -159,9 +139,9 @@ class ProfileController extends Controller
 
                 $invoiceNinja->createWebhook(route('invoiceninja.webhook', ['secret' => $user->invoiceninja_webhook_secret]));
 
-                return Redirect::route('profile.edit')->with('message', __('messages.invoiceninja_connected'));
+                return Redirect::back()->with('message', __('messages.invoiceninja_connected'));
             } catch (\Exception $e) {
-                return Redirect::route('profile.edit')->with('error', __('messages.error_invoiceninja_connection'));
+                return Redirect::back()->with('error', __('messages.error_invoiceninja_connection'));
             }
         }
 
@@ -170,10 +150,10 @@ class ProfileController extends Controller
             $user->payment_secret = strtolower(\Str::random(32));
             $user->save();
 
-            return Redirect::route('profile.edit')->with('message', __('messages.payment_url_connected'));
+            return Redirect::back()->with('message', __('messages.payment_url_connected'));
         }
 
-        return Redirect::route('profile.edit')->with('status', 'payments-updated');
+        return Redirect::back()->with('status', 'payments-updated');
     }
 
     public function unlinkPaymentUrl(Request $request): RedirectResponse
@@ -183,6 +163,6 @@ class ProfileController extends Controller
         $user->payment_secret = null;
         $user->save();
 
-        return Redirect::route('profile.edit')->with('message', __('messages.payment_url_unlinked'));
+        return Redirect::back()->with('message', __('messages.payment_url_unlinked'));
     }
 }
