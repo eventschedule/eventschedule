@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Sale;
+use Illuminate\Support\Carbon;
 
 class ReleaseTickets extends Command
 {
@@ -28,20 +29,26 @@ class ReleaseTickets extends Command
     {
         \Log::info('Release expired unpaid tickets...');
         
-        $connection = config('database.default');
-        $driver = config("database.connections.{$connection}.driver");
-        
-        $expiredSales = Sale::where('status', 'unpaid')
-            ->whereHas('event', function($query) use ($driver) {
+        $candidateSales = Sale::where('status', 'unpaid')
+            ->where('is_deleted', false)
+            ->whereHas('event', function ($query) {
                 $query->where('events.expire_unpaid_tickets', '>', 0);
-                if ($driver === 'sqlite') {
-                    $query->whereRaw("(strftime('%s', 'now') - strftime('%s', sales.created_at))/3600 >= events.expire_unpaid_tickets");
-                } else {
-                    $query->whereRaw('TIMESTAMPDIFF(HOUR, sales.created_at, NOW()) >= events.expire_unpaid_tickets');
-                }
             })
+            ->with(['event', 'saleTickets.ticket'])
             ->get();
-        
+
+        $expiredSales = $candidateSales->filter(function (Sale $sale) {
+            $expireAfterHours = (int) $sale->event->expire_unpaid_tickets;
+
+            if ($expireAfterHours <= 0 || ! $sale->created_at) {
+                return false;
+            }
+
+            $expiresAt = $sale->created_at->copy()->addHours($expireAfterHours);
+
+            return Carbon::now()->greaterThanOrEqualTo($expiresAt);
+        });
+
         \Log::info('Found ' . $expiredSales->count() . ' expired sales to process');
 
         foreach ($expiredSales as $sale) {

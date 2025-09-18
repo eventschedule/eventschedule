@@ -21,7 +21,7 @@ class Sale extends Model
     protected static function booted()
     {
         static::updated(function (self $sale) {
-            if ($sale->isDirty('status') && in_array($sale->status, ['cancelled', 'refunded', 'expired'])) {
+            if ($sale->wasChanged('status') && in_array($sale->status, ['cancelled', 'refunded', 'expired'])) {
                 $sale->loadMissing('saleTickets.ticket');
 
                 foreach ($sale->saleTickets as $saleTicket) {
@@ -29,7 +29,7 @@ class Sale extends Model
                 }
             }
 
-            if ($sale->isDirty('status') && $sale->status === 'paid') {
+            if ($sale->wasChanged('status') && $sale->status === 'paid') {
                 $sale->loadMissing(['saleTickets.ticket', 'event.roles.members', 'event.venue.members', 'event.creatorRole.members', 'event.user']);
 
                 self::sendPaidNotifications($sale);
