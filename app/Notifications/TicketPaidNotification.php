@@ -7,6 +7,8 @@ use App\Models\Sale;
 use App\Support\MailTemplateManager;
 use App\Utils\NotificationUtils;
 use App\Utils\UrlUtils;
+use App\Services\Wallet\AppleWalletService;
+use App\Services\Wallet\GoogleWalletService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -65,6 +67,7 @@ class TicketPaidNotification extends Notification
                 : $event->getGuestUrl($this->sale->subdomain, $this->sale->event_date),
             'order_reference' => (string) $this->sale->id,
             'app_name' => config('app.name'),
+            'wallet_links_markdown' => $this->walletLinksMarkdown(),
         ];
 
         $subject = $templates->renderSubject($templateKey, $data);
@@ -102,6 +105,32 @@ class TicketPaidNotification extends Notification
             'List-Unsubscribe' => '<' . route('role.unsubscribe', ['subdomain' => $subdomain]) . '>',
             'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
         ];
+    }
+
+    protected function walletLinksMarkdown(): string
+    {
+        $links = [];
+        $sale = $this->sale->loadMissing('event');
+
+        $appleWallet = app(AppleWalletService::class);
+
+        if ($appleWallet->isAvailableForSale($sale)) {
+            $links[] = '[' . __('messages.add_to_apple_wallet') . '](' . route('ticket.wallet.apple', [
+                'event_id' => UrlUtils::encodeId($sale->event_id),
+                'secret' => $sale->secret,
+            ]) . ')';
+        }
+
+        $googleWallet = app(GoogleWalletService::class);
+
+        if ($googleWallet->isAvailableForSale($sale)) {
+            $links[] = '[' . __('messages.save_to_google_wallet') . '](' . route('ticket.wallet.google', [
+                'event_id' => UrlUtils::encodeId($sale->event_id),
+                'secret' => $sale->secret,
+            ]) . ')';
+        }
+
+        return implode("\n\n", $links);
     }
 }
 

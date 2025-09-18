@@ -36,7 +36,8 @@
 - 🎫 **Multiple Ticket Types:** Offer different ticket tiers, such as Standard or VIP, to meet various audience needs.  
 - 🔢 **Ticket Quantity Limits:** Set a maximum number of tickets available for each event to manage capacity.  
 - ⏳ **Ticket Reservation System:** Allow attendees to reserve tickets with a configurable release time before purchase.  
-- 📅 **Calendar Integration:** Enable attendees to add events directly to Google, Apple, or Microsoft calendars. 
+- 📅 **Calendar Integration:** Enable attendees to add events directly to Google, Apple, or Microsoft calendars.
+- 🧾 **Mobile Wallet Tickets:** Offer Add to Apple Wallet and Save to Google Wallet passes for paid orders.
 - 📋 **Sub-schedules:** Organize events into multiple sub-schedules for better categorization and management.
 - 🔍 **Search Feature:** Powerful search functionality to help users find specific events or content across your schedule.
 - 🎨 **Event Graphics Generator:** Create beautiful graphics of your upcoming events with flyers, QR codes, and event details for social media and marketing.
@@ -110,6 +111,27 @@ Add the following line to your crontab to ensure scheduled tasks run automatical
 ---
 
 You're all set! 🎉 Event Schedule should now be up and running.
+
+## Mobile Wallet Tickets
+
+Event Schedule can generate Apple Wallet passes and Google Wallet tickets for paid orders. Configure both services using the new environment variables in `.env`:
+
+### Apple Wallet
+
+1. Set `APPLE_WALLET_ENABLED=true`.
+2. Provide the path to your PassKit certificate (`.p12`) via `APPLE_WALLET_CERTIFICATE_PATH` and its password with `APPLE_WALLET_CERTIFICATE_PASSWORD`.
+3. Download the latest Apple WWDR certificate and set `APPLE_WALLET_WWDR_CERTIFICATE_PATH` to its location.
+4. Specify your Pass Type Identifier (`APPLE_WALLET_PASS_TYPE_IDENTIFIER`) and Apple Developer Team ID (`APPLE_WALLET_TEAM_IDENTIFIER`).
+5. Optionally customize the organization name and colors with the remaining `APPLE_WALLET_*` variables.
+
+### Google Wallet
+
+1. Set `GOOGLE_WALLET_ENABLED=true`.
+2. Create a Google Wallet issuer and note the issuer ID for `GOOGLE_WALLET_ISSUER_ID`.
+3. Supply a service account credential file by either providing the file path in `GOOGLE_WALLET_SERVICE_ACCOUNT_JSON_PATH` or pasting the JSON/base64 contents into `GOOGLE_WALLET_SERVICE_ACCOUNT_JSON`.
+4. Customize the ticket class suffix and issuer name if needed (`GOOGLE_WALLET_CLASS_SUFFIX`, `GOOGLE_WALLET_ISSUER_NAME`).
+
+Once configured, paid ticket emails and the ticket viewer will surface “Add to Apple Wallet” and “Save to Google Wallet” actions automatically.
 
 ## Testing
 

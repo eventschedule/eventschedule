@@ -17,6 +17,8 @@ use Endroid\QrCode\Writer\PngWriter;
 use App\Utils\InvoiceNinja;
 use App\Utils\NotificationUtils;
 use App\Rules\NoFakeEmail;
+use App\Services\Wallet\AppleWalletService;
+use App\Services\Wallet\GoogleWalletService;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -486,13 +488,65 @@ class TicketController extends Controller
         exit;
     }
 
-    public function view($eventId, $secret)
+    public function view($eventId, $secret, AppleWalletService $appleWalletService, GoogleWalletService $googleWalletService)
     {
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
         $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
-        $role = $event->role();        
+        $role = $event->role();
 
-        return view('ticket.view', compact('event', 'sale', 'role'));
+        $appleWalletUrl = $appleWalletService->isAvailableForSale($sale)
+            ? route('ticket.wallet.apple', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret])
+            : null;
+        $googleWalletUrl = $googleWalletService->isAvailableForSale($sale)
+            ? route('ticket.wallet.google', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret])
+            : null;
+
+        return view('ticket.view', compact('event', 'sale', 'role', 'appleWalletUrl', 'googleWalletUrl'));
+    }
+
+    public function appleWallet($eventId, $secret, AppleWalletService $appleWalletService)
+    {
+        $event = Event::findOrFail(UrlUtils::decodeId($eventId));
+        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
+
+        if (! $appleWalletService->isAvailableForSale($sale)) {
+            abort(404);
+        }
+
+        try {
+            $pass = $appleWalletService->generateTicketPass($sale);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            abort(500, __('messages.unable_to_generate_wallet_pass'));
+        }
+
+        $filename = Str::slug($event->name . '-' . $sale->id) . '.pkpass';
+
+        return response($pass, 200, [
+            'Content-Type' => 'application/vnd.apple.pkpass',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    public function googleWallet($eventId, $secret, GoogleWalletService $googleWalletService)
+    {
+        $event = Event::findOrFail(UrlUtils::decodeId($eventId));
+        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
+
+        if (! $googleWalletService->isAvailableForSale($sale)) {
+            abort(404);
+        }
+
+        try {
+            $link = $googleWalletService->createSaveLink($sale);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            abort(500, __('messages.unable_to_generate_wallet_pass'));
+        }
+
+        return redirect()->away($link);
     }
 
     public function handleAction(Request $request, $sale_id)

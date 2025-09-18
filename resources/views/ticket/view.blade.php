@@ -195,6 +195,34 @@
         </div>
       </div>
 
+      @if ($appleWalletUrl || $googleWalletUrl)
+        <div class="bg-white border border-[#4E81FA] p-[18px] rounded-[24px] flex flex-col gap-[12px] w-full max-w-[400px] mx-auto text-center">
+          <p class="text-[11px] font-semibold uppercase text-[#4E81FA]">
+            {{ __('messages.add_tickets_to_wallet') }}
+          </p>
+          <div class="flex flex-col sm:flex-row gap-[10px] justify-center">
+            @if ($appleWalletUrl)
+              <a
+                href="{{ $appleWalletUrl }}"
+                class="inline-flex items-center justify-center rounded-full border border-[#4E81FA] px-4 py-2 text-[11px] font-semibold uppercase text-[#4E81FA] hover:bg-[#4E81FA] hover:text-white transition-colors duration-150"
+              >
+                {{ __('messages.add_to_apple_wallet') }}
+              </a>
+            @endif
+            @if ($googleWalletUrl)
+              <a
+                href="{{ $googleWalletUrl }}"
+                class="inline-flex items-center justify-center rounded-full border border-[#4E81FA] px-4 py-2 text-[11px] font-semibold uppercase text-[#4E81FA] hover:bg-[#4E81FA] hover:text-white transition-colors duration-150"
+                target="_blank"
+                rel="noopener"
+              >
+                {{ __('messages.save_to_google_wallet') }}
+              </a>
+            @endif
+          </div>
+        </div>
+      @endif
+
       <div
         class="bg-[#4e81fa26] p-[12px] sm:p-[18px] rounded-[24px] flex flex-col justify-between w-full max-w-[400px] h-[185px] mx-auto"
       >

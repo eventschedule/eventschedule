@@ -152,6 +152,8 @@ MD,
 
 [View Your Tickets](:ticket_view_url)
 
+:wallet_links_markdown
+
 Thanks,
 :app_name
 MD,
@@ -163,6 +165,7 @@ MD,
                 ':ticket_view_url' => 'Private link where the purchaser can view their order and tickets.',
                 ':order_reference' => 'Internal reference number for the order.',
                 ':app_name' => 'The application name configured in settings.',
+                ':wallet_links_markdown' => 'Markdown links that let purchasers add their tickets to mobile wallets when enabled.',
             ],
         ],
         'ticket_paid_organizer' => [
