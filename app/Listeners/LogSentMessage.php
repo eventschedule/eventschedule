@@ -3,15 +3,34 @@
 namespace App\Listeners;
 
 use Illuminate\Mail\Events\MessageSent;
+use Illuminate\Notifications\AnonymousNotifiable;
+use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\Log;
 
 class LogSentMessage
 {
-    public function handle(MessageSent $event): void
+    public function handle(MessageSent|NotificationSent $event): void
+    {
+        if ($event instanceof MessageSent) {
+            $context = $this->contextFromMessageSent($event);
+        } else {
+            $context = $this->contextFromNotificationSent($event);
+        }
+
+        if ($context === []) {
+            return;
+        }
+
+        Log::info('Mail sent', $context);
+    }
+
+    private function contextFromMessageSent(MessageSent $event): array
     {
         $message = $this->extractMessage($event);
 
-        $context = [];
+        $context = [
+            'event' => 'MessageSent',
+        ];
 
         if ($message) {
             $context['subject'] = $this->extractSubject($message);
@@ -44,12 +63,40 @@ class LogSentMessage
             ], static fn ($value) => $value !== null && $value !== '');
         }
 
-        $context = array_filter(
+        return array_filter(
             $context,
             static fn ($value) => $value !== null && $value !== [] && $value !== ''
         );
+    }
 
-        Log::info('Mail sent', $context);
+    private function contextFromNotificationSent(NotificationSent $event): array
+    {
+        if ($event->channel !== 'mail') {
+            return [];
+        }
+
+        $context = [
+            'event' => 'NotificationSent',
+            'channel' => $event->channel,
+            'notification' => $event->notification::class,
+        ];
+
+        if ($event->notifiable instanceof AnonymousNotifiable) {
+            $context['to'] = $this->formatAddresses(
+                (array) $event->notifiable->routeNotificationFor('mail', $event->notification)
+            );
+        } elseif (is_object($event->notifiable)) {
+            $context['notifiable'] = array_filter([
+                'type' => $event->notifiable::class,
+                'id' => method_exists($event->notifiable, 'getKey') ? $event->notifiable->getKey() : null,
+                'email' => $event->notifiable->email ?? null,
+            ], static fn ($value) => $value !== null && $value !== '');
+        }
+
+        return array_filter(
+            $context,
+            static fn ($value) => $value !== null && $value !== [] && $value !== ''
+        );
     }
 
     private function extractMessage(MessageSent $event): ?object
