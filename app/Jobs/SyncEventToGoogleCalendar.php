@@ -30,6 +30,22 @@ class SyncEventToGoogleCalendar implements ShouldQueue
     }
 
     /**
+     * Safely calculate expires_in seconds from google_token_expires_at
+     */
+    private function calculateExpiresIn($expiresAt): int
+    {
+        if (!$expiresAt) {
+            return 3600; // Default to 1 hour
+        }
+        
+        if (is_string($expiresAt)) {
+            $expiresAt = \Carbon\Carbon::parse($expiresAt);
+        }
+        
+        return $expiresAt->diffInSeconds(now());
+    }
+
+    /**
      * Execute the job.
      */
     public function handle(GoogleCalendarService $googleCalendarService): void
@@ -56,8 +72,7 @@ class SyncEventToGoogleCalendar implements ShouldQueue
             $googleCalendarService->setAccessToken([
                 'access_token' => $this->user->fresh()->google_token,
                 'refresh_token' => $this->user->fresh()->google_refresh_token,
-                'expires_in' => $this->user->fresh()->google_token_expires_at ? 
-                    $this->user->fresh()->google_token_expires_at->diffInSeconds(now()) : 3600,
+                'expires_in' => $this->calculateExpiresIn($this->user->fresh()->google_token_expires_at),
             ]);
 
             switch ($this->action) {

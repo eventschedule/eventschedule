@@ -358,8 +358,7 @@ class GoogleCalendarController extends Controller
                 $this->googleCalendarService->setAccessToken([
                     'access_token' => $user->fresh()->google_token,
                     'refresh_token' => $user->fresh()->google_refresh_token,
-                    'expires_in' => $user->fresh()->google_token_expires_at ? 
-                        $user->fresh()->google_token_expires_at->diffInSeconds(now()) : 3600,
+                    'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
                 ]);
 
                 $this->googleCalendarService->deleteEvent($event->google_event_id);
@@ -417,8 +416,7 @@ class GoogleCalendarController extends Controller
                     $this->googleCalendarService->setAccessToken([
                         'access_token' => $user->fresh()->google_token,
                         'refresh_token' => $user->fresh()->google_refresh_token,
-                        'expires_in' => $user->fresh()->google_token_expires_at ? 
-                            $user->fresh()->google_token_expires_at->diffInSeconds(now()) : 3600,
+                        'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
                     ]);
 
                     $calendarId = $role->getGoogleCalendarId();
@@ -441,8 +439,7 @@ class GoogleCalendarController extends Controller
                         $this->googleCalendarService->setAccessToken([
                             'access_token' => $user->fresh()->google_token,
                             'refresh_token' => $user->fresh()->google_refresh_token,
-                            'expires_in' => $user->fresh()->google_token_expires_at ? 
-                                $user->fresh()->google_token_expires_at->diffInSeconds(now()) : 3600,
+                            'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
                         ]);
 
                         $this->googleCalendarService->deleteWebhook($role->google_webhook_id);
