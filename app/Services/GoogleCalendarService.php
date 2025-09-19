@@ -408,6 +408,40 @@ class GoogleCalendarService
     }
 
     /**
+     * Sync all events for a user to Google Calendar across all their roles
+     */
+    public function syncAllUserEvents(User $user): array
+    {
+        $results = [
+            'created' => 0,
+            'updated' => 0,
+            'errors' => 0,
+        ];
+
+        if (!$this->refreshTokenIfNeeded($user)) {
+            $results['errors']++;
+            return $results;
+        }
+
+        // Get all roles for this user
+        $roles = $user->roles;
+        
+        if ($roles->isEmpty()) {
+            return $results;
+        }
+
+        // Sync events for each role
+        foreach ($roles as $role) {
+            $roleResults = $this->syncUserEvents($user, $role);
+            $results['created'] += $roleResults['created'];
+            $results['updated'] += $roleResults['updated'];
+            $results['errors'] += $roleResults['errors'];
+        }
+
+        return $results;
+    }
+
+    /**
      * Get events from Google Calendar for a specific time range
      */
     public function getEvents(string $calendarId, \DateTime $timeMin = null, \DateTime $timeMax = null): array

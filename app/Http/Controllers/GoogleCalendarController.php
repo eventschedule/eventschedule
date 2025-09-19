@@ -269,6 +269,40 @@ class GoogleCalendarController extends Controller
     }
 
     /**
+     * Sync all events to Google Calendar for the authenticated user across all their roles
+     */
+    public function syncAllEvents(Request $request)
+    {
+        $user = Auth::user();
+        
+        if (!$user->google_token) {
+            return response()->json(['error' => 'Google Calendar not connected'], 400);
+        }
+
+        try {
+            // Ensure user has valid token before syncing
+            if (!$this->googleCalendarService->ensureValidToken($user)) {
+                return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
+            }
+
+            $results = $this->googleCalendarService->syncAllUserEvents($user);
+            
+            return response()->json([
+                'message' => 'Events synced successfully',
+                'results' => $results,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to sync all events to Google Calendar', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json(['error' => 'Failed to sync events'], 500);
+        }
+    }
+
+    /**
      * Sync a specific event to Google Calendar
      */
     public function syncEvent(Request $request, $eventId)
