@@ -474,6 +474,8 @@
                         <input type="hidden" name="type" value="{{ $role->type }}"/>
                         @endif
 
+                        <input type="hidden" name="sync_direction" id="sync_direction_hidden" value="{{ old('sync_direction', $role->sync_direction) }}" />
+
                         <div class="mb-6">
                             <x-input-label for="name" :value="__('messages.name') . ' *'" />
                             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
@@ -1190,7 +1192,105 @@
                         @endif
                         
                     </div>
-                </div>                    
+                </div>
+
+                @if (auth()->user()->google_token || auth()->user()->isAdmin())
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                    <div class="max-w-xl">
+
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                            {{ __('Google Calendar Integration') }}
+                        </h2>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                            {{ __('Sync events between this role and your Google Calendar.') }}
+                        </p>
+                        
+                        <div class="space-y-6">
+                            <!-- Calendar Selection -->
+                            <div>
+                                <x-input-label for="google-calendar-select" :value="__('Select Google Calendar')" />
+                                <select id="google-calendar-select" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                    <option value="">{{ __('Loading calendars...') }}</option>
+                                </select>
+                            </div>
+
+                            <!-- Sync Direction Selection -->
+                            <div>
+                                <x-input-label :value="__('Sync Direction')" />
+                                <div class="mt-2 space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="radio" 
+                                               name="sync_direction" 
+                                               value="to" 
+                                               {{ $role->sync_direction === 'to' ? 'checked' : '' }}
+                                               class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                            {{ __('To Google Calendar') }} - {{ __('Events from Event Schedule will appear in Google Calendar') }}
+                                        </span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" 
+                                               name="sync_direction" 
+                                               value="from" 
+                                               {{ $role->sync_direction === 'from' ? 'checked' : '' }}
+                                               class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                            {{ __('From Google Calendar') }} - {{ __('Events from Google Calendar will appear in Event Schedule') }}
+                                        </span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" 
+                                               name="sync_direction" 
+                                               value="both" 
+                                               {{ $role->sync_direction === 'both' ? 'checked' : '' }}
+                                               class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                            {{ __('Bidirectional Sync') }} - {{ __('Events added in either place will appear in both') }}
+                                        </span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" 
+                                               name="sync_direction" 
+                                               value="" 
+                                               {{ !$role->sync_direction ? 'checked' : '' }}
+                                               class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
+                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                            {{ __('No Sync') }} - {{ __('Disable Google Calendar synchronization') }}
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Manual Sync Button -->
+                            <div>
+                                <x-secondary-button type="button" onclick="syncEvents()" id="sync-events-button">
+                                    {{ __('Sync Events') }}
+                                </x-secondary-button>
+                            </div>
+
+                            <!-- Status Messages -->
+                            <div id="sync-status" class="hidden">
+                                <div class="flex items-center text-blue-600 dark:text-blue-400">
+                                    <svg class="animate-spin -ml-1 mr-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span class="text-sm">{{ __('Syncing...') }}</span>
+                                </div>
+                            </div>
+
+                            <div id="sync-results" class="hidden">
+                                <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                                    <div class="text-sm text-green-800 dark:text-green-200">
+                                        <div id="sync-message"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+                    
             </div>            
         </div>
 
@@ -1211,111 +1311,6 @@
             </div>
 
         </div>
-
-        @if (auth()->user()->google_token)
-        <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <h3 class="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
-                {{ __('Google Calendar Integration') }}
-            </h3>
-            <p class="text-sm text-blue-700 dark:text-blue-300 mb-4">
-                {{ __('Sync events between this role and your Google Calendar.') }}
-            </p>
-            
-            <div class="space-y-4">
-                <!-- Calendar Selection -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {{ __('Select Google Calendar') }}
-                    </label>
-                    <select id="google-calendar-select" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                        <option value="">{{ __('Loading calendars...') }}</option>
-                    </select>
-                </div>
-
-                <!-- Sync Direction Selection -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {{ __('Sync Direction') }}
-                    </label>
-                    <div class="space-y-2">
-                        <label class="flex items-center">
-                            <input type="radio" 
-                                   name="sync_direction" 
-                                   value="to" 
-                                   {{ $role->sync_direction === 'to' ? 'checked' : '' }}
-                                   class="sync-direction-radio rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                {{ __('To Google Calendar') }} - {{ __('Events from EventSchedule will appear in Google Calendar') }}
-                            </span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" 
-                                   name="sync_direction" 
-                                   value="from" 
-                                   {{ $role->sync_direction === 'from' ? 'checked' : '' }}
-                                   class="sync-direction-radio rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                {{ __('From Google Calendar') }} - {{ __('Events from Google Calendar will appear in EventSchedule') }}
-                            </span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" 
-                                   name="sync_direction" 
-                                   value="both" 
-                                   {{ $role->sync_direction === 'both' ? 'checked' : '' }}
-                                   class="sync-direction-radio rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                {{ __('Bidirectional Sync') }} - {{ __('Events added in either place will appear in both') }}
-                            </span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" 
-                                   name="sync_direction" 
-                                   value="" 
-                                   {{ !$role->sync_direction ? 'checked' : '' }}
-                                   class="sync-direction-radio rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                {{ __('No Sync') }} - {{ __('Disable Google Calendar synchronization') }}
-                            </span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Manual Sync Options -->
-                <div class="flex space-x-2">
-                    <button type="button" 
-                            onclick="syncToGoogleCalendar()"
-                            class="inline-flex items-center px-3 py-1 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                        {{ __('Sync to Google Calendar') }}
-                    </button>
-                    <button type="button" 
-                            onclick="syncFromGoogleCalendar()"
-                            class="inline-flex items-center px-3 py-1 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 focus:bg-purple-700 active:bg-purple-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                        {{ __('Sync from Google Calendar') }}
-                    </button>
-                </div>
-
-                <!-- Status Messages -->
-                <div id="sync-status" class="hidden">
-                    <div class="flex items-center text-blue-600 dark:text-blue-400">
-                        <svg class="animate-spin -ml-1 mr-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span class="text-sm">{{ __('Syncing...') }}</span>
-                    </div>
-                </div>
-
-                <div id="sync-results" class="hidden">
-                    <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                        <div class="text-sm text-green-800 dark:text-green-200">
-                            <div id="sync-message"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endif
 
     </form>
 
@@ -1648,23 +1643,50 @@ function updateCalendarSelection() {
     });
 }
 
-function updateSyncDirection() {
+
+function syncEvents() {
     const selectedDirection = document.querySelector('input[name="sync_direction"]:checked');
-    if (!selectedDirection) {
+    const syncEventsButton = document.getElementById('sync-events-button');
+    
+    // Check if button is disabled
+    if (syncEventsButton && syncEventsButton.disabled) {
+        showSyncMessage('Please select a sync direction other than "No Sync" to enable syncing', 'error');
+        return;
+    }
+    
+    if (!selectedDirection || !selectedDirection.value) {
+        showSyncMessage('Please select a sync direction first', 'error');
         return;
     }
 
     showSyncStatus();
     
-    fetch(`/google-calendar/sync-direction/{{ $role->subdomain }}`, {
+    let url = '';
+    let requestBody = {
+        sync_direction: selectedDirection.value
+    };
+    
+    if (selectedDirection.value === 'to') {
+        url = '/google-calendar/sync-events';
+    } else if (selectedDirection.value === 'from') {
+        url = `/google-calendar/sync-from-google/{{ $role->subdomain }}`;
+    } else if (selectedDirection.value === 'both') {
+        // For bidirectional sync, we'll sync both directions
+        syncBothDirections();
+        return;
+    } else {
+        hideSyncStatus();
+        showSyncMessage('Invalid sync direction selected', 'error');
+        return;
+    }
+    
+    fetch(url, {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            sync_direction: selectedDirection.value
-        }),
+        body: JSON.stringify(requestBody),
     })
     .then(response => response.json())
     .then(data => {
@@ -1673,8 +1695,6 @@ function updateSyncDirection() {
             showSyncMessage('Error: ' + data.error, 'error');
         } else {
             showSyncMessage(data.message);
-            // Update the UI to reflect the change
-            updateSyncDirectionUI(data.sync_direction);
         }
     })
     .catch(error => {
@@ -1683,64 +1703,52 @@ function updateSyncDirection() {
     });
 }
 
-function updateSyncDirectionUI(syncDirection) {
-    // Update the radio button selection
-    const radios = document.querySelectorAll('input[name="sync_direction"]');
-    radios.forEach(radio => {
-        radio.checked = radio.value === syncDirection;
-    });
-    
-    // Update any status indicators if needed
-    console.log('Sync direction updated to:', syncDirection);
-}
-
-function syncToGoogleCalendar() {
+function syncBothDirections() {
     showSyncStatus();
     
+    const requestBody = {
+        sync_direction: 'both'
+    };
+    
+    // First sync to Google Calendar
     fetch('/google-calendar/sync-events', {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
             'Content-Type': 'application/json',
         },
+        body: JSON.stringify(requestBody),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            hideSyncStatus();
+            showSyncMessage('Error syncing to Google Calendar: ' + data.error, 'error');
+            return;
+        }
+        
+        // Then sync from Google Calendar
+        return fetch(`/google-calendar/sync-from-google/{{ $role->subdomain }}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody),
+        });
     })
     .then(response => response.json())
     .then(data => {
         hideSyncStatus();
         if (data.error) {
-            showSyncMessage('Error: ' + data.error, 'error');
+            showSyncMessage('Error syncing from Google Calendar: ' + data.error, 'error');
         } else {
-            showSyncMessage(data.message);
+            showSyncMessage('Bidirectional sync completed successfully');
         }
     })
     .catch(error => {
         hideSyncStatus();
-        showSyncMessage('Error: ' + error.message, 'error');
-    });
-}
-
-function syncFromGoogleCalendar() {
-    showSyncStatus();
-    
-    fetch(`/google-calendar/sync-from-google/{{ $role->subdomain }}`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json',
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        hideSyncStatus();
-        if (data.error) {
-            showSyncMessage('Error: ' + data.error, 'error');
-        } else {
-            showSyncMessage(data.message);
-        }
-    })
-    .catch(error => {
-        hideSyncStatus();
-        showSyncMessage('Error: ' + error.message, 'error');
+        showSyncMessage('Error during bidirectional sync: ' + error.message, 'error');
     });
 }
 
@@ -1783,8 +1791,24 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add event listeners for sync direction radio buttons
     const syncDirectionRadios = document.querySelectorAll('input[name="sync_direction"]');
+    const syncEventsButton = document.getElementById('sync-events-button');
+    
     syncDirectionRadios.forEach(radio => {
-        radio.addEventListener('change', updateSyncDirection);
+        radio.addEventListener('change', function() {
+            // Update the hidden field when radio button changes
+            document.getElementById('sync_direction_hidden').value = this.value;
+            
+            // Enable/disable sync events button based on selection
+            if (syncEventsButton) {
+                syncEventsButton.disabled = !this.value || this.value === '';
+            }
+        });
     });
+    
+    // Set initial state of sync events button
+    const selectedDirection = document.querySelector('input[name="sync_direction"]:checked');
+    if (syncEventsButton && selectedDirection) {
+        syncEventsButton.disabled = !selectedDirection.value || selectedDirection.value === '';
+    }
 });
 </script>

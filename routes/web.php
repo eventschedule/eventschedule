@@ -108,7 +108,6 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::post('/google-calendar/sync-event/{eventId}', [GoogleCalendarController::class, 'syncEvent'])->name('google.calendar.sync_event');
     Route::delete('/google-calendar/unsync-event/{eventId}', [GoogleCalendarController::class, 'unsyncEvent'])->name('google.calendar.unsync_event');
     Route::post('/google-calendar/role/{subdomain}', [GoogleCalendarController::class, 'updateRoleCalendar'])->name('google.calendar.update_role');
-    Route::post('/google-calendar/sync-direction/{subdomain}', [GoogleCalendarController::class, 'updateSyncDirection'])->name('google.calendar.sync_direction');
     Route::post('/google-calendar/sync-from-google/{subdomain}', [GoogleCalendarController::class, 'syncFromGoogleCalendar'])->name('google.calendar.sync_from_google');
     
     Route::get('/scan', [TicketController::class, 'scan'])->name('ticket.scan');
