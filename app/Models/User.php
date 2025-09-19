@@ -96,6 +96,8 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'google_token_expires_at' => 'datetime',
+            'facebook_token_expires_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
