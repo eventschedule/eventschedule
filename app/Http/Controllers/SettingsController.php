@@ -119,6 +119,9 @@ class SettingsController extends Controller
                 'status' => 'error',
                 'message' => __('messages.test_email_failed'),
                 'error' => __('messages.test_email_missing_user'),
+                'logs' => [
+                    'No authenticated user email address was available for the test message.',
+                ],
             ], 422);
         }
 
@@ -129,22 +132,57 @@ class SettingsController extends Controller
 
         $this->applyMailConfig($testMailSettings);
 
+        $logOutput = [];
+        $logOutput[] = 'Test email started at ' . now()->toDateTimeString();
+        $logOutput[] = 'Resolved mailer: ' . ($testMailSettings['mailer'] ?? config('mail.default'));
+        $logOutput[] = 'Target host: ' . ($testMailSettings['host'] ?: '(not configured)');
+        $logOutput[] = 'Target port: ' . ($testMailSettings['port'] ?: '(not configured)');
+        $logOutput[] = 'Encryption: ' . ($testMailSettings['encryption'] ?: '(none)');
+        $logOutput[] = 'Authentication username ' . ($testMailSettings['username'] ? 'provided' : 'not provided');
+        $logOutput[] = 'From address: ' . $testMailSettings['from_address'];
+        $logOutput[] = 'From name: ' . $testMailSettings['from_name'];
+        $logOutput[] = 'Attempting to send test message to: ' . $user->email;
+
         try {
             Mail::raw(__('messages.test_email_body'), function ($message) use ($user) {
                 $message->to($user->email)->subject(__('messages.test_email_subject'));
             });
 
+            $failures = Mail::failures();
+
+            if (empty($failures)) {
+                $logOutput[] = 'Mail driver did not report any delivery failures.';
+            } else {
+                $logOutput[] = 'Mail driver reported failures for the following recipients:';
+
+                foreach ($failures as $failure) {
+                    $logOutput[] = ' - ' . $failure;
+                }
+            }
+
             return response()->json([
                 'status' => 'success',
                 'message' => __('messages.test_email_sent'),
+                'logs' => $logOutput,
             ]);
         } catch (Throwable $exception) {
             report($exception);
+
+            $logOutput[] = 'Encountered exception while sending the test email: ' . $exception->getMessage();
+            $logOutput[] = 'Exception class: ' . get_class($exception);
+            $logOutput[] = 'Stack trace:';
+
+            foreach (explode(PHP_EOL, $exception->getTraceAsString()) as $traceLine) {
+                if ($traceLine !== '') {
+                    $logOutput[] = $traceLine;
+                }
+            }
 
             return response()->json([
                 'status' => 'error',
                 'message' => __('messages.test_email_failed'),
                 'error' => $exception->getMessage(),
+                'logs' => $logOutput,
             ], 500);
         } finally {
             $this->applyMailConfig($originalSettings);

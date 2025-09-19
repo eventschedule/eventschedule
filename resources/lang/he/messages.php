@@ -116,6 +116,7 @@ return [
     'test_email_missing_user' => 'Unable to determine a recipient for the test email.',
     'test_email_subject' => 'EventSchedule test email',
     'test_email_body' => 'This is a test email to confirm your email settings are configured correctly.',
+    'test_email_logs' => 'Test email log output',
     'error_details' => 'Error details:',
     'email_templates' => 'Email Templates',
     'email_templates_description' => 'Customize the email notifications sent by the application.',
