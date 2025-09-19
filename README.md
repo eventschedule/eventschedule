@@ -78,13 +78,16 @@ Copy [eventschedule.zip](https://github.com/eventschedule/eventschedule/releases
 
 ### 3. Set File Permissions
 
-Ensure correct permissions for storage and cache directories:
+The self-updater copies new releases directly into your installation. Make sure the
+project is owned by the web server user (replace `www-data` with the user that runs PHP on your server):
 
 ```bash
 cd /path/to/eventschedule
-chmod -R 755 storage
-sudo chown -R www-data:www-data storage bootstrap public
+sudo chown -R www-data:www-data .
 ```
+
+If you prefer to scope ownership more narrowly, ensure these directories remain writable by the web user:
+`app`, `bootstrap`, `config`, `database`, `public`, `resources`, `routes`, and `storage`.
 
 ---
 
