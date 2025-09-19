@@ -270,4 +270,14 @@ class User extends Authenticatable implements MustVerifyEmail
         $nameParts = explode(' ', trim($this->name));
         return $nameParts[0] ?: 'there';
     }
+
+    /**
+     * Check if user has Google Calendar connected
+     *
+     * @return bool
+     */
+    public function hasGoogleCalendarConnected(): bool
+    {
+        return !is_null($this->google_token) && !is_null($this->google_refresh_token);
+    }
 }

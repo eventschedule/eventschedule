@@ -1568,30 +1568,55 @@ function addImportCityField() {
 
 // Google Calendar integration functions
 document.addEventListener('DOMContentLoaded', function() {
-    loadGoogleCalendars();
+    // Only load Google calendars if the Google Calendar section is present
+    const googleCalendarSelect = document.getElementById('google-calendar-select');
+    if (googleCalendarSelect) {
+        loadGoogleCalendars();
+    }
 });
 
 function loadGoogleCalendars() {
+    const select = document.getElementById('google-calendar-select');
+    if (!select) {
+        console.warn('Google Calendar select element not found');
+        return;
+    }
+
     fetch('/google-calendar/calendars')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
         .then(data => {
-            const select = document.getElementById('google-calendar-select');
             select.innerHTML = '<option value="">{{ __("Select a calendar...") }}</option>';
             
-            data.calendars.forEach(calendar => {
-                const option = document.createElement('option');
-                option.value = calendar.id;
-                option.textContent = calendar.summary + (calendar.primary ? ' (Primary)' : '');
-                if (calendar.id === '{{ $role->google_calendar_id }}') {
-                    option.selected = true;
-                }
-                select.appendChild(option);
-            });
+            if (data.calendars && Array.isArray(data.calendars)) {
+                data.calendars.forEach(calendar => {
+                    const option = document.createElement('option');
+                    option.value = calendar.id;
+                    option.textContent = calendar.summary + (calendar.primary ? ' (Primary)' : '');
+                    if (calendar.id === '{{ $role->google_calendar_id }}') {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+            } else {
+                select.innerHTML = '<option value="">{{ __("No calendars available") }}</option>';
+            }
         })
         .catch(error => {
             console.error('Error loading calendars:', error);
-            const select = document.getElementById('google-calendar-select');
-            select.innerHTML = '<option value="">{{ __("Error loading calendars") }}</option>';
+            let errorMessage = '{{ __("Error loading calendars") }}';
+            
+            if (error.message.includes('401')) {
+                errorMessage = '{{ __("Google Calendar not connected. Please connect your account first.") }}';
+            } else if (error.message.includes('403')) {
+                errorMessage = '{{ __("Access denied. Please check your Google Calendar permissions.") }}';
+            }
+            
+            select.innerHTML = `<option value="">${errorMessage}</option>`;
         });
 }
 
