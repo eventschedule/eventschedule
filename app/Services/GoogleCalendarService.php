@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Event;
+use App\Models\Role;
 use App\Models\User;
 use Carbon\Carbon;
 use Google\Client;
