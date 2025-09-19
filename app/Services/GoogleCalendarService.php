@@ -87,80 +87,70 @@ class GoogleCalendarService
 
         // Handle google_token_expires_at as string or Carbon instance
         $expiresAt = $user->google_token_expires_at;
-        $expiresInSeconds = 3600; // Default to 1 hour
         
         if ($expiresAt) {
             if (is_string($expiresAt)) {
                 $expiresAt = \Carbon\Carbon::parse($expiresAt);
             }
-            $expiresInSeconds = $expiresAt->diffInSeconds(now());
+            
+            // Only refresh if token expires in the next 1 minute (reduced from 5 minutes)
+            $minutesUntilExpiry = $expiresAt->diffInMinutes(now());
+            
+            if ($minutesUntilExpiry > 1) {
+                // Token is still valid for more than 1 minute, no need to refresh
+                $this->setAccessToken([
+                    'access_token' => $user->google_token,
+                    'refresh_token' => $user->google_refresh_token,
+                    'expires_in' => $expiresAt->diffInSeconds(now()),
+                ]);
+                return true;
+            }
         }
         
-        $token = [
-            'access_token' => $user->google_token,
-            'refresh_token' => $user->google_refresh_token,
-            'expires_in' => $expiresInSeconds,
-        ];
+        Log::info('Refreshing Google Calendar token', [
+            'user_id' => $user->id,
+            'expires_at' => $expiresAt,
+            'minutes_until_expiry' => $expiresAt ? $expiresAt->diffInMinutes(now()) : 'unknown',
+        ]);
 
-        $this->client->setAccessToken($token);
-
-        // Check if token is expired or will expire in the next 5 minutes
-        $isExpired = $this->client->isAccessTokenExpired();
-        $willExpireSoon = false;
-        
-        if ($expiresAt) {
-            $willExpireSoon = $expiresAt->diffInMinutes(now()) < 5;
-        }
-        
-        if ($isExpired || $willExpireSoon) {
-            Log::info('Refreshing Google Calendar token', [
-                'user_id' => $user->id,
-                'expires_at' => $expiresAt,
-                'reason' => $isExpired ? 'expired' : 'expiring_soon',
-            ]);
-
-            $refreshToken = $user->google_refresh_token;
-            if ($refreshToken) {
-                try {
-                    $newToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken);
+        $refreshToken = $user->google_refresh_token;
+        if ($refreshToken) {
+            try {
+                $newToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken);
+                
+                if (!isset($newToken['error'])) {
+                    $user->update([
+                        'google_token' => $newToken['access_token'],
+                        'google_token_expires_at' => now()->addSeconds($newToken['expires_in']),
+                    ]);
                     
-                    if (!isset($newToken['error'])) {
-                        $user->update([
-                            'google_token' => $newToken['access_token'],
-                            'google_token_expires_at' => now()->addSeconds($newToken['expires_in']),
-                        ]);
-                        
-                        $this->setAccessToken($newToken);
-                        
-                        Log::info('Google Calendar token refreshed successfully', [
-                            'user_id' => $user->id,
-                            'new_expires_at' => $user->fresh()->google_token_expires_at,
-                        ]);
-                        
-                        return true;
-                    } else {
-                        Log::error('Failed to refresh Google Calendar token', [
-                            'user_id' => $user->id,
-                            'error' => $newToken['error'],
-                            'error_description' => $newToken['error_description'] ?? 'Unknown error',
-                        ]);
-                    }
-                } catch (\Exception $e) {
-                    Log::error('Exception during Google Calendar token refresh', [
+                    $this->setAccessToken($newToken);
+                    
+                    Log::info('Google Calendar token refreshed successfully', [
                         'user_id' => $user->id,
-                        'error' => $e->getMessage(),
+                        'new_expires_at' => $user->fresh()->google_token_expires_at,
+                    ]);
+                    
+                    return true;
+                } else {
+                    Log::error('Failed to refresh Google Calendar token', [
+                        'user_id' => $user->id,
+                        'error' => $newToken['error'],
+                        'error_description' => $newToken['error_description'] ?? 'Unknown error',
                     ]);
                 }
-            } else {
-                Log::warning('No refresh token available for user', [
+            } catch (\Exception $e) {
+                Log::error('Exception during Google Calendar token refresh', [
                     'user_id' => $user->id,
+                    'error' => $e->getMessage(),
                 ]);
             }
-            return false;
+        } else {
+            Log::warning('No refresh token available for user', [
+                'user_id' => $user->id,
+            ]);
         }
-
-        $this->setAccessToken($token);
-        return true;
+        return false;
     }
 
     /**
@@ -168,17 +158,6 @@ class GoogleCalendarService
      */
     public function ensureValidToken(User $user): bool
     {
-        // First attempt to refresh if needed
-        if ($this->refreshTokenIfNeeded($user)) {
-            return true;
-        }
-
-        // If refresh failed, try one more time after a short delay
-        Log::info('Retrying Google Calendar token refresh', [
-            'user_id' => $user->id,
-        ]);
-
-        sleep(1); // Brief delay before retry
         return $this->refreshTokenIfNeeded($user);
     }
 

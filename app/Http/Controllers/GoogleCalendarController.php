@@ -151,12 +151,6 @@ class GoogleCalendarController extends Controller
                 return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
             }
 
-            $this->googleCalendarService->setAccessToken([
-                'access_token' => $user->fresh()->google_token,
-                'refresh_token' => $user->fresh()->google_refresh_token,
-                'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
-            ]);
-
             $calendars = $this->googleCalendarService->getCalendars();
             
             return response()->json(['calendars' => $calendars]);
@@ -200,12 +194,6 @@ class GoogleCalendarController extends Controller
             }
 
             // Validate that the selected calendar exists and user has access
-            $this->googleCalendarService->setAccessToken([
-                'access_token' => $user->fresh()->google_token,
-                'refresh_token' => $user->fresh()->google_refresh_token,
-                'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
-            ]);
-
             $calendars = $this->googleCalendarService->getCalendars();
             $calendarExists = collect($calendars)->contains('id', $request->calendar_id);
             
@@ -306,12 +294,6 @@ class GoogleCalendarController extends Controller
                 return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
             }
 
-            $this->googleCalendarService->setAccessToken([
-                'access_token' => $user->fresh()->google_token,
-                'refresh_token' => $user->fresh()->google_refresh_token,
-                'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
-            ]);
-
             if ($event->google_event_id) {
                 $googleEvent = $this->googleCalendarService->updateEvent($event, $event->google_event_id);
             } else {
@@ -368,12 +350,6 @@ class GoogleCalendarController extends Controller
                     return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
                 }
 
-                $this->googleCalendarService->setAccessToken([
-                    'access_token' => $user->fresh()->google_token,
-                    'refresh_token' => $user->fresh()->google_refresh_token,
-                    'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
-                ]);
-
                 $this->googleCalendarService->deleteEvent($event->google_event_id);
                 $event->update(['google_event_id' => null]);
             }
@@ -420,12 +396,6 @@ class GoogleCalendarController extends Controller
             if (!$this->googleCalendarService->ensureValidToken($user)) {
                 return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
             }
-
-            $this->googleCalendarService->setAccessToken([
-                'access_token' => $user->fresh()->google_token,
-                'refresh_token' => $user->fresh()->google_refresh_token,
-                'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
-            ]);
 
             $calendarId = $role->getGoogleCalendarId();
             $results = $this->googleCalendarService->syncFromGoogleCalendar($user, $role, $calendarId);
@@ -478,12 +448,6 @@ class GoogleCalendarController extends Controller
                         return;
                     }
 
-                    $this->googleCalendarService->setAccessToken([
-                        'access_token' => $user->fresh()->google_token,
-                        'refresh_token' => $user->fresh()->google_refresh_token,
-                        'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
-                    ]);
-
                     $calendarId = $role->getGoogleCalendarId();
                     $webhookUrl = route('google.calendar.webhook.handle');
 
@@ -501,12 +465,6 @@ class GoogleCalendarController extends Controller
                 if ($role->google_webhook_id) {
                     // Delete existing webhook
                     if ($this->googleCalendarService->ensureValidToken($user)) {
-                        $this->googleCalendarService->setAccessToken([
-                            'access_token' => $user->fresh()->google_token,
-                            'refresh_token' => $user->fresh()->google_refresh_token,
-                            'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
-                        ]);
-
                         $this->googleCalendarService->deleteWebhook($role->google_webhook_id);
                     }
                 }
