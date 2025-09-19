@@ -32,7 +32,7 @@ class ApiSettingsController extends Controller
         $user->save();
         
         return back()
-            ->with('success', 'API settings updated successfully')
+            ->with('message', 'API settings updated successfully')
             ->with('show_new_api_key', $showNewKey);
     }
 } 

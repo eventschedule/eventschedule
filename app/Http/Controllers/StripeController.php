@@ -45,7 +45,7 @@ class StripeController extends Controller
         $user->stripe_completed_at = null;
         $user->save();
 
-        return redirect()->route('profile.edit')->with('success', __('messages.stripe_unlinked'));
+        return redirect()->route('profile.edit')->with('message', __('messages.stripe_unlinked'));
     }
 
     public function complete()
@@ -60,7 +60,7 @@ class StripeController extends Controller
                 $user->stripe_completed_at = now();
                 $user->save();
                 
-                return redirect()->route('profile.edit')->with('success', __('messages.stripe_connected'));
+                return redirect()->route('profile.edit')->with('message', __('messages.stripe_connected'));
             }
         }
 

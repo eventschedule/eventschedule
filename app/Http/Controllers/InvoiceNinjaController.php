@@ -27,7 +27,7 @@ class InvoiceNinjaController extends Controller
         $user->invoiceninja_webhook_secret = null;
         $user->save();
 
-        return redirect()->back()->with('success', __('messages.invoiceninja_unlinked'));
+        return redirect()->back()->with('message', __('messages.invoiceninja_unlinked'));
     }
 
     public function webhook(Request $request, $secret)
