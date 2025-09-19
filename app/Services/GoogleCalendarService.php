@@ -84,23 +84,37 @@ class GoogleCalendarService
             return false;
         }
 
+        // Handle google_token_expires_at as string or Carbon instance
+        $expiresAt = $user->google_token_expires_at;
+        $expiresInSeconds = 3600; // Default to 1 hour
+        
+        if ($expiresAt) {
+            if (is_string($expiresAt)) {
+                $expiresAt = \Carbon\Carbon::parse($expiresAt);
+            }
+            $expiresInSeconds = $expiresAt->diffInSeconds(now());
+        }
+        
         $token = [
             'access_token' => $user->google_token,
             'refresh_token' => $user->google_refresh_token,
-            'expires_in' => $user->google_token_expires_at ? 
-                $user->google_token_expires_at->diffInSeconds(now()) : 3600,
+            'expires_in' => $expiresInSeconds,
         ];
 
         $this->client->setAccessToken($token);
 
         // Check if token is expired or will expire in the next 5 minutes
         $isExpired = $this->client->isAccessTokenExpired();
-        $willExpireSoon = $user->google_token_expires_at && $user->google_token_expires_at->diffInMinutes(now()) < 5;
+        $willExpireSoon = false;
+        
+        if ($expiresAt) {
+            $willExpireSoon = $expiresAt->diffInMinutes(now()) < 5;
+        }
         
         if ($isExpired || $willExpireSoon) {
             Log::info('Refreshing Google Calendar token', [
                 'user_id' => $user->id,
-                'expires_at' => $user->google_token_expires_at,
+                'expires_at' => $expiresAt,
                 'reason' => $isExpired ? 'expired' : 'expiring_soon',
             ]);
 
