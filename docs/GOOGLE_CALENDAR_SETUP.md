@@ -102,7 +102,7 @@ When bidirectional sync is enabled:
    - Events will now sync both ways automatically
 
 5. **Manual Sync Options**:
-   - **Sync to Google Calendar**: Push all events from EventSchedule to Google Calendar
+   - **Sync to Google Calendar**: Push all events from Event Schedule to Google Calendar
    - **Sync from Google Calendar**: Pull all events from Google Calendar to EventSchedule
 
 ### For Developers

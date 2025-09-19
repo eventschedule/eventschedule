@@ -960,7 +960,17 @@ class RoleController extends Controller
         }        
 
         $role = Role::subdomain($subdomain)->firstOrFail();
+        
+        // Handle sync_direction changes and webhook management
+        $oldSyncDirection = $role->sync_direction;
+        $newSyncDirection = $request->input('sync_direction');
+        
         $role->fill($request->all());
+        
+        // If sync_direction changed, handle webhook management
+        if ($oldSyncDirection !== $newSyncDirection) {
+            $this->handleSyncDirectionChange($role, $newSyncDirection, $oldSyncDirection);
+        }
 
         $newSubdomain = Role::cleanSubdomain($request->new_subdomain);
         if ($newSubdomain != $subdomain) {
@@ -1954,5 +1964,99 @@ class RoleController extends Controller
             'success' => true,
             'message' => __('messages.videos_saved_successfully')
         ]);
+    }
+
+    /**
+     * Handle sync direction changes and webhook management
+     */
+    private function handleSyncDirectionChange($role, $newSyncDirection, $oldSyncDirection)
+    {
+        $user = auth()->user();
+        
+        if (!$user->google_token) {
+            return; // No Google Calendar connected, skip webhook management
+        }
+
+        try {
+            $googleCalendarService = app(\App\Services\GoogleCalendarService::class);
+
+            // Handle webhook management based on sync direction
+            if ($newSyncDirection === 'from' || $newSyncDirection === 'both') {
+                // Need webhook for syncing from Google
+                if (!$role->hasActiveWebhook()) {
+                    // Ensure user has valid token before creating webhook
+                    if (!$googleCalendarService->ensureValidToken($user)) {
+                        \Log::warning('Google Calendar token invalid and refresh failed during sync direction change', [
+                            'user_id' => $user->id,
+                            'role_id' => $role->id,
+                        ]);
+                        return;
+                    }
+
+                    $googleCalendarService->setAccessToken([
+                        'access_token' => $user->fresh()->google_token,
+                        'refresh_token' => $user->fresh()->google_refresh_token,
+                        'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
+                    ]);
+
+                    $calendarId = $role->getGoogleCalendarId();
+                    $webhookUrl = route('google.calendar.webhook.handle');
+
+                    // Create webhook
+                    $webhook = $googleCalendarService->createWebhook($calendarId, $webhookUrl);
+
+                    $role->update([
+                        'google_webhook_id' => $webhook['id'],
+                        'google_webhook_resource_id' => $webhook['resourceId'],
+                        'google_webhook_expires_at' => \Carbon\Carbon::createFromTimestamp($webhook['expiration'] / 1000),
+                    ]);
+                }
+            } else {
+                // No webhook needed for 'to' direction or no sync
+                if ($role->google_webhook_id) {
+                    // Delete existing webhook
+                    if ($googleCalendarService->ensureValidToken($user)) {
+                        $googleCalendarService->setAccessToken([
+                            'access_token' => $user->fresh()->google_token,
+                            'refresh_token' => $user->fresh()->google_refresh_token,
+                            'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
+                        ]);
+
+                        $googleCalendarService->deleteWebhook($role->google_webhook_id);
+                    }
+                }
+
+                $role->update([
+                    'google_webhook_id' => null,
+                    'google_webhook_resource_id' => null,
+                    'google_webhook_expires_at' => null,
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to handle sync direction change', [
+                'user_id' => $user->id,
+                'role_id' => $role->id,
+                'old_sync_direction' => $oldSyncDirection,
+                'new_sync_direction' => $newSyncDirection,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Safely calculate expires_in seconds from google_token_expires_at
+     */
+    private function calculateExpiresIn($expiresAt): int
+    {
+        if (!$expiresAt) {
+            return 3600; // Default to 1 hour
+        }
+        
+        if (is_string($expiresAt)) {
+            $expiresAt = \Carbon\Carbon::parse($expiresAt);
+        }
+        
+        return $expiresAt->diffInSeconds(now());
     }
 }

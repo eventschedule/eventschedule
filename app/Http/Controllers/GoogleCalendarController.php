@@ -250,6 +250,11 @@ class GoogleCalendarController extends Controller
                 return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
             }
 
+            // If sync_direction is provided, update the role's sync_direction
+            if ($request->has('sync_direction')) {
+                $this->updateRoleSyncDirection($user, $request->sync_direction);
+            }
+
             $results = $this->googleCalendarService->syncUserEvents($user);
             
             return response()->json([
@@ -378,10 +383,11 @@ class GoogleCalendarController extends Controller
         }
     }
 
+
     /**
-     * Update sync direction for a role
+     * Sync from Google Calendar to EventSchedule
      */
-    public function updateSyncDirection(Request $request, $subdomain)
+    public function syncFromGoogleCalendar(Request $request, $subdomain)
     {
         $user = Auth::user();
         
@@ -389,28 +395,79 @@ class GoogleCalendarController extends Controller
             return response()->json(['error' => 'Google Calendar not connected'], 400);
         }
 
-        $request->validate([
-            'sync_direction' => 'required|in:to,from,both',
-        ]);
-
         try {
             $role = \App\Models\Role::subdomain($subdomain)->firstOrFail();
             
-            // Check if user has permission to update this role
+            // Check if user has permission to sync this role
             if (!$role->users->contains($user)) {
                 return response()->json(['error' => 'Unauthorized'], 403);
             }
 
+            // If sync_direction is provided, update the role's sync_direction
+            if ($request->has('sync_direction')) {
+                $this->updateRoleSyncDirection($user, $request->sync_direction, $role);
+            }
+
+            // Ensure user has valid token before syncing
+            if (!$this->googleCalendarService->ensureValidToken($user)) {
+                return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
+            }
+
+            $this->googleCalendarService->setAccessToken([
+                'access_token' => $user->fresh()->google_token,
+                'refresh_token' => $user->fresh()->google_refresh_token,
+                'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
+            ]);
+
+            $calendarId = $role->getGoogleCalendarId();
+            $results = $this->googleCalendarService->syncFromGoogleCalendar($user, $role, $calendarId);
+
+            return response()->json([
+                'message' => 'Events synced from Google Calendar successfully',
+                'results' => $results,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to sync from Google Calendar', [
+                'user_id' => $user->id,
+                'subdomain' => $subdomain,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json(['error' => 'Failed to sync from Google Calendar'], 500);
+        }
+    }
+
+    /**
+     * Update role's sync direction and handle webhook management
+     */
+    private function updateRoleSyncDirection($user, $syncDirection, $role = null)
+    {
+        try {
+            // If no specific role provided, get the first role for this user
+            if (!$role) {
+                $role = $user->roles()->first();
+                if (!$role) {
+                    return;
+                }
+            }
+
             $oldSyncDirection = $role->sync_direction;
-            $newSyncDirection = $request->sync_direction;
+
+            // Update sync direction
+            $role->update(['sync_direction' => $syncDirection]);
 
             // Handle webhook management based on sync direction
-            if ($newSyncDirection === 'from' || $newSyncDirection === 'both') {
+            if ($syncDirection === 'from' || $syncDirection === 'both') {
                 // Need webhook for syncing from Google
                 if (!$role->hasActiveWebhook()) {
                     // Ensure user has valid token before creating webhook
                     if (!$this->googleCalendarService->ensureValidToken($user)) {
-                        return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
+                        Log::warning('Google Calendar token invalid and refresh failed during sync direction update', [
+                            'user_id' => $user->id,
+                            'role_id' => $role->id,
+                        ]);
+                        return;
                     }
 
                     $this->googleCalendarService->setAccessToken([
@@ -453,82 +510,13 @@ class GoogleCalendarController extends Controller
                 ]);
             }
 
-            // Update sync direction
-            $role->update([
-                'sync_direction' => $newSyncDirection,
-            ]);
-
-            $message = match($newSyncDirection) {
-                'to' => 'Sync to Google Calendar enabled',
-                'from' => 'Sync from Google Calendar enabled',
-                'both' => 'Bidirectional sync enabled',
-                default => 'Sync disabled'
-            };
-
-            return response()->json([
-                'message' => $message,
-                'sync_direction' => $newSyncDirection,
-                'sync_direction_label' => $role->getSyncDirectionLabel(),
-            ]);
-
         } catch (\Exception $e) {
-            Log::error('Failed to update sync direction', [
+            Log::error('Failed to update role sync direction', [
                 'user_id' => $user->id,
-                'subdomain' => $subdomain,
-                'sync_direction' => $request->sync_direction,
+                'role_id' => $role ? $role->id : null,
+                'sync_direction' => $syncDirection,
                 'error' => $e->getMessage(),
             ]);
-
-            return response()->json(['error' => 'Failed to update sync direction'], 500);
-        }
-    }
-
-    /**
-     * Sync from Google Calendar to EventSchedule
-     */
-    public function syncFromGoogleCalendar(Request $request, $subdomain)
-    {
-        $user = Auth::user();
-        
-        if (!$user->google_token) {
-            return response()->json(['error' => 'Google Calendar not connected'], 400);
-        }
-
-        try {
-            $role = \App\Models\Role::subdomain($subdomain)->firstOrFail();
-            
-            // Check if user has permission to sync this role
-            if (!$role->users->contains($user)) {
-                return response()->json(['error' => 'Unauthorized'], 403);
-            }
-
-            // Ensure user has valid token before syncing
-            if (!$this->googleCalendarService->ensureValidToken($user)) {
-                return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
-            }
-
-            $this->googleCalendarService->setAccessToken([
-                'access_token' => $user->fresh()->google_token,
-                'refresh_token' => $user->fresh()->google_refresh_token,
-                'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
-            ]);
-
-            $calendarId = $role->getGoogleCalendarId();
-            $results = $this->googleCalendarService->syncFromGoogleCalendar($user, $role, $calendarId);
-
-            return response()->json([
-                'message' => 'Events synced from Google Calendar successfully',
-                'results' => $results,
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Failed to sync from Google Calendar', [
-                'user_id' => $user->id,
-                'subdomain' => $subdomain,
-                'error' => $e->getMessage(),
-            ]);
-
-            return response()->json(['error' => 'Failed to sync from Google Calendar'], 500);
         }
     }
 
