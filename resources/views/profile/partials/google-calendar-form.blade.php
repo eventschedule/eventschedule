@@ -21,6 +21,7 @@
                     </span>
                 </div>
                 <a href="{{ route('google.calendar.disconnect') }}" 
+                   onclick="return confirm('{{ __('messages.are_you_sure') }}')"
                    class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
                     {{ __('Disconnect') }}
                 </a>

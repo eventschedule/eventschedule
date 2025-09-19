@@ -507,7 +507,7 @@ class TicketController extends Controller
             return response()->json(['success' => true]);
         }
         
-        return back()->with('success', __('messages.action_completed'));
+        return back()->with('message', __('messages.action_completed'));
     }
 
     public function release()

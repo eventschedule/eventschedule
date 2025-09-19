@@ -86,7 +86,7 @@ class GoogleCalendarController extends Controller
             ]);
             
             return redirect()->route('profile.edit')
-                ->with('success', 'Google Calendar connected successfully!');
+                ->with('message', 'Google Calendar connected successfully!');
 
         } catch (\Exception $e) {
             Log::error('Google Calendar OAuth callback error', [
@@ -131,7 +131,7 @@ class GoogleCalendarController extends Controller
         ]);
 
         return redirect()->route('profile.edit')
-            ->with('success', 'Google Calendar disconnected successfully.');
+            ->with('message', 'Google Calendar disconnected successfully.');
     }
 
     /**
