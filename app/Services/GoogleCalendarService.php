@@ -430,12 +430,15 @@ class GoogleCalendarService
             return $results;
         }
 
-        // Sync events for each role
+        // Sync events for each role that has sync enabled
         foreach ($roles as $role) {
-            $roleResults = $this->syncUserEvents($user, $role);
-            $results['created'] += $roleResults['created'];
-            $results['updated'] += $roleResults['updated'];
-            $results['errors'] += $roleResults['errors'];
+            // Only sync roles that have sync enabled (sync_direction is 'to' or 'both')
+            if ($role->syncsToGoogle()) {
+                $roleResults = $this->syncUserEvents($user, $role);
+                $results['created'] += $roleResults['created'];
+                $results['updated'] += $roleResults['updated'];
+                $results['errors'] += $roleResults['errors'];
+            }
         }
 
         return $results;
