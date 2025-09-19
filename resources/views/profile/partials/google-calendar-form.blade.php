@@ -26,6 +26,7 @@
                 </a>
             </div>
 
+            <!--
             <div class="space-y-4">
                 <div>
                     <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
@@ -63,6 +64,7 @@
                     </div>
                 </div>
             </div>
+            -->
         @else
             <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
                 <div class="flex items-center">
