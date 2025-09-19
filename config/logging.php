@@ -5,6 +5,106 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
 
+$rawLogLevel = env('LOG_LEVEL');
+
+$normalizeLogLevel = static function (string $default) use ($rawLogLevel): string {
+    $value = $rawLogLevel;
+
+    if ($value === null || $value === '') {
+        return $default;
+    }
+
+    if (is_array($value)) {
+        foreach ($value as $candidate) {
+            if (is_string($candidate) && $candidate !== '') {
+                return $candidate;
+            }
+        }
+
+        return $default;
+    }
+
+    if (is_string($value)) {
+        $decoded = json_decode($value, true);
+
+        if (json_last_error() === JSON_ERROR_NONE) {
+            if (is_array($decoded)) {
+                foreach ($decoded as $candidate) {
+                    if (is_string($candidate) && $candidate !== '') {
+                        return $candidate;
+                    }
+                }
+            }
+
+            if (is_string($decoded) && $decoded !== '') {
+                return $decoded;
+            }
+        }
+
+        foreach (array_map('trim', explode(',', $value)) as $candidate) {
+            if ($candidate !== '') {
+                return $candidate;
+            }
+        }
+
+        $value = trim($value, " \t\n\r\0\x0B\"'");
+
+        return $value !== '' ? $value : $default;
+    }
+
+    if (is_scalar($value)) {
+        $value = (string) $value;
+
+        return $value !== '' ? $value : $default;
+    }
+
+    return $default;
+};
+
+$stackChannels = (static function ($value): array {
+    if ($value === null || $value === '') {
+        return ['single'];
+    }
+
+    if (! is_array($value)) {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+
+            if (json_last_error() === JSON_ERROR_NONE) {
+                if (is_array($decoded)) {
+                    $value = $decoded;
+                } elseif (is_string($decoded)) {
+                    $value = [$decoded];
+                }
+            }
+        }
+
+        if (! is_array($value)) {
+            $value = explode(',', (string) $value);
+        }
+    }
+
+    $channels = [];
+
+    foreach ($value as $candidate) {
+        if (! is_string($candidate)) {
+            continue;
+        }
+
+        $candidate = trim($candidate, " \t\n\r\0\x0B\"'[]");
+
+        if ($candidate !== '') {
+            $channels[] = $candidate;
+        }
+    }
+
+    if ($channels === []) {
+        $channels[] = 'single';
+    }
+
+    return array_values(array_unique($channels));
+})(env('LOG_STACK', 'single'));
+
 return [
 
     /*
@@ -54,21 +154,21 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', env('LOG_STACK', 'single')),
+            'channels' => $stackChannels,
             'ignore_exceptions' => false,
         ],
 
         'single' => [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
+            'level' => $normalizeLogLevel('debug'),
             'replace_placeholders' => true,
         ],
 
         'daily' => [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
+            'level' => $normalizeLogLevel('debug'),
             'days' => env('LOG_DAILY_DAYS', 14),
             'replace_placeholders' => true,
         ],
@@ -78,13 +178,13 @@ return [
             'url' => env('LOG_SLACK_WEBHOOK_URL'),
             'username' => env('LOG_SLACK_USERNAME', 'Laravel Log'),
             'emoji' => env('LOG_SLACK_EMOJI', ':boom:'),
-            'level' => env('LOG_LEVEL', 'critical'),
+            'level' => $normalizeLogLevel('critical'),
             'replace_placeholders' => true,
         ],
 
         'papertrail' => [
             'driver' => 'monolog',
-            'level' => env('LOG_LEVEL', 'debug'),
+            'level' => $normalizeLogLevel('debug'),
             'handler' => env('LOG_PAPERTRAIL_HANDLER', SyslogUdpHandler::class),
             'handler_with' => [
                 'host' => env('PAPERTRAIL_URL'),
@@ -96,7 +196,7 @@ return [
 
         'stderr' => [
             'driver' => 'monolog',
-            'level' => env('LOG_LEVEL', 'debug'),
+            'level' => $normalizeLogLevel('debug'),
             'handler' => StreamHandler::class,
             'formatter' => env('LOG_STDERR_FORMATTER'),
             'with' => [
@@ -107,14 +207,14 @@ return [
 
         'syslog' => [
             'driver' => 'syslog',
-            'level' => env('LOG_LEVEL', 'debug'),
+            'level' => $normalizeLogLevel('debug'),
             'facility' => env('LOG_SYSLOG_FACILITY', LOG_USER),
             'replace_placeholders' => true,
         ],
 
         'errorlog' => [
             'driver' => 'errorlog',
-            'level' => env('LOG_LEVEL', 'debug'),
+            'level' => $normalizeLogLevel('debug'),
             'replace_placeholders' => true,
         ],
 
