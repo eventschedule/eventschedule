@@ -31,6 +31,7 @@ class GoogleCalendarService
         ]);
         $this->client->setAccessType('offline');
         $this->client->setApprovalPrompt('force');
+        $this->client->setPrompt('consent'); // This is the newer way to force consent
         $this->client->setIncludeGrantedScopes(true);
     }
 
@@ -48,6 +49,7 @@ class GoogleCalendarService
     public function getAuthUrlWithForce(): string
     {
         $this->client->setApprovalPrompt('force');
+        $this->client->setPrompt('consent');
         return $this->client->createAuthUrl();
     }
 
