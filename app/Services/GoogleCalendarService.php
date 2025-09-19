@@ -380,9 +380,9 @@ class GoogleCalendarService
     }
 
     /**
-     * Sync all events for a user to Google Calendar
+     * Sync all events for a user to Google Calendar for a specific role
      */
-    public function syncUserEvents(User $user): array
+    public function syncUserEvents(User $user, Role $role): array
     {
         $results = [
             'created' => 0,
@@ -395,11 +395,9 @@ class GoogleCalendarService
             return $results;
         }
 
-        // Get all events for the user's roles
-        $events = Event::whereHas('roles', function ($query) use ($user) {
-            $query->whereHas('users', function ($userQuery) use ($user) {
-                $userQuery->where('user_id', $user->id);
-            });
+        // Get all events for the specific role
+        $events = Event::whereHas('roles', function ($query) use ($role) {
+            $query->where('id', $role->id);
         })->get();
 
         foreach ($events as $event) {
