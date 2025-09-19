@@ -20,6 +20,22 @@ class GoogleCalendarController extends Controller
     }
 
     /**
+     * Safely calculate expires_in seconds from google_token_expires_at
+     */
+    private function calculateExpiresIn($expiresAt): int
+    {
+        if (!$expiresAt) {
+            return 3600; // Default to 1 hour
+        }
+        
+        if (is_string($expiresAt)) {
+            $expiresAt = \Carbon\Carbon::parse($expiresAt);
+        }
+        
+        return $expiresAt->diffInSeconds(now());
+    }
+
+    /**
      * Redirect to Google OAuth
      */
     public function redirect(): RedirectResponse
@@ -138,8 +154,7 @@ class GoogleCalendarController extends Controller
             $this->googleCalendarService->setAccessToken([
                 'access_token' => $user->fresh()->google_token,
                 'refresh_token' => $user->fresh()->google_refresh_token,
-                'expires_in' => $user->fresh()->google_token_expires_at ? 
-                    $user->fresh()->google_token_expires_at->diffInSeconds(now()) : 3600,
+                'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
             ]);
 
             $calendars = $this->googleCalendarService->getCalendars();
@@ -188,8 +203,7 @@ class GoogleCalendarController extends Controller
             $this->googleCalendarService->setAccessToken([
                 'access_token' => $user->fresh()->google_token,
                 'refresh_token' => $user->fresh()->google_refresh_token,
-                'expires_in' => $user->fresh()->google_token_expires_at ? 
-                    $user->fresh()->google_token_expires_at->diffInSeconds(now()) : 3600,
+                'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
             ]);
 
             $calendars = $this->googleCalendarService->getCalendars();
@@ -282,8 +296,7 @@ class GoogleCalendarController extends Controller
             $this->googleCalendarService->setAccessToken([
                 'access_token' => $user->fresh()->google_token,
                 'refresh_token' => $user->fresh()->google_refresh_token,
-                'expires_in' => $user->fresh()->google_token_expires_at ? 
-                    $user->fresh()->google_token_expires_at->diffInSeconds(now()) : 3600,
+                'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
             ]);
 
             if ($event->google_event_id) {
@@ -500,8 +513,7 @@ class GoogleCalendarController extends Controller
             $this->googleCalendarService->setAccessToken([
                 'access_token' => $user->fresh()->google_token,
                 'refresh_token' => $user->fresh()->google_refresh_token,
-                'expires_in' => $user->fresh()->google_token_expires_at ? 
-                    $user->fresh()->google_token_expires_at->diffInSeconds(now()) : 3600,
+                'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
             ]);
 
             $calendarId = $role->getGoogleCalendarId();

@@ -62,6 +62,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'facebook_token_expires_at',
     ];
 
+
     protected static function boot()
     {
         parent::boot();
