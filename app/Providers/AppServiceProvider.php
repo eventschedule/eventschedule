@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Listeners\LogSentMessage;
 use App\Models\Setting;
+use App\Support\WalletConfigManager;
 use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\Artisan;
@@ -104,6 +105,18 @@ class AppServiceProvider extends ServiceProvider
                 if (!empty($mailSettings['from_name'])) {
                     config(['mail.from.name' => $mailSettings['from_name']]);
                 }
+            }
+
+            $appleWalletSettings = Setting::forGroup('wallet.apple');
+
+            if (!empty($appleWalletSettings)) {
+                WalletConfigManager::applyApple($appleWalletSettings);
+            }
+
+            $googleWalletSettings = Setting::forGroup('wallet.google');
+
+            if (!empty($googleWalletSettings)) {
+                WalletConfigManager::applyGoogle($googleWalletSettings);
             }
         }
     }
