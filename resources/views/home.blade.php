@@ -182,7 +182,9 @@
                                             </td>
                                             <td class="px-6 py-4 align-top">
                                                 <div class="flex items-center justify-end space-x-3">
-                                                    <a href="{{ route('events.view', ['hash' => $hashedId]) }}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">{{ __('messages.view') }}</a>
+                                                    @if (\Illuminate\Support\Facades\Route::has('events.view'))
+                                                        <a href="{{ route('events.view', ['hash' => $hashedId]) }}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">{{ __('messages.view') }}</a>
+                                                    @endif
                                                     @if ($canEdit)
                                                         <a href="{{ route('event.edit_admin', ['hash' => $hashedId]) }}" class="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-100">{{ __('messages.edit') }}</a>
                                                         <form method="POST" action="{{ route('events.destroy', ['hash' => $hashedId]) }}" onsubmit="return confirm('{{ __('messages.are_you_sure') }}');">
