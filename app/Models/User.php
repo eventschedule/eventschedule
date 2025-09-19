@@ -31,6 +31,13 @@ class User extends Authenticatable implements MustVerifyEmail
         'payment_url',
         'payment_secret',
         'is_subscribed',
+        'google_id',
+        'google_token',
+        'google_refresh_token',
+        'google_token_expires_at',
+        'facebook_id',
+        'facebook_token',
+        'facebook_token_expires_at',
     ];
 
     /**
@@ -47,6 +54,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'invoiceninja_webhook_secret',
         'api_key',
         'payment_secret',
+        'google_token',
+        'google_refresh_token',
+        'google_token_expires_at',
+        'facebook_id',
+        'facebook_token',
+        'facebook_token_expires_at',
     ];
 
     protected static function boot()
