@@ -38,6 +38,17 @@
                 </li>
 
                 <li>
+                    <a href="{{ route('role.pages') }}"
+                        class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->routeIs('role.pages') ? 'bg-gray-800 text-white' : '' }}">
+                        <svg class="h-6 w-6 shrink-0" viewBox="0 0 24 24"
+                            fill="{{ request()->routeIs('role.pages') ? '#ccc' : '#666' }}" aria-hidden="true">
+                            <path d="M6 3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9.5a2 2 0 0 0 2-2V8.5L13 3H6zm7 1.5L17.5 9H13V4.5z" />
+                        </svg>
+                        {{ __('messages.pages') }}
+                    </a>
+                </li>
+
+                <li>
                     <a href="{{ route('role.venues') }}"
                         class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->routeIs('role.venues') ? 'bg-gray-800 text-white' : '' }}">
                         <svg class="h-6 w-6 shrink-0" viewBox="0 0 24 24" fill="none"

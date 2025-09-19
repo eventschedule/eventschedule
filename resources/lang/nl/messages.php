@@ -3,6 +3,10 @@
 return [
     'home' => 'Home',
     'venues' => 'Locaties',
+    'pages' => 'Pagina\'s',
+    'manage_pages_description' => 'Beheer al je planningspagina\'s op één plek.',
+    'no_pages_listed' => 'Nog geen pagina\'s aangemaakt.',
+    'create_first_page_prompt' => 'Begin met het maken van een pagina voor talent, locatie of curator.',
     'event_deleted' => 'Evenement succesvol verwijderd',
     'edit_event' => 'Evenement Bewerken',
     'add_event' => 'Evenement Toevoegen',

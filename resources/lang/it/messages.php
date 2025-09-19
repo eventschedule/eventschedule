@@ -3,6 +3,10 @@
 return [
     'home' => 'Home',
     'venues' => 'Luoghi',
+    'pages' => 'Pagine',
+    'manage_pages_description' => 'Gestisci tutte le tue pagine di calendario in un unico posto.',
+    'no_pages_listed' => 'Nessuna pagina ancora creata.',
+    'create_first_page_prompt' => 'Inizia creando una pagina per talento, luogo o curatore.',
     'event_deleted' => 'Evento eliminato con successo',
     'edit_event' => 'Modifica Evento',
     'add_event' => 'Aggiungi Evento',

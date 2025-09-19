@@ -3,6 +3,10 @@
 return [
     'home' => 'Startseite',
     'venues' => 'Veranstaltungsorte',
+    'pages' => 'Seiten',
+    'manage_pages_description' => 'Verwalte alle deine Zeitplan-Seiten an einem Ort.',
+    'no_pages_listed' => 'Noch keine Seiten erstellt.',
+    'create_first_page_prompt' => 'Beginne mit dem Erstellen einer Talent-, Veranstaltungsort- oder Kuratorseite.',
     'event_deleted' => 'Veranstaltung erfolgreich gelöscht',
     'edit_event' => 'Veranstaltung bearbeiten',
     'add_event' => 'Veranstaltung hinzufügen',

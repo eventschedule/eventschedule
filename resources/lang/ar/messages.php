@@ -3,6 +3,10 @@
 return [
     'home' => 'الرئيسية',
     'venues' => 'الأماكن',
+    'pages' => 'الصفحات',
+    'manage_pages_description' => 'إدارة جميع صفحات الجدول الخاصة بك في مكان واحد.',
+    'no_pages_listed' => 'لم يتم إنشاء صفحات بعد.',
+    'create_first_page_prompt' => 'ابدأ بإنشاء صفحة موهبة أو مكان أو منسق.',
     'event_deleted' => 'تم حذف الحدث بنجاح',
     'edit_event' => 'تعديل الحدث',
     'add_event' => 'إضافة حدث',
