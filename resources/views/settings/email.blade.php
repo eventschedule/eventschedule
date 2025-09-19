@@ -46,16 +46,20 @@
 
                                         const data = await response.json().catch(() => ({}));
 
+                                        const logs = Array.isArray(data.logs) ? data.logs : [];
+
                                         if (response.ok && data.status === 'success') {
                                             this.result = {
                                                 success: true,
                                                 message: data.message || '{{ __('messages.test_email_sent') }}',
+                                                logs,
                                             };
                                         } else {
                                             this.result = {
                                                 success: false,
                                                 message: data.message || '{{ __('messages.test_email_failed') }}',
                                                 error: data.error || null,
+                                                logs,
                                             };
                                         }
                                     } catch (error) {
@@ -63,6 +67,7 @@
                                             success: false,
                                             message: '{{ __('messages.test_email_failed') }}',
                                             error: error.message,
+                                            logs: [],
                                         };
                                     } finally {
                                         this.testing = false;
@@ -169,6 +174,18 @@
                                     <p class="mt-2"><span class="font-medium">{{ __('messages.error_details') }}</span>
                                         <span x-text="result.error"></span>
                                     </p>
+                                </template>
+                                <template x-if="result.logs && result.logs.length">
+                                    <div class="mt-4 rounded-md border border-gray-200 bg-white p-3 text-xs text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
+                                        <p class="mb-2 font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 text-[11px]">
+                                            {{ __('messages.test_email_logs') }}
+                                        </p>
+                                        <div class="space-y-1">
+                                            <template x-for="(logLine, index) in result.logs" :key="index">
+                                                <div class="font-mono" x-text="logLine"></div>
+                                            </template>
+                                        </div>
+                                    </div>
                                 </template>
                             </div>
                         </form>
