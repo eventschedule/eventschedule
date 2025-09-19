@@ -86,7 +86,7 @@
                                             <span>cURL</span>
                                             <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
                                         </div>
-                                        <pre class="mt-2 overflow-x-auto"><code>curl -X GET "{{ config('app.url') }}/api/schedules" \
+                                        <pre class="mt-2 overflow-x-auto"><code>curl -X GET "{{ app_public_url() }}/api/schedules" \
      -H "X-API-Key: your_api_key_here"</code></pre>
                                     </div>
                                 </div>
@@ -197,7 +197,7 @@
                                                 <span>cURL</span>
                                                 <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
                                             </div>
-                                            <pre class="mt-2 overflow-x-auto"><code>curl -X GET "{{ config('app.url') }}/api/schedules?page=1&per_page=100" \
+                                            <pre class="mt-2 overflow-x-auto"><code>curl -X GET "{{ app_public_url() }}/api/schedules?page=1&per_page=100" \
      -H "X-API-Key: your_api_key_here"</code></pre>
                                         </div>
                                     </div>
@@ -212,7 +212,7 @@
     "data": [
         {
             "id": "123",
-            "url": "{{ config('app.url') }}/venue-name",
+            "url": "{{ app_public_url() }}/venue-name",
             "type": "venue",
             "name": "My Venue",
             "email": "venue@example.com",
@@ -267,7 +267,7 @@
                                                 <span>cURL</span>
                                                 <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
                                             </div>
-                                            <pre class="mt-2 overflow-x-auto"><code>curl -X GET "{{ config('app.url') }}/api/events" \
+                                            <pre class="mt-2 overflow-x-auto"><code>curl -X GET "{{ app_public_url() }}/api/events" \
      -H "X-API-Key: your_api_key_here"</code></pre>
                                         </div>
                                     </div>
@@ -282,7 +282,7 @@
     "data": [
         {
             "id": "456",
-            "url": "{{ config('app.url') }}/venue-name/event-slug",
+            "url": "{{ app_public_url() }}/venue-name/event-slug",
             "name": "Event Name",
             "description": "Event description",
             "starts_at": "{{ now()->format('Y-m-d') }} 19:00:00",
@@ -347,7 +347,7 @@
                                                 <span>cURL</span>
                                                 <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
                                             </div>
-                                            <pre class="mt-2 overflow-x-auto"><code>curl -X POST "{{ config('app.url') }}/api/events/{subdomain}" \
+                                            <pre class="mt-2 overflow-x-auto"><code>curl -X POST "{{ app_public_url() }}/api/events/{subdomain}" \
      -H "X-API-Key: your_api_key_here" \
      -H "X-Requested-With: XMLHttpRequest" \
      -H "Content-Type: application/json" \
@@ -384,7 +384,7 @@
                                                 <span>cURL</span>
                                                 <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
                                             </div>
-                                            <pre class="mt-2 overflow-x-auto"><code>curl -X POST "{{ config('app.url') }}/api/events/{subdomain}" \
+                                            <pre class="mt-2 overflow-x-auto"><code>curl -X POST "{{ app_public_url() }}/api/events/{subdomain}" \
     -H "X-API-Key: your_api_key_here" \
     -H "X-Requested-With: XMLHttpRequest" \
     -F "flyer_image=@/path/to/your/flyer.jpg" \

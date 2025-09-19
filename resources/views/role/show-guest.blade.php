@@ -46,8 +46,8 @@
                   {{ $role->translatedName() }}
                 </h3>
                 @if (auth()->user() && auth()->user()->isMember($role->subdomain))
-                <a 
-                  href="{{ config('app.url') . route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false) }}"
+                <a
+                  href="{{ url(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false)) }}"
                   class="text-sm font-medium text-[#4E81FA] hover:underline inline-block"
                 >
                   {{ __('messages.edit_schedule') }}

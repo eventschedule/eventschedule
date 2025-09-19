@@ -3,7 +3,7 @@
         <meta name="description" content="{{ $post->meta_description }}">
         <meta property="og:title" content="{{ $post->meta_title }}">
         <meta property="og:description" content="{{ $post->meta_description }}">
-        <meta property="og:image" content="{{ $post->featured_image_url ?: config('app.url') . '/images/background.jpg' }}">
+        <meta property="og:image" content="{{ $post->featured_image_url ?: url('/images/background.jpg') }}">
         <meta property="og:url" content="{{ url()->current() }}">
         <meta property="og:site_name" content="Event Schedule">
         <meta property="og:type" content="article">
@@ -18,7 +18,7 @@
         @endif
         <meta name="twitter:title" content="{{ $post->meta_title }}">
         <meta name="twitter:description" content="{{ $post->meta_description }}">
-        <meta name="twitter:image" content="{{ $post->featured_image_url ?: config('app.url') . '/images/background.jpg' }}">
+        <meta name="twitter:image" content="{{ $post->featured_image_url ?: url('/images/background.jpg') }}">
         <meta name="twitter:card" content="summary_large_image">
         <link rel="canonical" href="{{ url()->current() }}">
         
@@ -29,7 +29,7 @@
             "@type": "BlogPosting",
             "headline": "{{ $post->title }}",
             "description": "{{ $post->meta_description }}",
-            "image": "{{ $post->featured_image_url ?: config('app.url') . '/images/background.jpg' }}",
+            "image": "{{ $post->featured_image_url ?: url('/images/background.jpg') }}",
             "author": {
                 "@type": "Person",
                 "name": "{{ $post->author_name }}"
@@ -39,7 +39,7 @@
                 "name": "Event Schedule",
                 "logo": {
                     "@type": "ImageObject",
-                    "url": "{{ config('app.url') }}/images/light_logo.png"
+                    "url": "{{ url('/images/light_logo.png') }}"
                 }
             },
             "datePublished": "{{ $post->published_at ? $post->published_at->toISOString() : '' }}",

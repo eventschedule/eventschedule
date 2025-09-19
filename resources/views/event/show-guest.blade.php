@@ -62,7 +62,7 @@
               </a>
               @if (auth()->user() && auth()->user()->canEditEvent($event))
                 <span class="text-white text-sm mx-1">|</span>
-                <a href="{{ config('app.url') . route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)], false) }}" class="text-white text-sm hover:underline">
+                <a href="{{ url(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)], false)) }}" class="text-white text-sm hover:underline">
                   {{ __('messages.edit_event') }}
                 </a>
               @endif
@@ -375,8 +375,8 @@
               @if ($each->isClaimed() && config('app.hosted'))
               <a
                 href="{{ auth()->user() && auth()->user()->isMember($each->subdomain)
-                  ? config('app.url') . route('role.view_admin', ['subdomain' => $each->subdomain, 'tab' => 'schedule'], false) 
-                  : config('app.url') . route('role.follow', ['subdomain' => $each->subdomain], false) }}"
+                  ? url(route('role.view_admin', ['subdomain' => $each->subdomain, 'tab' => 'schedule'], false))
+                  : url(route('role.follow', ['subdomain' => $each->subdomain], false)) }}"
                 class="inline-flex items-center justify-center"
               >
                 <button

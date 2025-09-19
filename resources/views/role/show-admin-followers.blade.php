@@ -31,7 +31,7 @@
             @if (config('app.hosted'))
                 {{ $role->subdomain . '.eventschedule.com' }}
             @else
-                {{ config('app.url') . '/' . $role->subdomain }}
+                {{ url('/' . $role->subdomain) }}
             @endif
         </a>
     </div>
