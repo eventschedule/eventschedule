@@ -24,7 +24,18 @@ class GoogleCalendarController extends Controller
      */
     public function redirect(): RedirectResponse
     {
-        $authUrl = $this->googleCalendarService->getAuthUrl();
+        $user = Auth::user();
+        
+        // If user has tokens but no refresh token, force re-authorization
+        if ($user->google_token && !$user->google_refresh_token) {
+            Log::info('User has access token but no refresh token, forcing re-authorization', [
+                'user_id' => $user->id,
+            ]);
+            $authUrl = $this->googleCalendarService->getAuthUrlWithForce();
+        } else {
+            $authUrl = $this->googleCalendarService->getAuthUrl();
+        }
+        
         return redirect($authUrl);
     }
 
@@ -42,7 +53,7 @@ class GoogleCalendarController extends Controller
             }
 
             $token = $this->googleCalendarService->getAccessToken($code);
-            
+                        
             if (isset($token['error'])) {
                 Log::error('Google OAuth error', ['error' => $token['error']]);
                 return redirect()->route('profile.edit')
@@ -57,7 +68,7 @@ class GoogleCalendarController extends Controller
                 'google_refresh_token' => $token['refresh_token'] ?? null,
                 'google_token_expires_at' => now()->addSeconds($token['expires_in']),
             ]);
-
+            
             return redirect()->route('profile.edit')
                 ->with('success', 'Google Calendar connected successfully!');
 
@@ -70,6 +81,23 @@ class GoogleCalendarController extends Controller
             return redirect()->route('profile.edit')
                 ->with('error', 'Failed to connect Google Calendar. Please try again.');
         }
+    }
+
+    /**
+     * Re-authorize Google Calendar (for users missing refresh token)
+     */
+    public function reauthorize(): RedirectResponse
+    {
+        $user = Auth::user();
+        
+        if (!$user->google_token) {
+            return redirect()->route('profile.edit')
+                ->with('error', 'Google Calendar not connected. Please connect first.');
+        }
+        
+        // Force re-authorization to get refresh token
+        $authUrl = $this->googleCalendarService->getAuthUrlWithForce();
+        return redirect($authUrl);
     }
 
     /**
@@ -95,23 +123,17 @@ class GoogleCalendarController extends Controller
      */
     public function getCalendars(Request $request)
     {
-        \Log::info('1. Getting Google Calendars');
-
         $user = Auth::user();
         
         if (!$user->google_token) {
             return response()->json(['error' => 'Google Calendar not connected'], 400);
         }
 
-        \Log::info('2. Getting Google Calendars');
-
         try {
             // Ensure user has valid token before getting calendars
             if (!$this->googleCalendarService->ensureValidToken($user)) {
                 return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
             }
-
-            \Log::info('3. Getting Google Calendars');
 
             $this->googleCalendarService->setAccessToken([
                 'access_token' => $user->fresh()->google_token,
@@ -120,12 +142,8 @@ class GoogleCalendarController extends Controller
                     $user->fresh()->google_token_expires_at->diffInSeconds(now()) : 3600,
             ]);
 
-            \Log::info('4. Getting Google Calendars'); 
-
             $calendars = $this->googleCalendarService->getCalendars();
             
-            \Log::info('5. Getting Google Calendars');
-
             return response()->json(['calendars' => $calendars]);
 
         } catch (\Exception $e) {

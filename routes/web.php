@@ -101,6 +101,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     // Google Calendar routes
     Route::get('/google-calendar/redirect', [GoogleCalendarController::class, 'redirect'])->name('google.calendar.redirect');
     Route::get('/google-calendar/callback', [GoogleCalendarController::class, 'callback'])->name('google.calendar.callback');
+    Route::get('/google-calendar/reauthorize', [GoogleCalendarController::class, 'reauthorize'])->name('google.calendar.reauthorize');
     Route::get('/google-calendar/disconnect', [GoogleCalendarController::class, 'disconnect'])->name('google.calendar.disconnect');
     Route::get('/google-calendar/calendars', [GoogleCalendarController::class, 'getCalendars'])->name('google.calendar.calendars');
     Route::post('/google-calendar/sync-events', [GoogleCalendarController::class, 'syncEvents'])->name('google.calendar.sync_events');
