@@ -15,9 +15,15 @@ use Stripe\StripeClient;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use App\Utils\InvoiceNinja;
+use App\Utils\NotificationUtils;
 use App\Rules\NoFakeEmail;
+use App\Services\Wallet\AppleWalletService;
+use App\Services\Wallet\GoogleWalletService;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\TicketSaleNotification;
 
 class TicketController extends Controller
 {
@@ -155,6 +161,18 @@ class TicketController extends Controller
 
         $sale->save();
 
+        Log::info('Ticket checkout created sale', [
+            'sale_id' => $sale->id,
+            'event_id' => $event->id,
+            'event_name' => $event->name,
+            'user_id' => optional($user)->id,
+            'purchaser_email' => $sale->email,
+            'total_tickets' => collect($request->tickets)->sum(),
+            'status' => $sale->status,
+            'payment_method' => $sale->payment_method,
+            'event_date' => $sale->event_date,
+        ]);
+
         foreach($request->tickets as $ticketId => $quantity) {
             if ($quantity > 0) {
                 $sale->saleTickets()->create([
@@ -170,10 +188,24 @@ class TicketController extends Controller
 
         $sale->payment_amount = $total;
         $sale->save();
-        
+
+        Log::info('Ticket checkout completed sale totals', [
+            'sale_id' => $sale->id,
+            'payment_amount' => $sale->payment_amount,
+            'status' => $sale->status,
+        ]);
+
+        $this->sendTicketSaleNotifications($sale);
+
         if ($total == 0) {
             $sale->status = 'paid';
             $sale->save();
+
+            Log::info('Ticket checkout auto-marked sale as paid (zero total)', [
+                'sale_id' => $sale->id,
+                'event_id' => $event->id,
+                'payment_amount' => $sale->payment_amount,
+            ]);
 
             return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
         } else {
@@ -456,13 +488,65 @@ class TicketController extends Controller
         exit;
     }
 
-    public function view($eventId, $secret)
+    public function view($eventId, $secret, AppleWalletService $appleWalletService, GoogleWalletService $googleWalletService)
     {
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
         $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
-        $role = $event->role();        
+        $role = $event->role();
 
-        return view('ticket.view', compact('event', 'sale', 'role'));
+        $appleWalletUrl = $appleWalletService->isAvailableForSale($sale)
+            ? route('ticket.wallet.apple', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret])
+            : null;
+        $googleWalletUrl = $googleWalletService->isAvailableForSale($sale)
+            ? route('ticket.wallet.google', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret])
+            : null;
+
+        return view('ticket.view', compact('event', 'sale', 'role', 'appleWalletUrl', 'googleWalletUrl'));
+    }
+
+    public function appleWallet($eventId, $secret, AppleWalletService $appleWalletService)
+    {
+        $event = Event::findOrFail(UrlUtils::decodeId($eventId));
+        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
+
+        if (! $appleWalletService->isAvailableForSale($sale)) {
+            abort(404);
+        }
+
+        try {
+            $pass = $appleWalletService->generateTicketPass($sale);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            abort(500, __('messages.unable_to_generate_wallet_pass'));
+        }
+
+        $filename = Str::slug($event->name . '-' . $sale->id) . '.pkpass';
+
+        return response($pass, 200, [
+            'Content-Type' => 'application/vnd.apple.pkpass',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    public function googleWallet($eventId, $secret, GoogleWalletService $googleWalletService)
+    {
+        $event = Event::findOrFail(UrlUtils::decodeId($eventId));
+        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
+
+        if (! $googleWalletService->isAvailableForSale($sale)) {
+            abort(404);
+        }
+
+        try {
+            $link = $googleWalletService->createSaveLink($sale);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            abort(500, __('messages.unable_to_generate_wallet_pass'));
+        }
+
+        return redirect()->away($link);
     }
 
     public function handleAction(Request $request, $sale_id)
@@ -477,9 +561,24 @@ class TicketController extends Controller
         switch ($request->action) {
             case 'mark_paid':
                 if ($sale->status === 'unpaid') {
+                    $previousStatus = $sale->status;
                     $sale->status = 'paid';
                     $sale->transaction_reference = __('messages.manual_payment');
                     $sale->save();
+
+                    Log::info('Sale manually marked as paid', [
+                        'sale_id' => $sale->id,
+                        'event_id' => $sale->event_id,
+                        'previous_status' => $previousStatus,
+                        'actor_id' => $user->id,
+                    ]);
+                } else {
+                    Log::info('Sale mark_paid request ignored', [
+                        'sale_id' => $sale->id,
+                        'event_id' => $sale->event_id,
+                        'current_status' => $sale->status,
+                        'actor_id' => $user->id,
+                    ]);
                 }
                 break;
             
@@ -508,6 +607,42 @@ class TicketController extends Controller
         }
         
         return back()->with('success', __('messages.action_completed'));
+    }
+
+    private function sendTicketSaleNotifications(Sale $sale): void
+    {
+        $sale->loadMissing(['saleTickets.ticket', 'event.roles.members', 'event.venue.members', 'event.creatorRole.members', 'event.user']);
+
+        $event = $sale->event;
+        $contextRole = $event->venue ?: $event->creatorRole;
+
+        Log::info('Dispatching ticket sale notifications', [
+            'sale_id' => $sale->id,
+            'event_id' => $event->id,
+            'purchaser_email' => $sale->email,
+            'status' => $sale->status,
+        ]);
+
+        if ($sale->email) {
+            Notification::route('mail', $sale->email)
+                ->notify(new TicketSaleNotification($sale, 'purchaser', $contextRole));
+        }
+
+        $notifiedUserIds = collect();
+        $organizerRoles = collect([$event->creatorRole, $event->venue])->filter();
+
+        foreach ($organizerRoles as $organizerRole) {
+            $members = NotificationUtils::roleMembers($organizerRole);
+
+            if ($members->isNotEmpty()) {
+                Notification::send($members, new TicketSaleNotification($sale, 'organizer', $organizerRole));
+                $notifiedUserIds = $notifiedUserIds->merge($members->pluck('id'));
+            }
+        }
+
+        if ($event->user && $event->user->email && $event->user->is_subscribed !== false && ! $notifiedUserIds->contains($event->user->id)) {
+            Notification::send($event->user, new TicketSaleNotification($sale, 'organizer', $contextRole));
+        }
     }
 
     public function release()

@@ -2,8 +2,11 @@
 
 namespace App\Notifications;
 
+use App\Models\Event;
+use App\Models\Role;
+use App\Models\User;
+use App\Utils\NotificationUtils;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -11,61 +14,70 @@ class RequestDeclinedNotification extends Notification
 {
     use Queueable;
 
-    protected $event;
+    protected Event $event;
+    protected ?User $actor;
+    protected string $recipientType;
+    protected ?Role $contextRole;
 
-    /**
-     * Create a new notification instance.
-     */
-    public function __construct($event)
+    public function __construct(Event $event, ?User $actor = null, string $recipientType = 'talent', ?Role $contextRole = null)
     {
         $this->event = $event;
+        $this->actor = $actor;
+        $this->recipientType = $recipientType;
+        $this->contextRole = $contextRole;
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
     public function via(object $notifiable): array
     {
         return ['mail'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
     public function toMail(object $notifiable): MailMessage
     {
-        $venue = $this->event->venue;
-        $role = $this->event->role();
+        $eventName = NotificationUtils::eventDisplayName($this->event);
+        $venueName = $this->event->getVenueDisplayName();
+        $talentName = optional($this->event->role())->getDisplayName();
+        $date = $this->event->localStartsAt(true);
 
-        return (new MailMessage)
-                    ->replyTo($this->venue->user->email, $this->venue->user->name)
-                    ->subject(str_replace(':venue', $venue->name, __('messages.' . $role->type . '_request_declined')))
-                    ->line(str_replace(':venue', $venue->name, __('messages.' . $role->type . '_request_declined')));
+        $lineKey = $this->recipientType === 'organizer'
+            ? 'messages.booking_request_declined_organizer'
+            : 'messages.booking_request_declined_talent';
+
+        $mail = (new MailMessage)
+            ->subject(__('messages.booking_request_declined_subject'))
+            ->line(__($lineKey, [
+                'talent' => $talentName ?: $eventName,
+                'venue' => $venueName ?: __('messages.event'),
+                'date' => $date ?: __('messages.date_to_be_announced'),
+            ]))
+            ->action(__('messages.view_event'), $this->event->getGuestUrl($this->contextRole?->subdomain ?? $this->event->venue?->subdomain));
+
+        if ($this->actor && $this->actor->email) {
+            $mail->replyTo($this->actor->email, $this->actor->name);
+        }
+
+        return $mail;
     }
 
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(object $notifiable): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
-    /**
-     * Get the notification's mail headers.
-     */
     public function toMailHeaders(): array
     {
-        $venue = $this->event->venue;
+        $subdomain = $this->contextRole?->subdomain
+            ?? $this->event->venue?->subdomain
+            ?? $this->event->role()?->subdomain;
+
+        if (! $subdomain) {
+            return [];
+        }
+
         return [
-            'List-Unsubscribe' => '<' . route('role.unsubscribe', ['subdomain' => $venue->subdomain]) . '>',
+            'List-Unsubscribe' => '<' . route('role.unsubscribe', ['subdomain' => $subdomain]) . '>',
             'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
         ];
     }
 }
+

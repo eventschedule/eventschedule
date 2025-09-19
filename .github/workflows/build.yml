@@ -6,8 +6,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      commit_secret: ${{ secrets.commit_secret }}
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
@@ -44,7 +44,7 @@ jobs:
       - name: Create Release
         uses: marvinpinto/action-automatic-releases@v1.2.1
         with:
-          repo_token: "${{ secrets.commit_secret }}"
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           draft: false
           prerelease: false
           title: "Latest Release"

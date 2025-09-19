@@ -2,14 +2,15 @@
 
 namespace App\Mail;
 
+use App\Support\MailTemplateManager;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Headers;
-use Illuminate\Mail\Mailables\Address;
+use Illuminate\Queue\SerializesModels;
 
 class ClaimVenue extends Mailable
 {
@@ -17,12 +18,15 @@ class ClaimVenue extends Mailable
 
     protected $event;
 
+    protected MailTemplateManager $templates;
+
     /**
      * Create a new message instance.
      */
     public function __construct($event)
     {
         $this->event = $event;
+        $this->templates = app(MailTemplateManager::class);
     }
 
     /**
@@ -30,26 +34,13 @@ class ClaimVenue extends Mailable
      */
     public function envelope(): Envelope
     {
-        $event = $this->event;
-        $venue = $event->venue;
-        $role = $event->role();
-        $user = $event->user;
-        $curator = $event->curator();
-
-        if ($curator) {
-            $subject = __('messages.claim_your_venue_curated');
-        } else {
-            $subject = __('messages.claim_your_venue');
-        }        
+        $data = $this->templateData();
 
         return new Envelope(
-            subject: str_replace(
-                        [':role', ':venue', ':event', ':curator'], 
-                        [$role->name, $venue->name, $event->name, $curator ? $curator->name : ''],
-                        $subject),
+            subject: $this->templates->renderSubject('claim_venue', $data),
             replyTo: [
-                new Address($user->email, $user->name),
-            ],                        
+                new Address($data['organizer_email'], $data['organizer_name']),
+            ],
         );
     }
 
@@ -58,30 +49,12 @@ class ClaimVenue extends Mailable
      */
     public function content(): Content
     {
-        $event = $this->event;
-        $role = $event->role();
-        $venue = $event->venue;
-        $user = $event->user;
-        $curator = $event->curator();
-
-        if ($curator) {
-            $subject = __('messages.claim_your_venue_curated');
-        } else {
-            $subject = __('messages.claim_your_venue');
-        }        
+        $data = $this->templateData();
 
         return new Content(
-            markdown: 'mail.venue.claim',
+            markdown: 'mail.templates.generic',
             with: [
-                'event' => $event,
-                'role' => $role,
-                'venue' => $venue,
-                'user' => $user,
-                'subject' => str_replace(
-                        [':role', ':venue', ':event', ':curator'], 
-                        [$role->name, $venue->name, $event->name, $curator ? $curator->name : ''],
-                        $subject),
-                'unsubscribe_url' => route('role.unsubscribe', ['subdomain' => $venue->subdomain]),
+                'body' => $this->templates->renderBody('claim_venue', $data),
             ]
         );
     }
@@ -106,5 +79,36 @@ class ClaimVenue extends Mailable
                 'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
             ],
         );
+    }
+
+    protected function templateData(): array
+    {
+        $event = $this->event;
+        $role = $event->role();
+        $venue = $event->venue;
+        $user = $event->user;
+        $curator = $event->curator();
+
+        $venueEmail = $venue->email;
+        $encodedEmail = $venueEmail ? base64_encode($venueEmail) : null;
+
+        $defaultEmail = config('mail.from.address') ?? config('mail.mailers.smtp.username') ?? 'no-reply@example.com';
+        $defaultName = config('mail.from.name') ?? config('app.name');
+
+        return [
+            'event_name' => $event->name,
+            'role_name' => $role->name,
+            'venue_name' => $venue->name,
+            'curator_name' => $curator ? $curator->name : '',
+            'organizer_name' => $user ? $user->name : $defaultName,
+            'organizer_email' => $user ? $user->email : $defaultEmail,
+            'event_url' => $event->getGuestUrl(),
+            'sign_up_url' => $encodedEmail ? route('sign_up', ['email' => $encodedEmail]) : route('sign_up'),
+            'unsubscribe_url' => $encodedEmail
+                ? route('role.show_unsubscribe', ['email' => $encodedEmail])
+                : route('role.show_unsubscribe'),
+            'app_name' => config('app.name'),
+            'is_curated' => (bool) $curator,
+        ];
     }
 }

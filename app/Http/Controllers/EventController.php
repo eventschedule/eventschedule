@@ -10,6 +10,7 @@ use App\Notifications\DeletedEventNotification;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use App\Utils\ColorUtils;
+use App\Utils\NotificationUtils;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Role;
@@ -97,18 +98,36 @@ class EventController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        $event->load(['roles.members', 'venue.members', 'creatorRole.members', 'sales']);
+
+        foreach ($event->roles as $roleModel) {
+            if ($roleModel->isTalent()) {
+                $members = NotificationUtils::roleMembers($roleModel);
+
+                if ($members->isNotEmpty()) {
+                    Notification::send($members, new DeletedEventNotification($event, $user, 'talent', $roleModel));
+                }
+            }
+        }
+
+        $organizerRoles = collect([$event->creatorRole, $event->venue])->filter();
+
+        foreach ($organizerRoles as $organizerRole) {
+            $members = NotificationUtils::roleMembers($organizerRole);
+
+            if ($members->isNotEmpty()) {
+                Notification::send($members, new DeletedEventNotification($event, $user, 'organizer', $organizerRole));
+            }
+        }
+
+        $purchaserEmails = NotificationUtils::purchaserEmails($event);
+
+        if ($purchaserEmails->isNotEmpty()) {
+            Notification::route('mail', $purchaserEmails->all())
+                ->notify(new DeletedEventNotification($event, $user, 'purchaser', $event->venue));
+        }
+
         $event->delete();
-
-        /*
-        $role = $event->role;
-        $venue = $event->venue;
-
-        $roleEmails = $role->members()->pluck('email')->toArray();
-        $venueEmails = $venue->members()->pluck('email')->toArray();
-        $emails = array_unique(array_merge($roleEmails, $venueEmails));
-
-        Notification::route('mail', $emails)->notify(new DeletedEventNotification($event, $user));
-        */
 
         $data = [
             'subdomain' => $subdomain, 
@@ -389,9 +408,28 @@ class EventController extends Controller
             $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
         }
 
-        //$emails = $event->role->members()->pluck('email');
-        //Notification::route('mail', $emails)->notify(new RequestAcceptedNotification($event));
-        
+        $event->load(['roles.members', 'venue.members', 'creatorRole.members']);
+
+        foreach ($event->roles as $talentRole) {
+            if ($talentRole->isTalent()) {
+                $members = NotificationUtils::roleMembers($talentRole);
+
+                if ($members->isNotEmpty()) {
+                    Notification::send($members, new RequestAcceptedNotification($event, $user, 'talent', $talentRole));
+                }
+            }
+        }
+
+        $organizerRoles = collect([$event->creatorRole, $event->venue])->filter();
+
+        foreach ($organizerRoles as $organizerRole) {
+            $members = NotificationUtils::roleMembers($organizerRole);
+
+            if ($members->isNotEmpty()) {
+                Notification::send($members, new RequestAcceptedNotification($event, $user, 'organizer', $organizerRole));
+            }
+        }
+
         return redirect('/' . $subdomain . '/requests')
                     ->with('message', __('messages.request_accepted'));
     }
@@ -411,8 +449,27 @@ class EventController extends Controller
             $event->roles()->updateExistingPivot($role->id, ['is_accepted' => false]);
         }
 
-        //$emails = $event->role->members()->pluck('email');
-        //Notification::route('mail', $emails)->notify(new RequestDeclinedNotification($event));
+        $event->load(['roles.members', 'venue.members', 'creatorRole.members']);
+
+        foreach ($event->roles as $talentRole) {
+            if ($talentRole->isTalent()) {
+                $members = NotificationUtils::roleMembers($talentRole);
+
+                if ($members->isNotEmpty()) {
+                    Notification::send($members, new RequestDeclinedNotification($event, $user, 'talent', $talentRole));
+                }
+            }
+        }
+
+        $organizerRoles = collect([$event->creatorRole, $event->venue])->filter();
+
+        foreach ($organizerRoles as $organizerRole) {
+            $members = NotificationUtils::roleMembers($organizerRole);
+
+            if ($members->isNotEmpty()) {
+                Notification::send($members, new RequestDeclinedNotification($event, $user, 'organizer', $organizerRole));
+            }
+        }
 
         if ($request->redirect_to == 'schedule') {
             return redirect('/' . $subdomain . '/schedule')

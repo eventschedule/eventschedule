@@ -11,8 +11,11 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use App\Mail\ClaimRole;
 use App\Mail\ClaimVenue;
+use App\Notifications\EventAddedNotification;
+use App\Utils\NotificationUtils;
 use App\Models\Ticket;
 
 
@@ -344,6 +347,28 @@ class EventRepo
         }
 
         $event->load('tickets');
+
+        if ($event->wasRecentlyCreated) {
+            $event->loadMissing(['roles.members', 'venue.members']);
+
+            foreach ($event->roles as $roleModel) {
+                if ($roleModel->isTalent()) {
+                    $members = NotificationUtils::roleMembers($roleModel);
+
+                    if ($members->isNotEmpty()) {
+                        Notification::send($members, new EventAddedNotification($event, $user, 'talent', $roleModel));
+                    }
+                }
+            }
+
+            if ($event->venue) {
+                $purchasers = NotificationUtils::roleMembers($event->venue);
+
+                if ($purchasers->isNotEmpty()) {
+                    Notification::send($purchasers, new EventAddedNotification($event, $user, 'purchaser', $event->venue));
+                }
+            }
+        }
 
         return $event;
     }

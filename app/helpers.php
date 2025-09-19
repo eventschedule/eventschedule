@@ -96,3 +96,37 @@ if (!function_exists('is_rtl')) {
         return in_array($locale, ['ar', 'he']);
     }
 }
+
+if (!function_exists('app_public_url')) {
+    /**
+     * Resolve the public application URL from settings when available.
+     */
+    function app_public_url(): string
+    {
+        static $cachedUrl = null;
+
+        if ($cachedUrl !== null) {
+            return $cachedUrl;
+        }
+
+        $url = config('app.url');
+
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
+                $generalSettings = \App\Models\Setting::forGroup('general');
+
+                if (!empty($generalSettings['public_url'])) {
+                    $url = $generalSettings['public_url'];
+                }
+            }
+        } catch (\Throwable $exception) {
+            // Ignore any issues while resolving the URL and fall back to the config value.
+        }
+
+        if (empty($url)) {
+            $url = url('/');
+        }
+
+        return $cachedUrl = rtrim($url, '/');
+    }
+}

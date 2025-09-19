@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\GraphicController;
@@ -72,10 +73,15 @@ Route::get('/translate_data', [AppController::class, 'translateData'])->name('tr
 
 Route::get('/ticket/qr_code/{event_id}/{secret}', [TicketController::class, 'qrCode'])->name('ticket.qr_code')->middleware('throttle:100,1');
 Route::get('/ticket/view/{event_id}/{secret}', [TicketController::class, 'view'])->name('ticket.view')->middleware('throttle:100,1');
+Route::get('/ticket/wallet/apple/{event_id}/{secret}', [TicketController::class, 'appleWallet'])->name('ticket.wallet.apple')->middleware('throttle:50,1');
+Route::get('/ticket/wallet/google/{event_id}/{secret}', [TicketController::class, 'googleWallet'])->name('ticket.wallet.google')->middleware('throttle:50,1');
 
 Route::middleware(['auth', 'verified'])->group(function () 
 {
     Route::get('/events', [HomeController::class, 'home'])->name('home');
+    Route::get('/manage/venues', [RoleController::class, 'venues'])->name('role.venues');
+    Route::get('/manage/curators', [RoleController::class, 'curators'])->name('role.curators');
+    Route::get('/manage/talent', [RoleController::class, 'talent'])->name('role.talent');
     Route::get('/new/{type}', [RoleController::class, 'create'])->name('new');
     Route::post('/validate_address', [RoleController::class, 'validateAddress'])->name('validate_address')->middleware('throttle:25,1440');
     Route::post('/store', [RoleController::class, 'store'])->name('role.store');
@@ -87,6 +93,21 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/sales', [TicketController::class, 'sales'])->name('sales');
     Route::post('/sales/action/{sale_id}', [TicketController::class, 'handleAction'])->name('sales.action');
     
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::get('/', [SettingsController::class, 'index'])->name('index');
+        Route::get('/general', [SettingsController::class, 'general'])->name('general');
+        Route::get('/integrations', [SettingsController::class, 'integrations'])->name('integrations');
+        Route::get('/wallet', [SettingsController::class, 'wallet'])->name('wallet');
+        Route::get('/email', [SettingsController::class, 'email'])->name('email');
+        Route::get('/email-templates', [SettingsController::class, 'emailTemplates'])->name('email_templates');
+        Route::patch('/general', [SettingsController::class, 'updateGeneral'])->name('general.update');
+        Route::patch('/wallet/apple', [SettingsController::class, 'updateAppleWallet'])->name('wallet.apple.update');
+        Route::patch('/wallet/google', [SettingsController::class, 'updateGoogleWallet'])->name('wallet.google.update');
+        Route::patch('/email', [SettingsController::class, 'updateMail'])->name('mail.update');
+        Route::post('/email/test', [SettingsController::class, 'testMail'])->name('mail.test');
+        Route::patch('/email-templates', [SettingsController::class, 'updateMailTemplates'])->name('mail_templates.update');
+    });
+
     Route::get('/account', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/account', [ProfileController::class, 'update'])->name('profile.update');
     Route::patch('/account/payments', [ProfileController::class, 'updatePayments'])->name('profile.update_payments');

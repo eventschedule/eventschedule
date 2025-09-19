@@ -639,6 +639,74 @@ class RoleController extends Controller
         return view('role/index', $data);
     }
 
+    public function venues(Request $request)
+    {
+        return $this->renderRoleListing($request, 'venues');
+    }
+
+    public function curators(Request $request)
+    {
+        return $this->renderRoleListing($request, 'curators');
+    }
+
+    public function talent(Request $request)
+    {
+        return $this->renderRoleListing($request, 'talent');
+    }
+
+    protected function renderRoleListing(Request $request, string $typeKey)
+    {
+        $config = [
+            'venues' => [
+                'type' => 'venue',
+                'title' => __('messages.venues'),
+                'description' => __('messages.manage_role_listings_venue'),
+                'create_label' => __('messages.new_venue'),
+                'empty_title' => __('messages.no_venues_listed'),
+                'empty_description' => __('messages.create_first_venue_prompt'),
+            ],
+            'curators' => [
+                'type' => 'curator',
+                'title' => __('messages.curators'),
+                'description' => __('messages.manage_role_listings_curator'),
+                'create_label' => __('messages.new_curator'),
+                'empty_title' => __('messages.no_curators_listed'),
+                'empty_description' => __('messages.create_first_curator_prompt'),
+            ],
+            'talent' => [
+                'type' => 'talent',
+                'title' => Str::plural(__('messages.talent')),
+                'description' => __('messages.manage_role_listings_talent'),
+                'create_label' => __('messages.new_talent'),
+                'empty_title' => __('messages.no_talent_listed'),
+                'empty_description' => __('messages.create_first_talent_prompt'),
+            ],
+        ];
+
+        if (! array_key_exists($typeKey, $config)) {
+            abort(404);
+        }
+
+        $typeConfig = $config[$typeKey];
+
+        $roles = $request->user()
+            ->member()
+            ->type($typeConfig['type'])
+            ->with('members')
+            ->orderBy('name')
+            ->get();
+
+        return view('role.listing', [
+            'roles' => $roles,
+            'pageTitle' => $typeConfig['title'],
+            'pageDescription' => $typeConfig['description'],
+            'createLabel' => $typeConfig['create_label'],
+            'roleType' => $typeConfig['type'],
+            'emptyTitle' => $typeConfig['empty_title'],
+            'emptyDescription' => $typeConfig['empty_description'],
+        ]);
+    }
+
 
     public function create($type)
     {
