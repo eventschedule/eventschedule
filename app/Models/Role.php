@@ -514,13 +514,47 @@ class Role extends Model implements MustVerifyEmail
         }
     }
 
-    public function getGuestUrl()
+    public function getGuestUrl(bool $absolute = true)
     {
         if (! $this->isClaimed()) {
             return '';
         }
 
-        return route('role.view_guest', ['subdomain' => $this->subdomain]);
+        $routeParameters = ['subdomain' => $this->subdomain];
+        $relativeUrl = route('role.view_guest', $routeParameters, false);
+
+        if ($customDomain = $this->getCustomDomainUrl()) {
+            return $absolute ? $customDomain . $relativeUrl : $relativeUrl;
+        }
+
+        if (! $absolute) {
+            return $relativeUrl;
+        }
+
+        if (config('app.hosted')) {
+            return route('role.view_guest', $routeParameters);
+        }
+
+        return url($relativeUrl);
+    }
+
+    public function getCustomDomainUrl(): ?string
+    {
+        if (! $this->custom_domain) {
+            return null;
+        }
+
+        $domain = trim($this->custom_domain);
+
+        if ($domain === '') {
+            return null;
+        }
+
+        if (! preg_match('/^https?:\/\//i', $domain)) {
+            $domain = 'https://' . $domain;
+        }
+
+        return rtrim($domain, '/');
     }
 
     public function toData()

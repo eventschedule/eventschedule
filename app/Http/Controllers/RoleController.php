@@ -141,7 +141,7 @@ class RoleController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        $mainDomain = config('app.url');
+        $mainDomain = app_public_url();
 
         if (! auth()->user()) {
             session(['pending_follow' => $subdomain]);
@@ -206,7 +206,7 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->first();
 
         if (! $role || ! $role->isClaimed()) {
-            return redirect(config('app.url'), );
+            return redirect(app_public_url());
         }
 
         if ($request->lang) {
@@ -1344,7 +1344,7 @@ class RoleController extends Controller
 
         session(['pending_request' => $subdomain]);
             
-        $mainDomain = config('app.url');
+        $mainDomain = app_public_url();
 
         if (! auth()->user()) {
             $lang = session()->has('translate') ? 'en' : $role->language_code;

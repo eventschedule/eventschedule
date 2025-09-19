@@ -3,12 +3,12 @@
         <meta name="description" content="Read the latest news, tips, and insights about event scheduling and ticketing from the Event Schedule team.">
         <meta property="og:title" content="Blog | Event Schedule">
         <meta property="og:description" content="Read the latest news, tips, and insights about event scheduling and ticketing from the Event Schedule team.">
-        <meta property="og:image" content="{{ config('app.url') }}/images/background.jpg">
+        <meta property="og:image" content="{{ url('/images/background.jpg') }}">
         <meta property="og:url" content="{{ url()->current() }}">
         <meta property="og:site_name" content="Event Schedule">
         <meta name="twitter:title" content="Blog | Event Schedule">
         <meta name="twitter:description" content="Read the latest news, tips, and insights about event scheduling and ticketing from the Event Schedule team.">
-        <meta name="twitter:image" content="{{ config('app.url') }}/images/background.jpg">
+        <meta name="twitter:image" content="{{ url('/images/background.jpg') }}">
         <meta name="twitter:card" content="summary_large_image">
         <link rel="canonical" href="{{ url()->current() }}">
     </x-slot>

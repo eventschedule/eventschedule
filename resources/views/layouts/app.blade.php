@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <link rel="icon" href="{{ asset('images/favicon.png') }}">
-    <link rel="sitemap" type="application/xml" href="{{ config('app.url') . route('sitemap', [], false) }}">    
+    <link rel="icon" href="{{ url('/images/favicon.png') }}">
+    <link rel="sitemap" type="application/xml" href="{{ url(route('sitemap', [], false)) }}">
     
     @if (config('app.hosted') || config('app.report_errors'))
         <script src="{{ config('app.sentry_js_dsn') }}" crossorigin="anonymous"></script>
@@ -21,12 +21,12 @@
         <meta name="description" content="The simple and free way to share your event schedule">
         <meta property="og:title" content="Event Schedule">
         <meta property="og:description" content="The simple and free way to share your event schedule">
-        <meta property="og:image" content="{{ config('app.url') }}/images/background.jpg">
+        <meta property="og:image" content="{{ url('/images/background.jpg') }}">
         <meta property="og:url" content="{{ str_replace('http://', 'https://', request()->url()) }}">
         <meta property="og:site_name" content="Event Schedule">
         <meta name="twitter:title" content="Event Schedule">
         <meta name="twitter:description" content="The simple and free way to share your event schedule">
-        <meta name="twitter:image" content="{{ config('app.url') }}/images/background.jpg">
+        <meta name="twitter:image" content="{{ url('/images/background.jpg') }}">
         <meta name="twitter:image:alt" content="Event Schedule">
         <meta name="twitter:card" content="summary_large_image">
     @endif    
