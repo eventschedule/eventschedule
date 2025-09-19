@@ -82,15 +82,17 @@ class GoogleCalendarService
         $this->client->setAccessToken($token);
 
         // Check if token is expired or will expire in the next 5 minutes
-        if ($this->client->isAccessTokenExpired() || 
-            ($user->google_token_expires_at && $user->google_token_expires_at->diffInMinutes(now()) < 5)) {
-            
+        $isExpired = $this->client->isAccessTokenExpired();
+        $willExpireSoon = $user->google_token_expires_at && $user->google_token_expires_at->diffInMinutes(now()) < 5;
+        
+        if ($isExpired || $willExpireSoon) {
             Log::info('Refreshing Google Calendar token', [
                 'user_id' => $user->id,
                 'expires_at' => $user->google_token_expires_at,
+                'reason' => $isExpired ? 'expired' : 'expiring_soon',
             ]);
 
-            $refreshToken = $this->client->getRefreshToken();
+            $refreshToken = $user->google_refresh_token;
             if ($refreshToken) {
                 try {
                     $newToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken);
