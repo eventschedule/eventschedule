@@ -95,17 +95,23 @@ class GoogleCalendarController extends Controller
      */
     public function getCalendars(Request $request)
     {
+        \Log::info('1. Getting Google Calendars');
+
         $user = Auth::user();
         
         if (!$user->google_token) {
             return response()->json(['error' => 'Google Calendar not connected'], 400);
         }
 
+        \Log::info('2. Getting Google Calendars');
+
         try {
             // Ensure user has valid token before getting calendars
             if (!$this->googleCalendarService->ensureValidToken($user)) {
                 return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
             }
+
+            \Log::info('3. Getting Google Calendars');
 
             $this->googleCalendarService->setAccessToken([
                 'access_token' => $user->fresh()->google_token,
@@ -114,8 +120,12 @@ class GoogleCalendarController extends Controller
                     $user->fresh()->google_token_expires_at->diffInSeconds(now()) : 3600,
             ]);
 
+            \Log::info('4. Getting Google Calendars'); 
+
             $calendars = $this->googleCalendarService->getCalendars();
             
+            \Log::info('5. Getting Google Calendars');
+
             return response()->json(['calendars' => $calendars]);
 
         } catch (\Exception $e) {
