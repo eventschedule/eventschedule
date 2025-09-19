@@ -231,12 +231,19 @@ class AppController extends Controller
             $relativeDirectory = '.';
         }
 
+        $exampleCommand = sprintf(
+            'sudo chown -R www-data:www-data %s',
+            escapeshellarg(base_path())
+        );
+
         throw new RuntimeException(
             sprintf(
                 'Unable to copy the update file "%s" because the "%s" directory is not writable. '
-                . 'Please adjust the directory permissions and try again.',
+                . 'Please adjust the directory permissions and try again. '
+                . 'Ensure the application files are owned by the web server user (for example: %s).',
                 $relativePath,
-                $relativeDirectory
+                $relativeDirectory,
+                $exampleCommand
             )
         );
     }
