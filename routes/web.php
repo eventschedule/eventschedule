@@ -94,9 +94,12 @@ Route::middleware(['auth', 'verified'])->group(function ()
         Route::get('/', [SettingsController::class, 'index'])->name('index');
         Route::get('/general', [SettingsController::class, 'general'])->name('general');
         Route::get('/integrations', [SettingsController::class, 'integrations'])->name('integrations');
+        Route::get('/wallet', [SettingsController::class, 'wallet'])->name('wallet');
         Route::get('/email', [SettingsController::class, 'email'])->name('email');
         Route::get('/email-templates', [SettingsController::class, 'emailTemplates'])->name('email_templates');
         Route::patch('/general', [SettingsController::class, 'updateGeneral'])->name('general.update');
+        Route::patch('/wallet/apple', [SettingsController::class, 'updateAppleWallet'])->name('wallet.apple.update');
+        Route::patch('/wallet/google', [SettingsController::class, 'updateGoogleWallet'])->name('wallet.google.update');
         Route::patch('/email', [SettingsController::class, 'updateMail'])->name('mail.update');
         Route::post('/email/test', [SettingsController::class, 'testMail'])->name('mail.test');
         Route::patch('/email-templates', [SettingsController::class, 'updateMailTemplates'])->name('mail_templates.update');
