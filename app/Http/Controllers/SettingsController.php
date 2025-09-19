@@ -17,6 +17,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Throwable;
+use App\Mail\TemplatePreview;
 
 class SettingsController extends Controller
 {
@@ -130,6 +131,19 @@ class SettingsController extends Controller
 
         return view('settings.email-templates', [
             'mailTemplates' => $mailTemplates->all(),
+        ]);
+    }
+
+    public function showEmailTemplate(Request $request, MailTemplateManager $mailTemplates, string $template): View
+    {
+        $this->authorizeAdmin($request->user());
+
+        if (! $mailTemplates->exists($template)) {
+            abort(404);
+        }
+
+        return view('settings.email-templates.show', [
+            'template' => $mailTemplates->get($template),
         ]);
     }
 
@@ -450,39 +464,103 @@ class SettingsController extends Controller
         return redirect()->route('settings.general')->with('status', 'general-settings-updated');
     }
 
-    public function updateMailTemplates(Request $request, MailTemplateManager $mailTemplates): RedirectResponse
+    public function updateMailTemplate(Request $request, MailTemplateManager $mailTemplates, string $template): RedirectResponse
     {
         $this->authorizeAdmin($request->user());
 
-        $templates = $mailTemplates->all();
+        if (! $mailTemplates->exists($template)) {
+            abort(404);
+        }
 
-        $rules = [];
+        $templateConfig = $mailTemplates->get($template);
 
-        foreach ($templates as $template) {
-            $base = 'mail_templates.' . $template['key'];
+        $rules = [
+            'enabled' => ['required', 'boolean'],
+        ];
 
-            if (isset($template['subject'])) {
-                $rules[$base . '.subject'] = ['required', 'string', 'max:255'];
-            }
+        if (isset($templateConfig['subject'])) {
+            $rules['subject'] = ['required', 'string', 'max:255'];
+        }
 
-            if (!empty($template['has_subject_curated']) && isset($template['subject_curated'])) {
-                $rules[$base . '.subject_curated'] = ['required', 'string', 'max:255'];
-            }
+        if (!empty($templateConfig['has_subject_curated']) && isset($templateConfig['subject_curated'])) {
+            $rules['subject_curated'] = ['required', 'string', 'max:255'];
+        }
 
-            if (isset($template['body'])) {
-                $rules[$base . '.body'] = ['required', 'string'];
-            }
+        if (isset($templateConfig['body'])) {
+            $rules['body'] = ['required', 'string'];
+        }
 
-            if (!empty($template['has_body_curated']) && isset($template['body_curated'])) {
-                $rules[$base . '.body_curated'] = ['required', 'string'];
-            }
+        if (!empty($templateConfig['has_body_curated']) && isset($templateConfig['body_curated'])) {
+            $rules['body_curated'] = ['required', 'string'];
         }
 
         $validated = $request->validate($rules);
 
-        $mailTemplates->updateFromArray($validated['mail_templates'] ?? []);
+        $mailTemplates->updateTemplate($template, $validated);
 
-        return redirect()->route('settings.email_templates')->with('status', 'mail-templates-updated');
+        return redirect()
+            ->route('settings.email_templates.show', ['template' => $template])
+            ->with('status', 'mail-template-updated');
+    }
+
+    public function testMailTemplate(Request $request, MailTemplateManager $mailTemplates, string $template): JsonResponse
+    {
+        $this->authorizeAdmin($request->user());
+
+        if (! $mailTemplates->exists($template)) {
+            abort(404);
+        }
+
+        $user = $request->user();
+
+        if (! $user || empty($user->email)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => __('messages.test_email_failed'),
+                'error' => __('messages.test_email_missing_user'),
+                'failures' => [],
+            ], 422);
+        }
+
+        $isCurated = $request->boolean('curated');
+
+        $data = array_merge(
+            $mailTemplates->sampleData($template, $isCurated),
+            ['is_curated' => $isCurated]
+        );
+
+        $subject = $mailTemplates->renderSubject($template, $data);
+        $body = $mailTemplates->renderBody($template, $data);
+
+        try {
+            Mail::to($user->email, $user->name ?? null)->send(new TemplatePreview($subject, $body));
+
+            $failures = Mail::failures();
+
+            if (! empty($failures)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => __('messages.test_email_failed'),
+                    'error' => __('messages.test_email_failures'),
+                    'failures' => $failures,
+                ], 500);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => __('messages.test_email_sent'),
+                'failures' => [],
+            ]);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => __('messages.test_email_failed'),
+                'error' => $exception->getMessage(),
+                'failures' => [],
+            ], 500);
+        }
     }
 
     protected function buildAppleWalletFormValues(array $stored): array

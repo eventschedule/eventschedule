@@ -17,6 +17,7 @@ use App\Mail\ClaimVenue;
 use App\Notifications\EventAddedNotification;
 use App\Utils\NotificationUtils;
 use App\Models\Ticket;
+use App\Support\MailTemplateManager;
 
 
 class EventRepo
@@ -300,12 +301,18 @@ class EventRepo
         }
 
         if (config('app.hosted')) {
+            $templates = app(MailTemplateManager::class);
+
             foreach ($roles as $role) {
                 if ($event->wasRecentlyCreated && ! $role->isClaimed() && $role->is_subscribed && $role->email) {
                     if ($role->isVenue()) {
-                        // Mail::to($role->email)->send(new ClaimVenue($event));
+                        if ($templates->enabled('claim_venue')) {
+                            Mail::to($role->email)->send(new ClaimVenue($event));
+                        }
                     } elseif ($role->isTalent()) {
-                        Mail::to($role->email)->send(new ClaimRole($event));
+                        if ($templates->enabled('claim_role')) {
+                            Mail::to($role->email)->send(new ClaimRole($event));
+                        }
                     }
                 }
             }
