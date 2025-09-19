@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use RuntimeException;
 use ZipArchive;
 class AppController extends Controller
 {
@@ -109,12 +110,12 @@ class AppController extends Controller
             $zip = new ZipArchive();
 
             if ($zip->open($zipPath) !== true) {
-                throw new \RuntimeException('Unable to open the uploaded update archive.');
+                throw new RuntimeException('Unable to open the uploaded update archive.');
             }
 
             if (! $zip->extractTo($extractPath)) {
                 $zip->close();
-                throw new \RuntimeException('Unable to extract the uploaded update archive.');
+                throw new RuntimeException('Unable to extract the uploaded update archive.');
             }
 
             $zip->close();
@@ -122,7 +123,7 @@ class AppController extends Controller
             $releaseRoot = $this->resolveReleaseRoot($extractPath);
 
             if (! $releaseRoot || ! File::isDirectory($releaseRoot)) {
-                throw new \RuntimeException('The uploaded archive did not contain a valid release.');
+                throw new RuntimeException('The uploaded archive did not contain a valid release.');
             }
 
             $this->copyReleaseContents($releaseRoot, base_path());
@@ -187,12 +188,57 @@ class AppController extends Controller
 
             File::ensureDirectoryExists(dirname($targetPath));
 
+            $this->ensureWritableDirectory($destination, dirname($targetPath), $relativePath);
+
             if (File::exists($targetPath)) {
-                File::delete($targetPath);
+                if (! File::delete($targetPath) && File::exists($targetPath)) {
+                    throw new RuntimeException(
+                        sprintf(
+                            'Unable to remove "%s" before updating it. Please check the file permissions.',
+                            $relativePath
+                        )
+                    );
+                }
             }
 
-            File::copy($item->getPathname(), $targetPath);
+            try {
+                File::copy($item->getPathname(), $targetPath);
+            } catch (\Throwable $exception) {
+                throw new RuntimeException(
+                    sprintf(
+                        'Unable to copy the update file "%s". Please ensure the application files are writable.',
+                        $relativePath
+                    ),
+                    previous: $exception
+                );
+            }
         }
+    }
+
+    private function ensureWritableDirectory(string $basePath, string $absoluteDirectory, string $relativePath): void
+    {
+        if (! is_dir($absoluteDirectory)) {
+            return;
+        }
+
+        if (is_writable($absoluteDirectory)) {
+            return;
+        }
+
+        $relativeDirectory = trim(Str::replaceFirst($basePath, '', $absoluteDirectory), DIRECTORY_SEPARATOR);
+
+        if ($relativeDirectory === '') {
+            $relativeDirectory = '.';
+        }
+
+        throw new RuntimeException(
+            sprintf(
+                'Unable to copy the update file "%s" because the "%s" directory is not writable. '
+                . 'Please adjust the directory permissions and try again.',
+                $relativePath,
+                $relativeDirectory
+            )
+        );
     }
 
     private function shouldSkipPath(string $relativePath, array $excludeFolders): bool
