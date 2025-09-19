@@ -4,6 +4,10 @@
 return [
     'home' => 'דף הבית',
     'venues' => 'מקומות',
+    'pages' => 'דפים',
+    'manage_pages_description' => 'נהל את כל דפי לוח הזמנים שלך במקום אחד.',
+    'no_pages_listed' => 'עדיין לא נוצרו דפים.',
+    'create_first_page_prompt' => 'התחל ביצירת דף כישרון, מקום או אוצר.',
     'event_deleted' => 'האירוע נמחק בהצלחה',
     'edit_event' => 'ערוך אירוע',
     'add_event' => 'הוסף אירוע',

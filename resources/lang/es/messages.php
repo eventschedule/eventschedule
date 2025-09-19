@@ -3,6 +3,10 @@
 return [
     'home' => 'Inicio',
     'venues' => 'Lugares',
+    'pages' => 'Páginas',
+    'manage_pages_description' => 'Administra todas tus páginas de horarios en un solo lugar.',
+    'no_pages_listed' => 'Aún no hay páginas creadas.',
+    'create_first_page_prompt' => 'Comienza creando una página de talento, sede o curador.',
     'event_deleted' => 'Evento eliminado con éxito',
     'edit_event' => 'Editar Evento',
     'add_event' => 'Agregar Evento',

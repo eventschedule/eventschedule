@@ -3,6 +3,10 @@
 return [
     'home' => 'Accueil',
     'venues' => 'Lieux',
+    'pages' => 'Pages',
+    'manage_pages_description' => 'Gérez toutes vos pages de planning en un seul endroit.',
+    'no_pages_listed' => 'Aucune page créée pour le moment.',
+    'create_first_page_prompt' => 'Commencez par créer une page talent, lieu ou curateur.',
     'event_deleted' => 'Événement supprimé avec succès',
     'edit_event' => 'Modifier l\'Événement',
     'add_event' => 'Ajouter un Événement',

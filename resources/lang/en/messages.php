@@ -3,6 +3,10 @@
 return [
     'home' => 'Home',
     'venues' => 'Venues',
+    'pages' => 'Pages',
+    'manage_pages_description' => 'Manage all of your schedule pages in one place.',
+    'no_pages_listed' => 'No pages created yet.',
+    'create_first_page_prompt' => 'Start by creating a talent, venue, or curator page.',
     'manage_role_listings_venue' => 'Keep venue details and contacts in one place.',
     'manage_role_listings_curator' => 'Track the curators you collaborate with across events.',
     'manage_role_listings_talent' => 'Manage your talent schedules and booking contacts.',

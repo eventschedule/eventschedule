@@ -3,6 +3,10 @@
 return [
     'home' => 'Início',
     'venues' => 'Locais',
+    'pages' => 'Páginas',
+    'manage_pages_description' => 'Gerencie todas as suas páginas de agenda em um só lugar.',
+    'no_pages_listed' => 'Nenhuma página criada ainda.',
+    'create_first_page_prompt' => 'Comece criando uma página de talento, local ou curador.',
     'event_deleted' => 'Evento excluído com sucesso',
     'edit_event' => 'Editar Evento',
     'add_event' => 'Adicionar Evento',

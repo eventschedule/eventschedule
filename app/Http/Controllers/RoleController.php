@@ -639,6 +639,24 @@ class RoleController extends Controller
         return view('role/index', $data);
     }
 
+    public function pages(Request $request)
+    {
+        $roles = $request->user()
+            ->member()
+            ->withCount([
+                'events',
+                'followers',
+                'members as team_members_count',
+            ])
+            ->orderBy('type')
+            ->orderBy('name')
+            ->get();
+
+        return view('role.pages', [
+            'roles' => $roles,
+        ]);
+    }
+
     public function venues(Request $request)
     {
         return $this->renderRoleListing($request, 'venues');
