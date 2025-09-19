@@ -31,6 +31,7 @@ class GoogleCalendarService
         ]);
         $this->client->setAccessType('offline');
         $this->client->setApprovalPrompt('force');
+        $this->client->setIncludeGrantedScopes(true);
     }
 
     /**
@@ -38,6 +39,15 @@ class GoogleCalendarService
      */
     public function getAuthUrl(): string
     {
+        return $this->client->createAuthUrl();
+    }
+
+    /**
+     * Get the authorization URL for Google OAuth with forced re-authorization
+     */
+    public function getAuthUrlWithForce(): string
+    {
+        $this->client->setApprovalPrompt('force');
         return $this->client->createAuthUrl();
     }
 
