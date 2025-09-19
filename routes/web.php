@@ -79,6 +79,8 @@ Route::get('/ticket/wallet/google/{event_id}/{secret}', [TicketController::class
 Route::middleware(['auth', 'verified'])->group(function () 
 {
     Route::get('/events', [HomeController::class, 'home'])->name('home');
+    Route::get('/events/{hash}/view', [EventController::class, 'view'])->name('events.view');
+    Route::delete('/events/{hash}', [EventController::class, 'destroyFromHome'])->name('events.destroy');
     Route::get('/manage/venues', [RoleController::class, 'venues'])->name('role.venues');
     Route::get('/manage/curators', [RoleController::class, 'curators'])->name('role.curators');
     Route::get('/manage/talent', [RoleController::class, 'talent'])->name('role.talent');

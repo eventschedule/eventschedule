@@ -4,6 +4,36 @@
         $venues = isset($venues) ? $venues : collect();
         $curators = isset($curators) ? $curators : collect();
     @endphp
+    @php
+        $creationRoles = collect([$schedules, $venues, $curators])->flatten()->unique('id')->sortBy('name');
+        $creationRoleOptions = $creationRoles->map(function ($role) {
+            return [
+                'id' => $role->encodeId(),
+                'name' => $role->name,
+                'type' => __('messages.' . strtolower($role->type)),
+                'route' => route('event.create', ['subdomain' => $role->subdomain]),
+            ];
+        })->values();
+        $venueOptions = $venues->map(function ($role) {
+            return [
+                'id' => $role->encodeId(),
+                'name' => $role->name,
+            ];
+        })->values();
+        $talentOptions = $schedules->map(function ($role) {
+            return [
+                'id' => $role->encodeId(),
+                'name' => $role->name,
+            ];
+        })->values();
+        $curatorOptions = $curators->map(function ($role) {
+            return [
+                'id' => $role->encodeId(),
+                'name' => $role->name,
+            ];
+        })->values();
+    @endphp
+
     <div class="py-5">
 
         <!-- Get Started Panel -->
@@ -89,7 +119,222 @@
         </div>
         @endif
 
+        <div class="mb-8 space-y-6">
+            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
+                <div class="px-6 py-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.events') }}</h2>
+                    </div>
+                    @if ($creationRoles->isNotEmpty())
+                        <x-primary-button type="button" @click="$dispatch('open-modal', 'create-event')">
+                            {{ __('messages.add_event') }}
+                        </x-primary-button>
+                    @endif
+                </div>
+
+                <div class="border-t border-gray-200 dark:border-gray-700">
+                    @if (count($events))
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                <thead class="bg-gray-50 dark:bg-gray-900/60 text-gray-700 dark:text-gray-200">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left font-medium">{{ __('messages.event_details') }}</th>
+                                        <th scope="col" class="px-6 py-3 text-left font-medium">{{ __('messages.venue') }}</th>
+                                        <th scope="col" class="px-6 py-3 text-left font-medium">{{ \Illuminate\Support\Str::plural(__('messages.talent')) }}</th>
+                                        <th scope="col" class="px-6 py-3 text-left font-medium">{{ \Illuminate\Support\Str::plural(__('messages.curator')) }}</th>
+                                        <th scope="col" class="px-6 py-3 text-right font-medium">{{ __('messages.actions') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
+                                    @foreach ($events as $event)
+                                        @php
+                                            $startAt = $event->starts_at ? $event->getStartDateTime(null, true) : null;
+                                            $dateDisplay = $startAt ? $startAt->locale(app()->getLocale())->translatedFormat('M j, Y • g:i A') : __('messages.unscheduled');
+                                            $talentList = $event->roles->filter(fn($role) => $role->isTalent())->map->translatedName()->implode(', ');
+                                            $curatorList = $event->roles->filter(fn($role) => $role->isCurator())->map->translatedName()->implode(', ');
+                                            $hashedId = \App\Utils\UrlUtils::encodeId($event->id);
+                                            $canEdit = auth()->user()->canEditEvent($event);
+                                        @endphp
+                                        <tr class="text-gray-700 dark:text-gray-200">
+                                            <td class="px-6 py-4 align-top">
+                                                <div class="font-medium text-gray-900 dark:text-gray-100">{{ $event->translatedName() }}</div>
+                                                <div class="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                                                    {{ $dateDisplay }}
+                                                    @if ($event->days_of_week)
+                                                        <span class="ml-2 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-200">{{ __('messages.recurring') }}</span>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 align-top">
+                                                <div class="text-sm text-gray-700 dark:text-gray-200">
+                                                    {{ $event->getVenueDisplayName() ?: __('messages.none') }}
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 align-top">
+                                                <div class="text-sm text-gray-700 dark:text-gray-200">
+                                                    {{ $talentList ?: __('messages.none') }}
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 align-top">
+                                                <div class="text-sm text-gray-700 dark:text-gray-200">
+                                                    {{ $curatorList ?: __('messages.none') }}
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 align-top">
+                                                <div class="flex items-center justify-end space-x-3">
+                                                    <a href="{{ route('events.view', ['hash' => $hashedId]) }}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">{{ __('messages.view') }}</a>
+                                                    @if ($canEdit)
+                                                        <a href="{{ route('event.edit_admin', ['hash' => $hashedId]) }}" class="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-100">{{ __('messages.edit') }}</a>
+                                                        <form method="POST" action="{{ route('events.destroy', ['hash' => $hashedId]) }}" onsubmit="return confirm('{{ __('messages.are_you_sure') }}');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">{{ __('messages.delete') }}</button>
+                                                        </form>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                            {{ __('messages.no_events_found') }}
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
         @include('role/partials/calendar', ['route' => 'home', 'tab' => ''])
+
+        @if ($creationRoles->isNotEmpty())
+            <x-modal name="create-event">
+                <div class="px-6 py-5">
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('messages.add_event') }}</h2>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">{{ __('messages.add_to_schedule') }}</p>
+
+                    <form x-data="eventCreateModal({
+                            roles: @js($creationRoleOptions),
+                            venues: @js($venueOptions),
+                            talents: @js($talentOptions),
+                            curators: @js($curatorOptions),
+                        })"
+                        class="mt-5 space-y-5"
+                        @submit.prevent="submit">
+
+                        <div>
+                            <x-input-label for="event-create-role" :value="__('messages.schedule')" />
+                            <select id="event-create-role"
+                                    x-model="selectedRole"
+                                    class="mt-2 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                                <option value="">{{ __('messages.please_select') }}</option>
+                                <template x-for="role in roles" :key="role.id">
+                                    <option :value="role.id" x-text="`${role.name} • ${role.type}`"></option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <div>
+                            <x-input-label for="event-create-venue" :value="__('messages.venue') . ' (' . __('messages.optional') . ')'" />
+                            <select id="event-create-venue"
+                                    x-model="selectedVenue"
+                                    class="mt-2 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                                <option value="">{{ __('messages.please_select') }}</option>
+                                <template x-for="venue in venues" :key="venue.id">
+                                    <option :value="venue.id" x-text="venue.name"></option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <div>
+                            <x-input-label for="event-create-talent" :value="__('messages.talent') . ' (' . __('messages.optional') . ')'" />
+                            <select id="event-create-talent"
+                                    x-model="selectedTalents"
+                                    multiple
+                                    class="mt-2 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                                <template x-for="talent in talents" :key="talent.id">
+                                    <option :value="talent.id" x-text="talent.name"></option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <div>
+                            <x-input-label for="event-create-curator" :value="__('messages.curator') . ' (' . __('messages.optional') . ')'" />
+                            <select id="event-create-curator"
+                                    x-model="selectedCurators"
+                                    multiple
+                                    class="mt-2 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                                <template x-for="curator in curators" :key="curator.id">
+                                    <option :value="curator.id" x-text="curator.name"></option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <div class="flex justify-end space-x-3">
+                            <x-secondary-button type="button" @click="$dispatch('close-modal', 'create-event')">{{ __('messages.cancel') }}</x-secondary-button>
+                            <x-primary-button type="submit" x-bind:disabled="! canSubmit">
+                                {{ __('messages.next') }}
+                            </x-primary-button>
+                        </div>
+                    </form>
+                </div>
+            </x-modal>
+        @endif
 
     </div>
 </x-app-admin-layout>
+
+<script {!! nonce_attr() !!}>
+    function eventCreateModal(config) {
+        return {
+            roles: config.roles || [],
+            venues: config.venues || [],
+            talents: config.talents || [],
+            curators: config.curators || [],
+            selectedRole: '',
+            selectedVenue: '',
+            selectedTalents: [],
+            selectedCurators: [],
+            get canSubmit() {
+                return this.selectedRole !== '';
+            },
+            submit() {
+                if (!this.canSubmit) {
+                    return;
+                }
+
+                const role = this.roles.find((item) => item.id === this.selectedRole);
+
+                if (!role) {
+                    return;
+                }
+
+                let target = role.route;
+
+                try {
+                    const url = new URL(target, window.location.origin);
+
+                    if (this.selectedVenue) {
+                        url.searchParams.set('venue', this.selectedVenue);
+                    }
+
+                    const uniqueTalents = Array.from(new Set(this.selectedTalents));
+                    uniqueTalents
+                        .filter((id) => id && id !== this.selectedRole)
+                        .forEach((id) => url.searchParams.append('talents[]', id));
+
+                    const uniqueCurators = Array.from(new Set(this.selectedCurators));
+                    uniqueCurators
+                        .filter((id) => id)
+                        .forEach((id) => url.searchParams.append('curators[]', id));
+
+                    window.location.href = url.toString();
+                } catch (error) {
+                    window.location.href = target;
+                }
+            }
+        };
+    }
+</script>
