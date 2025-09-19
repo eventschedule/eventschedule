@@ -250,6 +250,31 @@
               @endif
             </div>
             @endif
+
+            @if($role->show_email && !empty($role->contacts))
+            <div class="mt-6 w-full">
+              <div class="rounded-3xl border border-white/70 bg-white/70 p-4 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-gray-800/60">
+                <h3 class="text-sm font-semibold text-[#33383C] dark:text-gray-200">
+                  {{ __('messages.contacts') }}
+                </h3>
+                <div class="mt-3 space-y-3">
+                  @foreach ($role->contacts as $contact)
+                    <div class="rounded-2xl bg-white/80 p-3 text-sm text-[#33383C] shadow-sm dark:bg-gray-800/80 dark:text-gray-200">
+                      @if (!empty($contact['name']))
+                        <p class="font-semibold">{{ $contact['name'] }}</p>
+                      @endif
+                      @if (!empty($contact['email']))
+                        <a href="mailto:{{ $contact['email'] }}" class="block break-words text-[#4E81FA] hover:underline">{{ $contact['email'] }}</a>
+                      @endif
+                      @if (!empty($contact['phone']))
+                        <a href="tel:{{ $contact['phone'] }}" class="block text-sm text-[#33383C] hover:text-[#4E81FA] dark:text-gray-300">{{ $contact['phone'] }}</a>
+                      @endif
+                    </div>
+                  @endforeach
+                </div>
+              </div>
+            </div>
+            @endif
           </div>
         </div>
 

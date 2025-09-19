@@ -707,6 +707,21 @@ class RoleController extends Controller
         ]);
     }
 
+    protected function assignRoleContacts(Role $role, Request $request): void
+    {
+        $contacts = $request->input('contacts');
+
+        if (! is_array($contacts)) {
+            $contacts = [];
+        }
+
+        if ($role->supportsMultipleContacts()) {
+            $role->contacts = $contacts;
+        } else {
+            $role->contacts = [];
+        }
+    }
+
 
     public function create($type)
     {
@@ -801,7 +816,8 @@ class RoleController extends Controller
         $user = $request->user();        
 
         $role = new Role;
-        $role->fill($request->all());
+        $role->fill($request->except('contacts'));
+        $this->assignRoleContacts($role, $request);
         $role->subdomain = Role::generateSubdomain($request->name);
         $role->user_id = $user->id;
 
@@ -1028,7 +1044,8 @@ class RoleController extends Controller
         }        
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-        $role->fill($request->all());
+        $role->fill($request->except('contacts'));
+        $this->assignRoleContacts($role, $request);
 
         $newSubdomain = Role::cleanSubdomain($request->new_subdomain);
         if ($newSubdomain != $subdomain) {

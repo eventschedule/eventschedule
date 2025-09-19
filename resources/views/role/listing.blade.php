@@ -94,8 +94,27 @@
                                         {{ __('messages.main_contact') }}
                                     </dt>
                                     <dd class="mt-1 text-gray-900 dark:text-gray-100">
-                                        @php $owner = $role->members->firstWhere('pivot.level', 'owner'); @endphp
-                                        @if ($owner && ($owner->name || $owner->email))
+                                        @php
+                                            $contacts = collect($role->contacts);
+                                            $owner = $role->members->firstWhere('pivot.level', 'owner');
+                                        @endphp
+                                        @if ($contacts->isNotEmpty())
+                                            <div class="space-y-3">
+                                                @foreach ($contacts as $contact)
+                                                    <div class="space-y-1">
+                                                        @if (!empty($contact['name']))
+                                                            <p>{{ $contact['name'] }}</p>
+                                                        @endif
+                                                        @if (!empty($contact['email']))
+                                                            <a href="mailto:{{ $contact['email'] }}" class="text-[#4E81FA] hover:underline break-words">{{ $contact['email'] }}</a>
+                                                        @endif
+                                                        @if (!empty($contact['phone']))
+                                                            <a href="tel:{{ $contact['phone'] }}" class="text-sm text-gray-700 dark:text-gray-300 hover:text-[#4E81FA]">{{ $contact['phone'] }}</a>
+                                                        @endif
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @elseif ($owner && ($owner->name || $owner->email))
                                             <div class="space-y-1">
                                                 @if ($owner->name)
                                                     <p>{{ $owner->name }}</p>
