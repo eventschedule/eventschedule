@@ -88,17 +88,9 @@ class EventController extends Controller
         return redirect()->back()->with('message', __('messages.videos_cleared'));
     }
 
-    public function delete(Request $request, $subdomain, $hash)
+    protected function handleEventDeletion(Event $event, User $user): void
     {
-        $user = $request->user();
-        $event_id = UrlUtils::decodeId($hash);
-        $event = Event::findOrFail($event_id);
-
-        if (! $request->user()->canEditEvent($event)) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
-
-        $event->load(['roles.members', 'venue.members', 'creatorRole.members', 'sales']);
+        $event->loadMissing(['roles.members', 'venue.members', 'creatorRole.members', 'sales']);
 
         foreach ($event->roles as $roleModel) {
             if ($roleModel->isTalent()) {
@@ -128,14 +120,95 @@ class EventController extends Controller
         }
 
         $event->delete();
+    }
+
+    public function delete(Request $request, $subdomain, $hash)
+    {
+        $user = $request->user();
+        $event_id = UrlUtils::decodeId($hash);
+        $event = Event::findOrFail($event_id);
+
+        if (! $request->user()->canEditEvent($event)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $this->handleEventDeletion($event, $user);
 
         $data = [
-            'subdomain' => $subdomain, 
+            'subdomain' => $subdomain,
             'tab' => 'schedule',
         ];
 
         return redirect(route('role.view_admin', $data))
                 ->with('message', __('messages.event_deleted'));
+    }
+
+    public function destroyFromHome(Request $request, $hash)
+    {
+        $user = $request->user();
+        $event_id = UrlUtils::decodeId($hash);
+        $event = Event::findOrFail($event_id);
+
+        if (! $user->canEditEvent($event)) {
+            return redirect()->route('home')->with('error', __('messages.not_authorized'));
+        }
+
+        $this->handleEventDeletion($event, $user);
+
+        return redirect()->route('home')->with('message', __('messages.event_deleted'));
+    }
+
+    public function view(Request $request, $hash)
+    {
+        $event_id = UrlUtils::decodeId($hash);
+        $event = Event::with(['roles', 'creatorRole', 'tickets', 'user'])->findOrFail($event_id);
+
+        if (! $request->user()->canEditEvent($event)) {
+            return redirect()->route('home')->with('error', __('messages.not_authorized'));
+        }
+
+        $event->loadMissing('venue');
+
+        $startAt = $event->starts_at ? $event->getStartDateTime(null, true) : null;
+        $endAt = null;
+
+        if ($startAt && $event->duration) {
+            $endAt = $startAt->copy()->addHours($event->duration);
+        }
+
+        $recurringDays = [];
+
+        if ($event->days_of_week) {
+            $baseDate = Carbon::now()->startOfWeek(Carbon::SUNDAY);
+
+            foreach (str_split($event->days_of_week) as $index => $value) {
+                if ($value === '1') {
+                    $recurringDays[] = $baseDate->copy()->addDays($index)
+                        ->locale(app()->getLocale())
+                        ->translatedFormat('l');
+                }
+            }
+        }
+
+        $categories = get_translated_categories();
+        $categoryName = $event->category_id && isset($categories[$event->category_id])
+            ? $categories[$event->category_id]
+            : null;
+
+        return view('event.view', [
+            'event' => $event,
+            'venue' => $event->venue,
+            'talents' => $event->roles->filter(function ($role) {
+                return $role->isTalent();
+            }),
+            'curators' => $event->roles->filter(function ($role) {
+                return $role->isCurator();
+            }),
+            'startAt' => $startAt,
+            'endAt' => $endAt,
+            'recurringDays' => $recurringDays,
+            'categoryName' => $categoryName,
+        ]);
     }
 
 
@@ -151,6 +224,7 @@ class EventController extends Controller
         $venue = $role->isVenue() ? $role : null;
         $schedule = $role->isTalent() ? $role : null;
         $curator = $role->isCurator() ? $role : null;
+        $preselectedCurators = [];
 
         if (! $role->email_verified_at) {
             return redirect()->back()->with('error', __('messages.email_not_verified'));
@@ -177,6 +251,85 @@ class EventController extends Controller
 
         if ($schedule) {
             $selectedMembers = [$schedule->toData()];
+        }
+
+        // Allow selecting a venue via query parameter when launching from the events page
+        if ($request->filled('venue')) {
+            $venueId = UrlUtils::decodeId($request->query('venue'));
+
+            if ($venueId) {
+                $userVenue = $user->roles()
+                    ->where('roles.id', $venueId)
+                    ->where('roles.type', 'venue')
+                    ->first();
+
+                if ($userVenue) {
+                    $venue = $userVenue;
+                }
+            }
+        }
+
+        // Allow selecting additional talent schedules via query parameters
+        $requestedTalents = collect($request->query('talents', []));
+
+        if ($request->filled('talent')) {
+            $requestedTalents = $requestedTalents->merge([$request->query('talent')]);
+        }
+
+        if ($requestedTalents->isNotEmpty()) {
+            $existingIds = collect($selectedMembers)->pluck('id');
+
+            $requestedTalents
+                ->filter()
+                ->each(function ($encodedId) use ($user, &$selectedMembers, &$existingIds) {
+                    $decodedId = UrlUtils::decodeId($encodedId);
+
+                    if (! $decodedId) {
+                        return;
+                    }
+
+                    $talentRole = $user->roles()
+                        ->where('roles.id', $decodedId)
+                        ->where('roles.type', 'talent')
+                        ->first();
+
+                    if ($talentRole && ! $existingIds->contains($talentRole->encodeId())) {
+                        $selectedMembers[] = $talentRole->toData();
+                        $existingIds->push($talentRole->encodeId());
+                    }
+                });
+        }
+
+        // Allow pre-selecting curators from the events page
+        $requestedCurators = collect($request->query('curators', []));
+
+        if ($request->filled('curator')) {
+            $requestedCurators = $requestedCurators->merge([$request->query('curator')]);
+        }
+
+        if ($requestedCurators->isNotEmpty()) {
+            $requestedCurators
+                ->filter()
+                ->each(function ($encodedId) use (&$preselectedCurators, $user, &$curator) {
+                    $decodedId = UrlUtils::decodeId($encodedId);
+
+                    if (! $decodedId) {
+                        return;
+                    }
+
+                    $curatorRole = $user->roles()
+                        ->where('roles.id', $decodedId)
+                        ->where('roles.type', 'curator')
+                        ->first();
+
+                    if ($curatorRole) {
+                        $preselectedCurators[] = $curatorRole->encodeId();
+
+                        if (! $curator) {
+                            $curator = $curatorRole;
+                        }
+                    }
+                });
         }
 
         if ($request->date) {
@@ -223,6 +376,7 @@ class EventController extends Controller
             'members' => $members,
             'currencies' => $currencies,
             'event_categories' => get_translated_categories(),
+            'preselectedCurators' => $preselectedCurators,
         ]);
     }
 
