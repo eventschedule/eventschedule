@@ -48,10 +48,50 @@ class GraphicController extends Controller
             return response()->json(['error' => __('messages.no_events_found')], 404);
         }
 
-        // Generate the graphic
-        $generator = new EventGraphicGenerator($role, $events, $layout);
-        $imageData = $generator->generate();
-        
+        if (config('services.capturekit.key') && (! config('app.hosted') || $role->id == 19)) {
+            $url = $role->getGuestUrl($role->subdomain) . '?embed=true&graphic=true';
+            $url = 'https://api.capturekit.dev/capture?&access_key=' . config('services.capturekit.key') . '&viewport_width=950&full_page=true&url=' . urlencode($url);
+            
+            $ch = curl_init();
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_TIMEOUT => 60, // 60 second timeout
+                CURLOPT_CONNECTTIMEOUT => 30, // 30 second connection timeout
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_USERAGENT => 'EventSchedule/1.0',
+                CURLOPT_HTTPHEADER => [
+                    'Accept: image/png,image/*,*/*;q=0.8',
+                    'Accept-Language: en-US,en;q=0.5',
+                ]
+            ]);
+            
+            $imageData = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $error = curl_error($ch);
+            curl_close($ch);
+            
+            if ($error) {
+                \Log::error('CaptureKit cURL error: ' . $error);
+                return redirect()->back()->with('error', 'Failed to generate graphic: ' . $error);
+            }
+            
+            if ($httpCode !== 200) {
+                \Log::error('CaptureKit HTTP error: ' . $httpCode);
+                return redirect()->back()->with('error', 'Failed to generate graphic: HTTP ' . $httpCode);
+            }
+            
+            if (empty($imageData)) {
+                \Log::error('CaptureKit returned empty response');
+                return redirect()->back()->with('error', 'Failed to generate graphic: Empty response');
+            }
+        } else {
+            // Use the service to generate the graphic with the specified layout
+            $generator = new EventGraphicGenerator($role, $events, $layout);
+            $imageData = $generator->generate();
+        }
+         
         // Convert image data to base64 for display
         $imageBase64 = base64_encode($imageData);
         
