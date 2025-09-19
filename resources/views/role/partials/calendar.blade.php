@@ -6,6 +6,7 @@
     $totalDays = $endOfMonth->diffInDays($startOfMonth) + 1;
     $totalWeeks = ceil($totalDays / 7);
     $unavailable = [];
+    $publicUrl = app_public_url();
 
     // Always initialize as arrays
     $eventGroupIds = [];
@@ -57,8 +58,10 @@
             'guest_url' => $event->getGuestUrl(isset($subdomain) ? $subdomain : '', ''),
             'image_url' => $event->getImageUrl(),
             'can_edit' => auth()->user() && auth()->user()->canEditEvent($event),
-            'edit_url' => auth()->user() && auth()->user()->canEditEvent($event) 
-                ? (isset($role) ? config('app.url') . route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)], false) : config('app.url') . route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($event->id)], false))
+            'edit_url' => auth()->user() && auth()->user()->canEditEvent($event)
+                ? (isset($role)
+                    ? $publicUrl . route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)], false)
+                    : $publicUrl . route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($event->id)], false))
                 : null,
         ];
     }
