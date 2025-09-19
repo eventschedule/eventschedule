@@ -25,6 +25,9 @@ class GoogleCalendarService
         $this->client->setScopes([
             Calendar::CALENDAR_EVENTS,
             Calendar::CALENDAR_READONLY,
+            'openid',
+            'email',
+            'profile',
         ]);
         $this->client->setAccessType('offline');
         $this->client->setApprovalPrompt('force');
