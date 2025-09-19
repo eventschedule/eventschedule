@@ -1201,7 +1201,7 @@
                             {{ __('Google Calendar Integration') }}
                         </h2>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                            {{ __('Sync events between this role and your Google Calendar.') }}
+                            {{ __('Sync events between this schedule and your Google Calendar.') }}
                         </p>
                         
                         <div class="space-y-6">
@@ -1737,18 +1737,30 @@ function showSyncMessage(message, type = 'success') {
     const resultsDiv = document.getElementById('sync-results');
     const messageDiv = document.getElementById('sync-message');
     
+    if (!resultsDiv || !messageDiv) {
+        console.error('Sync results elements not found');
+        return;
+    }
+    
     messageDiv.textContent = message;
     
+    // Get the inner div that contains the styling classes
+    const innerDiv = resultsDiv.querySelector('div');
+    const textDiv = innerDiv.querySelector('div');
+    
+    if (!innerDiv || !textDiv) {
+        console.error('Sync results inner elements not found');
+        return;
+    }
+    
     if (type === 'error') {
-        resultsDiv.querySelector('.bg-green-50').classList.remove('bg-green-50', 'border-green-200');
-        resultsDiv.querySelector('.bg-green-50').classList.add('bg-red-50', 'border-red-200');
-        resultsDiv.querySelector('.text-green-800').classList.remove('text-green-800');
-        resultsDiv.querySelector('.text-green-800').classList.add('text-red-800');
+        // Remove green classes and add red classes
+        innerDiv.className = 'p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg';
+        textDiv.className = 'text-sm text-red-800 dark:text-red-200';
     } else {
-        resultsDiv.querySelector('.bg-red-50').classList.remove('bg-red-50', 'border-red-200');
-        resultsDiv.querySelector('.bg-red-50').classList.add('bg-green-50', 'border-green-200');
-        resultsDiv.querySelector('.text-red-800').classList.remove('text-red-800');
-        resultsDiv.querySelector('.text-red-800').classList.add('text-green-800');
+        // Remove red classes and add green classes
+        innerDiv.className = 'p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg';
+        textDiv.className = 'text-sm text-green-800 dark:text-green-200';
     }
     
     resultsDiv.classList.remove('hidden');
