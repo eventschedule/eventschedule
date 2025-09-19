@@ -1639,7 +1639,7 @@ function syncEvents() {
     };
     
     if (selectedDirection.value === 'to') {
-        url = '/google-calendar/sync-events';
+        url = '/google-calendar/sync-events/{{ $role->subdomain }}';
     } else if (selectedDirection.value === 'from') {
         url = `/google-calendar/sync-from-google/{{ $role->subdomain }}`;
     } else if (selectedDirection.value === 'both') {
@@ -1683,7 +1683,7 @@ function syncBothDirections() {
     };
     
     // First sync to Google Calendar
-    fetch('/google-calendar/sync-events', {
+    fetch('/google-calendar/sync-events/{{ $role->subdomain }}', {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),

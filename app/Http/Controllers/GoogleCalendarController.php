@@ -234,9 +234,9 @@ class GoogleCalendarController extends Controller
     }
 
     /**
-     * Sync all events to Google Calendar
+     * Sync all events to Google Calendar for a specific role
      */
-    public function syncEvents(Request $request)
+    public function syncEvents(Request $request, $subdomain)
     {
         $user = Auth::user();
         
@@ -245,6 +245,13 @@ class GoogleCalendarController extends Controller
         }
 
         try {
+            $role = \App\Models\Role::subdomain($subdomain)->firstOrFail();
+            
+            // Check if user has permission to sync this role
+            if (!$role->users->contains($user)) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+
             // Ensure user has valid token before syncing
             if (!$this->googleCalendarService->ensureValidToken($user)) {
                 return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
@@ -252,10 +259,10 @@ class GoogleCalendarController extends Controller
 
             // If sync_direction is provided, update the role's sync_direction
             if ($request->has('sync_direction')) {
-                $this->updateRoleSyncDirection($user, $request->sync_direction);
+                $this->updateRoleSyncDirection($user, $request->sync_direction, $role);
             }
 
-            $results = $this->googleCalendarService->syncUserEvents($user);
+            $results = $this->googleCalendarService->syncUserEvents($user, $role);
             
             return response()->json([
                 'message' => 'Events synced successfully',
@@ -265,6 +272,7 @@ class GoogleCalendarController extends Controller
         } catch (\Exception $e) {
             Log::error('Failed to sync events to Google Calendar', [
                 'user_id' => $user->id,
+                'role_id' => $role->id ?? null,
                 'error' => $e->getMessage(),
             ]);
 
