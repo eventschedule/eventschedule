@@ -92,6 +92,16 @@ class Event extends Model
             }
         });
 
+        static::created(function ($event) {
+            // Sync new event to Google Calendar
+            $event->syncToGoogleCalendar('create');
+        });
+
+        static::updated(function ($event) {
+            // Sync updated event to Google Calendar
+            $event->syncToGoogleCalendar('update');
+        });
+
         static::deleting(function ($event) {
             foreach ($event->roles as $role) {
                 if (($role->isTalent() || $role->isVenue()) && ! $role->isRegistered()) {
@@ -108,15 +118,7 @@ class Event extends Model
             }
 
             // Sync deletion to Google Calendar
-            if ($event->google_event_id) {
-                foreach ($event->roles as $role) {
-                    foreach ($role->users as $user) {
-                        if ($user->google_token) {
-                            SyncEventToGoogleCalendar::dispatch($event, $user, 'delete');
-                        }
-                    }
-                }
-            }
+            $event->syncToGoogleCalendar('delete');
         });
     }
 
@@ -727,6 +729,11 @@ class Event extends Model
      */
     public function syncToGoogleCalendar($action = 'create')
     {
+        // For deletions, only sync if the event has a Google event ID
+        if ($action === 'delete' && !$this->google_event_id) {
+            return;
+        }
+
         foreach ($this->roles as $role) {
             // Only sync to Google if the role is configured to sync to Google
             if (!$role->syncsToGoogle()) {
