@@ -1193,7 +1193,7 @@
                     </div>
                 </div>
 
-                @if (auth()->user()->google_token)
+                @if (auth()->user()->google_token || config('app.is_testing'))
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">
 
@@ -1223,9 +1223,10 @@
                                                value="to" 
                                                {{ $role->sync_direction === 'to' ? 'checked' : '' }}
                                                class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                            {{ __('To Google Calendar') }} - {{ __('Events from Event Schedule will appear in Google Calendar') }}
-                                        </span>
+                                        <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                            <div class="font-medium">{{ __('To Google Calendar') }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('Events from Event Schedule will appear in Google Calendar') }}</div>
+                                        </div>
                                     </label>
                                     <label class="flex items-center">
                                         <input type="radio" 
@@ -1233,9 +1234,10 @@
                                                value="from" 
                                                {{ $role->sync_direction === 'from' ? 'checked' : '' }}
                                                class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                            {{ __('From Google Calendar') }} - {{ __('Events from Google Calendar will appear in Event Schedule') }}
-                                        </span>
+                                        <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                            <div class="font-medium">{{ __('From Google Calendar') }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('Events from Google Calendar will appear in Event Schedule') }}</div>
+                                        </div>
                                     </label>
                                     <label class="flex items-center">
                                         <input type="radio" 
@@ -1243,9 +1245,10 @@
                                                value="both" 
                                                {{ $role->sync_direction === 'both' ? 'checked' : '' }}
                                                class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                            {{ __('Bidirectional Sync') }} - {{ __('Events added in either place will appear in both') }}
-                                        </span>
+                                        <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                            <div class="font-medium">{{ __('Bidirectional Sync') }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('Events added in either place will appear in both') }}</div>
+                                        </div>
                                     </label>
                                     <label class="flex items-center">
                                         <input type="radio" 
@@ -1253,9 +1256,10 @@
                                                value="" 
                                                {{ !$role->sync_direction ? 'checked' : '' }}
                                                class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
-                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                            {{ __('No Sync') }} - {{ __('Disable Google Calendar synchronization') }}
-                                        </span>
+                                        <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                            <div class="font-medium">{{ __('No Sync') }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('Disable Google Calendar synchronization') }}</div>
+                                        </div>
                                     </label>
                                 </div>
                             </div>
