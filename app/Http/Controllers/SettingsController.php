@@ -362,13 +362,31 @@ class SettingsController extends Controller
                 $message->to($user->email)->subject(__('messages.test_email_subject'));
             });
 
-            $failures = array_values(array_filter((array) Mail::failures(), function ($failure) {
-                return $failure !== null && $failure !== '';
-            }));
+            $failures = [];
+            $failuresInspected = false;
+
+            try {
+                $mailer = Mail::mailer();
+
+                if (is_object($mailer) && method_exists($mailer, 'failures')) {
+                    $failures = array_values(array_filter((array) $mailer->failures(), function ($failure) {
+                        return $failure !== null && $failure !== '';
+                    }));
+                    $failuresInspected = true;
+                } elseif ($mailer !== null) {
+                    $logOutput[] = 'Mailer does not support reporting failed recipients; assuming success.';
+                } else {
+                    $logOutput[] = 'Mailer instance was unavailable for failure inspection; assuming success.';
+                }
+            } catch (Throwable $inspectionException) {
+                $logOutput[] = 'Unable to inspect mailer for delivery failures: ' . $inspectionException->getMessage();
+            }
+
+            if ($failuresInspected && empty($failures)) {
+                $logOutput[] = 'Mail driver did not report any delivery failures.';
+            }
 
             if (empty($failures)) {
-                $logOutput[] = 'Mail driver did not report any delivery failures.';
-
                 return response()->json([
                     'status' => 'success',
                     'message' => __('messages.test_email_sent'),
