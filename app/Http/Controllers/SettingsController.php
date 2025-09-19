@@ -362,23 +362,33 @@ class SettingsController extends Controller
                 $message->to($user->email)->subject(__('messages.test_email_subject'));
             });
 
-            $failures = Mail::failures();
+            $failures = array_values(array_filter((array) Mail::failures(), function ($failure) {
+                return $failure !== null && $failure !== '';
+            }));
 
             if (empty($failures)) {
                 $logOutput[] = 'Mail driver did not report any delivery failures.';
-            } else {
-                $logOutput[] = 'Mail driver reported failures for the following recipients:';
 
-                foreach ($failures as $failure) {
-                    $logOutput[] = ' - ' . $failure;
-                }
+                return response()->json([
+                    'status' => 'success',
+                    'message' => __('messages.test_email_sent'),
+                    'logs' => $logOutput,
+                ]);
+            }
+
+            $logOutput[] = 'Mail driver reported failures for the following recipients:';
+
+            foreach ($failures as $failure) {
+                $logOutput[] = ' - ' . $failure;
             }
 
             return response()->json([
-                'status' => 'success',
-                'message' => __('messages.test_email_sent'),
+                'status' => 'error',
+                'message' => __('messages.test_email_failed'),
+                'error' => __('messages.test_email_failures'),
+                'failures' => $failures,
                 'logs' => $logOutput,
-            ]);
+            ], 500);
         } catch (Throwable $exception) {
             report($exception);
 
