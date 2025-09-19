@@ -24,6 +24,7 @@
                         </header>
 
                         <form method="post" action="{{ route('settings.mail.update') }}" class="mt-6 space-y-6"
+                            x-ref="form"
                             x-data="{
                                 testing: false,
                                 result: null,
@@ -31,7 +32,7 @@
                                     this.testing = true;
                                     this.result = null;
 
-                                    const formData = new FormData(this.$el);
+                                    const formData = new FormData(this.$refs.form);
                                     formData.delete('_method');
 
                                     try {
@@ -173,13 +174,13 @@
                             <div x-cloak x-show="result" x-transition
                                 :class="result?.success ? 'border-green-200 bg-green-50 text-green-700' : 'border-red-200 bg-red-50 text-red-700'"
                                 class="rounded-md border px-4 py-3 text-sm">
-                                <p class="font-medium" x-text="result.message"></p>
-                                <template x-if="!result.success && result.error">
+                                <p class="font-medium" x-text="result?.message ?? ''"></p>
+                                <template x-if="!result?.success && result?.error">
                                     <p class="mt-2"><span class="font-medium">{{ __('messages.error_details') }}</span>
                                         <span x-text="result.error"></span>
                                     </p>
                                 </template>
-                                <template x-if="result.failures && result.failures.length">
+                                <template x-if="result?.failures?.length">
                                     <div class="mt-2">
                                         <p class="font-medium">{{ __('messages.test_email_failed_recipients') }}</p>
                                         <ul class="mt-1 list-inside list-disc space-y-1">
@@ -189,7 +190,7 @@
                                         </ul>
                                     </div>
                                 </template>
-                                <template x-if="result.logs && result.logs.length">
+                                <template x-if="result?.logs?.length">
                                     <div class="mt-4 rounded-md border border-gray-200 bg-white p-3 text-xs text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
                                         <p class="mb-2 font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 text-[11px]">
                                             {{ __('messages.test_email_logs') }}
