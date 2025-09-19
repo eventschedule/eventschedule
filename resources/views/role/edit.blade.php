@@ -474,7 +474,6 @@
                         <input type="hidden" name="type" value="{{ $role->type }}"/>
                         @endif
 
-                        <input type="hidden" name="sync_direction" id="sync_direction_hidden" value="{{ old('sync_direction', $role->sync_direction) }}" />
 
                         <div class="mb-6">
                             <x-input-label for="name" :value="__('messages.name') . ' *'" />
@@ -1209,7 +1208,7 @@
                             <!-- Calendar Selection -->
                             <div>
                                 <x-input-label for="google-calendar-select" :value="__('Select Google Calendar')" />
-                                <select id="google-calendar-select" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                <select id="google-calendar-select" name="google_calendar_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                     <option value="">{{ __('Loading calendars...') }}</option>
                                 </select>
                             </div>
@@ -1615,33 +1614,6 @@ function loadGoogleCalendars() {
         });
 }
 
-function updateCalendarSelection() {
-    const select = document.getElementById('google-calendar-select');
-    const calendarId = select.value;
-    
-    if (!calendarId) return;
-    
-    fetch(`/google-calendar/role/{{ $role->subdomain }}`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ calendar_id: calendarId }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            alert('Error: ' + data.error);
-        } else {
-            showSyncMessage('Calendar updated successfully');
-        }
-    })
-    .catch(error => {
-        console.error('Error updating calendar:', error);
-        alert('Error updating calendar: ' + error.message);
-    });
-}
 
 
 function syncEvents() {
@@ -1782,22 +1754,14 @@ function showSyncMessage(message, type = 'success') {
     resultsDiv.classList.remove('hidden');
 }
 
-// Add event listeners for calendar selection and sync direction changes
+// Add event listeners for sync direction changes
 document.addEventListener('DOMContentLoaded', function() {
-    const calendarSelect = document.getElementById('google-calendar-select');
-    if (calendarSelect) {
-        calendarSelect.addEventListener('change', updateCalendarSelection);
-    }
-    
     // Add event listeners for sync direction radio buttons
     const syncDirectionRadios = document.querySelectorAll('input[name="sync_direction"]');
     const syncEventsButton = document.getElementById('sync-events-button');
     
     syncDirectionRadios.forEach(radio => {
         radio.addEventListener('change', function() {
-            // Update the hidden field when radio button changes
-            document.getElementById('sync_direction_hidden').value = this.value;
-            
             // Enable/disable sync events button based on selection
             if (syncEventsButton) {
                 syncEventsButton.disabled = !this.value || this.value === '';
