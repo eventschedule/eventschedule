@@ -65,6 +65,7 @@ class Role extends Model implements MustVerifyEmail
         'google_webhook_expires_at',
         'sync_direction',
         'request_terms',
+        'contacts',
     ];
 
     /**
@@ -288,6 +289,11 @@ class Role extends Model implements MustVerifyEmail
     public function isCurator()
     {
         return $this->type == 'curator';
+    }
+
+    public function supportsMultipleContacts(): bool
+    {
+        return $this->isVenue() || $this->isTalent() || $this->isCurator();
     }
 
     public function isRegistered()
@@ -750,6 +756,81 @@ class Role extends Model implements MustVerifyEmail
         } else {
             $this->attributes['import_config'] = $value;
         }
+    }
+
+    public function getContactsAttribute($value)
+    {
+        if (is_null($value)) {
+            return [];
+        }
+
+        $contacts = is_string($value) ? json_decode($value, true) : $value;
+
+        if (! is_array($contacts)) {
+            return [];
+        }
+
+        return collect($contacts)
+            ->filter(fn ($contact) => is_array($contact))
+            ->map(function (array $contact) {
+                return [
+                    'name' => isset($contact['name']) ? (string) $contact['name'] : '',
+                    'email' => isset($contact['email']) ? (string) $contact['email'] : '',
+                    'phone' => isset($contact['phone']) ? (string) $contact['phone'] : '',
+                ];
+            })
+            ->filter(function (array $contact) {
+                return $contact['name'] !== '' || $contact['email'] !== '' || $contact['phone'] !== '';
+            })
+            ->values()
+            ->all();
+    }
+
+    public function setContactsAttribute($value)
+    {
+        if (is_string($value)) {
+            $value = json_decode($value, true);
+        }
+
+        if (! is_array($value)) {
+            $this->attributes['contacts'] = null;
+
+            return;
+        }
+
+        $contacts = collect($value)
+            ->filter(fn ($contact) => is_array($contact))
+            ->map(function (array $contact) {
+                $name = isset($contact['name']) ? trim($contact['name']) : '';
+                $email = isset($contact['email']) ? strtolower(trim($contact['email'])) : '';
+                $phone = isset($contact['phone']) ? trim($contact['phone']) : '';
+
+                if ($name === '' && $email === '' && $phone === '') {
+                    return null;
+                }
+
+                $contactData = [];
+
+                if ($name !== '') {
+                    $contactData['name'] = $name;
+                }
+
+                if ($email !== '') {
+                    $contactData['email'] = $email;
+                }
+
+                if ($phone !== '') {
+                    $contactData['phone'] = $phone;
+                }
+
+                return $contactData;
+            })
+            ->filter()
+            ->values();
+
+        $this->attributes['contacts'] = $contacts->isEmpty()
+            ? null
+            : json_encode($contacts->all());
     }
 
     /**

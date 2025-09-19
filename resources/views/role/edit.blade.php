@@ -678,6 +678,60 @@
                             <x-input-error class="mt-2" :messages="$errors->get('website')" />
                         </div>
 
+                        @if ($role->supportsMultipleContacts())
+                        @php
+                            $contactValues = old('contacts', $role->contacts);
+                            if (! is_array($contactValues)) {
+                                $contactValues = [];
+                            }
+                        @endphp
+                        <div class="mb-6">
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                <div>
+                                    <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.contacts') }}</h3>
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.contacts_help') }}</p>
+                                </div>
+                                <x-secondary-button type="button" onclick="addContactField()" class="shrink-0">
+                                    {{ __('messages.add_contact') }}
+                                </x-secondary-button>
+                            </div>
+                            <div id="contact-items" class="mt-4 space-y-4">
+                                @forelse ($contactValues as $key => $contact)
+                                    @php
+                                        $contact = is_array($contact) ? $contact : (array) $contact;
+                                    @endphp
+                                    <div class="contact-item rounded-lg border border-gray-200 dark:border-gray-700 p-4" data-contact-key="{{ $key }}">
+                                        <div class="flex items-start justify-between gap-4">
+                                            <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.contact_details') }}</span>
+                                            <button type="button" class="inline-flex items-center rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800" onclick="removeContactField(this)">
+                                                {{ __('messages.remove') }}
+                                            </button>
+                                        </div>
+                                        <div class="mt-4 grid gap-4 sm:grid-cols-3">
+                                            <div>
+                                                <x-input-label for="contacts_{{ $key }}_name" :value="__('messages.name')" />
+                                                <x-text-input id="contacts_{{ $key }}_name" name="contacts[{{ $key }}][name]" type="text" class="mt-1 block w-full" :value="old('contacts.' . $key . '.name', data_get($contact, 'name', ''))" autocomplete="off" />
+                                                <x-input-error class="mt-2" :messages="$errors->get('contacts.' . $key . '.name')" />
+                                            </div>
+                                            <div>
+                                                <x-input-label for="contacts_{{ $key }}_email" :value="__('messages.email')" />
+                                                <x-text-input id="contacts_{{ $key }}_email" name="contacts[{{ $key }}][email]" type="email" class="mt-1 block w-full" :value="old('contacts.' . $key . '.email', data_get($contact, 'email', ''))" autocomplete="off" />
+                                                <x-input-error class="mt-2" :messages="$errors->get('contacts.' . $key . '.email')" />
+                                            </div>
+                                            <div>
+                                                <x-input-label for="contacts_{{ $key }}_phone" :value="__('messages.phone')" />
+                                                <x-text-input id="contacts_{{ $key }}_phone" name="contacts[{{ $key }}][phone]" type="text" class="mt-1 block w-full" :value="old('contacts.' . $key . '.phone', data_get($contact, 'phone', ''))" autocomplete="off" />
+                                                <x-input-error class="mt-2" :messages="$errors->get('contacts.' . $key . '.phone')" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <p id="no-contacts-placeholder" class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_contacts_added') }}</p>
+                                @endforelse
+                            </div>
+                        </div>
+                        @endif
+
                         @if ($role->isCurator())
                         <div class="mb-6">
                             <x-input-label for="city" :value="__('messages.city')" />
@@ -1525,6 +1579,95 @@ function closeImportOutput() {
     const modal = document.getElementById('import-output-modal');
     if (modal) {
         modal.remove();
+    }
+}
+
+let contactIndex = {{ count((array) old('contacts', $role->contacts ?? [])) }};
+
+function addContactField(values = {}) {
+    const container = document.getElementById('contact-items');
+
+    if (!container) {
+        return;
+    }
+
+    const placeholder = document.getElementById('no-contacts-placeholder');
+    if (placeholder) {
+        placeholder.remove();
+    }
+
+    const key = `new_${contactIndex++}`;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'contact-item rounded-lg border border-gray-200 dark:border-gray-700 p-4';
+    wrapper.dataset.contactKey = key;
+    wrapper.innerHTML = `
+        <div class="flex items-start justify-between gap-4">
+            <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.contact_details') }}</span>
+            <button type="button" class="inline-flex items-center rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800" onclick="removeContactField(this)">
+                {{ __('messages.remove') }}
+            </button>
+        </div>
+        <div class="mt-4 grid gap-4 sm:grid-cols-3">
+            <div>
+                <label for="contacts_${key}_name" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.name') }}</label>
+                <input id="contacts_${key}_name" name="contacts[${key}][name]" type="text" autocomplete="off" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+            </div>
+            <div>
+                <label for="contacts_${key}_email" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.email') }}</label>
+                <input id="contacts_${key}_email" name="contacts[${key}][email]" type="email" autocomplete="off" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+            </div>
+            <div>
+                <label for="contacts_${key}_phone" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.phone') }}</label>
+                <input id="contacts_${key}_phone" name="contacts[${key}][phone]" type="text" autocomplete="off" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+            </div>
+        </div>
+    `;
+
+    container.appendChild(wrapper);
+
+    const nameInput = wrapper.querySelector(`#contacts_${key}_name`);
+    const emailInput = wrapper.querySelector(`#contacts_${key}_email`);
+    const phoneInput = wrapper.querySelector(`#contacts_${key}_phone`);
+
+    if (values.name) {
+        nameInput.value = values.name;
+    }
+
+    if (values.email) {
+        emailInput.value = values.email;
+    }
+
+    if (values.phone) {
+        phoneInput.value = values.phone;
+    }
+
+    if (nameInput) {
+        nameInput.focus();
+    } else if (emailInput) {
+        emailInput.focus();
+    } else if (phoneInput) {
+        phoneInput.focus();
+    }
+}
+
+function removeContactField(button) {
+    const container = document.getElementById('contact-items');
+
+    if (!container) {
+        return;
+    }
+
+    const item = button.closest('.contact-item');
+    if (item) {
+        item.remove();
+    }
+
+    if (container.querySelectorAll('.contact-item').length === 0) {
+        const placeholder = document.createElement('p');
+        placeholder.id = 'no-contacts-placeholder';
+        placeholder.className = 'text-sm text-gray-500 dark:text-gray-400';
+        placeholder.textContent = '{{ __('messages.no_contacts_added') }}';
+        container.appendChild(placeholder);
     }
 }
 

@@ -31,6 +31,13 @@ class RoleUpdateRequest extends FormRequest
             'profile_image' => ['image', 'max:2500', new SquareImage],
             'background_image_url' => ['image', 'max:2500'],
             'header_image_url' => ['image', 'max:2500'],
+            'contacts' => ['nullable', 'array'],
+            'contacts.*.name' => ['nullable', 'string', 'max:255'],
+            'contacts.*.email' => array_merge(
+                ['nullable', 'string', 'email', 'max:255'],
+                config('app.hosted') ? [new NoFakeEmail] : []
+            ),
+            'contacts.*.phone' => ['nullable', 'string', 'max:255'],
         ];
     }
 }
