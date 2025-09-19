@@ -397,7 +397,7 @@ class GoogleCalendarService
 
         // Get all events for the specific role
         $events = Event::whereHas('roles', function ($query) use ($role) {
-            $query->where('id', $role->id);
+            $query->where('roles.id', $role->id);
         })->get();
 
         foreach ($events as $event) {
