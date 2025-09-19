@@ -125,6 +125,8 @@ return [
     'test_email_missing_user' => 'Unable to determine a recipient for the test email.',
     'test_email_subject' => 'EventSchedule test email',
     'test_email_body' => 'This is a test email to confirm your email settings are configured correctly.',
+    'test_email_failures' => 'Mail driver reported failures for one or more recipients.',
+    'test_email_failed_recipients' => 'Mail driver reported failures for the following recipients:',
     'test_email_logs' => 'Test email log output',
     'error_details' => 'Error details:',
     'email_templates' => 'Email Templates',

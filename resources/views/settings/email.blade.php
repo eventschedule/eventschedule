@@ -47,12 +47,14 @@
                                         const data = await response.json().catch(() => ({}));
 
                                         const logs = Array.isArray(data.logs) ? data.logs : [];
+                                        const failures = Array.isArray(data.failures) ? data.failures : [];
 
                                         if (response.ok && data.status === 'success') {
                                             this.result = {
                                                 success: true,
                                                 message: data.message || '{{ __('messages.test_email_sent') }}',
                                                 logs,
+                                                failures,
                                             };
                                         } else {
                                             this.result = {
@@ -60,6 +62,7 @@
                                                 message: data.message || '{{ __('messages.test_email_failed') }}',
                                                 error: data.error || null,
                                                 logs,
+                                                failures,
                                             };
                                         }
                                     } catch (error) {
@@ -68,6 +71,7 @@
                                             message: '{{ __('messages.test_email_failed') }}',
                                             error: error.message,
                                             logs: [],
+                                            failures: [],
                                         };
                                     } finally {
                                         this.testing = false;
@@ -174,6 +178,16 @@
                                     <p class="mt-2"><span class="font-medium">{{ __('messages.error_details') }}</span>
                                         <span x-text="result.error"></span>
                                     </p>
+                                </template>
+                                <template x-if="result.failures && result.failures.length">
+                                    <div class="mt-2">
+                                        <p class="font-medium">{{ __('messages.test_email_failed_recipients') }}</p>
+                                        <ul class="mt-1 list-inside list-disc space-y-1">
+                                            <template x-for="(failure, index) in result.failures" :key="index">
+                                                <li class="font-mono" x-text="failure"></li>
+                                            </template>
+                                        </ul>
+                                    </div>
                                 </template>
                                 <template x-if="result.logs && result.logs.length">
                                     <div class="mt-4 rounded-md border border-gray-200 bg-white p-3 text-xs text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
