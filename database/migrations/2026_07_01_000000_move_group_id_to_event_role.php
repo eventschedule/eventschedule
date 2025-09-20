@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         // Add group_id to event_role if it doesn't exist
-        if (!Schema::hasColumn('event_role', 'group_id')) {
+        if (! Schema::hasColumn('event_role', 'group_id')) {
             Schema::table('event_role', function (Blueprint $table) {
                 $table->foreignId('group_id')->nullable()->constrained()->onDelete('set null');
             });
