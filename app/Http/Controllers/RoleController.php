@@ -2002,13 +2002,6 @@ class RoleController extends Controller
                     $calendarId = $role->getGoogleCalendarId();
                     $webhookUrl = route('google.calendar.webhook.handle');
 
-                    // Create webhook
-                    \Log::info('Creating webhook for role', [
-                        'role_id' => $role->id,
-                        'calendar_id' => $calendarId,
-                        'webhook_url' => $webhookUrl,
-                    ]);
-                    
                     $webhook = $googleCalendarService->createWebhook($calendarId, $webhookUrl);
 
                     $role->update([
