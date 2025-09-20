@@ -65,6 +65,7 @@ class Role extends Model implements MustVerifyEmail
         'google_webhook_expires_at',
         'sync_direction',
         'request_terms',
+        'request_terms_en',
     ];
 
     /**
@@ -141,6 +142,10 @@ class Role extends Model implements MustVerifyEmail
 
             if ($model->isDirty('state')) {
                 $model->state_en = null;
+            }
+
+            if ($model->isDirty('request_terms')) {
+                $model->request_terms_en = null;
             }
         });
 

@@ -736,14 +736,14 @@ class Event extends Model
 
         foreach ($this->roles as $role) {
             // Only sync to Google if the role is configured to sync to Google
-            if (!$role->syncsToGoogle()) {
+            if (! $role->syncsToGoogle()) {
                 continue;
             }
 
-            foreach ($role->users as $user) {
-                if ($user->google_token) {
-                    SyncEventToGoogleCalendar::dispatch($this, $user, $action, $role->getGoogleCalendarId());
-                }
+            $user = $role->user;
+
+            if ($user->google_token) {
+                SyncEventToGoogleCalendar::dispatch($this, $user, $action, $role->getGoogleCalendarId());
             }
         }
     }
