@@ -28,7 +28,9 @@ class TicketSaleNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        $templates = app(MailTemplateManager::class);
+
+        return $templates->enabled($this->templateKey()) ? ['mail'] : [];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -46,9 +48,7 @@ class TicketSaleNotification extends Notification
         ]);
 
         $templates = app(MailTemplateManager::class);
-        $templateKey = $this->recipientType === 'purchaser'
-            ? 'ticket_sale_purchaser'
-            : 'ticket_sale_organizer';
+        $templateKey = $this->templateKey();
 
         $eventDate = $date ?: __('messages.date_to_be_announced');
         $buyerName = $this->sale->name ?: $this->sale->email;
@@ -104,6 +104,13 @@ class TicketSaleNotification extends Notification
             'List-Unsubscribe' => '<' . route('role.unsubscribe', ['subdomain' => $subdomain]) . '>',
             'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
         ];
+    }
+
+    protected function templateKey(): string
+    {
+        return $this->recipientType === 'purchaser'
+            ? 'ticket_sale_purchaser'
+            : 'ticket_sale_organizer';
     }
 }
 

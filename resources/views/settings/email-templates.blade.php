@@ -23,83 +23,40 @@
                             </p>
                         </header>
 
-                        <form method="post" action="{{ route('settings.mail_templates.update') }}" class="mt-6 space-y-6">
-                            @csrf
-                            @method('patch')
-
+                        <div class="mt-6 space-y-4">
                             @foreach($mailTemplates as $template)
-                                <div class="p-4 sm:p-6 border border-gray-200 dark:border-gray-700 rounded-lg space-y-6">
-                                    <div>
-                                        <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
-                                            {{ $template['label'] }}
-                                        </h3>
+                                <a href="{{ route('settings.email_templates.show', ['template' => $template['key']]) }}"
+                                    class="block rounded-lg border border-gray-200 bg-white px-4 py-4 transition hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:border-gray-700 dark:bg-gray-800">
+                                    <div class="flex items-start justify-between gap-4">
+                                        <div>
+                                            <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                                                {{ $template['label'] }}
+                                            </h3>
 
-                                        @if(!empty($template['description']))
-                                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                                                {{ $template['description'] }}
-                                            </p>
-                                        @endif
+                                            @if(!empty($template['description']))
+                                                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                                    {{ $template['description'] }}
+                                                </p>
+                                            @endif
+                                        </div>
+
+                                        <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium {{ $template['enabled'] ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300' }}">
+                                            {{ $template['enabled'] ? __('messages.enabled') : __('messages.disabled') }}
+                                        </span>
                                     </div>
 
-                                    <div class="space-y-6">
-                                        @if(isset($template['subject']))
-                                            <div>
-                                                <x-input-label for="mail_templates_{{ $template['key'] }}_subject" :value="__('messages.email_template_subject')" />
-                                                <x-text-input id="mail_templates_{{ $template['key'] }}_subject" name="mail_templates[{{ $template['key'] }}][subject]" type="text" class="mt-1 block w-full" :value="old('mail_templates.' . $template['key'] . '.subject', $template['subject'])" />
-                                                <x-input-error class="mt-2" :messages="$errors->get('mail_templates.' . $template['key'] . '.subject')" />
-                                            </div>
-                                        @endif
-
-                                        @if(!empty($template['has_subject_curated']) && isset($template['subject_curated']))
-                                            <div>
-                                                <x-input-label for="mail_templates_{{ $template['key'] }}_subject_curated" :value="__('messages.email_template_subject_curated')" />
-                                                <x-text-input id="mail_templates_{{ $template['key'] }}_subject_curated" name="mail_templates[{{ $template['key'] }}][subject_curated]" type="text" class="mt-1 block w-full" :value="old('mail_templates.' . $template['key'] . '.subject_curated', $template['subject_curated'])" />
-                                                <x-input-error class="mt-2" :messages="$errors->get('mail_templates.' . $template['key'] . '.subject_curated')" />
-                                            </div>
-                                        @endif
-
-                                        @if(isset($template['body']))
-                                            <div>
-                                                <x-input-label for="mail_templates_{{ $template['key'] }}_body" :value="__('messages.email_template_body')" />
-                                                <textarea id="mail_templates_{{ $template['key'] }}_body" name="mail_templates[{{ $template['key'] }}][body]" rows="8"
-                                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">{{ old('mail_templates.' . $template['key'] . '.body', $template['body']) }}</textarea>
-                                                <x-input-error class="mt-2" :messages="$errors->get('mail_templates.' . $template['key'] . '.body')" />
-                                                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                                    {{ __('messages.email_template_markdown_hint') }}
-                                                </p>
-                                            </div>
-                                        @endif
-
-                                        @if(!empty($template['placeholders']))
-                                            <div class="text-sm text-gray-600 dark:text-gray-400">
-                                                <p class="font-medium">
-                                                    {{ __('messages.email_template_placeholders') }}
-                                                </p>
-                                                <ul class="mt-2 space-y-1 text-xs sm:text-sm">
-                                                    @foreach($template['placeholders'] as $placeholder => $description)
-                                                        <li>
-                                                            <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-900 dark:text-gray-100 rounded">
-                                                                {{ $placeholder }}
-                                                            </code>
-                                                            <span class="ml-2">{{ $description }}</span>
-                                                        </li>
-                                                    @endforeach
-                                                </ul>
-                                            </div>
-                                        @endif
+                                    <div class="mt-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                                        <span>{{ __('messages.email_template_status') }}: {{ $template['enabled'] ? __('messages.enabled') : __('messages.disabled') }}</span>
+                                        <span class="inline-flex items-center gap-1 text-[#4E81FA]">
+                                            <span>{{ __('messages.preview') }}</span>
+                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </span>
                                     </div>
-                                </div>
+                                </a>
                             @endforeach
-
-                            <div class="flex items-center gap-4">
-                                <x-primary-button>{{ __('messages.save') }}</x-primary-button>
-
-                                @if (session('status') === 'mail-templates-updated')
-                                    <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
-                                        class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.email_templates_saved') }}</p>
-                                @endif
-                            </div>
-                        </form>
+                        </div>
                     </section>
                 </div>
             </div>

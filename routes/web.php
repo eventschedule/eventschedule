@@ -103,12 +103,14 @@ Route::middleware(['auth', 'verified'])->group(function ()
         Route::get('/wallet', [SettingsController::class, 'wallet'])->name('wallet');
         Route::get('/email', [SettingsController::class, 'email'])->name('email');
         Route::get('/email-templates', [SettingsController::class, 'emailTemplates'])->name('email_templates');
+        Route::get('/email-templates/{template}', [SettingsController::class, 'showEmailTemplate'])->name('email_templates.show');
         Route::patch('/general', [SettingsController::class, 'updateGeneral'])->name('general.update');
         Route::patch('/wallet/apple', [SettingsController::class, 'updateAppleWallet'])->name('wallet.apple.update');
         Route::patch('/wallet/google', [SettingsController::class, 'updateGoogleWallet'])->name('wallet.google.update');
         Route::patch('/email', [SettingsController::class, 'updateMail'])->name('mail.update');
         Route::post('/email/test', [SettingsController::class, 'testMail'])->name('mail.test');
-        Route::patch('/email-templates', [SettingsController::class, 'updateMailTemplates'])->name('mail_templates.update');
+        Route::patch('/email-templates/{template}', [SettingsController::class, 'updateMailTemplate'])->name('mail_templates.update');
+        Route::post('/email-templates/{template}/test', [SettingsController::class, 'testMailTemplate'])->name('mail_templates.test');
     });
 
     Route::get('/account', [ProfileController::class, 'edit'])->name('profile.edit');

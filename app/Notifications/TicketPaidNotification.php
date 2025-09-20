@@ -30,7 +30,9 @@ class TicketPaidNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        $templates = app(MailTemplateManager::class);
+
+        return $templates->enabled($this->templateKey()) ? ['mail'] : [];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -47,9 +49,7 @@ class TicketPaidNotification extends Notification
         ]);
 
         $templates = app(MailTemplateManager::class);
-        $templateKey = $this->recipientType === 'purchaser'
-            ? 'ticket_paid_purchaser'
-            : 'ticket_paid_organizer';
+        $templateKey = $this->templateKey();
 
         $eventDate = $date ?: __('messages.date_to_be_announced');
         $buyerName = $this->sale->name ?: $this->sale->email;
@@ -131,6 +131,13 @@ class TicketPaidNotification extends Notification
         }
 
         return implode("\n\n", $links);
+    }
+
+    protected function templateKey(): string
+    {
+        return $this->recipientType === 'purchaser'
+            ? 'ticket_paid_purchaser'
+            : 'ticket_paid_organizer';
     }
 }
 

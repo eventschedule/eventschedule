@@ -5,6 +5,7 @@ return [
         'claim_role' => [
             'label' => 'Role invitation email',
             'description' => 'Sent to performers when they are added to an event schedule.',
+            'enabled' => true,
             'subject' => ':venue_name scheduled an event for :role_name',
             'subject_curated' => ':event_name at :venue_name was added to the :curator_name schedule',
             'body' => <<<'MD'
@@ -39,6 +40,7 @@ MD,
         'claim_venue' => [
             'label' => 'Venue invitation email',
             'description' => 'Sent to venue contacts when an event is scheduled at their location.',
+            'enabled' => true,
             'subject' => ':role_name scheduled an event at :venue_name',
             'subject_curated' => ':event_name at :venue_name was added to the :curator_name schedule',
             'body' => <<<'MD'
@@ -73,6 +75,7 @@ MD,
         'ticket_sale_purchaser' => [
             'label' => 'Ticket reservation confirmation (purchaser)',
             'description' => 'Sent to attendees after they reserve tickets for an event.',
+            'enabled' => true,
             'subject' => 'Your ticket reservation for :event_name',
             'body' => <<<'MD'
 # Hello!
@@ -106,6 +109,7 @@ MD,
         'ticket_sale_organizer' => [
             'label' => 'Ticket reservation notification (organizer)',
             'description' => 'Sent to organizers when a new ticket reservation is created.',
+            'enabled' => true,
             'subject' => 'New ticket reservation for :event_name',
             'body' => <<<'MD'
 # Hello!
@@ -139,6 +143,7 @@ MD,
         'ticket_paid_purchaser' => [
             'label' => 'Ticket payment confirmation (purchaser)',
             'description' => 'Sent to attendees after their order is marked as paid.',
+            'enabled' => true,
             'subject' => 'Payment received for :event_name',
             'body' => <<<'MD'
 # Hello!
@@ -171,6 +176,7 @@ MD,
         'ticket_paid_organizer' => [
             'label' => 'Ticket payment notification (organizer)',
             'description' => 'Sent to organizers when an order is marked as paid.',
+            'enabled' => true,
             'subject' => 'Ticket payment received for :event_name',
             'body' => <<<'MD'
 # Hello!

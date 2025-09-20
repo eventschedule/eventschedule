@@ -37,49 +37,60 @@
                     </a>
                 </li>
 
+                @php
+                    $scheduleRoutes = ['role.pages', 'role.venues', 'role.curators', 'role.talent'];
+                    $schedulesActive = false;
+                    foreach ($scheduleRoutes as $routeName) {
+                        if (request()->routeIs($routeName)) {
+                            $schedulesActive = true;
+                            break;
+                        }
+                    }
+                @endphp
+
                 <li>
                     <a href="{{ route('role.pages') }}"
-                        class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->routeIs('role.pages') ? 'bg-gray-800 text-white' : '' }}">
+                        class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ $schedulesActive ? 'bg-gray-800 text-white' : '' }}">
                         <svg class="h-6 w-6 shrink-0" viewBox="0 0 24 24"
-                            fill="{{ request()->routeIs('role.pages') ? '#ccc' : '#666' }}" aria-hidden="true">
+                            fill="{{ $schedulesActive ? '#ccc' : '#666' }}" aria-hidden="true">
                             <path d="M6 3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9.5a2 2 0 0 0 2-2V8.5L13 3H6zm7 1.5L17.5 9H13V4.5z" />
                         </svg>
-                        {{ __('messages.pages') }}
+                        {{ __('messages.schedules') }}
                     </a>
-                </li>
 
-                <li>
-                    <a href="{{ route('role.venues') }}"
-                        class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->routeIs('role.venues') ? 'bg-gray-800 text-white' : '' }}">
-                        <svg class="h-6 w-6 shrink-0" viewBox="0 0 24 24" fill="none"
-                            stroke="{{ request()->routeIs('role.venues') ? '#ccc' : '#666' }}" stroke-width="1.5" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M3 21h18M4.5 21V9l7.5-4.5L19.5 9V21M9 21v-6h6v6" />
-                        </svg>
-                        {{ __('messages.venues') }}
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{{ route('role.curators') }}"
-                        class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->routeIs('role.curators') ? 'bg-gray-800 text-white' : '' }}">
-                        <svg class="h-6 w-6 shrink-0" viewBox="0 0 24 24"
-                            fill="{{ request()->routeIs('role.curators') ? '#ccc' : '#666' }}" aria-hidden="true">
-                            <path d="M12 4l2.47 5.02 5.53.8-4 3.91.94 5.5L12 16.9l-4.94 2.33.94-5.5-4-3.91 5.53-.8L12 4z" />
-                        </svg>
-                        {{ __('messages.curators') }}
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{{ route('role.talent') }}"
-                        class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->routeIs('role.talent') ? 'bg-gray-800 text-white' : '' }}">
-                        <svg class="h-6 w-6 shrink-0" viewBox="0 0 24 24"
-                            fill="{{ request()->routeIs('role.talent') ? '#ccc' : '#666' }}" aria-hidden="true">
-                            <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.33 0-6 2.24-6 5v1h12v-1c0-2.76-2.67-5-6-5z" />
-                        </svg>
-                        {{ \Illuminate\Support\Str::plural(__('messages.talent')) }}
-                    </a>
+                    <ul role="list" class="mt-1 space-y-1 pl-9">
+                        <li>
+                            <a href="{{ route('role.venues') }}"
+                                class="group flex gap-x-3 rounded-md p-2 text-sm font-medium leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->routeIs('role.venues') ? 'bg-gray-800 text-white' : '' }}">
+                                <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none"
+                                    stroke="{{ request()->routeIs('role.venues') ? '#ccc' : '#666' }}" stroke-width="1.5" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M3 21h18M4.5 21V9l7.5-4.5L19.5 9V21M9 21v-6h6v6" />
+                                </svg>
+                                {{ __('messages.venues') }}
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('role.curators') }}"
+                                class="group flex gap-x-3 rounded-md p-2 text-sm font-medium leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->routeIs('role.curators') ? 'bg-gray-800 text-white' : '' }}">
+                                <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24"
+                                    fill="{{ request()->routeIs('role.curators') ? '#ccc' : '#666' }}" aria-hidden="true">
+                                    <path d="M12 4l2.47 5.02 5.53.8-4 3.91.94 5.5L12 16.9l-4.94 2.33.94-5.5-4-3.91 5.53-.8L12 4z" />
+                                </svg>
+                                {{ __('messages.curators') }}
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('role.talent') }}"
+                                class="group flex gap-x-3 rounded-md p-2 text-sm font-medium leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->routeIs('role.talent') ? 'bg-gray-800 text-white' : '' }}">
+                                <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24"
+                                    fill="{{ request()->routeIs('role.talent') ? '#ccc' : '#666' }}" aria-hidden="true">
+                                    <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.33 0-6 2.24-6 5v1h12v-1c0-2.76-2.67-5-6-5z" />
+                                </svg>
+                                {{ \Illuminate\Support\Str::plural(__('messages.talent')) }}
+                            </a>
+                        </li>
+                    </ul>
                 </li>
 
                 @if (config('app.hosted'))
