@@ -119,6 +119,27 @@ class RoleController extends Controller
 
         $emails = $role->members()->pluck('email');
 
+        // Clean up Google Calendar webhook before deleting role
+        if ($role->google_webhook_id && $role->google_webhook_resource_id) {
+            try {
+                $user = $role->users()->first();
+                if ($user && $user->google_token) {
+                    $googleCalendarService = app(\App\Services\GoogleCalendarService::class);
+                    
+                    // Ensure user has valid token before deleting webhook
+                    if ($googleCalendarService->ensureValidToken($user)) {
+                        $googleCalendarService->deleteWebhook($role->google_webhook_id, $role->google_webhook_resource_id);
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::warning('Failed to clean up webhook during role deletion', [
+                    'role_id' => $role->id,
+                    'webhook_id' => $role->google_webhook_id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
         // Prevent orphaned events
         if ($role->isTalent()) {
             $events = $role->events()->get();
@@ -2021,7 +2042,7 @@ class RoleController extends Controller
                             'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
                         ]);
 
-                        $googleCalendarService->deleteWebhook($role->google_webhook_id);
+                        $googleCalendarService->deleteWebhook($role->google_webhook_id, $role->google_webhook_resource_id);
                     }
                 }
 

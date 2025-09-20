@@ -104,6 +104,27 @@ class ProfileController extends Controller
         $roles = $user->owner()->get();
 
         foreach ($roles as $role) {
+            // Clean up Google Calendar webhook before deleting role
+            if ($role->google_webhook_id && $role->google_webhook_resource_id) {
+                try {
+                    if ($user->google_token) {
+                        $googleCalendarService = app(\App\Services\GoogleCalendarService::class);
+                        
+                        // Ensure user has valid token before deleting webhook
+                        if ($googleCalendarService->ensureValidToken($user)) {
+                            $googleCalendarService->deleteWebhook($role->google_webhook_id, $role->google_webhook_resource_id);
+                        }
+                    }
+                } catch (\Exception $e) {
+                    Log::warning('Failed to clean up webhook during user deletion', [
+                        'user_id' => $user->id,
+                        'role_id' => $role->id,
+                        'webhook_id' => $role->google_webhook_id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+
             if ($role->profile_image_url) {
                 $path = $role->getAttributes()['profile_image_url'];
                 if (config('filesystems.default') == 'local') {
