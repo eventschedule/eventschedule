@@ -169,7 +169,7 @@ class Role extends Model implements MustVerifyEmail
     public function events()
     {
         return $this->belongsToMany(Event::class)
-                    ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id')
+                    ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id')
                     ->using(EventRole::class);
     }
 
