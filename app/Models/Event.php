@@ -724,16 +724,13 @@ class Event extends Model
             return;
         }
 
-        foreach ($this->roles as $role) {
-            // Only sync to Google if the role is configured to sync to Google
-            if (! $role->syncsToGoogle()) {
-                continue;
-            }
+        $role = $this->creatorRole;
 
+        // Only sync to Google if the role is configured to sync to Google
+        if ($role->syncsToGoogle()) {            
             $user = $role->user;
 
             if ($user->google_token) {
-                \Log::info('Syncing event to Google Calendar: ' . $action . ' for role: ' . $role->name);
                 SyncEventToGoogleCalendar::dispatchSync($this, $role, $action);
             }
         }

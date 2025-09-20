@@ -48,8 +48,6 @@ class SyncEventToGoogleCalendar implements ShouldQueue
      */
     public function handle(GoogleCalendarService $googleCalendarService): void
     {
-        \Log::info('Handle: Syncing event...');
-
         try {
             $user = $this->role->user;
 
