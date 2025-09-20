@@ -164,7 +164,7 @@ class GoogleCalendarService
     /**
      * Create a Google Calendar event from an Event model
      */
-    public function createEvent(Event $event, string $calendarId = null): ?GoogleEvent
+    public function createEvent(Event $event, Role $role): ?GoogleEvent
     {
         try {
             if (!$this->calendarService) {
@@ -172,8 +172,16 @@ class GoogleCalendarService
             }
 
             // Use the role's selected calendar or default to primary
+            $calendarId = $role->getGoogleCalendarId();
+
+            $user = $role->user;
+
+            if (! $user->google_token) {
+                throw new \Exception('User does not have Google Calendar connected');
+            }
+
             if (!$calendarId) {
-                $calendarId = $event->creatorRole ? $event->creatorRole->getGoogleCalendarId() : 'primary';
+                $calendarId = 'primary';
             }
 
             $googleEvent = new GoogleEvent();
@@ -195,13 +203,13 @@ class GoogleCalendarService
             // Set start and end times
             $startDateTime = new EventDateTime();
             $startDateTime->setDateTime($event->getStartDateTime()->toRfc3339String());
-            $startDateTime->setTimeZone($event->creatorRole->timezone ?? 'UTC');
+            $startDateTime->setTimeZone($role->timezone ?? 'UTC');
             $googleEvent->setStart($startDateTime);
 
             $endDateTime = new EventDateTime();
             $endTime = $event->getStartDateTime()->copy()->addHours($event->duration ?: 2);
             $endDateTime->setDateTime($endTime->toRfc3339String());
-            $endDateTime->setTimeZone($event->creatorRole->timezone ?? 'UTC');
+            $endDateTime->setTimeZone($role->timezone ?? 'UTC');
             $googleEvent->setEnd($endDateTime);
 
             // Set location
@@ -234,16 +242,24 @@ class GoogleCalendarService
     /**
      * Update a Google Calendar event
      */
-    public function updateEvent(Event $event, string $googleEventId, string $calendarId = null): ?GoogleEvent
+    public function updateEvent(Event $event, string $googleEventId, Role $role): ?GoogleEvent
     {
         try {
             if (!$this->calendarService) {
                 throw new \Exception('Calendar service not initialized');
             }
 
+            $calendarId = $role->getGoogleCalendarId();
+
+            $user = $role->user;
+
+            if (! $user->google_token) {
+                throw new \Exception('User does not have Google Calendar connected');
+            }
+
             // Use the role's selected calendar or default to primary
             if (!$calendarId) {
-                $calendarId = $event->creatorRole ? $event->creatorRole->getGoogleCalendarId() : 'primary';
+                $calendarId = 'primary';
             }
 
             $googleEvent = $this->calendarService->events->get($calendarId, $googleEventId);
@@ -266,13 +282,13 @@ class GoogleCalendarService
             // Set start and end times
             $startDateTime = new EventDateTime();
             $startDateTime->setDateTime($event->getStartDateTime()->toRfc3339String());
-            $startDateTime->setTimeZone($event->creatorRole->timezone ?? 'UTC');
+            $startDateTime->setTimeZone($role->timezone ?? 'UTC');
             $googleEvent->setStart($startDateTime);
 
             $endDateTime = new EventDateTime();
             $endTime = $event->getStartDateTime()->copy()->addHours($event->duration ?: 2);
             $endDateTime->setDateTime($endTime->toRfc3339String());
-            $endDateTime->setTimeZone($event->creatorRole->timezone ?? 'UTC');
+            $endDateTime->setTimeZone($role->timezone ?? 'UTC');
             $googleEvent->setEnd($endDateTime);
 
             // Set location
