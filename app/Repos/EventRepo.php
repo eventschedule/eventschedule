@@ -343,7 +343,7 @@ class EventRepo
             $event->tickets()->update(['is_deleted' => true]);
         }
 
-        $event->load('tickets');
+        $event->load(['tickets', 'roles']);
 
         if ($event->wasRecentlyCreated) {
             $event->syncToGoogleCalendar('create');
