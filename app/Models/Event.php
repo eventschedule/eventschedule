@@ -735,9 +735,11 @@ class Event extends Model
         \Log::info('Syncing event to Google Calendar: ' . $action);
 
         // For deletions, only sync if the event has a Google event ID
-        if ($action === 'delete' && !$this->google_event_id) {
+        if ($action === 'delete' && ! $this->google_event_id) {
             return;
         }
+
+        $this->load('roles');
 
         foreach ($this->roles as $role) {
             \Log::info('Checking role: ' . $role->name);
