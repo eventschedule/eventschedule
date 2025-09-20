@@ -397,15 +397,17 @@ class GoogleCalendarService
 
         foreach ($events as $event) {
             try {
-                if ($event->google_event_id) {
+                $googleEventId = $event->getGoogleEventIdForRole($role->id);
+                
+                if ($googleEventId) {
                     // Update existing event
-                    $this->updateEvent($event, $event->google_event_id);
+                    $this->updateEvent($event, $googleEventId, $role);
                     $results['updated']++;
                 } else {
                     // Create new event
-                    $googleEvent = $this->createEvent($event);
+                    $googleEvent = $this->createEvent($event, $role);
                     if ($googleEvent) {
-                        $event->update(['google_event_id' => $googleEvent->getId()]);
+                        $event->setGoogleEventIdForRole($role->id, $googleEvent->getId());
                         $results['created']++;
                     } else {
                         $results['errors']++;
@@ -570,12 +572,11 @@ class GoogleCalendarService
 
             foreach ($googleEvents as $googleEvent) {
                 try {
-                    // Check if this event already exists
-                    $existingEvent = Event::where('google_event_id', $googleEvent['id'])
-                                        ->whereHas('creatorRole', function($query) use ($calendarId) {
-                                            $query->where('google_calendar_id', $calendarId);
-                                        })
-                                        ->first();
+                    // Check if this event already exists by looking for the google_event_id in event_role table
+                    $existingEvent = Event::whereHas('roles', function($query) use ($googleEvent, $role) {
+                        $query->where('role_id', $role->id)
+                              ->where('google_event_id', $googleEvent['id']);
+                    })->first();
 
                     // Also check for events with the same name and start time to prevent duplicates
                     if (!$existingEvent && isset($googleEvent['start'])) {
@@ -589,8 +590,8 @@ class GoogleCalendarService
                         if ($startTime) {
                             $existingEvent = Event::where('name', $googleEvent['summary'] ?: 'Untitled Event')
                                                 ->where('starts_at', $startTime->format('Y-m-d H:i:s'))
-                                                ->whereHas('creatorRole', function($query) use ($role) {
-                                                    $query->where('id', $role->id);
+                                                ->whereHas('roles', function($query) use ($role) {
+                                                    $query->where('role_id', $role->id);
                                                 })
                                                 ->first();
                         }
@@ -636,7 +637,6 @@ class GoogleCalendarService
         $event = new Event();
         $event->user_id = $role->user_id;
         $event->creator_role_id = $role->id;
-        $event->google_event_id = $googleEvent['id'];
         $event->name = $googleEvent['summary'] ?: 'Untitled Event';
         $event->description = $googleEvent['description'] ?: '';
         $event->slug = \Str::slug($event->name);
@@ -659,9 +659,10 @@ class GoogleCalendarService
 
         $event->save();
 
-        // Attach to the role
+        // Attach to the role with google_event_id
         $event->roles()->attach($role->id, [
             'is_accepted' => true,
+            'google_event_id' => $googleEvent['id'],
         ]);
 
         Log::info('Event created from Google Calendar', [

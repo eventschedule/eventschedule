@@ -328,12 +328,22 @@ class GoogleCalendarController extends Controller
                 return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
             }
 
-            if ($event->google_event_id) {
-                $googleEvent = $this->googleCalendarService->updateEvent($event, $event->google_event_id);
+            // Get the role from the subdomain in the request
+            $subdomain = request()->subdomain;
+            $role = \App\Models\Role::subdomain($subdomain)->first();
+            
+            if (!$role) {
+                return response()->json(['error' => 'Role not found'], 404);
+            }
+
+            $googleEventId = $event->getGoogleEventIdForRole($role->id);
+            
+            if ($googleEventId) {
+                $googleEvent = $this->googleCalendarService->updateEvent($event, $googleEventId, $role);
             } else {
-                $googleEvent = $this->googleCalendarService->createEvent($event);
+                $googleEvent = $this->googleCalendarService->createEvent($event, $role);
                 if ($googleEvent) {
-                    $event->update(['google_event_id' => $googleEvent->getId()]);
+                    $event->setGoogleEventIdForRole($role->id, $googleEvent->getId());
                 }
             }
 
@@ -378,14 +388,24 @@ class GoogleCalendarController extends Controller
                 return response()->json(['error' => 'Unauthorized'], 403);
             }
 
-            if ($event->google_event_id) {
+            // Get the role from the subdomain in the request
+            $subdomain = request()->subdomain;
+            $role = \App\Models\Role::subdomain($subdomain)->first();
+            
+            if (!$role) {
+                return response()->json(['error' => 'Role not found'], 404);
+            }
+
+            $googleEventId = $event->getGoogleEventIdForRole($role->id);
+            
+            if ($googleEventId) {
                 // Ensure user has valid token before deleting
                 if (!$this->googleCalendarService->ensureValidToken($user)) {
                     return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
                 }
 
-                $this->googleCalendarService->deleteEvent($event->google_event_id);
-                $event->update(['google_event_id' => null]);
+                $this->googleCalendarService->deleteEvent($googleEventId, $role->getGoogleCalendarId());
+                $event->setGoogleEventIdForRole($role->id, null);
             }
 
             return response()->json(['message' => 'Event removed from Google Calendar']);

@@ -32,7 +32,6 @@ class Event extends Model
         'registration_url',
         'category_id',
         'creator_role_id',
-        'google_event_id',
     ];
 
     protected $casts = [
@@ -107,8 +106,15 @@ class Event extends Model
                     ->delete();
             }
 
-            // Sync deletion to Google Calendar
-            $event->syncToGoogleCalendar('delete');
+            // Sync deletion to Google Calendar for all roles that have sync enabled
+            foreach ($event->roles as $role) {
+                if ($role->syncsToGoogle()) {
+                    $user = $role->user;
+                    if ($user && $user->google_token) {
+                        SyncEventToGoogleCalendar::dispatchSync($event, $role, 'delete');
+                    }
+                }
+            }
         });
     }
 
@@ -715,15 +721,56 @@ class Event extends Model
     }
 
     /**
+     * Get Google event ID for a specific role
+     */
+    public function getGoogleEventIdForRole($roleId)
+    {
+        $eventRole = $this->roles->first(function($role) use ($roleId) {
+            return $role->id == $roleId;
+        });
+
+        return $eventRole ? $eventRole->pivot->google_event_id : null;
+    }
+
+    /**
+     * Set Google event ID for a specific role
+     */
+    public function setGoogleEventIdForRole($roleId, $googleEventId)
+    {
+        $this->roles()->updateExistingPivot($roleId, ['google_event_id' => $googleEventId]);
+    }
+
+    /**
+     * Get Google event ID for the role defined by subdomain
+     */
+    public function getGoogleEventIdForSubdomain($subdomain)
+    {
+        $role = $this->roles->first(function($role) use ($subdomain) {
+            return $role->subdomain == $subdomain;
+        });
+
+        return $role ? $this->getGoogleEventIdForRole($role->id) : null;
+    }
+
+    /**
+     * Set Google event ID for the role defined by subdomain
+     */
+    public function setGoogleEventIdForSubdomain($subdomain, $googleEventId)
+    {
+        $role = $this->roles->first(function($role) use ($subdomain) {
+            return $role->subdomain == $subdomain;
+        });
+
+        if ($role) {
+            $this->setGoogleEventIdForRole($role->id, $googleEventId);
+        }
+    }
+
+    /**
      * Sync this event to Google Calendar for all connected users
      */
     public function syncToGoogleCalendar($action = 'create')
     {
-        // For deletions, only sync if the event has a Google event ID
-        if ($action === 'delete' && !$this->google_event_id) {
-            return;
-        }
-
         $role = $this->creatorRole;
 
         // Only sync to Google if the role is configured to sync to Google
@@ -737,23 +784,31 @@ class Event extends Model
     }
 
     /**
-     * Check if this event is synced to Google Calendar
+     * Check if this event is synced to Google Calendar for a specific role
      */
-    public function isSyncedToGoogleCalendar()
+    public function isSyncedToGoogleCalendarForRole($roleId)
     {
-        return !is_null($this->google_event_id);
+        return !is_null($this->getGoogleEventIdForRole($roleId));
     }
 
     /**
-     * Get Google Calendar sync status for a specific user
+     * Check if this event is synced to Google Calendar for the role defined by subdomain
      */
-    public function getGoogleCalendarSyncStatus(User $user)
+    public function isSyncedToGoogleCalendarForSubdomain($subdomain)
+    {
+        return !is_null($this->getGoogleEventIdForSubdomain($subdomain));
+    }
+
+    /**
+     * Get Google Calendar sync status for a specific user and role
+     */
+    public function getGoogleCalendarSyncStatus(User $user, $roleId = null)
     {
         if (!$user->google_token) {
             return 'not_connected';
         }
 
-        if ($this->isSyncedToGoogleCalendar()) {
+        if ($roleId && $this->isSyncedToGoogleCalendarForRole($roleId)) {
             return 'synced';
         }
 
