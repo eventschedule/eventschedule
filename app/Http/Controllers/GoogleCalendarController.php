@@ -123,6 +123,32 @@ class GoogleCalendarController extends Controller
     {
         $user = Auth::user();
         
+        // Clean up any active webhooks before disconnecting
+        try {
+            $roles = $user->roles()->whereNotNull('google_webhook_id')->get();
+            
+            foreach ($roles as $role) {
+                if ($role->google_webhook_id && $role->google_webhook_resource_id) {
+                    // Ensure user has valid token before deleting webhook
+                    if ($this->googleCalendarService->ensureValidToken($user)) {
+                        $this->googleCalendarService->deleteWebhook($role->google_webhook_id, $role->google_webhook_resource_id);
+                    }
+                    
+                    // Clear webhook data from role
+                    $role->update([
+                        'google_webhook_id' => null,
+                        'google_webhook_resource_id' => null,
+                        'google_webhook_expires_at' => null,
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::warning('Failed to clean up webhooks during Google Calendar disconnect', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+        
         $user->update([
             'google_id' => null,
             'google_token' => null,
@@ -519,7 +545,7 @@ class GoogleCalendarController extends Controller
                 if ($role->google_webhook_id) {
                     // Delete existing webhook
                     if ($this->googleCalendarService->ensureValidToken($user)) {
-                        $this->googleCalendarService->deleteWebhook($role->google_webhook_id);
+                        $this->googleCalendarService->deleteWebhook($role->google_webhook_id, $role->google_webhook_resource_id);
                     }
                 }
 

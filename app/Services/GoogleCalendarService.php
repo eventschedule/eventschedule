@@ -746,7 +746,7 @@ class GoogleCalendarService
     /**
      * Delete a webhook
      */
-    public function deleteWebhook(string $webhookId): bool
+    public function deleteWebhook(string $webhookId, string $resourceId): bool
     {
         try {
             if (!$this->calendarService) {
@@ -755,11 +755,13 @@ class GoogleCalendarService
 
             $channel = new \Google\Service\Calendar\Channel();
             $channel->setId($webhookId);
+            $channel->setResourceId($resourceId);
             
             $this->calendarService->channels->stop($channel);
             
             Log::info('Google Calendar webhook deleted', [
                 'webhook_id' => $webhookId,
+                'resource_id' => $resourceId,
             ]);
 
             return true;
@@ -767,6 +769,7 @@ class GoogleCalendarService
         } catch (\Exception $e) {
             Log::error('Failed to delete Google Calendar webhook', [
                 'webhook_id' => $webhookId,
+                'resource_id' => $resourceId,
                 'error' => $e->getMessage(),
             ]);
             return false;
