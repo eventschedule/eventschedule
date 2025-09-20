@@ -345,6 +345,12 @@ class EventRepo
 
         $event->load('tickets');
 
+        if ($event->wasRecentlyCreated) {
+            $event->syncToGoogleCalendar('create');
+        } else {
+            $event->syncToGoogleCalendar('update');
+        }
+
         return $event;
     }
 
