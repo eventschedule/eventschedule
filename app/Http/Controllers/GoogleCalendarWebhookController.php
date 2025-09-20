@@ -38,8 +38,6 @@ class GoogleCalendarWebhookController extends Controller
      */
     public function handle(Request $request)
     {
-        \Log::info('Google Calendar webhook - handle');
-
         try {
             // Verify the webhook token
             $token = $request->header('X-Goog-Channel-Token');
@@ -162,8 +160,6 @@ class GoogleCalendarWebhookController extends Controller
      */
     public function verify(Request $request)
     {
-        \Log::info('Google Calendar webhook - verify');
-
         $challenge = $request->get('challenge');
         
         if ($challenge) {
