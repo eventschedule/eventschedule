@@ -305,7 +305,7 @@ class GoogleCalendarController extends Controller
     /**
      * Sync a specific event to Google Calendar
      */
-    public function syncEvent(Request $request, $eventId)
+    public function syncEvent(Request $request, $subdomain, $eventId)
     {
         $user = Auth::user();
         
@@ -370,7 +370,7 @@ class GoogleCalendarController extends Controller
     /**
      * Remove event from Google Calendar
      */
-    public function unsyncEvent(Request $request, $eventId)
+    public function unsyncEvent(Request $request, $subdomain, $eventId)
     {
         $user = Auth::user();
         
@@ -379,32 +379,30 @@ class GoogleCalendarController extends Controller
         }
 
         try {
-            \Log::info('Unsyncing event: ' . $eventId);
             $event = \App\Models\Event::findOrFail($eventId);
-            \Log::info('Here 1');
+            
             // Check if user has permission to unsync this event
             if (!$event->roles->contains(function ($role) use ($user) {
                 return $role->users->contains($user);
             })) {
                 return response()->json(['error' => 'Unauthorized'], 403);
             }
-            \Log::info('Here 2');
+
             // Get the role from the subdomain in the request
             $subdomain = request()->subdomain;
             $role = \App\Models\Role::subdomain($subdomain)->first();
-            \Log::info('Here 3');
+            
             if (!$role) {
                 return response()->json(['error' => 'Role not found'], 404);
             }
-            \Log::info('Here 4');
+
             $googleEventId = $event->getGoogleEventIdForRole($role->id);
-            \Log::info('Here 5');
+            
             if ($googleEventId) {
                 // Ensure user has valid token before deleting
                 if (!$this->googleCalendarService->ensureValidToken($user)) {
                     return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
                 }
-                \Log::info('Here 6');
 
                 $this->googleCalendarService->deleteEvent($googleEventId, $role->getGoogleCalendarId());
                 $event->setGoogleEventIdForRole($role->id, null);
