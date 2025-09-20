@@ -133,7 +133,7 @@ class Event extends Model
         // Load venue from event_role table where the role is a venue
         return $this->belongsToMany(Role::class, 'event_role', 'event_id', 'role_id')
                     ->where('roles.type', 'venue')
-                    ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id')
+                    ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id')
                     ->using(EventRole::class);
     }
 
@@ -183,7 +183,7 @@ class Event extends Model
     public function roles()
     {
         return $this->belongsToMany(Role::class)
-                    ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id')
+                    ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id')
                     ->using(EventRole::class);
     }
 
