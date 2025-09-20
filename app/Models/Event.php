@@ -93,8 +93,11 @@ class Event extends Model
         });
 
         static::created(function ($event) {
+
+            \Log::info('Event created');
+
             // Sync new event to Google Calendar
-            $event->syncToGoogleCalendar('create');
+            $event->syncToGoogleCalendar('create');            
         });
 
         static::updated(function ($event) {
@@ -729,20 +732,28 @@ class Event extends Model
      */
     public function syncToGoogleCalendar($action = 'create')
     {
+        \Log::info('Syncing event to Google Calendar: ' . $action);
+
         // For deletions, only sync if the event has a Google event ID
         if ($action === 'delete' && !$this->google_event_id) {
             return;
         }
 
         foreach ($this->roles as $role) {
+            \Log::info('Checking role: ' . $role->name);
+
+
             // Only sync to Google if the role is configured to sync to Google
             if (! $role->syncsToGoogle()) {
+                \Log::info('Role does not sync to Google: ' . $role->name);
                 continue;
             }
 
             $user = $role->user;
 
             if ($user->google_token) {
+                \Log::info('Syncing event to Google Calendar: ' . $action . ' - ' . $user->name);
+
                 SyncEventToGoogleCalendar::dispatch($this, $user, $action, $role->getGoogleCalendarId());
             }
         }
