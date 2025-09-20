@@ -379,6 +379,7 @@ class GoogleCalendarController extends Controller
         }
 
         try {
+            \Log::info('Unsyncing event: ' . $eventId);
             $event = \App\Models\Event::findOrFail($eventId);
             
             // Check if user has permission to unsync this event
