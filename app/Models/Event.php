@@ -719,28 +719,22 @@ class Event extends Model
      */
     public function syncToGoogleCalendar($action = 'create')
     {
-        \Log::info('Syncing event to Google Calendar: ' . $action);
-
         // For deletions, only sync if the event has a Google event ID
         if ($action === 'delete' && !$this->google_event_id) {
             return;
         }
 
         foreach ($this->roles as $role) {
-            \Log::info('check role: ' . $role->name);
-
             // Only sync to Google if the role is configured to sync to Google
             if (! $role->syncsToGoogle()) {
-                \Log::info('role does not sync to Google: ' . $role->name);
                 continue;
             }
 
             $user = $role->user;
-            \Log::info('user: ' . $user->name);
 
             if ($user->google_token) {
-                \Log::info('syncing event to Google Calendar: ' . $role->name);
-                SyncEventToGoogleCalendar::dispatch($this, $user, $action, $role->getGoogleCalendarId());
+                \Log::info('Syncing event to Google Calendar: ' . $action . ' for role: ' . $role->name);
+                SyncEventToGoogleCalendar::dispatch($this, $role, $action);
             }
         }
     }
