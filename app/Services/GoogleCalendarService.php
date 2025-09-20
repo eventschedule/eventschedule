@@ -788,7 +788,7 @@ class GoogleCalendarService
         $channelId = $prefix . $timestamp . '_' . $random;
         
         // Replace any potentially invalid characters (though our generation should be safe)
-        $channelId = preg_replace('/[^A-Za-z0-9\\-_\\+/=]/', '', $channelId);
+        $channelId = preg_replace('/[^A-Za-z0-9\\-_\\+\\/=]/', '', $channelId);
         
         return $channelId;
     }
