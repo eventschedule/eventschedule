@@ -1004,7 +1004,7 @@
                                 </svg>
                                 <span class="text-sm">{{ __('Synced to Google Calendar') }}</span>
                             </div>
-                            <x-secondary-button type="button" onclick="unsyncEvent({{ $event->id }})">
+                            <x-secondary-button type="button" onclick="unsyncEvent('{{ $subdomain }}', {{ $event->id }})">
                                 {{ __('Remove from Google Calendar') }}
                             </x-secondary-button>
                         @else
@@ -1014,7 +1014,7 @@
                                 </svg>
                                 <span class="text-sm">{{ __('Not synced to Google Calendar') }}</span>
                             </div>
-                            <x-primary-button type="button" onclick="syncEvent({{ $event->id }})">
+                            <x-primary-button type="button" onclick="syncEvent('{{ $subdomain }}', {{ $event->id }})">
                                 {{ __('Sync to Google Calendar') }}
                             </x-primary-button>
                         @endif
@@ -1562,11 +1562,11 @@
   }).mount('#app')
 
   // Google Calendar sync functions
-  function syncEvent(eventId) {
+  function syncEvent(subdomain, eventId) {
     const statusDiv = document.getElementById(`sync-status-${eventId}`);
     statusDiv.classList.remove('hidden');
     
-    fetch(`/google-calendar/sync-event/${eventId}`, {
+    fetch(`/google-calendar/sync-event/${subdomain}/${eventId}`, {
       method: 'POST',
       headers: {
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -1593,7 +1593,7 @@
     });
   }
 
-  function unsyncEvent(eventId) {
+  function unsyncEvent(subdomain, eventId) {
     if (!confirm('Are you sure you want to remove this event from Google Calendar?')) {
       return;
     }
@@ -1601,7 +1601,7 @@
     const statusDiv = document.getElementById(`sync-status-${eventId}`);
     statusDiv.classList.remove('hidden');
     
-    fetch(`/google-calendar/unsync-event/${eventId}`, {
+    fetch(`/google-calendar/unsync-event/${subdomain}/${eventId}`, {
       method: 'DELETE',
       headers: {
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
