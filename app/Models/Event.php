@@ -734,7 +734,7 @@ class Event extends Model
 
             if ($user->google_token) {
                 \Log::info('Syncing event to Google Calendar: ' . $action . ' for role: ' . $role->name);
-                SyncEventToGoogleCalendar::dispatch($this, $role, $action);
+                SyncEventToGoogleCalendar::dispatchNow($this, $role, $action);
             }
         }
     }
