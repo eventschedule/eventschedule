@@ -38,9 +38,12 @@ class GoogleCalendarWebhookController extends Controller
      */
     public function handle(Request $request)
     {
+        \Log::info('Google Calendar webhook received');
+
         try {
             // Verify the webhook token
             $token = $request->header('X-Goog-Channel-Token');
+
             if ($token !== env('GOOGLE_WEBHOOK_SECRET', 'default_secret')) {
                 Log::warning('Invalid Google Calendar webhook token', [
                     'token' => $token,
