@@ -14,7 +14,7 @@ return new class extends Migration
     {
         // Add google_event_id column to event_role table
         Schema::table('event_role', function (Blueprint $table) {
-            $table->string('google_event_id')->nullable()->after('group_id');
+            $table->string('google_event_id')->nullable();
         });
 
         // Remove google_event_id column from events table
