@@ -715,7 +715,7 @@ class GoogleCalendarService
             }
 
             $webhook = new \Google\Service\Calendar\Channel();
-            $webhook->setId(uniqid('webhook_', true));
+            $webhook->setId($this->generateValidChannelId());
             $webhook->setType('web_hook');
             $webhook->setAddress($webhookUrl);
             $webhook->setToken(env('GOOGLE_WEBHOOK_SECRET', 'default_secret'));
@@ -771,5 +771,25 @@ class GoogleCalendarService
             ]);
             return false;
         }
+    }
+
+    /**
+     * Generate a valid channel ID for Google Calendar webhooks
+     * Channel ID must match pattern [A-Za-z0-9\\-_\\+/=]+
+     */
+    private function generateValidChannelId(): string
+    {
+        // Generate a unique ID using only allowed characters
+        $prefix = 'webhook_';
+        $timestamp = time();
+        $random = bin2hex(random_bytes(8)); // 16 character hex string
+        
+        // Combine and ensure only valid characters
+        $channelId = $prefix . $timestamp . '_' . $random;
+        
+        // Replace any potentially invalid characters (though our generation should be safe)
+        $channelId = preg_replace('/[^A-Za-z0-9\\-_\\+/=]/', '', $channelId);
+        
+        return $channelId;
     }
 }
