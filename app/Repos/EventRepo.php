@@ -345,10 +345,13 @@ class EventRepo
 
         $event->load(['tickets', 'roles']);
 
-        if ($event->wasRecentlyCreated) {
-            $event->syncToGoogleCalendar('create');
-        } else {
-            $event->syncToGoogleCalendar('update');
+        // Sync to Google Calendar for the current role
+        if ($currentRole && $currentRole->syncsToGoogle()) {
+            if ($event->wasRecentlyCreated) {
+                $event->syncToGoogleCalendar('create');
+            } else {
+                $event->syncToGoogleCalendar('update');
+            }
         }
 
         return $event;

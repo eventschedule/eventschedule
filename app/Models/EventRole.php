@@ -15,6 +15,7 @@ class EventRole extends Pivot
         'role_id',
         'is_accepted',
         'group_id',
+        'google_event_id',
     ];
 
     public function role()

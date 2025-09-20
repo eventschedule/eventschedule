@@ -110,9 +110,7 @@ class SyncEventToGoogleCalendar implements ShouldQueue
         $googleEvent = $googleCalendarService->createEvent($this->event, $this->role);
         
         if ($googleEvent) {
-            $this->event->update([
-                'google_event_id' => $googleEvent->getId(),
-            ]);
+            $this->event->setGoogleEventIdForRole($this->role->id, $googleEvent->getId());
             
             Log::info('Event created in Google Calendar', [
                 'event_id' => $this->event->id,
@@ -127,22 +125,24 @@ class SyncEventToGoogleCalendar implements ShouldQueue
      */
     private function updateEvent(GoogleCalendarService $googleCalendarService): void
     {
-        if (!$this->event->google_event_id) {
-            // If no Google event ID, create a new event
+        $googleEventId = $this->event->getGoogleEventIdForRole($this->role->id);
+        
+        if (!$googleEventId) {
+            // If no Google event ID for this role, create a new event
             $this->createEvent($googleCalendarService);
             return;
         }
 
         $googleEvent = $googleCalendarService->updateEvent(
             $this->event, 
-            $this->event->google_event_id,
+            $googleEventId,
             $this->role
         );
         
         if ($googleEvent) {
             Log::info('Event updated in Google Calendar', [
                 'event_id' => $this->event->id,
-                'google_event_id' => $this->event->google_event_id,
+                'google_event_id' => $googleEventId,
             ]);
         }
     }
@@ -152,20 +152,20 @@ class SyncEventToGoogleCalendar implements ShouldQueue
      */
     private function deleteEvent(GoogleCalendarService $googleCalendarService): void
     {
-        if (!$this->event->google_event_id) {
+        $googleEventId = $this->event->getGoogleEventIdForRole($this->role->id);
+        
+        if (!$googleEventId) {
             return;
         }
 
-        $success = $googleCalendarService->deleteEvent($this->event->google_event_id, $this->role->getGoogleCalendarId());
+        $success = $googleCalendarService->deleteEvent($googleEventId, $this->role->getGoogleCalendarId());
         
         if ($success) {
-            $this->event->update([
-                'google_event_id' => null,
-            ]);
+            $this->event->setGoogleEventIdForRole($this->role->id, null);
             
             Log::info('Event deleted from Google Calendar', [
                 'event_id' => $this->event->id,
-                'google_event_id' => $this->event->google_event_id,
+                'google_event_id' => $googleEventId,
             ]);
         }
     }
