@@ -247,7 +247,10 @@ class GoogleCalendarService
             $googleEvent = $this->calendarService->events->get($calendarId, $googleEventId);
             
             $googleEvent->setSummary($event->name);
-            $googleEvent->setDescription($event->description);
+
+            if (! empty($event->description)) {
+                $googleEvent->setDescription($event->description);
+            }
 
             // Set start and end times
             $startDateTime = new EventDateTime();
@@ -600,7 +603,6 @@ class GoogleCalendarService
         $event->creator_role_id = $role->id;
         $event->name = $googleEvent['summary'] ?: 'Untitled Event';
         $event->description = $googleEvent['description'] ?: '';
-        $event->registration_url = $googleEvent['htmlLink'] ?: null;
         $event->slug = \Str::slug($event->name);
 
         // Set start time
@@ -627,6 +629,15 @@ class GoogleCalendarService
             'google_event_id' => $googleEvent['id'],
         ]);
 
+        if ($googleEvent['location']) {
+            $venue = $this->convertLocationToVenue($role, $googleEvent['location']);
+            if ($venue && ! $event->roles()->where('role_id', $venue->id)->exists()) {
+                $event->roles()->attach($venue->id, [
+                    'is_accepted' => $role->user->isMember($venue->subdomain),
+                ]);
+            }
+        }
+
         return $event;
     }
 
@@ -636,8 +647,10 @@ class GoogleCalendarService
     private function updateEventFromGoogle(Event $event, array $googleEvent, Role $role): void
     {
         $event->name = $googleEvent['summary'] ?: 'Untitled Event';
-        $event->description = $googleEvent['description'] ?: '';
-        $event->registration_url = $googleEvent['htmlLink'] ?: null;
+
+        if (! empty($googleEvent['description'])) {
+            $event->description = $googleEvent['description'];
+        }
 
         // Update start time
         if ($googleEvent['start']->getDateTime()) {
@@ -651,6 +664,15 @@ class GoogleCalendarService
             $start = \Carbon\Carbon::parse($googleEvent['start']->getDateTime());
             $end = \Carbon\Carbon::parse($googleEvent['end']->getDateTime());
             $event->duration = $start->diffInHours($end);
+        }
+
+        if ($googleEvent['location']) {
+            $venue = $this->convertLocationToVenue($role, $googleEvent['location']);
+            if ($venue && ! $event->roles()->where('role_id', $venue->id)->exists()) {
+                $event->roles()->attach($venue->id, [
+                    'is_accepted' => $role->user->isMember($venue->subdomain),
+                ]);
+            }
         }
 
         $event->save();
@@ -735,5 +757,34 @@ class GoogleCalendarService
         $channelId = preg_replace('/[^A-Za-z0-9\\-_\\+\\/=]/', '', $channelId);
         
         return $channelId;
+    }
+
+    private function convertLocationToVenue($role, $location)
+    {
+        $location = trim($location);
+
+        if (! $location) {
+            return null;
+        }
+
+        $venue = Role::where('type', 'venue')
+                    ->where('address1', $location)
+                    ->where('user_id', $role->user_id)
+                    ->where('is_deleted', false)
+                    ->first();
+
+        if ($role) {
+            return $role;
+        }
+
+        $venue = new Role();
+        $venue->type = 'venue';
+        $venue->address1 = $location;
+        $venue->country_code = $role->country_code;
+        $venue->save();
+
+        $venue->members()->attach($role->user_id, ['level' => 'follower', 'created_at' => now()]);
+
+        return $venue;
     }
 }
