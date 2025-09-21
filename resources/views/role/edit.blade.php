@@ -1265,14 +1265,13 @@
                                 </div>
                             </div>
 
-                            <!-- Manual Sync Button -->
+                            @if (false)
                             <div>
                                 <x-secondary-button type="button" onclick="syncEvents()" id="sync-events-button">
                                     {{ __('messages.sync_events') }}
                                 </x-secondary-button>
                             </div>
 
-                            <!-- Status Messages -->
                             <div id="sync-status" class="hidden">
                                 <div class="flex items-center text-blue-600 dark:text-blue-400">
                                     <svg class="animate-spin -ml-1 mr-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -1290,6 +1289,7 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
                         </div>
                         @else
                         <a href="{{ route('profile.edit') }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline">
