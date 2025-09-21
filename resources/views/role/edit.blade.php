@@ -1198,24 +1198,24 @@
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('Google Calendar Integration') }}
+                            {{ __('messages.google_calendar_integration') }}
                         </h2>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                            {{ __('Sync events between this schedule and your Google Calendar.') }}
+                            {{ __('messages.sync_events_between_schedules') }}
                         </p>
                         
                         <div class="space-y-6">
                             <!-- Calendar Selection -->
                             <div>
-                                <x-input-label for="google-calendar-select" :value="__('Select Google Calendar')" />
+                                <x-input-label for="google-calendar-select" :value="__('messages.select_google_calendar')" />
                                 <select id="google-calendar-select" name="google_calendar_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
-                                    <option value="">{{ __('Loading calendars...') }}</option>
+                                    <option value="">{{ __('messages.loading_calendars') }}</option>
                                 </select>
                             </div>
 
                             <!-- Sync Direction Selection -->
                             <div>
-                                <x-input-label :value="__('Sync Direction')" />
+                                <x-input-label :value="__('messages.sync_direction')" />
                                 <div class="mt-2 space-y-2">
                                     <label class="flex items-center">
                                         <input type="radio" 
@@ -1224,8 +1224,8 @@
                                                {{ $role->sync_direction === 'to' ? 'checked' : '' }}
                                                class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
                                         <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                            <div class="font-medium">{{ __('To Google Calendar') }}</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('Events from Event Schedule will appear in Google Calendar') }}</div>
+                                            <div class="font-medium">{{ __('messages.to_google_calendar') }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.to_google_calendar_description') }}</div>
                                         </div>
                                     </label>
                                     <label class="flex items-center">
@@ -1235,8 +1235,8 @@
                                                {{ $role->sync_direction === 'from' ? 'checked' : '' }}
                                                class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
                                         <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                            <div class="font-medium">{{ __('From Google Calendar') }}</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('Events from Google Calendar will appear in Event Schedule') }}</div>
+                                            <div class="font-medium">{{ __('messages.from_google_calendar') }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.from_google_calendar_description') }}</div>
                                         </div>
                                     </label>
                                     <label class="flex items-center">
@@ -1246,8 +1246,8 @@
                                                {{ $role->sync_direction === 'both' ? 'checked' : '' }}
                                                class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
                                         <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                            <div class="font-medium">{{ __('Bidirectional Sync') }}</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('Events added in either place will appear in both') }}</div>
+                                            <div class="font-medium">{{ __('messages.bidirectional_sync') }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.bidirectional_sync_description') }}</div>
                                         </div>
                                     </label>
                                     <label class="flex items-center">
@@ -1257,8 +1257,8 @@
                                                {{ !$role->sync_direction ? 'checked' : '' }}
                                                class="border-gray-300 dark:border-gray-700 focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] h-4 w-4">
                                         <div class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                            <div class="font-medium">{{ __('No Sync') }}</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('Disable Google Calendar synchronization') }}</div>
+                                            <div class="font-medium">{{ __('messages.no_sync') }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.no_sync_description') }}</div>
                                         </div>
                                     </label>
                                 </div>
@@ -1267,7 +1267,7 @@
                             <!-- Manual Sync Button -->
                             <div>
                                 <x-secondary-button type="button" onclick="syncEvents()" id="sync-events-button">
-                                    {{ __('Sync Events') }}
+                                    {{ __('messages.sync_events') }}
                                 </x-secondary-button>
                             </div>
 
@@ -1278,7 +1278,7 @@
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
-                                    <span class="text-sm">{{ __('Syncing...') }}</span>
+                                    <span class="text-sm">{{ __('messages.syncing') }}</span>
                                 </div>
                             </div>
 
@@ -1588,7 +1588,7 @@ function loadGoogleCalendars() {
             return response.json();
         })
         .then(data => {
-            select.innerHTML = '<option value="">{{ __("Select a calendar...") }}</option>';
+            select.innerHTML = '<option value="">{{ __("messages.select_a_calendar") }}</option>';
             
             if (data.calendars && Array.isArray(data.calendars)) {
                 data.calendars.forEach(calendar => {
@@ -1601,17 +1601,17 @@ function loadGoogleCalendars() {
                     select.appendChild(option);
                 });
             } else {
-                select.innerHTML = '<option value="">{{ __("No calendars available") }}</option>';
+                select.innerHTML = '<option value="">{{ __("messages.no_calendars_available") }}</option>';
             }
         })
         .catch(error => {
             console.error('Error loading calendars:', error);
-            let errorMessage = '{{ __("Error loading calendars") }}';
+            let errorMessage = '{{ __("messages.error_loading_calendars") }}';
             
             if (error.message.includes('401')) {
-                errorMessage = '{{ __("Google Calendar not connected. Please connect your account first.") }}';
+                errorMessage = '{{ __("messages.google_calendar_not_connected") }}';
             } else if (error.message.includes('403')) {
-                errorMessage = '{{ __("Access denied. Please check your Google Calendar permissions.") }}';
+                errorMessage = '{{ __("messages.access_denied_calendar") }}';
             }
             
             select.innerHTML = `<option value="">${errorMessage}</option>`;
