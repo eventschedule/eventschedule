@@ -798,6 +798,18 @@ class Event extends Model
     }
 
     /**
+     * Check if this event is synced to Google Calendar for the role defined by subdomain
+     */
+    public function canBeSyncedToGoogleCalendarForSubdomain($subdomain)
+    {
+        $role = $this->roles->first(function($role) use ($subdomain) {
+            return $role->subdomain == $subdomain;
+        });
+
+        return $role && $role->hasGoogleCalendarIntegration() && $role->syncsToGoogle();
+    }
+
+    /**
      * Get Google Calendar sync status for a specific user and role
      */
     public function getGoogleCalendarSyncStatus(User $user, $roleId = null)
