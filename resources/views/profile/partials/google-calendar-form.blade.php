@@ -1,11 +1,11 @@
 <section>
     <header>
         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-            {{ __('Google Calendar Integration') }}
+            {{ __('messages.google_calendar_integration') }}
         </h2>
 
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __('Connect your Google Calendar to automatically sync your events.') }}
+            {{ __('messages.connect_google_calendar_description') }}
         </p>
     </header>
 
@@ -17,20 +17,20 @@
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                     </svg>
                     <span class="text-sm font-medium text-green-800 dark:text-green-200">
-                        {{ __('Google Calendar Connected') }}
+                        {{ __('messages.google_calendar_connected') }}
                     </span>
                 </div>
                 <a href="{{ route('google.calendar.disconnect') }}" 
                    onclick="return confirm('{{ __('messages.are_you_sure') }}')"
                    class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
-                    {{ __('Disconnect') }}
+                    {{ __('messages.disconnect') }}
                 </a>
             </div>
 
             <div class="space-y-4">
                 <div>
                     <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
-                        {{ __('Sync Options') }}
+                        {{ __('messages.sync_options') }}
                     </h3>
                     
                     <button type="button" 
@@ -39,7 +39,7 @@
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                         </svg>
-                        {{ __('Sync All Events') }}
+                        {{ __('messages.sync_all_events') }}
                     </button>
                 </div>
 
@@ -50,7 +50,7 @@
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            <span class="text-sm text-blue-800 dark:text-blue-200">{{ __('Syncing events...') }}</span>
+                            <span class="text-sm text-blue-800 dark:text-blue-200">{{ __('messages.syncing_events') }}</span>
                         </div>
                     </div>
                 </div>
@@ -73,7 +73,7 @@
                         <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                         <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                     </svg>
-                    {{ __('Connect Google Calendar') }}
+                    {{ __('messages.connect_google_calendar') }}
             </a>
         @endif
     </div>

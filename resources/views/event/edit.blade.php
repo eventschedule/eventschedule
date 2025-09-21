@@ -990,10 +990,10 @@
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                 <div class="max-w-xl">                                                
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                        {{ __('Google Calendar Sync') }}
+                        {{ __('messages.google_calendar_sync') }}
                     </h2>
                     <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                        {{ __('Sync this event with your Google Calendar.') }}
+                        {{ __('messages.sync_this_event_description') }}
                     </p>
                 
                     <div class="flex items-center space-x-4">
@@ -1002,20 +1002,20 @@
                                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                 </svg>
-                                <span class="text-sm">{{ __('Synced to Google Calendar') }}</span>
+                                <span class="text-sm">{{ __('messages.synced_to_google_calendar') }}</span>
                             </div>
                             <x-secondary-button type="button" onclick="unsyncEvent('{{ $subdomain }}', {{ $event->id }})">
-                                {{ __('Remove from Google Calendar') }}
+                                {{ __('messages.remove_from_google_calendar') }}
                             </x-secondary-button>
                         @else
                             <div class="flex items-center text-gray-500 dark:text-gray-400">
                                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm8 0a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V8zm0 4a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1v-2z" clip-rule="evenodd"></path>
                                 </svg>
-                                <span class="text-sm">{{ __('Not synced to Google Calendar') }}</span>
+                                <span class="text-sm">{{ __('messages.not_synced_to_google_calendar') }}</span>
                             </div>
                             <x-primary-button type="button" onclick="syncEvent('{{ $subdomain }}', {{ $event->id }})">
-                                {{ __('Sync to Google Calendar') }}
+                                {{ __('messages.sync_to_google_calendar') }}
                             </x-primary-button>
                         @endif
                     </div>
@@ -1026,7 +1026,7 @@
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            <span class="text-sm">{{ __('Syncing...') }}</span>
+                            <span class="text-sm">{{ __('messages.syncing') }}</span>
                         </div>
                     </div>
                 </div>
