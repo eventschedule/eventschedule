@@ -631,7 +631,7 @@ class GoogleCalendarService
 
         if ($googleEvent['location']) {
             $venue = $this->convertLocationToVenue($role, $googleEvent['location']);
-            if ($venue && ! $event->roles()->where('role_id', $venue->id)->exists()) {
+            if ($venue && ! $event->roles()->where('type', 'venue')->exists()) {
                 $event->roles()->attach($venue->id, [
                     'is_accepted' => $role->user->isMember($venue->subdomain),
                 ]);
@@ -668,7 +668,7 @@ class GoogleCalendarService
 
         if ($googleEvent['location']) {
             $venue = $this->convertLocationToVenue($role, $googleEvent['location']);
-            if ($venue && ! $event->roles()->where('role_id', $venue->id)->exists()) {
+            if ($venue && ! $event->roles()->where('type', 'venue')->exists()) {
                 $event->roles()->attach($venue->id, [
                     'is_accepted' => $role->user->isMember($venue->subdomain),
                 ]);
