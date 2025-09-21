@@ -699,7 +699,7 @@ class GoogleCalendarService
             $webhook->setId($this->generateValidChannelId());
             $webhook->setType('web_hook');
             $webhook->setAddress($webhookUrl);
-            $webhook->setToken(env('GOOGLE_WEBHOOK_SECRET', 'default_secret'));
+            $webhook->setToken(config('services.google.webhook_secret'));
 
             $result = $this->calendarService->events->watch($calendarId, $webhook);
             
