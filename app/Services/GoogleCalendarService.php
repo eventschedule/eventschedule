@@ -125,12 +125,7 @@ class GoogleCalendarService
                     ]);
                     
                     $this->setAccessToken($newToken);
-                    
-                    Log::info('Google Calendar token refreshed successfully', [
-                        'user_id' => $user->id,
-                        'new_expires_at' => $user->fresh()->google_token_expires_at,
-                    ]);
-                    
+                                        
                     return true;
                 } else {
                     Log::error('Failed to refresh Google Calendar token', [
@@ -222,11 +217,6 @@ class GoogleCalendarService
 
             // Create the event
             $createdEvent = $this->calendarService->events->insert($calendarId, $googleEvent);
-            
-            Log::info('Google Calendar event created', [
-                'event_id' => $event->id,
-                'google_event_id' => $createdEvent->getId(),
-            ]);
 
             return $createdEvent;
 
@@ -299,11 +289,6 @@ class GoogleCalendarService
             // Update the event
             $updatedEvent = $this->calendarService->events->update($calendarId, $googleEventId, $googleEvent);
             
-            Log::info('Google Calendar event updated', [
-                'event_id' => $event->id,
-                'google_event_id' => $googleEventId,
-            ]);
-
             return $updatedEvent;
 
         } catch (\Exception $e) {
@@ -328,10 +313,6 @@ class GoogleCalendarService
 
             $this->calendarService->events->delete($calendarId, $googleEventId);
             
-            Log::info('Google Calendar event deleted', [
-                'google_event_id' => $googleEventId,
-            ]);
-
             return true;
 
         } catch (\Exception $e) {
@@ -722,12 +703,6 @@ class GoogleCalendarService
 
             $result = $this->calendarService->events->watch($calendarId, $webhook);
             
-            Log::info('Google Calendar webhook created', [
-                'calendar_id' => $calendarId,
-                'webhook_id' => $result->getId(),
-                'resource_id' => $result->getResourceId(),
-            ]);
-
             return [
                 'id' => $result->getId(),
                 'resourceId' => $result->getResourceId(),
@@ -759,11 +734,6 @@ class GoogleCalendarService
             
             $this->calendarService->channels->stop($channel);
             
-            Log::info('Google Calendar webhook deleted', [
-                'webhook_id' => $webhookId,
-                'resource_id' => $resourceId,
-            ]);
-
             return true;
 
         } catch (\Exception $e) {

@@ -54,12 +54,6 @@ class GoogleCalendarWebhookController extends Controller
             $resourceId = $request->header('X-Goog-Resource-ID');
             $resourceState = $request->header('X-Goog-Resource-State');
 
-            Log::info('Google Calendar webhook received', [
-                'channel_id' => $channelId,
-                'resource_id' => $resourceId,
-                'resource_state' => $resourceState,
-            ]);
-
             // Find the role with this webhook
             $role = Role::where('google_webhook_id', $channelId)
                        ->where('google_webhook_resource_id', $resourceId)
@@ -163,9 +157,6 @@ class GoogleCalendarWebhookController extends Controller
         $challenge = $request->get('challenge');
         
         if ($challenge) {
-            Log::info('Google Calendar webhook verification', [
-                'challenge' => $challenge,
-            ]);
             return response($challenge, 200);
         }
 
