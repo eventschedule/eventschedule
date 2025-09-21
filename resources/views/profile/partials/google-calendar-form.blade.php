@@ -27,45 +27,6 @@
                 </a>
             </div>
 
-            @if (false)
-            <div class="space-y-4">
-                <div>
-                    <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
-                        {{ __('messages.sync_options') }}
-                    </h3>
-                    
-                    <button type="button" 
-                            onclick="syncAllEvents()"
-                            class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                        </svg>
-                        {{ __('messages.sync_all_events') }}
-                    </button>
-                </div>
-
-                <div id="sync-status" class="hidden">
-                    <div class="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                        <div class="flex items-center">
-                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span class="text-sm text-blue-800 dark:text-blue-200">{{ __('messages.syncing_events') }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="sync-results" class="hidden">
-                    <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                        <div class="text-sm text-green-800 dark:text-green-200">
-                            <div id="sync-message"></div>
-                            <div id="sync-details" class="mt-1 text-xs"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            @endif
         @else
             <a href="{{ route('google.calendar.redirect') }}" 
                 class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -81,49 +42,3 @@
     </div>
 </section>
 
-<script>
-function syncAllEvents() {
-    const statusDiv = document.getElementById('sync-status');
-    const resultsDiv = document.getElementById('sync-results');
-    
-    // Show loading status
-    statusDiv.classList.remove('hidden');
-    resultsDiv.classList.add('hidden');
-    
-    fetch('{{ route("google.calendar.sync_all_events") }}', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json',
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        statusDiv.classList.add('hidden');
-        resultsDiv.classList.remove('hidden');
-        
-        if (data.error) {
-            document.getElementById('sync-message').textContent = 'Error: ' + data.error;
-            resultsDiv.querySelector('.bg-green-50').classList.remove('bg-green-50', 'border-green-200');
-            resultsDiv.querySelector('.bg-green-50').classList.add('bg-red-50', 'border-red-200');
-            resultsDiv.querySelector('.text-green-800').classList.remove('text-green-800');
-            resultsDiv.querySelector('.text-green-800').classList.add('text-red-800');
-        } else {
-            document.getElementById('sync-message').textContent = data.message;
-            if (data.results) {
-                const details = `Created: ${data.results.created}, Updated: ${data.results.updated}, Errors: ${data.results.errors}`;
-                document.getElementById('sync-details').textContent = details;
-            }
-        }
-    })
-    .catch(error => {
-        statusDiv.classList.add('hidden');
-        resultsDiv.classList.remove('hidden');
-        document.getElementById('sync-message').textContent = 'Error: ' + error.message;
-        resultsDiv.querySelector('.bg-green-50').classList.remove('bg-green-50', 'border-green-200');
-        resultsDiv.querySelector('.bg-green-50').classList.add('bg-red-50', 'border-red-200');
-        resultsDiv.querySelector('.text-green-800').classList.remove('text-green-800');
-        resultsDiv.querySelector('.text-green-800').classList.add('text-red-800');
-    });
-}
-</script>

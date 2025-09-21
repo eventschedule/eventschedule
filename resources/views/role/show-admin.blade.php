@@ -250,6 +250,16 @@
                                     {{ __('messages.import_events') }}
                                 </div>
                             </a>
+                            @if (auth()->user()->google_token && $role->google_calendar_id)
+                            <a href="#" onclick="syncEventsFromDropdown()" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
+                                <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M12,18A6,6 0 0,1 6,12C6,11 6.25,10.03 6.7,9.2L5.24,7.74C4.46,8.97 4,10.43 4,12A8,8 0 0,0 12,20C13.57,20 15.03,19.54 16.26,18.76L14.8,17.3C13.97,17.75 13,18 12,18M20,12A8,8 0 0,0 12,4C10.43,4 8.97,4.46 7.74,5.24L9.2,6.7C10.03,6.25 11,6 12,6A6,6 0 0,1 18,12C18,13 17.75,13.97 17.3,14.8L18.76,16.26C19.54,15.03 20,13.57 20,12M14.8,17.3L16.26,18.76L18.76,16.26L17.3,14.8L14.8,17.3M9.2,6.7L7.74,5.24L5.24,7.74L6.7,9.2L9.2,6.7M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z" />
+                                </svg>
+                                <div>
+                                    {{ __('messages.sync_events') }}
+                                </div>
+                            </a>
+                            @endif
                             <a href="#" onclick="handleEventsGraphicClick()" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
                                 <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path d="M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19M8.5,13.5L11,16.5L14.5,12L19,18H5L8.5,13.5Z" />
@@ -392,6 +402,54 @@ function handleEventsGraphicClick() {
     @else
         window.location.href = '{{ route("event.generate_graphic", ["subdomain" => $role->subdomain]) }}';
     @endif
+}
+
+function syncEventsFromDropdown() {
+    // Check if user has Google token and role has calendar ID
+    @if (!auth()->user()->google_token || !$role->google_calendar_id)
+        alert('{{ __("messages.google_calendar_not_connected") }}');
+        return false;
+    @endif
+    
+    // Show confirmation dialog
+    if (!confirm('{{ __("messages.sync_events_confirmation") }}')) {
+        return false;
+    }
+    
+    // Show loading state
+    const originalText = event.target.textContent;
+    event.target.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>{{ __("messages.syncing") }}';
+    event.target.disabled = true;
+    
+    // Use the unified sync endpoint
+    const syncDirection = '{{ $role->sync_direction }}' || 'to';
+    const requestBody = {
+        sync_direction: syncDirection
+    };
+    
+    fetch('/google-calendar/sync/{{ $role->subdomain }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert('{{ __("messages.sync_error") }}: ' + data.error);
+        } else {
+            alert(data.message || '{{ __("messages.sync_completed") }}');
+        }
+    })
+    .catch(error => {
+        alert('{{ __("messages.sync_error") }}: ' + error.message);
+    })
+    .finally(() => {
+        event.target.innerHTML = originalText;
+        event.target.disabled = false;
+    });
 }
 </script>
 
