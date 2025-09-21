@@ -611,4 +611,5 @@ return [
     'google_calendar_not_connected' => 'Google Calendar לא מחובר. אנא חבר את החשבון שלך תחילה.',
     'access_denied_calendar' => 'הגישה נדחתה. אנא בדוק את הרשאות Google Calendar שלך.',
     'sync_events_between_schedules' => 'סנכרן אירועים בין לוח הזמנים הזה ל-Google Calendar שלך.',
+    'events_synced' => 'האירועים סונכרנו בהצלחה!',
 ];

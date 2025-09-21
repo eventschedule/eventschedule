@@ -618,4 +618,5 @@ return [
     'google_calendar_not_connected' => 'Google Calendar non connecté. Veuillez d\'abord connecter votre compte.',
     'access_denied_calendar' => 'Accès refusé. Veuillez vérifier vos autorisations Google Calendar.',
     'sync_events_between_schedules' => 'Synchronisez les événements entre ce planning et votre Google Calendar.',
+    'events_synced' => 'Événements synchronisés avec succès !',
 ];

@@ -619,4 +619,5 @@ return [
     'google_calendar_not_connected' => 'Google Calendar non connesso. Collega prima il tuo account.',
     'access_denied_calendar' => 'Accesso negato. Controlla le tue autorizzazioni Google Calendar.',
     'sync_events_between_schedules' => 'Sincronizza eventi tra questo programma e il tuo Google Calendar.',
+    'events_synced' => 'Eventi sincronizzati con successo!',
 ];
