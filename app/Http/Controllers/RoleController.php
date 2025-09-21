@@ -785,6 +785,13 @@ class RoleController extends Controller
 
         $role->save();
 
+        // Handle sync direction and calendar setup for new role
+        $syncDirection = $request->input('sync_direction');
+        $calendarId = $request->input('google_calendar_id');
+        if ($syncDirection || $calendarId) {
+            $this->handleSyncAndCalendarChanges($role, $syncDirection, null, $calendarId, null);
+        }
+
         // Save groups
         if ($request->has('groups')) {
             $groupsData = $request->input('groups', []);
@@ -982,15 +989,18 @@ class RoleController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
         
-        // Handle sync_direction changes and webhook management
+        // Handle sync_direction and calendar changes and webhook management
         $oldSyncDirection = $role->sync_direction;
         $newSyncDirection = $request->input('sync_direction');
+        $oldCalendarId = $role->google_calendar_id;
+        $newCalendarId = $request->input('google_calendar_id');
         
         $role->fill($request->all());
         
-        // If sync_direction changed, handle webhook management
-        if ($newSyncDirection && $oldSyncDirection !== $newSyncDirection) {
-            $this->handleSyncDirectionChange($role, $newSyncDirection, $oldSyncDirection);
+        // If sync_direction or calendar changed, handle webhook management
+        if (($newSyncDirection && $oldSyncDirection !== $newSyncDirection) || 
+            ($oldCalendarId !== $newCalendarId)) {
+            $this->handleSyncAndCalendarChanges($role, $newSyncDirection, $oldSyncDirection, $newCalendarId, $oldCalendarId);
         }
 
         $newSubdomain = Role::cleanSubdomain($request->new_subdomain);
@@ -1988,9 +1998,9 @@ class RoleController extends Controller
     }
 
     /**
-     * Handle sync direction changes and webhook management
+     * Handle sync direction and calendar changes and webhook management
      */
-    private function handleSyncDirectionChange($role, $newSyncDirection, $oldSyncDirection)
+    private function handleSyncAndCalendarChanges($role, $newSyncDirection, $oldSyncDirection, $newCalendarId = null, $oldCalendarId = null)
     {
         $user = auth()->user();
         
@@ -2000,6 +2010,30 @@ class RoleController extends Controller
 
         try {
             $googleCalendarService = app(\App\Services\GoogleCalendarService::class);
+
+            // Check if we need to remove old webhook (calendar changed or sync direction changed)
+            $shouldRemoveOldWebhook = ($oldCalendarId !== $newCalendarId) || 
+                                    ($oldSyncDirection !== $newSyncDirection && 
+                                     ($oldSyncDirection === 'from' || $oldSyncDirection === 'both'));
+
+            if ($shouldRemoveOldWebhook && $role->google_webhook_id) {
+                // Delete existing webhook
+                if ($googleCalendarService->ensureValidToken($user)) {
+                    $googleCalendarService->setAccessToken([
+                        'access_token' => $user->fresh()->google_token,
+                        'refresh_token' => $user->fresh()->google_refresh_token,
+                        'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
+                    ]);
+
+                    $googleCalendarService->deleteWebhook($role->google_webhook_id, $role->google_webhook_resource_id);
+                }
+
+                $role->update([
+                    'google_webhook_id' => null,
+                    'google_webhook_resource_id' => null,
+                    'google_webhook_expires_at' => null,
+                ]);
+            }
 
             // Handle webhook management based on sync direction
             if ($newSyncDirection === 'from' || $newSyncDirection === 'both') {
@@ -2031,34 +2065,16 @@ class RoleController extends Controller
                         'google_webhook_expires_at' => \Carbon\Carbon::createFromTimestamp($webhook['expiration'] / 1000),
                     ]);
                 }
-            } else {
-                // No webhook needed for 'to' direction or no sync
-                if ($role->google_webhook_id) {
-                    // Delete existing webhook
-                    if ($googleCalendarService->ensureValidToken($user)) {
-                        $googleCalendarService->setAccessToken([
-                            'access_token' => $user->fresh()->google_token,
-                            'refresh_token' => $user->fresh()->google_refresh_token,
-                            'expires_in' => $this->calculateExpiresIn($user->fresh()->google_token_expires_at),
-                        ]);
-
-                        $googleCalendarService->deleteWebhook($role->google_webhook_id, $role->google_webhook_resource_id);
-                    }
-                }
-
-                $role->update([
-                    'google_webhook_id' => null,
-                    'google_webhook_resource_id' => null,
-                    'google_webhook_expires_at' => null,
-                ]);
             }
 
         } catch (\Exception $e) {
-            \Log::error('Failed to handle sync direction change', [
+            \Log::error('Failed to handle sync and calendar changes', [
                 'user_id' => $user->id,
                 'role_id' => $role->id,
                 'old_sync_direction' => $oldSyncDirection,
                 'new_sync_direction' => $newSyncDirection,
+                'old_calendar_id' => $oldCalendarId,
+                'new_calendar_id' => $newCalendarId,
                 'error' => $e->getMessage(),
             ]);
         }
