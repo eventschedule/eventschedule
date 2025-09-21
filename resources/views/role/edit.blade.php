@@ -1647,26 +1647,12 @@ function syncEvents() {
 
     showSyncStatus();
     
-    let url = '';
-    let requestBody = {
+    // Use the unified sync endpoint
+    const requestBody = {
         sync_direction: selectedDirection.value
     };
     
-    if (selectedDirection.value === 'to') {
-        url = '/google-calendar/sync-events/{{ $role->subdomain }}';
-    } else if (selectedDirection.value === 'from') {
-        url = `/google-calendar/sync-from-google/{{ $role->subdomain }}`;
-    } else if (selectedDirection.value === 'both') {
-        // For bidirectional sync, we'll sync both directions
-        syncBothDirections();
-        return;
-    } else {
-        hideSyncStatus();
-        showSyncMessage('Invalid sync direction selected', 'error');
-        return;
-    }
-    
-    fetch(url, {
+    fetch('/google-calendar/sync/{{ $role->subdomain }}', {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -1686,55 +1672,6 @@ function syncEvents() {
     .catch(error => {
         hideSyncStatus();
         showSyncMessage('Error: ' + error.message, 'error');
-    });
-}
-
-function syncBothDirections() {
-    showSyncStatus();
-    
-    const requestBody = {
-        sync_direction: 'both'
-    };
-    
-    // First sync to Google Calendar
-    fetch('/google-calendar/sync-events/{{ $role->subdomain }}', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            hideSyncStatus();
-            showSyncMessage('Error syncing to Google Calendar: ' + data.error, 'error');
-            return;
-        }
-        
-        // Then sync from Google Calendar
-        return fetch(`/google-calendar/sync-from-google/{{ $role->subdomain }}`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestBody),
-        });
-    })
-    .then(response => response.json())
-    .then(data => {
-        hideSyncStatus();
-        if (data.error) {
-            showSyncMessage('Error syncing from Google Calendar: ' + data.error, 'error');
-        } else {
-            showSyncMessage('Bidirectional sync completed successfully');
-        }
-    })
-    .catch(error => {
-        hideSyncStatus();
-        showSyncMessage('Error during bidirectional sync: ' + error.message, 'error');
     });
 }
 

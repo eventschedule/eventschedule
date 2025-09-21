@@ -104,12 +104,9 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/google-calendar/reauthorize', [GoogleCalendarController::class, 'reauthorize'])->name('google.calendar.reauthorize');
     Route::get('/google-calendar/disconnect', [GoogleCalendarController::class, 'disconnect'])->name('google.calendar.disconnect');
     Route::get('/google-calendar/calendars', [GoogleCalendarController::class, 'getCalendars'])->name('google.calendar.calendars');
-    Route::post('/google-calendar/sync-events/{subdomain}', [GoogleCalendarController::class, 'syncEvents'])->name('google.calendar.sync_events');
-    Route::post('/google-calendar/sync-all-events', [GoogleCalendarController::class, 'syncAllEvents'])->name('google.calendar.sync_all_events');
+    Route::post('/google-calendar/sync/{subdomain}', [GoogleCalendarController::class, 'sync'])->name('google.calendar.sync');
     Route::post('/google-calendar/sync-event/{subdomain}/{eventId}', [GoogleCalendarController::class, 'syncEvent'])->name('google.calendar.sync_event');
     Route::delete('/google-calendar/unsync-event/{subdomain}/{eventId}', [GoogleCalendarController::class, 'unsyncEvent'])->name('google.calendar.unsync_event');
-    Route::post('/google-calendar/role/{subdomain}', [GoogleCalendarController::class, 'updateRoleCalendar'])->name('google.calendar.update_role');
-    Route::post('/google-calendar/sync-from-google/{subdomain}', [GoogleCalendarController::class, 'syncFromGoogleCalendar'])->name('google.calendar.sync_from_google');
     
     Route::get('/scan', [TicketController::class, 'scan'])->name('ticket.scan');
     Route::post('/ticket/view/{event_id}/{secret}', [TicketController::class, 'scanned'])->name('ticket.scanned');
