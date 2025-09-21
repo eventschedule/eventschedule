@@ -552,7 +552,7 @@ class GoogleCalendarService
                         }
 
                         if ($startTime) {
-                            $existingEvent = Event::where('name', $googleEvent['summary'] ?: 'Untitled Event')
+                            $existingEvent = Event::where('name', $googleEvent['summary'] ?: __('messages.untitled_event'))
                                                 ->where('starts_at', $startTime->format('Y-m-d H:i:s'))
                                                 ->whereHas('roles', function($query) use ($role) {
                                                     $query->where('role_id', $role->id);
@@ -601,7 +601,7 @@ class GoogleCalendarService
         $event = new Event();
         $event->user_id = $role->user_id;
         $event->creator_role_id = $role->id;
-        $event->name = $googleEvent['summary'] ?: 'Untitled Event';
+        $event->name = $googleEvent['summary'] ?: __('messages.untitled_event');
         $event->description = $googleEvent['description'] ?: '';
         $event->slug = \Str::slug($event->name);
 
@@ -646,7 +646,7 @@ class GoogleCalendarService
      */
     private function updateEventFromGoogle(Event $event, array $googleEvent, Role $role): void
     {
-        $event->name = $googleEvent['summary'] ?: 'Untitled Event';
+        $event->name = $googleEvent['summary'] ?: __('messages.untitled_event');
 
         if (! empty($googleEvent['description'])) {
             $event->description = $googleEvent['description'];

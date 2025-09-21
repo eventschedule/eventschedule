@@ -628,4 +628,5 @@ return [
     'access_denied_calendar' => 'Access denied. Please check your Google Calendar permissions.',
     'sync_events_between_schedules' => 'Sync events between this schedule and your Google Calendar.',
     'events_synced' => 'Events synced successfully!',
+    'untitled_event' => 'Untitled Event',
 ];
