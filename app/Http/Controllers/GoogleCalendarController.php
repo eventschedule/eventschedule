@@ -353,35 +353,30 @@ class GoogleCalendarController extends Controller
             }
 
             $results = [];
-            $messages = [];
-
+            
             // Handle different sync directions
             switch ($syncDirection) {
                 case 'to':
                     $results['to'] = $this->googleCalendarService->syncUserEvents($user, $role);
-                    $messages[] = 'Events synced to Google Calendar successfully';
                     break;
                     
                 case 'from':
                     $calendarId = $role->getGoogleCalendarId();
                     $results['from'] = $this->googleCalendarService->syncFromGoogleCalendar($user, $role, $calendarId);
-                    $messages[] = 'Events synced from Google Calendar successfully';
                     break;
                     
                 case 'both':
                     // Sync to Google Calendar first
                     $results['to'] = $this->googleCalendarService->syncUserEvents($user, $role);
-                    $messages[] = 'Events synced to Google Calendar successfully';
                     
                     // Then sync from Google Calendar
                     $calendarId = $role->getGoogleCalendarId();
                     $results['from'] = $this->googleCalendarService->syncFromGoogleCalendar($user, $role, $calendarId);
-                    $messages[] = 'Events synced from Google Calendar successfully';
                     break;
             }
 
             return response()->json([
-                'message' => implode('; ', $messages),
+                'message' => __('messages.events_synced'),
                 'sync_direction' => $syncDirection,
                 'results' => $results,
             ]);

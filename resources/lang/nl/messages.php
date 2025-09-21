@@ -616,4 +616,5 @@ return [
     'google_calendar_not_connected' => 'Google Calendar niet verbonden. Verbind eerst je account.',
     'access_denied_calendar' => 'Toegang geweigerd. Controleer je Google Calendar machtigingen.',
     'sync_events_between_schedules' => 'Synchroniseer evenementen tussen dit rooster en je Google Calendar.',
+    'events_synced' => 'Evenementen succesvol gesynchroniseerd!',
 ];
