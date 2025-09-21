@@ -595,28 +595,37 @@ class GoogleCalendarService
      */
     private function createEventFromGoogle(array $googleEvent, Role $role, string $calendarId): Event
     {
-        $request = new \Illuminate\Http\Request();
-        $request->merge([
-            'name' => $googleEvent['summary'] ?: 'Untitled Event',
-            'description' => $googleEvent['description'] ?: '',
-            'starts_at' => $googleEvent['start']->getDateTime() ? \Carbon\Carbon::parse($googleEvent['start']->getDateTime())->utc() : \Carbon\Carbon::parse($googleEvent['start']->getDate())->utc(),
-            'duration' => $googleEvent['end']->getDateTime() && $googleEvent['start']->getDateTime() ? \Carbon\Carbon::parse($googleEvent['start']->getDateTime())->diffInHours(\Carbon\Carbon::parse($googleEvent['end']->getDateTime())) : 2,
-            'venue_name' => $googleEvent['location'] ?: null,
-            'registration_url' => $googleEvent['htmlLink'] ?: null,
-            'members' => [
-                $role->id => [
-                    'name' => $role->name,
-                ]
-            ],
+        $event = new Event();
+        $event->user_id = $role->user_id;
+        $event->creator_role_id = $role->id;
+        $event->name = $googleEvent['summary'] ?: 'Untitled Event';
+        $event->description = $googleEvent['description'] ?: '';
+        $event->registration_url = $googleEvent['htmlLink'] ?: null;
+        $event->slug = \Str::slug($event->name);
+
+        // Set start time
+        if ($googleEvent['start']->getDateTime()) {
+            $event->starts_at = \Carbon\Carbon::parse($googleEvent['start']->getDateTime())->utc();
+        } elseif ($googleEvent['start']->getDate()) {
+            $event->starts_at = \Carbon\Carbon::parse($googleEvent['start']->getDate())->utc();
+        }
+
+        // Set duration
+        if ($googleEvent['end']->getDateTime() && $googleEvent['start']->getDateTime()) {
+            $start = \Carbon\Carbon::parse($googleEvent['start']->getDateTime());
+            $end = \Carbon\Carbon::parse($googleEvent['end']->getDateTime());
+            $event->duration = $start->diffInHours($end);
+        } else {
+            $event->duration = 2; // Default 2 hours
+        }
+
+        $event->save();
+
+        // Attach to the role with google_event_id
+        $event->roles()->attach($role->id, [
+            'is_accepted' => true,
+            'google_event_id' => $googleEvent['id'],
         ]);
-
-        $request->setUserResolver(function () use ($role) {
-            return $role->user;
-        });        
-
-        $event = $this->eventRepo->saveEvent($role, $request);
-
-        $event->setGoogleEventIdForRole($role->id, $googleEvent['id']);
 
         return $event;
     }
@@ -626,21 +635,25 @@ class GoogleCalendarService
      */
     private function updateEventFromGoogle(Event $event, array $googleEvent, Role $role): void
     {
-        $request = new \Illuminate\Http\Request();
-        $request->merge([
-            'name' => $googleEvent['summary'] ?: 'Untitled Event',
-            'description' => $googleEvent['description'] ?: '',
-            'starts_at' => $googleEvent['start']->getDateTime() ? \Carbon\Carbon::parse($googleEvent['start']->getDateTime())->utc() : \Carbon\Carbon::parse($googleEvent['start']->getDate())->utc(),
-            'duration' => $googleEvent['end']->getDateTime() && $googleEvent['start']->getDateTime() ? \Carbon\Carbon::parse($googleEvent['start']->getDateTime())->diffInHours(\Carbon\Carbon::parse($googleEvent['end']->getDateTime())) : 2,
-            'venue_name' => $googleEvent['location'] ?: null,
-            'registration_url' => $googleEvent['htmlLink'] ?: null,
-        ]);
+        $event->name = $googleEvent['summary'] ?: 'Untitled Event';
+        $event->description = $googleEvent['description'] ?: '';
+        $event->registration_url = $googleEvent['htmlLink'] ?: null;
 
-        $request->setUserResolver(function () use ($role) {
-            return $role->user;
-        });        
+        // Update start time
+        if ($googleEvent['start']->getDateTime()) {
+            $event->starts_at = \Carbon\Carbon::parse($googleEvent['start']->getDateTime())->utc();
+        } elseif ($googleEvent['start']->getDate()) {
+            $event->starts_at = \Carbon\Carbon::parse($googleEvent['start']->getDate())->utc();
+        }
 
-        $this->eventRepo->saveEvent($role, $request, $event);
+        // Update duration
+        if ($googleEvent['end']->getDateTime() && $googleEvent['start']->getDateTime()) {
+            $start = \Carbon\Carbon::parse($googleEvent['start']->getDateTime());
+            $end = \Carbon\Carbon::parse($googleEvent['end']->getDateTime());
+            $event->duration = $start->diffInHours($end);
+        }
+
+        $event->save();
     }
 
     /**
