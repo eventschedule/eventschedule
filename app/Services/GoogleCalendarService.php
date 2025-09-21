@@ -11,13 +11,15 @@ use Google\Service\Calendar;
 use Google\Service\Calendar\Event as GoogleEvent;
 use Google\Service\Calendar\EventDateTime;
 use Illuminate\Support\Facades\Log;
+use App\Repos\EventRepo;
 
 class GoogleCalendarService
 {
     protected $client;
     protected $calendarService;
+    protected $eventRepo;
 
-    public function __construct()
+    public function __construct(EventRepo $eventRepo)
     {
         $this->client = new Client();
         $this->client->setClientId(config('services.google.client_id'));
@@ -34,6 +36,8 @@ class GoogleCalendarService
         $this->client->setApprovalPrompt('force');
         $this->client->setPrompt('consent'); // This is the newer way to force consent
         $this->client->setIncludeGrantedScopes(true);
+
+        $this->eventRepo = $eventRepo;
     }
 
     /**
@@ -175,25 +179,13 @@ class GoogleCalendarService
                 throw new \Exception('User does not have Google Calendar connected');
             }
 
-            if (!$calendarId) {
+            if (! $calendarId) {
                 $calendarId = 'primary';
             }
 
             $googleEvent = new GoogleEvent();
             $googleEvent->setSummary($event->name);
-            
-            // Set description
-            $description = $event->description_html ? strip_tags($event->description_html) : $event->description;
-            if ($event->venue) {
-                $description .= "\n\nVenue: " . $event->venue->getDisplayName();
-                if ($event->venue->bestAddress()) {
-                    $description .= "\nAddress: " . $event->venue->bestAddress();
-                }
-            }
-            if ($event->event_url) {
-                $description .= "\n\nEvent URL: " . $event->event_url;
-            }
-            $googleEvent->setDescription($description);
+            $googleEvent->setDescription($event->description);
 
             // Set start and end times
             $startDateTime = new EventDateTime();
@@ -248,26 +240,14 @@ class GoogleCalendarService
             }
 
             // Use the role's selected calendar or default to primary
-            if (!$calendarId) {
+            if (! $calendarId) {
                 $calendarId = 'primary';
             }
 
             $googleEvent = $this->calendarService->events->get($calendarId, $googleEventId);
             
             $googleEvent->setSummary($event->name);
-            
-            // Set description
-            $description = $event->description_html ? strip_tags($event->description_html) : $event->description;
-            if ($event->venue) {
-                $description .= "\n\nVenue: " . $event->venue->getDisplayName();
-                if ($event->venue->bestAddress()) {
-                    $description .= "\nAddress: " . $event->venue->bestAddress();
-                }
-            }
-            if ($event->event_url) {
-                $description .= "\n\nEvent URL: " . $event->event_url;
-            }
-            $googleEvent->setDescription($description);
+            $googleEvent->setDescription($event->description);
 
             // Set start and end times
             $startDateTime = new EventDateTime();
@@ -615,42 +595,28 @@ class GoogleCalendarService
      */
     private function createEventFromGoogle(array $googleEvent, Role $role, string $calendarId): Event
     {
-        $event = new Event();
-        $event->user_id = $role->user_id;
-        $event->creator_role_id = $role->id;
-        $event->name = $googleEvent['summary'] ?: 'Untitled Event';
-        $event->description = $googleEvent['description'] ?: '';
-        $event->slug = \Str::slug($event->name);
-
-        // Set start time
-        if ($googleEvent['start']->getDateTime()) {
-            $event->starts_at = \Carbon\Carbon::parse($googleEvent['start']->getDateTime())->utc();
-        } elseif ($googleEvent['start']->getDate()) {
-            $event->starts_at = \Carbon\Carbon::parse($googleEvent['start']->getDate())->utc();
-        }
-
-        // Set duration
-        if ($googleEvent['end']->getDateTime() && $googleEvent['start']->getDateTime()) {
-            $start = \Carbon\Carbon::parse($googleEvent['start']->getDateTime());
-            $end = \Carbon\Carbon::parse($googleEvent['end']->getDateTime());
-            $event->duration = $start->diffInHours($end);
-        } else {
-            $event->duration = 2; // Default 2 hours
-        }
-
-        $event->save();
-
-        // Attach to the role with google_event_id
-        $event->roles()->attach($role->id, [
-            'is_accepted' => true,
-            'google_event_id' => $googleEvent['id'],
+        $request = new \Illuminate\Http\Request();
+        $request->merge([
+            'name' => $googleEvent['summary'] ?: 'Untitled Event',
+            'description' => $googleEvent['description'] ?: '',
+            'starts_at' => $googleEvent['start']->getDateTime() ? \Carbon\Carbon::parse($googleEvent['start']->getDateTime())->utc() : \Carbon\Carbon::parse($googleEvent['start']->getDate())->utc(),
+            'duration' => $googleEvent['end']->getDateTime() && $googleEvent['start']->getDateTime() ? \Carbon\Carbon::parse($googleEvent['start']->getDateTime())->diffInHours(\Carbon\Carbon::parse($googleEvent['end']->getDateTime())) : 2,
+            'venue_name' => $googleEvent['location'] ?: null,
+            'registration_url' => $googleEvent['htmlLink'] ?: null,
+            'members' => [
+                $role->id => [
+                    'name' => $role->name,
+                ]
+            ],
         ]);
 
-        Log::info('Event created from Google Calendar', [
-            'event_id' => $event->id,
-            'google_event_id' => $googleEvent['id'],
-            'role_id' => $role->id,
-        ]);
+        $request->setUserResolver(function () use ($role) {
+            return $role->user;
+        });        
+
+        $event = $this->eventRepo->saveEvent($role, $request);
+
+        $event->setGoogleEventIdForRole($role->id, $googleEvent['id']);
 
         return $event;
     }
@@ -660,29 +626,21 @@ class GoogleCalendarService
      */
     private function updateEventFromGoogle(Event $event, array $googleEvent, Role $role): void
     {
-        $event->name = $googleEvent['summary'] ?: 'Untitled Event';
-        $event->description = $googleEvent['description'] ?: '';
-
-        // Update start time
-        if ($googleEvent['start']->getDateTime()) {
-            $event->starts_at = \Carbon\Carbon::parse($googleEvent['start']->getDateTime())->utc();
-        } elseif ($googleEvent['start']->getDate()) {
-            $event->starts_at = \Carbon\Carbon::parse($googleEvent['start']->getDate())->utc();
-        }
-
-        // Update duration
-        if ($googleEvent['end']->getDateTime() && $googleEvent['start']->getDateTime()) {
-            $start = \Carbon\Carbon::parse($googleEvent['start']->getDateTime());
-            $end = \Carbon\Carbon::parse($googleEvent['end']->getDateTime());
-            $event->duration = $start->diffInHours($end);
-        }
-
-        $event->save();
-
-        Log::info('Event updated from Google Calendar', [
-            'event_id' => $event->id,
-            'google_event_id' => $googleEvent['id'],
+        $request = new \Illuminate\Http\Request();
+        $request->merge([
+            'name' => $googleEvent['summary'] ?: 'Untitled Event',
+            'description' => $googleEvent['description'] ?: '',
+            'starts_at' => $googleEvent['start']->getDateTime() ? \Carbon\Carbon::parse($googleEvent['start']->getDateTime())->utc() : \Carbon\Carbon::parse($googleEvent['start']->getDate())->utc(),
+            'duration' => $googleEvent['end']->getDateTime() && $googleEvent['start']->getDateTime() ? \Carbon\Carbon::parse($googleEvent['start']->getDateTime())->diffInHours(\Carbon\Carbon::parse($googleEvent['end']->getDateTime())) : 2,
+            'venue_name' => $googleEvent['location'] ?: null,
+            'registration_url' => $googleEvent['htmlLink'] ?: null,
         ]);
+
+        $request->setUserResolver(function () use ($role) {
+            return $role->user;
+        });        
+
+        $this->eventRepo->saveEvent($role, $request, $event);
     }
 
     /**
