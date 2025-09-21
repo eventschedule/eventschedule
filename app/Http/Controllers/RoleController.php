@@ -989,7 +989,7 @@ class RoleController extends Controller
         $role->fill($request->all());
         
         // If sync_direction changed, handle webhook management
-        if ($oldSyncDirection !== $newSyncDirection) {
+        if ($newSyncDirection && $oldSyncDirection !== $newSyncDirection) {
             $this->handleSyncDirectionChange($role, $newSyncDirection, $oldSyncDirection);
         }
 

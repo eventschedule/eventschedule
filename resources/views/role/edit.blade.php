@@ -1193,7 +1193,7 @@
                     </div>
                 </div>
 
-                @if (auth()->user()->google_token || config('app.is_testing'))
+                @if (! $role->exists || $role->user_id == auth()->user()->id)
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">
 
@@ -1204,6 +1204,7 @@
                             {{ __('messages.sync_events_between_schedules') }}
                         </p>
                         
+                        @if (auth()->user()->google_token)
                         <div class="space-y-6">
                             <!-- Calendar Selection -->
                             <div>
@@ -1290,6 +1291,11 @@
                                 </div>
                             </div>
                         </div>
+                        @else
+                        <a href="{{ route('profile.edit') }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline">
+                            {{ __('messages.connect_google_calendar') }}
+                        </a>
+                        @endif
                     </div>
                 </div>
                 @endif
