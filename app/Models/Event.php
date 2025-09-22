@@ -436,21 +436,13 @@ class Event extends Model
             $subdomain = $this->creatorRole ? $this->creatorRole->subdomain : null;
         }
 
-        $slug = $this->slug;
+        $slug = $this->slug ?: ($this->id ? UrlUtils::encodeId($this->id) : null);
 
-        if ($venueSubdomain && $roleSubdomain) {
-            $slug = $venueSubdomain == $subdomain ? $roleSubdomain : $venueSubdomain;
-        }
-        
-        // TODO supoprt custom_slug
-        
-        if ($date === null && $this->starts_at) {
-            $date = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d');
-        }
+        // TODO support custom_slug
 
         $data = [
-            'subdomain' => $subdomain, 
-            'slug' => $slug, 
+            'subdomain' => $subdomain,
+            'slug' => $slug,
         ];
 
         if ($date) {

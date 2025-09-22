@@ -174,19 +174,14 @@ class EventRepo
         $venueId = $venue ? $venue->id : null;
 
         if (! $event) {
-            $event = new Event;       
+            $event = new Event;
             $event->user_id = $user->id;
             $event->creator_role_id = $creatorRoleId;
+            $event->slug = $this->generateUniqueSlug($request->name_en ?: $request->name);
+        }
 
-            if ($request->name_en) {
-                $event->slug = \Str::slug($request->name_en);
-            } else {
-                $event->slug = \Str::slug($request->name);
-            }
-
-            if (! $event->slug) {
-                $event->slug = strtolower(\Str::random(5));
-            }
+        if (! $event->slug) {
+            $event->slug = $this->generateUniqueSlug($request->name_en ?: $request->name, $event);
         }
 
         $event->fill($request->all());
@@ -384,9 +379,9 @@ class EventRepo
     {
         $event = null;
         $eventDate = $date ? Carbon::parse($date) : null;
-        
+
         $subdomainRole = Role::where('subdomain', $subdomain)->first();
-        $slugRole = Role::where('subdomain', $slug)->first();        
+        $slugRole = Role::where('subdomain', $slug)->first();
         $timezone = auth()->user() ? auth()->user()->timezone : $subdomainRole->timezone;
         $eventId = UrlUtils::decodeId($slug);
 
@@ -554,5 +549,34 @@ class EventRepo
         }
 
         return $event;
+    }
+
+    private function generateUniqueSlug(?string $name, ?Event $existingEvent = null): string
+    {
+        $baseSlug = $name ? Str::slug($name) : '';
+
+        if ($baseSlug === '') {
+            $baseSlug = strtolower(Str::random(5));
+        }
+
+        $slug = $baseSlug;
+        $suffix = 1;
+        $ignoreId = $existingEvent?->id;
+
+        while ($this->slugExists($slug, $ignoreId)) {
+            $slug = $baseSlug . '-' . $suffix;
+            $suffix++;
+        }
+
+        return $slug;
+    }
+
+    private function slugExists(string $slug, ?int $ignoreId = null): bool
+    {
+        return Event::where('slug', $slug)
+            ->when($ignoreId, function ($query) use ($ignoreId) {
+                $query->where('id', '!=', $ignoreId);
+            })
+            ->exists();
     }
 }

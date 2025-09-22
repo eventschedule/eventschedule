@@ -538,9 +538,13 @@ const calendarApp = createApp({
         getEventUrl(event, date) {
             let url = event.guest_url;
             let queryParams = [];
-            
+
             if (date) {
-                queryParams.push('date=' + date);
+                const eventDate = new Date(date);
+                if (!Number.isNaN(eventDate.getTime())) {
+                    queryParams.push('month=' + (eventDate.getMonth() + 1));
+                    queryParams.push('year=' + eventDate.getFullYear());
+                }
             }
             
             // Preserve current filter values
