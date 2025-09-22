@@ -447,17 +447,27 @@ class Event extends Model
         }
         
         // TODO supoprt custom_slug
-        
-        if ($date === null && $this->starts_at) {
-            $date = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d');
+
+        if ($date === true) {
+            $date = $this->starts_at
+                ? Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d')
+                : null;
+        }
+
+        if ($date instanceof Carbon) {
+            $date = $date->format('Y-m-d');
+        }
+
+        if (is_string($date)) {
+            $date = trim($date) !== '' ? trim($date) : null;
         }
 
         $data = [
-            'subdomain' => $subdomain, 
-            'slug' => $slug, 
+            'subdomain' => $subdomain,
+            'slug' => $slug,
         ];
 
-        if ($date) {
+        if ($date !== null && $date !== false) {
             $data['date'] = $date;
         }
 

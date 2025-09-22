@@ -1739,7 +1739,7 @@ class RoleController extends Controller
                 'venue_name' => $event->getVenueDisplayName(),
                 'local_starts_at' => $event->localStartsAt(),
                 'image_url' => $event->getImageUrl(),
-                'guest_url' => $event->getGuestUrl($subdomain, ''),
+                'guest_url' => $event->getGuestUrl($subdomain),
                 'group_id' => $groupId ? \App\Utils\UrlUtils::encodeId($groupId) : null,
                 'category_id' => $event->category_id,
             ];
