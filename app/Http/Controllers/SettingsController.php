@@ -376,27 +376,14 @@ class SettingsController extends Controller
                 $message->to($user->email)->subject(__('messages.test_email_subject'));
             });
 
-            $failures = [];
-            $failuresInspected = false;
+            $inspection = $this->inspectMailerFailures();
+            $failures = $inspection['failures'];
 
-            try {
-                $mailer = Mail::mailer();
-
-                if (is_object($mailer) && method_exists($mailer, 'failures')) {
-                    $failures = array_values(array_filter((array) $mailer->failures(), function ($failure) {
-                        return $failure !== null && $failure !== '';
-                    }));
-                    $failuresInspected = true;
-                } elseif ($mailer !== null) {
-                    $logOutput[] = 'Mailer does not support reporting failed recipients; assuming success.';
-                } else {
-                    $logOutput[] = 'Mailer instance was unavailable for failure inspection; assuming success.';
-                }
-            } catch (Throwable $inspectionException) {
-                $logOutput[] = 'Unable to inspect mailer for delivery failures: ' . $inspectionException->getMessage();
+            if (! empty($inspection['note'])) {
+                $logOutput[] = $inspection['note'];
             }
 
-            if ($failuresInspected && empty($failures)) {
+            if ($inspection['inspected'] && empty($failures)) {
                 $logOutput[] = 'Mail driver did not report any delivery failures.';
             }
 
@@ -535,7 +522,8 @@ class SettingsController extends Controller
         try {
             Mail::to($user->email, $user->name ?? null)->send(new TemplatePreview($subject, $body));
 
-            $failures = Mail::failures();
+            $inspection = $this->inspectMailerFailures(true);
+            $failures = $inspection['failures'];
 
             if (! empty($failures)) {
                 return response()->json([
@@ -560,6 +548,57 @@ class SettingsController extends Controller
                 'error' => $exception->getMessage(),
                 'failures' => [],
             ], 500);
+        }
+    }
+
+    /**
+     * Inspect the configured mailer for any reported delivery failures.
+     *
+     * @return array{failures: array<int, string>, inspected: bool, note: string|null}
+     */
+    protected function inspectMailerFailures(bool $throwOnError = false): array
+    {
+        $result = [
+            'failures' => [],
+            'inspected' => false,
+            'note' => null,
+        ];
+
+        try {
+            $mailer = Mail::mailer();
+
+            if ($mailer === null) {
+                $result['note'] = 'Mailer instance was unavailable for failure inspection; assuming success.';
+
+                return $result;
+            }
+
+            if (! is_object($mailer)) {
+                $result['note'] = 'Mailer does not support reporting failed recipients; assuming success.';
+
+                return $result;
+            }
+
+            if (! method_exists($mailer, 'failures')) {
+                $result['note'] = 'Mailer does not support reporting failed recipients; assuming success.';
+
+                return $result;
+            }
+
+            $result['failures'] = array_values(array_filter((array) $mailer->failures(), function ($failure) {
+                return $failure !== null && $failure !== '';
+            }));
+            $result['inspected'] = true;
+
+            return $result;
+        } catch (Throwable $exception) {
+            if ($throwOnError) {
+                throw $exception;
+            }
+
+            $result['note'] = 'Unable to inspect mailer for delivery failures: ' . $exception->getMessage();
+
+            return $result;
         }
     }
 
