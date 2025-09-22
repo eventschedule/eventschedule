@@ -2,10 +2,12 @@
 
 namespace Tests;
 
+use App\Models\Setting;
 use Facebook\WebDriver\Chrome\ChromeOptions;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
 use Laravel\Dusk\TestCase as BaseTestCase;
 use PHPUnit\Framework\Attributes\BeforeClass;
 
@@ -24,6 +26,13 @@ abstract class DuskTestCase extends BaseTestCase
             'mail.mailers.smtp.channel',
             $this->app['config']->get('mail.mailers.log.channel')
         );
+
+        if (Schema::hasTable('settings')) {
+            Setting::setGroup('mail', [
+                'mailer' => 'log',
+                'disable_delivery' => true,
+            ]);
+        }
     }
 
     /**
