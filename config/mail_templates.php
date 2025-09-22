@@ -196,6 +196,8 @@ The reservation expired after :expire_after_hours hour(s) without payment.
 - **Total Reserved:** :amount_total
 - **Order #:** :order_reference
 
+[View Tickets](:ticket_view_url)
+
 [View Event](:event_url)
 
 Thanks,
