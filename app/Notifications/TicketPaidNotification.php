@@ -61,10 +61,10 @@ class TicketPaidNotification extends Notification
             'amount_total' => $formattedAmount,
             'buyer_name' => $buyerName,
             'buyer_email' => $buyerEmail,
-            'event_url' => $event->getGuestUrl($this->sale->subdomain, $this->sale->event_date),
+            'event_url' => $event->getGuestUrl($this->sale->subdomain),
             'ticket_view_url' => $this->recipientType === 'purchaser'
                 ? $ticketViewUrl
-                : $event->getGuestUrl($this->sale->subdomain, $this->sale->event_date),
+                : $event->getGuestUrl($this->sale->subdomain),
             'order_reference' => (string) $this->sale->id,
             'app_name' => config('app.name'),
             'wallet_links_markdown' => $this->walletLinksMarkdown(),

@@ -365,7 +365,7 @@ class TicketController extends Controller
 
         $event = $sale->event;
         
-        $eventUrl = $event->getGuestUrl($subdomain, $sale->event_date);
+        $eventUrl = $event->getGuestUrl($subdomain);
         $separator = Str::contains($eventUrl, '?') ? '&' : '?';
 
         return redirect($eventUrl . $separator . 'tickets=true');
@@ -399,7 +399,7 @@ class TicketController extends Controller
 
         $event = $sale->event;
         
-        $eventUrl = $event->getGuestUrl($sale->subdomain, $sale->event_date);
+        $eventUrl = $event->getGuestUrl($sale->subdomain);
         $separator = Str::contains($eventUrl, '?') ? '&' : '?';
 
         return redirect($eventUrl . $separator . 'tickets=true');
