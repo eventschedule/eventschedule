@@ -235,7 +235,6 @@ class RoleController extends Controller
 
         $otherRole = null;
         $event = null;
-        $canonicalEvent = null;
         $selectedGroup = null;
         $date = $request->date ? date('Y-m-d', strtotime($request->date)) : null;
 
@@ -249,31 +248,17 @@ class RoleController extends Controller
         }
 
         if ($slug) {
-            // Check if slug is a group slug first
+            $canonicalEvent = null;
+
             if ($role->groups) {
                 $group = $role->groups->where('slug', $slug)->first();
                 if ($group) {
                     $selectedGroup = $group;
-                    $slug = ''; // Clear slug since it's a group, not an event
-                } else {
-                    // Try to find event by slug
-                    $canonicalEvent = $this->eventRepo->getEvent($subdomain, $slug, null);
-                    $event = $canonicalEvent;
-
-                    if ($date) {
-                        $eventForDate = $this->eventRepo->getEvent($subdomain, $slug, $date);
-
-                        if ($eventForDate) {
-                            $event = $eventForDate;
-
-                            if (! $canonicalEvent) {
-                                $canonicalEvent = $eventForDate;
-                            }
-                        }
-                    }
+                    $slug = '';
                 }
-            } else {
-                // Try to find event by slug
+            }
+
+            if ($slug) {
                 $canonicalEvent = $this->eventRepo->getEvent($subdomain, $slug, null);
                 $event = $canonicalEvent;
 
@@ -302,26 +287,19 @@ class RoleController extends Controller
                     }
                     $date = $nextDate->format('Y-m-d');
                 }
-            } else if (!$selectedGroup) {
-                if ($canonicalEvent) {
-                    $redirectUrl = $canonicalEvent->getGuestUrl($role->subdomain);
-                    $queryParams = $request->query();
-                    unset($queryParams['date']);
+            } elseif (! $selectedGroup) {
+                $queryParams = collect($request->query())->except('date')->toArray();
 
-                    if (! empty($queryParams)) {
-                        $redirectUrl .= (str_contains($redirectUrl, '?') ? '&' : '?') . http_build_query($queryParams);
-                    }
+                if ($canonicalEvent) {
+                    $redirectUrl = UrlUtils::appendQueryParameters(
+                        $canonicalEvent->getGuestUrl($role->subdomain),
+                        $queryParams
+                    );
 
                     return redirect($redirectUrl);
                 }
 
-                $redirectUrl = $role->getGuestUrl();
-                $queryParams = $request->query();
-                unset($queryParams['date']);
-
-                if (! empty($queryParams)) {
-                    $redirectUrl .= (str_contains($redirectUrl, '?') ? '&' : '?') . http_build_query($queryParams);
-                }
+                $redirectUrl = UrlUtils::appendQueryParameters($role->getGuestUrl(), $queryParams);
 
                 return redirect($redirectUrl);
             }

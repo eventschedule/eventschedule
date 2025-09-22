@@ -577,7 +577,7 @@ class GoogleCalendarService
         $event->google_event_id = $googleEvent['id'];
         $event->name = $googleEvent['summary'] ?: 'Untitled Event';
         $event->description = $googleEvent['description'] ?: '';
-        $event->slug = Event::generateUniqueSlug($event->name);
+        $event->slug = \Str::slug($event->name);
 
         // Set start time
         if ($googleEvent['start']->getDateTime()) {

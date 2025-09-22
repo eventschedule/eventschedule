@@ -174,18 +174,22 @@ class EventRepo
         $venueId = $venue ? $venue->id : null;
 
         if (! $event) {
-            $event = new Event;
+            $event = new Event;       
             $event->user_id = $user->id;
             $event->creator_role_id = $creatorRoleId;
+
+            if ($request->name_en) {
+                $event->slug = \Str::slug($request->name_en);
+            } else {
+                $event->slug = \Str::slug($request->name);
+            }
+
+            if (! $event->slug) {
+                $event->slug = strtolower(\Str::random(5));
+            }
         }
 
         $event->fill($request->all());
-
-        $slugSource = $event->name_en ?: $event->name;
-
-        if (! $event->slug || Event::slugExists($event->slug, $event->id)) {
-            $event->slug = Event::generateUniqueSlug($slugSource, $event->id);
-        }
         
         if (! $request->event_url) {
             $event->event_url = null;
@@ -378,14 +382,13 @@ class EventRepo
 
     public function getEvent($subdomain, $slug, $date = null)
     {
-        $event = null;
+        $date = $date ?: null;
 
         $subdomainRole = Role::where('subdomain', $subdomain)->first();
         $slugRole = Role::where('subdomain', $slug)->first();
-
         $timezone = config('app.timezone', 'UTC');
-        $user = auth()->user();
 
+        $user = auth()->user();
         if ($user && $user->timezone) {
             $timezone = $user->timezone;
         } elseif ($subdomainRole && $subdomainRole->timezone) {
@@ -420,6 +423,20 @@ class EventRepo
             }
         }
 
+        if ($eventDateContext) {
+            $event = $this->findEventBySlugForDate($subdomain, $slug, $eventDateContext);
+
+            if ($event) {
+                return $event;
+            }
+        }
+
+        $event = $this->findEventBySlug($subdomain, $slug);
+
+        if ($event) {
+            return $event;
+        }
+
         if ($subdomainRole && $slugRole) {
             $venue = null;
             $role = null;
@@ -446,15 +463,7 @@ class EventRepo
                             $query->where('role_id', $venue->id);
                         })
                         ->where(function ($query) use ($eventDateContext) {
-                            $query->whereBetween('starts_at', [
-                                $eventDateContext['startUtc'],
-                                $eventDateContext['endUtc'],
-                            ])
-                                ->orWhere(function ($query) use ($eventDateContext) {
-                                    $query->whereNotNull('days_of_week')
-                                        ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDateContext['dayOfWeek'] + 1])
-                                        ->where('starts_at', '<=', $eventDateContext['endUtc']);
-                                });
+                            $this->applyDateContext($query, $eventDateContext);
                         })
                         ->orderBy('starts_at')
                         ->first();
@@ -470,7 +479,7 @@ class EventRepo
                         ->orderBy('starts_at')
                         ->first();
 
-                    if (!$event) {
+                    if (! $event) {
                         $event = Event::with(['venue', 'roles'])
                             ->whereHas('roles', function ($query) use ($role) {
                                 $query->where('role_id', $role->id);
@@ -491,46 +500,62 @@ class EventRepo
         }
 
         if ($eventDateContext) {
-            $event = $this->queryEventBySlug($subdomain, $slug)
+            $event = Event::with(['venue', 'roles'])
                 ->where(function ($query) use ($eventDateContext) {
-                    $query->whereBetween('starts_at', [$eventDateContext['startUtc'], $eventDateContext['endUtc']])
-                        ->orWhere(function ($query) use ($eventDateContext) {
-                            $query->whereNotNull('days_of_week')
-                                ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDateContext['dayOfWeek'] + 1])
-                                ->where('starts_at', '<=', $eventDateContext['endUtc']);
-                        });
+                    $this->applyDateContext($query, $eventDateContext);
                 })
-                ->orderBy('starts_at')
+                ->where(function ($query) use ($subdomain) {
+                    $query->whereHas('roles', function ($q) use ($subdomain) {
+                        $q->where('type', 'venue')
+                            ->where('subdomain', $subdomain);
+                    })->orWhereHas('roles', function ($q) use ($subdomain) {
+                        $q->where('subdomain', $subdomain);
+                    });
+                })
                 ->first();
 
-            if (! $event) {
-                $event = $this->findEventBySlug($subdomain, $slug);
+            if ($event) {
+                return $event;
             }
-        } else {
-            $event = $this->findEventBySlug($subdomain, $slug);
         }
+
+        return null;
+    }
+
+    protected function findEventBySlugForDate(string $subdomain, string $slug, array $eventDateContext)
+    {
+        $query = $this->queryEventBySlug($subdomain, $slug);
+
+        $event = (clone $query)
+            ->where(function ($query) use ($eventDateContext) {
+                $this->applyDateContext($query, $eventDateContext);
+            })
+            ->orderBy('starts_at')
+            ->first();
 
         if ($event) {
             return $event;
         }
 
-        if ($eventDateContext) {
-            $event = Event::with(['venue', 'roles'])
-                        ->where(function ($query) use ($eventDateContext) {
-                            $query->whereBetween('starts_at', [$eventDateContext['startUtc'], $eventDateContext['endUtc']]);
-                        })
-                        ->where(function($query) use ($subdomain) {
-                            $query->whereHas('roles', function($q) use ($subdomain) {
-                                $q->where('type', 'venue')
-                                  ->where('subdomain', $subdomain);
-                            })->orWhereHas('roles', function($q) use ($subdomain) {
-                                $q->where('subdomain', $subdomain);
-                            });
-                        })
-                        ->first();
+        return $this->findEventBySlug($subdomain, $slug);
+    }
+
+    protected function findEventBySlug(string $subdomain, string $slug)
+    {
+        $query = $this->queryEventBySlug($subdomain, $slug);
+
+        $event = (clone $query)
+            ->where('starts_at', '>=', now()->subDay())
+            ->orderBy('starts_at')
+            ->first();
+
+        if ($event) {
+            return $event;
         }
 
-        return $event;
+        return (clone $query)
+            ->orderBy('starts_at', 'desc')
+            ->first();
     }
 
     protected function queryEventBySlug(string $subdomain, string $slug)
@@ -547,23 +572,15 @@ class EventRepo
             });
     }
 
-    protected function findEventBySlug(string $subdomain, string $slug)
+    protected function applyDateContext($query, array $eventDateContext): void
     {
-        $baseQuery = $this->queryEventBySlug($subdomain, $slug);
-
-        $event = (clone $baseQuery)
-            ->where('starts_at', '>=', now()->subDay())
-            ->orderBy('starts_at', 'desc')
-            ->first();
-
-        if ($event) {
-            return $event;
-        }
-
-        return (clone $baseQuery)
-            ->where('starts_at', '<', now())
-            ->orderBy('starts_at', 'desc')
-            ->first();
+        $query->whereBetween('starts_at', [$eventDateContext['startUtc'], $eventDateContext['endUtc']])
+            ->orWhere(function ($query) use ($eventDateContext) {
+                $query->whereNotNull('days_of_week')
+                    ->whereRaw("SUBSTRING(days_of_week, ?, 1) = '1'", [$eventDateContext['dayOfWeek'] + 1])
+                    ->where('starts_at', '<=', $eventDateContext['endUtc']);
+            });
     }
+
 
 }

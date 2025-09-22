@@ -21,16 +21,14 @@
 
         @if ($event && $event->exists)
             @php
-                $eventCanonicalUrl = $event->getGuestUrl();
-                $eventCanonicalSeparator = str_contains($eventCanonicalUrl, '?') ? '&' : '?';
+                $canonicalEventUrl = $event->getGuestUrl();
+                if ($role->language_code != 'en') {
+                    $canonicalEventUrl = \App\Utils\UrlUtils::appendQueryParameters($canonicalEventUrl, [
+                        'lang' => request()->lang ?? (session()->has('translate') ? 'en' : $role->language_code),
+                    ]);
+                }
             @endphp
-            @if ($eventCanonicalUrl)
-                @if ($role->language_code != 'en')
-                    <link rel="canonical" href="{{ $eventCanonicalUrl }}{{ $eventCanonicalSeparator }}{{ 'lang=' . (request()->lang ?? (session()->has('translate') ? 'en' : $role->language_code)) }}">
-                @else
-                    <link rel="canonical" href="{{ $eventCanonicalUrl }}">
-                @endif
-            @endif
+            <link rel="canonical" href="{{ $canonicalEventUrl }}">
             @if ($event->description_html)
             <meta name="description" content="{{ trim(strip_tags($event->translatedDescription())) }}">
             @elseif ($event->role() && $event->role()->description_html)
@@ -48,16 +46,14 @@
             <meta name="twitter:card" content="summary_large_image">
         @elseif ($role->exists)
             @php
-                $roleCanonicalUrl = $role->getGuestUrl();
-                $roleCanonicalSeparator = str_contains($roleCanonicalUrl, '?') ? '&' : '?';
+                $canonicalRoleUrl = $role->getGuestUrl();
+                if ($role->language_code != 'en') {
+                    $canonicalRoleUrl = \App\Utils\UrlUtils::appendQueryParameters($canonicalRoleUrl, [
+                        'lang' => request()->lang ?? (session()->has('translate') ? 'en' : $role->language_code),
+                    ]);
+                }
             @endphp
-            @if ($roleCanonicalUrl)
-                @if ($role->language_code != 'en')
-                    <link rel="canonical" href="{{ $roleCanonicalUrl }}{{ $roleCanonicalSeparator }}{{ 'lang=' . (request()->lang ?? (session()->has('translate') ? 'en' : $role->language_code)) }}">
-                @else
-                    <link rel="canonical" href="{{ $roleCanonicalUrl }}">
-                @endif
-            @endif
+            <link rel="canonical" href="{{ $canonicalRoleUrl }}">
             @if ($description = trim(strip_tags($role->translatedDescription())))
             <meta name="description" content="{{ $description }}">
             <meta property="og:description" content="{{ $description }}">

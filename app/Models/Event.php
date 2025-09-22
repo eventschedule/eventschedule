@@ -92,11 +92,8 @@ class Event extends Model
                 }
             }
 
-            $slugSource = $model->name_en ?: $model->name;
-
-            if (! $model->slug || static::slugExists($model->slug, $model->id)) {
-                $model->slug = static::generateUniqueSlug($slugSource, $model->id);
-            }
+            $baseSlugSource = $model->slug ?: ($model->name_en ?: $model->name);
+            $model->slug = static::generateUniqueSlug($baseSlugSource, $model->id);
         });
 
         static::deleting(function ($event) {
@@ -443,13 +440,21 @@ class Event extends Model
             $subdomain = $this->creatorRole ? $this->creatorRole->subdomain : null;
         }
 
-        $slug = $this->slug ?: ($this->id ? UrlUtils::encodeId($this->id) : null);
+        $slug = $this->slug;
 
-        // TODO support custom_slug
+        if ($venueSubdomain && $roleSubdomain) {
+            $slug = $venueSubdomain == $subdomain ? $roleSubdomain : $venueSubdomain;
+        }
+        
+        // TODO supoprt custom_slug
+        
+        if ($date === null && $this->starts_at) {
+            $date = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d');
+        }
 
         $data = [
-            'subdomain' => $subdomain,
-            'slug' => $slug,
+            'subdomain' => $subdomain, 
+            'slug' => $slug, 
         ];
 
         if ($date) {
@@ -459,14 +464,9 @@ class Event extends Model
         return $data;
     }
 
-    public static function generateUniqueSlug(?string $name, ?int $ignoreId = null): string
+    public static function generateUniqueSlug(?string $value, ?int $ignoreId = null): string
     {
-        $baseSlug = $name ? Str::slug($name) : '';
-
-        if ($baseSlug === '') {
-            $baseSlug = strtolower(Str::random(5));
-        }
-
+        $baseSlug = Str::slug($value ?? '') ?: Str::lower(Str::random(8));
         $slug = $baseSlug;
         $suffix = 1;
 

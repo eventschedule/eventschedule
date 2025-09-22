@@ -535,31 +535,22 @@ const calendarApp = createApp({
             }
             return true;
         },
-        getEventUrl(event, date) {
+        getEventUrl(event, _date) {
             let url = event.guest_url;
-            let queryParams = [];
+            const queryParams = [];
 
-            if (date) {
-                const eventDate = new Date(date);
-                if (!Number.isNaN(eventDate.getTime())) {
-                    queryParams.push('month=' + (eventDate.getMonth() + 1));
-                    queryParams.push('year=' + eventDate.getFullYear());
-                }
-            }
-            
-            // Preserve current filter values
             if (this.selectedCategory) {
                 queryParams.push('category=' + this.selectedCategory);
             }
-            
+
             if (this.selectedGroup) {
                 queryParams.push('schedule=' + this.selectedGroup);
             }
-            
+
             if (queryParams.length > 0) {
-                url += '?' + queryParams.join('&');
+                url += (url.includes('?') ? '&' : '?') + queryParams.join('&');
             }
-            
+
             return url;
         },
         getEventTooltip(event) {
