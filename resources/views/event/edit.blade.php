@@ -729,7 +729,7 @@
                             
                             @foreach($curators as $curator)
                             <div class="mb-4">
-                                <div class="flex items-center mb-2">
+                                <div class="flex items-center mb-2 h-6">
                                     <input type="checkbox" 
                                            id="curator_{{ $curator->encodeId() }}" 
                                            name="curators[]" 
@@ -740,21 +740,25 @@
                                     <label for="curator_{{ $curator->encodeId() }}" class="ml-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
                                         {{ $curator->name }}
                                     </label>
-                                    @if($curator->accept_requests && $curator->request_terms)
-                                    <div class="ml-2 relative group">
-                                        <button type="button" class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none">
-                                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                                            </svg>
-                                        </button>
-                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 w-[28rem] max-w-lg z-10">
-                                            <div class="leading-relaxed" 
-                                                 dir="{{ is_rtl() ? 'rtl' : 'ltr' }}"
-                                                 style="{{ is_rtl() ? 'text-align: right;' : 'text-align: left;' }}">{!! nl2br(e($curator->translatedRequestTerms())) !!}</div>
-                                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
+                                    <div class="ml-2 flex-shrink-0">
+                                        @if($curator->accept_requests && $curator->request_terms)
+                                        <div class="relative group">
+                                            <button type="button" class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none">
+                                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 w-[28rem] max-w-lg z-10">
+                                                <div class="leading-relaxed" 
+                                                     dir="{{ is_rtl() ? 'rtl' : 'ltr' }}"
+                                                     style="{{ is_rtl() ? 'text-align: right;' : 'text-align: left;' }}">{!! nl2br(e($curator->translatedRequestTerms())) !!}</div>
+                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
+                                            </div>
                                         </div>
+                                        @else
+                                        <div class="w-4 h-4"></div>
+                                        @endif
                                     </div>
-                                    @endif
                                 </div>
                                 
                                 @if($curator->groups && count($curator->groups) > 0)
