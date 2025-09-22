@@ -18,14 +18,12 @@ abstract class DuskTestCase extends BaseTestCase
     {
         parent::setUp();
 
-        $this->beforeServingApplication(function ($app) {
-            $app['config']->set('mail.default', 'log');
-            $app['config']->set('mail.mailers.smtp.transport', 'log');
-            $app['config']->set(
-                'mail.mailers.smtp.channel',
-                $app['config']->get('mail.mailers.log.channel')
-            );
-        });
+        $this->app['config']->set('mail.default', 'log');
+        $this->app['config']->set('mail.mailers.smtp.transport', 'log');
+        $this->app['config']->set(
+            'mail.mailers.smtp.channel',
+            $this->app['config']->get('mail.mailers.log.channel')
+        );
     }
 
     /**
