@@ -12,6 +12,23 @@ use PHPUnit\Framework\Attributes\BeforeClass;
 abstract class DuskTestCase extends BaseTestCase
 {
     /**
+     * Prepare the base application configuration for browser tests.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->beforeServingApplication(function ($app) {
+            $app['config']->set('mail.default', 'log');
+            $app['config']->set('mail.mailers.smtp.transport', 'log');
+            $app['config']->set(
+                'mail.mailers.smtp.channel',
+                $app['config']->get('mail.mailers.log.channel')
+            );
+        });
+    }
+
+    /**
      * Prepare for Dusk test execution.
      */
     #[BeforeClass]
