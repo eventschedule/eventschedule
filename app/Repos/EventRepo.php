@@ -300,7 +300,7 @@ class EventRepo
             $event->save();
         }
 
-        if (config('app.hosted')) {
+        if (! config('mail.disable_delivery')) {
             $templates = app(MailTemplateManager::class);
 
             foreach ($roles as $role) {

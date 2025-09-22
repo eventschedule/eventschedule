@@ -113,4 +113,6 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    'disable_delivery' => env('MAIL_DISABLE_DELIVERY', false),
+
 ];
