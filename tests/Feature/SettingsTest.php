@@ -168,6 +168,103 @@ class SettingsTest extends TestCase
         $this->assertSame('Initial Name', config('mail.from.name'));
     }
 
+    public function test_test_mail_rebuilds_mailer_with_updated_configuration(): void
+    {
+        $admin = User::factory()->create(['email' => 'admin@example.com']);
+
+        config([
+            'mail.default' => 'smtp',
+            'mail.mailers.smtp.host' => 'smtp.initial.test',
+            'mail.mailers.smtp.port' => 1025,
+            'mail.mailers.smtp.username' => 'initial-user',
+            'mail.mailers.smtp.password' => 'initial-pass',
+            'mail.mailers.smtp.encryption' => null,
+            'mail.from.address' => 'initial@example.com',
+            'mail.from.name' => 'Initial Name',
+        ]);
+
+        if (app()->bound('mail.manager')) {
+            app('mail.manager')->purge('smtp');
+        }
+
+        app()->forgetInstance('mailer');
+
+        if (method_exists(app(), 'forgetResolvedInstance')) {
+            app()->forgetResolvedInstance('mailer');
+        }
+
+        $initialMailer = app('mail.manager')->mailer('smtp');
+        $this->assertSame('smtp.initial.test', $this->getMailerHost($initialMailer));
+
+        $resolvedInitialMailer = app('mailer');
+        $this->assertSame($initialMailer, $resolvedInitialMailer);
+        $this->assertSame('smtp.initial.test', $this->getMailerHost($resolvedInitialMailer));
+
+        $originalFacade = Mail::getFacadeRoot();
+
+        Mail::swap(new class($this, $admin)
+        {
+            public function __construct(private SettingsTest $testCase, private User $user)
+            {
+            }
+
+            public function raw(string $body, callable $callback): void
+            {
+                $this->testCase->assertSame(__('messages.test_email_body'), $body);
+                $this->testCase->assertIsCallable($callback);
+
+                $managerMailer = app('mail.manager')->mailer('smtp');
+                $this->testCase->assertSame('smtp.mailtrap.io', $this->testCase->getMailerHost($managerMailer));
+
+                $resolvedMailer = app('mailer');
+                $this->testCase->assertSame('smtp.mailtrap.io', $this->testCase->getMailerHost($resolvedMailer));
+
+                $message = Mockery::mock(Message::class);
+                $message->shouldReceive('to')->once()->with($this->user->email)->andReturnSelf();
+                $message->shouldReceive('subject')->once()->with(__('messages.test_email_subject'))->andReturnSelf();
+
+                $callback($message);
+            }
+        });
+
+        try {
+            $payload = [
+                'mail_mailer' => 'smtp',
+                'mail_host' => 'smtp.mailtrap.io',
+                'mail_port' => 2525,
+                'mail_username' => 'mailer@example.com',
+                'mail_password' => 'secret-password',
+                'mail_encryption' => 'tls',
+                'mail_from_address' => 'no-reply@example.com',
+                'mail_from_name' => 'Event Schedule',
+            ];
+
+            $response = $this
+                ->actingAs($admin)
+                ->postJson('/settings/email/test', $payload);
+
+            $response->assertOk();
+
+            $restoredManagerMailer = app('mail.manager')->mailer('smtp');
+            $this->assertSame('smtp.initial.test', $this->getMailerHost($restoredManagerMailer));
+
+            $restoredResolvedMailer = app('mailer');
+            $this->assertSame('smtp.initial.test', $this->getMailerHost($restoredResolvedMailer));
+        } finally {
+            Mail::swap($originalFacade);
+
+            if (app()->bound('mail.manager')) {
+                app('mail.manager')->purge('smtp');
+            }
+
+            app()->forgetInstance('mailer');
+
+            if (method_exists(app(), 'forgetResolvedInstance')) {
+                app()->forgetResolvedInstance('mailer');
+            }
+        }
+    }
+
     public function test_test_mail_reports_mail_driver_failures(): void
     {
         $admin = User::factory()->create(['email' => 'admin@example.com']);
@@ -410,5 +507,20 @@ class SettingsTest extends TestCase
                 return $this->failures;
             }
         };
+    }
+
+    protected function getMailerHost($mailer): ?string
+    {
+        if (! is_object($mailer) || ! method_exists($mailer, 'getSymfonyTransport')) {
+            return null;
+        }
+
+        $transport = $mailer->getSymfonyTransport();
+
+        if (! is_object($transport) || ! method_exists($transport, 'getHost')) {
+            return null;
+        }
+
+        return $transport->getHost();
     }
 }

@@ -430,6 +430,7 @@ class SettingsController extends Controller
             ], 500);
         } finally {
             $this->applyMailConfig($originalSettings);
+            $this->purgeResolvedMailer($originalSettings['mailer'] ?? null);
         }
     }
 
@@ -771,6 +772,21 @@ class SettingsController extends Controller
             'mail.from.address' => $settings['from_address'],
             'mail.from.name' => $settings['from_name'],
         ]);
+
+        $this->purgeResolvedMailer($settings['mailer'] ?? null);
+    }
+
+    protected function purgeResolvedMailer(?string $mailer = null): void
+    {
+        if (app()->bound('mail.manager')) {
+            app('mail.manager')->purge($mailer);
+        }
+
+        app()->forgetInstance('mailer');
+
+        if (method_exists(app(), 'forgetResolvedInstance')) {
+            app()->forgetResolvedInstance('mailer');
+        }
     }
 
     protected function nullableTrim(?string $value): ?string
