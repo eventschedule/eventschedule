@@ -7,11 +7,13 @@ use App\Models\Role;
 use App\Models\Sale;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Notifications\TicketTimeoutNotification;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Notification;
 
 class ReleaseTicketsCommandTest extends TestCase
 {
@@ -101,6 +103,8 @@ class ReleaseTicketsCommandTest extends TestCase
 
         Carbon::setTestNow(Carbon::parse('2024-01-01 13:00:00'));
 
+        Notification::fake();
+
         Artisan::call('app:release-tickets');
 
         Carbon::setTestNow(null);
@@ -112,6 +116,24 @@ class ReleaseTicketsCommandTest extends TestCase
 
         $updatedSold = json_decode($ticket->sold, true);
         $this->assertSame(0, $updatedSold[$sale->event_date]);
+
+        Notification::assertSentOnDemand(
+            TicketTimeoutNotification::class,
+            function ($notification, $channels, $notifiable) use ($sale) {
+                return in_array('mail', $channels, true)
+                    && ($notifiable->routes['mail'] ?? null) === $sale->email;
+            }
+        );
+
+        Notification::assertSentTo(
+            $user,
+            TicketTimeoutNotification::class,
+            function (TicketTimeoutNotification $notification) use ($user, $event) {
+                $mail = $notification->toMail($user);
+
+                return str_contains($mail->subject, $event->name);
+            }
+        );
     }
 
     public function test_it_keeps_recent_unpaid_sales_active(): void

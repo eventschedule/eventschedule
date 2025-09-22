@@ -140,6 +140,82 @@ MD,
                 ':app_name' => 'The application name configured in settings.',
             ],
         ],
+        'ticket_timeout_purchaser' => [
+            'label' => 'Ticket reservation timeout (purchaser)',
+            'description' => 'Sent to attendees when an unpaid ticket reservation expires.',
+            'enabled' => true,
+            'subject' => 'Ticket reservation expired for :event_name',
+            'body' => <<<'MD'
+# Hello!
+
+:subject_line
+
+Payment was not completed within the :expire_after_hours-hour reservation window, so your tickets have been released.
+
+- **Event:** :event_name
+- **Date:** :event_date
+- **Tickets:** :ticket_quantity
+- **Total Reserved:** :amount_total
+- **Order #:** :order_reference
+
+[Review Reservation](:ticket_view_url)
+
+[View Event](:event_url)
+
+Thanks,
+:app_name
+MD,
+            'placeholders' => [
+                ':subject_line' => 'The email subject line with placeholders applied.',
+                ':event_name' => 'Name of the event.',
+                ':event_date' => 'Date of the event, or "Date to be announced" when not available.',
+                ':ticket_quantity' => 'Number of tickets reserved in the order.',
+                ':amount_total' => 'Total amount reserved or paid, including the currency.',
+                ':event_url' => 'Public link where the recipient can view the event.',
+                ':ticket_view_url' => 'Private link where the purchaser can review their order.',
+                ':order_reference' => 'Internal reference number for the order.',
+                ':expire_after_hours' => 'Number of hours the reservation remained active before expiring.',
+                ':app_name' => 'The application name configured in settings.',
+            ],
+        ],
+        'ticket_timeout_organizer' => [
+            'label' => 'Ticket reservation timeout (organizer)',
+            'description' => 'Sent to organizers when an unpaid ticket reservation expires.',
+            'enabled' => true,
+            'subject' => 'Ticket reservation expired for :event_name',
+            'body' => <<<'MD'
+# Hello!
+
+:subject_line
+
+The reservation expired after :expire_after_hours hour(s) without payment.
+
+- **Buyer:** :buyer_name (:buyer_email)
+- **Tickets:** :ticket_quantity
+- **Date:** :event_date
+- **Total Reserved:** :amount_total
+- **Order #:** :order_reference
+
+[View Event](:event_url)
+
+Thanks,
+:app_name
+MD,
+            'placeholders' => [
+                ':subject_line' => 'The email subject line with placeholders applied.',
+                ':event_name' => 'Name of the event.',
+                ':event_date' => 'Date of the event, or "Date to be announced" when not available.',
+                ':ticket_quantity' => 'Number of tickets reserved in the order.',
+                ':amount_total' => 'Total amount reserved or paid, including the currency.',
+                ':buyer_name' => 'Name provided by the purchaser.',
+                ':buyer_email' => 'Email address provided by the purchaser.',
+                ':event_url' => 'Public link where the recipient can view the event.',
+                ':ticket_view_url' => 'Link to the event page filtered to ticket information.',
+                ':order_reference' => 'Internal reference number for the order.',
+                ':expire_after_hours' => 'Number of hours the reservation remained active before expiring.',
+                ':app_name' => 'The application name configured in settings.',
+            ],
+        ],
         'ticket_paid_purchaser' => [
             'label' => 'Ticket payment confirmation (purchaser)',
             'description' => 'Sent to attendees after their order is marked as paid.',
