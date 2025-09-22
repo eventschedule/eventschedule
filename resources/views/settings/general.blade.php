@@ -37,6 +37,18 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('public_url')" />
                             </div>
 
+                            <div>
+                                <x-input-label for="update_repository_url" :value="__('messages.update_repository_url')" />
+                                <x-text-input id="update_repository_url" name="update_repository_url" type="url"
+                                    class="mt-1 block w-full"
+                                    :value="old('update_repository_url', $generalSettings['update_repository_url'])"
+                                    autocomplete="off" />
+                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                    {{ __('messages.update_repository_url_help') }}
+                                </p>
+                                <x-input-error class="mt-2" :messages="$errors->get('update_repository_url')" />
+                            </div>
+
                             <div class="flex items-center gap-4">
                                 <x-primary-button>{{ __('messages.save') }}</x-primary-button>
 

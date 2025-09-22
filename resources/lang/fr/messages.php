@@ -135,6 +135,8 @@ return [
     'back_to_email_templates' => 'Retour aux modèles',
     'public_url' => 'Public URL',
     'public_url_help' => 'This URL is used when generating public links for schedules, events, and emails.',
+    'update_repository_url' => 'Update repository URL',
+    'update_repository_url_help' => 'Set the repository URL that should be checked for new releases. Leave blank to use the default.',
     'general_settings_saved' => 'General settings saved successfully.',
     'email_template_subject' => 'Subject',
     'email_template_subject_curated' => 'Subject (Curated schedules)',
