@@ -125,7 +125,9 @@ class SettingsTest extends TestCase
             })
             ->andReturnNull();
 
-        Mail::shouldReceive('failures')->once()->andReturn([]);
+        $mailer = $this->makeMailerStub([]);
+
+        Mail::shouldReceive('mailer')->once()->andReturn($mailer);
 
         $payload = [
             'mail_mailer' => 'smtp',
@@ -197,7 +199,9 @@ class SettingsTest extends TestCase
             })
             ->andReturnNull();
 
-        Mail::shouldReceive('failures')->once()->andReturn(['failed@example.com']);
+        $mailer = $this->makeMailerStub(['failed@example.com']);
+
+        Mail::shouldReceive('mailer')->once()->andReturn($mailer);
 
         $payload = [
             'mail_mailer' => 'smtp',
@@ -259,7 +263,7 @@ class SettingsTest extends TestCase
             ->withAnyArgs()
             ->andThrow(new RuntimeException('SMTP connection refused'));
 
-        Mail::shouldReceive('failures')->never();
+        Mail::shouldReceive('mailer')->never();
 
         $payload = [
             'mail_mailer' => 'smtp',
@@ -329,7 +333,7 @@ class SettingsTest extends TestCase
         ]);
 
         Mail::shouldReceive('raw')->never();
-        Mail::shouldReceive('failures')->never();
+        Mail::shouldReceive('mailer')->never();
 
         $payload = [
             'mail_mailer' => 'smtp',
@@ -391,5 +395,20 @@ class SettingsTest extends TestCase
         ]);
 
         $this->assertSame('https://example.org', config('app.url'));
+    }
+
+    protected function makeMailerStub(array $failures): object
+    {
+        return new class($failures)
+        {
+            public function __construct(private array $failures)
+            {
+            }
+
+            public function failures(): array
+            {
+                return $this->failures;
+            }
+        };
     }
 }
