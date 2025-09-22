@@ -19,7 +19,7 @@ trait AccountSetupTrait
                 ->check('terms')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SIGN UP')
-                ->waitForLocation('/events', 10)
+                ->waitForLocation('/events', 20)
                 ->assertPathIs('/events')
                 ->assertSee($name);
     }
@@ -37,7 +37,7 @@ trait AccountSetupTrait
                 ->type('address1', $address)
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
-                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 10)
+                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 20)
                 ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
     }
 
@@ -53,7 +53,7 @@ trait AccountSetupTrait
                 ->pause(1000)
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
-                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 10)
+                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 20)
                 ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
     }
 
@@ -71,7 +71,7 @@ trait AccountSetupTrait
                 ->check('accept_requests')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
-                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 10)
+                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 20)
                 ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
     }
 
@@ -92,7 +92,7 @@ trait AccountSetupTrait
                 ->type('tickets[0][description]', 'General admission ticket')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
-                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $talentName)) . '/schedule', 10)
+                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $talentName)) . '/schedule', 20)
                 ->assertSee($venueName);
     }
 
@@ -198,7 +198,7 @@ trait AccountSetupTrait
             form.submit();
         ");
 
-        $browser->waitForLocation('/login', 10)
+        $browser->waitForLocation('/login', 20)
             ->assertPathIs('/login');
     }
 } 

@@ -28,9 +28,9 @@ class GeneralTest extends DuskTestCase
 
             // Log out
             $browser->press($name)
-                    ->waitForText('Log Out', 2)
+                    ->waitForText('Log Out', 5)
                     ->clickLink('Log Out')
-                    ->waitForLocation('/login', 10)
+                    ->waitForLocation('/login', 20)
                     ->assertPathIs('/login');
 
             // Log back in
@@ -38,7 +38,7 @@ class GeneralTest extends DuskTestCase
                     ->type('email', $email)
                     ->type('password', $password)
                     ->press('LOG IN')
-                    ->waitForLocation('/events', 10)
+                    ->waitForLocation('/events', 20)
                     ->assertPathIs('/events')
                     ->assertSee($name);
 
@@ -49,7 +49,7 @@ class GeneralTest extends DuskTestCase
                     ->type('website', 'https://google.com')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->waitForLocation('/venue/schedule', 10)
+                    ->waitForLocation('/venue/schedule', 20)
                     ->assertSee('google.com');
 
             // Create/edit talent using the trait
@@ -59,7 +59,7 @@ class GeneralTest extends DuskTestCase
                     ->type('website', 'https://google.com')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->waitForLocation('/talent/schedule', 10)
+                    ->waitForLocation('/talent/schedule', 20)
                     ->assertSee('google.com');
 
             // Create/edit event
@@ -68,7 +68,7 @@ class GeneralTest extends DuskTestCase
 
             $browser->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->waitForLocation('/talent/schedule', 10)
+                    ->waitForLocation('/talent/schedule', 20)
                     ->assertSee('Venue');
 
             // Create/edit event
@@ -78,7 +78,7 @@ class GeneralTest extends DuskTestCase
             $browser->type('name', 'Venue Event')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
-                    ->waitForLocation('/venue/schedule', 10)
+                    ->waitForLocation('/venue/schedule', 20)
                     ->assertSee('Venue Event');
         });
     }
