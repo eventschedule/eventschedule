@@ -20,11 +20,7 @@
                     console.error('Could not copy text: ', err);
                     alert('{{ __("messages.copy_failed") }}');
                 });
-            }
-            
-            
-            
-            
+            }                                            
             
             function downloadImage() {
                 if (!graphicData) return;
@@ -67,6 +63,12 @@
                 fetch('{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain, "layout" => $layout]) }}')
                     .then(response => {
                         if (!response.ok) {
+                            // Handle 404 specifically for no events
+                            if (response.status === 404) {
+                                return response.json().then(data => {
+                                    throw new Error(data.error || '{{ __("messages.no_events_found") }}');
+                                });
+                            }
                             throw new Error('Network response was not ok');
                         }
                         return response.json();
