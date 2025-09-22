@@ -235,6 +235,7 @@ class RoleController extends Controller
 
         $otherRole = null;
         $event = null;
+        $canonicalEvent = null;
         $selectedGroup = null;
         $date = $request->date ? date('Y-m-d', strtotime($request->date)) : null;
 
@@ -256,11 +257,37 @@ class RoleController extends Controller
                     $slug = ''; // Clear slug since it's a group, not an event
                 } else {
                     // Try to find event by slug
-                    $event = $this->eventRepo->getEvent($subdomain, $slug, $date);
+                    $canonicalEvent = $this->eventRepo->getEvent($subdomain, $slug, null);
+                    $event = $canonicalEvent;
+
+                    if ($date) {
+                        $eventForDate = $this->eventRepo->getEvent($subdomain, $slug, $date);
+
+                        if ($eventForDate) {
+                            $event = $eventForDate;
+
+                            if (! $canonicalEvent) {
+                                $canonicalEvent = $eventForDate;
+                            }
+                        }
+                    }
                 }
             } else {
                 // Try to find event by slug
-                $event = $this->eventRepo->getEvent($subdomain, $slug, $date);
+                $canonicalEvent = $this->eventRepo->getEvent($subdomain, $slug, null);
+                $event = $canonicalEvent;
+
+                if ($date) {
+                    $eventForDate = $this->eventRepo->getEvent($subdomain, $slug, $date);
+
+                    if ($eventForDate) {
+                        $event = $eventForDate;
+
+                        if (! $canonicalEvent) {
+                            $canonicalEvent = $eventForDate;
+                        }
+                    }
+                }
             }
 
             if ($event) {
@@ -276,8 +303,28 @@ class RoleController extends Controller
                     $date = $nextDate->format('Y-m-d');
                 }
             } else if (!$selectedGroup) {
-                return redirect($role->getGuestUrl());
-            }        
+                if ($canonicalEvent) {
+                    $redirectUrl = $canonicalEvent->getGuestUrl($role->subdomain);
+                    $queryParams = $request->query();
+                    unset($queryParams['date']);
+
+                    if (! empty($queryParams)) {
+                        $redirectUrl .= (str_contains($redirectUrl, '?') ? '&' : '?') . http_build_query($queryParams);
+                    }
+
+                    return redirect($redirectUrl);
+                }
+
+                $redirectUrl = $role->getGuestUrl();
+                $queryParams = $request->query();
+                unset($queryParams['date']);
+
+                if (! empty($queryParams)) {
+                    $redirectUrl .= (str_contains($redirectUrl, '?') ? '&' : '?') . http_build_query($queryParams);
+                }
+
+                return redirect($redirectUrl);
+            }
         }
 
         // Also check for schedule parameter in query string
