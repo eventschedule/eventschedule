@@ -1266,6 +1266,28 @@
 
         </div>
 
+        @if ($role->exists && in_array($role->type, ['talent', 'curator', 'venue']))
+        @php $typeLabel = __('messages.' . $role->type); @endphp
+        <div class="max-w-7xl mx-auto mt-6">
+            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                <div class="max-w-xl">
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                        {{ __('messages.delete') }} {{ $typeLabel }}
+                    </h2>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                        {{ __('messages.are_you_sure') }}
+                    </p>
+                    <div class="mt-4">
+                        <x-danger-button type="button"
+                            onclick="if (confirm(@js(__('messages.are_you_sure')))) { window.location.href = '{{ route('role.delete', ['subdomain' => $role->subdomain]) }}'; }">
+                            {{ __('messages.delete') }} {{ $typeLabel }}
+                        </x-danger-button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+
         @if (auth()->user()->google_token)
         <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
             <h3 class="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
