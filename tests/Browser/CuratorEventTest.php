@@ -116,10 +116,10 @@ class CuratorEventTest extends DuskTestCase
     protected function createEventForBothCurators(Browser $browser): void
     {
         // Create an event and add it to both curators
-        $browser->visit('/talent/add-event?date=' . date('Y-m-d'))
-                ->select('#selected_venue')
-                ->type('duration', '2')
-                
+        $browser->visit('/talent/add-event?date=' . date('Y-m-d'));
+        $this->selectExistingVenue($browser);
+
+        $browser->type('duration', '2')
                 ->scrollIntoView('input[name="curators[]"]')
                 // Use curator names to find and check the checkboxes
                 ->script("

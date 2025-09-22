@@ -28,7 +28,7 @@ return [
     |
     */
 
-    'version_installed' => env('SELF_UPDATER_VERSION_INSTALLED', 'v1.0.32-dfiore1230'),
+    'version_installed' => env('SELF_UPDATER_VERSION_INSTALLED', 'v1.0.33-dfiore1230'),
 
     'github_defaults' => [
         'vendor' => $defaultGithubVendor,

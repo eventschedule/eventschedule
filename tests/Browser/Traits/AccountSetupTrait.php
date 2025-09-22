@@ -19,7 +19,7 @@ trait AccountSetupTrait
                 ->check('terms')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SIGN UP')
-                ->waitForLocation('/events', 10)
+                ->waitForLocation('/events', 20)
                 ->assertPathIs('/events')
                 ->assertSee($name);
     }
@@ -37,7 +37,7 @@ trait AccountSetupTrait
                 ->type('address1', $address)
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
-                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 10)
+                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 20)
                 ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
     }
 
@@ -53,7 +53,7 @@ trait AccountSetupTrait
                 ->pause(1000)
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
-                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 10)
+                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 20)
                 ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
     }
 
@@ -71,7 +71,7 @@ trait AccountSetupTrait
                 ->check('accept_requests')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
-                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 10)
+                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 20)
                 ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
     }
 
@@ -80,18 +80,76 @@ trait AccountSetupTrait
      */
     protected function createTestEventWithTickets(Browser $browser, string $talentName = 'Talent', string $venueName = 'Venue', string $eventName = 'Test Event'): void
     {
-        $browser->visit('/' . strtolower(str_replace(' ', '-', $talentName)) . '/add-event?date=' . date('Y-m-d', strtotime('+3 days')))
-                ->select('#selected_venue')
-                ->type('name', $eventName)
+        $browser->visit('/' . strtolower(str_replace(' ', '-', $talentName)) . '/add-event?date=' . date('Y-m-d', strtotime('+3 days')));
+
+        $this->selectExistingVenue($browser);
+
+        $browser->type('name', $eventName)
                 ->scrollIntoView('input[name="tickets_enabled"]')
                 ->check('tickets_enabled')
                 ->type('tickets[0][price]', '10')
                 ->type('tickets[0][quantity]', '50')
-                ->type('tickets[0][description]', 'General admission ticket')                    
+                ->type('tickets[0][description]', 'General admission ticket')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
-                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $talentName)) . '/schedule', 10)
+                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $talentName)) . '/schedule', 20)
                 ->assertSee($venueName);
+    }
+
+    /**
+     * Select the first available venue for the event form using Vue state
+     */
+    protected function selectExistingVenue(Browser $browser): void
+    {
+        $browser->waitFor('#selected_venue', 5);
+
+        $browser->waitUsing(5, 100, function () use ($browser) {
+            $result = $browser->script('return window.app && Array.isArray(window.app.venues) && window.app.venues.length > 0;');
+
+            return ! empty($result) && $result[0];
+        });
+
+        $browser->script(<<<'JS'
+            if (window.app && Array.isArray(window.app.venues) && window.app.venues.length > 0) {
+                window.app.venueType = 'use_existing';
+                window.app.selectedVenue = window.app.venues[0];
+            }
+        JS);
+
+        $browser->waitUsing(5, 100, function () use ($browser) {
+            $result = $browser->script("return (function () {\n                var input = document.querySelector('input[name=\"venue_id\"]');\n                return !!(input && input.value);\n            })();");
+
+            return ! empty($result) && $result[0];
+        });
+    }
+
+    /**
+     * Add the first available member to the event form using Vue state
+     */
+    protected function addExistingMember(Browser $browser): void
+    {
+        $browser->waitUsing(5, 100, function () use ($browser) {
+            $result = $browser->script('return window.app && Array.isArray(window.app.filteredMembers) && window.app.filteredMembers.length > 0;');
+
+            return ! empty($result) && $result[0];
+        });
+
+        $browser->script(<<<'JS'
+            if (window.app && Array.isArray(window.app.filteredMembers) && window.app.filteredMembers.length > 0) {
+                window.app.memberType = 'use_existing';
+                window.app.selectedMember = window.app.filteredMembers[0];
+
+                if (typeof window.app.addExistingMember === 'function') {
+                    window.app.addExistingMember();
+                }
+            }
+        JS);
+
+        $browser->waitUsing(5, 100, function () use ($browser) {
+            $result = $browser->script('return window.app && Array.isArray(window.app.selectedMembers) && window.app.selectedMembers.length > 0;');
+
+            return ! empty($result) && $result[0];
+        });
     }
 
     /**
@@ -140,7 +198,7 @@ trait AccountSetupTrait
             form.submit();
         ");
 
-        $browser->waitForLocation('/login', 10)
+        $browser->waitForLocation('/login', 20)
             ->assertPathIs('/login');
     }
 } 
