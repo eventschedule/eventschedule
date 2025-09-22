@@ -9,6 +9,7 @@ use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Jobs\SyncEventToGoogleCalendar;
+use Illuminate\Support\Str;
 
 class Event extends Model
 {
@@ -88,8 +89,11 @@ class Event extends Model
                     $eventRole->description_translated = null;
                     $eventRole->description_html_translated = null;
                     $eventRole->save();
-                }                
+                }
             }
+
+            $baseSlugSource = $model->slug ?: ($model->name_en ?: $model->name);
+            $model->slug = static::generateUniqueSlug($baseSlugSource, $model->id);
         });
 
         static::deleting(function ($event) {
@@ -427,7 +431,7 @@ class Event extends Model
     {
         $venueSubdomain = $this->venue && $this->venue->isClaimed() ? $this->venue->subdomain : null;
         $roleSubdomain = $this->role() && $this->role()->isClaimed() ? $this->role()->subdomain : null;
-        
+
         if (! $subdomain) {
             $subdomain = $roleSubdomain ? $roleSubdomain : $venueSubdomain;
         }
@@ -443,21 +447,54 @@ class Event extends Model
         }
         
         // TODO supoprt custom_slug
-        
-        if ($date === null && $this->starts_at) {
-            $date = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d');
+
+        if ($date === true) {
+            $date = $this->starts_at
+                ? Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d')
+                : null;
+        }
+
+        if ($date instanceof Carbon) {
+            $date = $date->format('Y-m-d');
+        }
+
+        if (is_string($date)) {
+            $date = trim($date) !== '' ? trim($date) : null;
         }
 
         $data = [
-            'subdomain' => $subdomain, 
-            'slug' => $slug, 
+            'subdomain' => $subdomain,
+            'slug' => $slug,
         ];
 
-        if ($date) {
+        if ($date !== null && $date !== false) {
             $data['date'] = $date;
         }
 
         return $data;
+    }
+
+    public static function generateUniqueSlug(?string $value, ?int $ignoreId = null): string
+    {
+        $baseSlug = Str::slug($value ?? '') ?: Str::lower(Str::random(8));
+        $slug = $baseSlug;
+        $suffix = 1;
+
+        while (static::slugExists($slug, $ignoreId)) {
+            $slug = $baseSlug . '-' . $suffix;
+            $suffix++;
+        }
+
+        return $slug;
+    }
+
+    public static function slugExists(string $slug, ?int $ignoreId = null): bool
+    {
+        return static::where('slug', $slug)
+            ->when($ignoreId, function ($query) use ($ignoreId) {
+                $query->where('id', '!=', $ignoreId);
+            })
+            ->exists();
     }
 
     public function getTitle()

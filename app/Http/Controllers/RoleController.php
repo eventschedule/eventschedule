@@ -248,19 +248,31 @@ class RoleController extends Controller
         }
 
         if ($slug) {
-            // Check if slug is a group slug first
+            $canonicalEvent = null;
+
             if ($role->groups) {
                 $group = $role->groups->where('slug', $slug)->first();
                 if ($group) {
                     $selectedGroup = $group;
-                    $slug = ''; // Clear slug since it's a group, not an event
-                } else {
-                    // Try to find event by slug
-                    $event = $this->eventRepo->getEvent($subdomain, $slug, $date);
+                    $slug = '';
                 }
-            } else {
-                // Try to find event by slug
-                $event = $this->eventRepo->getEvent($subdomain, $slug, $date);
+            }
+
+            if ($slug) {
+                $canonicalEvent = $this->eventRepo->getEvent($subdomain, $slug, null);
+                $event = $canonicalEvent;
+
+                if ($date) {
+                    $eventForDate = $this->eventRepo->getEvent($subdomain, $slug, $date);
+
+                    if ($eventForDate) {
+                        $event = $eventForDate;
+
+                        if (! $canonicalEvent) {
+                            $canonicalEvent = $eventForDate;
+                        }
+                    }
+                }
             }
 
             if ($event) {
@@ -275,9 +287,22 @@ class RoleController extends Controller
                     }
                     $date = $nextDate->format('Y-m-d');
                 }
-            } else if (!$selectedGroup) {
-                return redirect($role->getGuestUrl());
-            }        
+            } elseif (! $selectedGroup) {
+                $queryParams = collect($request->query())->except('date')->toArray();
+
+                if ($canonicalEvent) {
+                    $redirectUrl = UrlUtils::appendQueryParameters(
+                        $canonicalEvent->getGuestUrl($role->subdomain),
+                        $queryParams
+                    );
+
+                    return redirect($redirectUrl);
+                }
+
+                $redirectUrl = UrlUtils::appendQueryParameters($role->getGuestUrl(), $queryParams);
+
+                return redirect($redirectUrl);
+            }
         }
 
         // Also check for schedule parameter in query string
@@ -1714,7 +1739,7 @@ class RoleController extends Controller
                 'venue_name' => $event->getVenueDisplayName(),
                 'local_starts_at' => $event->localStartsAt(),
                 'image_url' => $event->getImageUrl(),
-                'guest_url' => $event->getGuestUrl($subdomain, ''),
+                'guest_url' => $event->getGuestUrl($subdomain),
                 'group_id' => $groupId ? \App\Utils\UrlUtils::encodeId($groupId) : null,
                 'category_id' => $event->category_id,
             ];

@@ -365,7 +365,12 @@ class TicketController extends Controller
 
         $event = $sale->event;
         
-        return redirect($event->getGuestUrl($subdomain, $sale->event_date) . '&tickets=true');
+        $redirectUrl = UrlUtils::appendQueryParameters(
+            $event->getGuestUrl($subdomain),
+            ['tickets' => 'true']
+        );
+
+        return redirect($redirectUrl);
     }
 
     public function paymentUrlSuccess($sale_id)
@@ -396,7 +401,12 @@ class TicketController extends Controller
 
         $event = $sale->event;
         
-        return redirect($event->getGuestUrl($sale->subdomain, $sale->event_date) . '&tickets=true');
+        $redirectUrl = UrlUtils::appendQueryParameters(
+            $event->getGuestUrl($sale->subdomain),
+            ['tickets' => 'true']
+        );
+
+        return redirect($redirectUrl);
     }
 
     public function scan()

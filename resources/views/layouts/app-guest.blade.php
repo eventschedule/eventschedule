@@ -19,12 +19,16 @@
             <link rel="alternate" hreflang="{{ $role->language_code }}" href="{{ str_replace('http://', 'https://', request()->fullUrlWithQuery(['lang' => $role->language_code])) }}">
         @endif
 
-        @if ($event && $event->exists) 
-            @if ($role->language_code != 'en')
-                <link rel="canonical" href="{{ $event->getGuestUrl() }}&{{ 'lang=' . (request()->lang ?? (session()->has('translate') ? 'en' : $role->language_code)) }}">
-            @else
-                <link rel="canonical" href="{{ $event->getGuestUrl() }}">
-            @endif
+        @if ($event && $event->exists)
+            @php
+                $canonicalEventUrl = $event->getGuestUrl();
+                if ($role->language_code != 'en') {
+                    $canonicalEventUrl = \App\Utils\UrlUtils::appendQueryParameters($canonicalEventUrl, [
+                        'lang' => request()->lang ?? (session()->has('translate') ? 'en' : $role->language_code),
+                    ]);
+                }
+            @endphp
+            <link rel="canonical" href="{{ $canonicalEventUrl }}">
             @if ($event->description_html)
             <meta name="description" content="{{ trim(strip_tags($event->translatedDescription())) }}">
             @elseif ($event->role() && $event->role()->description_html)
@@ -41,11 +45,15 @@
             <meta name="twitter:image:alt" content="{{ $event->translatedName() }}">
             <meta name="twitter:card" content="summary_large_image">
         @elseif ($role->exists)
-            @if ($role->language_code != 'en')
-                <link rel="canonical" href="{{ $role->getGuestUrl() }}?{{ 'lang=' . (request()->lang ?? (session()->has('translate') ? 'en' : $role->language_code)) }}">
-            @else
-                <link rel="canonical" href="{{ $role->getGuestUrl() }}">
-            @endif
+            @php
+                $canonicalRoleUrl = $role->getGuestUrl();
+                if ($role->language_code != 'en') {
+                    $canonicalRoleUrl = \App\Utils\UrlUtils::appendQueryParameters($canonicalRoleUrl, [
+                        'lang' => request()->lang ?? (session()->has('translate') ? 'en' : $role->language_code),
+                    ]);
+                }
+            @endphp
+            <link rel="canonical" href="{{ $canonicalRoleUrl }}">
             @if ($description = trim(strip_tags($role->translatedDescription())))
             <meta name="description" content="{{ $description }}">
             <meta property="og:description" content="{{ $description }}">

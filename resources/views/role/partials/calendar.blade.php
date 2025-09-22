@@ -55,7 +55,7 @@
             'days_of_week' => $event->days_of_week,
             'local_starts_at' => $event->localStartsAt(),
             'local_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
-            'guest_url' => $event->getGuestUrl(isset($subdomain) ? $subdomain : '', ''),
+            'guest_url' => $event->getGuestUrl(isset($subdomain) ? $subdomain : ''),
             'image_url' => $event->getImageUrl(),
             'can_edit' => auth()->user() && auth()->user()->canEditEvent($event),
             'edit_url' => auth()->user() && auth()->user()->canEditEvent($event)
@@ -535,27 +535,22 @@ const calendarApp = createApp({
             }
             return true;
         },
-        getEventUrl(event, date) {
+        getEventUrl(event, _date) {
             let url = event.guest_url;
-            let queryParams = [];
-            
-            if (date) {
-                queryParams.push('date=' + date);
-            }
-            
-            // Preserve current filter values
+            const queryParams = [];
+
             if (this.selectedCategory) {
                 queryParams.push('category=' + this.selectedCategory);
             }
-            
+
             if (this.selectedGroup) {
                 queryParams.push('schedule=' + this.selectedGroup);
             }
-            
+
             if (queryParams.length > 0) {
-                url += '?' + queryParams.join('&');
+                url += (url.includes('?') ? '&' : '?') + queryParams.join('&');
             }
-            
+
             return url;
         },
         getEventTooltip(event) {

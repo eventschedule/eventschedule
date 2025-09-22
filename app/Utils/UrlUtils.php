@@ -37,6 +37,21 @@ class UrlUtils
         return rtrim($url, '/');
     }
 
+    public static function appendQueryParameters(string $url, array $parameters): string
+    {
+        $filtered = array_filter($parameters, function ($value) {
+            return $value !== null && $value !== '';
+        });
+
+        if (empty($filtered)) {
+            return $url;
+        }
+
+        $separator = str_contains($url, '?') ? '&' : '?';
+
+        return $url . $separator . http_build_query($filtered);
+    }
+
     public static function cleanSlug($slug)
     {
         $slug = preg_replace('/[^a-zA-Z0-9]/', '', trim($slug));

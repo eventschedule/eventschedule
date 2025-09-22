@@ -92,6 +92,6 @@ class Sale extends Model
     {
         $event = $this->event;
 
-        return $event->getGuestUrl($this->subdomain, $this->event_date);
+        return $event->getGuestUrl($this->subdomain);
     }
 }
