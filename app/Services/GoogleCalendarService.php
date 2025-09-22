@@ -767,14 +767,24 @@ class GoogleCalendarService
             return null;
         }
 
+        // Get IDs of venues where the role's user is a follower
+        $followedVenueIds = Role::where('type', 'venue')
+            ->whereHas('members', function($query) use ($role) {
+                $query->where('user_id', $role->user_id)
+                      ->where('level', 'follower');
+            })
+            ->where('is_deleted', false)
+            ->pluck('id')
+            ->toArray();
+
         $venue = Role::where('type', 'venue')
                     ->where('address1', $location)
-                    ->where('user_id', $role->user_id)
+                    ->whereIn('id', $followedVenueIds)
                     ->where('is_deleted', false)
                     ->first();
 
-        if ($role) {
-            return $role;
+        if ($venue) {
+            return $venue;
         }
 
         $venue = new Role();
