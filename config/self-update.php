@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+$defaultGithubVendor = env('SELF_UPDATER_REPO_VENDOR', 'eventschedule');
+$defaultGithubName = env('SELF_UPDATER_REPO_NAME', 'eventschedule');
+$defaultGithubUrl = env('SELF_UPDATER_REPO_URL', 'https://github.com/eventschedule/eventschedule');
+
 return [
 
     /*
@@ -24,7 +28,13 @@ return [
     |
     */
 
-    'version_installed' => env('SELF_UPDATER_VERSION_INSTALLED', 'v1.0.32'),
+    'version_installed' => env('SELF_UPDATER_VERSION_INSTALLED', 'v1.0.32-dfiore1230'),
+
+    'github_defaults' => [
+        'vendor' => $defaultGithubVendor,
+        'name' => $defaultGithubName,
+        'url' => $defaultGithubUrl,
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -42,9 +52,9 @@ return [
     'repository_types' => [
         'github' => [
             'type'                 => 'github',
-            'repository_vendor'    => env('SELF_UPDATER_REPO_VENDOR', 'eventschedule'),
-            'repository_name'      => env('SELF_UPDATER_REPO_NAME', 'eventschedule'),
-            'repository_url'       => 'https://github.com/eventschedule/eventschedule',
+            'repository_vendor'    => $defaultGithubVendor,
+            'repository_name'      => $defaultGithubName,
+            'repository_url'       => $defaultGithubUrl,
             'download_path'        => env('SELF_UPDATER_DOWNLOAD_PATH', '/tmp'),
             'private_access_token' => env('SELF_UPDATER_GITHUB_PRIVATE_ACCESS_TOKEN', ''),
             'use_branch'           => env('SELF_UPDATER_USE_BRANCH', ''),

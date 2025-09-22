@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Listeners\LogSentMessage;
 use App\Models\Setting;
+use App\Support\UpdateConfigManager;
 use App\Support\WalletConfigManager;
 use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Notifications\Events\NotificationSent;
@@ -65,6 +66,8 @@ class AppServiceProvider extends ServiceProvider
 
         if (Schema::hasTable('settings')) {
             $generalSettings = Setting::forGroup('general');
+
+            UpdateConfigManager::apply($generalSettings['update_repository_url'] ?? null);
 
             if (!empty($generalSettings['public_url'])) {
                 config(['app.url' => $generalSettings['public_url']]);

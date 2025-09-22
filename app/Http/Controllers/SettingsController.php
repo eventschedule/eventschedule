@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use App\Support\MailTemplateManager;
+use App\Support\UpdateConfigManager;
 use App\Support\WalletConfigManager;
 use Codedge\Updater\UpdaterManager;
 use Illuminate\Http\JsonResponse;
@@ -438,15 +439,24 @@ class SettingsController extends Controller
 
         $validated = $request->validate([
             'public_url' => ['required', 'string', 'max:255', 'url'],
+            'update_repository_url' => ['nullable', 'string', 'max:255', 'url'],
         ]);
 
         $publicUrl = $this->sanitizeUrl($validated['public_url']);
 
+        $updateRepositoryUrl = $this->nullableTrim($validated['update_repository_url'] ?? null);
+
+        if ($updateRepositoryUrl !== null) {
+            $updateRepositoryUrl = $this->sanitizeUrl($updateRepositoryUrl);
+        }
+
         Setting::setGroup('general', [
             'public_url' => $publicUrl,
+            'update_repository_url' => $updateRepositoryUrl,
         ]);
 
         $this->applyGeneralConfig($publicUrl);
+        UpdateConfigManager::apply($updateRepositoryUrl);
 
         return redirect()->route('settings.general')->with('status', 'general-settings-updated');
     }
@@ -713,6 +723,8 @@ class SettingsController extends Controller
 
         return [
             'public_url' => $storedGeneralSettings['public_url'] ?? config('app.url'),
+            'update_repository_url' => $storedGeneralSettings['update_repository_url']
+                ?? config('self-update.repository_types.github.repository_url'),
         ];
     }
 
