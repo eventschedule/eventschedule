@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\TicketPaidNotification;
+use App\Notifications\TicketTimeoutNotification;
 use App\Utils\NotificationUtils;
 
 class Sale extends Model
@@ -34,6 +35,12 @@ class Sale extends Model
 
                 self::sendPaidNotifications($sale);
             }
+
+            if ($sale->wasChanged('status') && $sale->status === 'expired') {
+                $sale->loadMissing(['saleTickets.ticket', 'event.roles.members', 'event.venue.members', 'event.creatorRole.members', 'event.user']);
+
+                self::sendTimeoutNotifications($sale);
+            }
         });
     }
 
@@ -61,6 +68,33 @@ class Sale extends Model
 
         if ($event->user && $event->user->email && $event->user->is_subscribed !== false && ! $notifiedUserIds->contains($event->user->id)) {
             Notification::send($event->user, new TicketPaidNotification($sale, 'organizer', $contextRole));
+        }
+    }
+
+    protected static function sendTimeoutNotifications(self $sale): void
+    {
+        $event = $sale->event;
+        $contextRole = $event->venue ?: $event->creatorRole;
+
+        if ($sale->email) {
+            Notification::route('mail', $sale->email)
+                ->notify(new TicketTimeoutNotification($sale, 'purchaser', $contextRole));
+        }
+
+        $notifiedUserIds = collect();
+        $organizerRoles = collect([$event->creatorRole, $event->venue])->filter();
+
+        foreach ($organizerRoles as $organizerRole) {
+            $members = NotificationUtils::roleMembers($organizerRole);
+
+            if ($members->isNotEmpty()) {
+                Notification::send($members, new TicketTimeoutNotification($sale, 'organizer', $organizerRole));
+                $notifiedUserIds = $notifiedUserIds->merge($members->pluck('id'));
+            }
+        }
+
+        if ($event->user && $event->user->email && $event->user->is_subscribed !== false && ! $notifiedUserIds->contains($event->user->id)) {
+            Notification::send($event->user, new TicketTimeoutNotification($sale, 'organizer', $contextRole));
         }
     }
 
