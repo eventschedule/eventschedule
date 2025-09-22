@@ -80,18 +80,76 @@ trait AccountSetupTrait
      */
     protected function createTestEventWithTickets(Browser $browser, string $talentName = 'Talent', string $venueName = 'Venue', string $eventName = 'Test Event'): void
     {
-        $browser->visit('/' . strtolower(str_replace(' ', '-', $talentName)) . '/add-event?date=' . date('Y-m-d', strtotime('+3 days')))
-                ->select('#selected_venue')
-                ->type('name', $eventName)
+        $browser->visit('/' . strtolower(str_replace(' ', '-', $talentName)) . '/add-event?date=' . date('Y-m-d', strtotime('+3 days')));
+
+        $this->selectExistingVenue($browser);
+
+        $browser->type('name', $eventName)
                 ->scrollIntoView('input[name="tickets_enabled"]')
                 ->check('tickets_enabled')
                 ->type('tickets[0][price]', '10')
                 ->type('tickets[0][quantity]', '50')
-                ->type('tickets[0][description]', 'General admission ticket')                    
+                ->type('tickets[0][description]', 'General admission ticket')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
                 ->waitForLocation('/' . strtolower(str_replace(' ', '-', $talentName)) . '/schedule', 10)
                 ->assertSee($venueName);
+    }
+
+    /**
+     * Select the first available venue for the event form using Vue state
+     */
+    protected function selectExistingVenue(Browser $browser): void
+    {
+        $browser->waitFor('#selected_venue', 5);
+
+        $browser->waitUsing(5, 100, function () use ($browser) {
+            $result = $browser->script('return window.app && Array.isArray(window.app.venues) && window.app.venues.length > 0;');
+
+            return ! empty($result) && $result[0];
+        });
+
+        $browser->script(<<<'JS'
+            if (window.app && Array.isArray(window.app.venues) && window.app.venues.length > 0) {
+                window.app.venueType = 'use_existing';
+                window.app.selectedVenue = window.app.venues[0];
+            }
+        JS);
+
+        $browser->waitUsing(5, 100, function () use ($browser) {
+            $result = $browser->script("return (function () {\n                var input = document.querySelector('input[name=\"venue_id\"]');\n                return !!(input && input.value);\n            })();");
+
+            return ! empty($result) && $result[0];
+        });
+    }
+
+    /**
+     * Add the first available member to the event form using Vue state
+     */
+    protected function addExistingMember(Browser $browser): void
+    {
+        $browser->waitUsing(5, 100, function () use ($browser) {
+            $result = $browser->script('return window.app && Array.isArray(window.app.filteredMembers) && window.app.filteredMembers.length > 0;');
+
+            return ! empty($result) && $result[0];
+        });
+
+        $browser->script(<<<'JS'
+            if (window.app && Array.isArray(window.app.filteredMembers) && window.app.filteredMembers.length > 0) {
+                window.app.memberType = 'use_existing';
+                window.app.selectedMember = window.app.filteredMembers[0];
+
+                if (typeof window.app.addExistingMember === 'function') {
+                    window.app.addExistingMember();
+                }
+            }
+        JS);
+
+        $browser->waitUsing(5, 100, function () use ($browser) {
+            $result = $browser->script('return window.app && Array.isArray(window.app.selectedMembers) && window.app.selectedMembers.length > 0;');
+
+            return ! empty($result) && $result[0];
+        });
     }
 
     /**
