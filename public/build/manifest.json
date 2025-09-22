@@ -1,0 +1,27 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-BMy41M7m.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/css/countrySelect.min.css": {
+    "file": "assets/countrySelect-IUQOXjF3.css",
+    "src": "resources/css/countrySelect.min.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-BufOQPip.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "css": [
+      "assets/app-Bmjhe05e.css"
+    ]
+  },
+  "resources/js/countrySelect.min.js": {
+    "file": "assets/countrySelect.min-B9n9fkrT.js",
+    "name": "countrySelect.min",
+    "src": "resources/js/countrySelect.min.js",
+    "isEntry": true
+  }
+}
