@@ -6,6 +6,11 @@
     $totalDays = $endOfMonth->diffInDays($startOfMonth) + 1;
     $totalWeeks = ceil($totalDays / 7);
     $unavailable = [];
+    
+    // Calculate today's date considering user's timezone if logged in
+    $today = auth()->check() && auth()->user()->timezone 
+        ? Carbon\Carbon::now(auth()->user()->timezone)->startOfDay()
+        : Carbon\Carbon::now()->startOfDay();
 
     // Always initialize as arrays
     $eventGroupIds = [];
@@ -246,11 +251,11 @@
                         <div class="flex justify-between">
                         @if ($route == 'admin')
                         <time datetime="{{ $currentDate->format('Y-m-d') }}"
-                            class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded bg-[#4E81FA] font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
+                            class="{{ $currentDate->day == $today->day && $currentDate->month == $today->month && $currentDate->year == $today->year ? 'flex h-6 w-6 items-center justify-center rounded bg-[#4E81FA] font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
                         @else
                         <time datetime="{{ $currentDate->format('Y-m-d') }}"
-                            style="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? ('background-color: ' . (isset($otherRole) && $otherRole->accent_color ? $otherRole->accent_color : (isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA'))) : '' }}"
-                            class="{{ $currentDate->day == now()->day && $currentDate->month == now()->month && $currentDate->year == now()->year ? 'flex h-6 w-6 items-center justify-center rounded font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
+                            style="{{ $currentDate->day == $today->day && $currentDate->month == $today->month && $currentDate->year == $today->year ? ('background-color: ' . (isset($otherRole) && $otherRole->accent_color ? $otherRole->accent_color : (isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA'))) : '' }}"
+                            class="{{ $currentDate->day == $today->day && $currentDate->month == $today->month && $currentDate->year == $today->year ? 'flex h-6 w-6 items-center justify-center rounded font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
                         @endif
                         @if (count($unavailable))
                             <div class="has-tooltip" data-tooltip="{!! __('messages.unavailable') . ":<br/>" . implode("<br/>", $unavailable) !!}">
@@ -391,7 +396,8 @@ const calendarApp = createApp({
             subdomain: '{{ isset($subdomain) ? $subdomain : '' }}',
             route: '{{ $route }}',
             embed: {{ isset($embed) && $embed ? 'true' : 'false' }},
-            isRtl: {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'true' : 'false' }}
+            isRtl: {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'true' : 'false' }},
+            userTimezone: '{{ auth()->check() && auth()->user()->timezone ? auth()->user()->timezone : null }}'
         }
     },
     computed: {
@@ -581,7 +587,15 @@ const calendarApp = createApp({
         },
         isPastEvent(dateStr) {
             const eventDate = new Date(dateStr + 'T23:59:59');
-            const today = new Date();
+            let today = new Date();
+            
+            // If user has a timezone, adjust today's date to their timezone
+            if (this.userTimezone) {
+                // Create a date in the user's timezone
+                const userNow = new Date().toLocaleString("en-US", {timeZone: this.userTimezone});
+                today = new Date(userNow);
+            }
+            
             today.setHours(0, 0, 0, 0);
             return eventDate < today;
         },
