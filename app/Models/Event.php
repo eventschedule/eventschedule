@@ -9,6 +9,7 @@ use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Jobs\SyncEventToGoogleCalendar;
+use Illuminate\Support\Str;
 
 class Event extends Model
 {
@@ -88,7 +89,13 @@ class Event extends Model
                     $eventRole->description_translated = null;
                     $eventRole->description_html_translated = null;
                     $eventRole->save();
-                }                
+                }
+            }
+
+            $slugSource = $model->name_en ?: $model->name;
+
+            if (! $model->slug || static::slugExists($model->slug, $model->id)) {
+                $model->slug = static::generateUniqueSlug($slugSource, $model->id);
             }
         });
 
@@ -427,7 +434,7 @@ class Event extends Model
     {
         $venueSubdomain = $this->venue && $this->venue->isClaimed() ? $this->venue->subdomain : null;
         $roleSubdomain = $this->role() && $this->role()->isClaimed() ? $this->role()->subdomain : null;
-        
+
         if (! $subdomain) {
             $subdomain = $roleSubdomain ? $roleSubdomain : $venueSubdomain;
         }
@@ -450,6 +457,34 @@ class Event extends Model
         }
 
         return $data;
+    }
+
+    public static function generateUniqueSlug(?string $name, ?int $ignoreId = null): string
+    {
+        $baseSlug = $name ? Str::slug($name) : '';
+
+        if ($baseSlug === '') {
+            $baseSlug = strtolower(Str::random(5));
+        }
+
+        $slug = $baseSlug;
+        $suffix = 1;
+
+        while (static::slugExists($slug, $ignoreId)) {
+            $slug = $baseSlug . '-' . $suffix;
+            $suffix++;
+        }
+
+        return $slug;
+    }
+
+    public static function slugExists(string $slug, ?int $ignoreId = null): bool
+    {
+        return static::where('slug', $slug)
+            ->when($ignoreId, function ($query) use ($ignoreId) {
+                $query->where('id', '!=', $ignoreId);
+            })
+            ->exists();
     }
 
     public function getTitle()
