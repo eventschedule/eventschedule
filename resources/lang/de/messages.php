@@ -402,6 +402,7 @@ return [
     'customer' => 'Kunde',
     'transaction_reference' => 'Transaktionsreferenz',
     'total' => 'Gesamt',
+    'remaining' => 'Verbleibend',
     'number_of_attendees' => 'Anzahl der Teilnehmer',
     'terms_and_conditions' => 'Allgemeine Geschäftsbedingungen',
     'event_support_contact' => 'Event-Support-Kontakt',

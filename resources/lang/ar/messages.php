@@ -400,6 +400,7 @@ return [
     'customer' => 'العميل',
     'transaction_reference' => 'مرجع المعاملة',
     'total' => 'الإجمالي',
+    'remaining' => 'المتبقي',
     'number_of_attendees' => 'عدد الحضور',
     'terms_and_conditions' => 'الشروط والأحكام',
     'event_support_contact' => 'اتصال دعم الحدث',

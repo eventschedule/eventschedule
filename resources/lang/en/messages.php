@@ -511,6 +511,7 @@ return [
     'customer' => 'Customer',
     'transaction_reference' => 'Transaction Reference',
     'total' => 'Total',
+    'remaining' => 'Remaining',
     'number_of_attendees' => 'Number of Attendees',
     'terms_and_conditions' => 'Terms & Conditions',
     'terms_public_note' => 'This page is publicly accessible so guests and ticket holders can review the Terms & Conditions at any time.',

@@ -586,6 +586,7 @@ return [
     'customer' => 'לקוח',
     'transaction_reference' => 'התייחסות עסקה',
     'total' => 'סה"כ',
+    'remaining' => 'נותרו',
     'number_of_attendees' => 'מספר משתתפים',
     'terms_and_conditions' => 'תנאים והגבלות',
     'event_support_contact' => 'יצירת קשר לתמיכה באירוע',

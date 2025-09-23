@@ -765,6 +765,59 @@ class Event extends Model
         return $this->tickets->sum('quantity');
     }
 
+    public function hasLimitedTickets()
+    {
+        if (! $this->tickets_enabled) {
+            return false;
+        }
+
+        if (! $this->relationLoaded('tickets')) {
+            $this->load('tickets');
+        }
+
+        return $this->tickets->contains(function ($ticket) {
+            return ! is_null($ticket->quantity) && $ticket->quantity > 0;
+        });
+    }
+
+    public function getTotalTicketsSold()
+    {
+        if (! $this->relationLoaded('tickets')) {
+            $this->load('tickets');
+        }
+
+        return $this->tickets->sum(function ($ticket) {
+            if (! $ticket->sold) {
+                return 0;
+            }
+
+            $sold = json_decode($ticket->sold, true);
+
+            if (! is_array($sold)) {
+                return 0;
+            }
+
+            return collect($sold)->sum();
+        });
+    }
+
+    public function getRemainingTicketQuantity()
+    {
+        if (! $this->hasLimitedTickets()) {
+            return null;
+        }
+
+        $totalQuantity = $this->getTotalTicketQuantity();
+
+        if ($totalQuantity <= 0) {
+            return null;
+        }
+
+        $remaining = $totalQuantity - $this->getTotalTicketsSold();
+
+        return max($remaining, 0);
+    }
+
     /**
      * Sync this event to Google Calendar for all connected users
      */

@@ -406,6 +406,7 @@ return [
     'customer' => 'Cliente',
     'transaction_reference' => 'Referencia de transacción',
     'total' => 'Total',
+    'remaining' => 'Restantes',
     'number_of_attendees' => 'Número de asistentes',
     'terms_and_conditions' => 'Términos y condiciones',
     'event_support_contact' => 'Contacto de soporte del evento',
