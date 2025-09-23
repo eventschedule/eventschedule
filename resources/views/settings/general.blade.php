@@ -49,19 +49,6 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('update_repository_url')" />
                             </div>
 
-                            <div>
-                                <x-input-label for="terms_markdown" :value="__('messages.terms_settings_label')" />
-                                <textarea id="terms_markdown" name="terms_markdown"
-                                    class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">{{ old('terms_markdown', $generalSettings['terms_markdown']) }}</textarea>
-                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                    {{ __('messages.terms_settings_description') }}
-                                </p>
-                                <p class="mt-2 text-xs text-gray-500 dark:text-gray-500">
-                                    {{ __('messages.terms_settings_hint') }}
-                                </p>
-                                <x-input-error class="mt-2" :messages="$errors->get('terms_markdown')" />
-                            </div>
-
                             <div class="flex items-center gap-4">
                                 <x-primary-button>{{ __('messages.save') }}</x-primary-button>
 

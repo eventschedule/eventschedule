@@ -39,6 +39,7 @@ class SettingsTest extends TestCase
         $response->assertOk();
         $response->assertSee('Email Settings');
         $response->assertSee('General Settings');
+        $response->assertSee('Terms & Conditions');
     }
 
     public function test_non_admin_cannot_access_settings_page(): void
@@ -641,8 +642,8 @@ class SettingsTest extends TestCase
         $admin = User::factory()->create();
 
         $payload = [
-            'public_url' => 'https://example.org',
-            'terms_markdown' => "## Custom Terms\n\nPlease review before attending.",
+            'public_url' => 'https://example.org/',
+            'update_repository_url' => 'https://github.com/example/repo/',
         ];
 
         $response = $this
@@ -659,14 +660,46 @@ class SettingsTest extends TestCase
             'value' => 'https://example.org',
         ]);
 
+        $this->assertDatabaseHas('settings', [
+            'group' => 'general',
+            'key' => 'update_repository_url',
+            'value' => 'https://github.com/example/repo',
+        ]);
+
+        $generalSettings = Setting::forGroup('general');
+
+        $this->assertSame('https://example.org', $generalSettings['public_url']);
+        $this->assertSame('https://github.com/example/repo', $generalSettings['update_repository_url']);
+        $this->assertSame('https://example.org', config('app.url'));
+    }
+
+    public function test_admin_can_update_terms_settings(): void
+    {
+        $admin = User::factory()->create();
+
+        Setting::setGroup('general', [
+            'public_url' => 'https://example.org',
+        ]);
+
+        $payload = [
+            'terms_markdown' => "## Custom Terms\n\nPlease review before attending.",
+        ];
+
+        $response = $this
+            ->actingAs($admin)
+            ->patch('/settings/terms', $payload);
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/settings/terms');
+
         $generalSettings = Setting::forGroup('general');
 
         $this->assertSame("## Custom Terms\n\nPlease review before attending.", $generalSettings['terms_markdown']);
         $this->assertStringContainsString('<h2>Custom Terms</h2>', $generalSettings['terms_html']);
         $this->assertArrayHasKey('terms_updated_at', $generalSettings);
         $this->assertNotEmpty($generalSettings['terms_updated_at']);
-
-        $this->assertSame('https://example.org', config('app.url'));
+        $this->assertSame('https://example.org', $generalSettings['public_url']);
     }
 
     protected function makeMailerStub(array $failures): object

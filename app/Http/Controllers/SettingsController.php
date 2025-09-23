@@ -63,6 +63,15 @@ class SettingsController extends Controller
         ]);
     }
 
+    public function terms(Request $request): View
+    {
+        $this->authorizeAdmin($request->user());
+
+        return view('settings.terms', [
+            'termsSettings' => $this->getTermsSettings(),
+        ]);
+    }
+
     public function integrations(Request $request): View
     {
         $this->authorizeAdmin($request->user());
@@ -443,17 +452,11 @@ class SettingsController extends Controller
         $validated = $request->validate([
             'public_url' => ['required', 'string', 'max:255', 'url'],
             'update_repository_url' => ['nullable', 'string', 'max:255', 'url'],
-            'terms_markdown' => ['nullable', 'string', 'max:65000'],
         ]);
 
         $publicUrl = $this->sanitizeUrl($validated['public_url']);
 
         $updateRepositoryUrl = $this->nullableTrim($validated['update_repository_url'] ?? null);
-
-        $termsMarkdown = $this->nullableTrim($validated['terms_markdown'] ?? null);
-        $termsHtml = $termsMarkdown ? MarkdownUtils::convertToHtml($termsMarkdown) : null;
-
-        $storedGeneralSettings = Setting::forGroup('general');
 
         if ($updateRepositoryUrl !== null) {
             $updateRepositoryUrl = $this->sanitizeUrl($updateRepositoryUrl);
@@ -462,6 +465,28 @@ class SettingsController extends Controller
         Setting::setGroup('general', [
             'public_url' => $publicUrl,
             'update_repository_url' => $updateRepositoryUrl,
+        ]);
+
+        $this->applyGeneralConfig($publicUrl);
+        UpdateConfigManager::apply($updateRepositoryUrl);
+
+        return redirect()->route('settings.general')->with('status', 'general-settings-updated');
+    }
+
+    public function updateTerms(Request $request): RedirectResponse
+    {
+        $this->authorizeAdmin($request->user());
+
+        $validated = $request->validate([
+            'terms_markdown' => ['nullable', 'string', 'max:65000'],
+        ]);
+
+        $termsMarkdown = $this->nullableTrim($validated['terms_markdown'] ?? null);
+        $termsHtml = $termsMarkdown ? MarkdownUtils::convertToHtml($termsMarkdown) : null;
+
+        $storedGeneralSettings = Setting::forGroup('general');
+
+        Setting::setGroup('general', [
             'terms_markdown' => $termsMarkdown,
             'terms_html' => $termsHtml,
             'terms_updated_at' => (($storedGeneralSettings['terms_markdown'] ?? null) !== $termsMarkdown)
@@ -469,10 +494,7 @@ class SettingsController extends Controller
                 : ($storedGeneralSettings['terms_updated_at'] ?? null),
         ]);
 
-        $this->applyGeneralConfig($publicUrl);
-        UpdateConfigManager::apply($updateRepositoryUrl);
-
-        return redirect()->route('settings.general')->with('status', 'general-settings-updated');
+        return redirect()->route('settings.terms')->with('status', 'terms-settings-updated');
     }
 
     public function updateMailTemplate(Request $request, MailTemplateManager $mailTemplates, string $template): RedirectResponse
@@ -766,6 +788,14 @@ class SettingsController extends Controller
             'public_url' => $storedGeneralSettings['public_url'] ?? config('app.url'),
             'update_repository_url' => $storedGeneralSettings['update_repository_url']
                 ?? config('self-update.repository_types.github.repository_url'),
+        ];
+    }
+
+    protected function getTermsSettings(): array
+    {
+        $storedGeneralSettings = Setting::forGroup('general');
+
+        return [
             'terms_markdown' => $storedGeneralSettings['terms_markdown']
                 ?? config('terms.default_markdown'),
         ];
