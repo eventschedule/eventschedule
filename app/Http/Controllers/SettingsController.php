@@ -7,6 +7,7 @@ use App\Support\MailConfigManager;
 use App\Support\MailTemplateManager;
 use App\Support\UpdateConfigManager;
 use App\Support\WalletConfigManager;
+use App\Utils\MarkdownUtils;
 use Codedge\Updater\UpdaterManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -442,11 +443,17 @@ class SettingsController extends Controller
         $validated = $request->validate([
             'public_url' => ['required', 'string', 'max:255', 'url'],
             'update_repository_url' => ['nullable', 'string', 'max:255', 'url'],
+            'terms_markdown' => ['nullable', 'string', 'max:65000'],
         ]);
 
         $publicUrl = $this->sanitizeUrl($validated['public_url']);
 
         $updateRepositoryUrl = $this->nullableTrim($validated['update_repository_url'] ?? null);
+
+        $termsMarkdown = $this->nullableTrim($validated['terms_markdown'] ?? null);
+        $termsHtml = $termsMarkdown ? MarkdownUtils::convertToHtml($termsMarkdown) : null;
+
+        $storedGeneralSettings = Setting::forGroup('general');
 
         if ($updateRepositoryUrl !== null) {
             $updateRepositoryUrl = $this->sanitizeUrl($updateRepositoryUrl);
@@ -455,6 +462,11 @@ class SettingsController extends Controller
         Setting::setGroup('general', [
             'public_url' => $publicUrl,
             'update_repository_url' => $updateRepositoryUrl,
+            'terms_markdown' => $termsMarkdown,
+            'terms_html' => $termsHtml,
+            'terms_updated_at' => (($storedGeneralSettings['terms_markdown'] ?? null) !== $termsMarkdown)
+                ? now()->toIso8601String()
+                : ($storedGeneralSettings['terms_updated_at'] ?? null),
         ]);
 
         $this->applyGeneralConfig($publicUrl);
@@ -752,6 +764,8 @@ class SettingsController extends Controller
             'public_url' => $storedGeneralSettings['public_url'] ?? config('app.url'),
             'update_repository_url' => $storedGeneralSettings['update_repository_url']
                 ?? config('self-update.repository_types.github.repository_url'),
+            'terms_markdown' => $storedGeneralSettings['terms_markdown']
+                ?? config('terms.default_markdown'),
         ];
     }
 
