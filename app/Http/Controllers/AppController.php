@@ -167,6 +167,10 @@ class AppController extends Controller
             RecursiveIteratorIterator::SELF_FIRST
         );
 
+        $directoriesToCheck = [$destination => true];
+        $directoriesToCreate = [];
+        $filesToCopy = [];
+
         foreach ($iterator as $item) {
             $relativePath = ltrim(Str::replaceFirst($source, '', $item->getPathname()), DIRECTORY_SEPARATOR);
             $relativePath = str_replace('\\', '/', $relativePath);
@@ -182,32 +186,68 @@ class AppController extends Controller
             $targetPath = $destination . '/' . $relativePath;
 
             if ($item->isDir()) {
-                File::ensureDirectoryExists($targetPath);
+                $directoriesToCreate[] = $targetPath;
+                $directoriesToCheck[$targetPath] = true;
+
+                $parentDirectory = dirname($targetPath);
+
+                if ($parentDirectory !== $targetPath) {
+                    $directoriesToCheck[$parentDirectory] = true;
+                }
+
                 continue;
             }
 
-            File::ensureDirectoryExists(dirname($targetPath));
+            $targetDirectory = dirname($targetPath);
 
-            $this->ensureWritableDirectory($destination, dirname($targetPath), $relativePath);
+            $directoriesToCheck[$targetDirectory] = true;
 
-            if (File::exists($targetPath)) {
-                if (! File::delete($targetPath) && File::exists($targetPath)) {
+            $filesToCopy[] = [
+                'source' => $item->getPathname(),
+                'target' => $targetPath,
+                'relative' => $relativePath,
+            ];
+        }
+
+        $unwritableDirectories = [];
+
+        foreach (array_keys($directoriesToCheck) as $directory) {
+            if (is_dir($directory) && ! is_writable($directory)) {
+                $unwritableDirectories[] = $directory;
+            }
+        }
+
+        if ($unwritableDirectories !== []) {
+            throw new RuntimeException(
+                $this->formatUnwritableDirectoriesMessage($destination, $unwritableDirectories)
+            );
+        }
+
+        foreach ($directoriesToCreate as $directory) {
+            File::ensureDirectoryExists($directory);
+        }
+
+        foreach ($filesToCopy as $file) {
+            File::ensureDirectoryExists(dirname($file['target']));
+
+            if (File::exists($file['target'])) {
+                if (! File::delete($file['target']) && File::exists($file['target'])) {
                     throw new RuntimeException(
                         sprintf(
                             'Unable to remove "%s" before updating it. Please check the file permissions.',
-                            $relativePath
+                            $file['relative']
                         )
                     );
                 }
             }
 
             try {
-                File::copy($item->getPathname(), $targetPath);
+                File::copy($file['source'], $file['target']);
             } catch (\Throwable $exception) {
                 throw new RuntimeException(
                     sprintf(
                         'Unable to copy the update file "%s". Please ensure the application files are writable.',
-                        $relativePath
+                        $file['relative']
                     ),
                     previous: $exception
                 );
@@ -215,37 +255,39 @@ class AppController extends Controller
         }
     }
 
-    private function ensureWritableDirectory(string $basePath, string $absoluteDirectory, string $relativePath): void
+    private function formatUnwritableDirectoriesMessage(string $basePath, array $directories): string
     {
-        if (! is_dir($absoluteDirectory)) {
-            return;
-        }
+        $relativeDirectories = array_map(
+            fn (string $directory) => $this->relativeDirectory($basePath, $directory),
+            array_unique($directories)
+        );
 
-        if (is_writable($absoluteDirectory)) {
-            return;
-        }
-
-        $relativeDirectory = trim(Str::replaceFirst($basePath, '', $absoluteDirectory), DIRECTORY_SEPARATOR);
-
-        if ($relativeDirectory === '') {
-            $relativeDirectory = '.';
-        }
+        sort($relativeDirectories);
 
         $exampleCommand = sprintf(
             'sudo chown -R www-data:www-data %s',
             escapeshellarg(base_path())
         );
 
-        throw new RuntimeException(
-            sprintf(
-                'Unable to copy the update file "%s" because the "%s" directory is not writable. '
-                . 'Please adjust the directory permissions and try again. '
-                . 'Ensure the application files are owned by the web server user (for example: %s).',
-                $relativePath,
-                $relativeDirectory,
-                $exampleCommand
-            )
+        return sprintf(
+            'Unable to copy the update files because the following directories are not writable: %s. '
+            . 'Please adjust the directory permissions and try again. '
+            . 'Ensure the application files are owned by the web server user (for example: %s).',
+            implode(', ', $relativeDirectories),
+            $exampleCommand
         );
+    }
+
+    private function relativeDirectory(string $basePath, string $absoluteDirectory): string
+    {
+        $relativeDirectory = trim(
+            Str::replaceFirst($basePath, '', $absoluteDirectory),
+            DIRECTORY_SEPARATOR
+        );
+
+        $relativeDirectory = str_replace('\\', '/', $relativeDirectory);
+
+        return $relativeDirectory === '' ? '.' : $relativeDirectory;
     }
 
     private function shouldSkipPath(string $relativePath, array $excludeFolders): bool
