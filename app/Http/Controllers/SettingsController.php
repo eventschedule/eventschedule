@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Setting;
+use App\Support\MailConfigManager;
 use App\Support\MailTemplateManager;
 use App\Support\UpdateConfigManager;
 use App\Support\WalletConfigManager;
@@ -802,20 +803,7 @@ class SettingsController extends Controller
             config(['mail.disable_delivery' => $this->toBoolean($settings['disable_delivery'])]);
         }
 
-        $this->purgeResolvedMailer($settings['mailer'] ?? null);
-    }
-
-    protected function purgeResolvedMailer(?string $mailer = null): void
-    {
-        if (app()->bound('mail.manager')) {
-            app('mail.manager')->purge($mailer);
-        }
-
-        app()->forgetInstance('mailer');
-
-        if (method_exists(app(), 'forgetResolvedInstance')) {
-            app()->forgetResolvedInstance('mailer');
-        }
+        MailConfigManager::purgeResolvedMailer($settings['mailer'] ?? null);
     }
 
     protected function nullableTrim(?string $value): ?string
