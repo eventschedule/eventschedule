@@ -190,7 +190,23 @@ class EventRepo
             }
         }
 
-        $event->fill($request->all());
+        $input = $request->all();
+
+        if (array_key_exists('slug', $input)) {
+            $slugValue = $input['slug'];
+
+            if ($slugValue !== null) {
+                $slugValue = Str::slug($slugValue);
+            }
+
+            if ($slugValue === '') {
+                $slugValue = null;
+            }
+
+            $input['slug'] = $slugValue;
+        }
+
+        $event->fill($input);
         
         if (! $request->event_url) {
             $event->event_url = null;

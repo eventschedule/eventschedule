@@ -17,6 +17,7 @@ class EventCreateRequest extends FormRequest
     {        
         return [
             'flyer_image_url' => ['image', 'max:2500'],
+            'slug' => ['nullable', 'string', 'max:255'],
         ];
     }
 }
