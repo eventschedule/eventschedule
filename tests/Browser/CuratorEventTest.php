@@ -95,7 +95,7 @@ class CuratorEventTest extends DuskTestCase
             $this->assertEquals(EventRole::count(), 4, 
                 'There should be 4 event_role records before editing the event');
             
-            $browser->visit($eventUrl)
+            $browser->visit($this->relativeGuestUrl($eventUrl))
                     ->waitForText('Edit Event', 5)
                     ->clickLink('Edit Event')
                     ->waitForText('Edit Event', 5)
@@ -140,4 +140,17 @@ class CuratorEventTest extends DuskTestCase
                 ->waitForLocation('/talent/schedule', 5)
                 ->assertSee('Talent');
     }
-} 
+
+    private function relativeGuestUrl(string $url): string
+    {
+        $parts = parse_url($url);
+
+        $path = $parts['path'] ?? '/';
+
+        if (! empty($parts['query'])) {
+            $path .= '?' . $parts['query'];
+        }
+
+        return $path;
+    }
+}
