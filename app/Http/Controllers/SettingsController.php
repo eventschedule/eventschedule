@@ -738,6 +738,7 @@ class SettingsController extends Controller
             'disable_delivery' => array_key_exists('disable_delivery', $storedMailSettings)
                 ? $this->toBoolean($storedMailSettings['disable_delivery'])
                 : $this->toBoolean(config('mail.disable_delivery')),
+            'smtp_url' => config('mail.mailers.smtp.url'),
         ];
     }
 
@@ -753,6 +754,7 @@ class SettingsController extends Controller
             'from_address' => config('mail.from.address'),
             'from_name' => config('mail.from.name'),
             'disable_delivery' => $this->toBoolean(config('mail.disable_delivery')),
+            'smtp_url' => config('mail.mailers.smtp.url'),
         ];
     }
 
@@ -786,6 +788,12 @@ class SettingsController extends Controller
 
     protected function applyMailConfig(array $settings): void
     {
+        if (array_key_exists('smtp_url', $settings)) {
+            config(['mail.mailers.smtp.url' => $settings['smtp_url']]);
+        } elseif (($settings['mailer'] ?? config('mail.default')) === 'smtp' && config('mail.mailers.smtp.url') !== null) {
+            config(['mail.mailers.smtp.url' => null]);
+        }
+
         config(['mail.default' => $settings['mailer']]);
 
         if ($settings['host'] !== null) {

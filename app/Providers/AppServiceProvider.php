@@ -78,6 +78,10 @@ class AppServiceProvider extends ServiceProvider
             $mailSettings = Setting::forGroup('mail');
 
             if (!empty($mailSettings)) {
+                if (config('mail.mailers.smtp.url') !== null) {
+                    config(['mail.mailers.smtp.url' => null]);
+                }
+
                 $mailer = $mailSettings['mailer'] ?? null;
 
                 if (!empty($mailSettings['mailer'])) {
