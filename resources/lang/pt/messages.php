@@ -236,6 +236,8 @@ return [
     'ticket_link_copied' => 'Link dos ingressos copiado para a área de transferência',
     'checkout' => 'Finalizar compra',
     'tickets' => 'Ingressos',
+    'total_tickets' => 'Total de ingressos',
+    'available_tickets' => 'Ingressos disponíveis',
     'requires_pro_plan' => 'Requer um plano Pro',
     'save_as_default' => 'Salvar como padrão',
     'learn_more' => 'Saiba mais',

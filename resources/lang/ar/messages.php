@@ -374,6 +374,8 @@ return [
     'ticket_link_copied' => 'تم نسخ رابط التذاكر إلى الحافظة',
     'checkout' => 'الدفع',
     'tickets' => 'التذاكر',
+    'total_tickets' => 'إجمالي التذاكر',
+    'available_tickets' => 'التذاكر المتاحة',
     'requires_pro_plan' => 'يتطلب خطة برو',
     'save_as_default' => 'حفظ كافتراضي',
     'learn_more' => 'اعرف المزيد',

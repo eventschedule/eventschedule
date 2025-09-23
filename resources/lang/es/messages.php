@@ -380,6 +380,8 @@ return [
     'ticket_link_copied' => 'Enlace de entradas copiado al portapapeles',
     'checkout' => 'Pagar',
     'tickets' => 'Entradas',
+    'total_tickets' => 'Entradas totales',
+    'available_tickets' => 'Entradas disponibles',
     'requires_pro_plan' => 'Requiere un plan Pro',
     'save_as_default' => 'Guardar como predeterminado',
     'learn_more' => 'Aprender más',

@@ -379,6 +379,8 @@ return [
     'ticket_link_copied' => 'Lien des billets copié dans le presse-papiers',
     'checkout' => 'Paiement',
     'tickets' => 'Billets',
+    'total_tickets' => 'Nombre total de billets',
+    'available_tickets' => 'Billets disponibles',
     'requires_pro_plan' => 'Nécessite un plan Pro',
     'save_as_default' => 'Enregistrer par défaut',
     'learn_more' => 'En savoir plus',
