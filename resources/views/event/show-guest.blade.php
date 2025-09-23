@@ -57,7 +57,7 @@
               }
             @endphp
             <div class="mt-2">
-              <a href="{{ $backUrl }}" class="text-white text-sm hover:underline">
+              <a href="{{ $backUrl }}" class="text-white text-sm hover:underline" dusk="back-to-schedule-link">
                 <div style="display: inline-block;" class="hover:underline">← {{ __('messages.back_to_schedule') }}</div>
               </a>
               @if (auth()->user() && auth()->user()->canEditEvent($event))

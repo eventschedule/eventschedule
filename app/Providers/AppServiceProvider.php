@@ -108,6 +108,20 @@ class AppServiceProvider extends ServiceProvider
                 if (!empty($mailSettings['from_name'])) {
                     config(['mail.from.name' => $mailSettings['from_name']]);
                 }
+
+                if (array_key_exists('disable_delivery', $mailSettings) && $mailSettings['disable_delivery'] !== null) {
+                    $disableDelivery = $mailSettings['disable_delivery'];
+
+                    if (! is_bool($disableDelivery)) {
+                        $disableDelivery = in_array(
+                            strtolower((string) $disableDelivery),
+                            ['1', 'true', 'yes', 'on'],
+                            true
+                        );
+                    }
+
+                    config(['mail.disable_delivery' => (bool) $disableDelivery]);
+                }
             }
 
             $appleWalletSettings = Setting::forGroup('wallet.apple');

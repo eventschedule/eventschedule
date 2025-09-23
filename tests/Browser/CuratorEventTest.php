@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Role;
 use App\Models\Event;
 use App\Models\EventRole;
+use App\Utils\UrlUtils;
 
 class CuratorEventTest extends DuskTestCase
 {
@@ -95,9 +96,17 @@ class CuratorEventTest extends DuskTestCase
             $this->assertEquals(EventRole::count(), 4, 
                 'There should be 4 event_role records before editing the event');
             
-            $browser->visit($eventUrl)
-                    ->waitForText('Edit Event', 5)
-                    ->clickLink('Edit Event')
+            $guestPath = $this->relativeUrl($eventUrl);
+            $editPath = $this->relativeUrl(route('event.edit', [
+                'subdomain' => 'curator1',
+                'hash' => UrlUtils::encodeId($event->id),
+            ], false));
+
+            $browser->visit($guestPath)
+                    ->waitFor('@back-to-schedule-link', 5)
+                    ->assertPresent('@back-to-schedule-link')
+                    ->visit($editPath)
+                    ->waitForLocation($this->pathWithoutQuery($editPath), 5)
                     ->waitForText('Edit Event', 5)
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
@@ -140,4 +149,38 @@ class CuratorEventTest extends DuskTestCase
                 ->waitForLocation('/talent/schedule', 5)
                 ->assertSee('Talent');
     }
-} 
+
+    private function relativeUrl(string $url): string
+    {
+        if (preg_match('/^https?:\/\//i', $url)) {
+            $parts = parse_url($url);
+
+            $path = $parts['path'] ?? '/';
+
+            if ($path === '') {
+                $path = '/';
+            }
+
+            if (! str_starts_with($path, '/')) {
+                $path = '/' . $path;
+            }
+
+            if (! empty($parts['query'])) {
+                $path .= '?' . $parts['query'];
+            }
+
+            return $path;
+        }
+
+        if ($url === '') {
+            return '/';
+        }
+
+        return str_starts_with($url, '/') ? $url : '/' . $url;
+    }
+
+    private function pathWithoutQuery(string $url): string
+    {
+        return explode('?', $this->relativeUrl($url), 2)[0];
+    }
+}
