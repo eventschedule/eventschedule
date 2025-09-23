@@ -23,6 +23,43 @@
 
                 openButton.addEventListener('click', toggleMenu);
                 closeButton.addEventListener('click', toggleMenu);
+
+                $('[data-collapse-trigger]').each(function() {
+                    const $trigger = $(this);
+                    const $container = $trigger.closest('[data-collapse-container]');
+                    const contentId = $trigger.attr('aria-controls');
+                    const $content = contentId ? $('#' + contentId) : $();
+                    const $icon = $trigger.find('[data-collapse-icon]');
+                    const initialOpen = $container.attr('data-collapse-state') === 'open';
+
+                    const setState = function(isOpen) {
+                        if ($content.length) {
+                            if (isOpen) {
+                                $content.removeClass('hidden');
+                            } else {
+                                $content.addClass('hidden');
+                            }
+                        }
+
+                        $container.attr('data-collapse-state', isOpen ? 'open' : 'closed');
+                        $trigger.attr('aria-expanded', isOpen ? 'true' : 'false');
+
+                        if ($icon.length) {
+                            if (isOpen) {
+                                $icon.addClass('rotate-180');
+                            } else {
+                                $icon.removeClass('rotate-180');
+                            }
+                        }
+                    };
+
+                    setState(initialOpen);
+
+                    $trigger.on('click', function() {
+                        const isOpen = $container.attr('data-collapse-state') === 'open';
+                        setState(!isOpen);
+                    });
+                });
             });
         </script>
 
