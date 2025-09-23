@@ -530,6 +530,11 @@ class SettingsController extends Controller
         $subject = $mailTemplates->renderSubject($template, $data);
         $body = $mailTemplates->renderBody($template, $data);
 
+        $originalMailConfig = $this->getCurrentMailConfig();
+        $mailSettings = $this->getMailSettings();
+
+        $this->applyMailConfig($mailSettings);
+
         try {
             Mail::to($user->email, $user->name ?? null)->send(new TemplatePreview($subject, $body));
 
@@ -559,6 +564,8 @@ class SettingsController extends Controller
                 'error' => $exception->getMessage(),
                 'failures' => [],
             ], 500);
+        } finally {
+            $this->applyMailConfig($originalMailConfig);
         }
     }
 
@@ -715,6 +722,24 @@ class SettingsController extends Controller
             'encryption' => $storedMailSettings['encryption'] ?? config('mail.mailers.smtp.encryption'),
             'from_address' => $storedMailSettings['from_address'] ?? config('mail.from.address'),
             'from_name' => $storedMailSettings['from_name'] ?? config('mail.from.name'),
+            'disable_delivery' => array_key_exists('disable_delivery', $storedMailSettings)
+                ? $this->toBoolean($storedMailSettings['disable_delivery'])
+                : $this->toBoolean(config('mail.disable_delivery')),
+        ];
+    }
+
+    protected function getCurrentMailConfig(): array
+    {
+        return [
+            'mailer' => config('mail.default'),
+            'host' => config('mail.mailers.smtp.host'),
+            'port' => config('mail.mailers.smtp.port'),
+            'username' => config('mail.mailers.smtp.username'),
+            'password' => config('mail.mailers.smtp.password'),
+            'encryption' => config('mail.mailers.smtp.encryption'),
+            'from_address' => config('mail.from.address'),
+            'from_name' => config('mail.from.name'),
+            'disable_delivery' => $this->toBoolean(config('mail.disable_delivery')),
         ];
     }
 
@@ -773,6 +798,10 @@ class SettingsController extends Controller
             'mail.from.name' => $settings['from_name'],
         ]);
 
+        if (array_key_exists('disable_delivery', $settings) && $settings['disable_delivery'] !== null) {
+            config(['mail.disable_delivery' => $this->toBoolean($settings['disable_delivery'])]);
+        }
+
         $this->purgeResolvedMailer($settings['mailer'] ?? null);
     }
 
@@ -801,6 +830,25 @@ class SettingsController extends Controller
         $trimmed = trim($url);
 
         return rtrim($trimmed, '/');
+    }
+
+    protected function toBoolean(mixed $value): bool
+    {
+        if ($value === null) {
+            return false;
+        }
+
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_numeric($value)) {
+            return (bool) $value;
+        }
+
+        $normalized = strtolower(trim((string) $value));
+
+        return in_array($normalized, ['1', 'true', 'yes', 'on'], true);
     }
 
     protected function validateMailSettings(Request $request): array
