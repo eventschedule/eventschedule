@@ -169,6 +169,21 @@
 
 </x-slot>
 
+@php
+    $baseEventUrl = $role->getGuestUrl()
+        ? \App\Utils\UrlUtils::clean($role->getGuestUrl())
+        : \App\Utils\UrlUtils::clean(url('/' . $role->subdomain));
+
+    $slugExample = \Illuminate\Support\Str::slug(__('messages.event_name'));
+    if ($slugExample === '') {
+        $slugExample = 'event';
+    }
+
+    $oldSlugValue = old('slug');
+    $initialSlug = $oldSlugValue !== null ? $oldSlugValue : ($event->slug ?? '');
+    $slugWasManuallyEdited = $event->exists ? true : ($oldSlugValue !== null && $oldSlugValue !== '');
+@endphp
+
 <div id="app">
 
   <h2 class="pt-2 my-4 text-xl font-bold leading-7 text-gray-900 dark:text-gray-100x sm:truncate sm:text-2xl sm:tracking-tight">
@@ -591,22 +606,21 @@
                             @endif
                         </div>
 
-                        <!--
-                        <x-input-label for="event_slug" :value="__('messages.url')" />
-                            <div class="mt-1 flex">
-                                <x-text-input type="text" 
-                                    class="block w-1/2 rounded-r-none bg-gray-100 dark:bg-gray-800" 
-                                    :value="''"
-                                    readonly />
-                                <x-text-input id="event_slug" 
-                                    name="slug" 
-                                    type="text" 
-                                    class="block w-1/2 rounded-l-none border-l-0"
-                                    :value="old('slug', $event->slug)"
-                                    placeholder="{{ __('messages.auto_generated') }}"                                    autocomplete="off" />
-                            </div>
+                        <div class="mb-6">
+                            <x-input-label for="event_slug" :value="__('messages.url')" />
+                            <x-text-input id="event_slug"
+                                name="slug"
+                                type="text"
+                                class="mt-1 block w-full"
+                                maxlength="255"
+                                v-model="eventSlug"
+                                @input="onSlugInput"
+                                autocomplete="off" />
+                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                <span v-if="eventUrlBase">@{{ eventUrlBase }}/</span>@{{ eventSlug || slugPreviewPlaceholder }}
+                            </p>
                             <x-input-error class="mt-2" :messages="$errors->get('slug')" />
-                        -->
+                        </div>
 
                         @if($effectiveRole->groups && count($effectiveRole->groups))
                         <div class="mb-6">
@@ -1103,6 +1117,10 @@
         isInPerson: false,
         isOnline: false,
         eventName: @json($event->name ?? ''),
+        eventSlug: @json($initialSlug),
+        slugManuallyEdited: @json($slugWasManuallyEdited),
+        slugPreviewPlaceholder: @json($slugExample),
+        eventUrlBase: @json($baseEventUrl),
         tickets: @json($event->tickets ?? [new Ticket()]).map(ticket => ({
           ...ticket,
           /*
@@ -1123,6 +1141,34 @@
       }
     },
     methods: {
+      slugify(value) {
+        if (!value) {
+          return '';
+        }
+
+        const text = value.toString();
+        const normalized = typeof text.normalize === 'function' ? text.normalize('NFD') : text;
+
+        return normalized
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-zA-Z0-9\s-]/g, '')
+          .trim()
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .toLowerCase();
+      },
+      updateSlugFromName(value) {
+        if (this.slugManuallyEdited && this.eventSlug) {
+          return;
+        }
+
+        this.eventSlug = this.slugify(value);
+      },
+      onSlugInput(event) {
+        const sanitized = this.slugify(event.target.value);
+        this.eventSlug = sanitized;
+        this.slugManuallyEdited = sanitized.length > 0;
+      },
       clearSelectedVenue() {
         this.selectedVenue = "";
       },
@@ -1398,6 +1444,10 @@
         @endif
       },
       validateForm(event) {
+        const sanitizedSlug = this.slugify(this.eventSlug);
+        this.eventSlug = sanitizedSlug;
+        this.event.slug = sanitizedSlug || null;
+
         if (! this.isFormValid) {
           event.preventDefault();
           alert("{{ __('messages.please_select_venue_or_participant') }}");
@@ -1492,6 +1542,19 @@
       }
     },
     watch: {
+      eventName(newValue) {
+        if (!this.event.id && !this.slugManuallyEdited) {
+          this.updateSlugFromName(newValue);
+        }
+      },
+      eventSlug(newValue) {
+        if (!this.event.id && !newValue) {
+          this.slugManuallyEdited = false;
+          this.updateSlugFromName(this.eventName);
+        }
+
+        this.event.slug = newValue || null;
+      },
       venueType() {
         this.venueEmail = "";
         this.venueSearchEmail = "";
@@ -1562,6 +1625,12 @@
 
       // Initialize curator group selections
       this.initializeCuratorGroupSelections();
+
+      if (!this.event.id) {
+        this.updateSlugFromName(this.eventName);
+      }
+
+      this.event.slug = this.eventSlug || null;
     }
   }).mount('#app')
 
