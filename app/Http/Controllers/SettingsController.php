@@ -788,44 +788,7 @@ class SettingsController extends Controller
 
     protected function applyMailConfig(array $settings): void
     {
-        if (array_key_exists('smtp_url', $settings)) {
-            config(['mail.mailers.smtp.url' => $settings['smtp_url']]);
-        } elseif (($settings['mailer'] ?? config('mail.default')) === 'smtp' && config('mail.mailers.smtp.url') !== null) {
-            config(['mail.mailers.smtp.url' => null]);
-        }
-
-        config(['mail.default' => $settings['mailer']]);
-
-        if ($settings['host'] !== null) {
-            config(['mail.mailers.smtp.host' => $settings['host']]);
-        }
-
-        if ($settings['port'] !== null) {
-            config(['mail.mailers.smtp.port' => (int) $settings['port']]);
-        }
-
-        if ($settings['username'] !== null) {
-            config(['mail.mailers.smtp.username' => $settings['username']]);
-        }
-
-        if ($settings['password'] !== null) {
-            config(['mail.mailers.smtp.password' => $settings['password']]);
-        }
-
-        if ($settings['encryption'] !== null) {
-            config(['mail.mailers.smtp.encryption' => $settings['encryption'] ?: null]);
-        }
-
-        config([
-            'mail.from.address' => $settings['from_address'],
-            'mail.from.name' => $settings['from_name'],
-        ]);
-
-        if (array_key_exists('disable_delivery', $settings) && $settings['disable_delivery'] !== null) {
-            config(['mail.disable_delivery' => $this->toBoolean($settings['disable_delivery'])]);
-        }
-
-        MailConfigManager::purgeResolvedMailer($settings['mailer'] ?? null);
+        MailConfigManager::apply($settings);
     }
 
     protected function nullableTrim(?string $value): ?string
