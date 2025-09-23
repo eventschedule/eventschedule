@@ -238,6 +238,8 @@ return [
     'ticket_link_copied' => 'Link dei biglietti copiato negli appunti',
     'checkout' => 'Checkout',
     'tickets' => 'Biglietti',
+    'total_tickets' => 'Totale biglietti',
+    'available_tickets' => 'Biglietti disponibili',
     'requires_pro_plan' => 'Richiede un piano Pro',
     'save_as_default' => 'Salva come predefinito',
     'learn_more' => 'Scopri di più',

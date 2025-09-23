@@ -376,6 +376,8 @@ return [
     'ticket_link_copied' => 'Ticketlink in die Zwischenablage kopiert',
     'checkout' => 'Kasse',
     'tickets' => 'Tickets',
+    'total_tickets' => 'Gesamtanzahl Tickets',
+    'available_tickets' => 'Verfügbare Tickets',
     'requires_pro_plan' => 'Erfordert einen Pro-Plan',
     'save_as_default' => 'Als Standard speichern',
     'learn_more' => 'Mehr erfahren',

@@ -235,6 +235,8 @@ return [
     'ticket_link_copied' => 'Ticketlink gekopieerd naar het klembord',
     'checkout' => 'Afrekenen',
     'tickets' => 'Tickets',
+    'total_tickets' => 'Totaal aantal tickets',
+    'available_tickets' => 'Beschikbare tickets',
     'requires_pro_plan' => 'Vereist een Pro-abonnement',
     'save_as_default' => 'Opslaan als standaard',
     'learn_more' => 'Meer informatie',

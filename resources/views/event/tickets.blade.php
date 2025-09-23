@@ -1,3 +1,9 @@
+@php
+    $hasLimitedTickets = $event->hasLimitedTickets();
+    $totalTicketCapacity = $hasLimitedTickets ? $event->getTotalTicketQuantity() : null;
+    $remainingTicketCapacity = $hasLimitedTickets ? $event->getRemainingTicketQuantity() : null;
+@endphp
+
 <x-slot name="head">
   <script src="{{ asset('js/vue.global.prod.js') }}"></script>
   <script {!! nonce_attr() !!}>
@@ -17,6 +23,9 @@
                     email: @json(old('email', auth()->check() ? auth()->user()->email : '')),
                     password: '',
                     totalTicketsMode: @json($event->total_tickets_mode ?? 'individual'),
+                    hasLimitedTickets: @json($hasLimitedTickets),
+                    totalTicketCapacity: @json($totalTicketCapacity),
+                    remainingTicketCapacity: @json($remainingTicketCapacity),
                 };
             },
             created() {
@@ -51,6 +60,15 @@
                     }
                     return this.tickets.reduce((total, ticket) => total + ticket.quantity, 0);
                 },
+                availableTicketsCount() {
+                    if (!this.hasLimitedTickets) {
+                        return null;
+                    }
+
+                    const remaining = Number(this.remainingTicketCapacity ?? 0) - this.totalSelectedTickets;
+
+                    return remaining > 0 ? remaining : 0;
+                },
                 remainingTickets() {
                     if (this.isCombinedMode) {
                         return this.totalAvailableTickets - this.totalSelectedTickets;
@@ -64,6 +82,13 @@
                         style: 'currency',
                         currency: '{{ $event->ticket_currency_code }}'
                     }).format(price);
+                },
+                formatNumber(value) {
+                    if (value === null || value === undefined) {
+                        return '';
+                    }
+
+                    return new Intl.NumberFormat('{{ app()->getLocale() }}').format(value);
                 },
                 validateForm(e) {
                     if (!this.hasSelectedTickets) {
@@ -123,7 +148,7 @@
 
         <div class="mb-12">
             <label for="email" class="text-gray-900">{{ __('messages.email') . ' *' }}</label>
-            <input type="email" name="email" id="email" class="mt-1 block w-full border-gray-300 bg-white text-gray-900" 
+            <input type="email" name="email" id="email" class="mt-1 block w-full border-gray-300 bg-white text-gray-900"
                 v-model="email" required autocomplete="email" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
@@ -148,7 +173,33 @@
             @endif
         </div>
 
-    
+
+        <div v-if="tickets.length" class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 text-gray-900 dark:border-gray-700 dark:bg-gray-800/60 dark:text-gray-100">
+                <p class="text-sm text-gray-600 dark:text-gray-300">{{ __('messages.total_tickets') }}</p>
+                <p class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                    <template v-if="hasLimitedTickets">
+                        @{{ formatNumber(totalTicketCapacity) }}
+                    </template>
+                    <template v-else>
+                        {{ __('messages.unlimited') }}
+                    </template>
+                </p>
+            </div>
+            <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 text-gray-900 dark:border-gray-700 dark:bg-gray-800/60 dark:text-gray-100">
+                <p class="text-sm text-gray-600 dark:text-gray-300">{{ __('messages.available_tickets') }}</p>
+                <p class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                    <template v-if="hasLimitedTickets">
+                        @{{ formatNumber(availableTicketsCount) }}
+                    </template>
+                    <template v-else>
+                        {{ __('messages.unlimited') }}
+                    </template>
+                </p>
+            </div>
+        </div>
+
+
         <div v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-8">
             <div class="flex items-center justify-between">
                 <div>

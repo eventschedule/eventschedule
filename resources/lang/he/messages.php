@@ -230,6 +230,8 @@ return [
     'ticket_link_copied' => 'קישור הכרטיסים הועתק ללוח',
     'checkout' => 'תשלום',
     'tickets' => 'כרטיסים',
+    'total_tickets' => 'מספר הכרטיסים הכולל',
+    'available_tickets' => 'כרטיסים זמינים',
     'requires_pro_plan' => 'נדרש מסלול מקצועי',
     'save_as_default' => 'שמור כברירת מחדל',
     'learn_more' => 'למד עוד',
