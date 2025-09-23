@@ -103,7 +103,7 @@ class CuratorEventTest extends DuskTestCase
             ], false));
 
             $browser->visit($guestPath)
-                    ->waitForText('Back to schedule', 5)
+                    ->waitForText(__('messages.back_to_schedule'), 5)
                     ->visit($editPath)
                     ->waitForLocation($this->pathWithoutQuery($editPath), 5)
                     ->waitForText('Edit Event', 5)
