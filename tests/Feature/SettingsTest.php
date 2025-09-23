@@ -57,6 +57,8 @@ class SettingsTest extends TestCase
     {
         $admin = User::factory()->create();
 
+        config(['mail.mailers.smtp.url' => 'smtp://initial.test:1025']);
+
         $payload = [
             'mail_mailer' => 'smtp',
             'mail_host' => 'smtp.mailtrap.io',
@@ -95,6 +97,7 @@ class SettingsTest extends TestCase
         $this->assertSame('tls', config('mail.mailers.smtp.encryption'));
         $this->assertSame('no-reply@example.com', config('mail.from.address'));
         $this->assertSame('Event Schedule', config('mail.from.name'));
+        $this->assertNull(config('mail.mailers.smtp.url'));
     }
 
     public function test_mail_settings_from_database_are_applied_during_boot(): void
@@ -109,6 +112,7 @@ class SettingsTest extends TestCase
             'mail.from.address' => config('mail.from.address'),
             'mail.from.name' => config('mail.from.name'),
             'mail.disable_delivery' => config('mail.disable_delivery'),
+            'mail.mailers.smtp.url' => config('mail.mailers.smtp.url'),
         ];
 
         config([
@@ -118,6 +122,7 @@ class SettingsTest extends TestCase
             'mail.mailers.smtp.username' => 'initial-user',
             'mail.mailers.smtp.password' => 'initial-pass',
             'mail.mailers.smtp.encryption' => null,
+            'mail.mailers.smtp.url' => 'smtp://smtp.initial.test:1025',
             'mail.from.address' => 'initial@example.com',
             'mail.from.name' => 'Initial Name',
             'mail.disable_delivery' => true,
@@ -156,6 +161,7 @@ class SettingsTest extends TestCase
         $this->assertSame('no-reply@example.com', config('mail.from.address'));
         $this->assertSame('Event Schedule', config('mail.from.name'));
         $this->assertFalse(config('mail.disable_delivery'));
+        $this->assertNull(config('mail.mailers.smtp.url'));
 
         MailConfigManager::purgeResolvedMailer($originalConfig['mail.default'] ?? null);
         config($originalConfig);
@@ -172,6 +178,7 @@ class SettingsTest extends TestCase
             'mail.mailers.smtp.username' => 'initial-user',
             'mail.mailers.smtp.password' => 'initial-pass',
             'mail.mailers.smtp.encryption' => null,
+            'mail.mailers.smtp.url' => 'smtp://smtp.initial.test:1025',
             'mail.from.address' => 'initial@example.com',
             'mail.from.name' => 'Initial Name',
         ]);
@@ -233,6 +240,7 @@ class SettingsTest extends TestCase
         $this->assertNull(config('mail.mailers.smtp.encryption'));
         $this->assertSame('initial@example.com', config('mail.from.address'));
         $this->assertSame('Initial Name', config('mail.from.name'));
+        $this->assertSame('smtp://smtp.initial.test:1025', config('mail.mailers.smtp.url'));
     }
 
     public function test_test_mail_rebuilds_mailer_with_updated_configuration(): void
@@ -343,6 +351,7 @@ class SettingsTest extends TestCase
             'mail.mailers.smtp.username' => 'initial-user',
             'mail.mailers.smtp.password' => 'initial-pass',
             'mail.mailers.smtp.encryption' => null,
+            'mail.mailers.smtp.url' => 'smtp://smtp.initial.test:1025',
             'mail.from.address' => 'initial@example.com',
             'mail.from.name' => 'Initial Name',
         ]);
@@ -405,6 +414,7 @@ class SettingsTest extends TestCase
         $this->assertNull(config('mail.mailers.smtp.encryption'));
         $this->assertSame('initial@example.com', config('mail.from.address'));
         $this->assertSame('Initial Name', config('mail.from.name'));
+        $this->assertSame('smtp://smtp.initial.test:1025', config('mail.mailers.smtp.url'));
     }
 
     public function test_test_mail_reports_transport_exceptions(): void
@@ -418,6 +428,7 @@ class SettingsTest extends TestCase
             'mail.mailers.smtp.username' => 'initial-user',
             'mail.mailers.smtp.password' => 'initial-pass',
             'mail.mailers.smtp.encryption' => null,
+            'mail.mailers.smtp.url' => 'smtp://smtp.initial.test:1025',
             'mail.from.address' => 'initial@example.com',
             'mail.from.name' => 'Initial Name',
         ]);
@@ -479,6 +490,7 @@ class SettingsTest extends TestCase
         $this->assertNull(config('mail.mailers.smtp.encryption'));
         $this->assertSame('initial@example.com', config('mail.from.address'));
         $this->assertSame('Initial Name', config('mail.from.name'));
+        $this->assertSame('smtp://smtp.initial.test:1025', config('mail.mailers.smtp.url'));
     }
 
     public function test_test_mail_requires_authenticated_user_email(): void
@@ -492,6 +504,7 @@ class SettingsTest extends TestCase
             'mail.mailers.smtp.username' => 'initial-user',
             'mail.mailers.smtp.password' => 'initial-pass',
             'mail.mailers.smtp.encryption' => null,
+            'mail.mailers.smtp.url' => 'smtp://smtp.initial.test:1025',
             'mail.from.address' => 'initial@example.com',
             'mail.from.name' => 'Initial Name',
         ]);
@@ -534,6 +547,7 @@ class SettingsTest extends TestCase
         $this->assertNull(config('mail.mailers.smtp.encryption'));
         $this->assertSame('initial@example.com', config('mail.from.address'));
         $this->assertSame('Initial Name', config('mail.from.name'));
+        $this->assertSame('smtp://smtp.initial.test:1025', config('mail.mailers.smtp.url'));
     }
 
     public function test_mail_template_test_uses_configured_mail_settings(): void
@@ -550,6 +564,7 @@ class SettingsTest extends TestCase
             'mail.mailers.smtp.username' => 'initial-user',
             'mail.mailers.smtp.password' => 'initial-pass',
             'mail.mailers.smtp.encryption' => null,
+            'mail.mailers.smtp.url' => 'smtp://smtp.initial.test:1025',
             'mail.from.address' => 'initial@example.com',
             'mail.from.name' => 'Initial Name',
             'mail.disable_delivery' => true,
@@ -618,6 +633,7 @@ class SettingsTest extends TestCase
         $this->assertSame('initial@example.com', config('mail.from.address'));
         $this->assertSame('Initial Name', config('mail.from.name'));
         $this->assertTrue(config('mail.disable_delivery'));
+        $this->assertSame('smtp://smtp.initial.test:1025', config('mail.mailers.smtp.url'));
     }
 
     public function test_admin_can_update_general_settings(): void
