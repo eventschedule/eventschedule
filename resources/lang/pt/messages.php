@@ -262,6 +262,7 @@ return [
     'customer' => 'Cliente',
     'transaction_reference' => 'Referência da transação',
     'total' => 'Total',
+    'remaining' => 'Restantes',
     'number_of_attendees' => 'Número de participantes',
     'terms_and_conditions' => 'Termos e condições',
     'event_support_contact' => 'Contato de suporte do evento',

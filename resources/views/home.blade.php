@@ -167,6 +167,40 @@
                                                         <span class="ml-2 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-200">{{ __('messages.recurring') }}</span>
                                                     @endif
                                                 </div>
+                                                @if ($event->tickets_enabled && $event->tickets->isNotEmpty())
+                                                    @php
+                                                        $hasLimitedTickets = $event->hasLimitedTickets();
+                                                        $totalTicketCount = $hasLimitedTickets ? $event->getTotalTicketQuantity() : null;
+                                                        $remainingTicketCount = $event->getRemainingTicketQuantity();
+                                                        $remainingTicketValue = $hasLimitedTickets ? max($remainingTicketCount ?? 0, 0) : null;
+                                                        $totalTicketLabel = $hasLimitedTickets ? number_format($totalTicketCount) : __('messages.unlimited');
+                                                        $remainingTicketLabel = $hasLimitedTickets ? number_format($remainingTicketValue) : __('messages.unlimited');
+                                                        $remainingBadgeClasses = 'inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200';
+
+                                                        if ($hasLimitedTickets) {
+                                                            if ($remainingTicketValue === 0) {
+                                                                $remainingBadgeClasses = 'inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-1 text-red-700 dark:bg-red-900/40 dark:text-red-200';
+                                                            } elseif ($remainingTicketValue <= 5) {
+                                                                $remainingBadgeClasses = 'inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200';
+                                                            }
+                                                        }
+                                                    @endphp
+                                                    <div class="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold">
+                                                        <span class="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
+                                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h16.5a.75.75 0 01.75.75v3a2.25 2.25 0 010 4.5v3a.75.75 0 01-.75.75H3.75a.75.75 0 01-.75-.75v-3a2.25 2.25 0 010-4.5v-3a.75.75 0 01.75-.75z" />
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5.25v13.5m6-13.5v13.5" />
+                                                            </svg>
+                                                            <span class="tracking-wide">{{ __('messages.total') }} {{ __('messages.tickets') }}: <span class="text-sm font-bold">{{ $totalTicketLabel }}</span></span>
+                                                        </span>
+                                                        <span class="{{ $remainingBadgeClasses }}">
+                                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                            </svg>
+                                                            <span class="tracking-wide">{{ __('messages.remaining') }} {{ __('messages.tickets') }}: <span class="text-sm font-bold">{{ $remainingTicketLabel }}</span></span>
+                                                        </span>
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td class="px-6 py-4 align-top">
                                                 <div class="text-sm text-gray-700 dark:text-gray-200">

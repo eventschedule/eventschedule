@@ -261,6 +261,7 @@ return [
     'customer' => 'Klant',
     'transaction_reference' => 'Transactiereferentie',
     'total' => 'Totaal',
+    'remaining' => 'Resterend',
     'number_of_attendees' => 'Aantal deelnemers',
     'terms_and_conditions' => 'Algemene voorwaarden',
     'event_support_contact' => 'Evenement support contact',

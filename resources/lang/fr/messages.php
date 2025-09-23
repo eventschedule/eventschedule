@@ -405,6 +405,7 @@ return [
     'customer' => 'Client',
     'transaction_reference' => 'Référence de transaction',
     'total' => 'Total',
+    'remaining' => 'Restants',
     'number_of_attendees' => 'Nombre de participants',
     'terms_and_conditions' => 'Termes et conditions',
     'event_support_contact' => 'Contact de support événementiel',
