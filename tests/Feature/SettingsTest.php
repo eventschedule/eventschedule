@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Mail\TemplatePreview;
+use App\Providers\AppServiceProvider;
 use App\Models\Setting;
 use App\Models\User;
+use App\Support\MailConfigManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
@@ -93,6 +95,70 @@ class SettingsTest extends TestCase
         $this->assertSame('tls', config('mail.mailers.smtp.encryption'));
         $this->assertSame('no-reply@example.com', config('mail.from.address'));
         $this->assertSame('Event Schedule', config('mail.from.name'));
+    }
+
+    public function test_mail_settings_from_database_are_applied_during_boot(): void
+    {
+        $originalConfig = [
+            'mail.default' => config('mail.default'),
+            'mail.mailers.smtp.host' => config('mail.mailers.smtp.host'),
+            'mail.mailers.smtp.port' => config('mail.mailers.smtp.port'),
+            'mail.mailers.smtp.username' => config('mail.mailers.smtp.username'),
+            'mail.mailers.smtp.password' => config('mail.mailers.smtp.password'),
+            'mail.mailers.smtp.encryption' => config('mail.mailers.smtp.encryption'),
+            'mail.from.address' => config('mail.from.address'),
+            'mail.from.name' => config('mail.from.name'),
+            'mail.disable_delivery' => config('mail.disable_delivery'),
+        ];
+
+        config([
+            'mail.default' => 'log',
+            'mail.mailers.smtp.host' => 'smtp.initial.test',
+            'mail.mailers.smtp.port' => 1025,
+            'mail.mailers.smtp.username' => 'initial-user',
+            'mail.mailers.smtp.password' => 'initial-pass',
+            'mail.mailers.smtp.encryption' => null,
+            'mail.from.address' => 'initial@example.com',
+            'mail.from.name' => 'Initial Name',
+            'mail.disable_delivery' => true,
+        ]);
+
+        $initialMailer = app('mailer');
+
+        Setting::setGroup('mail', [
+            'mailer' => 'smtp',
+            'host' => 'smtp.mailtrap.io',
+            'port' => '2525',
+            'username' => 'mailer@example.com',
+            'password' => 'secret-password',
+            'encryption' => 'tls',
+            'from_address' => 'no-reply@example.com',
+            'from_name' => 'Event Schedule',
+            'disable_delivery' => '0',
+        ]);
+
+        $provider = app()->getProvider(AppServiceProvider::class);
+        $provider->boot();
+
+        $mailer = Mail::mailer();
+        $this->assertSame('smtp.mailtrap.io', $this->getMailerHost($mailer));
+
+        $resolvedMailer = app('mailer');
+        $this->assertSame('smtp.mailtrap.io', $this->getMailerHost($resolvedMailer));
+        $this->assertNotSame($initialMailer, $resolvedMailer);
+
+        $this->assertSame('smtp', config('mail.default'));
+        $this->assertSame('smtp.mailtrap.io', config('mail.mailers.smtp.host'));
+        $this->assertSame(2525, config('mail.mailers.smtp.port'));
+        $this->assertSame('mailer@example.com', config('mail.mailers.smtp.username'));
+        $this->assertSame('secret-password', config('mail.mailers.smtp.password'));
+        $this->assertSame('tls', config('mail.mailers.smtp.encryption'));
+        $this->assertSame('no-reply@example.com', config('mail.from.address'));
+        $this->assertSame('Event Schedule', config('mail.from.name'));
+        $this->assertFalse(config('mail.disable_delivery'));
+
+        MailConfigManager::purgeResolvedMailer($originalConfig['mail.default'] ?? null);
+        config($originalConfig);
     }
 
     public function test_admin_can_send_test_mail_successfully(): void

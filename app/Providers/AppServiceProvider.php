@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Listeners\LogSentMessage;
 use App\Models\Setting;
+use App\Support\MailConfigManager;
 use App\Support\UpdateConfigManager;
 use App\Support\WalletConfigManager;
 use Illuminate\Mail\Events\MessageSent;
@@ -77,6 +78,8 @@ class AppServiceProvider extends ServiceProvider
             $mailSettings = Setting::forGroup('mail');
 
             if (!empty($mailSettings)) {
+                $mailer = $mailSettings['mailer'] ?? null;
+
                 if (!empty($mailSettings['mailer'])) {
                     config(['mail.default' => $mailSettings['mailer']]);
                 }
@@ -122,6 +125,8 @@ class AppServiceProvider extends ServiceProvider
 
                     config(['mail.disable_delivery' => (bool) $disableDelivery]);
                 }
+
+                MailConfigManager::purgeResolvedMailer($mailer);
             }
 
             $appleWalletSettings = Setting::forGroup('wallet.apple');
