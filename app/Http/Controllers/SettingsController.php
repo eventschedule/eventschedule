@@ -432,7 +432,7 @@ class SettingsController extends Controller
             ], 500);
         } finally {
             $this->applyMailConfig($originalSettings);
-            $this->purgeResolvedMailer($originalSettings['mailer'] ?? null);
+            MailConfigManager::purgeResolvedMailer($originalSettings['mailer'] ?? null);
         }
     }
 
