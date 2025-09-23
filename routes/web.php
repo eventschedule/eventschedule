@@ -11,6 +11,7 @@ use App\Http\Controllers\TicketController;
 use App\Http\Controllers\InvoiceNinjaController;
 use App\Http\Controllers\AppController;
 use App\Http\Controllers\Api\ApiSettingsController;
+use App\Http\Controllers\TermsController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\GoogleCalendarWebhookController;
@@ -60,6 +61,8 @@ Route::get('/unsubscribe', [RoleController::class, 'showUnsubscribe'])->name('ro
 Route::post('/unsubscribe', [RoleController::class, 'unsubscribe'])->name('role.unsubscribe')->middleware('throttle:2,2');
 Route::get('/user/unsubscribe', [RoleController::class, 'unsubscribeUser'])->name('user.unsubscribe')->middleware('throttle:2,2');
 Route::post('/clear-pending-request', [EventController::class, 'clearPendingRequest'])->name('event.clear_pending_request');
+
+Route::get('/terms', [TermsController::class, 'show'])->name('terms.show');
 
 Route::post('/stripe/webhook', [StripeController::class, 'webhook'])->name('stripe.webhook')->middleware('throttle:60,1');
 Route::post('/invoiceninja/webhook/{secret}', [InvoiceNinjaController::class, 'webhook'])->name('invoiceninja.webhook')->middleware('throttle:60,1');

@@ -626,6 +626,7 @@ class SettingsTest extends TestCase
 
         $payload = [
             'public_url' => 'https://example.org',
+            'terms_markdown' => "## Custom Terms\n\nPlease review before attending.",
         ];
 
         $response = $this
@@ -641,6 +642,13 @@ class SettingsTest extends TestCase
             'key' => 'public_url',
             'value' => 'https://example.org',
         ]);
+
+        $generalSettings = Setting::forGroup('general');
+
+        $this->assertSame("## Custom Terms\n\nPlease review before attending.", $generalSettings['terms_markdown']);
+        $this->assertStringContainsString('<h2>Custom Terms</h2>', $generalSettings['terms_html']);
+        $this->assertArrayHasKey('terms_updated_at', $generalSettings);
+        $this->assertNotEmpty($generalSettings['terms_updated_at']);
 
         $this->assertSame('https://example.org', config('app.url'));
     }
