@@ -2,6 +2,39 @@
     $schedules = isset($schedules) ? $schedules : collect();
     $venues = isset($venues) ? $venues : collect();
     $curators = isset($curators) ? $curators : collect();
+
+    $scheduleRoutes = ['role.pages', 'role.venues', 'role.curators', 'role.talent', 'role.view_admin'];
+    $schedulesActive = false;
+    foreach ($scheduleRoutes as $routeName) {
+        if (request()->routeIs($routeName)) {
+            $schedulesActive = true;
+            break;
+        }
+    }
+
+    $venuesSectionOpen = request()->routeIs('role.venues');
+    foreach ($venues as $venue) {
+        if (request()->is($venue->subdomain) || request()->is($venue->subdomain . '/*')) {
+            $venuesSectionOpen = true;
+            break;
+        }
+    }
+
+    $curatorsSectionOpen = request()->routeIs('role.curators');
+    foreach ($curators as $curator) {
+        if (request()->is($curator->subdomain) || request()->is($curator->subdomain . '/*')) {
+            $curatorsSectionOpen = true;
+            break;
+        }
+    }
+
+    $talentSectionOpen = request()->routeIs('role.talent');
+    foreach ($schedules as $schedule) {
+        if (request()->is($schedule->subdomain) || request()->is($schedule->subdomain . '/*')) {
+            $talentSectionOpen = true;
+            break;
+        }
+    }
 @endphp
 
 <a href="https://www.eventschedule.com">
@@ -15,7 +48,7 @@
         <li>
             <ul role="list" class="-mx-2 space-y-1">
 
-            <li>
+                <li>
                     <a href="{{ route('home') }}"
                         class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('events') ? 'bg-gray-800 text-white' : '' }}">
                         <svg class="h-6 w-6 shrink-0" viewBox="0 0 24 24"
@@ -37,17 +70,6 @@
                     </a>
                 </li>
 
-                @php
-                    $scheduleRoutes = ['role.pages', 'role.venues', 'role.curators', 'role.talent'];
-                    $schedulesActive = false;
-                    foreach ($scheduleRoutes as $routeName) {
-                        if (request()->routeIs($routeName)) {
-                            $schedulesActive = true;
-                            break;
-                        }
-                    }
-                @endphp
-
                 <li>
                     <a href="{{ route('role.pages') }}"
                         class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ $schedulesActive ? 'bg-gray-800 text-white' : '' }}">
@@ -59,36 +81,137 @@
                     </a>
 
                     <ul role="list" class="mt-1 space-y-1 pl-9">
-                        <li>
-                            <a href="{{ route('role.venues') }}"
-                                class="group flex gap-x-3 rounded-md p-2 text-sm font-medium leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->routeIs('role.venues') ? 'bg-gray-800 text-white' : '' }}">
-                                <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none"
-                                    stroke="{{ request()->routeIs('role.venues') ? '#ccc' : '#666' }}" stroke-width="1.5" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M3 21h18M4.5 21V9l7.5-4.5L19.5 9V21M9 21v-6h6v6" />
-                                </svg>
-                                {{ __('messages.venues') }}
-                            </a>
+                        <li data-collapse-container class="space-y-1" data-collapse-state="{{ $venuesSectionOpen ? 'open' : 'closed' }}">
+                            <div class="flex items-center gap-x-2">
+                                <a href="{{ route('role.venues') }}"
+                                    class="group flex flex-1 gap-x-3 rounded-md p-2 text-sm font-medium leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ $venuesSectionOpen ? 'bg-gray-800 text-white' : '' }}">
+                                    <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none"
+                                        stroke="{{ $venuesSectionOpen ? '#ccc' : '#666' }}" stroke-width="1.5" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M3 21h18M4.5 21V9l7.5-4.5L19.5 9V21M9 21v-6h6v6" />
+                                    </svg>
+                                    <span class="flex-1 text-left">{{ __('messages.venues') }}</span>
+                                </a>
+
+                                @if ($venues->isNotEmpty())
+                                    <button type="button"
+                                        class="ml-1 inline-flex items-center rounded-md p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                        data-collapse-trigger aria-controls="collapse-venues"
+                                        aria-expanded="{{ $venuesSectionOpen ? 'true' : 'false' }}">
+                                        <span class="sr-only">{{ __('Toggle :menu menu', ['menu' => __('messages.venues')]) }}</span>
+                                        <svg data-collapse-icon class="h-4 w-4 transform transition-transform duration-200" viewBox="0 0 20 20" fill="none"
+                                            stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 8l4 4 4-4" />
+                                        </svg>
+                                    </button>
+                                @endif
+                            </div>
+
+                            @if ($venues->isNotEmpty())
+                                <ul role="list" id="collapse-venues" data-collapse-content
+                                    class="mt-1 space-y-1 pl-9 {{ $venuesSectionOpen ? '' : 'hidden' }}">
+                                    <li class="px-2 text-xs font-semibold leading-6 text-gray-400">{{ __('messages.venue_schedules') }}</li>
+
+                                    @foreach ($venues as $venue)
+                                        <li>
+                                            <a href="{{ route('role.view_admin', ['subdomain' => $venue->subdomain, 'tab' => $venue->subdomain == request()->subdomain ? 'schedule' : (request()->tab ? request()->tab : 'schedule')]) }}"
+                                                class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is($venue->subdomain) || request()->is($venue->subdomain . '/*') ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
+                                                <span
+                                                    class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($venue->subdomain) || request()->is($venue->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($venue->name, 0, 1)) }}</span>
+                                                <span class="truncate">{{ $venue->name }}</span>
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
                         </li>
-                        <li>
-                            <a href="{{ route('role.curators') }}"
-                                class="group flex gap-x-3 rounded-md p-2 text-sm font-medium leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->routeIs('role.curators') ? 'bg-gray-800 text-white' : '' }}">
-                                <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24"
-                                    fill="{{ request()->routeIs('role.curators') ? '#ccc' : '#666' }}" aria-hidden="true">
-                                    <path d="M12 4l2.47 5.02 5.53.8-4 3.91.94 5.5L12 16.9l-4.94 2.33.94-5.5-4-3.91 5.53-.8L12 4z" />
-                                </svg>
-                                {{ __('messages.curators') }}
-                            </a>
+
+                        <li data-collapse-container class="space-y-1" data-collapse-state="{{ $curatorsSectionOpen ? 'open' : 'closed' }}">
+                            <div class="flex items-center gap-x-2">
+                                <a href="{{ route('role.curators') }}"
+                                    class="group flex flex-1 gap-x-3 rounded-md p-2 text-sm font-medium leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ $curatorsSectionOpen ? 'bg-gray-800 text-white' : '' }}">
+                                    <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24"
+                                        fill="{{ $curatorsSectionOpen ? '#ccc' : '#666' }}" aria-hidden="true">
+                                        <path d="M12 4l2.47 5.02 5.53.8-4 3.91.94 5.5L12 16.9l-4.94 2.33.94-5.5-4-3.91 5.53-.8L12 4z" />
+                                    </svg>
+                                    <span class="flex-1 text-left">{{ __('messages.curators') }}</span>
+                                </a>
+
+                                @if ($curators->isNotEmpty())
+                                    <button type="button"
+                                        class="ml-1 inline-flex items-center rounded-md p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                        data-collapse-trigger aria-controls="collapse-curators"
+                                        aria-expanded="{{ $curatorsSectionOpen ? 'true' : 'false' }}">
+                                        <span class="sr-only">{{ __('Toggle :menu menu', ['menu' => __('messages.curators')]) }}</span>
+                                        <svg data-collapse-icon class="h-4 w-4 transform transition-transform duration-200" viewBox="0 0 20 20" fill="none"
+                                            stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 8l4 4 4-4" />
+                                        </svg>
+                                    </button>
+                                @endif
+                            </div>
+
+                            @if ($curators->isNotEmpty())
+                                <ul role="list" id="collapse-curators" data-collapse-content
+                                    class="mt-1 space-y-1 pl-9 {{ $curatorsSectionOpen ? '' : 'hidden' }}">
+                                    <li class="px-2 text-xs font-semibold leading-6 text-gray-400">{{ __('messages.curator_schedules') }}</li>
+
+                                    @foreach ($curators as $curator)
+                                        <li>
+                                            <a href="{{ route('role.view_admin', ['subdomain' => $curator->subdomain, 'tab' => $curator->subdomain == request()->subdomain ? 'schedule' : (request()->tab ? request()->tab : 'schedule')]) }}"
+                                                class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is($curator->subdomain) || request()->is($curator->subdomain . '/*') ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
+                                                <span
+                                                    class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($curator->subdomain) || request()->is($curator->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($curator->name, 0, 1)) }}</span>
+                                                <span class="truncate">{{ $curator->name }}</span>
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
                         </li>
-                        <li>
-                            <a href="{{ route('role.talent') }}"
-                                class="group flex gap-x-3 rounded-md p-2 text-sm font-medium leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->routeIs('role.talent') ? 'bg-gray-800 text-white' : '' }}">
-                                <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24"
-                                    fill="{{ request()->routeIs('role.talent') ? '#ccc' : '#666' }}" aria-hidden="true">
-                                    <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.33 0-6 2.24-6 5v1h12v-1c0-2.76-2.67-5-6-5z" />
-                                </svg>
-                                {{ \Illuminate\Support\Str::plural(__('messages.talent')) }}
-                            </a>
+
+                        <li data-collapse-container class="space-y-1" data-collapse-state="{{ $talentSectionOpen ? 'open' : 'closed' }}">
+                            <div class="flex items-center gap-x-2">
+                                <a href="{{ route('role.talent') }}"
+                                    class="group flex flex-1 gap-x-3 rounded-md p-2 text-sm font-medium leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ $talentSectionOpen ? 'bg-gray-800 text-white' : '' }}">
+                                    <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24"
+                                        fill="{{ $talentSectionOpen ? '#ccc' : '#666' }}" aria-hidden="true">
+                                        <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.33 0-6 2.24-6 5v1h12v-1c0-2.76-2.67-5-6-5z" />
+                                    </svg>
+                                    <span class="flex-1 text-left">{{ \Illuminate\Support\Str::plural(__('messages.talent')) }}</span>
+                                </a>
+
+                                @if ($schedules->isNotEmpty())
+                                    <button type="button"
+                                        class="ml-1 inline-flex items-center rounded-md p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                        data-collapse-trigger aria-controls="collapse-talent"
+                                        aria-expanded="{{ $talentSectionOpen ? 'true' : 'false' }}">
+                                        <span class="sr-only">{{ __('Toggle :menu menu', ['menu' => \Illuminate\Support\Str::plural(__('messages.talent'))]) }}</span>
+                                        <svg data-collapse-icon class="h-4 w-4 transform transition-transform duration-200" viewBox="0 0 20 20" fill="none"
+                                            stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 8l4 4 4-4" />
+                                        </svg>
+                                    </button>
+                                @endif
+                            </div>
+
+                            @if ($schedules->isNotEmpty())
+                                <ul role="list" id="collapse-talent" data-collapse-content
+                                    class="mt-1 space-y-1 pl-9 {{ $talentSectionOpen ? '' : 'hidden' }}">
+                                    <li class="px-2 text-xs font-semibold leading-6 text-gray-400">{{ __('messages.talent_schedules') }}</li>
+
+                                    @foreach ($schedules as $each)
+                                        <li>
+                                            <a href="{{ route('role.view_admin', ['subdomain' => $each->subdomain, 'tab' => $each->subdomain == request()->subdomain ? 'schedule' : (request()->tab ? request()->tab : 'schedule')]) }}"
+                                                class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is($each->subdomain) || request()->is($each->subdomain . '/*') ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
+                                                <span
+                                                    class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($each->subdomain) || request()->is($each->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($each->name, 0, 1)) }}</span>
+                                                <span class="truncate">{{ $each->name }}</span>
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
                         </li>
                     </ul>
                 </li>
@@ -133,70 +256,6 @@
             </ul>
         </li>
 
-    
-        @if ($schedules->isNotEmpty())
-        <li>
-            <div class="text-xs font-semibold leading-6 text-gray-400">{{ __('messages.talent_schedules') }}</div>
-
-            <ul role="list" class="-mx-2 mt-2 space-y-1">
-
-                @foreach ($schedules as $each)
-                <li>
-                    <a href="{{ route('role.view_admin', ['subdomain' => $each->subdomain, 'tab' => $each->subdomain == request()->subdomain ? 'schedule' : (request()->tab ? request()->tab : 'schedule')]) }}"
-                        class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is($each->subdomain) || request()->is($each->subdomain . '/*') ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
-                        <span
-                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($each->subdomain) || request()->is($each->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($each->name, 0, 1)) }}</span>
-                        <span class="truncate">{{ $each->name }}</span>
-                    </a>
-                </li>
-                @endforeach
-
-            </ul>
-        </li>
-        @endif
-
-
-        @if ($venues->isNotEmpty())
-        <li>
-            <div class="text-xs font-semibold leading-6 text-gray-400">{{ __('messages.venue_schedules') }}</div>
-
-            <ul role="list" class="-mx-2 mt-2 space-y-1">
-
-                @foreach ($venues as $venue)
-                <li>
-                    <a href="{{ route('role.view_admin', ['subdomain' => $venue->subdomain, 'tab' => $venue->subdomain == request()->subdomain ? 'schedule' : (request()->tab ? request()->tab : 'schedule')]) }}"
-                        class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is($venue->subdomain) || request()->is($venue->subdomain . '/*') ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
-                        <span
-                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($venue->subdomain) || request()->is($venue->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($venue->name, 0, 1)) }}</span>
-                        <span class="truncate">{{ $venue->name }}</span>
-                    </a>
-                </li>
-                @endforeach
-
-            </ul>
-        </li>
-        @endif
-
-        @if ($curators->isNotEmpty())
-        <li>
-            <div class="text-xs font-semibold leading-6 text-gray-400">{{ __('messages.curator_schedules') }}</div>
-
-            <ul role="list" class="-mx-2 mt-2 space-y-1">
-
-                @foreach ($curators as $curator)
-                <li>
-                    <a href="{{ route('role.view_admin', ['subdomain' => $curator->subdomain, 'tab' => $curator->subdomain == request()->subdomain ? 'schedule' : (request()->tab ? request()->tab : 'schedule')]) }}"
-                        class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is($curator->subdomain) || request()->is($curator->subdomain . '/*') ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
-                        <span
-                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($curator->subdomain) || request()->is($curator->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($curator->name, 0, 1)) }}</span>
-                        <span class="truncate">{{ $curator->name }}</span>
-                    </a>
-                </li>
-                @endforeach
-
-            </ul>
-        </li>
-        @endif
 
         @if (auth()->user()->isAdmin())
         <li class="mt-auto">
