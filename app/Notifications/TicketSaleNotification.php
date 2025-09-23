@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\Role;
 use App\Models\Sale;
+use App\Support\MailConfigManager;
 use App\Support\MailTemplateManager;
 use App\Utils\NotificationUtils;
 use App\Utils\UrlUtils;
@@ -28,6 +29,12 @@ class TicketSaleNotification extends Notification
 
     public function via(object $notifiable): array
     {
+        MailConfigManager::applyFromDatabase();
+
+        if (config('mail.disable_delivery')) {
+            return [];
+        }
+
         $templates = app(MailTemplateManager::class);
 
         return $templates->enabled($this->templateKey()) ? ['mail'] : [];

@@ -78,59 +78,7 @@ class AppServiceProvider extends ServiceProvider
             $mailSettings = Setting::forGroup('mail');
 
             if (!empty($mailSettings)) {
-                if (config('mail.mailers.smtp.url') !== null) {
-                    config(['mail.mailers.smtp.url' => null]);
-                }
-
-                $mailer = $mailSettings['mailer'] ?? null;
-
-                if (!empty($mailSettings['mailer'])) {
-                    config(['mail.default' => $mailSettings['mailer']]);
-                }
-
-                if (array_key_exists('host', $mailSettings) && $mailSettings['host'] !== null) {
-                    config(['mail.mailers.smtp.host' => $mailSettings['host']]);
-                }
-
-                if (array_key_exists('port', $mailSettings) && $mailSettings['port'] !== null) {
-                    config(['mail.mailers.smtp.port' => (int) $mailSettings['port']]);
-                }
-
-                if (array_key_exists('username', $mailSettings) && $mailSettings['username'] !== null) {
-                    config(['mail.mailers.smtp.username' => $mailSettings['username']]);
-                }
-
-                if (array_key_exists('password', $mailSettings) && $mailSettings['password'] !== null) {
-                    config(['mail.mailers.smtp.password' => $mailSettings['password']]);
-                }
-
-                if (array_key_exists('encryption', $mailSettings)) {
-                    config(['mail.mailers.smtp.encryption' => $mailSettings['encryption'] ?: null]);
-                }
-
-                if (!empty($mailSettings['from_address'])) {
-                    config(['mail.from.address' => $mailSettings['from_address']]);
-                }
-
-                if (!empty($mailSettings['from_name'])) {
-                    config(['mail.from.name' => $mailSettings['from_name']]);
-                }
-
-                if (array_key_exists('disable_delivery', $mailSettings) && $mailSettings['disable_delivery'] !== null) {
-                    $disableDelivery = $mailSettings['disable_delivery'];
-
-                    if (! is_bool($disableDelivery)) {
-                        $disableDelivery = in_array(
-                            strtolower((string) $disableDelivery),
-                            ['1', 'true', 'yes', 'on'],
-                            true
-                        );
-                    }
-
-                    config(['mail.disable_delivery' => (bool) $disableDelivery]);
-                }
-
-                MailConfigManager::purgeResolvedMailer($mailer);
+                MailConfigManager::apply($mailSettings);
             }
 
             $appleWalletSettings = Setting::forGroup('wallet.apple');

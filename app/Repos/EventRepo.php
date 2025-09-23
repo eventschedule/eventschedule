@@ -17,6 +17,7 @@ use App\Mail\ClaimVenue;
 use App\Notifications\EventAddedNotification;
 use App\Utils\NotificationUtils;
 use App\Models\Ticket;
+use App\Support\MailConfigManager;
 use App\Support\MailTemplateManager;
 
 
@@ -299,6 +300,8 @@ class EventRepo
             $event->flyer_image_url = $filename;
             $event->save();
         }
+
+        MailConfigManager::applyFromDatabase();
 
         if (! config('mail.disable_delivery')) {
             $templates = app(MailTemplateManager::class);
