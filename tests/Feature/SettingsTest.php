@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Mail\TemplatePreview;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -467,6 +468,90 @@ class SettingsTest extends TestCase
         $this->assertNull(config('mail.mailers.smtp.encryption'));
         $this->assertSame('initial@example.com', config('mail.from.address'));
         $this->assertSame('Initial Name', config('mail.from.name'));
+    }
+
+    public function test_mail_template_test_uses_configured_mail_settings(): void
+    {
+        $admin = User::factory()->create([
+            'email' => 'admin@example.com',
+            'name' => 'Admin User',
+        ]);
+
+        config([
+            'mail.default' => 'log',
+            'mail.mailers.smtp.host' => 'smtp.initial.test',
+            'mail.mailers.smtp.port' => 1025,
+            'mail.mailers.smtp.username' => 'initial-user',
+            'mail.mailers.smtp.password' => 'initial-pass',
+            'mail.mailers.smtp.encryption' => null,
+            'mail.from.address' => 'initial@example.com',
+            'mail.from.name' => 'Initial Name',
+            'mail.disable_delivery' => true,
+        ]);
+
+        Setting::setGroup('mail', [
+            'mailer' => 'smtp',
+            'host' => 'smtp.mailtrap.io',
+            'port' => '2525',
+            'username' => 'mailer@example.com',
+            'password' => 'secret-password',
+            'encryption' => 'tls',
+            'from_address' => 'no-reply@example.com',
+            'from_name' => 'Event Schedule',
+            'disable_delivery' => '0',
+        ]);
+
+        $pendingMail = Mockery::mock();
+        $pendingMail->shouldReceive('send')
+            ->once()
+            ->withArgs(function ($mailable) {
+                $this->assertInstanceOf(TemplatePreview::class, $mailable);
+                $this->assertSame('smtp.mailtrap.io', config('mail.mailers.smtp.host'));
+                $this->assertSame(2525, config('mail.mailers.smtp.port'));
+                $this->assertSame('mailer@example.com', config('mail.mailers.smtp.username'));
+                $this->assertSame('secret-password', config('mail.mailers.smtp.password'));
+                $this->assertSame('tls', config('mail.mailers.smtp.encryption'));
+                $this->assertSame('no-reply@example.com', config('mail.from.address'));
+                $this->assertSame('Event Schedule', config('mail.from.name'));
+                $this->assertSame('smtp', config('mail.default'));
+                $this->assertFalse(config('mail.disable_delivery'));
+
+                return true;
+            })
+            ->andReturnNull();
+
+        Mail::shouldReceive('to')
+            ->once()
+            ->with($admin->email, $admin->name)
+            ->andReturn($pendingMail);
+
+        $mailer = $this->makeMailerStub([]);
+
+        Mail::shouldReceive('mailer')->once()->andReturn($mailer);
+
+        $response = $this
+            ->actingAs($admin)
+            ->postJson('/settings/email-templates/claim_role/test');
+
+        $response->assertOk();
+
+        $response->assertJson(function (AssertableJson $json) {
+            $json
+                ->where('status', 'success')
+                ->where('message', __('messages.test_email_sent'))
+                ->where('failures', [])
+                ->etc();
+        });
+
+        $this->assertSame('log', config('mail.default'));
+        $this->assertSame('smtp.initial.test', config('mail.mailers.smtp.host'));
+        $this->assertSame(1025, config('mail.mailers.smtp.port'));
+        $this->assertSame('initial-user', config('mail.mailers.smtp.username'));
+        $this->assertSame('initial-pass', config('mail.mailers.smtp.password'));
+        $this->assertNull(config('mail.mailers.smtp.encryption'));
+        $this->assertSame('initial@example.com', config('mail.from.address'));
+        $this->assertSame('Initial Name', config('mail.from.name'));
+        $this->assertTrue(config('mail.disable_delivery'));
     }
 
     public function test_admin_can_update_general_settings(): void
