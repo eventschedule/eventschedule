@@ -6,6 +6,9 @@
         $talentNames = $talents->map->translatedName()->implode(', ');
         $curatorNames = $curators->map->translatedName()->implode(', ');
         $hasTickets = $event->tickets_enabled && $event->tickets->count() > 0;
+        $hasLimitedTickets = $event->hasLimitedTickets();
+        $totalTicketCapacity = $hasLimitedTickets ? $event->getTotalTicketQuantity() : null;
+        $remainingTicketCapacity = $hasLimitedTickets ? $event->getRemainingTicketQuantity() : null;
         $guestUrl = $event->getGuestUrl(false, null, null, true);
         $cleanGuestUrl = $guestUrl ? \App\Utils\UrlUtils::clean($guestUrl) : null;
     @endphp
@@ -153,6 +156,28 @@
                         <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
                             <div class="px-6 py-5">
                                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('messages.tickets') }}</h2>
+                                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-900/60">
+                                        <p class="text-sm font-medium text-gray-600 dark:text-gray-300">{{ __('messages.total_tickets') }}</p>
+                                        <p class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                                            @if ($hasLimitedTickets && ! is_null($totalTicketCapacity))
+                                                {{ number_format($totalTicketCapacity) }}
+                                            @else
+                                                {{ __('messages.unlimited') }}
+                                            @endif
+                                        </p>
+                                    </div>
+                                    <div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-900/60">
+                                        <p class="text-sm font-medium text-gray-600 dark:text-gray-300">{{ __('messages.available_tickets') }}</p>
+                                        <p class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                                            @if ($hasLimitedTickets && ! is_null($remainingTicketCapacity))
+                                                {{ number_format($remainingTicketCapacity) }}
+                                            @else
+                                                {{ __('messages.unlimited') }}
+                                            @endif
+                                        </p>
+                                    </div>
+                                </div>
                                 <div class="mt-4 overflow-x-auto">
                                     <table class="min-w-full divide-y divide-gray-200 text-sm">
                                         <thead class="bg-gray-50 dark:bg-gray-900/60 text-gray-700 dark:text-gray-200">
