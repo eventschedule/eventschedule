@@ -51,6 +51,6 @@ jobs:
           draft: false
           prerelease: false
           title: "Latest Release"
-          automatic_release_tag: "v1.0.32-dfiore1230"
+          automatic_release_tag: "2.0.0b"
           files: |
             eventschedule.zip
