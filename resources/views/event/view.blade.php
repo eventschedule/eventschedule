@@ -6,7 +6,7 @@
         $talentNames = $talents->map->translatedName()->implode(', ');
         $curatorNames = $curators->map->translatedName()->implode(', ');
         $hasTickets = $event->tickets_enabled && $event->tickets->count() > 0;
-        $guestUrl = $event->getGuestUrl();
+        $guestUrl = $event->getGuestUrl(false, null, null, true);
         $cleanGuestUrl = $guestUrl ? \App\Utils\UrlUtils::clean($guestUrl) : null;
     @endphp
 
