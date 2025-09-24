@@ -128,7 +128,7 @@
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.events') }}</h2>
                     </div>
                     @if ($creationRoles->isNotEmpty())
-                        <x-primary-button type="button" @click="$dispatch('open-modal', 'create-event')">
+                        <x-primary-button type="button" x-data="" @click="$dispatch('open-modal', 'create-event')">
                             {{ __('messages.add_event') }}
                         </x-primary-button>
                     @endif
