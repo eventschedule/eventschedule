@@ -448,6 +448,12 @@
 
     </x-slot>
 
+    <x-role-breadcrumbs
+        :role="$role"
+        :current="$role->exists ? $role->name : $title"
+        class="mb-4"
+    />
+
     <h2 class="pt-2 my-4 text-xl font-bold leading-7 text-gray-900 dark:text-gray-100x sm:truncate sm:text-2xl sm:tracking-tight">
         {{ $title }}
     </h2>
