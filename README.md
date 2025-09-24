@@ -42,7 +42,8 @@
 - 🔍 **Search Feature:** Powerful search functionality to help users find specific events or content across your schedule.
 - 🎨 **Event Graphics Generator:** Create beautiful graphics of your upcoming events with flyers, QR codes, and event details for social media and marketing.
 - 🔌 **REST API:** Access and manage your events programmatically through a REST API.
-- 🚀 **Automatic App Updates:** Keep the platform up to date effortlessly with one-click automatic updates.  
+- 🚀 **Automatic App Updates:** Keep the platform up to date effortlessly with one-click automatic updates.
+- 🧭 **Streamlined Admin Navigation:** Reach Venues, Talent, and Curators from top-level menus while keeping their detailed sub-navigation intact.
 
 <div style="display: flex; gap: 10px;">
     <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_1.png?raw=true" width="49%" alt="Guest > Schedule">
