@@ -7,7 +7,7 @@
         $curatorNames = $curators->map->translatedName()->implode(', ');
         $hasTickets = $event->tickets_enabled && $event->tickets->count() > 0;
         $guestUrl = $event->getGuestUrl();
-        $displayEventUrl = $event->event_url ?: $guestUrl;
+        $cleanGuestUrl = $guestUrl ? \App\Utils\UrlUtils::clean($guestUrl) : null;
     @endphp
 
     <div class="py-6">
@@ -116,10 +116,10 @@
                                     <dd class="mt-1">{{ $categoryName ?? __('messages.none') }}</dd>
                                 </div>
                                 <div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-900/60">
-                                    <dt class="font-medium text-gray-900 dark:text-gray-100">{{ __('messages.event_url') }}</dt>
+                                    <dt class="font-medium text-gray-900 dark:text-gray-100">{{ __('messages.url') }}</dt>
                                     <dd class="mt-1">
-                                        @if ($displayEventUrl)
-                                            <a href="{{ $displayEventUrl }}" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400">{{ $displayEventUrl }}</a>
+                                        @if ($guestUrl)
+                                            <a href="{{ $guestUrl }}" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400">{{ $cleanGuestUrl }}</a>
                                         @else
                                             {{ __('messages.none') }}
                                         @endif
