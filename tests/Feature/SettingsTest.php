@@ -673,6 +673,33 @@ class SettingsTest extends TestCase
         $this->assertSame('https://example.org', config('app.url'));
     }
 
+    public function test_updating_repository_url_clears_cached_version_information(): void
+    {
+        $admin = User::factory()->create();
+
+        Setting::setGroup('general', [
+            'public_url' => 'https://initial.example',
+            'update_repository_url' => 'https://github.com/example/old-repo',
+        ]);
+
+        Cache::put('version_available', 'v1.0.0', 3600);
+
+        $payload = [
+            'public_url' => 'https://example.org/',
+            'update_repository_url' => 'https://github.com/example/new-repo/',
+        ];
+
+        $response = $this
+            ->actingAs($admin)
+            ->patch('/settings/general', $payload);
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/settings/general');
+
+        $this->assertFalse(Cache::has('version_available'));
+    }
+
     public function test_admin_can_update_terms_settings(): void
     {
         $admin = User::factory()->create();

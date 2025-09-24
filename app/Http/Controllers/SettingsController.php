@@ -13,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
@@ -449,6 +450,8 @@ class SettingsController extends Controller
     {
         $this->authorizeAdmin($request->user());
 
+        $storedGeneralSettings = Setting::forGroup('general');
+
         $validated = $request->validate([
             'public_url' => ['required', 'string', 'max:255', 'url'],
             'update_repository_url' => ['nullable', 'string', 'max:255', 'url'],
@@ -462,10 +465,18 @@ class SettingsController extends Controller
             $updateRepositoryUrl = $this->sanitizeUrl($updateRepositoryUrl);
         }
 
+        $previousRepositoryUrl = $storedGeneralSettings['update_repository_url'] ?? null;
+        $normalizedPreviousRepositoryUrl = $this->normalizeRepositoryUrl($previousRepositoryUrl);
+        $normalizedNewRepositoryUrl = $this->normalizeRepositoryUrl($updateRepositoryUrl);
+
         Setting::setGroup('general', [
             'public_url' => $publicUrl,
             'update_repository_url' => $updateRepositoryUrl,
         ]);
+
+        if ($normalizedPreviousRepositoryUrl !== $normalizedNewRepositoryUrl) {
+            Cache::forget('version_available');
+        }
 
         $this->applyGeneralConfig($publicUrl);
         UpdateConfigManager::apply($updateRepositoryUrl);
@@ -833,6 +844,21 @@ class SettingsController extends Controller
         $trimmed = trim($url);
 
         return rtrim($trimmed, '/');
+    }
+
+    protected function normalizeRepositoryUrl(?string $url): ?string
+    {
+        if (! is_string($url)) {
+            return null;
+        }
+
+        $trimmed = trim($url);
+
+        if ($trimmed === '') {
+            return null;
+        }
+
+        return $this->sanitizeUrl($trimmed);
     }
 
     protected function toBoolean(mixed $value): bool
