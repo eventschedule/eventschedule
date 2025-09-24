@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\RoleContactController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\GraphicController;
@@ -90,6 +91,18 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/manage/curators', [RoleController::class, 'curators'])->name('role.curators');
     Route::get('/manage/talent', [RoleController::class, 'talent'])->name('role.talent');
     Route::get('/manage/contacts', [RoleController::class, 'contacts'])->name('role.contacts');
+    Route::get('/manage/contacts/export/{format}', [RoleContactController::class, 'export'])
+        ->whereIn('format', ['csv', 'xlsx'])
+        ->name('role.contacts.export');
+    Route::post('/manage/contacts', [RoleContactController::class, 'store'])->name('role.contacts.store');
+    Route::put('/manage/contacts/{role}/{contact}', [RoleContactController::class, 'update'])
+        ->whereNumber('role')
+        ->whereNumber('contact')
+        ->name('role.contacts.update');
+    Route::delete('/manage/contacts/{role}/{contact}', [RoleContactController::class, 'destroy'])
+        ->whereNumber('role')
+        ->whereNumber('contact')
+        ->name('role.contacts.destroy');
     Route::get('/new/{type}', [RoleController::class, 'create'])->name('new');
     Route::post('/validate_address', [RoleController::class, 'validateAddress'])->name('validate_address')->middleware('throttle:25,1440');
     Route::post('/store', [RoleController::class, 'store'])->name('role.store');
