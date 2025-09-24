@@ -17,8 +17,11 @@
                     <div class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
                         <div>
                             <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
-                                {{ $event->translatedName() }}
+                                {{ __('messages.clone_event') }}
                             </h1>
+                            <p class="mt-1 text-base font-medium text-gray-700 dark:text-gray-200">
+                                {{ $event->translatedName() }}
+                            </p>
                             <div class="mt-3 space-y-1 text-sm text-gray-600 dark:text-gray-300">
                                 @if ($startDisplay)
                                     <div>
@@ -58,31 +61,31 @@
                             </div>
                         </div>
 
-                        <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
                             @if ($guestUrl)
                                 <a href="{{ $guestUrl }}" target="_blank"
-                                   class="inline-flex items-center rounded-md border border-transparent bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700">
+                                   class="inline-flex items-center justify-center rounded-md border border-transparent bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700">
                                     {{ __('messages.view_event') }}
                                 </a>
                             @endif
-                            @if (auth()->user()->canEditEvent($event) || auth()->user()->isAdmin())
-                                <a href="{{ route('events.clone.confirm', ['hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}"
-                                   class="inline-flex items-center rounded-md border border-transparent bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700">
-                                    {{ __('messages.clone_event') }}
-                                </a>
-                            @endif
-                            <a href="{{ route('event.edit_admin', ['hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}"
-                               class="inline-flex items-center rounded-md bg-[#4E81FA] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#3A6BE0]">
-                                {{ __('messages.edit') }}
+                            <a href="{{ route('events.view', ['hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}"
+                               class="inline-flex items-center justify-center rounded-md border border-transparent bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700">
+                                {{ __('messages.cancel') }}
                             </a>
-                            <form method="POST" action="{{ route('events.destroy', ['hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" onsubmit="return confirm('{{ __('messages.are_you_sure') }}');">
+                            <form method="POST" action="{{ route('events.clone', ['hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" class="inline-flex">
                                 @csrf
-                                @method('DELETE')
-                                <x-danger-button>
-                                    {{ __('messages.delete') }}
-                                </x-danger-button>
+                                <x-primary-button>
+                                    {{ __('messages.clone_event_confirm_button') }}
+                                </x-primary-button>
                             </form>
                         </div>
+                    </div>
+
+                    <p class="mt-4 text-sm text-gray-600 dark:text-gray-300">
+                        {{ __('messages.clone_event_description', ['name' => $event->translatedName()]) }}
+                    </p>
+                    <div class="mt-4 rounded-md border-l-4 border-yellow-400 bg-yellow-50 p-4 text-sm text-yellow-700 dark:border-yellow-500 dark:bg-yellow-500/10 dark:text-yellow-200">
+                        {{ __('messages.clone_event_warning') }}
                     </div>
 
                     <div class="mt-4 flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-300">

@@ -9,6 +9,7 @@ use App\Notifications\RequestAcceptedNotification;
 use App\Notifications\DeletedEventNotification;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use App\Utils\ColorUtils;
 use App\Utils\NotificationUtils;
 use Illuminate\Http\Request;
@@ -209,6 +210,101 @@ class EventController extends Controller
             'recurringDays' => $recurringDays,
             'categoryName' => $categoryName,
         ]);
+    }
+
+    public function cloneConfirm(Request $request, $hash)
+    {
+        $eventId = UrlUtils::decodeId($hash);
+        $event = Event::with(['roles', 'creatorRole', 'tickets', 'user'])->findOrFail($eventId);
+        $user = $request->user();
+
+        if (! $user || (! $user->canEditEvent($event) && ! $user->isAdmin())) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $event->loadMissing('venue');
+
+        $startAt = $event->starts_at ? $event->getStartDateTime(null, true) : null;
+        $endAt = null;
+
+        if ($startAt && $event->duration) {
+            $endAt = $startAt->copy()->addHours($event->duration);
+        }
+
+        $recurringDays = [];
+
+        if ($event->days_of_week) {
+            $baseDate = Carbon::now()->startOfWeek(Carbon::SUNDAY);
+
+            foreach (str_split($event->days_of_week) as $index => $value) {
+                if ($value === '1') {
+                    $recurringDays[] = $baseDate->copy()->addDays($index)
+                        ->locale(app()->getLocale())
+                        ->translatedFormat('l');
+                }
+            }
+        }
+
+        $categories = get_translated_categories();
+        $categoryName = $event->category_id && isset($categories[$event->category_id])
+            ? $categories[$event->category_id]
+            : null;
+
+        return view('event.clone-confirm', [
+            'event' => $event,
+            'venue' => $event->venue,
+            'talents' => $event->roles->filter(function ($role) {
+                return $role->isTalent();
+            }),
+            'curators' => $event->roles->filter(function ($role) {
+                return $role->isCurator();
+            }),
+            'startAt' => $startAt,
+            'endAt' => $endAt,
+            'recurringDays' => $recurringDays,
+            'categoryName' => $categoryName,
+        ]);
+    }
+
+    public function clone(Request $request, $hash)
+    {
+        $eventId = UrlUtils::decodeId($hash);
+        $event = Event::with(['roles', 'tickets'])->findOrFail($eventId);
+        $user = $request->user();
+
+        if (! $user || (! $user->canEditEvent($event) && ! $user->isAdmin())) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $clonedEvent = DB::transaction(function () use ($event) {
+            $newEvent = $event->replicate();
+            $newEvent->created_at = now();
+            $newEvent->updated_at = now();
+            $newEvent->google_event_id = null;
+            $newEvent->save();
+
+            foreach ($event->roles as $role) {
+                $pivotAttributes = collect($role->pivot->getAttributes())
+                    ->except(['id', 'event_id', 'role_id']);
+
+                $newEvent->roles()->attach($role->id, $pivotAttributes->toArray());
+            }
+
+            foreach ($event->tickets as $ticket) {
+                $newTicket = $ticket->replicate();
+                $newTicket->event_id = $newEvent->id;
+                $newTicket->sold = null;
+                $newTicket->created_at = now();
+                $newTicket->updated_at = now();
+                $newTicket->save();
+            }
+
+            return $newEvent;
+        });
+
+        return redirect()->route('event.edit_admin', [
+            'hash' => UrlUtils::encodeId($clonedEvent->id),
+        ])->with('message', __('messages.event_cloned'));
     }
 
 
