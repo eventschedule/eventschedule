@@ -126,6 +126,8 @@ class AppController extends Controller
                 throw new RuntimeException('The uploaded archive did not contain a valid release.');
             }
 
+            $this->validateReleaseAssets($releaseRoot);
+
             $this->copyReleaseContents($releaseRoot, base_path());
 
             Artisan::call('migrate', ['--force' => true]);
@@ -138,6 +140,80 @@ class AppController extends Controller
                 File::deleteDirectory($extractPath);
             }
         }
+    }
+
+    private function validateReleaseAssets(string $releaseRoot): void
+    {
+        $manifestPath = $releaseRoot . '/public/build/manifest.json';
+
+        if (! File::exists($manifestPath)) {
+            throw new RuntimeException(
+                'The uploaded update is missing the compiled front-end assets. '
+                . 'Please run "npm run build" before creating the update package.'
+            );
+        }
+
+        $manifest = json_decode(File::get($manifestPath), true);
+
+        if (! is_array($manifest)) {
+            throw new RuntimeException(
+                'The uploaded update contains an invalid Vite manifest. '
+                . 'Please regenerate the assets with "npm run build" and try again.'
+            );
+        }
+
+        $missingFiles = [];
+
+        foreach ($manifest as $entry) {
+            if (! is_array($entry)) {
+                continue;
+            }
+
+            $files = $this->extractManifestFiles($entry);
+
+            foreach ($files as $relativePath) {
+                $assetPath = $releaseRoot . '/public/build/' . ltrim($relativePath, '/');
+
+                if (! File::exists($assetPath)) {
+                    $missingFiles[] = $relativePath;
+                }
+            }
+        }
+
+        if ($missingFiles !== []) {
+            $missingFiles = array_unique($missingFiles);
+
+            throw new RuntimeException(
+                sprintf(
+                    'The uploaded update is missing the following compiled assets referenced by the Vite manifest: %s. '
+                    . 'Please run "npm run build" before creating the update package.',
+                    implode(', ', $missingFiles)
+                )
+            );
+        }
+    }
+
+    private function extractManifestFiles(array $entry): array
+    {
+        $files = [];
+
+        if (isset($entry['file']) && is_string($entry['file'])) {
+            $files[] = $entry['file'];
+        }
+
+        foreach (['css', 'assets'] as $key) {
+            if (! isset($entry[$key]) || ! is_array($entry[$key])) {
+                continue;
+            }
+
+            foreach ($entry[$key] as $value) {
+                if (is_string($value)) {
+                    $files[] = $value;
+                }
+            }
+        }
+
+        return array_values(array_unique($files));
     }
 
     private function resolveReleaseRoot(string $extractPath): string
