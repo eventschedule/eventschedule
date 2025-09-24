@@ -34,8 +34,6 @@
             ];
         })->values();
 
-        $eventViewRouteName = 'events.view';
-        $eventViewRouteExists = \Illuminate\Support\Facades\Route::has($eventViewRouteName);
     @endphp
 
     <div class="py-5">
@@ -221,23 +219,16 @@
                                             <td class="px-6 py-4 align-top">
                                                 <div class="flex items-center justify-end space-x-3">
                                                     @php
-                                                        $eventViewUrl = null;
-
-                                                        if ($eventViewRouteExists ?? false) {
-                                                            $eventViewUrl = rescue(
-                                                                fn () => route($eventViewRouteName, ['hash' => $hashedId]),
-                                                                null,
-                                                                false
-                                                            );
-
-                                                            if (! $eventViewUrl) {
-                                                                $eventViewRouteExists = false;
-                                                            }
-                                                        }
+                                                        $eventGuestUrl = rescue(
+                                                            fn () => $event->getGuestUrl(false, null, null, true),
+                                                            null,
+                                                            false
+                                                        );
                                                     @endphp
 
-                                                    @if ($eventViewUrl)
-                                                        <a href="{{ $eventViewUrl }}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">{{ __('messages.view') }}</a>
+                                                    @if ($eventGuestUrl)
+                                                        <a href="{{ $eventGuestUrl }}" target="_blank" rel="noopener noreferrer"
+                                                           class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">{{ __('messages.view_event') }}</a>
                                                     @endif
                                                     @if ($canEdit)
                                                         <a href="{{ route('event.edit_admin', ['hash' => $hashedId]) }}"
