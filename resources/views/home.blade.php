@@ -3,6 +3,7 @@
         $schedules = isset($schedules) ? $schedules : collect();
         $venues = isset($venues) ? $venues : collect();
         $curators = isset($curators) ? $curators : collect();
+        $calendarEvents = isset($calendarEvents) ? $calendarEvents : collect();
     @endphp
     @php
         $creationRoles = collect([$schedules, $venues, $curators])->flatten()->unique('id')->sortBy('name');
@@ -253,6 +254,11 @@
                                 </tbody>
                             </table>
                         </div>
+                        @if (method_exists($events, 'hasPages') && $events->hasPages())
+                            <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+                                {{ $events->links() }}
+                            </div>
+                        @endif
                     @else
                         <div class="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
                             {{ __('messages.no_events_found') }}
@@ -262,7 +268,7 @@
             </div>
         </div>
 
-        @include('role/partials/calendar', ['route' => 'home', 'tab' => ''])
+        @include('role/partials/calendar', ['route' => 'home', 'tab' => '', 'events' => $calendarEvents])
 
         @if ($creationRoles->isNotEmpty())
             <x-modal name="create-event">
