@@ -697,6 +697,42 @@ class RoleController extends Controller
         return $this->renderRoleListing($request, 'talent');
     }
 
+    public function contacts(Request $request)
+    {
+        $roles = $request->user()
+            ->member()
+            ->whereIn('roles.type', ['venue', 'curator', 'talent'])
+            ->with('members')
+            ->orderBy('type')
+            ->orderBy('name')
+            ->get();
+
+        $rolesByType = $roles->groupBy('type');
+
+        $contactsByType = $rolesByType->map(function ($rolesOfType) {
+            return $rolesOfType->flatMap(function (Role $role) {
+                return collect($role->contacts)
+                    ->map(function (array $contact) use ($role) {
+                        return [
+                            'role' => $role,
+                            'contact' => $contact,
+                        ];
+                    });
+            })->values();
+        });
+
+        return view('role.contacts', [
+            'contactsByType' => $contactsByType,
+            'typeOrder' => ['venue', 'curator', 'talent'],
+            'typeLabels' => [
+                'venue' => __('messages.venues'),
+                'curator' => __('messages.curators'),
+                'talent' => Str::plural(__('messages.talent')),
+            ],
+            'hasContacts' => $contactsByType->flatten(1)->isNotEmpty(),
+        ]);
+    }
+
     protected function renderRoleListing(Request $request, string $typeKey)
     {
         $config = [

@@ -87,6 +87,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/manage/venues', [RoleController::class, 'venues'])->name('role.venues');
     Route::get('/manage/curators', [RoleController::class, 'curators'])->name('role.curators');
     Route::get('/manage/talent', [RoleController::class, 'talent'])->name('role.talent');
+    Route::get('/manage/contacts', [RoleController::class, 'contacts'])->name('role.contacts');
     Route::get('/new/{type}', [RoleController::class, 'create'])->name('new');
     Route::post('/validate_address', [RoleController::class, 'validateAddress'])->name('validate_address')->middleware('throttle:25,1440');
     Route::post('/store', [RoleController::class, 'store'])->name('role.store');
