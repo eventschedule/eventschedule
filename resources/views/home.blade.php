@@ -265,7 +265,12 @@
             </div>
         </div>
 
-        @include('role/partials/calendar', ['route' => 'home', 'tab' => '', 'events' => $calendarEvents])
+        @include('role/partials/calendar', [
+            'route' => 'home',
+            'tab' => '',
+            'events' => $calendarEvents,
+            'canCreateEvent' => $creationRoles->isNotEmpty(),
+        ])
 
         @if ($creationRoles->isNotEmpty())
             <x-modal name="create-event">
