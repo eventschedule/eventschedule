@@ -51,6 +51,23 @@ class RoleListingTest extends TestCase
         $response->assertDontSeeText('Hidden ' . Str::title($type));
     }
 
+    /**
+     * @dataProvider roleListingProvider
+     */
+    public function test_role_listing_pages_support_list_view(string $routeName, string $type, ?string $titleKey, string $createKey): void
+    {
+        $user = User::factory()->create();
+        $role = $this->createRoleForUser($user, $type, 'List ' . Str::title($type));
+
+        $this->actingAs($user);
+
+        $response = $this->get(route($routeName, ['view' => 'list']));
+
+        $response->assertOk();
+        $response->assertSee('<table', false);
+        $response->assertSeeText($role->name);
+    }
+
     public static function roleListingProvider(): array
     {
         return [

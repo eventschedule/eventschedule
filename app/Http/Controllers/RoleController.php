@@ -762,6 +762,24 @@ class RoleController extends Controller
             ->orderBy('name')
             ->get();
 
+        $availableViews = ['grid', 'list'];
+        $sessionKey = 'role_listing_view_' . $typeConfig['type'];
+        $requestedView = $request->query('view');
+
+        if ($requestedView !== null) {
+            $selectedView = in_array($requestedView, $availableViews, true)
+                ? $requestedView
+                : 'grid';
+
+            session([$sessionKey => $selectedView]);
+        } else {
+            $selectedView = session($sessionKey, 'grid');
+        }
+
+        if (! in_array($selectedView, $availableViews, true)) {
+            $selectedView = 'grid';
+        }
+
         return view('role.listing', [
             'roles' => $roles,
             'pageTitle' => $typeConfig['title'],
@@ -770,6 +788,7 @@ class RoleController extends Controller
             'roleType' => $typeConfig['type'],
             'emptyTitle' => $typeConfig['empty_title'],
             'emptyDescription' => $typeConfig['empty_description'],
+            'selectedView' => $selectedView,
         ]);
     }
 
