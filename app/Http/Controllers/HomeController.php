@@ -58,7 +58,7 @@ class HomeController extends Controller
         $user = $request->user();
         $roleIds = $user->roles()->pluck('roles.id');
         
-        $events = Event::with(['roles', 'creatorRole', 'tickets'])
+        $baseQuery = Event::with(['roles', 'creatorRole', 'tickets'])
             ->where(function ($query) use ($roleIds, $user) {
                 $query->where(function ($query) use ($roleIds) {
                     $query->whereIn('id', function ($query) use ($roleIds) {
@@ -70,7 +70,9 @@ class HomeController extends Controller
                 })->orWhere(function ($query) use ($user) {
                     $query->where('user_id', $user->id);
                 });
-            })
+            });
+
+        $calendarEvents = (clone $baseQuery)
             ->where(function ($query) use ($startOfMonth, $endOfMonth) {
                 $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
                     ->orWhereNotNull('days_of_week');
@@ -78,8 +80,14 @@ class HomeController extends Controller
             ->orderBy('starts_at')
             ->get();
 
+        $events = $baseQuery
+            ->orderBy('starts_at')
+            ->paginate(10)
+            ->withQueryString();
+
         return view('home', compact(
             'events',
+            'calendarEvents',
             'month',
             'year',
             'startOfMonth',
