@@ -397,9 +397,9 @@ class Event extends Model
         return '';
     }
 
-    public function getGuestUrl($subdomain = false, $date = null, $useCustomDomain = null)
+    public function getGuestUrl($subdomain = false, $date = null, $useCustomDomain = null, bool $forceEventSlug = false)
     {
-        $data = $this->getGuestUrlData($subdomain, $date);
+        $data = $this->getGuestUrlData($subdomain, $date, $forceEventSlug);
 
         if (! $data['subdomain']) {
             \Log::error('No subdomain found for event ' . $this->id);
@@ -427,7 +427,7 @@ class Event extends Model
         return url($relativeUrl);
     }
 
-    public function getGuestUrlData($subdomain = false, $date = null)
+    public function getGuestUrlData($subdomain = false, $date = null, bool $forceEventSlug = false)
     {
         $venueSubdomain = $this->venue && $this->venue->isClaimed() ? $this->venue->subdomain : null;
         $roleSubdomain = $this->role() && $this->role()->isClaimed() ? $this->role()->subdomain : null;
@@ -442,7 +442,11 @@ class Event extends Model
 
         $slug = $this->slug;
 
-        if ($venueSubdomain && $roleSubdomain) {
+        if (! $forceEventSlug && $venueSubdomain && $roleSubdomain) {
+            $slug = $venueSubdomain == $subdomain ? $roleSubdomain : $venueSubdomain;
+        }
+
+        if ($forceEventSlug && (! $slug) && $venueSubdomain && $roleSubdomain) {
             $slug = $venueSubdomain == $subdomain ? $roleSubdomain : $venueSubdomain;
         }
         
