@@ -3,7 +3,7 @@
     $venues = isset($venues) ? $venues : collect();
     $curators = isset($curators) ? $curators : collect();
 
-    $scheduleRoutes = ['role.pages', 'role.venues', 'role.curators', 'role.talent', 'role.view_admin'];
+    $scheduleRoutes = ['role.pages', 'role.venues', 'role.curators', 'role.talent', 'role.contacts', 'role.view_admin'];
     $schedulesActive = false;
     foreach ($scheduleRoutes as $routeName) {
         if (request()->routeIs($routeName)) {
@@ -212,6 +212,16 @@
                                     @endforeach
                                 </ul>
                             @endif
+                        </li>
+                        <li>
+                            <a href="{{ route('role.contacts') }}"
+                                class="group flex gap-x-3 rounded-md p-2 text-sm font-medium leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->routeIs('role.contacts') ? 'bg-gray-800 text-white' : '' }}">
+                                <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="{{ request()->routeIs('role.contacts') ? '#ccc' : '#666' }}" stroke-width="1.5" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.25h15a.75.75 0 01.75.75v12.75a.75.75 0 01-.75.75h-15a.75.75 0 01-.75-.75V6a.75.75 0 01.75-.75z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 8.25h7.5M8.25 12h4.5M8.25 15.75H12" />
+                                </svg>
+                                {{ __('messages.contacts') }}
+                            </a>
                         </li>
                     </ul>
                 </li>

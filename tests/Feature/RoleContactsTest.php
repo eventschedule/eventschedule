@@ -103,4 +103,63 @@ class RoleContactsTest extends TestCase
 
         $this->assertSame([], $role->contacts);
     }
+
+    public function test_contacts_page_displays_role_contacts(): void
+    {
+        $user = User::factory()->create();
+
+        $venue = new Role([
+            'type' => 'venue',
+            'name' => 'Concert Hall',
+            'email' => 'venue@example.com',
+        ]);
+        $venue->subdomain = 'concert-hall';
+        $venue->user_id = $user->id;
+        $venue->contacts = [
+            ['name' => 'Venue Contact', 'email' => 'venue-contact@example.com', 'phone' => '555-1000'],
+        ];
+        $venue->save();
+        $venue->users()->attach($user->id, ['level' => 'owner']);
+
+        $curator = new Role([
+            'type' => 'curator',
+            'name' => 'Event Collective',
+            'email' => 'curator@example.com',
+        ]);
+        $curator->subdomain = 'event-collective';
+        $curator->user_id = $user->id;
+        $curator->contacts = [
+            ['name' => 'Curator Contact', 'email' => 'curator-contact@example.com'],
+        ];
+        $curator->save();
+        $curator->users()->attach($user->id, ['level' => 'owner']);
+
+        $talent = new Role([
+            'type' => 'talent',
+            'name' => 'Headline Artist',
+            'email' => 'talent@example.com',
+        ]);
+        $talent->subdomain = 'headline-artist';
+        $talent->user_id = $user->id;
+        $talent->contacts = [
+            ['name' => 'Talent Contact', 'phone' => '555-2000'],
+        ];
+        $talent->save();
+        $talent->users()->attach($user->id, ['level' => 'owner']);
+
+        $this->actingAs($user);
+
+        $response = $this->get(route('role.contacts'));
+
+        $response->assertOk();
+        $response->assertSeeText(__('messages.venues'));
+        $response->assertSeeText(__('messages.curators'));
+        $response->assertSeeText(__('messages.contacts'));
+        $response->assertSeeText('Venue Contact');
+        $response->assertSee('venue-contact@example.com');
+        $response->assertSee('555-1000');
+        $response->assertSeeText('Curator Contact');
+        $response->assertSeeText('Talent Contact');
+        $response->assertSee('555-2000');
+    }
 }
