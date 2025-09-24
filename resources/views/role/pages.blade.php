@@ -116,6 +116,12 @@
                                                     >
                                                         {{ __('messages.manage') }}
                                                     </a>
+                                                    <a
+                                                        href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}"
+                                                        class="inline-flex items-center rounded-md bg-[#4E81FA] px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#3b6ae0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]"
+                                                    >
+                                                        {{ __('messages.edit') }}
+                                                    </a>
                                                     @if ($publicUrl)
                                                         <a
                                                             href="{{ $publicUrl }}"
