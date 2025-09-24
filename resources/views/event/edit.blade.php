@@ -150,29 +150,17 @@
         }
     }
 
-    function copyEventUrl(button) {
-        const url = '{{ $event->exists ? $event->getGuestUrl($subdomain, $isUnique ? null : true, null, true) : "" }}';
-        navigator.clipboard.writeText(url).then(() => {
-            const originalHTML = button.innerHTML;
-            button.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                </svg>
-            `;
-            setTimeout(() => {
-                button.innerHTML = originalHTML;
-            }, 2000);
-        });
-    }
-
     </script>
 
 </x-slot>
 
 @php
-    $baseEventUrl = $role->getGuestUrl()
-        ? \App\Utils\UrlUtils::clean($role->getGuestUrl())
-        : \App\Utils\UrlUtils::clean(url('/' . $role->subdomain));
+    $absoluteEventUrlBase = $role->getGuestUrl()
+        ?: url('/' . $role->subdomain);
+
+    $baseEventUrl = $absoluteEventUrlBase
+        ? \App\Utils\UrlUtils::clean($absoluteEventUrlBase)
+        : '';
 
     $slugExample = \Illuminate\Support\Str::slug(__('messages.event_name'));
     if ($slugExample === '') {
@@ -592,18 +580,6 @@
                                 v-model="eventName"
                                 required autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
-                            @if ($event->exists)
-                            <div class="text-sm text-gray-500 flex items-center gap-2">
-                                <a href="{{ $event->getGuestUrl($subdomain, $isUnique ? null : true, null, true) }}" target="_blank" class="hover:underline">
-                                    {{ \App\Utils\UrlUtils::clean($event->getGuestUrl($subdomain, $isUnique ? null : true, null, true)) }}
-                                </a>
-                                <button type="button" onclick="copyEventUrl(this)" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
-                                    </svg>
-                                </button>
-                            </div>
-                            @endif
                         </div>
 
                         <div class="mb-6">
@@ -616,9 +592,37 @@
                                 v-model="eventSlug"
                                 @input="onSlugInput"
                                 autocomplete="off" />
-                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                <span v-if="eventUrlBase">@{{ eventUrlBase }}/</span>@{{ eventSlug || slugPreviewPlaceholder }}
-                            </p>
+                            <div class="mt-2 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                                <span class="truncate">
+                                    <template v-if="eventUrlBase">
+                                        <template v-if="canUseEventUrl">
+                                            <a :href="fullEventUrl" target="_blank" class="hover:underline">
+                                                @{{ displayEventUrl }}
+                                            </a>
+                                        </template>
+                                        <template v-else>
+                                            @{{ displayEventUrl }}
+                                        </template>
+                                    </template>
+                                    <template v-else>
+                                        @{{ eventSlug || slugPreviewPlaceholder }}
+                                    </template>
+                                </span>
+                                <button v-if="canUseEventUrl" type="button" @click="copyEventUrl"
+                                    class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                                    title="{{ __('messages.copy_url') }}">
+                                    <template v-if="eventUrlCopied">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                        </svg>
+                                    </template>
+                                    <template v-else>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
+                                        </svg>
+                                    </template>
+                                </button>
+                            </div>
                             <x-input-error class="mt-2" :messages="$errors->get('slug')" />
                         </div>
 
@@ -1121,6 +1125,7 @@
         slugManuallyEdited: @json($slugWasManuallyEdited),
         slugPreviewPlaceholder: @json($slugExample),
         eventUrlBase: @json($baseEventUrl),
+        eventUrlBaseAbsolute: @json($absoluteEventUrlBase),
         tickets: @json($event->tickets ?? [new Ticket()]).map(ticket => ({
           ...ticket,
           /*
@@ -1138,6 +1143,7 @@
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
         soldLabel: "{{ __('messages.sold_reserved') }}",
         isRecurring: @json($event->days_of_week ? true : false),
+        eventUrlCopied: false,
       }
     },
     methods: {
@@ -1168,6 +1174,19 @@
         const sanitized = this.slugify(event.target.value);
         this.eventSlug = sanitized;
         this.slugManuallyEdited = sanitized.length > 0;
+      },
+      copyEventUrl() {
+        if (!this.fullEventUrl) {
+          return;
+        }
+
+        navigator.clipboard.writeText(this.fullEventUrl).then(() => {
+          this.eventUrlCopied = true;
+
+          setTimeout(() => {
+            this.eventUrlCopied = false;
+          }, 2000);
+        });
       },
       clearSelectedVenue() {
         this.selectedVenue = "";
@@ -1495,6 +1514,29 @@
       },
     },
     computed: {
+      displayEventUrl() {
+        const base = this.eventUrlBase ? this.eventUrlBase.replace(/\/$/, '') : '';
+        const slug = this.eventSlug || this.slugPreviewPlaceholder;
+
+        if (base) {
+          return slug ? `${base}/${slug}` : base;
+        }
+
+        return slug;
+      },
+      fullEventUrl() {
+        const base = this.eventUrlBaseAbsolute ? this.eventUrlBaseAbsolute.replace(/\/$/, '') : '';
+        const slug = this.eventSlug;
+
+        if (base && slug) {
+          return `${base}/${slug}`;
+        }
+
+        return '';
+      },
+      canUseEventUrl() {
+        return !!this.event.id && !!this.fullEventUrl;
+      },
       filteredMembers() {
         return this.members.filter(member => !this.selectedMembers.some(selected => selected.id === member.id));
       },
