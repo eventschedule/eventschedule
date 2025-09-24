@@ -83,6 +83,8 @@ Route::middleware(['auth', 'verified'])->group(function ()
 {
     Route::get('/events', [HomeController::class, 'home'])->name('home');
     Route::get('/events/{hash}/view', [EventController::class, 'view'])->name('events.view');
+    Route::get('/events/{hash}/clone', [EventController::class, 'cloneConfirm'])->name('events.clone.confirm');
+    Route::post('/events/{hash}/clone', [EventController::class, 'clone'])->name('events.clone');
     Route::delete('/events/{hash}', [EventController::class, 'destroyFromHome'])->name('events.destroy');
     Route::get('/manage/venues', [RoleController::class, 'venues'])->name('role.venues');
     Route::get('/manage/curators', [RoleController::class, 'curators'])->name('role.curators');
