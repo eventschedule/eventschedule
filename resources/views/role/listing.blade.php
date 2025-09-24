@@ -30,12 +30,20 @@
                                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $subtitle }}</p>
                                     @endif
                                 </div>
-                                <a
-                                    href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}"
-                                    class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-[#4E81FA] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-[#4E81FA]"
-                                >
-                                    {{ __('messages.manage') }}
-                                </a>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <a
+                                        href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']) }}"
+                                        class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-[#4E81FA] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-[#4E81FA]"
+                                    >
+                                        {{ __('messages.manage') }}
+                                    </a>
+                                    <a
+                                        href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}"
+                                        class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-[#4E81FA] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-[#4E81FA]"
+                                    >
+                                        {{ __('messages.edit_' . strtolower($role->type)) }}
+                                    </a>
+                                </div>
                             </div>
 
                             <dl class="mt-6 flex-1 space-y-5 text-sm">
