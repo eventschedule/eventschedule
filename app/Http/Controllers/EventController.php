@@ -463,7 +463,7 @@ class EventController extends Controller
         $currencies = file_get_contents(base_path('storage/currencies.json'));
         $currencies = json_decode($currencies);
 
-        $eventUrlData = $event->getGuestUrlData($subdomain, false);
+        $eventUrlData = $event->getGuestUrlData($subdomain, false, true);
         $matchingEvent = $this->eventRepo->getEvent($eventUrlData['subdomain'], $eventUrlData['slug'], false);        
         $isUnique = ! $matchingEvent || $matchingEvent->id == $event->id ? true : false;
 
