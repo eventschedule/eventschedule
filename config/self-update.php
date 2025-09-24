@@ -28,7 +28,7 @@ return [
     |
     */
 
-    'version_installed' => env('SELF_UPDATER_VERSION_INSTALLED', '2.0.0b'),
+    'version_installed' => env('SELF_UPDATER_VERSION_INSTALLED', '2.0.1b'),
 
     'github_defaults' => [
         'vendor' => $defaultGithubVendor,
