@@ -168,8 +168,8 @@ class RoleController extends Controller
             return redirect($redirectUrl);            
 
         } else {
-            $redirectUrl = $mainDomain . route('following', [], false);
-            
+            $redirectUrl = $mainDomain . route('home', [], false);
+
             return redirect($redirectUrl)
                     ->with('message', str_replace(':name', $role->name, __('messages.followed_role')));
         }
@@ -189,7 +189,7 @@ class RoleController extends Controller
             $user->roles()->detach($role->id);
         }
 
-        return redirect(route('following'))
+        return redirect(route('home'))
                 ->with('message', str_replace(':name', $role->name, __('messages.unfollowed_role')));
     }
 
@@ -647,21 +647,6 @@ class RoleController extends Controller
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))
                     ->with('message', __('messages.removed_member'));
-    }
-
-    public function following()
-    {
-        $user = auth()->user();
-        $roleIds = $user->following()->pluck('roles.id');
-        $roles = Role::whereIn('id', $roleIds)
-                    ->orderBy('name', 'ASC')
-                    ->get();
-
-        $data = [
-            'roles' => $roles,
-        ];
-
-        return view('role/index', $data);
     }
 
     public function pages(Request $request)
