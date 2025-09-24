@@ -708,6 +708,8 @@ class RoleController extends Controller
 
         return view('role.contacts', [
             'contactsByType' => $contactsByType,
+            'rolesByType' => $rolesByType,
+            'roles' => $roles,
             'typeOrder' => ['venue', 'curator', 'talent'],
             'typeLabels' => [
                 'venue' => __('messages.venues'),
