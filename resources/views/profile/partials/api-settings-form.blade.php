@@ -6,9 +6,6 @@
 
         <p class="mt-1 text-sm text-gray-600">
             {{ __('Manage your API access settings.') }}
-            <a href="{{ route('api.documentation') }}" class="text-indigo-600 hover:text-indigo-900">
-                {{ __('View API Documentation') }}
-            </a>
         </p>
     </header>
 

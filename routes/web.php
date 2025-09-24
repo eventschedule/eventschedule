@@ -94,7 +94,6 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/search-roles', [RoleController::class, 'search'])->name('role.search');
     Route::get('/search-events/{subdomain}', [RoleController::class, 'searchEvents'])->name('role.search_events');
     Route::get('/admin-edit-event/{hash}', [EventController::class, 'editAdmin'])->name('event.edit_admin');
-    Route::get('/following', [RoleController::class, 'following'])->name('following');
     Route::get('/pages', [RoleController::class, 'pages'])->name('role.pages');
     Route::get('/tickets', [TicketController::class, 'tickets'])->name('tickets');
     Route::get('/sales', [TicketController::class, 'sales'])->name('sales');
@@ -186,10 +185,6 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|availability|requests|profile|followers|team|plan|videos');
 
     Route::post('/{subdomain}/upload-image', [EventController::class, 'uploadImage'])->name('event.upload_image');
-
-    Route::get('/api/documentation', function () {
-        return view('api.documentation');
-    })->name('api.documentation');
 
     Route::patch('/api-settings', [ApiSettingsController::class, 'update'])->name('api-settings.update');
     Route::post('/api-settings/show-key', [ApiSettingsController::class, 'showApiKey'])->name('api-settings.show-key');
