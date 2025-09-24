@@ -226,7 +226,10 @@
                                                         );
                                                     @endphp
 
-                                                    @if ($eventGuestUrl)
+                                                    @if ($canEdit)
+                                                        <a href="{{ route('events.view', ['hash' => $hashedId]) }}" target="_blank" rel="noopener noreferrer"
+                                                           class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">{{ __('messages.view_event') }}</a>
+                                                    @elseif ($eventGuestUrl)
                                                         <a href="{{ $eventGuestUrl }}" target="_blank" rel="noopener noreferrer"
                                                            class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">{{ __('messages.view_event') }}</a>
                                                     @endif
