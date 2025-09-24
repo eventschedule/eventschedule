@@ -38,9 +38,6 @@ jobs:
           rm -rf .git .github tests
           rm -f .gitattributes .gitignore phpunit.xml
 
-          # Ensure the archive defaults to the web server user
-          sudo chown -R www-data:www-data .
-
           # Create zip file
           zip -r eventschedule.zip .
 
