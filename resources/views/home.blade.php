@@ -240,7 +240,10 @@
                                                         <a href="{{ $eventViewUrl }}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">{{ __('messages.view') }}</a>
                                                     @endif
                                                     @if ($canEdit)
-                                                        <a href="{{ route('event.edit_admin', ['hash' => $hashedId]) }}" class="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-100">{{ __('messages.edit') }}</a>
+                                                        <a href="{{ route('event.edit_admin', ['hash' => $hashedId]) }}"
+                                                           class="inline-flex items-center rounded-md bg-[#4E81FA] px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-[#3A6BE0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]">
+                                                            {{ __('messages.edit') }}
+                                                        </a>
                                                         <form method="POST" action="{{ route('events.destroy', ['hash' => $hashedId]) }}" onsubmit="return confirm('{{ __('messages.are_you_sure') }}');">
                                                             @csrf
                                                             @method('DELETE')
