@@ -270,7 +270,7 @@
                                 class="relative group" 
                                 :class="event.can_edit ? '{{ (isset($role) && $role->isRtl()) ? 'hover:pl-8' : 'hover:pr-8' }}' : ''"
                                 v-show="isEventVisible(event)">
-                                <a :href="getEventUrl(event, '{{ $currentDate->format('Y-m-d') }}')"
+                                <a :href="getEventUrl(event, '{{ $currentDate->utc()->format('Y-m-d') }}')"
                                     class="flex has-tooltip" 
                                     :data-tooltip="getEventTooltip(event)"
                                     @click.stop {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
