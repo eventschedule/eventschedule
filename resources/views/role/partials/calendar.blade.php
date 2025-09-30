@@ -271,7 +271,7 @@
                                 class="relative group" 
                                 :class="event.can_edit ? '{{ (isset($role) && $role->isRtl()) ? 'hover:pl-8' : 'hover:pr-8' }}' : ''"
                                 v-show="isEventVisible(event)">
-                                <a :href="getEventUrl(event, '{{ ! $event->starts_at || $event->days_of_week ? $currentDate->format('Y-m-d') : $event->getStartDateTime(null, false)->format('Y-m-d') }}')"
+                                <a :href="getEventUrl(event)"
                                     class="flex has-tooltip" 
                                     :data-tooltip="getEventTooltip(event)"
                                     @click.stop {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
@@ -311,7 +311,7 @@
                 <ol id="mobileEventsList"
                     class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow ring-1 ring-black ring-opacity-5">
                     <template v-for="event in mobileEventsList" :key="'mobile-' + event.uniqueKey">
-                        <a v-if="isEventVisible(event)" :href="getEventUrl(event, event.occurrenceDate)" 
+                        <a v-if="isEventVisible(event)" :href="getEventUrl(event)" 
                            {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}>
                             <li class="relative flex items-center py-6 px-4 {{ (isset($force_mobile) && $force_mobile) ? '' : 'xl:static' }} event-item {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'space-x-reverse' : '' }} space-x-6"
                                 :class="isPastEvent(event.occurrenceDate) ? 'past-event hidden' : ''">
@@ -456,7 +456,7 @@ const calendarApp = createApp({
                 eventsForDate.forEach(event => {
                     mobileEvents.push({
                         ...event,
-                        occurrenceDate: event.utc_date && ! event.days_of_week ? event.utc_date : dateStr,
+                        occurrenceDate: dateStr,
                         // Create a unique key for recurring events
                         uniqueKey: event.days_of_week ? `${event.id}-${dateStr}` : event.id
                     });
@@ -498,34 +498,6 @@ const calendarApp = createApp({
             }
             return [];
         },
-        eventMatchesDate(event, dateStr) {
-            // Convert dateStr to Date object for comparison
-            const checkDate = new Date(dateStr + 'T00:00:00');
-            
-            if (event.starts_at) {
-                // Use the local_date that's already converted to the role's timezone
-                if (event.local_date) {
-                    return event.local_date === dateStr;
-                }
-                
-                // Fallback for events without local_date
-                const eventDate = new Date(event.starts_at);
-                return eventDate.toDateString() === checkDate.toDateString();
-            } else if (event.days_of_week) {
-                // For recurring events, check if the date is on or after the start date
-                // and if the day of the week matches
-                if (event.starts_at) {
-                    const eventStartDate = new Date(event.starts_at);
-                    if (checkDate < eventStartDate) {
-                        return false;
-                    }
-                }
-                
-                const dayOfWeek = checkDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
-                return event.days_of_week[dayOfWeek] === '1';
-            }
-            return false;
-        },
         isEventVisible(event) {
             if (this.selectedGroup) {
                 // Find the group by slug to get its ID for filtering
@@ -539,12 +511,12 @@ const calendarApp = createApp({
             }
             return true;
         },
-        getEventUrl(event, date) {
+        getEventUrl(event) {
             let url = event.guest_url;
             let queryParams = [];
             
-            if (date) {
-                queryParams.push('date=' + date);
+            if (event.utc_date) {
+                queryParams.push('date=' + event.utc_date);
             }
             
             // Preserve current filter values
@@ -600,41 +572,6 @@ const calendarApp = createApp({
             today.setHours(0, 0, 0, 0);
             return eventDate < today;
         },
-        getEventDate(event) {
-            if (event.starts_at) {
-                // Use the local_date that's already converted to the role's timezone
-                if (event.local_date) {
-                    return event.local_date;
-                }
-                
-                // Fallback for events without local_date
-                const eventDate = new Date(event.starts_at);
-                return eventDate.toISOString().split('T')[0]; // Return YYYY-MM-DD format
-            }
-            // For recurring events, we need to determine the date based on the current month
-            // This is a simplified approach - you might need to adjust based on your specific logic
-            const currentMonth = new Date(this.startOfMonth);
-            const dayOfWeek = this.getDayOfWeekFromDaysOfWeek(event.days_of_week);
-            if (dayOfWeek !== null) {
-                const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-                const firstOccurrence = this.getFirstOccurrenceOfDay(firstDayOfMonth, dayOfWeek);
-                return firstOccurrence.toISOString().split('T')[0];
-            }
-            return null;
-        },
-        getEventDisplayDate(event) {
-            const date = this.getEventDate(event);
-            if (!date) return '';
-            
-            const eventDate = new Date(date);
-            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            const day = eventDate.getDate();
-            const suffix = this.getDaySuffix(day);
-            const month = monthNames[eventDate.getMonth()];
-            
-            return `${month} ${day}${suffix}`;
-        },
         formatMobileDate(dateStr) {
             if (!dateStr) return '';
             
@@ -646,23 +583,6 @@ const calendarApp = createApp({
             const month = monthNames[eventDate.getMonth()];
             
             return `${month} ${day}${suffix}`;
-        },
-        getDayOfWeekFromDaysOfWeek(daysOfWeek) {
-            if (!daysOfWeek) return null;
-            // Find the first day of the week that is set to '1'
-            for (let i = 0; i < daysOfWeek.length; i++) {
-                if (daysOfWeek[i] === '1') {
-                    return i; // 0 = Sunday, 1 = Monday, etc.
-                }
-            }
-            return null;
-        },
-        getFirstOccurrenceOfDay(startDate, dayOfWeek) {
-            const currentDay = startDate.getDay();
-            const daysToAdd = (dayOfWeek - currentDay + 7) % 7;
-            const firstOccurrence = new Date(startDate);
-            firstOccurrence.setDate(startDate.getDate() + daysToAdd);
-            return firstOccurrence;
         },
         getDaySuffix(day) {
             if (day >= 11 && day <= 13) return 'th';
