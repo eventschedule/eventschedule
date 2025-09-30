@@ -59,6 +59,7 @@
             'days_of_week' => $event->days_of_week,
             'local_starts_at' => $event->localStartsAt(),
             'local_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
+            'utc_date' => $event->starts_at ? $event->getStartDateTime(null, false)->format('Y-m-d') : null,
             'guest_url' => $event->getGuestUrl(isset($subdomain) ? $subdomain : '', ''),
             'image_url' => $event->getImageUrl(),
             'can_edit' => auth()->user() && auth()->user()->canEditEvent($event),
@@ -270,7 +271,7 @@
                                 class="relative group" 
                                 :class="event.can_edit ? '{{ (isset($role) && $role->isRtl()) ? 'hover:pl-8' : 'hover:pr-8' }}' : ''"
                                 v-show="isEventVisible(event)">
-                                <a :href="getEventUrl(event, '{{ $currentDate->format('Y-m-d') }}')"
+                                <a :href="getEventUrl(event, '{{ ! $event->starts_at || $event->days_of_week ? $currentDate->format('Y-m-d') : $event->getStartDateTime(null, false)->format('Y-m-d') }}')"
                                     class="flex has-tooltip" 
                                     :data-tooltip="getEventTooltip(event)"
                                     @click.stop {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
@@ -455,7 +456,7 @@ const calendarApp = createApp({
                 eventsForDate.forEach(event => {
                     mobileEvents.push({
                         ...event,
-                        occurrenceDate: dateStr,
+                        occurrenceDate: event.utc_date && ! event.days_of_week ? event.utc_date : dateStr,
                         // Create a unique key for recurring events
                         uniqueKey: event.days_of_week ? `${event.id}-${dateStr}` : event.id
                     });
