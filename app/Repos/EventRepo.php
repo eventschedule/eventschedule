@@ -364,11 +364,10 @@ class EventRepo
         
         $subdomainRole = Role::where('subdomain', $subdomain)->first();
         $slugRole = Role::where('subdomain', $slug)->first();        
-        $timezone = auth()->user() ? auth()->user()->timezone : $subdomainRole->timezone;
         $eventId = UrlUtils::decodeId($slug);
 
         if ($subdomainRole && $eventId) {
-            $event = Event::with(['venue', 'roles'])
+            $event = Event::with('roles')
                 ->where('id', $eventId)
                 ->first();
 
@@ -395,17 +394,14 @@ class EventRepo
 
             if ($role && $venue) {
                 if ($eventDate) {
-                    $event = Event::with(['venue', 'roles'])
+                    $event = Event::with('roles')
                         ->whereHas('roles', function ($query) use ($role) {
                             $query->where('role_id', $role->id);
                         })
-                        ->whereHas('roles', function ($query) use ($venue) {
-                            $query->where('role_id', $venue->id);
-                        })
-                        ->where(function ($query) use ($eventDate, $timezone) {
+                        ->where(function ($query) use ($eventDate) {
                             $query->whereBetween('starts_at', [
-                                $eventDate->copy()->setTimezone($timezone)->startOfDay()->setTimezone('UTC'),
-                                $eventDate->copy()->setTimezone($timezone)->endOfDay()->setTimezone('UTC'),                                                        
+                                $eventDate->copy()->startOfDay(),
+                                $eventDate->copy()->endOfDay(),                                                        
                             ])
                                 ->orWhere(function ($query) use ($eventDate) {
                                     $query->whereNotNull('days_of_week')
@@ -416,7 +412,7 @@ class EventRepo
                         ->orderBy('starts_at')
                         ->first();
                 } else {
-                    $event = Event::with(['venue', 'roles'])
+                    $event = Event::with('roles')
                         ->whereHas('roles', function ($query) use ($role) {
                             $query->where('role_id', $role->id);
                         })
@@ -428,7 +424,7 @@ class EventRepo
                         ->first();
 
                     if (!$event) {
-                        $event = Event::with(['venue', 'roles'])
+                        $event = Event::with('roles')
                             ->whereHas('roles', function ($query) use ($role) {
                                 $query->where('role_id', $role->id);
                             })    
@@ -447,14 +443,13 @@ class EventRepo
             }
         }
 
-        if ($eventDate) {                
-            $event = Event::with(['venue', 'roles'])
+        if ($eventDate) {
+            $event = Event::with('roles')
                         ->where('slug', $slug)
-                        ->where(function ($query) use ($eventDate, $timezone) {
-                            // Convert local date to UTC range for comparison
-                            $startOfDay = $eventDate->copy()->setTimezone($timezone)->startOfDay()->setTimezone('UTC');
-                            $endOfDay = $eventDate->copy()->setTimezone($timezone)->endOfDay()->setTimezone('UTC');
-                            
+                        ->where(function ($query) use ($eventDate) {
+                            $startOfDay = $eventDate->copy()->startOfDay();
+                            $endOfDay = $eventDate->copy()->endOfDay();
+
                             $query->whereBetween('starts_at', [$startOfDay, $endOfDay])
                                 ->orWhere(function ($query) use ($eventDate) {
                                     $query->whereNotNull('days_of_week')
@@ -464,24 +459,17 @@ class EventRepo
                         })
                         ->where(function($query) use ($subdomain) {
                             $query->whereHas('roles', function($q) use ($subdomain) {
-                                $q->where('type', 'venue')
-                                  ->where('subdomain', $subdomain);
-                            })->orWhereHas('roles', function($q) use ($subdomain) {
                                 $q->where('subdomain', $subdomain);
                             });
                         })
                         ->orderBy('starts_at')
                         ->first();
-            
         } else {
-            $event = Event::with(['venue', 'roles'])
+            $event = Event::with('roles')
                         ->where('slug', $slug)
                         ->where('starts_at', '>=', now()->subDay())                    
                         ->where(function($query) use ($subdomain) {
                             $query->whereHas('roles', function($q) use ($subdomain) {
-                                $q->where('type', 'venue')
-                                  ->where('subdomain', $subdomain);
-                            })->orWhereHas('roles', function($q) use ($subdomain) {
                                 $q->where('subdomain', $subdomain);
                             });
                         })
@@ -489,14 +477,11 @@ class EventRepo
                         ->first();
             
             if (! $event) {
-                $event = Event::with(['venue', 'roles'])
+                $event = Event::with('roles')
                             ->where('slug', $slug)
                             ->where('starts_at', '<', now())
                             ->where(function($query) use ($subdomain) {
                                 $query->whereHas('roles', function($q) use ($subdomain) {
-                                    $q->where('type', 'venue')
-                                      ->where('subdomain', $subdomain);
-                                })->orWhereHas('roles', function($q) use ($subdomain) {
                                     $q->where('subdomain', $subdomain);
                                 });
                             })    
@@ -511,19 +496,15 @@ class EventRepo
         }
 
         if ($eventDate) {
-            $event = Event::with(['venue', 'roles'])
-                        ->where(function ($query) use ($eventDate, $timezone) {
-                            // Convert local date to UTC range for comparison
-                            $startOfDay = $eventDate->copy()->setTimezone($timezone)->startOfDay()->setTimezone('UTC');
-                            $endOfDay = $eventDate->copy()->setTimezone($timezone)->endOfDay()->setTimezone('UTC');
+            $event = Event::with('roles')
+                        ->where(function ($query) use ($eventDate) {
+                            $startOfDay = $eventDate->copy()->startOfDay();
+                            $endOfDay = $eventDate->copy()->endOfDay();
                             
                             $query->whereBetween('starts_at', [$startOfDay, $endOfDay]);
                         })
                         ->where(function($query) use ($subdomain) {
                             $query->whereHas('roles', function($q) use ($subdomain) {
-                                $q->where('type', 'venue')
-                                  ->where('subdomain', $subdomain);
-                            })->orWhereHas('roles', function($q) use ($subdomain) {
                                 $q->where('subdomain', $subdomain);
                             });
                         })
