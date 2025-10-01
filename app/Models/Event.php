@@ -558,15 +558,15 @@ class Event extends Model
 
         $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
 
-        if ($locale) {
-            $startAt->setTimezone($timezone);        
-        }
-
         if ($date) {
             $customDate = Carbon::createFromFormat('Y-m-d', $date);
             $startAt->setDate($customDate->year, $customDate->month, $customDate->day);
         }
-        
+
+        if ($locale) {
+            $startAt->setTimezone($timezone);
+        }
+
         return $startAt;
     }
 
