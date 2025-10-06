@@ -619,4 +619,5 @@ return [
     'access_denied_calendar' => 'Accès refusé. Veuillez vérifier vos autorisations Google Calendar.',
     'sync_events_between_schedules' => 'Synchronisez les événements entre ce planning et votre Google Calendar.',
     'events_synced' => 'Événements synchronisés avec succès !',
+    'untitled_event' => 'Événement Sans Titre',
 ];

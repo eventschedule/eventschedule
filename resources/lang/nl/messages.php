@@ -617,4 +617,5 @@ return [
     'access_denied_calendar' => 'Toegang geweigerd. Controleer je Google Calendar machtigingen.',
     'sync_events_between_schedules' => 'Synchroniseer evenementen tussen dit rooster en je Google Calendar.',
     'events_synced' => 'Evenementen succesvol gesynchroniseerd!',
+    'untitled_event' => 'Naamloos Evenement',
 ];
