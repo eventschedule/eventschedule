@@ -623,4 +623,5 @@ return [
     'access_denied_calendar' => 'Zugriff verweigert. Bitte überprüfen Sie Ihre Google Kalender Berechtigungen.',
     'sync_events_between_schedules' => 'Synchronisieren Sie Veranstaltungen zwischen diesem Zeitplan und Ihrem Google Kalender.',
     'events_synced' => 'Veranstaltungen erfolgreich synchronisiert!',
+    'untitled_event' => 'Unbenannte Veranstaltung',
 ];

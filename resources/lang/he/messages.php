@@ -612,4 +612,5 @@ return [
     'access_denied_calendar' => 'הגישה נדחתה. אנא בדוק את הרשאות Google Calendar שלך.',
     'sync_events_between_schedules' => 'סנכרן אירועים בין לוח הזמנים הזה ל-Google Calendar שלך.',
     'events_synced' => 'האירועים סונכרנו בהצלחה!',
+    'untitled_event' => 'אירוע ללא כותרת',
 ];

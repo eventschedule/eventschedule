@@ -618,4 +618,5 @@ return [
     'access_denied_calendar' => 'Acesso negado. Verifique suas permissões do Google Calendar.',
     'sync_events_between_schedules' => 'Sincronize eventos entre este cronograma e seu Google Calendar.',
     'events_synced' => 'Eventos sincronizados com sucesso!',
+    'untitled_event' => 'Evento Sem Título',
 ];
