@@ -115,15 +115,15 @@
         <input type="hidden" name="subdomain" value="{{ $subdomain }}">
 
         <div class="mb-6">
-            <label for="name" class="text-gray-900">{{ __('messages.name') . ' *' }}</label>
-            <input type="text" name="name" id="name" class="mt-1 block w-full border-gray-300 bg-white text-gray-900" 
+            <label for="name" class="text-gray-900 dark:text-gray-100">{{ __('messages.name') . ' *' }}</label>
+            <input type="text" name="name" id="name" class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" 
                 v-model="name" required autofocus autocomplete="name" />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
 
         <div class="mb-12">
-            <label for="email" class="text-gray-900">{{ __('messages.email') . ' *' }}</label>
-            <input type="email" name="email" id="email" class="mt-1 block w-full border-gray-300 bg-white text-gray-900" 
+            <label for="email" class="text-gray-900 dark:text-gray-100">{{ __('messages.email') . ' *' }}</label>
+            <input type="email" name="email" id="email" class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" 
                 v-model="email" required autocomplete="email" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
@@ -133,14 +133,14 @@
                         <input id="create_account" name="create_account" type="checkbox" 
                             v-model="createAccount" value="1"
                             class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
-                        <label for="create_account" class="ml-3 block text-sm font-medium leading-6 text-gray-900">
+                        <label for="create_account" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                             {{ __('messages.create_account') }}
                         </label>
                     </div>
 
                     <div class="mt-6" v-if="createAccount">
-                        <label for="password" class="text-gray-900">{{ __('messages.password') . ' *' }}</label>
-                        <input type="password" name="password" id="password" class="mt-1 block w-full border-gray-300 bg-white text-gray-900" 
+                        <label for="password" class="text-gray-900 dark:text-gray-100">{{ __('messages.password') . ' *' }}</label>
+                        <input type="password" name="password" id="password" class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" 
                             v-model="password" required autocomplete="new-password" />
                         <x-input-error class="mt-2" :messages="$errors->get('password')" />
                     </div>
@@ -152,17 +152,17 @@
         <div v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-8">
             <div class="flex items-center justify-between">
                 <div>
-                    <h3 class="text-lg font-medium">@{{ ticket.type }}</h3>
-                    <p v-if="ticket.description" class="text-sm text-gray-600">@{{ ticket.description }}</p>
-                    <p :class="{'text-lg': tickets.length === 1, 'text-sm': tickets.length > 1}" class="font-medium">@{{ formatPrice(ticket.price) }}</p>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">@{{ ticket.type }}</h3>
+                    <p v-if="ticket.description" class="text-sm text-gray-600 dark:text-gray-400">@{{ ticket.description }}</p>
+                    <p :class="{'text-lg': tickets.length === 1, 'text-sm': tickets.length > 1}" class="font-medium text-gray-900 dark:text-gray-100">@{{ formatPrice(ticket.price) }}</p>
                 </div>
                 <div>
-                    <p v-if="getAvailableQuantity(ticket) === 0" class="text-lg font-medium text-gray-500">{{ __('messages.sold_out') }}</p>
+                    <p v-if="getAvailableQuantity(ticket) === 0" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sold_out') }}</p>
                     <p v-else>
                     <select 
                         v-model="ticket.selectedQty"
                         @change="updateTicketQuantities"
-                        class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        class="block w-24 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         :name="`tickets[${ticket.id}]`" :id="`ticket-${index}`"
                     >
                         <option value="0">0</option>
@@ -177,20 +177,20 @@
 
         <hr/>
         
-        <div class="my-4 text-lg font-bold">
+        <div class="my-4 text-lg font-bold text-gray-900 dark:text-gray-100">
             Total: @{{ formatPrice(totalAmount) }}
         </div>
 
         <div class="flex justify-center items-center py-4 gap-8">
             <button 
                 type="submit" 
-                class="mt-4 inline-flex gap-x-1.5 rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
+                class="mt-4 inline-flex gap-x-1.5 rounded-md bg-white dark:bg-gray-700 px-6 py-3 text-lg font-semibold text-gray-500 dark:text-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white dark:disabled:hover:bg-gray-700"
                 :disabled="!hasSelectedTickets"
             >
                 {{ strtoupper(__('messages.checkout')) }}
             </button>
             
-            <a href="{{ request()->fullUrlWithQuery(['tickets' => false]) }}" class="hover:underline mt-4">
+            <a href="{{ request()->fullUrlWithQuery(['tickets' => false]) }}" class="hover:underline mt-4 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
                 {{ strtoupper(__('messages.cancel')) }}
             </a>
         </div>
