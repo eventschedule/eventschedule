@@ -832,12 +832,17 @@ class RoleController extends Controller
         }
 
         // Header images
-        $headers = file_get_contents(base_path('storage/headers.json'));
-        $headers = json_decode($headers);
+        $headers = $this->decodeJsonFile('storage/headers.json');
 
         $headerOptions = [];
         foreach ($headers as $header) {
-            $headerOptions[$header->name] = str_replace('_', ' ', $header->name);
+            $name = $this->extractName($header);
+
+            if (! $name) {
+                continue;
+            }
+
+            $headerOptions[$name] = str_replace('_', ' ', $name);
         }
 
         asort($headerOptions);
@@ -847,12 +852,17 @@ class RoleController extends Controller
         ] + $headerOptions;
 
         // Background images
-        $backgrounds = file_get_contents(base_path('storage/backgrounds.json'));
-        $backgrounds = json_decode($backgrounds);
+        $backgrounds = $this->decodeJsonFile('storage/backgrounds.json');
 
         $backgroundOptions = [];
         foreach ($backgrounds as $background) {
-            $backgroundOptions[$background->name] = str_replace('_', ' ', $background->name);
+            $name = $this->extractName($background);
+
+            if (! $name) {
+                continue;
+            }
+
+            $backgroundOptions[$name] = str_replace('_', ' ', $name);
         }
 
         asort($backgroundOptions);
@@ -862,12 +872,18 @@ class RoleController extends Controller
         ] + $backgroundOptions;
 
         // Background gradients
-        $gradients = file_get_contents(base_path('storage/gradients.json'));
-        $gradients = json_decode($gradients);
+        $gradients = $this->decodeJsonFile('storage/gradients.json');
 
         $gradientOptions = [];
-        foreach ($gradients as $gradient) {            
-            $gradientOptions[join(', ', $gradient->colors)] = $gradient->name;
+        foreach ($gradients as $gradient) {
+            $name = $this->extractName($gradient);
+            $colors = $this->extractColors($gradient);
+
+            if (! $name || empty($colors)) {
+                continue;
+            }
+
+            $gradientOptions[join(', ', $colors)] = $name;
         }
 
         asort($gradientOptions);
@@ -876,8 +892,7 @@ class RoleController extends Controller
             '' => __('messages.custom'),
         ] + $gradientOptions;
 
-        $fonts = file_get_contents(base_path('storage/fonts.json'));
-        $fonts = json_decode($fonts);
+        $fonts = $this->decodeJsonFile('storage/fonts.json');
 
         $data = [
             'role' => $role,
@@ -1056,12 +1071,17 @@ class RoleController extends Controller
         $role = Role::with('groups')->subdomain($subdomain)->firstOrFail();
 
         // Header images
-        $headers = file_get_contents(base_path('storage/headers.json'));
-        $headers = json_decode($headers);
+        $headers = $this->decodeJsonFile('storage/headers.json');
 
         $headerOptions = [];
         foreach ($headers as $header) {
-            $headerOptions[$header->name] = str_replace('_', ' ', $header->name);
+            $name = $this->extractName($header);
+
+            if (! $name) {
+                continue;
+            }
+
+            $headerOptions[$name] = str_replace('_', ' ', $name);
         }
 
         asort($headerOptions);
@@ -1072,12 +1092,17 @@ class RoleController extends Controller
         
 
         // Background images
-        $backgrounds = file_get_contents(base_path('storage/backgrounds.json'));
-        $backgrounds = json_decode($backgrounds);
+        $backgrounds = $this->decodeJsonFile('storage/backgrounds.json');
 
         $backgroundOptions = [];
         foreach ($backgrounds as $background) {
-            $backgroundOptions[$background->name] = str_replace('_', ' ', $background->name);
+            $name = $this->extractName($background);
+
+            if (! $name) {
+                continue;
+            }
+
+            $backgroundOptions[$name] = str_replace('_', ' ', $name);
         }
 
         asort($backgroundOptions);
@@ -1088,12 +1113,18 @@ class RoleController extends Controller
 
 
         // Background gradients
-        $gradients = file_get_contents(base_path('storage/gradients.json'));
-        $gradients = json_decode($gradients);
+        $gradients = $this->decodeJsonFile('storage/gradients.json');
 
         $gradientOptions = [];
         foreach ($gradients as $gradient) {
-            $gradientOptions[join(', ', $gradient->colors)] = $gradient->name;
+            $name = $this->extractName($gradient);
+            $colors = $this->extractColors($gradient);
+
+            if (! $name || empty($colors)) {
+                continue;
+            }
+
+            $gradientOptions[join(', ', $colors)] = $name;
         }
 
         asort($gradientOptions);
@@ -1102,8 +1133,7 @@ class RoleController extends Controller
             '' => __('messages.custom'),
         ] + $gradientOptions;
 
-        $fonts = file_get_contents(base_path('storage/fonts.json'));
-        $fonts = json_decode($fonts);
+        $fonts = $this->decodeJsonFile('storage/fonts.json');
 
         $data = [
             'user' => auth()->user(),
@@ -2124,5 +2154,62 @@ class RoleController extends Controller
             'success' => true,
             'message' => __('messages.videos_saved_successfully')
         ]);
+    }
+
+    private function decodeJsonFile(string $relativePath): array
+    {
+        $path = base_path($relativePath);
+
+        if (! file_exists($path)) {
+            return [];
+        }
+
+        $contents = file_get_contents($path);
+
+        if ($contents === false) {
+            return [];
+        }
+
+        $data = json_decode($contents, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE || ! is_array($data)) {
+            return [];
+        }
+
+        return $data;
+    }
+
+    private function extractName($item): ?string
+    {
+        if (is_array($item) && isset($item['name'])) {
+            return $item['name'];
+        }
+
+        if (is_object($item) && isset($item->name)) {
+            return $item->name;
+        }
+
+        if (is_string($item)) {
+            return $item;
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array|object|string  $item
+     * @return array<int, string>
+     */
+    private function extractColors($item): array
+    {
+        if (is_array($item) && isset($item['colors']) && is_array($item['colors'])) {
+            return array_values(array_filter($item['colors'], 'is_string'));
+        }
+
+        if (is_object($item) && isset($item->colors) && is_array($item->colors)) {
+            return array_values(array_filter($item->colors, 'is_string'));
+        }
+
+        return [];
     }
 }
