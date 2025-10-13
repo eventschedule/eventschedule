@@ -605,6 +605,10 @@ class GoogleCalendarService
         $event->description = $googleEvent['description'] ?: '';
         $event->slug = \Str::slug($event->name);
 
+        if (! $event->slug) {
+            $event->slug = strtolower(\Str::random(5));
+        }
+
         // Set start time
         if ($googleEvent['start']->getDateTime()) {
             $event->starts_at = \Carbon\Carbon::parse($googleEvent['start']->getDateTime())->utc();
