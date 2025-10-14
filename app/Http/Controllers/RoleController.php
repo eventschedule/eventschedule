@@ -2222,18 +2222,6 @@ class RoleController extends Controller
         }
 
         if (is_object($item)) {
-            foreach (['name', 'value', 'label', 'title'] as $key) {
-                if (property_exists($item, $key)) {
-                    $value = $item->{$key};
-
-                    $candidate = $this->extractStringCandidate($value);
-
-                    if (is_string($candidate) && trim($candidate) !== '') {
-                        return $candidate;
-                    }
-                }
-            }
-
             $item = get_object_vars($item);
         }
 
@@ -2245,6 +2233,14 @@ class RoleController extends Controller
                     if (is_string($candidate) && trim($candidate) !== '') {
                         return $candidate;
                     }
+                }
+            }
+
+            foreach ($item as $value) {
+                $candidate = $this->extractStringCandidate($value);
+
+                if (is_string($candidate) && trim($candidate) !== '') {
+                    return $candidate;
                 }
             }
 
