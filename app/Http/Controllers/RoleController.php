@@ -2197,16 +2197,52 @@ class RoleController extends Controller
 
     private function extractName($item): ?string
     {
+        $candidate = $this->extractStringCandidate($item);
+
+        if (is_string($candidate)) {
+            $candidate = trim($candidate);
+
+            return $candidate === '' ? null : $candidate;
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  mixed  $item
+     */
+    private function extractStringCandidate($item): ?string
+    {
+        if ($item instanceof \JsonSerializable) {
+            $item = $item->jsonSerialize();
+        }
+
+        if ($item instanceof \Traversable) {
+            $item = iterator_to_array($item);
+        }
+
         if (is_object($item)) {
+            foreach (['name', 'value', 'label', 'title'] as $key) {
+                if (property_exists($item, $key)) {
+                    $value = $item->{$key};
+
+                    $candidate = $this->extractStringCandidate($value);
+
+                    if (is_string($candidate) && trim($candidate) !== '') {
+                        return $candidate;
+                    }
+                }
+            }
+
             $item = get_object_vars($item);
         }
 
         if (is_array($item)) {
             foreach (['name', 'value', 'label', 'title'] as $key) {
-                if (array_key_exists($key, $item) && is_string($item[$key])) {
-                    $candidate = trim($item[$key]);
+                if (array_key_exists($key, $item)) {
+                    $candidate = $this->extractStringCandidate($item[$key]);
 
-                    if ($candidate !== '') {
+                    if (is_string($candidate) && trim($candidate) !== '') {
                         return $candidate;
                     }
                 }
@@ -2215,10 +2251,10 @@ class RoleController extends Controller
             return null;
         }
 
-        if (is_string($item)) {
-            $candidate = trim($item);
+        if (is_scalar($item)) {
+            $string = (string) $item;
 
-            return $candidate === '' ? null : $candidate;
+            return $string === '' ? null : $string;
         }
 
         return null;
