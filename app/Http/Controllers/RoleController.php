@@ -824,11 +824,27 @@ class RoleController extends Controller
         $role->background_colors = ColorUtils::randomGradient();
         $role->background_image = ColorUtils::randomBackgroundImage();
         $role->background_rotation = rand(0, 359);
-        $role->timezone = auth()->user()->timezone;
-        $role->language_code = auth()->user()->language_code;
+        $user = auth()->user();
+
+        $role->timezone = data_get($user, 'timezone', config('app.timezone'));
+        $role->language_code = data_get($user, 'language_code', config('app.locale'));
 
         if ($role->type == 'talent') {
-            $role->name = auth()->user()->name;
+            $name = data_get($user, 'name');
+
+            if (! is_string($name) || trim($name) === '') {
+                $firstName = data_get($user, 'first_name');
+                $lastName = data_get($user, 'last_name');
+
+                $parts = array_filter([
+                    is_string($firstName) ? trim($firstName) : null,
+                    is_string($lastName) ? trim($lastName) : null,
+                ]);
+
+                $name = implode(' ', $parts);
+            }
+
+            $role->name = is_string($name) ? trim($name) : '';
         }
 
         // Header images
