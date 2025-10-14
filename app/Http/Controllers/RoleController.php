@@ -2148,12 +2148,22 @@ class RoleController extends Controller
             }
 
             if (! is_string($name)) {
+                $this->reportRoleAssetParsingIssue(
+                    'name_non_string',
+                    $item,
+                    new \RuntimeException('Role asset name was not a string')
+                );
                 continue;
             }
 
             $name = trim($name);
 
             if ($name === '') {
+                $this->reportRoleAssetParsingIssue(
+                    'name_empty',
+                    $item,
+                    new \RuntimeException('Role asset name was empty after trimming')
+                );
                 continue;
             }
 
@@ -2188,12 +2198,22 @@ class RoleController extends Controller
             }
 
             if (! is_string($name)) {
+                $this->reportRoleAssetParsingIssue(
+                    'gradient_name_non_string',
+                    $item,
+                    new \RuntimeException('Role asset gradient name was not a string')
+                );
                 continue;
             }
 
             $name = trim($name);
 
             if ($name === '') {
+                $this->reportRoleAssetParsingIssue(
+                    'gradient_name_empty',
+                    $item,
+                    new \RuntimeException('Role asset gradient name was empty after trimming')
+                );
                 continue;
             }
 
@@ -2205,6 +2225,11 @@ class RoleController extends Controller
             }
 
             if (empty($colors)) {
+                $this->reportRoleAssetParsingIssue(
+                    'gradient_colors_empty',
+                    $item,
+                    new \RuntimeException('Role asset gradient colors were empty')
+                );
                 continue;
             }
 
