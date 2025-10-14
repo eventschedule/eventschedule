@@ -848,61 +848,27 @@ class RoleController extends Controller
         }
 
         // Header images
-        $headers = $this->decodeJsonFile('storage/headers.json');
-
-        $headerOptions = [];
-        foreach ($headers as $header) {
-            $name = $this->extractName($header);
-
-            if (! $name) {
-                continue;
-            }
-
-            $headerOptions[$name] = str_replace('_', ' ', $name);
-        }
-
-        asort($headerOptions);
+        $headerOptions = $this->prepareNameOptions(
+            $this->decodeJsonFile('storage/headers.json')
+        );
 
         $headerOptions = [
             '' => __('messages.custom'),
         ] + $headerOptions;
 
         // Background images
-        $backgrounds = $this->decodeJsonFile('storage/backgrounds.json');
-
-        $backgroundOptions = [];
-        foreach ($backgrounds as $background) {
-            $name = $this->extractName($background);
-
-            if (! $name) {
-                continue;
-            }
-
-            $backgroundOptions[$name] = str_replace('_', ' ', $name);
-        }
-
-        asort($backgroundOptions);
+        $backgroundOptions = $this->prepareNameOptions(
+            $this->decodeJsonFile('storage/backgrounds.json')
+        );
 
         $backgroundOptions = [
             '' => __('messages.custom'),
         ] + $backgroundOptions;
 
         // Background gradients
-        $gradients = $this->decodeJsonFile('storage/gradients.json');
-
-        $gradientOptions = [];
-        foreach ($gradients as $gradient) {
-            $name = $this->extractName($gradient);
-            $colors = $this->extractColors($gradient);
-
-            if (! $name || empty($colors)) {
-                continue;
-            }
-
-            $gradientOptions[join(', ', $colors)] = $name;
-        }
-
-        asort($gradientOptions);
+        $gradientOptions = $this->prepareGradientOptions(
+            $this->decodeJsonFile('storage/gradients.json')
+        );
 
         $gradientOptions = [
             '' => __('messages.custom'),
@@ -1087,41 +1053,19 @@ class RoleController extends Controller
         $role = Role::with('groups')->subdomain($subdomain)->firstOrFail();
 
         // Header images
-        $headers = $this->decodeJsonFile('storage/headers.json');
-
-        $headerOptions = [];
-        foreach ($headers as $header) {
-            $name = $this->extractName($header);
-
-            if (! $name) {
-                continue;
-            }
-
-            $headerOptions[$name] = str_replace('_', ' ', $name);
-        }
-
-        asort($headerOptions);
+        $headerOptions = $this->prepareNameOptions(
+            $this->decodeJsonFile('storage/headers.json')
+        );
 
         $headerOptions = [
             '' => __('messages.custom'),
         ] + $headerOptions;
-        
+
 
         // Background images
-        $backgrounds = $this->decodeJsonFile('storage/backgrounds.json');
-
-        $backgroundOptions = [];
-        foreach ($backgrounds as $background) {
-            $name = $this->extractName($background);
-
-            if (! $name) {
-                continue;
-            }
-
-            $backgroundOptions[$name] = str_replace('_', ' ', $name);
-        }
-
-        asort($backgroundOptions);
+        $backgroundOptions = $this->prepareNameOptions(
+            $this->decodeJsonFile('storage/backgrounds.json')
+        );
 
         $backgroundOptions = [
             '' => __('messages.custom'),
@@ -1129,21 +1073,9 @@ class RoleController extends Controller
 
 
         // Background gradients
-        $gradients = $this->decodeJsonFile('storage/gradients.json');
-
-        $gradientOptions = [];
-        foreach ($gradients as $gradient) {
-            $name = $this->extractName($gradient);
-            $colors = $this->extractColors($gradient);
-
-            if (! $name || empty($colors)) {
-                continue;
-            }
-
-            $gradientOptions[join(', ', $colors)] = $name;
-        }
-
-        asort($gradientOptions);
+        $gradientOptions = $this->prepareGradientOptions(
+            $this->decodeJsonFile('storage/gradients.json')
+        );
 
         $gradientOptions = [
             '' => __('messages.custom'),
@@ -2193,6 +2125,83 @@ class RoleController extends Controller
         }
 
         return $data;
+    }
+
+    /**
+     * @param  iterable<mixed>|null  $items
+     * @return array<string, string>
+     */
+    private function prepareNameOptions($items): array
+    {
+        if (! is_iterable($items)) {
+            $items = $items === null ? [] : [$items];
+        }
+
+        $options = [];
+
+        foreach ($items as $item) {
+            $name = $this->extractName($item);
+
+            if (! is_string($name)) {
+                continue;
+            }
+
+            $name = trim($name);
+
+            if ($name === '') {
+                continue;
+            }
+
+            $options[$name] = str_replace('_', ' ', $name);
+        }
+
+        if (! empty($options)) {
+            asort($options);
+        }
+
+        return $options;
+    }
+
+    /**
+     * @param  iterable<mixed>|null  $items
+     * @return array<string, string>
+     */
+    private function prepareGradientOptions($items): array
+    {
+        if (! is_iterable($items)) {
+            $items = $items === null ? [] : [$items];
+        }
+
+        $options = [];
+
+        foreach ($items as $item) {
+            $name = $this->extractName($item);
+            $colors = $this->extractColors($item);
+
+            if (! is_string($name)) {
+                continue;
+            }
+
+            $name = trim($name);
+
+            if ($name === '' || empty($colors)) {
+                continue;
+            }
+
+            $key = join(', ', $colors);
+
+            if ($key === '') {
+                continue;
+            }
+
+            $options[$key] = $name;
+        }
+
+        if (! empty($options)) {
+            asort($options);
+        }
+
+        return $options;
     }
 
     private function extractName($item): ?string
