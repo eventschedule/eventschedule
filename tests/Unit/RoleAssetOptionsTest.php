@@ -85,4 +85,43 @@ class RoleAssetOptionsTest extends TestCase
         $this->assertArrayHasKey('#111111, #222222', $result);
         $this->assertSame('Nested', $result['#111111, #222222']);
     }
+
+    public function testNormalizeDecodedJsonStructureConvertsStdClassToArrays(): void
+    {
+        $controller = new RoleController($this->eventRepo);
+
+        $normalizer = new \ReflectionMethod(RoleController::class, 'normalizeDecodedJsonStructure');
+        $normalizer->setAccessible(true);
+
+        $prepare = new \ReflectionMethod(RoleController::class, 'prepareNameOptions');
+        $prepare->setAccessible(true);
+
+        $json = <<<JSON
+        {
+            "headers": [
+                {"name": "Alpha_Header"},
+                {"value": {"label": "Bravo_Header"}},
+                {"meta": {"title": "Charlie Header"}},
+                {"items": [{"items": [{"value": {"name": "Delta_Header"}}]}]}
+            ]
+        }
+        JSON;
+
+        $decoded = json_decode($json);
+        $normalized = $normalizer->invoke($controller, $decoded);
+
+        $this->assertIsArray($normalized);
+        $this->assertArrayHasKey('headers', $normalized);
+
+        $result = $prepare->invoke($controller, $normalized['headers']);
+
+        $this->assertArrayHasKey('Alpha_Header', $result);
+        $this->assertSame('Alpha Header', $result['Alpha_Header']);
+        $this->assertArrayHasKey('Bravo_Header', $result);
+        $this->assertSame('Bravo Header', $result['Bravo_Header']);
+        $this->assertArrayHasKey('Charlie Header', $result);
+        $this->assertSame('Charlie Header', $result['Charlie Header']);
+        $this->assertArrayHasKey('Delta_Header', $result);
+        $this->assertSame('Delta Header', $result['Delta_Header']);
+    }
 }
