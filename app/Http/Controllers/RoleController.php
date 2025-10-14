@@ -2140,7 +2140,12 @@ class RoleController extends Controller
         $options = [];
 
         foreach ($items as $item) {
-            $name = $this->extractName($item);
+            try {
+                $name = $this->extractName($item);
+            } catch (\Throwable $e) {
+                $this->reportRoleAssetParsingIssue('name', $item, $e);
+                continue;
+            }
 
             if (! is_string($name)) {
                 continue;
@@ -2175,8 +2180,12 @@ class RoleController extends Controller
         $options = [];
 
         foreach ($items as $item) {
-            $name = $this->extractName($item);
-            $colors = $this->extractColors($item);
+            try {
+                $name = $this->extractName($item);
+            } catch (\Throwable $e) {
+                $this->reportRoleAssetParsingIssue('gradient_name', $item, $e);
+                continue;
+            }
 
             if (! is_string($name)) {
                 continue;
@@ -2184,7 +2193,18 @@ class RoleController extends Controller
 
             $name = trim($name);
 
-            if ($name === '' || empty($colors)) {
+            if ($name === '') {
+                continue;
+            }
+
+            try {
+                $colors = $this->extractColors($item);
+            } catch (\Throwable $e) {
+                $this->reportRoleAssetParsingIssue('gradient_colors', $item, $e);
+                continue;
+            }
+
+            if (empty($colors)) {
                 continue;
             }
 
@@ -2231,7 +2251,13 @@ class RoleController extends Controller
         }
 
         if (is_object($item)) {
-            $item = get_object_vars($item);
+            try {
+                $item = get_object_vars($item);
+            } catch (\Throwable $e) {
+                $this->reportRoleAssetParsingIssue('string_candidate_object', $item, $e);
+
+                return null;
+            }
         }
 
         if (is_array($item)) {
@@ -2272,7 +2298,13 @@ class RoleController extends Controller
     private function extractColors($item): array
     {
         if (is_object($item)) {
-            $item = get_object_vars($item);
+            try {
+                $item = get_object_vars($item);
+            } catch (\Throwable $e) {
+                $this->reportRoleAssetParsingIssue('color_candidate_object', $item, $e);
+
+                return [];
+            }
         }
 
         if (is_array($item)) {
@@ -2302,5 +2334,69 @@ class RoleController extends Controller
         }
 
         return [];
+    }
+
+    private function reportRoleAssetParsingIssue(string $context, $item, \Throwable $exception): void
+    {
+        try {
+            $preview = $this->summarizeRoleAssetValue($item);
+        } catch (\Throwable $e) {
+            $preview = '[unavailable: ' . $e->getMessage() . ']';
+        }
+
+        \Log::warning('Failed to parse role asset option', [
+            'context' => $context,
+            'item_preview' => $preview,
+            'exception' => $exception->getMessage(),
+        ]);
+    }
+
+    private function summarizeRoleAssetValue($value): string
+    {
+        if (is_scalar($value) || $value === null) {
+            return var_export($value, true);
+        }
+
+        if ($value instanceof \JsonSerializable) {
+            try {
+                $value = $value->jsonSerialize();
+            } catch (\Throwable $e) {
+                return 'json-serializable(' . get_debug_type($value) . ')';
+            }
+
+            return $this->summarizeRoleAssetValue($value);
+        }
+
+        if ($value instanceof \Traversable) {
+            try {
+                $value = iterator_to_array($value);
+            } catch (\Throwable $e) {
+                return 'traversable(' . get_debug_type($value) . ')';
+            }
+
+            return $this->summarizeRoleAssetValue($value);
+        }
+
+        if (is_object($value)) {
+            try {
+                $value = get_object_vars($value);
+            } catch (\Throwable $e) {
+                return 'object(' . get_debug_type($value) . ')';
+            }
+
+            return $this->summarizeRoleAssetValue($value);
+        }
+
+        if (is_array($value)) {
+            $encoded = @json_encode($value);
+
+            if (! is_string($encoded)) {
+                return 'array(' . count($value) . ')';
+            }
+
+            return substr($encoded, 0, 200);
+        }
+
+        return get_debug_type($value);
     }
 }
