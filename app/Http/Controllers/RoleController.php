@@ -2133,24 +2133,41 @@ class RoleController extends Controller
      */
     private function prepareNameOptions($items): array
     {
-        if (! is_iterable($items)) {
-            $items = $items === null ? [] : [$items];
-        }
-
         $options = [];
 
-        foreach ($items as $item) {
+        foreach ($this->normalizeRoleAssetSequence($items, 'name_option') as $entry) {
+            $original = $entry['original'];
+            $item = $entry['value'];
+
+            if ($item === null) {
+                $this->reportRoleAssetParsingIssue(
+                    'name_option_normalize',
+                    $original,
+                    new \RuntimeException('Role asset name option could not be normalized')
+                );
+                continue;
+            }
+
             try {
-                $name = $this->extractName($item);
+                $name = $this->determineRoleAssetName($item, $original);
             } catch (\Throwable $e) {
-                $this->reportRoleAssetParsingIssue('name', $item, $e);
+                $this->reportRoleAssetParsingIssue('name', $original, $e);
+                continue;
+            }
+
+            if ($name === null) {
+                $this->reportRoleAssetParsingIssue(
+                    'name_missing',
+                    $original,
+                    new \RuntimeException('Role asset name was missing')
+                );
                 continue;
             }
 
             if (! is_string($name)) {
                 $this->reportRoleAssetParsingIssue(
                     'name_non_string',
-                    $item,
+                    $original,
                     new \RuntimeException('Role asset name was not a string')
                 );
                 continue;
@@ -2161,7 +2178,7 @@ class RoleController extends Controller
             if ($name === '') {
                 $this->reportRoleAssetParsingIssue(
                     'name_empty',
-                    $item,
+                    $original,
                     new \RuntimeException('Role asset name was empty after trimming')
                 );
                 continue;
@@ -2183,24 +2200,41 @@ class RoleController extends Controller
      */
     private function prepareGradientOptions($items): array
     {
-        if (! is_iterable($items)) {
-            $items = $items === null ? [] : [$items];
-        }
-
         $options = [];
 
-        foreach ($items as $item) {
+        foreach ($this->normalizeRoleAssetSequence($items, 'gradient_option') as $entry) {
+            $original = $entry['original'];
+            $item = $entry['value'];
+
+            if ($item === null) {
+                $this->reportRoleAssetParsingIssue(
+                    'gradient_option_normalize',
+                    $original,
+                    new \RuntimeException('Role asset gradient option could not be normalized')
+                );
+                continue;
+            }
+
             try {
-                $name = $this->extractName($item);
+                $name = $this->determineRoleAssetName($item, $original);
             } catch (\Throwable $e) {
-                $this->reportRoleAssetParsingIssue('gradient_name', $item, $e);
+                $this->reportRoleAssetParsingIssue('gradient_name', $original, $e);
+                continue;
+            }
+
+            if ($name === null) {
+                $this->reportRoleAssetParsingIssue(
+                    'gradient_name_missing',
+                    $original,
+                    new \RuntimeException('Role asset gradient name was missing')
+                );
                 continue;
             }
 
             if (! is_string($name)) {
                 $this->reportRoleAssetParsingIssue(
                     'gradient_name_non_string',
-                    $item,
+                    $original,
                     new \RuntimeException('Role asset gradient name was not a string')
                 );
                 continue;
@@ -2211,23 +2245,23 @@ class RoleController extends Controller
             if ($name === '') {
                 $this->reportRoleAssetParsingIssue(
                     'gradient_name_empty',
-                    $item,
+                    $original,
                     new \RuntimeException('Role asset gradient name was empty after trimming')
                 );
                 continue;
             }
 
             try {
-                $colors = $this->extractColors($item);
+                $colors = $this->extractColors($item, $original);
             } catch (\Throwable $e) {
-                $this->reportRoleAssetParsingIssue('gradient_colors', $item, $e);
+                $this->reportRoleAssetParsingIssue('gradient_colors', $original, $e);
                 continue;
             }
 
             if (empty($colors)) {
                 $this->reportRoleAssetParsingIssue(
                     'gradient_colors_empty',
-                    $item,
+                    $original,
                     new \RuntimeException('Role asset gradient colors were empty')
                 );
                 continue;
@@ -2249,46 +2283,64 @@ class RoleController extends Controller
         return $options;
     }
 
-    private function extractName($item): ?string
+    private function determineRoleAssetName($item, $original, int $depth = 0): ?string
     {
-        $candidate = $this->extractStringCandidate($item);
+        if ($depth > 10) {
+            $this->reportRoleAssetParsingIssue(
+                'name_depth_limit',
+                $original,
+                new \RuntimeException('Exceeded traversal depth while resolving role asset name')
+            );
 
-        if (is_string($candidate)) {
-            $candidate = trim($candidate);
-
-            return $candidate === '' ? null : $candidate;
+            return null;
         }
 
-        return null;
-    }
-
-    /**
-     * @param  mixed  $item
-     */
-    private function extractStringCandidate($item): ?string
-    {
         if ($item instanceof \JsonSerializable) {
-            $item = $item->jsonSerialize();
+            try {
+                $item = $item->jsonSerialize();
+            } catch (\Throwable $e) {
+                $this->reportRoleAssetParsingIssue('name_json_serialize', $original, $e);
+
+                return null;
+            }
         }
 
         if ($item instanceof \Traversable) {
-            $item = iterator_to_array($item);
+            try {
+                $item = iterator_to_array($item);
+            } catch (\Throwable $e) {
+                $this->reportRoleAssetParsingIssue('name_traversable', $original, $e);
+
+                return null;
+            }
         }
 
         if (is_object($item)) {
             try {
                 $item = get_object_vars($item);
             } catch (\Throwable $e) {
-                $this->reportRoleAssetParsingIssue('string_candidate_object', $item, $e);
+                $this->reportRoleAssetParsingIssue('name_object', $original, $e);
 
                 return null;
             }
         }
 
+        if (is_string($item)) {
+            $item = trim($item);
+
+            return $item === '' ? null : $item;
+        }
+
+        if (is_scalar($item)) {
+            $string = trim((string) $item);
+
+            return $string === '' ? null : $string;
+        }
+
         if (is_array($item)) {
             foreach (['name', 'value', 'label', 'title'] as $key) {
                 if (array_key_exists($key, $item)) {
-                    $candidate = $this->extractStringCandidate($item[$key]);
+                    $candidate = $this->determineRoleAssetName($item[$key], $original, $depth + 1);
 
                     if (is_string($candidate) && trim($candidate) !== '') {
                         return $candidate;
@@ -2297,7 +2349,7 @@ class RoleController extends Controller
             }
 
             foreach ($item as $value) {
-                $candidate = $this->extractStringCandidate($value);
+                $candidate = $this->determineRoleAssetName($value, $original, $depth + 1);
 
                 if (is_string($candidate) && trim($candidate) !== '') {
                     return $candidate;
@@ -2307,26 +2359,118 @@ class RoleController extends Controller
             return null;
         }
 
-        if (is_scalar($item)) {
-            $string = (string) $item;
+        return null;
+    }
 
-            return $string === '' ? null : $string;
+    /**
+     * @param  iterable<mixed>|null  $items
+     * @return iterable<int, array{original: mixed, value: mixed}>
+     */
+    private function normalizeRoleAssetSequence($items, string $context): iterable
+    {
+        if ($items instanceof \Traversable) {
+            try {
+                $items = iterator_to_array($items);
+            } catch (\Throwable $e) {
+                $this->reportRoleAssetParsingIssue($context . '_iterable', $items, $e);
+                $items = [];
+            }
+        } elseif (! is_iterable($items)) {
+            $items = $items === null ? [] : [$items];
         }
 
-        return null;
+        foreach ($items as $item) {
+            yield [
+                'original' => $item,
+                'value' => $this->normalizeRoleAssetValue($item, $context),
+            ];
+        }
+    }
+
+    private function normalizeRoleAssetValue($value, string $context)
+    {
+        if ($value instanceof \JsonSerializable) {
+            try {
+                $value = $value->jsonSerialize();
+            } catch (\Throwable $e) {
+                $this->reportRoleAssetParsingIssue($context . '_json_serialize', $value, $e);
+
+                return null;
+            }
+        }
+
+        if ($value instanceof \Traversable) {
+            try {
+                $value = iterator_to_array($value);
+            } catch (\Throwable $e) {
+                $this->reportRoleAssetParsingIssue($context . '_traversable', $value, $e);
+
+                return null;
+            }
+        }
+
+        if (is_object($value)) {
+            try {
+                $value = get_object_vars($value);
+            } catch (\Throwable $e) {
+                $this->reportRoleAssetParsingIssue($context . '_object', $value, $e);
+
+                return null;
+            }
+        }
+
+        return $value;
     }
 
     /**
      * @param  array|object|string  $item
      * @return array<int, string>
      */
-    private function extractColors($item): array
+    private function extractColors($item, $original = null, int $depth = 0): array
     {
+        if ($depth > 10) {
+            if ($original !== null) {
+                $this->reportRoleAssetParsingIssue(
+                    'gradient_colors_depth_limit',
+                    $original,
+                    new \RuntimeException('Exceeded traversal depth while resolving gradient colors')
+                );
+            }
+
+            return [];
+        }
+
+        if ($item instanceof \JsonSerializable) {
+            try {
+                $item = $item->jsonSerialize();
+            } catch (\Throwable $e) {
+                if ($original !== null) {
+                    $this->reportRoleAssetParsingIssue('gradient_colors_json_serialize', $original, $e);
+                }
+
+                return [];
+            }
+        }
+
+        if ($item instanceof \Traversable) {
+            try {
+                $item = iterator_to_array($item);
+            } catch (\Throwable $e) {
+                if ($original !== null) {
+                    $this->reportRoleAssetParsingIssue('gradient_colors_traversable', $original, $e);
+                }
+
+                return [];
+            }
+        }
+
         if (is_object($item)) {
             try {
                 $item = get_object_vars($item);
             } catch (\Throwable $e) {
-                $this->reportRoleAssetParsingIssue('color_candidate_object', $item, $e);
+                if ($original !== null) {
+                    $this->reportRoleAssetParsingIssue('color_candidate_object', $original, $e);
+                }
 
                 return [];
             }
@@ -2342,23 +2486,65 @@ class RoleController extends Controller
             }
 
             if ($colors !== null) {
-                return array_values(array_filter($colors, function ($color) {
-                    return is_string($color) && trim($color) !== '';
-                }));
+                return $this->sanitizeColorList($colors);
             }
 
-            return [];
+            $aggregate = [];
+
+            foreach ($item as $value) {
+                $aggregate = array_merge(
+                    $aggregate,
+                    $this->extractColors($value, $original, $depth + 1)
+                );
+            }
+
+            return $this->sanitizeColorList($aggregate);
         }
 
         if (is_string($item) && trim($item) !== '') {
-            $parts = array_map('trim', explode(',', $item));
+            return $this->sanitizeColorList(explode(',', $item));
+        }
 
-            return array_values(array_filter($parts, function ($color) {
-                return $color !== '';
-            }));
+        if (is_scalar($item)) {
+            $string = trim((string) $item);
+
+            if ($string === '') {
+                return [];
+            }
+
+            return $this->sanitizeColorList(explode(',', $string));
         }
 
         return [];
+    }
+
+    /**
+     * @param  array<int, mixed>  $colors
+     * @return array<int, string>
+     */
+    private function sanitizeColorList(array $colors): array
+    {
+        $normalized = [];
+
+        foreach ($colors as $color) {
+            if (! is_string($color)) {
+                if (is_scalar($color)) {
+                    $color = (string) $color;
+                } else {
+                    continue;
+                }
+            }
+
+            $color = trim($color);
+
+            if ($color === '') {
+                continue;
+            }
+
+            $normalized[] = $color;
+        }
+
+        return array_values($normalized);
     }
 
     private function reportRoleAssetParsingIssue(string $context, $item, \Throwable $exception): void
