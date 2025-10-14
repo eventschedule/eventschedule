@@ -2118,13 +2118,69 @@ class RoleController extends Controller
             return [];
         }
 
+        $contents = $this->stripUtf8Bom($contents);
+
         $data = json_decode($contents, true);
 
-        if (json_last_error() !== JSON_ERROR_NONE || ! is_array($data)) {
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $data = json_decode($contents);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return [];
+            }
+        }
+
+        $normalized = $this->normalizeDecodedJsonStructure($data);
+
+        return is_array($normalized) ? $normalized : [];
+    }
+
+    private function stripUtf8Bom(string $contents): string
+    {
+        return str_starts_with($contents, "\xEF\xBB\xBF")
+            ? substr($contents, 3)
+            : $contents;
+    }
+
+    private function normalizeDecodedJsonStructure($value, int $depth = 0)
+    {
+        if ($depth > 20) {
             return [];
         }
 
-        return $data;
+        if ($value instanceof \JsonSerializable) {
+            try {
+                $value = $value->jsonSerialize();
+            } catch (\Throwable $e) {
+                return [];
+            }
+        }
+
+        if ($value instanceof \Traversable) {
+            try {
+                $value = iterator_to_array($value);
+            } catch (\Throwable $e) {
+                return [];
+            }
+        }
+
+        if (is_object($value)) {
+            try {
+                $value = get_object_vars($value);
+            } catch (\Throwable $e) {
+                return [];
+            }
+        }
+
+        if (! is_array($value)) {
+            return $value;
+        }
+
+        foreach ($value as $key => $item) {
+            $value[$key] = $this->normalizeDecodedJsonStructure($item, $depth + 1);
+        }
+
+        return $value;
     }
 
     /**
