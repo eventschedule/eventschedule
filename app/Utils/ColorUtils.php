@@ -11,10 +11,6 @@ class ColorUtils
         $gradientOptions = [];
 
         foreach ($gradients as $gradient) {
-            if (is_object($gradient)) {
-                $gradient = get_object_vars($gradient);
-            }
-
             if (is_array($gradient) && isset($gradient['colors']) && is_array($gradient['colors'])) {
                 $colors = array_values(array_filter($gradient['colors'], 'is_string'));
 
@@ -43,10 +39,6 @@ class ColorUtils
         $backgroundOptions = [];
 
         foreach ($backgrounds as $background) {
-            if (is_object($background)) {
-                $background = get_object_vars($background);
-            }
-
             if (is_array($background) && isset($background['name']) && is_string($background['name'])) {
                 $backgroundOptions[] = $background['name'];
             } elseif (is_string($background) && trim($background) !== '') {
@@ -80,7 +72,7 @@ class ColorUtils
             return [];
         }
 
-        $data = json_decode($contents);
+        $data = json_decode($contents, true);
 
         if (json_last_error() !== JSON_ERROR_NONE || ! is_array($data)) {
             return [];
