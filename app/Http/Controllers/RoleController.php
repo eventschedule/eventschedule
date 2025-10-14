@@ -2170,7 +2170,7 @@ class RoleController extends Controller
             return [];
         }
 
-        $data = json_decode($contents, true);
+        $data = json_decode($contents);
 
         if (json_last_error() !== JSON_ERROR_NONE || ! is_array($data)) {
             return [];
@@ -2185,12 +2185,24 @@ class RoleController extends Controller
             $item = get_object_vars($item);
         }
 
-        if (is_array($item) && array_key_exists('name', $item)) {
-            return $item['name'];
+        if (is_array($item)) {
+            foreach (['name', 'value', 'label', 'title'] as $key) {
+                if (array_key_exists($key, $item) && is_string($item[$key])) {
+                    $candidate = trim($item[$key]);
+
+                    if ($candidate !== '') {
+                        return $candidate;
+                    }
+                }
+            }
+
+            return null;
         }
 
         if (is_string($item)) {
-            return $item;
+            $candidate = trim($item);
+
+            return $candidate === '' ? null : $candidate;
         }
 
         return null;
@@ -2206,8 +2218,30 @@ class RoleController extends Controller
             $item = get_object_vars($item);
         }
 
-        if (is_array($item) && isset($item['colors']) && is_array($item['colors'])) {
-            return array_values(array_filter($item['colors'], 'is_string'));
+        if (is_array($item)) {
+            $colors = null;
+
+            if (isset($item['colors']) && is_array($item['colors'])) {
+                $colors = $item['colors'];
+            } elseif (isset($item['value']) && is_array($item['value'])) {
+                $colors = $item['value'];
+            }
+
+            if ($colors !== null) {
+                return array_values(array_filter($colors, function ($color) {
+                    return is_string($color) && trim($color) !== '';
+                }));
+            }
+
+            return [];
+        }
+
+        if (is_string($item) && trim($item) !== '') {
+            $parts = array_map('trim', explode(',', $item));
+
+            return array_values(array_filter($parts, function ($color) {
+                return $color !== '';
+            }));
         }
 
         return [];
