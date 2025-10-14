@@ -2181,12 +2181,12 @@ class RoleController extends Controller
 
     private function extractName($item): ?string
     {
-        if (is_array($item) && isset($item['name'])) {
-            return $item['name'];
+        if (is_object($item)) {
+            $item = get_object_vars($item);
         }
 
-        if (is_object($item) && isset($item->name)) {
-            return $item->name;
+        if (is_array($item) && array_key_exists('name', $item)) {
+            return $item['name'];
         }
 
         if (is_string($item)) {
@@ -2202,12 +2202,12 @@ class RoleController extends Controller
      */
     private function extractColors($item): array
     {
-        if (is_array($item) && isset($item['colors']) && is_array($item['colors'])) {
-            return array_values(array_filter($item['colors'], 'is_string'));
+        if (is_object($item)) {
+            $item = get_object_vars($item);
         }
 
-        if (is_object($item) && isset($item->colors) && is_array($item->colors)) {
-            return array_values(array_filter($item->colors, 'is_string'));
+        if (is_array($item) && isset($item['colors']) && is_array($item['colors'])) {
+            return array_values(array_filter($item['colors'], 'is_string'));
         }
 
         return [];
