@@ -2186,7 +2186,7 @@ class RoleController extends Controller
             return [];
         }
 
-        $data = json_decode($contents);
+        $data = json_decode($contents, true);
 
         if (json_last_error() !== JSON_ERROR_NONE || ! is_array($data)) {
             return [];
