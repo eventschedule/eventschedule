@@ -2199,52 +2199,57 @@ class RoleController extends Controller
             $original = $entry['original'];
             $item = $entry['value'];
 
-            if ($item === null) {
-                $this->reportRoleAssetParsingIssue(
-                    'name_option_normalize',
-                    $original,
-                    new \RuntimeException('Role asset name option could not be normalized')
-                );
-                continue;
-            }
-
             try {
-                $name = $this->determineRoleAssetName($item, $original);
+                if ($item === null) {
+                    $this->reportRoleAssetParsingIssue(
+                        'name_option_normalize',
+                        $original,
+                        new \RuntimeException('Role asset name option could not be normalized')
+                    );
+                    continue;
+                }
+
+                try {
+                    $name = $this->determineRoleAssetName($item, $original);
+                } catch (\Throwable $e) {
+                    $this->reportRoleAssetParsingIssue('name', $original, $e);
+                    continue;
+                }
+
+                if ($name === null) {
+                    $this->reportRoleAssetParsingIssue(
+                        'name_missing',
+                        $original,
+                        new \RuntimeException('Role asset name was missing')
+                    );
+                    continue;
+                }
+
+                if (! is_string($name)) {
+                    $this->reportRoleAssetParsingIssue(
+                        'name_non_string',
+                        $original,
+                        new \RuntimeException('Role asset name was not a string')
+                    );
+                    continue;
+                }
+
+                $name = trim($name);
+
+                if ($name === '') {
+                    $this->reportRoleAssetParsingIssue(
+                        'name_empty',
+                        $original,
+                        new \RuntimeException('Role asset name was empty after trimming')
+                    );
+                    continue;
+                }
+
+                $options[$name] = str_replace('_', ' ', $name);
             } catch (\Throwable $e) {
-                $this->reportRoleAssetParsingIssue('name', $original, $e);
+                $this->reportRoleAssetParsingIssue('name_option_exception', $original, $e);
                 continue;
             }
-
-            if ($name === null) {
-                $this->reportRoleAssetParsingIssue(
-                    'name_missing',
-                    $original,
-                    new \RuntimeException('Role asset name was missing')
-                );
-                continue;
-            }
-
-            if (! is_string($name)) {
-                $this->reportRoleAssetParsingIssue(
-                    'name_non_string',
-                    $original,
-                    new \RuntimeException('Role asset name was not a string')
-                );
-                continue;
-            }
-
-            $name = trim($name);
-
-            if ($name === '') {
-                $this->reportRoleAssetParsingIssue(
-                    'name_empty',
-                    $original,
-                    new \RuntimeException('Role asset name was empty after trimming')
-                );
-                continue;
-            }
-
-            $options[$name] = str_replace('_', ' ', $name);
         }
 
         if (! empty($options)) {
@@ -2266,74 +2271,79 @@ class RoleController extends Controller
             $original = $entry['original'];
             $item = $entry['value'];
 
-            if ($item === null) {
-                $this->reportRoleAssetParsingIssue(
-                    'gradient_option_normalize',
-                    $original,
-                    new \RuntimeException('Role asset gradient option could not be normalized')
-                );
-                continue;
-            }
-
             try {
-                $name = $this->determineRoleAssetName($item, $original);
+                if ($item === null) {
+                    $this->reportRoleAssetParsingIssue(
+                        'gradient_option_normalize',
+                        $original,
+                        new \RuntimeException('Role asset gradient option could not be normalized')
+                    );
+                    continue;
+                }
+
+                try {
+                    $name = $this->determineRoleAssetName($item, $original);
+                } catch (\Throwable $e) {
+                    $this->reportRoleAssetParsingIssue('gradient_name', $original, $e);
+                    continue;
+                }
+
+                if ($name === null) {
+                    $this->reportRoleAssetParsingIssue(
+                        'gradient_name_missing',
+                        $original,
+                        new \RuntimeException('Role asset gradient name was missing')
+                    );
+                    continue;
+                }
+
+                if (! is_string($name)) {
+                    $this->reportRoleAssetParsingIssue(
+                        'gradient_name_non_string',
+                        $original,
+                        new \RuntimeException('Role asset gradient name was not a string')
+                    );
+                    continue;
+                }
+
+                $name = trim($name);
+
+                if ($name === '') {
+                    $this->reportRoleAssetParsingIssue(
+                        'gradient_name_empty',
+                        $original,
+                        new \RuntimeException('Role asset gradient name was empty after trimming')
+                    );
+                    continue;
+                }
+
+                try {
+                    $colors = $this->extractColors($item, $original);
+                } catch (\Throwable $e) {
+                    $this->reportRoleAssetParsingIssue('gradient_colors', $original, $e);
+                    continue;
+                }
+
+                if (empty($colors)) {
+                    $this->reportRoleAssetParsingIssue(
+                        'gradient_colors_empty',
+                        $original,
+                        new \RuntimeException('Role asset gradient colors were empty')
+                    );
+                    continue;
+                }
+
+                $key = join(', ', $colors);
+
+                if ($key === '') {
+                    continue;
+                }
+
+                $options[$key] = $name;
             } catch (\Throwable $e) {
-                $this->reportRoleAssetParsingIssue('gradient_name', $original, $e);
+                $this->reportRoleAssetParsingIssue('gradient_option_exception', $original, $e);
                 continue;
             }
-
-            if ($name === null) {
-                $this->reportRoleAssetParsingIssue(
-                    'gradient_name_missing',
-                    $original,
-                    new \RuntimeException('Role asset gradient name was missing')
-                );
-                continue;
-            }
-
-            if (! is_string($name)) {
-                $this->reportRoleAssetParsingIssue(
-                    'gradient_name_non_string',
-                    $original,
-                    new \RuntimeException('Role asset gradient name was not a string')
-                );
-                continue;
-            }
-
-            $name = trim($name);
-
-            if ($name === '') {
-                $this->reportRoleAssetParsingIssue(
-                    'gradient_name_empty',
-                    $original,
-                    new \RuntimeException('Role asset gradient name was empty after trimming')
-                );
-                continue;
-            }
-
-            try {
-                $colors = $this->extractColors($item, $original);
-            } catch (\Throwable $e) {
-                $this->reportRoleAssetParsingIssue('gradient_colors', $original, $e);
-                continue;
-            }
-
-            if (empty($colors)) {
-                $this->reportRoleAssetParsingIssue(
-                    'gradient_colors_empty',
-                    $original,
-                    new \RuntimeException('Role asset gradient colors were empty')
-                );
-                continue;
-            }
-
-            $key = join(', ', $colors);
-
-            if ($key === '') {
-                continue;
-            }
-
-            $options[$key] = $name;
         }
 
         if (! empty($options)) {
@@ -2355,52 +2365,64 @@ class RoleController extends Controller
             $original = $entry['original'];
             $item = $entry['value'];
 
-            if ($item === null) {
-                $this->reportRoleAssetParsingIssue(
-                    'font_option_normalize',
-                    $original,
-                    new \RuntimeException('Role asset font option could not be normalized')
-                );
-                continue;
-            }
-
             try {
-                $value = $this->determineRoleAssetName($item, $original);
+                if ($item === null) {
+                    $this->reportRoleAssetParsingIssue(
+                        'font_option_normalize',
+                        $original,
+                        new \RuntimeException('Role asset font option could not be normalized')
+                    );
+                    continue;
+                }
+
+                try {
+                    $value = $this->determineRoleAssetName($item, $original);
+                } catch (\Throwable $e) {
+                    $this->reportRoleAssetParsingIssue('font_value', $original, $e);
+                    continue;
+                }
+
+                if (! is_string($value)) {
+                    $this->reportRoleAssetParsingIssue(
+                        'font_value_non_string',
+                        $original,
+                        new \RuntimeException('Role asset font value was not a string')
+                    );
+                    continue;
+                }
+
+                $value = trim($value);
+
+                if ($value === '') {
+                    $this->reportRoleAssetParsingIssue(
+                        'font_value_empty',
+                        $original,
+                        new \RuntimeException('Role asset font value was empty after trimming')
+                    );
+                    continue;
+                }
+
+                try {
+                    $label = $this->determineRoleAssetLabel($item, $original);
+                } catch (\Throwable $e) {
+                    $this->reportRoleAssetParsingIssue('font_label', $original, $e);
+                    continue;
+                }
+
+                if (! is_string($label) || trim($label) === '') {
+                    $label = $value;
+                } else {
+                    $label = trim($label);
+                }
+
+                $options[] = [
+                    'value' => $value,
+                    'label' => $label,
+                ];
             } catch (\Throwable $e) {
-                $this->reportRoleAssetParsingIssue('font_value', $original, $e);
+                $this->reportRoleAssetParsingIssue('font_option_exception', $original, $e);
                 continue;
             }
-
-            if (! is_string($value)) {
-                $this->reportRoleAssetParsingIssue(
-                    'font_value_non_string',
-                    $original,
-                    new \RuntimeException('Role asset font value was not a string')
-                );
-                continue;
-            }
-
-            $value = trim($value);
-
-            if ($value === '') {
-                $this->reportRoleAssetParsingIssue(
-                    'font_value_empty',
-                    $original,
-                    new \RuntimeException('Role asset font value was empty after trimming')
-                );
-                continue;
-            }
-
-            $label = $this->determineRoleAssetLabel($item, $original);
-
-            if (! is_string($label) || trim($label) === '') {
-                $label = $value;
-            }
-
-            $options[] = [
-                'value' => $value,
-                'label' => trim($label),
-            ];
         }
 
         if (empty($options)) {
