@@ -1114,43 +1114,87 @@
 
                         <div class="mb-6">
                             <div id="groups-list">
-                                @php $groups = $role->groups ?? []; @endphp
+                                @php
+                                    $groups = $role->groups ?? [];
+                                    $rawGroups = old('groups', $groups);
+
+                                    if ($rawGroups instanceof \Illuminate\Support\Collection) {
+                                        $rawGroups = $rawGroups->all();
+                                    }
+
+                                    if ($rawGroups instanceof \Illuminate\Database\Eloquent\Collection) {
+                                        $rawGroups = $rawGroups->all();
+                                    }
+
+                                    if (! is_array($rawGroups)) {
+                                        $rawGroups = (array) $rawGroups;
+                                    }
+
+                                    $normalizedGroups = [];
+
+                                    foreach ($rawGroups as $key => $group) {
+                                        if ($group instanceof \Illuminate\Contracts\Support\Arrayable) {
+                                            $group = $group->toArray();
+                                        } elseif ($group instanceof \Illuminate\Database\Eloquent\Model) {
+                                            $group = $group->toArray();
+                                        } elseif (is_object($group)) {
+                                            $group = (array) $group;
+                                        } elseif (! is_array($group)) {
+                                            $group = [];
+                                        }
+
+                                        $groupId = $group['id'] ?? $key;
+
+                                        $normalizedGroups[$key] = [
+                                            'id' => is_scalar($groupId) ? (string) $groupId : $key,
+                                            'name' => isset($group['name']) && is_scalar($group['name']) ? (string) $group['name'] : '',
+                                            'name_en' => isset($group['name_en']) && is_scalar($group['name_en']) ? (string) $group['name_en'] : '',
+                                            'slug' => isset($group['slug']) && is_scalar($group['slug']) ? (string) $group['slug'] : '',
+                                        ];
+                                    }
+                                @endphp
                                 <div id="group-items">
-                                    @foreach(old('groups', $groups) as $i => $group)
+                                    @foreach($normalizedGroups as $i => $group)
+                                        @php
+                                            $groupKey = $group['id'] === '' ? $i : $group['id'];
+                                            $groupName = $group['name'];
+                                            $groupNameEn = $group['name_en'];
+                                            $groupSlug = $group['slug'];
+                                        @endphp
                                         <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                                             <div class="mb-4">
-                                                <x-input-label for="group_name_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.name')" />
-                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][name]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->name : $group['name'] ?? ''" />
+                                                <x-input-label for="group_name_{{ $groupKey }}" :value="__('messages.name')" />
+                                                <x-text-input name="groups[{{ $groupKey }}][name]" type="text" class="mt-1 block w-full" :value="$groupName" />
                                             </div>
                                             @if($role->language_code !== 'en' || auth()->user()->language_code !== 'en')
                                             <div class="mb-4">
-                                                <x-input-label for="group_name_en_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.english_name')" />
-                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][name_en]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->name_en : $group['name_en'] ?? ''" />
+                                                <x-input-label for="group_name_en_{{ $groupKey }}" :value="__('messages.english_name')" />
+                                                <x-text-input name="groups[{{ $groupKey }}][name_en]" type="text" class="mt-1 block w-full" :value="$groupNameEn" />
                                             </div>
                                             @endif
-                                            @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
-                                            <div class="mb-4" id="group-url-display-{{ is_object($group) ? $group->id : $i }}">
+                                            @if(!empty($groupSlug))
+                                            <div class="mb-4" id="group-url-display-{{ $groupKey }}">
                                                 <p class="text-sm text-gray-500 flex items-center gap-2">
-                                                    <a href="{{ $role->getGuestUrl() }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" target="_blank" class="hover:underline">
-                                                        {{ \App\Utils\UrlUtils::clean($role->getGuestUrl()) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}
+                                                    <a href="{{ $role->getGuestUrl() }}/{{ $groupSlug }}" target="_blank" class="hover:underline">
+                                                        {{ \App\Utils\UrlUtils::clean($role->getGuestUrl()) }}/{{ $groupSlug }}
                                                     </a>
-                                                    <button type="button" onclick="copyGroupUrl(this, '{{ $role->getGuestUrl() }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}')" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
+                                                    <button type="button" onclick="copyGroupUrl(this, '{{ $role->getGuestUrl() }}/{{ $groupSlug }}')" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
                                                         </svg>
                                                     </button>
                                                 </p>
                                             </div>
-                                            <div class="mb-4 {{ (is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])) ? 'hidden' : '' }}" id="group-slug-edit-{{ is_object($group) ? $group->id : $i }}">
-                                                <x-input-label for="group_slug_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.slug')" />
-                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][slug]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->slug : $group['slug'] ?? ''" />
+                                            <div class="mb-4 {{ empty($groupSlug) ? '' : 'hidden' }}" id="group-slug-edit-{{ $groupKey }}">
+                                                <x-input-label for="group_slug_{{ $groupKey }}" :value="__('messages.slug')" />
+                                                <x-text-input name="groups[{{ $groupKey }}][slug]" type="text" class="mt-1 block w-full" :value="$groupSlug" />
                                             </div>
                                             <div class="flex gap-4 items-center">
-                                                <x-secondary-button type="button" onclick="toggleGroupSlugEdit('{{ is_object($group) ? $group->id : $i }}')" id="edit-button-{{ is_object($group) ? $group->id : $i }}">
+                                                <x-secondary-button type="button" onclick="toggleGroupSlugEdit('{{ $groupKey }}')" id="edit-button-{{ $groupKey }}">
                                                     {{ __('messages.edit') }}
                                                 </x-secondary-button>
-                                                @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
-                                                <x-secondary-button type="button" onclick="toggleGroupSlugEdit('{{ is_object($group) ? $group->id : $i }}')" class="hidden" id="cancel-button-{{ is_object($group) ? $group->id : $i }}">
+                                                @if(!empty($groupSlug))
+                                                <x-secondary-button type="button" onclick="toggleGroupSlugEdit('{{ $groupKey }}')" class="hidden" id="cancel-button-{{ $groupKey }}">
                                                     {{ __('messages.cancel') }}
                                                 </x-secondary-button>
                                                 @endif
