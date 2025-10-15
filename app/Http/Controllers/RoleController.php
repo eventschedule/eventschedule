@@ -26,6 +26,7 @@ use App\Utils\UrlUtils;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
 use Carbon\Carbon;
+use Illuminate\Contracts\Support\Arrayable;
 
 class RoleController extends Controller
 {
@@ -825,16 +826,17 @@ class RoleController extends Controller
         $role->background_image = ColorUtils::randomBackgroundImage();
         $role->background_rotation = rand(0, 359);
         $user = auth()->user();
+        $userData = $this->normalizeAuthenticatedUser($user);
 
-        $role->timezone = data_get($user, 'timezone', config('app.timezone'));
-        $role->language_code = data_get($user, 'language_code', config('app.locale'));
+        $role->timezone = $userData['timezone'] ?? config('app.timezone');
+        $role->language_code = $userData['language_code'] ?? config('app.locale');
 
         if ($role->type == 'talent') {
-            $name = data_get($user, 'name');
+            $name = $userData['name'] ?? null;
 
             if (! is_string($name) || trim($name) === '') {
-                $firstName = data_get($user, 'first_name');
-                $lastName = data_get($user, 'last_name');
+                $firstName = $userData['first_name'] ?? null;
+                $lastName = $userData['last_name'] ?? null;
 
                 $parts = array_filter([
                     is_string($firstName) ? trim($firstName) : null,
@@ -2810,5 +2812,38 @@ class RoleController extends Controller
         }
 
         return get_debug_type($value);
+    }
+
+    /**
+     * @param  mixed  $user
+     * @return array<string, mixed>
+     */
+    private function normalizeAuthenticatedUser($user): array
+    {
+        if ($user === null) {
+            return [];
+        }
+
+        if ($user instanceof Arrayable) {
+            try {
+                return $user->toArray();
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
+        if (is_array($user)) {
+            return $user;
+        }
+
+        if (is_object($user)) {
+            try {
+                return get_object_vars($user);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
+        return [];
     }
 }
