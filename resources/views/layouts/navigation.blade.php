@@ -105,12 +105,20 @@
                             <li class="px-2 text-xs font-semibold leading-6 text-gray-400">{{ __('messages.venue_schedules') }}</li>
 
                             @foreach ($venues as $venue)
+                                @php
+                                    $venueName = data_get($venue, 'name');
+                                    $venueName = is_string($venueName) ? trim($venueName) : '';
+                                    if ($venueName === '') {
+                                        $venueName = __('messages.venue');
+                                    }
+                                    $venueInitial = mb_strtoupper(mb_substr($venueName, 0, 1));
+                                @endphp
                                 <li>
                                     <a href="{{ route('role.view_admin', ['subdomain' => $venue->subdomain, 'tab' => $venue->subdomain == request()->subdomain ? 'schedule' : (request()->tab ? request()->tab : 'schedule')]) }}"
                                         class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is($venue->subdomain) || request()->is($venue->subdomain . '/*') ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
                                         <span
-                                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($venue->subdomain) || request()->is($venue->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($venue->name, 0, 1)) }}</span>
-                                        <span class="truncate">{{ $venue->name }}</span>
+                                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($venue->subdomain) || request()->is($venue->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ $venueInitial }}</span>
+                                        <span class="truncate">{{ $venueName }}</span>
                                     </a>
                                 </li>
                             @endforeach
@@ -149,12 +157,20 @@
                             <li class="px-2 text-xs font-semibold leading-6 text-gray-400">{{ __('messages.curator_schedules') }}</li>
 
                             @foreach ($curators as $curator)
+                                @php
+                                    $curatorName = data_get($curator, 'name');
+                                    $curatorName = is_string($curatorName) ? trim($curatorName) : '';
+                                    if ($curatorName === '') {
+                                        $curatorName = __('messages.curator');
+                                    }
+                                    $curatorInitial = mb_strtoupper(mb_substr($curatorName, 0, 1));
+                                @endphp
                                 <li>
                                     <a href="{{ route('role.view_admin', ['subdomain' => $curator->subdomain, 'tab' => $curator->subdomain == request()->subdomain ? 'schedule' : (request()->tab ? request()->tab : 'schedule')]) }}"
                                         class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is($curator->subdomain) || request()->is($curator->subdomain . '/*') ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
                                         <span
-                                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($curator->subdomain) || request()->is($curator->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($curator->name, 0, 1)) }}</span>
-                                        <span class="truncate">{{ $curator->name }}</span>
+                                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($curator->subdomain) || request()->is($curator->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ $curatorInitial }}</span>
+                                        <span class="truncate">{{ $curatorName }}</span>
                                     </a>
                                 </li>
                             @endforeach
@@ -193,12 +209,20 @@
                             <li class="px-2 text-xs font-semibold leading-6 text-gray-400">{{ __('messages.talent_schedules') }}</li>
 
                             @foreach ($schedules as $each)
+                                @php
+                                    $scheduleName = data_get($each, 'name');
+                                    $scheduleName = is_string($scheduleName) ? trim($scheduleName) : '';
+                                    if ($scheduleName === '') {
+                                        $scheduleName = \Illuminate\Support\Str::plural(__('messages.talent'));
+                                    }
+                                    $scheduleInitial = mb_strtoupper(mb_substr($scheduleName, 0, 1));
+                                @endphp
                                 <li>
                                     <a href="{{ route('role.view_admin', ['subdomain' => $each->subdomain, 'tab' => $each->subdomain == request()->subdomain ? 'schedule' : (request()->tab ? request()->tab : 'schedule')]) }}"
                                         class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 hover:bg-gray-800 hover:text-white {{ request()->is($each->subdomain) || request()->is($each->subdomain . '/*') ? 'bg-gray-800 text-white' : 'text-gray-400' }}">
                                         <span
-                                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($each->subdomain) || request()->is($each->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ strtoupper(substr($each->name, 0, 1)) }}</span>
-                                        <span class="truncate">{{ $each->name }}</span>
+                                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium group-hover:text-white {{ request()->is($each->subdomain) || request()->is($each->subdomain . '/*') ? 'text-white' : 'text-gray-400' }}">{{ $scheduleInitial }}</span>
+                                        <span class="truncate">{{ $scheduleName }}</span>
                                     </a>
                                 </li>
                             @endforeach

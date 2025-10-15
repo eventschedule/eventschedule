@@ -874,7 +874,9 @@ class RoleController extends Controller
             '' => __('messages.custom'),
         ] + $gradientOptions;
 
-        $fonts = $this->decodeJsonFile('storage/fonts.json');
+        $fonts = $this->prepareFontOptions(
+            $this->decodeJsonFile('storage/fonts.json')
+        );
 
         $data = [
             'role' => $role,
@@ -2339,6 +2341,78 @@ class RoleController extends Controller
         return $options;
     }
 
+    /**
+     * @param  iterable<mixed>|null  $items
+     * @return array<int, array{value: string, label: string}>
+     */
+    private function prepareFontOptions($items): array
+    {
+        $options = [];
+
+        foreach ($this->normalizeRoleAssetSequence($items, 'font_option') as $entry) {
+            $original = $entry['original'];
+            $item = $entry['value'];
+
+            if ($item === null) {
+                $this->reportRoleAssetParsingIssue(
+                    'font_option_normalize',
+                    $original,
+                    new \RuntimeException('Role asset font option could not be normalized')
+                );
+                continue;
+            }
+
+            try {
+                $value = $this->determineRoleAssetName($item, $original);
+            } catch (\Throwable $e) {
+                $this->reportRoleAssetParsingIssue('font_value', $original, $e);
+                continue;
+            }
+
+            if (! is_string($value)) {
+                $this->reportRoleAssetParsingIssue(
+                    'font_value_non_string',
+                    $original,
+                    new \RuntimeException('Role asset font value was not a string')
+                );
+                continue;
+            }
+
+            $value = trim($value);
+
+            if ($value === '') {
+                $this->reportRoleAssetParsingIssue(
+                    'font_value_empty',
+                    $original,
+                    new \RuntimeException('Role asset font value was empty after trimming')
+                );
+                continue;
+            }
+
+            $label = $this->determineRoleAssetLabel($item, $original);
+
+            if (! is_string($label) || trim($label) === '') {
+                $label = $value;
+            }
+
+            $options[] = [
+                'value' => $value,
+                'label' => trim($label),
+            ];
+        }
+
+        if (empty($options)) {
+            $options[] = [
+                'value' => 'Roboto',
+                'label' => 'Roboto',
+            ];
+        }
+
+        usort($options, fn ($a, $b) => strnatcasecmp($a['label'], $b['label']));
+
+        return $options;
+    }
+
     private function determineRoleAssetName($item, $original, int $depth = 0): ?string
     {
         if ($depth > 10) {
@@ -2413,6 +2487,77 @@ class RoleController extends Controller
             }
 
             return null;
+        }
+
+        return null;
+    }
+
+    private function determineRoleAssetLabel($item, $original, int $depth = 0): ?string
+    {
+        if ($depth > 10) {
+            return null;
+        }
+
+        if ($item instanceof \JsonSerializable) {
+            try {
+                $item = $item->jsonSerialize();
+            } catch (\Throwable $e) {
+                $this->reportRoleAssetParsingIssue('label_json_serialize', $original, $e);
+
+                return null;
+            }
+        }
+
+        if ($item instanceof \Traversable) {
+            try {
+                $item = iterator_to_array($item);
+            } catch (\Throwable $e) {
+                $this->reportRoleAssetParsingIssue('label_traversable', $original, $e);
+
+                return null;
+            }
+        }
+
+        if (is_object($item)) {
+            try {
+                $item = get_object_vars($item);
+            } catch (\Throwable $e) {
+                $this->reportRoleAssetParsingIssue('label_object', $original, $e);
+
+                return null;
+            }
+        }
+
+        if (is_string($item)) {
+            $item = trim($item);
+
+            return $item === '' ? null : $item;
+        }
+
+        if (is_scalar($item)) {
+            $string = trim((string) $item);
+
+            return $string === '' ? null : $string;
+        }
+
+        if (is_array($item)) {
+            foreach (['label', 'name', 'title', 'value'] as $key) {
+                if (array_key_exists($key, $item)) {
+                    $candidate = $this->determineRoleAssetLabel($item[$key], $original, $depth + 1);
+
+                    if (is_string($candidate) && trim($candidate) !== '') {
+                        return $candidate;
+                    }
+                }
+            }
+
+            foreach ($item as $value) {
+                $candidate = $this->determineRoleAssetLabel($value, $original, $depth + 1);
+
+                if (is_string($candidate) && trim($candidate) !== '') {
+                    return $candidate;
+                }
+            }
         }
 
         return null;
