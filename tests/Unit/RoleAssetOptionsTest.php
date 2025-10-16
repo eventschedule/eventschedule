@@ -49,6 +49,25 @@ class RoleAssetOptionsTest extends TestCase
         $this->assertSame('header four', $result['header_four']);
     }
 
+    public function testPrepareNameOptionsHandlesStdClassPayload(): void
+    {
+        $controller = new RoleController($this->eventRepo);
+
+        $method = new \ReflectionMethod(RoleController::class, 'prepareNameOptions');
+        $method->setAccessible(true);
+
+        $payload = json_decode('[{"name":"Alpha"},{"label":"Beta"},"Gamma"]');
+
+        $result = $method->invoke($controller, $payload);
+
+        $this->assertArrayHasKey('Alpha', $result);
+        $this->assertSame('Alpha', $result['Alpha']);
+        $this->assertArrayHasKey('Beta', $result);
+        $this->assertSame('Beta', $result['Beta']);
+        $this->assertArrayHasKey('Gamma', $result);
+        $this->assertSame('Gamma', $result['Gamma']);
+    }
+
     public function testPrepareGradientOptionsHandlesNestedColors(): void
     {
         $controller = new RoleController($this->eventRepo);
