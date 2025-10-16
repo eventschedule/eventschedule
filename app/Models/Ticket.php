@@ -47,7 +47,7 @@ class Ticket extends Model
         $data['type'] = $this->type;
         $data['quantity'] = $this->quantity;
         $data['price'] = $this->price;
-        $data['description'] = $this->description;
+        $data['description'] = $this->description ? UrlUtils::convertUrlsToLinks($this->description) : null;
 
         $sold = $this->sold ? json_decode($this->sold, true) : [];
         $sold = $sold[$date] ?? 0;

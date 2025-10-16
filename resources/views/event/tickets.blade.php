@@ -153,7 +153,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">@{{ ticket.type }}</h3>
-                    <p v-if="ticket.description" class="text-sm text-gray-600 dark:text-gray-400">@{{ ticket.description }}</p>
+                    <p v-if="ticket.description" class="text-sm text-gray-600 dark:text-gray-400" v-html="ticket.description"></p>
                     <p :class="{'text-lg': tickets.length === 1, 'text-sm': tickets.length > 1}" class="font-medium text-gray-900 dark:text-gray-100">@{{ formatPrice(ticket.price) }}</p>
                 </div>
                 <div>
