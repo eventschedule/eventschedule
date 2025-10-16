@@ -533,16 +533,17 @@ class RoleController extends Controller
 
                 if ($roleUser && $roleUser->dates_unavailable) {
                     $datesUnavailable = json_decode($roleUser->dates_unavailable);
-                }
-            } else if ($tab == 'followers') {
-                $followersWithRoles = $role->followers()
-                    ->with(['roles' => function ($query) {
-                        $query->wherePivotIn('level', ['owner', 'admin'])
-                            ->orderBy('role_user.created_at', 'asc')
-                            ->limit(1);
-                    }])
-                    ->paginate(10);
-            }
+                }     
+            }       
+        } else if ($tab == 'followers') {
+            $followersWithRoles = $role->followers()
+                ->with(['roles' => function ($query) {
+                    $query->wherePivotIn('level', ['owner', 'admin'])
+                        ->orderBy('role_user.created_at', 'asc')
+                        ->limit(1);
+                }])
+                ->orderBy('pivot_created_at', 'desc')
+                ->paginate(10);
         }
 
         return view('role/show-admin', compact(
