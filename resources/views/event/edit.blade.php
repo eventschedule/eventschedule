@@ -1,9 +1,11 @@
 <x-app-admin-layout>
 
-@vite([
-    'resources/js/countrySelect.min.js',
-    'resources/css/countrySelect.min.css',
-])
+@if (config('app.load_vite_assets'))
+    @vite([
+        'resources/js/countrySelect.min.js',
+        'resources/css/countrySelect.min.css',
+    ])
+@endif
 
 <!-- Step Indicator for Add Event Flow -->
 @if(session('pending_request'))

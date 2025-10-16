@@ -47,7 +47,9 @@
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
 
     <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if (config('app.load_vite_assets'))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
 
     {{ isset($head) ? $head : '' }}
 </head>
