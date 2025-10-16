@@ -33,6 +33,16 @@ class RoleController extends Controller
 {
     protected $eventRepo;
 
+    /**
+     * @var array<int, string>
+     */
+    private array $roleAssetContextStack = [];
+
+    /**
+     * @var array<string, int>
+     */
+    private array $roleAssetParsingIssueCounts = [];
+
     public function __construct(EventRepo $eventRepo)
     {
         $this->eventRepo = $eventRepo;
@@ -2207,6 +2217,9 @@ class RoleController extends Controller
      */
     private function loadRoleAssetOptions(string $relativePath, callable $processor, string $context)
     {
+        $this->roleAssetContextStack[] = $context;
+        $initialIssueCount = $this->roleAssetParsingIssueCounts[$context] ?? 0;
+
         set_error_handler(function ($severity, $message, $file, $line) {
             throw new \ErrorException($message, 0, $severity, $file, $line);
         });
@@ -2215,14 +2228,32 @@ class RoleController extends Controller
             $data = $this->decodeJsonFile($relativePath);
             $data = $this->normalizeRoleAssetDataset($data);
 
-            return $processor($data);
+            $options = $processor($data);
         } catch (\Throwable $e) {
             $this->logRoleAssetPreparationFailure($context, $relativePath, $e);
 
             return [];
         } finally {
             restore_error_handler();
+            array_pop($this->roleAssetContextStack);
         }
+
+        if ($this->shouldBypassRoleAssetOptions($context, $initialIssueCount)) {
+            return [];
+        }
+
+        return is_array($options) ? $options : [];
+    }
+
+    private function shouldBypassRoleAssetOptions(string $context, int $initialIssueCount): bool
+    {
+        if (! in_array($context, ['create.background_options', 'edit.background_options'], true)) {
+            return false;
+        }
+
+        $currentCount = $this->roleAssetParsingIssueCounts[$context] ?? 0;
+
+        return $currentCount > $initialIssueCount;
     }
 
     /**
@@ -3076,6 +3107,14 @@ class RoleController extends Controller
 
     private function reportRoleAssetParsingIssue(string $context, $item, \Throwable $exception): void
     {
+        if (! empty($this->roleAssetContextStack)) {
+            $activeContext = end($this->roleAssetContextStack);
+
+            if (is_string($activeContext)) {
+                $this->roleAssetParsingIssueCounts[$activeContext] = ($this->roleAssetParsingIssueCounts[$activeContext] ?? 0) + 1;
+            }
+        }
+
         try {
             $preview = $this->summarizeRoleAssetValue($item);
         } catch (\Throwable $e) {
