@@ -76,7 +76,7 @@ class CuratorEventTest extends DuskTestCase
             $browser->visit('/login')
                     ->type('email', $user1Email)
                     ->type('password', $user1Password)
-                    ->press('LOG IN')
+                    ->press(__('messages.log_in'))
                     ->waitForLocation('/events', 5)
                     ->assertPathIs('/events')
                     ->assertSee($user1Name);

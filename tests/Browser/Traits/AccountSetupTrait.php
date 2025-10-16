@@ -18,7 +18,7 @@ trait AccountSetupTrait
                 ->type('password', $password)
                 ->check('terms')
                 ->scrollIntoView('button[type="submit"]')
-                ->press('SIGN UP')
+                ->press(__('messages.sign_up'))
                 ->waitForLocation('/events', 20)
                 ->assertPathIs('/events')
                 ->assertSee($name);
