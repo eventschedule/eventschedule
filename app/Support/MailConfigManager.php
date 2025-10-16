@@ -29,13 +29,13 @@ class MailConfigManager
         static::apply($mailSettings);
     }
 
-    public static function apply(array $settings): void
+    public static function apply(array $settings, bool $force = false): void
     {
         $normalized = static::normalizeSettings($settings);
 
         $hash = md5(json_encode($normalized));
 
-        if ($hash === static::$appliedHash) {
+        if (! $force && $hash === static::$appliedHash) {
             return;
         }
 

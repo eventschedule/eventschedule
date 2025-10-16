@@ -371,7 +371,7 @@ class SettingsController extends Controller
         $originalSettings = $this->getMailSettings();
         $testMailSettings = $this->buildMailSettings($request, $validated);
 
-        $this->applyMailConfig($testMailSettings);
+        $this->applyMailConfig($testMailSettings, force: true);
 
         $logOutput = [];
         $logOutput[] = 'Test email started at ' . now()->toDateTimeString();
@@ -579,7 +579,7 @@ class SettingsController extends Controller
         $originalMailConfig = $this->getCurrentMailConfig();
         $mailSettings = $this->getMailSettings();
 
-        $this->applyMailConfig($mailSettings);
+        $this->applyMailConfig($mailSettings, force: true);
 
         try {
             Mail::to($user->email, $user->name ?? null)->send(new TemplatePreview($subject, $body));
@@ -827,9 +827,9 @@ class SettingsController extends Controller
         URL::forceRootUrl($publicUrl);
     }
 
-    protected function applyMailConfig(array $settings): void
+    protected function applyMailConfig(array $settings, bool $force = false): void
     {
-        MailConfigManager::apply($settings);
+        MailConfigManager::apply($settings, $force);
     }
 
     protected function nullableTrim(?string $value): ?string
