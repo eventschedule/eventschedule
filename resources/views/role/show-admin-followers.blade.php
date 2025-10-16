@@ -69,10 +69,14 @@
                                     @if($follower->roles->isNotEmpty())
                                         @php
                                             $firstRole = $follower->roles->first();
-                                        @endphp                                        
-                                        <a href="{{ $firstRole->getGuestUrl() }}" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">
-                                            {{ $firstRole->name }}
-                                        </a>
+                                        @endphp                 
+                                        @if ($firstRole->isClaimed())
+                                            <a href="{{ $firstRole->getGuestUrl() }}" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">
+                                                {{ $firstRole->name }}
+                                            </a>
+                                        @else
+                                            <span class="text-gray-500">{{ $firstRole->name }}</span>
+                                        @endif
                                     @endif
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
@@ -113,6 +117,8 @@
     </div>
 
     <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+        <div>
+        </div>
         <div>
             {{ $followersWithRoles->links() }}
         </div>
