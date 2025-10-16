@@ -20,6 +20,10 @@ abstract class DuskTestCase extends BaseTestCase
     {
         parent::setUp();
 
+        // Ensure feature gates relying on the "testing" flag stay open even when
+        // the Dusk environment reuses the base .env without APP_TESTING enabled.
+        $this->app['config']->set('app.is_testing', true);
+
         $this->app['config']->set('mail.default', 'log');
         $this->app['config']->set('mail.mailers.smtp.transport', 'log');
         $this->app['config']->set(
