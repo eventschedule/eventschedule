@@ -76,7 +76,7 @@ abstract class DuskTestCase extends BaseTestCase
      */
     private static function synchronizeDuskEnvironmentOverrides(): void
     {
-        $path = base_path('.env.dusk.local');
+        $path = dirname(__DIR__) . DIRECTORY_SEPARATOR . '.env.dusk.local';
 
         if (! is_file($path)) {
             return;
