@@ -105,6 +105,41 @@ class RoleAssetOptionsTest extends TestCase
         $this->assertSame('Nested', $result['#111111, #222222']);
     }
 
+    public function testNormalizeRoleAssetDatasetCastsObjectsRecursively(): void
+    {
+        $controller = new RoleController($this->eventRepo);
+
+        $method = new \ReflectionMethod(RoleController::class, 'normalizeRoleAssetDataset');
+        $method->setAccessible(true);
+
+        $payload = json_decode('{
+            "headers": {
+                "alpha": {"name": "ALPHA"},
+                "beta": {"items": [{"value": {"label": "BETA"}}]},
+                "gamma": "GAMMA",
+                "delta": [{"meta": {"title": "DELTA"}}]
+            }
+        }');
+
+        $normalized = $method->invoke($controller, $payload);
+
+        $this->assertIsArray($normalized);
+        $this->assertArrayHasKey('headers', $normalized);
+        $this->assertIsArray($normalized['headers']);
+        $this->assertIsArray($normalized['headers']['alpha']);
+        $this->assertIsArray($normalized['headers']['beta']);
+
+        $prepare = new \ReflectionMethod(RoleController::class, 'prepareNameOptions');
+        $prepare->setAccessible(true);
+
+        $result = $prepare->invoke($controller, $normalized['headers']);
+
+        $this->assertArrayHasKey('ALPHA', $result);
+        $this->assertArrayHasKey('BETA', $result);
+        $this->assertArrayHasKey('GAMMA', $result);
+        $this->assertArrayHasKey('DELTA', $result);
+    }
+
     public function testNormalizeDecodedJsonStructureConvertsStdClassToArrays(): void
     {
         $controller = new RoleController($this->eventRepo);
