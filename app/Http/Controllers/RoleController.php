@@ -539,6 +539,7 @@ class RoleController extends Controller
             $followersWithRoles = $role->followers()
                 ->with(['roles' => function ($query) {
                     $query->wherePivotIn('level', ['owner', 'admin'])
+                        ->where('is_deleted', false)
                         ->orderBy('role_user.created_at', 'asc')
                         ->limit(1);
                 }])
