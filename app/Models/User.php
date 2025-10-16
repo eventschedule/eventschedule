@@ -23,10 +23,21 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'timezone',
         'language_code',
-        'stripe_account_id',
+        'profile_image_url',
         'api_key',
+        'google_id',
+        'google_token',
+        'google_refresh_token',
+        'google_token_expires_at',
+        'facebook_id',
+        'facebook_token',
+        'facebook_token_expires_at',
+        'stripe_account_id',
+        'stripe_company_name',
+        'stripe_completed_at',
         'invoiceninja_api_key',
         'invoiceninja_api_url',
+        'invoiceninja_company_name',
         'invoiceninja_webhook_secret',
         'payment_url',
         'payment_secret',
@@ -47,6 +58,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'invoiceninja_webhook_secret',
         'api_key',
         'payment_secret',
+        'google_token',
+        'google_refresh_token',
+        'facebook_token',
     ];
 
     protected static function boot()
@@ -83,6 +97,10 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'google_token_expires_at' => 'datetime',
+            'facebook_token_expires_at' => 'datetime',
+            'stripe_completed_at' => 'datetime',
+            'is_subscribed' => 'boolean',
         ];
     }
 
