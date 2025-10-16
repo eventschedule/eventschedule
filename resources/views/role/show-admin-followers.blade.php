@@ -69,7 +69,7 @@
                                     @if($follower->roles->isNotEmpty())
                                         @php
                                             $firstRole = $follower->roles->first();
-                                        @endphp
+                                        @endphp                                        
                                         <a href="{{ $firstRole->getGuestUrl() }}" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">
                                             {{ $firstRole->name }}
                                         </a>
