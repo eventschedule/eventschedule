@@ -435,9 +435,10 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        $role = Role::subdomain($subdomain)->firstOrFail();
-        $followers = $role->followers()->get();
+        $role = Role::subdomain($subdomain)->firstOrFail();        
         $members = $role->members()->get();
+        $followers = $role->followers()->get();
+        $followersWithRoles = [];
 
         $events = [];
         $unscheduled = [];
@@ -533,6 +534,14 @@ class RoleController extends Controller
                 if ($roleUser && $roleUser->dates_unavailable) {
                     $datesUnavailable = json_decode($roleUser->dates_unavailable);
                 }
+            } else if ($tab == 'followers') {
+                $followersWithRoles = $role->followers()
+                    ->with(['roles' => function ($query) {
+                        $query->wherePivotIn('level', ['owner', 'admin'])
+                            ->orderBy('role_user.created_at', 'asc')
+                            ->limit(1);
+                    }])
+                    ->paginate(10);
             }
         }
 
@@ -543,6 +552,7 @@ class RoleController extends Controller
             'events',
             'members',
             'followers',
+            'followersWithRoles',
             'requests',
             'month',
             'year',
