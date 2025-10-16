@@ -48,7 +48,7 @@
             <div></div>
             @endif
 
-            <x-primary-button class="ml-4">
+            <x-primary-button dusk="log-in-button" class="ml-4">
                 {{ __('messages.log_in') }}
             </x-primary-button>
         </div>
