@@ -459,17 +459,6 @@ class Event extends Model
         return str_replace([':role', ':venue'], [$this->name, $this->venue ? $this->venue->getDisplayName() : $this->getEventUrlDomain()], $title);
     }
 
-    public function getUse24HourTime()
-    {
-        if ($this->role()) {
-            return $this->role()->use_24_hour_time;
-        } else if ($this->venue) {
-            return $this->venue->use_24_hour_time;
-        }
-
-        return false;
-    }
-
     public function getMetaDescription($date = null)
     {
         $str = '';
@@ -572,13 +561,7 @@ class Event extends Model
 
     public function use24HourTime()
     {
-        if ($this->role() && $this->role()->use_24_hour_time) {
-            return true;
-        } else if ($this->venue && $this->venue->use_24_hour_time) {
-            return true;
-        }
-
-        return false;
+        return $this->creatorRole && $this->creatorRole->use_24_hour_time;
     }
 
     public function getTimeFormat()
@@ -602,15 +585,15 @@ class Event extends Model
         return ! $this->getStartDateTime(null, true)->isSameDay($this->getStartDateTime(null, true)->addHours($this->duration));
     }
 
-    public function getStartEndTime($date = null)
+    public function getStartEndTime($date = null, $use24 = false)
     {
         $date = $this->getStartDateTime($date, true);
 
         if ($this->duration > 0) {
             $endDate = $date->copy()->addHours($this->duration);
-            return $date->format($this->use24HourTime() ? 'H:i' : 'g:i A') . ' - ' . $endDate->format($this->use24HourTime() ? 'H:i' : 'g:i A');
+            return $date->format($use24 ? 'H:i' : 'g:i A') . ' - ' . $endDate->format($use24 ? 'H:i' : 'g:i A');
         } else {
-            return $date->format($this->use24HourTime() ? 'H:i' : 'g:i A');
+            return $date->format($use24 ? 'H:i' : 'g:i A');
         }        
     }
 
