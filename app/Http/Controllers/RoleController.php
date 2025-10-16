@@ -14,6 +14,7 @@ use App\Http\Requests\RoleCreateRequest;
 use App\Http\Requests\RoleUpdateRequest;
 use App\Http\Requests\MemberAddRequest;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Str;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,7 +27,6 @@ use App\Utils\UrlUtils;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
 use Carbon\Carbon;
-use Illuminate\Contracts\Support\Arrayable;
 
 class RoleController extends Controller
 {
@@ -2208,6 +2208,7 @@ class RoleController extends Controller
     {
         try {
             $data = $this->decodeJsonFile($relativePath);
+            $data = $this->normalizeRoleAssetDataset($data);
 
             return $processor($data);
         } catch (\Throwable $e) {
@@ -2215,6 +2216,83 @@ class RoleController extends Controller
 
             throw $e;
         }
+    }
+
+    /**
+     * @param  mixed  $items
+     * @return array<int|string, mixed>
+     */
+    private function normalizeRoleAssetDataset($items): array
+    {
+        $normalized = $this->normalizeDecodedJsonStructure($items);
+
+        if ($normalized === null) {
+            return [];
+        }
+
+        if (! is_array($normalized)) {
+            $normalized = [$normalized];
+        }
+
+        try {
+            $encoded = json_encode($normalized, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            $decoded = json_decode($encoded, true, 512, JSON_THROW_ON_ERROR);
+
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        } catch (\Throwable $e) {
+            $this->reportRoleAssetParsingIssue('dataset_json_cast', $items, $e);
+        }
+
+        return $this->forceRoleAssetDatasetToArray($normalized);
+    }
+
+    /**
+     * @param  mixed  $value
+     * @return mixed
+     */
+    private function forceRoleAssetDatasetToArray($value)
+    {
+        if (is_array($value)) {
+            foreach ($value as $key => $item) {
+                $value[$key] = $this->forceRoleAssetDatasetToArray($item);
+            }
+
+            return $value;
+        }
+
+        if ($value instanceof Arrayable) {
+            try {
+                return $this->forceRoleAssetDatasetToArray($value->toArray());
+            } catch (\Throwable $e) {
+                $this->reportRoleAssetParsingIssue('dataset_arrayable', $value, $e);
+
+                return [];
+            }
+        }
+
+        if ($value instanceof \Traversable) {
+            try {
+                return $this->forceRoleAssetDatasetToArray(iterator_to_array($value));
+            } catch (\Throwable $e) {
+                $this->reportRoleAssetParsingIssue('dataset_traversable', $value, $e);
+
+                return [];
+            }
+        }
+
+        if (is_object($value)) {
+            try {
+                return $this->forceRoleAssetDatasetToArray(get_object_vars($value));
+            } catch (\Throwable $e) {
+                $this->reportRoleAssetParsingIssue('dataset_object', $value, $e);
+
+                return [];
+            }
+        }
+
+        return $value;
     }
 
     private function logRoleAssetPreparationFailure(string $context, string $relativePath, \Throwable $exception): void
