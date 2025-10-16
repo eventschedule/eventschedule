@@ -2154,11 +2154,11 @@ class RoleController extends Controller
     {
         $path = base_path($relativePath);
 
-        if (! file_exists($path)) {
+        if (! file_exists($path) || ! is_readable($path)) {
             return [];
         }
 
-        $contents = file_get_contents($path);
+        $contents = @file_get_contents($path);
 
         if ($contents === false) {
             return [];
