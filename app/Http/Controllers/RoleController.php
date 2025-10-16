@@ -935,20 +935,21 @@ class RoleController extends Controller
         $role->save();
 
         // Save groups
-        if ($request->has('groups')) {
-            $groupsData = $request->input('groups', []);
+        $groupsData = $this->normalizeGroupInput($request->input('groups', []));
+
+        if (! empty($groupsData)) {
             $groupNames = [];
-            
+
             // Collect all group names for translation if needed
             foreach ($groupsData as $groupData) {
-                if (!empty($groupData['name'])) {
+                if ($groupData['name'] !== '') {
                     $groupNames[] = $groupData['name'];
                 }
             }
-            
+
             // Translate names if role is not in English
             $translations = [];
-            if (!empty($groupNames) && $role->language_code !== 'en') {
+            if (! empty($groupNames) && $role->language_code !== 'en') {
                 try {
                     $translations = GeminiUtils::translateGroupNames($groupNames, $role->language_code);
                 } catch (\Exception $e) {
@@ -956,26 +957,32 @@ class RoleController extends Controller
                     // Continue without translations if API fails
                 }
             }
-            
+
             // Create groups with translations
             foreach ($groupsData as $groupData) {
-                if (!empty($groupData['name'])) {
-                    $groupCreateData = [
-                        'name' => $groupData['name'],
-                        'slug' => Str::slug($groupData['name']),
-                    ];
-                    
-                    // Preserve manually entered English name or add automatic translation
-                    if (isset($groupData['name_en'])) {
-                        $groupCreateData['name_en'] = $groupData['name_en'];
-                        $groupCreateData['slug'] = Str::slug($groupData['name_en']);
-                    } elseif (isset($translations[$groupData['name']])) {   
-                        $groupCreateData['name_en'] = $translations[$groupData['name']];
-                        $groupCreateData['slug'] = Str::slug($translations[$groupData['name']]);
-                    }
-                    
-                    $role->groups()->create($groupCreateData);
+                if ($groupData['name'] === '') {
+                    continue;
                 }
+
+                $groupCreateData = [
+                    'name' => $groupData['name'],
+                    'slug' => $groupData['slug'] !== ''
+                        ? $groupData['slug']
+                        : Str::slug($groupData['name']),
+                ];
+
+                $nameEn = $groupData['name_en'];
+
+                // Preserve manually entered English name or add automatic translation
+                if ($nameEn !== '') {
+                    $groupCreateData['name_en'] = $nameEn;
+                    $groupCreateData['slug'] = Str::slug($nameEn);
+                } elseif (isset($translations[$groupData['name']])) {
+                    $groupCreateData['name_en'] = $translations[$groupData['name']];
+                    $groupCreateData['slug'] = Str::slug($translations[$groupData['name']]);
+                }
+
+                $role->groups()->create($groupCreateData);
             }
         }
 
@@ -1138,13 +1145,13 @@ class RoleController extends Controller
 
         // Sync groups
         $existingGroupIds = $role->groups()->pluck('id')->toArray();
-        $submittedGroups = $request->input('groups', []);
+        $submittedGroups = $this->normalizeGroupInput($request->input('groups', []));
         $submittedIds = [];
-        
+
         // Collect new group names for translation
         $newGroupNames = [];
         foreach ($submittedGroups as $key => $groupData) {
-            if (isset($groupData['name']) && $groupData['name'] && !is_numeric($key) && empty($groupData['name_en'])) {
+            if ($groupData['name'] !== '' && ! is_numeric($key) && $groupData['name_en'] === '') {
                 $newGroupNames[] = $groupData['name'];
             }
         }
@@ -1161,44 +1168,55 @@ class RoleController extends Controller
         }
 
         foreach ($submittedGroups as $key => $groupData) {
-            if (isset($groupData['name']) && $groupData['name']) {
-                if (is_numeric($key) && in_array($key, $existingGroupIds)) {
-                    // Update existing
-                    $updateData = [
-                        'name' => $groupData['name'],
-                        'slug' => $groupData['slug'] ?? Str::slug($groupData['name']),
-                    ];
-                    
-                    // Preserve manually entered English name or add automatic translation
-                    if (isset($groupData['name_en'])) {
-                        $updateData['name_en'] = $groupData['name_en'];
-                    } elseif (isset($translations[$groupData['name']])) {
-                        $updateData['name_en'] = $translations[$groupData['name']];
-                        // Use English name for slug if translation is available
-                        $updateData['slug'] = Str::slug($translations[$groupData['name']]);
-                    }
-                    
-                    $role->groups()->where('id', $key)->update($updateData);
-                    $submittedIds[] = $key;
-                } else {
-                    // New group
-                    $createData = [
-                        'name' => $groupData['name'],
-                        'slug' => Str::slug($groupData['name']),
-                    ];
-                    
-                    // Preserve manually entered English name or add automatic translation
-                    if (isset($groupData['name_en'])) {
-                        $createData['name_en'] = $groupData['name_en'];
-                        $createData['slug'] = Str::slug($groupData['name_en']);
-                    } elseif (isset($translations[$groupData['name']])) {
-                        $createData['name_en'] = $translations[$groupData['name']];
-                        $createData['slug'] = Str::slug($translations[$groupData['name']]);
-                    }
-                    
-                    $newGroup = $role->groups()->create($createData);
-                    $submittedIds[] = $newGroup->id;
+            if ($groupData['name'] === '') {
+                continue;
+            }
+
+            $baseSlug = $groupData['slug'] !== ''
+                ? $groupData['slug']
+                : Str::slug($groupData['name']);
+
+            if (is_numeric($key) && in_array($key, $existingGroupIds)) {
+                // Update existing
+                $updateData = [
+                    'name' => $groupData['name'],
+                    'slug' => $baseSlug,
+                ];
+
+                $nameEn = $groupData['name_en'];
+
+                // Preserve manually entered English name or add automatic translation
+                if ($nameEn !== '') {
+                    $updateData['name_en'] = $nameEn;
+                    $updateData['slug'] = Str::slug($nameEn);
+                } elseif (isset($translations[$groupData['name']])) {
+                    $updateData['name_en'] = $translations[$groupData['name']];
+                    // Use English name for slug if translation is available
+                    $updateData['slug'] = Str::slug($translations[$groupData['name']]);
                 }
+
+                $role->groups()->where('id', $key)->update($updateData);
+                $submittedIds[] = $key;
+            } else {
+                // New group
+                $createData = [
+                    'name' => $groupData['name'],
+                    'slug' => Str::slug($groupData['name']),
+                ];
+
+                $nameEn = $groupData['name_en'];
+
+                // Preserve manually entered English name or add automatic translation
+                if ($nameEn !== '') {
+                    $createData['name_en'] = $nameEn;
+                    $createData['slug'] = Str::slug($nameEn);
+                } elseif (isset($translations[$groupData['name']])) {
+                    $createData['name_en'] = $translations[$groupData['name']];
+                    $createData['slug'] = Str::slug($translations[$groupData['name']]);
+                }
+
+                $newGroup = $role->groups()->create($createData);
+                $submittedIds[] = $newGroup->id;
             }
         }
         
@@ -2185,6 +2203,52 @@ class RoleController extends Controller
         }
 
         return $value;
+    }
+
+    /**
+     * Normalize dynamic group payloads into predictable arrays.
+     *
+     * @param  mixed  $groups
+     * @return array<int|string, array{id: string|null, name: string, name_en: string, slug: string}>
+     */
+    private function normalizeGroupInput($groups): array
+    {
+        $normalized = $this->normalizeDecodedJsonStructure($groups);
+
+        if (! is_array($normalized)) {
+            $normalized = (array) $normalized;
+        }
+
+        $result = [];
+
+        foreach ($normalized as $key => $group) {
+            if ($group instanceof Arrayable) {
+                $group = $group->toArray();
+            } elseif (is_object($group)) {
+                try {
+                    $group = get_object_vars($group);
+                } catch (\Throwable $e) {
+                    report($e);
+                    $group = [];
+                }
+            } elseif (! is_array($group)) {
+                $group = is_scalar($group) ? ['name' => (string) $group] : [];
+            }
+
+            $name = isset($group['name']) && is_scalar($group['name']) ? trim((string) $group['name']) : '';
+            $nameEn = isset($group['name_en']) && is_scalar($group['name_en']) ? trim((string) $group['name_en']) : '';
+            $slug = isset($group['slug']) && is_scalar($group['slug']) ? trim((string) $group['slug']) : '';
+            $id = isset($group['id']) && is_scalar($group['id']) ? (string) $group['id'] : null;
+
+            $result[$key] = [
+                'id' => $id,
+                'name' => $name,
+                'name_en' => $nameEn,
+                'slug' => $slug,
+            ];
+        }
+
+        return $result;
     }
 
     /**
