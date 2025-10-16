@@ -265,7 +265,7 @@
               />
             </svg>
             <p class="text-sm">
-              {{ $event->getStartEndTime($date) }}
+              {{ $event->getStartEndTime($date, $role->use_24_hour_time) }}
             </p>
           </div>
           @endif
