@@ -429,7 +429,7 @@ class GoogleCalendarService
     /**
      * Get events from Google Calendar for a specific time range
      */
-    public function getEvents(string $calendarId, \DateTime $timeMin = null, \DateTime $timeMax = null): array
+    public function getEvents(string $calendarId, ?\DateTime $timeMin = null, ?\DateTime $timeMax = null): array
     {
         try {
             if (!$this->calendarService) {
