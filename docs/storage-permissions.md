@@ -21,12 +21,23 @@ Every directory (`framework`, `logs`, `app`) lacks the execute bit and is owned 
 
 The usual symptom is an HTTP 500 error because the framework fails to write to the log or cache directory while bootstrapping the request.
 
+## Running the Permission Inspector
+
+Use the bundled Artisan command to check whether Laravel can access the expected directories and files:
+
+```bash
+php artisan storage:permissions
+```
+
+The command scans `storage/` and `bootstrap/cache`, reporting any entries that are not readable, writable, or (for directories) traversable. Add the `--json` flag when you want to feed the output to another tool.
+
 ## Fixing Ownership
 
 Ensure the storage tree is owned by the same user that runs the PHP process. On many Linux distributions that is `www-data`:
 
 ```bash
 sudo chown -R www-data:www-data /data/Docker/eventscheduler/storage
+sudo chown -R www-data:www-data /data/Docker/eventscheduler/bootstrap/cache
 ```
 
 If you deploy via Docker, run the command inside the container as `root` but target the user configured for the PHP-FPM process.
@@ -38,6 +49,8 @@ Grant the owner read, write, and execute access, and allow the group to traverse
 ```bash
 sudo find /data/Docker/eventscheduler/storage -type d -exec chmod 775 {} +
 sudo find /data/Docker/eventscheduler/storage -type f -exec chmod 664 {} +
+sudo find /data/Docker/eventscheduler/bootstrap/cache -type d -exec chmod 775 {} +
+sudo find /data/Docker/eventscheduler/bootstrap/cache -type f -exec chmod 664 {} +
 ```
 
 This results in directory entries such as `drwxrwxr-x`, which lets PHP create and read files while preventing anonymous users from writing to the directory.
