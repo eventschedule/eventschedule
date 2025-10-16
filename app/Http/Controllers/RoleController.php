@@ -2207,6 +2207,10 @@ class RoleController extends Controller
      */
     private function loadRoleAssetOptions(string $relativePath, callable $processor, string $context)
     {
+        set_error_handler(function ($severity, $message, $file, $line) {
+            throw new \ErrorException($message, 0, $severity, $file, $line);
+        });
+
         try {
             $data = $this->decodeJsonFile($relativePath);
             $data = $this->normalizeRoleAssetDataset($data);
@@ -2216,6 +2220,8 @@ class RoleController extends Controller
             $this->logRoleAssetPreparationFailure($context, $relativePath, $e);
 
             return [];
+        } finally {
+            restore_error_handler();
         }
     }
 
@@ -2510,6 +2516,7 @@ class RoleController extends Controller
      */
     private function prepareNameOptions($items): array
     {
+        $items = $this->forceRoleAssetDatasetToArray($items);
         $options = [];
 
         foreach ($this->normalizeRoleAssetSequence($items, 'name_option') as $entry) {
@@ -2582,6 +2589,7 @@ class RoleController extends Controller
      */
     private function prepareGradientOptions($items): array
     {
+        $items = $this->forceRoleAssetDatasetToArray($items);
         $options = [];
 
         foreach ($this->normalizeRoleAssetSequence($items, 'gradient_option') as $entry) {
@@ -2676,6 +2684,7 @@ class RoleController extends Controller
      */
     private function prepareFontOptions($items): array
     {
+        $items = $this->forceRoleAssetDatasetToArray($items);
         $options = [];
 
         foreach ($this->normalizeRoleAssetSequence($items, 'font_option') as $entry) {
