@@ -74,8 +74,6 @@
                                             <a href="{{ $firstRole->getGuestUrl() }}" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">
                                                 {{ $firstRole->name }}
                                             </a>
-                                        @else
-                                            <span class="text-gray-500">{{ $firstRole->name }}</span>
                                         @endif
                                     @endif
                                 </td>
