@@ -15,6 +15,7 @@ use App\Http\Requests\RoleUpdateRequest;
 use App\Http\Requests\MemberAddRequest;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -2239,13 +2240,15 @@ class RoleController extends Controller
             $decoded = json_decode($encoded, true, 512, JSON_THROW_ON_ERROR);
 
             if (is_array($decoded)) {
-                return $decoded;
+                return $this->enrichRoleAssetDatasetWithNames($decoded);
             }
         } catch (\Throwable $e) {
             $this->reportRoleAssetParsingIssue('dataset_json_cast', $items, $e);
         }
 
-        return $this->forceRoleAssetDatasetToArray($normalized);
+        return $this->enrichRoleAssetDatasetWithNames(
+            $this->forceRoleAssetDatasetToArray($normalized)
+        );
     }
 
     /**
@@ -2293,6 +2296,80 @@ class RoleController extends Controller
         }
 
         return $value;
+    }
+
+    private function enrichRoleAssetDatasetWithNames(array $dataset): array
+    {
+        foreach ($dataset as $key => $entry) {
+            $dataset[$key] = $this->enrichRoleAssetEntryWithName($entry, is_string($key) ? $key : null);
+        }
+
+        return $dataset;
+    }
+
+    private function enrichRoleAssetEntryWithName($entry, ?string $fallbackKey)
+    {
+        $entry = $this->forceRoleAssetDatasetToArray($entry);
+
+        if (! is_array($entry)) {
+            $candidate = $this->stringifyRoleAssetCandidate($entry);
+
+            if ($candidate !== null) {
+                return ['name' => $candidate];
+            }
+
+            return $entry;
+        }
+
+        if (! Arr::isAssoc($entry)) {
+            return $entry;
+        }
+
+        $name = $this->resolveRoleAssetNameFromEntry($entry);
+
+        if ($name === null && $fallbackKey !== null) {
+            $name = $fallbackKey;
+        }
+
+        if ($name !== null) {
+            $entry['name'] = $name;
+        }
+
+        return $entry;
+    }
+
+    private function resolveRoleAssetNameFromEntry(array $entry): ?string
+    {
+        $candidateKeys = ['name', 'label', 'title', 'value', 'id', 'slug'];
+
+        foreach ($candidateKeys as $candidateKey) {
+            if (array_key_exists($candidateKey, $entry)) {
+                $candidate = $this->stringifyRoleAssetCandidate($entry[$candidateKey]);
+
+                if ($candidate !== null && $candidate !== '') {
+                    return $candidate;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private function stringifyRoleAssetCandidate($value): ?string
+    {
+        if (is_string($value)) {
+            $value = trim($value);
+
+            return $value === '' ? null : $value;
+        }
+
+        if (is_scalar($value)) {
+            $string = trim((string) $value);
+
+            return $string === '' ? null : $string;
+        }
+
+        return null;
     }
 
     private function logRoleAssetPreparationFailure(string $context, string $relativePath, \Throwable $exception): void
