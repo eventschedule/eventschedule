@@ -3087,11 +3087,38 @@ class RoleController extends Controller
             $preview = '[unavailable: ' . $e->getMessage() . ']';
         }
 
-        \Log::warning('Failed to parse role asset option', [
+        $payload = [
             'context' => $context,
             'item_preview' => $preview,
             'exception' => $exception->getMessage(),
-        ]);
+        ];
+
+        try {
+            \Log::warning('Failed to parse role asset option', $payload);
+
+            return;
+        } catch (\Throwable $loggingFailure) {
+            $payload['logging_failure'] = [
+                'exception_class' => get_class($loggingFailure),
+                'exception_message' => $loggingFailure->getMessage(),
+            ];
+
+            $serializedPayload = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+            if ($serializedPayload === false) {
+                $payload['serialization_failure'] = [
+                    'error_code' => json_last_error(),
+                    'error_message' => json_last_error_msg(),
+                ];
+
+                $serializedPayload = null;
+            }
+
+            $fallbackMessage = 'Failed to parse role asset option (fallback logger): ';
+            $fallbackMessage .= $serializedPayload ?? var_export($payload, true);
+
+            error_log($fallbackMessage);
+        }
     }
 
     private function summarizeRoleAssetValue($value): string
