@@ -16,7 +16,7 @@
 </div>
 
 
-@if(count($followers) == 0 || ! $role->email_verified_at)
+@if($followers->total() == 0 || ! $role->email_verified_at)
 
 <div class="text-center pt-20">
     <svg class="mx-auto h-12 w-12 text-gray-400" fill="#ccc" viewBox="0 0 24 24" stroke="currentColor"
@@ -52,15 +52,28 @@
                                     {{ __('messages.name') }}
                                 </th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                    {{ __('messages.schedule') }}
+                                </th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                     {{ __('messages.date') }}
                                 </th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 bg-white">
-                            @foreach ($followers as $follower)
+                            @foreach ($followersWithRoles as $follower)
                             <tr class="bg-white hover:bg-gray-50 transition-colors duration-150">
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                                     {{ $follower->name }}
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                    @if($follower->roles->isNotEmpty())
+                                        @php
+                                            $firstRole = $follower->roles->first();
+                                        @endphp
+                                        <a href="{{ $firstRole->getGuestUrl() }}" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">
+                                            {{ $firstRole->name }}
+                                        </a>
+                                    @endif
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     {{ $follower->pivot->created_at->format($role->use_24_hour_time ? 'M jS, Y • g:i' : 'M jS, Y • h:i A') }}
@@ -74,5 +87,48 @@
         </div>
     </div>
 </div>
+
+@if($followersWithRoles->hasPages())
+<div class="mt-6 flex items-center justify-between">
+    <div class="flex-1 flex justify-between sm:hidden">
+        @if ($followersWithRoles->onFirstPage())
+            <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default leading-5 rounded-md">
+                {{ __('messages.previous') }}
+            </span>
+        @else
+            <a href="{{ $followers->previousPageUrl() }}" class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 rounded-md hover:text-gray-500 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
+                {{ __('messages.previous') }}
+            </a>
+        @endif
+
+        @if ($followersWithRoles->hasMorePages())
+            <a href="{{ $followers->nextPageUrl() }}" class="ml-3 relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 rounded-md hover:text-gray-500 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
+                {{ __('messages.next') }}
+            </a>
+        @else
+            <span class="ml-3 relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default leading-5 rounded-md">
+                {{ __('messages.next') }}
+            </span>
+        @endif
+    </div>
+
+    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+        <div>
+            <p class="text-sm text-gray-700">
+                {{ __('messages.showing') }}
+                <span class="font-medium">{{ $followersWithRoles->firstItem() }}</span>
+                {{ __('messages.to') }}
+                <span class="font-medium">{{ $followersWithRoles->lastItem() }}</span>
+                {{ __('messages.of') }}
+                <span class="font-medium">{{ $followersWithRoles->total() }}</span>
+                {{ __('messages.results') }}
+            </p>
+        </div>
+        <div>
+            {{ $followersWithRoles->links() }}
+        </div>
+    </div>
+</div>
+@endif
 
 @endif
