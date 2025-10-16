@@ -27,6 +27,7 @@ use App\Models\EventRole;
 use App\Utils\UrlUtils;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
+use App\Support\GroupPayloadNormalizer;
 use Carbon\Carbon;
 
 class RoleController extends Controller
@@ -2503,42 +2504,7 @@ class RoleController extends Controller
      */
     private function normalizeGroupInput($groups): array
     {
-        $normalized = $this->normalizeDecodedJsonStructure($groups);
-
-        if (! is_array($normalized)) {
-            $normalized = (array) $normalized;
-        }
-
-        $result = [];
-
-        foreach ($normalized as $key => $group) {
-            if ($group instanceof Arrayable) {
-                $group = $group->toArray();
-            } elseif (is_object($group)) {
-                try {
-                    $group = get_object_vars($group);
-                } catch (\Throwable $e) {
-                    report($e);
-                    $group = [];
-                }
-            } elseif (! is_array($group)) {
-                $group = is_scalar($group) ? ['name' => (string) $group] : [];
-            }
-
-            $name = isset($group['name']) && is_scalar($group['name']) ? trim((string) $group['name']) : '';
-            $nameEn = isset($group['name_en']) && is_scalar($group['name_en']) ? trim((string) $group['name_en']) : '';
-            $slug = isset($group['slug']) && is_scalar($group['slug']) ? trim((string) $group['slug']) : '';
-            $id = isset($group['id']) && is_scalar($group['id']) ? (string) $group['id'] : null;
-
-            $result[$key] = [
-                'id' => $id,
-                'name' => $name,
-                'name_en' => $nameEn,
-                'slug' => $slug,
-            ];
-        }
-
-        return $result;
+        return GroupPayloadNormalizer::forPersistence($groups);
     }
 
     /**

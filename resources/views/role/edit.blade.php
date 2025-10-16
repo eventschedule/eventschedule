@@ -1115,43 +1115,9 @@
                         <div class="mb-6">
                             <div id="groups-list">
                                 @php
-                                    $groups = $role->groups ?? [];
-                                    $rawGroups = old('groups', $groups);
-
-                                    if ($rawGroups instanceof \Illuminate\Support\Collection) {
-                                        $rawGroups = $rawGroups->all();
-                                    }
-
-                                    if ($rawGroups instanceof \Illuminate\Database\Eloquent\Collection) {
-                                        $rawGroups = $rawGroups->all();
-                                    }
-
-                                    if (! is_array($rawGroups)) {
-                                        $rawGroups = (array) $rawGroups;
-                                    }
-
-                                    $normalizedGroups = [];
-
-                                    foreach ($rawGroups as $key => $group) {
-                                        if ($group instanceof \Illuminate\Contracts\Support\Arrayable) {
-                                            $group = $group->toArray();
-                                        } elseif ($group instanceof \Illuminate\Database\Eloquent\Model) {
-                                            $group = $group->toArray();
-                                        } elseif (is_object($group)) {
-                                            $group = (array) $group;
-                                        } elseif (! is_array($group)) {
-                                            $group = [];
-                                        }
-
-                                        $groupId = $group['id'] ?? $key;
-
-                                        $normalizedGroups[$key] = [
-                                            'id' => is_scalar($groupId) ? (string) $groupId : $key,
-                                            'name' => isset($group['name']) && is_scalar($group['name']) ? (string) $group['name'] : '',
-                                            'name_en' => isset($group['name_en']) && is_scalar($group['name_en']) ? (string) $group['name_en'] : '',
-                                            'slug' => isset($group['slug']) && is_scalar($group['slug']) ? (string) $group['slug'] : '',
-                                        ];
-                                    }
+                                    $normalizedGroups = \App\Support\GroupPayloadNormalizer::forView(
+                                        old('groups', $role->groups ?? [])
+                                    );
                                 @endphp
                                 <div id="group-items">
                                     @foreach($normalizedGroups as $i => $group)
