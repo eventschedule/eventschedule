@@ -141,6 +141,14 @@ class InvoiceNinja
         
         $result = json_decode($result, true);
 
+        if (! isset($result['data'])) {
+            $message = 'Invoice Ninja API request failed';
+            if (isset($result['message'])) {
+                $message .= ': ' . $result['message'];
+            }
+            throw new \Exception($message);
+        }
+
         return $result['data'];
     }
 
