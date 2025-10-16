@@ -25,6 +25,7 @@ abstract class DuskTestCase extends BaseTestCase
         // Ensure feature gates relying on the "testing" flag stay open even when
         // the Dusk environment reuses the base .env without APP_TESTING enabled.
         $this->app['config']->set('app.is_testing', true);
+        $this->app['config']->set('app.browser_testing', true);
         $this->app['config']->set('app.debug', true);
         $this->app['config']->set('app.load_vite_assets', false);
 
@@ -63,6 +64,7 @@ abstract class DuskTestCase extends BaseTestCase
     {
         foreach ([
             'APP_TESTING' => 'true',
+            'BROWSER_TESTING' => 'true',
             'APP_DEBUG' => 'true',
             'LOAD_VITE_ASSETS' => 'false',
         ] as $key => $value) {
@@ -89,6 +91,7 @@ abstract class DuskTestCase extends BaseTestCase
 
         foreach ([
             'APP_TESTING' => 'true',
+            'BROWSER_TESTING' => 'true',
             'APP_DEBUG' => 'true',
             'LOAD_VITE_ASSETS' => 'false',
         ] as $key => $value) {

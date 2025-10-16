@@ -63,7 +63,7 @@ if (!function_exists('is_hosted_or_admin')) {
      */
     function is_hosted_or_admin(): bool
     {
-        if (config('app.hosted') || config('app.is_testing')) {
+        if (config('app.hosted') || config('app.is_testing') || config('app.browser_testing')) {
             return true;
         }
 
