@@ -2215,7 +2215,7 @@ class RoleController extends Controller
         } catch (\Throwable $e) {
             $this->logRoleAssetPreparationFailure($context, $relativePath, $e);
 
-            throw $e;
+            return [];
         }
     }
 
