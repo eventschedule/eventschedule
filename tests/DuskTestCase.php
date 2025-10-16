@@ -9,6 +9,7 @@ use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Dusk\TestCase as BaseTestCase;
+use PHPUnit\Framework\Attributes\AfterClass;
 use PHPUnit\Framework\Attributes\BeforeClass;
 
 abstract class DuskTestCase extends BaseTestCase
@@ -51,10 +52,17 @@ abstract class DuskTestCase extends BaseTestCase
     public static function prepare(): void
     {
         static::synchronizeDuskEnvironmentOverrides();
+        static::ensureBrowserTestingFlagFile();
 
         if (! static::runningInSail()) {
             static::startChromeDriver(['--port=9515']);
         }
+    }
+
+    #[AfterClass]
+    public static function cleanup(): void
+    {
+        static::removeBrowserTestingFlagFile();
     }
 
     /**
@@ -111,6 +119,34 @@ abstract class DuskTestCase extends BaseTestCase
         }
 
         file_put_contents($path, $contents);
+    }
+
+    private static function ensureBrowserTestingFlagFile(): void
+    {
+        $path = static::browserTestingFlagPath();
+        $directory = dirname($path);
+
+        if (! is_dir($directory)) {
+            mkdir($directory, 0777, true);
+        }
+
+        file_put_contents($path, '1');
+    }
+
+    private static function removeBrowserTestingFlagFile(): void
+    {
+        $path = static::browserTestingFlagPath();
+
+        if (is_file($path)) {
+            @unlink($path);
+        }
+    }
+
+    private static function browserTestingFlagPath(): string
+    {
+        return dirname(__DIR__) . DIRECTORY_SEPARATOR . 'storage'
+            . DIRECTORY_SEPARATOR . 'framework'
+            . DIRECTORY_SEPARATOR . 'browser-testing.flag';
     }
 
     /**

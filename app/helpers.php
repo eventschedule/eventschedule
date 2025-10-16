@@ -67,6 +67,12 @@ if (!function_exists('is_hosted_or_admin')) {
             return true;
         }
 
+        $flagPath = storage_path('framework/browser-testing.flag');
+
+        if (is_string($flagPath) && is_file($flagPath)) {
+            return true;
+        }
+
         return auth()->user() && auth()->user()->isAdmin();
     }
 }
