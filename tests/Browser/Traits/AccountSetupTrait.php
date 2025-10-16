@@ -30,7 +30,9 @@ trait AccountSetupTrait
     protected function createTestVenue(Browser $browser, string $name = 'Venue', string $address = '123 Test St'): void
     {
         $browser->visit('/new/venue')
-                ->waitForText(__('messages.new_venue'), 10)
+                ->waitForLocation('/new/venue', 10)
+                ->assertPathIs('/new/venue')
+                ->waitFor('input[name="name"]', 10)
                 ->clear('name')
                 ->type('name', $name)
                 ->pause(1000)
@@ -47,7 +49,9 @@ trait AccountSetupTrait
     protected function createTestTalent(Browser $browser, string $name = 'Talent'): void
     {
         $browser->visit('/new/talent')
-                ->waitForText(__('messages.new_talent'), 10)
+                ->waitForLocation('/new/talent', 10)
+                ->assertPathIs('/new/talent')
+                ->waitFor('input[name="name"]', 10)
                 ->clear('name')
                 ->type('name', $name)
                 ->pause(1000)
@@ -63,7 +67,9 @@ trait AccountSetupTrait
     protected function createTestCurator(Browser $browser, string $name = 'Curator'): void
     {
         $browser->visit('/new/curator')
-                ->waitForText(__('messages.new_curator'), 10)
+                ->waitForLocation('/new/curator', 10)
+                ->assertPathIs('/new/curator')
+                ->waitFor('input[name="name"]', 10)
                 ->clear('name')
                 ->type('name', $name)
                 ->pause(1000)
