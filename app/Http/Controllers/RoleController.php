@@ -850,8 +850,10 @@ class RoleController extends Controller
         }
 
         // Header images
-        $headerOptions = $this->prepareNameOptions(
-            $this->decodeJsonFile('storage/headers.json')
+        $headerOptions = $this->loadRoleAssetOptions(
+            'storage/headers.json',
+            fn ($data) => $this->prepareNameOptions($data),
+            'create.header_options'
         );
 
         $headerOptions = [
@@ -859,8 +861,10 @@ class RoleController extends Controller
         ] + $headerOptions;
 
         // Background images
-        $backgroundOptions = $this->prepareNameOptions(
-            $this->decodeJsonFile('storage/backgrounds.json')
+        $backgroundOptions = $this->loadRoleAssetOptions(
+            'storage/backgrounds.json',
+            fn ($data) => $this->prepareNameOptions($data),
+            'create.background_options'
         );
 
         $backgroundOptions = [
@@ -868,8 +872,10 @@ class RoleController extends Controller
         ] + $backgroundOptions;
 
         // Background gradients
-        $gradientOptions = $this->prepareGradientOptions(
-            $this->decodeJsonFile('storage/gradients.json')
+        $gradientOptions = $this->loadRoleAssetOptions(
+            'storage/gradients.json',
+            fn ($data) => $this->prepareGradientOptions($data),
+            'create.gradient_options'
         );
 
         $gradientOptions = [
@@ -1064,8 +1070,10 @@ class RoleController extends Controller
         $role = Role::with('groups')->subdomain($subdomain)->firstOrFail();
 
         // Header images
-        $headerOptions = $this->prepareNameOptions(
-            $this->decodeJsonFile('storage/headers.json')
+        $headerOptions = $this->loadRoleAssetOptions(
+            'storage/headers.json',
+            fn ($data) => $this->prepareNameOptions($data),
+            'edit.header_options'
         );
 
         $headerOptions = [
@@ -1074,8 +1082,10 @@ class RoleController extends Controller
 
 
         // Background images
-        $backgroundOptions = $this->prepareNameOptions(
-            $this->decodeJsonFile('storage/backgrounds.json')
+        $backgroundOptions = $this->loadRoleAssetOptions(
+            'storage/backgrounds.json',
+            fn ($data) => $this->prepareNameOptions($data),
+            'edit.background_options'
         );
 
         $backgroundOptions = [
@@ -1084,8 +1094,10 @@ class RoleController extends Controller
 
 
         // Background gradients
-        $gradientOptions = $this->prepareGradientOptions(
-            $this->decodeJsonFile('storage/gradients.json')
+        $gradientOptions = $this->loadRoleAssetOptions(
+            'storage/gradients.json',
+            fn ($data) => $this->prepareGradientOptions($data),
+            'edit.gradient_options'
         );
 
         $gradientOptions = [
@@ -2145,16 +2157,102 @@ class RoleController extends Controller
         $data = json_decode($contents, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            $data = json_decode($contents);
+            $fallback = json_decode($contents);
 
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return [];
             }
+
+            if ($fallback instanceof \JsonSerializable) {
+                try {
+                    $fallback = $fallback->jsonSerialize();
+                } catch (\Throwable $e) {
+                    return [];
+                }
+            }
+
+            if ($fallback instanceof \Traversable) {
+                try {
+                    $fallback = iterator_to_array($fallback);
+                } catch (\Throwable $e) {
+                    return [];
+                }
+            }
+
+            if (is_object($fallback)) {
+                try {
+                    $fallback = get_object_vars($fallback);
+                } catch (\Throwable $e) {
+                    return [];
+                }
+            }
+
+            if (! is_array($fallback)) {
+                return [];
+            }
+
+            $data = $fallback;
         }
 
         $normalized = $this->normalizeDecodedJsonStructure($data);
 
         return is_array($normalized) ? $normalized : [];
+    }
+
+    /**
+     * @template T
+     * @param  callable(mixed):T  $processor
+     * @return T
+     */
+    private function loadRoleAssetOptions(string $relativePath, callable $processor, string $context)
+    {
+        try {
+            $data = $this->decodeJsonFile($relativePath);
+
+            return $processor($data);
+        } catch (\Throwable $e) {
+            $this->logRoleAssetPreparationFailure($context, $relativePath, $e);
+
+            throw $e;
+        }
+    }
+
+    private function logRoleAssetPreparationFailure(string $context, string $relativePath, \Throwable $exception): void
+    {
+        $payload = [
+            'context' => $context,
+            'asset_path' => $relativePath,
+            'exception_class' => get_class($exception),
+            'exception_message' => $exception->getMessage(),
+            'exception_trace' => $exception->getTraceAsString(),
+        ];
+
+        try {
+            \Log::error('Role asset preparation failed', $payload);
+
+            return;
+        } catch (\Throwable $loggingFailure) {
+            $payload['logging_failure'] = [
+                'exception_class' => get_class($loggingFailure),
+                'exception_message' => $loggingFailure->getMessage(),
+            ];
+
+            $serializedPayload = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+            if ($serializedPayload === false) {
+                $payload['serialization_failure'] = [
+                    'error_code' => json_last_error(),
+                    'error_message' => json_last_error_msg(),
+                ];
+
+                $serializedPayload = null;
+            }
+
+            $fallbackMessage = 'Role asset preparation failed (fallback logger): ';
+            $fallbackMessage .= $serializedPayload ?? var_export($payload, true);
+
+            error_log($fallbackMessage);
+        }
     }
 
     private function stripUtf8Bom(string $contents): string
@@ -2678,37 +2776,13 @@ class RoleController extends Controller
 
     private function normalizeRoleAssetValue($value, string $context)
     {
-        if ($value instanceof \JsonSerializable) {
-            try {
-                $value = $value->jsonSerialize();
-            } catch (\Throwable $e) {
-                $this->reportRoleAssetParsingIssue($context . '_json_serialize', $value, $e);
+        try {
+            return $this->normalizeDecodedJsonStructure($value);
+        } catch (\Throwable $e) {
+            $this->reportRoleAssetParsingIssue($context . '_normalize', $value, $e);
 
-                return null;
-            }
+            return null;
         }
-
-        if ($value instanceof \Traversable) {
-            try {
-                $value = iterator_to_array($value);
-            } catch (\Throwable $e) {
-                $this->reportRoleAssetParsingIssue($context . '_traversable', $value, $e);
-
-                return null;
-            }
-        }
-
-        if (is_object($value)) {
-            try {
-                $value = get_object_vars($value);
-            } catch (\Throwable $e) {
-                $this->reportRoleAssetParsingIssue($context . '_object', $value, $e);
-
-                return null;
-            }
-        }
-
-        return $value;
     }
 
     /**
