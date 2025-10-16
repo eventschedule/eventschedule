@@ -25,6 +25,7 @@ abstract class DuskTestCase extends BaseTestCase
         // Ensure feature gates relying on the "testing" flag stay open even when
         // the Dusk environment reuses the base .env without APP_TESTING enabled.
         $this->app['config']->set('app.is_testing', true);
+        $this->app['config']->set('app.debug', true);
         $this->app['config']->set('app.load_vite_assets', false);
 
         $this->app['config']->set('mail.default', 'log');
@@ -62,6 +63,7 @@ abstract class DuskTestCase extends BaseTestCase
     {
         foreach ([
             'APP_TESTING' => 'true',
+            'APP_DEBUG' => 'true',
             'LOAD_VITE_ASSETS' => 'false',
         ] as $key => $value) {
             putenv("{$key}={$value}");
@@ -79,7 +81,7 @@ abstract class DuskTestCase extends BaseTestCase
         $path = dirname(__DIR__) . DIRECTORY_SEPARATOR . '.env.dusk.local';
 
         if (! is_file($path)) {
-            return;
+            file_put_contents($path, '');
         }
 
         $contents = file_get_contents($path);
@@ -87,6 +89,7 @@ abstract class DuskTestCase extends BaseTestCase
 
         foreach ([
             'APP_TESTING' => 'true',
+            'APP_DEBUG' => 'true',
             'LOAD_VITE_ASSETS' => 'false',
         ] as $key => $value) {
             $pattern = "/^{$key}=.*$/m";
