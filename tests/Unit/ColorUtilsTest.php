@@ -41,4 +41,19 @@ class ColorUtilsTest extends TestCase
 
         $this->assertSame(['#123456', '#abcdef', '#FEDCBA'], $result);
     }
+
+    public function testDetermineRoleAssetLabelPrefersLabel(): void
+    {
+        $method = new \ReflectionMethod(ColorUtils::class, 'determineRoleAssetLabel');
+        $method->setAccessible(true);
+
+        $value = [
+            'value' => 'bg-one',
+            'label' => 'Background One',
+        ];
+
+        $result = $method->invoke(null, $value, 0);
+
+        $this->assertSame('Background One', $result);
+    }
 }

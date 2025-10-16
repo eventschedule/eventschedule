@@ -56,7 +56,7 @@ class RoleAssetOptionsTest extends TestCase
         $method = new \ReflectionMethod(RoleController::class, 'prepareNameOptions');
         $method->setAccessible(true);
 
-        $payload = json_decode('[{"name":"Alpha"},{"label":"Beta"},"Gamma"]');
+        $payload = json_decode('[{"name":"Alpha"},{"label":"Beta"},{"value":"bg-one","label":"Background One"},"Gamma"]');
 
         $result = $method->invoke($controller, $payload);
 
@@ -64,6 +64,8 @@ class RoleAssetOptionsTest extends TestCase
         $this->assertSame('Alpha', $result['Alpha']);
         $this->assertArrayHasKey('Beta', $result);
         $this->assertSame('Beta', $result['Beta']);
+        $this->assertArrayHasKey('bg-one', $result);
+        $this->assertSame('Background One', $result['bg-one']);
         $this->assertArrayHasKey('Gamma', $result);
         $this->assertSame('Gamma', $result['Gamma']);
     }

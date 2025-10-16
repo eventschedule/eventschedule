@@ -42,26 +42,37 @@ class ColorUtils
         $backgroundOptions = [];
 
         foreach (self::yieldRoleAssetItems($backgrounds) as $background) {
-            $name = self::determineRoleAssetName($background);
+            $value = self::determineRoleAssetName($background);
 
-            if ($name === null) {
+            if (! is_string($value)) {
                 continue;
             }
 
-            $backgroundOptions[] = $name;
-        }
+            $value = trim($value);
 
-        $backgroundOptions = array_values(array_unique(array_filter($backgroundOptions, function ($value) {
-            return is_string($value) && trim($value) !== '';
-        })));
+            if ($value === '') {
+                continue;
+            }
+
+            $label = self::determineRoleAssetLabel($background);
+
+            if (! is_string($label) || trim($label) === '') {
+                $label = str_replace('_', ' ', $value);
+            } else {
+                $label = trim($label);
+            }
+
+            $backgroundOptions[$value] = $label;
+        }
 
         if (empty($backgroundOptions)) {
             return '';
         }
 
-        $random = array_rand($backgroundOptions);
+        $values = array_keys($backgroundOptions);
+        $random = $values[array_rand($values)];
 
-        return $backgroundOptions[$random];
+        return $random;
     }
 
     /**
@@ -205,6 +216,71 @@ class ColorUtils
 
             foreach ($item as $value) {
                 $candidate = self::determineRoleAssetName($value, $depth + 1);
+
+                if (is_string($candidate) && trim($candidate) !== '') {
+                    return $candidate;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static function determineRoleAssetLabel($item, int $depth = 0): ?string
+    {
+        if ($depth > 10) {
+            return null;
+        }
+
+        if ($item instanceof \JsonSerializable) {
+            try {
+                $item = $item->jsonSerialize();
+            } catch (\Throwable $e) {
+                return null;
+            }
+        }
+
+        if ($item instanceof \Traversable) {
+            try {
+                $item = iterator_to_array($item);
+            } catch (\Throwable $e) {
+                return null;
+            }
+        }
+
+        if (is_object($item)) {
+            try {
+                $item = get_object_vars($item);
+            } catch (\Throwable $e) {
+                return null;
+            }
+        }
+
+        if (is_string($item)) {
+            $item = trim($item);
+
+            return $item === '' ? null : $item;
+        }
+
+        if (is_scalar($item)) {
+            $string = trim((string) $item);
+
+            return $string === '' ? null : $string;
+        }
+
+        if (is_array($item)) {
+            foreach (['label', 'name', 'title', 'value', 'id', 'slug'] as $key) {
+                if (array_key_exists($key, $item)) {
+                    $candidate = self::determineRoleAssetLabel($item[$key], $depth + 1);
+
+                    if (is_string($candidate) && trim($candidate) !== '') {
+                        return $candidate;
+                    }
+                }
+            }
+
+            foreach ($item as $value) {
+                $candidate = self::determineRoleAssetLabel($value, $depth + 1);
 
                 if (is_string($candidate) && trim($candidate) !== '') {
                     return $candidate;
