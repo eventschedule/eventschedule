@@ -2566,7 +2566,20 @@ class RoleController extends Controller
                     continue;
                 }
 
-                $options[$name] = str_replace('_', ' ', $name);
+                try {
+                    $label = $this->determineRoleAssetLabel($item, $original);
+                } catch (\Throwable $e) {
+                    $this->reportRoleAssetParsingIssue('name_label', $original, $e);
+                    $label = null;
+                }
+
+                if (! is_string($label) || trim($label) === '') {
+                    $label = str_replace('_', ' ', $name);
+                } else {
+                    $label = trim($label);
+                }
+
+                $options[$name] = $label;
             } catch (\Throwable $e) {
                 $this->reportRoleAssetParsingIssue('name_option_exception', $original, $e);
                 continue;
