@@ -2219,13 +2219,40 @@ class RoleController extends Controller
 
     private function logRoleAssetPreparationFailure(string $context, string $relativePath, \Throwable $exception): void
     {
-        \Log::error('Role asset preparation failed', [
+        $payload = [
             'context' => $context,
             'asset_path' => $relativePath,
             'exception_class' => get_class($exception),
             'exception_message' => $exception->getMessage(),
             'exception_trace' => $exception->getTraceAsString(),
-        ]);
+        ];
+
+        try {
+            \Log::error('Role asset preparation failed', $payload);
+
+            return;
+        } catch (\Throwable $loggingFailure) {
+            $payload['logging_failure'] = [
+                'exception_class' => get_class($loggingFailure),
+                'exception_message' => $loggingFailure->getMessage(),
+            ];
+
+            $serializedPayload = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+            if ($serializedPayload === false) {
+                $payload['serialization_failure'] = [
+                    'error_code' => json_last_error(),
+                    'error_message' => json_last_error_msg(),
+                ];
+
+                $serializedPayload = null;
+            }
+
+            $fallbackMessage = 'Role asset preparation failed (fallback logger): ';
+            $fallbackMessage .= $serializedPayload ?? var_export($payload, true);
+
+            error_log($fallbackMessage);
+        }
     }
 
     private function stripUtf8Bom(string $contents): string
