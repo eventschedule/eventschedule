@@ -398,6 +398,9 @@ class EventRepo
                         ->whereHas('roles', function ($query) use ($role) {
                             $query->where('role_id', $role->id);
                         })
+                        ->whereHas('roles', function ($query) use ($venue) {
+                            $query->where('role_id', $venue->id);
+                        })
                         ->where(function ($query) use ($eventDate) {
                             $query->whereBetween('starts_at', [
                                 $eventDate->copy()->startOfDay(),
