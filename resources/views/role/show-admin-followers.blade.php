@@ -114,17 +114,6 @@
 
     <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
         <div>
-            <p class="text-sm text-gray-700">
-                {{ __('messages.showing') }}
-                <span class="font-medium">{{ $followersWithRoles->firstItem() }}</span>
-                {{ __('messages.to') }}
-                <span class="font-medium">{{ $followersWithRoles->lastItem() }}</span>
-                {{ __('messages.of') }}
-                <span class="font-medium">{{ $followersWithRoles->total() }}</span>
-                {{ __('messages.results') }}
-            </p>
-        </div>
-        <div>
             {{ $followersWithRoles->links() }}
         </div>
     </div>
