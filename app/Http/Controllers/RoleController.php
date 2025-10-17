@@ -861,6 +861,16 @@ class RoleController extends Controller
             $role->name = is_string($name) ? trim($name) : '';
         }
 
+        $data = [
+            'role' => $role,
+            'user' => $user,
+            'title' => __('messages.new_' . $role->type),
+        ];
+
+        if (function_exists('is_browser_testing') && is_browser_testing()) {
+            return view('testing.role.create', $data);
+        }
+
         // Header images
         $headerOptions = $this->loadRoleAssetOptions(
             'storage/headers.json',
@@ -898,19 +908,12 @@ class RoleController extends Controller
             $this->decodeJsonFile('storage/fonts.json')
         );
 
-        $data = [
-            'role' => $role,
-            'user' => auth()->user(),
-            'title' => __('messages.new_' . $role->type),
+        $data = array_merge($data, [
             'gradients' => $gradientOptions,
             'backgrounds' => $backgroundOptions,
             'headers' => $headerOptions,
             'fonts' => $fonts,
-        ];
-
-        if (function_exists('is_browser_testing') && is_browser_testing()) {
-            return view('testing.role.create', $data);
-        }
+        ]);
 
         return view('role/edit', $data);
     }
@@ -1085,6 +1088,16 @@ class RoleController extends Controller
 
         $role = Role::with('groups')->subdomain($subdomain)->firstOrFail();
 
+        $data = [
+            'user' => auth()->user(),
+            'role' => $role,
+            'title' => __('messages.edit_' . $role->type),
+        ];
+
+        if (function_exists('is_browser_testing') && is_browser_testing()) {
+            return view('testing.role.edit', $data);
+        }
+
         // Header images
         $headerOptions = $this->loadRoleAssetOptions(
             'storage/headers.json',
@@ -1122,15 +1135,12 @@ class RoleController extends Controller
 
         $fonts = $this->decodeJsonFile('storage/fonts.json');
 
-        $data = [
-            'user' => auth()->user(),
-            'role' => $role,
-            'title' => __('messages.edit_' . $role->type),
+        $data = array_merge($data, [
             'gradients' => $gradientOptions,
             'backgrounds' => $backgroundOptions,
             'headers' => $headerOptions,
             'fonts' => $fonts,
-        ];
+        ]);
 
         return view('role/edit', $data);
     }
