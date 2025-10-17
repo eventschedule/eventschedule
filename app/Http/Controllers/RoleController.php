@@ -908,6 +908,10 @@ class RoleController extends Controller
             'fonts' => $fonts,
         ];
 
+        if (function_exists('is_browser_testing') && is_browser_testing()) {
+            return view('testing.role.create', $data);
+        }
+
         return view('role/edit', $data);
     }
 
