@@ -33,12 +33,12 @@ class TicketTest extends DuskTestCase
 
             // Purchase ticket
             $browser->visit('/talent/venue')
-                    ->press('Buy Tickets')
+                    ->click('@buy-tickets-button')
                     ->select('#ticket-0', '1')
                     ->scrollIntoView('button[type="submit"]')
-                    ->press('CHECKOUT')
-                    ->waitForText('NUMBER OF ATTENDEES', 3)
-                    ->assertSee(strtoupper($name));
+                    ->click('@checkout-button')
+                    ->waitForText(__('messages.number_of_attendees'), 5)
+                    ->assertSee($name);
         });
     }
 }

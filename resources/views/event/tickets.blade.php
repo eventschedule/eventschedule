@@ -233,8 +233,9 @@
         </div>
 
         <div class="flex justify-center items-center py-4 gap-8">
-            <button 
-                type="submit" 
+            <button
+                type="submit"
+                dusk="checkout-button"
                 class="mt-4 inline-flex gap-x-1.5 rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
                 :disabled="!hasSelectedTickets"
             >
