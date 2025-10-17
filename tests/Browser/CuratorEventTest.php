@@ -109,7 +109,7 @@ class CuratorEventTest extends DuskTestCase
                     ->waitForLocation($this->pathWithoutQuery($editPath), 5)
                     ->waitForText('Edit Event', 5)
                     ->scrollIntoView('button[type="submit"]')
-                    ->press('SAVE')
+                    ->press('Save')
                     ->waitForLocation('/curator1/schedule', 5)
                     ->assertSee('Talent');
             
@@ -145,7 +145,7 @@ class CuratorEventTest extends DuskTestCase
                 ");
                 
         $browser->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
+                ->press('Save')
                 ->waitForLocation('/talent/schedule', 5)
                 ->assertSee('Talent');
     }

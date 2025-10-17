@@ -44,7 +44,7 @@ class GeneralTest extends DuskTestCase
                     ->assertPathIs('/venue/edit')
                     ->type('website', 'https://google.com')
                     ->scrollIntoView('button[type="submit"]')
-                    ->press('SAVE')
+                    ->press('Save')
                     ->waitForLocation('/venue/schedule', 20)
                     ->assertSee('google.com');
 
@@ -54,7 +54,7 @@ class GeneralTest extends DuskTestCase
                     ->assertPathIs('/talent/edit')
                     ->type('website', 'https://google.com')
                     ->scrollIntoView('button[type="submit"]')
-                    ->press('SAVE')
+                    ->press('Save')
                     ->waitForLocation('/talent/schedule', 20)
                     ->assertSee('google.com');
 
@@ -63,7 +63,7 @@ class GeneralTest extends DuskTestCase
             $this->selectExistingVenue($browser);
 
             $browser->scrollIntoView('button[type="submit"]')
-                    ->press('SAVE')
+                    ->press('Save')
                     ->waitForLocation('/talent/schedule', 20)
                     ->assertSee('Venue');
 
@@ -73,7 +73,7 @@ class GeneralTest extends DuskTestCase
 
             $browser->type('name', 'Venue Event')
                     ->scrollIntoView('button[type="submit"]')
-                    ->press('SAVE')
+                    ->press('Save')
                     ->waitForLocation('/venue/schedule', 20)
                     ->assertSee('Venue Event');
         });

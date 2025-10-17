@@ -66,7 +66,7 @@ class GroupsTest extends DuskTestCase
         $browser->waitFor('input[name*="groups"][name*="name"]', 5)
                 ->type('input[name*="groups"][name*="name"]', 'Main Shows')
                 ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
+                ->press('Save')
                 ->waitForLocation('/talent/schedule', 5);
         
         // Add second sub-schedule
@@ -81,7 +81,7 @@ class GroupsTest extends DuskTestCase
         $browser->waitFor('#group-items > div:last-child input[name*="groups"][name*="name"]', 5)
                 ->type('#group-items > div:last-child input[name*="groups"][name*="name"]', 'Workshops')
                 ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
+                ->press('Save')
                 ->waitForLocation('/talent/schedule', 5);
 
         // Verify both sub-schedules were saved in database
@@ -116,7 +116,7 @@ class GroupsTest extends DuskTestCase
                 ->scrollIntoView('select[name="current_role_group_id"]')
                 ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($mainShows->id))
                 ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
+                ->press('Save')
                 ->waitForLocation('/talent/schedule', 5)
                 ->assertSee('Main Show Event');
         
@@ -129,7 +129,7 @@ class GroupsTest extends DuskTestCase
                 ->scrollIntoView('select[name="current_role_group_id"]')
                 ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($workshops->id))
                 ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
+                ->press('Save')
                 ->waitForLocation('/talent/schedule', 5)
                 ->assertSee('Workshop Event');
         
@@ -140,7 +140,7 @@ class GroupsTest extends DuskTestCase
         $browser->type('name', 'General Event')
                 ->type('duration', '1')
                 ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
+                ->press('Save')
                 ->waitForLocation('/talent/schedule', 5)
                 ->assertSee('General Event');
     }
