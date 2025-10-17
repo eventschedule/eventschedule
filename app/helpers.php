@@ -67,6 +67,20 @@ if (!function_exists('is_browser_testing')) {
             return true;
         }
 
+        try {
+            $request = request();
+        } catch (\Throwable $e) {
+            $request = null;
+        }
+
+        if ($request instanceof \Illuminate\Http\Request) {
+            $cookie = $request->cookies->get('browser_testing');
+
+            if (filter_var($cookie, FILTER_VALIDATE_BOOLEAN) || $cookie === '1') {
+                return true;
+            }
+        }
+
         $flagPath = storage_path('framework/browser-testing.flag');
 
         return is_string($flagPath) && is_file($flagPath);

@@ -12,7 +12,15 @@ class ApplyBrowserTestingOverrides
      */
     public function handle(Request $request, Closure $next)
     {
-        if (function_exists('is_browser_testing') && is_browser_testing()) {
+        $isBrowserTesting = function_exists('is_browser_testing') && is_browser_testing();
+
+        if (! $isBrowserTesting) {
+            $cookie = $request->cookies->get('browser_testing');
+
+            $isBrowserTesting = filter_var($cookie, FILTER_VALIDATE_BOOLEAN) || $cookie === '1';
+        }
+
+        if ($isBrowserTesting) {
             config([
                 'app.is_testing' => true,
                 'app.browser_testing' => true,

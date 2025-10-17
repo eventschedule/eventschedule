@@ -12,7 +12,8 @@ trait AccountSetupTrait
     protected function setupTestAccount(Browser $browser, string $name = 'Talent', string $email = 'test@gmail.com', string $password = 'password'): void
     {
         // Sign up
-        $browser->visit('/sign_up')
+        $browser->withCookies(['browser_testing' => '1'])
+                ->visit('/sign_up')
                 ->type('name', $name)
                 ->type('email', $email)
                 ->type('password', $password)
