@@ -108,6 +108,67 @@ class RoleControllerUserNormalizationTest extends TestCase
         $this->assertSame('existing@example.test', $user->email);
     }
 
+    public function testPrepareGroupsForViewHandlesStdClassWithoutName(): void
+    {
+        $controller = new RoleController(Mockery::mock(EventRepo::class));
+
+        $groups = [
+            (object) ['id' => 5, 'slug' => 'main-stage'],
+            (object) ['slug' => 'vip'],
+            new \stdClass(),
+            'Acoustic Set',
+        ];
+
+        $normalized = $this->invokePrepareGroupsForView($controller, $groups);
+
+        $this->assertSame([
+            0 => [
+                'id' => '5',
+                'name' => '',
+                'name_en' => '',
+                'slug' => 'main-stage',
+            ],
+            1 => [
+                'id' => '1',
+                'name' => '',
+                'name_en' => '',
+                'slug' => 'vip',
+            ],
+            2 => [
+                'id' => '2',
+                'name' => '',
+                'name_en' => '',
+                'slug' => '',
+            ],
+            3 => [
+                'id' => '3',
+                'name' => 'Acoustic Set',
+                'name_en' => '',
+                'slug' => '',
+            ],
+        ], $normalized);
+    }
+
+    public function testPrepareGroupsForViewTrimsStringValues(): void
+    {
+        $controller = new RoleController(Mockery::mock(EventRepo::class));
+
+        $groups = [
+            ['id' => '  group-1  ', 'name' => '  Showcase  ', 'name_en' => null, 'slug' => '  showcase '],
+        ];
+
+        $normalized = $this->invokePrepareGroupsForView($controller, $groups);
+
+        $this->assertSame([
+            0 => [
+                'id' => 'group-1',
+                'name' => 'Showcase',
+                'name_en' => '',
+                'slug' => 'showcase',
+            ],
+        ], $normalized);
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -125,5 +186,16 @@ class RoleControllerUserNormalizationTest extends TestCase
         $method->setAccessible(true);
 
         $method->invoke($controller, $user, $userData, $role);
+    }
+
+    /**
+     * @return array<int|string, array{id: string, name: string, name_en: string, slug: string}>
+     */
+    private function invokePrepareGroupsForView(RoleController $controller, $groups): array
+    {
+        $method = new \ReflectionMethod($controller, 'prepareGroupsForView');
+        $method->setAccessible(true);
+
+        return $method->invoke($controller, $groups);
     }
 }
