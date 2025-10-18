@@ -59,7 +59,7 @@ class GroupsTest extends DuskTestCase
     {
         $browser->visit('/' . $talentSlug . '/edit')
                 ->waitForText('Subschedules', 5)
-                ->scrollIntoView('#address')
+                ->scrollIntoView('#group-items')
                 ->waitForText('Subschedules', 5);
 
         // Add first sub-schedule
@@ -74,7 +74,7 @@ class GroupsTest extends DuskTestCase
         // Add second sub-schedule
         $browser->visit('/' . $talentSlug . '/edit')
                 ->waitForText('Subschedules', 5)
-                ->scrollIntoView('#address')
+                ->scrollIntoView('#group-items')
                 ->waitForText('Subschedules', 5);
 
         $browser->script("addGroupField();");
