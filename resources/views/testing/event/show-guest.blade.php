@@ -68,6 +68,66 @@
         </div>
     @endif
 
+    @php
+        $showTicketLink = $event->registration_url || $event->canSellTickets();
+        $ticketUrl = $event->registration_url ?: request()->fullUrlWithQuery(['tickets' => 'true']);
+        $ticketCtaLabel = $event->registration_url
+            ? __('messages.view_event')
+            : ($event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets'));
+    @endphp
+
+    @if ($showTicketLink && request()->get('tickets') !== 'true')
+        <div class="section" style="margin-top: 2rem;">
+            <a href="{{ $ticketUrl }}" dusk="buy-tickets-button" {{ $event->registration_url ? 'target="_blank"' : '' }}>
+                {{ $ticketCtaLabel }}
+            </a>
+        </div>
+    @endif
+
+    @if ($event->canSellTickets() && request()->get('tickets') === 'true')
+        <div class="section" style="margin-top: 2rem;">
+            <form method="post" action="{{ route('event.checkout', ['subdomain' => $role->subdomain]) }}">
+                @csrf
+                <input type="hidden" name="event_id" value="{{ App\Utils\UrlUtils::encodeId($event->id) }}">
+                <input type="hidden" name="event_date" value="{{ $date }}">
+                <input type="hidden" name="subdomain" value="{{ $role->subdomain }}">
+
+                <div style="display: grid; gap: 1.5rem;">
+                    <label style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <span>{{ __('messages.name') }} *</span>
+                        <input type="text" name="name" value="{{ old('name', optional(auth()->user())->name) }}" required>
+                    </label>
+
+                    <label style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <span>{{ __('messages.email') }} *</span>
+                        <input type="email" name="email" value="{{ old('email', optional(auth()->user())->email) }}" required>
+                    </label>
+
+                    @foreach ($event->tickets as $index => $ticket)
+                        <div>
+                            <div style="font-weight: 600;">{{ $ticket->type }}</div>
+                            @if ($ticket->description)
+                                <div class="muted" style="margin-top: 0.25rem;">{{ $ticket->description }}</div>
+                            @endif
+                            <label style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem;">
+                                <span>{{ __('messages.quantity') }}</span>
+                                <select id="ticket-{{ $index }}" name="tickets[{{ $ticket->id }}]">
+                                    @for ($qty = 0; $qty <= max(10, (int) $ticket->quantity); $qty++)
+                                        <option value="{{ $qty }}">{{ $qty }}</option>
+                                    @endfor
+                                </select>
+                            </label>
+                        </div>
+                    @endforeach
+
+                    <button type="submit" dusk="checkout-button" style="padding: 0.75rem 1.5rem; border-radius: 9999px; background: #4f46e5; color: #fff; font-weight: 600; border: none; cursor: pointer;">
+                        {{ __('messages.checkout') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    @endif
+
     <div class="section" style="margin-top: 2rem;">
         <a href="{{ url(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)], false)) }}"
            dusk="edit-event-link">
