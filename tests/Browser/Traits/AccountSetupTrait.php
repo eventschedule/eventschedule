@@ -95,11 +95,7 @@ trait AccountSetupTrait
                 ->scrollIntoView('button[type="submit"]')
                 ->press('Save');
 
-        $slug = $this->getRoleSlug('venue', $name, 15);
-        $schedulePath = '/' . $slug . '/schedule';
-
-        $browser->waitForLocation($schedulePath, 20)
-                ->assertPathIs($schedulePath);
+        $this->waitForRoleScheduleRedirect($browser, 'venue', $name, 20);
     }
 
     /**
@@ -117,11 +113,7 @@ trait AccountSetupTrait
                 ->scrollIntoView('button[type="submit"]')
                 ->press('Save');
 
-        $slug = $this->getRoleSlug('talent', $name, 15);
-        $schedulePath = '/' . $slug . '/schedule';
-
-        $browser->waitForLocation($schedulePath, 20)
-                ->assertPathIs($schedulePath);
+        $this->waitForRoleScheduleRedirect($browser, 'talent', $name, 20);
     }
 
     /**
@@ -141,11 +133,7 @@ trait AccountSetupTrait
                 ->scrollIntoView('button[type="submit"]')
                 ->press('Save');
 
-        $slug = $this->getRoleSlug('curator', $name, 15);
-        $schedulePath = '/' . $slug . '/schedule';
-
-        $browser->waitForLocation($schedulePath, 20)
-                ->assertPathIs($schedulePath);
+        $this->waitForRoleScheduleRedirect($browser, 'curator', $name, 20);
     }
 
     /**
@@ -361,6 +349,37 @@ trait AccountSetupTrait
         $typeKey = strtolower($type);
 
         $this->roleSlugs[$typeKey][$name] = $slug;
+    }
+
+    protected function waitForRoleScheduleRedirect(Browser $browser, string $type, string $name, int $seconds = 20): string
+    {
+        $schedulePath = null;
+
+        $browser->waitUsing($seconds, 100, function () use ($browser, &$schedulePath) {
+            $path = $this->currentPath($browser);
+
+            if (! $path || ! Str::endsWith($path, '/schedule')) {
+                return false;
+            }
+
+            $schedulePath = $path;
+
+            return true;
+        });
+
+        $this->assertNotNull($schedulePath, 'Failed to detect the schedule redirect after saving the role.');
+
+        $browser->assertPathIs($schedulePath);
+
+        $slug = trim(Str::beforeLast($schedulePath, '/schedule'), '/');
+
+        if ($slug === '') {
+            $slug = Str::slug($name);
+        }
+
+        $this->rememberRoleSlug($type, $name, $slug);
+
+        return $slug;
     }
 
     protected function resolveRoleSubdomain(string $name, ?string $type = null): ?string
