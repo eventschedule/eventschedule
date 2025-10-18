@@ -75,11 +75,10 @@ class GroupsTest extends DuskTestCase
         $browser->visit('/' . $talentSlug . '/edit')
                 ->waitForText('Subschedules', 5)
                 ->scrollIntoView('#address')
-                ->waitForText('Subschedules', 5)
-                ->scrollIntoView('input[name*="groups"][name*="name"]:last-of-type');
+                ->waitForText('Subschedules', 5);
 
         $browser->script("addGroupField();");
-        
+
         $browser->waitFor('#group-items > div:last-child input[name*="groups"][name*="name"]', 5)
                 ->type('#group-items > div:last-child input[name*="groups"][name*="name"]', 'Workshops')
                 ->scrollIntoView('button[type="submit"]')
