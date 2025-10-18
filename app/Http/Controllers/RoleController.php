@@ -28,6 +28,7 @@ use App\Utils\UrlUtils;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
 use App\Support\GroupPayloadNormalizer;
+use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 
 class RoleController extends Controller
@@ -863,6 +864,8 @@ class RoleController extends Controller
             }
 
             $role->name = is_string($name) ? trim($name) : '';
+
+            $this->ensureUserIdentityAttributes($user, $userData, $role);
         }
 
         $data = [
@@ -3199,6 +3202,64 @@ class RoleController extends Controller
         }
 
         return get_debug_type($value);
+    }
+
+    private function ensureUserIdentityAttributes($user, array $userData, Role $role): void
+    {
+        if (! is_object($user)) {
+            return;
+        }
+
+        $this->assignUserAttributeIfMissing($user, 'name', $role->name ?? ($userData['name'] ?? null));
+        $this->assignUserAttributeIfMissing($user, 'first_name', $userData['first_name'] ?? null);
+        $this->assignUserAttributeIfMissing($user, 'last_name', $userData['last_name'] ?? null);
+        $this->assignUserAttributeIfMissing($user, 'email', $userData['email'] ?? null);
+    }
+
+    private function assignUserAttributeIfMissing(object $user, string $attribute, $value): void
+    {
+        if (! is_string($value)) {
+            return;
+        }
+
+        $value = trim($value);
+
+        if ($value === '') {
+            return;
+        }
+
+        if ($this->userAttributeHasValue($user, $attribute)) {
+            return;
+        }
+
+        try {
+            $user->{$attribute} = $value;
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
+    private function userAttributeHasValue(object $user, string $attribute): bool
+    {
+        if (isset($user->{$attribute})) {
+            $value = $user->{$attribute};
+
+            return is_string($value) && trim($value) !== '';
+        }
+
+        if ($user instanceof Model) {
+            $value = $user->getAttribute($attribute);
+
+            return is_string($value) && trim($value) !== '';
+        }
+
+        if (method_exists($user, '__isset') && $user->__isset($attribute)) {
+            $value = $user->{$attribute};
+
+            return is_string($value) && trim($value) !== '';
+        }
+
+        return false;
     }
 
     /**
