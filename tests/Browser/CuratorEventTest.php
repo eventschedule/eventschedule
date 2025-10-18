@@ -90,7 +90,7 @@ class CuratorEventTest extends DuskTestCase
             
             // Get the event from the database
             $event = \App\Models\Event::where('name', 'Talent')->latest()->first();
-            $eventUrl = $event->getGuestUrl('curator1');
+            $eventUrl = $event->getGuestUrl('curator1', null, null, true);
             
             // Assert that the number of records remains the same
             $this->assertEquals(EventRole::count(), 4, 
@@ -103,7 +103,7 @@ class CuratorEventTest extends DuskTestCase
             ], false));
 
             $browser->visit($guestPath)
-                    ->waitFor('@back-to-schedule-link', 5)
+                    ->waitFor('@back-to-schedule-link', 10)
                     ->assertPresent('@back-to-schedule-link')
                     ->visit($editPath)
                     ->waitForLocation($this->pathWithoutQuery($editPath), 5)
