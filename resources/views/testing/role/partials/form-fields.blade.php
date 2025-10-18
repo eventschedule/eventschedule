@@ -134,6 +134,66 @@
         </label>
     </div>
 
+    <div id="subschedules-section" class="space-y-4 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            {{ __('messages.subschedules') }}
+        </h2>
+
+        @php
+            $normalizedGroups = \App\Support\GroupPayloadNormalizer::forView(
+                old('groups', $role->groups ?? [])
+            );
+        @endphp
+
+        <div id="group-items" class="space-y-4">
+            @foreach($normalizedGroups as $index => $group)
+                @php
+                    $groupKey = $group['id'] === '' ? 'existing_' . $index : $group['id'];
+                @endphp
+
+                <div class="space-y-3 rounded-md border border-gray-200 p-4 dark:border-gray-700" data-group-item>
+                    <div>
+                        <label for="group_name_{{ $groupKey }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {{ __('messages.name') }}
+                        </label>
+                        <input
+                            id="group_name_{{ $groupKey }}"
+                            name="groups[{{ $groupKey }}][name]"
+                            type="text"
+                            value="{{ $group['name'] }}"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
+                        >
+                    </div>
+
+                    @if(!empty($group['slug']))
+                        <input type="hidden" name="groups[{{ $groupKey }}][slug]" value="{{ $group['slug'] }}">
+                    @endif
+
+                    <div class="flex justify-end">
+                        <button
+                            type="button"
+                            class="inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-xs font-semibold uppercase text-gray-700 transition hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
+                            onclick="this.closest('[data-group-item]').remove()"
+                        >
+                            {{ __('messages.remove') }}
+                        </button>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
+        <div class="flex justify-start">
+            <button
+                type="button"
+                class="inline-flex items-center rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
+                onclick="addGroupField()"
+            >
+                {{ __('messages.add') }}
+            </button>
+        </div>
+
+    </div>
+
     <div class="flex justify-end">
         <button
             type="submit"
@@ -143,3 +203,51 @@
         </button>
     </div>
 </div>
+
+<script {!! nonce_attr() !!}>
+    window.addGroupField = function () {
+        const container = document.getElementById('group-items');
+        if (!container) {
+            return;
+        }
+
+        const index = container.children.length;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'space-y-3 rounded-md border border-gray-200 p-4 dark:border-gray-700';
+        wrapper.setAttribute('data-group-item', '');
+
+        wrapper.innerHTML = `
+            <div>
+                <label for="group_name_new_${index}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ __('messages.name') }}
+                </label>
+                <input
+                    id="group_name_new_${index}"
+                    name="groups[new_${index}][name]"
+                    type="text"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
+                >
+            </div>
+            <div class="flex justify-end">
+                <button
+                    type="button"
+                    class="inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-xs font-semibold uppercase text-gray-700 transition hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
+                    onclick="this.closest('[data-group-item]').remove()"
+                >
+                    {{ __('messages.remove') }}
+                </button>
+            </div>
+        `;
+
+        container.appendChild(wrapper);
+
+        const input = wrapper.querySelector('input');
+        if (input) {
+            input.focus();
+        }
+    };
+
+    document.querySelectorAll('#group-items > div').forEach((item) => {
+        item.setAttribute('data-group-item', '');
+    });
+</script>
