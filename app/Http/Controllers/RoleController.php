@@ -398,7 +398,11 @@ class RoleController extends Controller
         if ($embed) {
             $view = 'role/show-guest-embed';
         } else if ($event) {
-            $view = 'event/show-guest';
+            if (function_exists('is_browser_testing') && is_browser_testing()) {
+                $view = 'testing.event.show-guest';
+            } else {
+                $view = 'event/show-guest';
+            }
         }
 
         $fonts = [];
