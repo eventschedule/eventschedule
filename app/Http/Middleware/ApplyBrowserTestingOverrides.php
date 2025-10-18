@@ -30,7 +30,12 @@ class ApplyBrowserTestingOverrides
                 'app.debug' => true,
                 'app.load_vite_assets' => false,
                 'app.url' => $host ?: config('app.url'),
+                'debugbar.enabled' => false,
             ]);
+
+            if (app()->bound('debugbar')) {
+                app('debugbar')->disable();
+            }
 
             if (! empty($host)) {
                 URL::forceRootUrl($host);

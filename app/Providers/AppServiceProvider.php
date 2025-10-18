@@ -37,7 +37,12 @@ class AppServiceProvider extends ServiceProvider
                 'app.browser_testing' => true,
                 'app.debug' => true,
                 'app.load_vite_assets' => false,
+                'debugbar.enabled' => false,
             ]);
+
+            if ($this->app->bound('debugbar')) {
+                $this->app->make('debugbar')->disable();
+            }
         }
 
         Event::listen(MessageSent::class, LogSentMessage::class);
