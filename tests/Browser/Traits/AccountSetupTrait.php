@@ -170,7 +170,8 @@ trait AccountSetupTrait
                 ->scrollIntoView('#enable_api');
         $browser->script("document.getElementById('enable_api').checked = true;");
         $browser->press('Save')
-                ->waitForText('API settings updated successfully', 5);
+                ->waitFor('@api-settings-success', 5)
+                ->assertSeeIn('@api-settings-success', 'API settings updated successfully');
         
         // Get the API key from the page - it should be visible after enabling
         $apiKey = $browser->value('#api_key');

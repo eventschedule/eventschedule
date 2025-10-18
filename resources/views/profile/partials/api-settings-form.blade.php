@@ -75,7 +75,7 @@
             </button>
 
             @if (session('success'))
-                <p class="text-sm text-gray-600 dark:text-gray-400">{{ session('success') }}</p>
+                <p dusk="api-settings-success" class="text-sm text-gray-600 dark:text-gray-400">{{ session('success') }}</p>
             @endif
         </div>
     </form>
