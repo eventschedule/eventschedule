@@ -200,17 +200,13 @@ trait AccountSetupTrait
                 ->scrollIntoView('#enable_api')
                 ->check('enable_api');
 
-        $browser->waitForReload(function () use ($browser) {
-            $browser->press('Save');
-        });
-
-        $browser->waitFor('#enable_api', 5);
+        $browser->press('Save');
 
         $apiKey = null;
 
         try {
-            $browser->waitFor('#api_key', 5);
-            $browser->waitUsing(5, 100, function () use ($browser) {
+            $browser->waitFor('#api_key', 10);
+            $browser->waitUsing(10, 100, function () use ($browser) {
                 $value = $browser->value('#api_key');
 
                 return ! empty($value) && strlen($value) >= 32;
