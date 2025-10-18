@@ -111,7 +111,7 @@
                             @endif
                             <label style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem;">
                                 <span>{{ __('messages.quantity') }}</span>
-                                <select id="ticket-{{ $index }}" name="tickets[{{ $ticket->id }}]">
+                                <select id="ticket-{{ $index }}" name="tickets[{{ App\Utils\UrlUtils::encodeId($ticket->id) }}]">
                                     @for ($qty = 0; $qty <= max(10, (int) $ticket->quantity); $qty++)
                                         <option value="{{ $qty }}">{{ $qty }}</option>
                                     @endfor
