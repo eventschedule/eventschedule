@@ -33,42 +33,46 @@ class CuratorEventTest extends DuskTestCase
             $user1Password = 'password123';
             
             $this->setupTestAccount($browser, $user1Name, $user1Email, $user1Password);
-            $this->createTestCurator($browser, 'Curator1');            
+            $this->createTestCurator($browser, 'Curator1');
+            $curator1Slug = $this->getRoleSlug('curator', 'Curator1');
             $this->logoutUser($browser, $user1Name);
 
             // Step 2: Create second user with curator role
             $user2Name = 'Curator2';
             $user2Email = 'curator2@test.com';
             $user2Password = 'password123';
-            
+
             $this->setupTestAccount($browser, $user2Name, $user2Email, $user2Password);
             $this->createTestCurator($browser, 'Curator2');
+            $curator2Slug = $this->getRoleSlug('curator', 'Curator2');
             $this->logoutUser($browser, $user2Name);
 
             // Step 3: Create third user who follows both curator roles
             $user3Name = 'Event Creator';
             $user3Email = 'test@gmail.com';
             $user3Password = 'password';
-            
+
             $this->setupTestAccount($browser, $user3Name, $user3Email, $user3Password);
             $this->createTestVenue($browser);
-            $this->createTestTalent($browser);            
+            $this->createTestTalent($browser);
+
+            $talentSlug = $this->getRoleSlug('talent', 'Talent');
 
             // Follow first curator
-            $browser->visit('/curator1')
+            $browser->visit('/' . $curator1Slug)
                     ->waitForText('Add Event', 5)
                     ->clickLink('Add Event')
-                    ->waitForLocation('/talent/add-event', 5);
-            
+                    ->waitForLocation('/' . $talentSlug . '/add-event', 5);
+
             // Follow second curator
-            $browser->visit('/curator2')
+            $browser->visit('/' . $curator2Slug)
                     ->waitForText('Add Event', 5)
                     ->clickLink('Add Event')
-                    ->waitForLocation('/talent/add-event', 5);
+                    ->waitForLocation('/' . $talentSlug . '/add-event', 5);
 
             // Create an event that will be added to both curator roles
-            $this->createEventForBothCurators($browser);
-            
+            $this->createEventForBothCurators($browser, $talentSlug);
+
             // Log out third user
             $this->logoutUser($browser, $user3Name);
 
@@ -82,23 +86,23 @@ class CuratorEventTest extends DuskTestCase
                     ->assertSee($user1Name);
             
             // Approve the event
-            $browser->visit('/curator1/requests')
+            $browser->visit('/' . $curator1Slug . '/requests')
                     ->waitForText('Accept', 5)
                     ->click('.test-accept-event')
-                    ->waitForLocation('/curator1/schedule', 5)
+                    ->waitForLocation('/' . $curator1Slug . '/schedule', 5)
                     ->assertSee('Talent');
-            
+
             // Get the event from the database
             $event = \App\Models\Event::where('name', 'Talent')->latest()->first();
-            $eventUrl = $event->getGuestUrl('curator1', null, null, true);
-            
+            $eventUrl = $event->getGuestUrl($curator1Slug, null, null, true);
+
             // Assert that the number of records remains the same
-            $this->assertEquals(EventRole::count(), 4, 
+            $this->assertEquals(EventRole::count(), 4,
                 'There should be 4 event_role records before editing the event');
-            
+
             $guestPath = $this->relativeUrl($eventUrl);
             $editPath = $this->relativeUrl(route('event.edit', [
-                'subdomain' => 'curator1',
+                'subdomain' => $curator1Slug,
                 'hash' => UrlUtils::encodeId($event->id),
             ], false));
 
@@ -110,7 +114,7 @@ class CuratorEventTest extends DuskTestCase
                     ->waitForText('Edit Event', 5)
                     ->scrollIntoView('button[type="submit"]')
                     ->press('Save')
-                    ->waitForLocation('/curator1/schedule', 5)
+                    ->waitForLocation('/' . $curator1Slug . '/schedule', 5)
                     ->assertSee('Talent');
             
             // Assert that the number of records remains the same
@@ -122,10 +126,10 @@ class CuratorEventTest extends DuskTestCase
     /**
      * Create an event that will be added to both curator roles
      */
-    protected function createEventForBothCurators(Browser $browser): void
+    protected function createEventForBothCurators(Browser $browser, string $talentSlug): void
     {
         // Create an event and add it to both curators
-        $browser->visit('/talent/add-event?date=' . date('Y-m-d'));
+        $browser->visit('/' . $talentSlug . '/add-event?date=' . date('Y-m-d'));
         $this->selectExistingVenue($browser);
 
         $browser->type('duration', '2')
@@ -143,10 +147,10 @@ class CuratorEventTest extends DuskTestCase
                         }
                     });
                 ");
-                
+
         $browser->scrollIntoView('button[type="submit"]')
                 ->press('Save')
-                ->waitForLocation('/talent/schedule', 5)
+                ->waitForLocation('/' . $talentSlug . '/schedule', 5)
                 ->assertSee('Talent');
     }
 

@@ -31,8 +31,10 @@ class TicketTest extends DuskTestCase
             $this->createTestTalent($browser);
             $this->createTestEventWithTickets($browser);
 
+            $talentSlug = $this->getRoleSlug('talent', 'Talent');
+
             // Purchase ticket
-            $browser->visit('/talent/venue')
+            $browser->visit('/' . $talentSlug . '/venue')
                     ->click('@buy-tickets-button')
                     ->select('#ticket-0', '1')
                     ->scrollIntoView('button[type="submit"]')

@@ -40,41 +40,45 @@ class GeneralTest extends DuskTestCase
 
             // Create/edit venue using the trait
             $this->createTestVenue($browser);
+            $venueSlug = $this->getRoleSlug('venue', 'Venue');
+
             $browser->clickLink('Edit Venue')
-                    ->assertPathIs('/venue/edit')
+                    ->assertPathIs('/' . $venueSlug . '/edit')
                     ->type('website', 'https://google.com')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('Save')
-                    ->waitForLocation('/venue/schedule', 20)
+                    ->waitForLocation('/' . $venueSlug . '/schedule', 20)
                     ->assertSee('google.com');
 
             // Create/edit talent using the trait
             $this->createTestTalent($browser);
+            $talentSlug = $this->getRoleSlug('talent', 'Talent');
+
             $browser->clickLink('Edit Talent')
-                    ->assertPathIs('/talent/edit')
+                    ->assertPathIs('/' . $talentSlug . '/edit')
                     ->type('website', 'https://google.com')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('Save')
-                    ->waitForLocation('/talent/schedule', 20)
+                    ->waitForLocation('/' . $talentSlug . '/schedule', 20)
                     ->assertSee('google.com');
 
             // Create/edit event
-            $browser->visit('/talent/add-event?date=' . date('Y-m-d'));
+            $browser->visit('/' . $talentSlug . '/add-event?date=' . date('Y-m-d'));
             $this->selectExistingVenue($browser);
 
             $browser->scrollIntoView('button[type="submit"]')
                     ->press('Save')
-                    ->waitForLocation('/talent/schedule', 20)
+                    ->waitForLocation('/' . $talentSlug . '/schedule', 20)
                     ->assertSee('Venue');
 
             // Create/edit event
-            $browser->visit('/venue/add-event?date=' . date('Y-m-d'));
+            $browser->visit('/' . $venueSlug . '/add-event?date=' . date('Y-m-d'));
             $this->addExistingMember($browser);
 
             $browser->type('name', 'Venue Event')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('Save')
-                    ->waitForLocation('/venue/schedule', 20)
+                    ->waitForLocation('/' . $venueSlug . '/schedule', 20)
                     ->assertSee('Venue Event');
         });
     }

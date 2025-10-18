@@ -35,31 +35,33 @@ class GroupsTest extends DuskTestCase
             $this->setupTestAccount($browser, $userName, $userEmail, $userPassword);
             $this->createTestTalent($browser);
             $this->createTestVenue($browser);
-            
+
+            $talentSlug = $this->getRoleSlug('talent', 'Talent');
+
             // Step 2: Create sub-schedules
-            $this->createGroups($browser);
-            
+            $this->createGroups($browser, $talentSlug);
+
             // Step 3: Create events and assign them to sub-schedules
-            $this->createEventsWithGroups($browser);
-            
+            $this->createEventsWithGroups($browser, $talentSlug);
+
             // Step 4: Test filtering in guest view
-            $this->testGuestViewFiltering($browser);
-            
+            $this->testGuestViewFiltering($browser, $talentSlug);
+
             // Step 5: Test API functionality
-            $this->testApiGroupFunctionality($browser);
+            $this->testApiGroupFunctionality($browser, $talentSlug);
         });
     }
 
     /**
      * Create sub-schedules for the talent role
      */
-    protected function createGroups(Browser $browser): void
+    protected function createGroups(Browser $browser, string $talentSlug): void
     {
-        $browser->visit('/talent/edit')
+        $browser->visit('/' . $talentSlug . '/edit')
                 ->waitForText('Subschedules', 5)
                 ->scrollIntoView('#address')
                 ->waitForText('Subschedules', 5);
-        
+
         // Add first sub-schedule
         $browser->script("addGroupField();");
         
@@ -67,27 +69,27 @@ class GroupsTest extends DuskTestCase
                 ->type('input[name*="groups"][name*="name"]', 'Main Shows')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('Save')
-                ->waitForLocation('/talent/schedule', 5);
-        
+                ->waitForLocation('/' . $talentSlug . '/schedule', 5);
+
         // Add second sub-schedule
-        $browser->visit('/talent/edit')
+        $browser->visit('/' . $talentSlug . '/edit')
                 ->waitForText('Subschedules', 5)
                 ->scrollIntoView('#address')
                 ->waitForText('Subschedules', 5)
                 ->scrollIntoView('input[name*="groups"][name*="name"]:last-of-type');
-        
+
         $browser->script("addGroupField();");
         
         $browser->waitFor('#group-items > div:last-child input[name*="groups"][name*="name"]', 5)
                 ->type('#group-items > div:last-child input[name*="groups"][name*="name"]', 'Workshops')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('Save')
-                ->waitForLocation('/talent/schedule', 5);
+                ->waitForLocation('/' . $talentSlug . '/schedule', 5);
 
         // Verify both sub-schedules were saved in database
-        $role = Role::where('subdomain', 'talent')->first();
+        $role = Role::where('subdomain', $talentSlug)->first();
         $this->assertNotNull($role);
-        
+
         $mainShows = $role->groups()->where('name', 'Main Shows')->first();
         $this->assertNotNull($mainShows);
         $this->assertEquals('main-shows', $mainShows->slug);
@@ -100,15 +102,15 @@ class GroupsTest extends DuskTestCase
     /**
      * Create events and assign them to different sub-schedules
      */
-    protected function createEventsWithGroups(Browser $browser): void
+    protected function createEventsWithGroups(Browser $browser, string $talentSlug): void
     {
         // Get the actual group IDs from the database
-        $role = Role::where('subdomain', 'talent')->first();
+        $role = Role::where('subdomain', $talentSlug)->first();
         $mainShows = $role->groups()->where('name', 'Main Shows')->first();
         $workshops = $role->groups()->where('name', 'Workshops')->first();
-        
+
         // Create first event for "Main Shows" sub-schedule
-        $browser->visit('/talent/add-event?date=' . date('Y-m-d'));
+        $browser->visit('/' . $talentSlug . '/add-event?date=' . date('Y-m-d'));
         $this->selectExistingVenue($browser);
 
         $browser->type('name', 'Main Show Event')
@@ -117,11 +119,11 @@ class GroupsTest extends DuskTestCase
                 ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($mainShows->id))
                 ->scrollIntoView('button[type="submit"]')
                 ->press('Save')
-                ->waitForLocation('/talent/schedule', 5)
+                ->waitForLocation('/' . $talentSlug . '/schedule', 5)
                 ->assertSee('Main Show Event');
-        
+
         // Create second event for "Workshops" sub-schedule
-        $browser->visit('/talent/add-event?date=' . date('Y-m-d'));
+        $browser->visit('/' . $talentSlug . '/add-event?date=' . date('Y-m-d'));
         $this->selectExistingVenue($browser);
 
         $browser->type('name', 'Workshop Event')
@@ -130,51 +132,51 @@ class GroupsTest extends DuskTestCase
                 ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($workshops->id))
                 ->scrollIntoView('button[type="submit"]')
                 ->press('Save')
-                ->waitForLocation('/talent/schedule', 5)
+                ->waitForLocation('/' . $talentSlug . '/schedule', 5)
                 ->assertSee('Workshop Event');
-        
+
         // Create third event without sub-schedule
-        $browser->visit('/talent/add-event?date=' . date('Y-m-d'));
+        $browser->visit('/' . $talentSlug . '/add-event?date=' . date('Y-m-d'));
         $this->selectExistingVenue($browser);
 
         $browser->type('name', 'General Event')
                 ->type('duration', '1')
                 ->scrollIntoView('button[type="submit"]')
                 ->press('Save')
-                ->waitForLocation('/talent/schedule', 5)
+                ->waitForLocation('/' . $talentSlug . '/schedule', 5)
                 ->assertSee('General Event');
     }
 
     /**
      * Test filtering functionality in guest view
      */
-    protected function testGuestViewFiltering(Browser $browser): void
+    protected function testGuestViewFiltering(Browser $browser, string $talentSlug): void
     {
         // Visit guest view - should show all events initially
-        $browser->visit('/talent')
+        $browser->visit('/' . $talentSlug)
                 ->waitForText('Talent', 5);
-        
+
         // Check that all events are visible initially
         $browser->assertSee('Main Show Event')
                 ->assertSee('Workshop Event')
                 ->assertSee('General Event');
-        
+
         // Test filtering by "Main Shows" sub-schedule by visiting the filtered URL
-        $browser->visit('/talent/main-shows')
+        $browser->visit('/' . $talentSlug . '/main-shows')
                 ->waitForText('Talent', 5)
                 ->assertSee('Main Show Event')
                 ->assertDontSee('Workshop Event')
                 ->assertDontSee('General Event');
-        
+
         // Test filtering by "Workshops" sub-schedule by visiting the filtered URL
-        $browser->visit('/talent/workshops')
+        $browser->visit('/' . $talentSlug . '/workshops')
                 ->waitForText('Talent', 5)
                 ->assertSee('Workshop Event')
                 ->assertDontSee('Main Show Event')
                 ->assertDontSee('General Event');
-        
+
         // Test "All Schedules" filter by visiting the base URL again
-        $browser->visit('/talent')
+        $browser->visit('/' . $talentSlug)
                 ->waitForText('Talent', 5)
                 ->assertSee('Main Show Event')
                 ->assertSee('Workshop Event')
@@ -184,43 +186,43 @@ class GroupsTest extends DuskTestCase
     /**
      * Test API functionality for creating events with sub-schedules
      */
-    protected function testApiGroupFunctionality(Browser $browser): void
+    protected function testApiGroupFunctionality(Browser $browser, string $talentSlug): void
     {
         // Enable API for the user
         $apiKey = $this->enableApi($browser);
-        
+
         // Test API call to create event with sub-schedule
-        $response = $this->createEventViaApi($apiKey, 'API Test Event', 'main-shows');
+        $response = $this->createEventViaApi($apiKey, 'API Test Event', 'main-shows', $talentSlug);
 
         $this->assertEquals(201, $response['httpCode'], 'POST /api/events should return 201');
         $this->assertArrayHasKey('data', $response['data'], 'Response should have data key');
         $this->assertArrayHasKey('id', $response['data']['data'], 'Response should have id in data');
-        
+
         // Verify the event was created with the correct sub-schedule
         $event = Event::where('name', 'API Test Event')->first();
         $this->assertNotNull($event);
-        
-        $role = Role::where('subdomain', 'talent')->first();
+
+        $role = Role::where('subdomain', $talentSlug)->first();
         $group = $role->groups()->where('slug', 'main-shows')->first();
         $this->assertNotNull($group);
-        
+
         $eventRole = EventRole::where('event_id', $event->id)
                              ->where('role_id', $role->id)
                              ->first();
         $this->assertNotNull($eventRole);
         $this->assertEquals($group->id, $eventRole->group_id);
-        
+
         // Test API call with invalid sub-schedule
-        $response = $this->createEventViaApi($apiKey, 'Invalid Schedule Event', 'invalid-schedule');
+        $response = $this->createEventViaApi($apiKey, 'Invalid Schedule Event', 'invalid-schedule', $talentSlug);
         $this->assertEquals(422, $response['httpCode'], 'Invalid schedule should return 422');
-        
+
         $this->assertStringContainsString('Schedule not found', $response['data']['error']);
     }
 
     /**
      * Helper method to create event via API using cURL
      */
-    protected function createEventViaApi(string $apiKey, string $eventName, string $scheduleSlug): array
+    protected function createEventViaApi(string $apiKey, string $eventName, string $scheduleSlug, string $talentSlug): array
     {
         $baseUrl = config('app.url');
         $eventData = [
@@ -232,7 +234,7 @@ class GroupsTest extends DuskTestCase
 
         $ch = curl_init();
         curl_setopt_array($ch, [
-            CURLOPT_URL => $baseUrl . '/api/events/talent',
+            CURLOPT_URL => $baseUrl . '/api/events/' . $talentSlug,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => json_encode($eventData),

@@ -2,13 +2,21 @@
 
 namespace Tests\Browser\Traits;
 
+use App\Models\Role;
 use App\Models\User;
+use Illuminate\Support\Str;
 use Laravel\Dusk\Browser;
 use Throwable;
 
 trait AccountSetupTrait
 {
     protected ?string $testAccountEmail = null;
+    protected ?int $testAccountUserId = null;
+
+    /**
+     * @var array<string, array<string, string>>
+     */
+    protected array $roleSlugs = [];
 
     /**
      * Set up a test account with basic data
@@ -16,6 +24,7 @@ trait AccountSetupTrait
     protected function setupTestAccount(Browser $browser, string $name = 'Talent', string $email = 'test@gmail.com', string $password = 'password'): void
     {
         $this->testAccountEmail = $email;
+        $this->testAccountUserId = null;
 
         // Sign up
         $browser->visit('/')
@@ -54,6 +63,10 @@ trait AccountSetupTrait
 
         $browser->assertPathIs('/events')
                 ->assertSee($name);
+
+        if ($user = $this->resolveTestAccountUser()) {
+            $this->testAccountUserId = $user->id;
+        }
     }
 
     /**
@@ -70,9 +83,13 @@ trait AccountSetupTrait
                 ->pause(1000)
                 ->type('address1', $address)
                 ->scrollIntoView('button[type="submit"]')
-                ->press('Save')
-                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 20)
-                ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
+                ->press('Save');
+
+        $slug = $this->getRoleSlug('venue', $name, 15);
+        $schedulePath = '/' . $slug . '/schedule';
+
+        $browser->waitForLocation($schedulePath, 20)
+                ->assertPathIs($schedulePath);
     }
 
     /**
@@ -88,9 +105,13 @@ trait AccountSetupTrait
                 ->type('name', $name)
                 ->pause(1000)
                 ->scrollIntoView('button[type="submit"]')
-                ->press('Save')
-                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 20)
-                ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
+                ->press('Save');
+
+        $slug = $this->getRoleSlug('talent', $name, 15);
+        $schedulePath = '/' . $slug . '/schedule';
+
+        $browser->waitForLocation($schedulePath, 20)
+                ->assertPathIs($schedulePath);
     }
 
     /**
@@ -108,9 +129,13 @@ trait AccountSetupTrait
                 ->scrollIntoView('input[name="accept_requests"]')
                 ->check('accept_requests')
                 ->scrollIntoView('button[type="submit"]')
-                ->press('Save')
-                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 20)
-                ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
+                ->press('Save');
+
+        $slug = $this->getRoleSlug('curator', $name, 15);
+        $schedulePath = '/' . $slug . '/schedule';
+
+        $browser->waitForLocation($schedulePath, 20)
+                ->assertPathIs($schedulePath);
     }
 
     /**
@@ -118,7 +143,9 @@ trait AccountSetupTrait
      */
     protected function createTestEventWithTickets(Browser $browser, string $talentName = 'Talent', string $venueName = 'Venue', string $eventName = 'Test Event'): void
     {
-        $browser->visit('/' . strtolower(str_replace(' ', '-', $talentName)) . '/add-event?date=' . date('Y-m-d', strtotime('+3 days')));
+        $talentSlug = $this->getRoleSlug('talent', $talentName, 15);
+
+        $browser->visit('/' . $talentSlug . '/add-event?date=' . date('Y-m-d', strtotime('+3 days')));
 
         $this->selectExistingVenue($browser);
 
@@ -129,8 +156,11 @@ trait AccountSetupTrait
                 ->type('tickets[0][quantity]', '50')
                 ->type('tickets[0][description]', 'General admission ticket')
                 ->scrollIntoView('button[type="submit"]')
-                ->press('Save')
-                ->waitForLocation('/' . strtolower(str_replace(' ', '-', $talentName)) . '/schedule', 20)
+                ->press('Save');
+
+        $schedulePath = '/' . $talentSlug . '/schedule';
+
+        $browser->waitForLocation($schedulePath, 20)
                 ->assertSee($venueName);
     }
 
@@ -244,7 +274,126 @@ trait AccountSetupTrait
             return null;
         }
 
-        return optional(User::where('email', $this->testAccountEmail)->first())->api_key;
+        $user = $this->resolveTestAccountUser();
+
+        return optional($user)->api_key;
+    }
+
+    protected function getRoleSlug(string $type, string $name, int $waitSeconds = 5): string
+    {
+        $typeKey = strtolower($type);
+
+        if (isset($this->roleSlugs[$typeKey][$name]) && $this->roleSlugs[$typeKey][$name] !== '') {
+            return $this->roleSlugs[$typeKey][$name];
+        }
+
+        $slug = $this->waitForRoleSubdomain($typeKey, $name, $waitSeconds);
+
+        if (! empty($slug)) {
+            return $slug;
+        }
+
+        $fallback = Str::slug($name);
+
+        $this->roleSlugs[$typeKey][$name] = $fallback;
+
+        return $fallback;
+    }
+
+    protected function waitForRoleSubdomain(string $type, string $name, int $seconds = 5): ?string
+    {
+        $typeKey = strtolower($type);
+        $deadline = microtime(true) + max($seconds, 1);
+        $slug = null;
+
+        do {
+            $slug = $this->resolveRoleSubdomain($name, $typeKey);
+
+            if (! empty($slug)) {
+                $this->rememberRoleSlug($typeKey, $name, $slug);
+
+                return $slug;
+            }
+
+            usleep(100000);
+        } while (microtime(true) < $deadline);
+
+        return $slug;
+    }
+
+    protected function rememberRoleSlug(string $type, string $name, string $slug): void
+    {
+        if ($slug === '') {
+            return;
+        }
+
+        $typeKey = strtolower($type);
+
+        $this->roleSlugs[$typeKey][$name] = $slug;
+    }
+
+    protected function resolveRoleSubdomain(string $name, ?string $type = null): ?string
+    {
+        $query = Role::query();
+
+        if ($type !== null && $type !== '') {
+            $query->where('type', $type);
+        }
+
+        if ($name !== '') {
+            $query->where('name', $name);
+        }
+
+        if ($user = $this->resolveTestAccountUser()) {
+            $query->where('user_id', $user->id);
+        }
+
+        $role = $query->latest('id')->first();
+
+        if (! $role && $name !== '') {
+            $fallback = Role::query()->where('name', $name);
+
+            if ($type !== null && $type !== '') {
+                $fallback->where('type', $type);
+            }
+
+            $role = $fallback->latest('id')->first();
+        }
+
+        if ($role) {
+            $this->rememberRoleSlug($type ?? ($role->type ?? ''), $name, $role->subdomain);
+
+            return $role->subdomain;
+        }
+
+        return null;
+    }
+
+    protected function resolveTestAccountUser(): ?User
+    {
+        if ($this->testAccountUserId) {
+            $user = User::find($this->testAccountUserId);
+
+            if ($user) {
+                return $user;
+            }
+
+            $this->testAccountUserId = null;
+        }
+
+        if (! $this->testAccountEmail) {
+            return null;
+        }
+
+        $user = User::where('email', $this->testAccountEmail)
+            ->latest('id')
+            ->first();
+
+        if ($user) {
+            $this->testAccountUserId = $user->id;
+        }
+
+        return $user;
     }
 
     /**

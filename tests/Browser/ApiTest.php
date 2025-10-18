@@ -33,28 +33,30 @@ class ApiTest extends DuskTestCase
             
             // Enable API and get the API key
             $apiKey = $this->enableApi($browser);
-            
+
+            $talentSlug = $this->getRoleSlug('talent', 'Talent');
+
             // Test API endpoints using cURL
-            $this->testApiEndpoints($apiKey);
+            $this->testApiEndpoints($apiKey, $talentSlug);
         });
     }
 
     /**
      * Test various API endpoints using cURL
      */
-    private function testApiEndpoints(string $apiKey): void
+    private function testApiEndpoints(string $apiKey, string $talentSlug): void
     {
         $baseUrl = config('app.url');
-        
+
         // Test 1: Get schedules (should return user's schedules)
         $this->testGetSchedules($baseUrl, $apiKey);
-        
+
         // Test 2: Get events (should return user's events)
         $this->testGetEvents($baseUrl, $apiKey);
-        
+
         // Test 3: Create a new event via API
-        $this->testCreateEvent($baseUrl, $apiKey);
-        
+        $this->testCreateEvent($baseUrl, $apiKey, $talentSlug);
+
         // Test 4: Test authentication failure
         $this->testAuthenticationFailure($baseUrl);
     }
@@ -126,7 +128,7 @@ class ApiTest extends DuskTestCase
     /**
      * Test POST /api/events/{subdomain} endpoint
      */
-    private function testCreateEvent(string $baseUrl, string $apiKey): void
+    private function testCreateEvent(string $baseUrl, string $apiKey, string $talentSlug): void
     {
         $eventData = [
             'name' => 'API Created Event',
@@ -137,7 +139,7 @@ class ApiTest extends DuskTestCase
 
         $ch = curl_init();
         curl_setopt_array($ch, [
-            CURLOPT_URL => $baseUrl . '/api/events/talent',
+            CURLOPT_URL => $baseUrl . '/api/events/' . $talentSlug,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => json_encode($eventData),
