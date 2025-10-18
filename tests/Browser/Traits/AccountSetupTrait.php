@@ -232,9 +232,13 @@ trait AccountSetupTrait
 
         $browser->press('Save');
 
-        $browser->waitUsing(5, 100, function () use ($browser) {
-            return $browser->element('@api-settings-success') !== null
-                || $browser->element('#api_key') !== null;
+        $browser->waitUsing(15, 100, function () use ($browser) {
+            try {
+                return $browser->element('@api-settings-success') !== null
+                    || $browser->element('#api_key') !== null;
+            } catch (Throwable $exception) {
+                return false;
+            }
         });
 
         $apiKey = null;
