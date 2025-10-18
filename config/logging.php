@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\Logging\LogLevelNormalizer;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -8,57 +9,7 @@ use Monolog\Processor\PsrLogMessageProcessor;
 $rawLogLevel = env('LOG_LEVEL');
 
 $normalizeLogLevel = static function (string $default) use ($rawLogLevel): string {
-    $value = $rawLogLevel;
-
-    if ($value === null || $value === '') {
-        return $default;
-    }
-
-    if (is_array($value)) {
-        foreach ($value as $candidate) {
-            if (is_string($candidate) && $candidate !== '') {
-                return $candidate;
-            }
-        }
-
-        return $default;
-    }
-
-    if (is_string($value)) {
-        $decoded = json_decode($value, true);
-
-        if (json_last_error() === JSON_ERROR_NONE) {
-            if (is_array($decoded)) {
-                foreach ($decoded as $candidate) {
-                    if (is_string($candidate) && $candidate !== '') {
-                        return $candidate;
-                    }
-                }
-            }
-
-            if (is_string($decoded) && $decoded !== '') {
-                return $decoded;
-            }
-        }
-
-        foreach (array_map('trim', explode(',', $value)) as $candidate) {
-            if ($candidate !== '') {
-                return $candidate;
-            }
-        }
-
-        $value = trim($value, " \t\n\r\0\x0B\"'");
-
-        return $value !== '' ? $value : $default;
-    }
-
-    if (is_scalar($value)) {
-        $value = (string) $value;
-
-        return $value !== '' ? $value : $default;
-    }
-
-    return $default;
+    return LogLevelNormalizer::normalize($rawLogLevel, $default);
 };
 
 $stackChannels = (static function ($value): array {
