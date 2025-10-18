@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 
 class ApplyBrowserTestingOverrides
 {
@@ -21,12 +22,19 @@ class ApplyBrowserTestingOverrides
         }
 
         if ($isBrowserTesting) {
+            $host = $request->getSchemeAndHttpHost();
+
             config([
                 'app.is_testing' => true,
                 'app.browser_testing' => true,
                 'app.debug' => true,
                 'app.load_vite_assets' => false,
+                'app.url' => $host ?: config('app.url'),
             ]);
+
+            if (! empty($host)) {
+                URL::forceRootUrl($host);
+            }
         }
 
         return $next($request);
