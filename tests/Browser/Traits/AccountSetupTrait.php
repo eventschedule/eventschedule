@@ -200,7 +200,9 @@ trait AccountSetupTrait
                 ->scrollIntoView('#enable_api')
                 ->check('enable_api');
 
-        $browser->press('Save');
+        $browser->waitForReload(function (Browser $browser) {
+            $browser->press('Save');
+        });
 
         $apiKey = null;
 
