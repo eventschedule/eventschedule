@@ -205,20 +205,25 @@ trait AccountSetupTrait
         $apiKey = null;
 
         try {
-            $browser->waitFor('#api_key', 10);
-            $browser->waitUsing(10, 100, function () use ($browser) {
-                $value = $browser->value('#api_key');
+            $browser->waitUsing(15, 200, function () use (&$apiKey) {
+                $apiKey = $this->resolveApiKeyFromDatabase();
 
-                return ! empty($value) && strlen($value) >= 32;
+                return ! empty($apiKey) && strlen($apiKey) >= 32;
             });
-
-            $apiKey = $browser->value('#api_key');
         } catch (Throwable $exception) {
             $apiKey = $this->resolveApiKeyFromDatabase();
 
             if (empty($apiKey)) {
                 throw $exception;
             }
+        }
+
+        if ($browser->element('#api_key')) {
+            $browser->waitUsing(5, 100, function () use ($browser) {
+                $value = $browser->value('#api_key');
+
+                return ! empty($value) && strlen($value) >= 32;
+            });
         }
 
         if ($browser->element('@api-settings-success')) {
