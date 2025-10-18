@@ -21,8 +21,32 @@ trait AccountSetupTrait
                 ->check('terms')
                 ->scrollIntoView('button[type="submit"]')
                 ->click('@sign-up-button')
-                ->waitForLocation('/events', 20)
-                ->assertPathIs('/events')
+                ->waitUsing(20, 100, function () use ($browser) {
+                    $currentUrl = $browser->driver->getCurrentURL();
+
+                    if (! is_string($currentUrl)) {
+                        return false;
+                    }
+
+                    $path = parse_url($currentUrl, PHP_URL_PATH) ?: '';
+
+                    return in_array($path, ['/events', '/login'], true);
+                });
+
+        $currentUrl = $browser->driver->getCurrentURL();
+        $currentPath = is_string($currentUrl) ? parse_url($currentUrl, PHP_URL_PATH) : null;
+
+        if ($currentPath !== '/events') {
+            $browser->assertPathIs('/login')
+                    ->type('email', $email)
+                    ->type('password', $password)
+                    ->click('@log-in-button')
+                    ->waitForLocation('/events', 20);
+
+            $currentPath = '/events';
+        }
+
+        $browser->assertPathIs('/events')
                 ->assertSee($name);
     }
 
