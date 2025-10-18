@@ -139,17 +139,34 @@
             {{ __('messages.subschedules') }}
         </h2>
 
-        @php
-            $normalizedGroups = \App\Support\GroupPayloadNormalizer::forView(
-                old('groups', $role->groups ?? [])
-            );
-        @endphp
+          @php
+              $groupSource = isset($groupsForView)
+                  ? $groupsForView
+                  : \App\Support\GroupPayloadNormalizer::forView(
+                      old('groups', $role->groups ?? [])
+                  );
+
+              $normalizedGroups = is_iterable($groupSource)
+                  ? $groupSource
+                  : [];
+          @endphp
 
         <div id="group-items" class="space-y-4">
             @foreach($normalizedGroups as $index => $group)
-                @php
-                    $groupKey = $group['id'] === '' ? 'existing_' . $index : $group['id'];
-                @endphp
+                  @php
+                      $groupId = (string) data_get($group, 'id', '');
+                      $indexKey = is_scalar($index) ? (string) $index : (string) ($loop->index ?? $index);
+
+                      if ($indexKey === '') {
+                          $indexKey = isset($loop)
+                              ? 'group_' . $loop->index
+                              : 'group_' . uniqid('', false);
+                      }
+
+                        $groupKey = $groupId !== '' ? $groupId : 'existing_' . $indexKey;
+                        $groupName = (string) data_get($group, 'name', '');
+                        $groupSlug = (string) data_get($group, 'slug', '');
+                  @endphp
 
                 <div class="space-y-3 rounded-md border border-gray-200 p-4 dark:border-gray-700" data-group-item>
                     <div>
@@ -160,13 +177,13 @@
                             id="group_name_{{ $groupKey }}"
                             name="groups[{{ $groupKey }}][name]"
                             type="text"
-                            value="{{ $group['name'] }}"
+                              value="{{ $groupName }}"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
                         >
                     </div>
 
-                    @if(!empty($group['slug']))
-                        <input type="hidden" name="groups[{{ $groupKey }}][slug]" value="{{ $group['slug'] }}">
+                      @if($groupSlug !== '')
+                          <input type="hidden" name="groups[{{ $groupKey }}][slug]" value="{{ $groupSlug }}">
                     @endif
 
                     <div class="flex justify-end">

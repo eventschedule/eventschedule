@@ -1116,25 +1116,42 @@
 
                         <div class="mb-6">
                             <div id="groups-list">
-                                @php
-                                    $normalizedGroups = \App\Support\GroupPayloadNormalizer::forView(
-                                        old('groups', $role->groups ?? [])
-                                    );
-                                @endphp
-                                <div id="group-items">
-                                    @foreach($normalizedGroups as $i => $group)
-                                        @php
-                                            $groupKey = $group['id'] === '' ? $i : $group['id'];
-                                            $groupName = $group['name'];
-                                            $groupNameEn = $group['name_en'];
-                                            $groupSlug = $group['slug'];
-                                        @endphp
-                                        <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                                            <div class="mb-4">
-                                                <x-input-label for="group_name_{{ $groupKey }}" :value="__('messages.name')" />
-                                                <x-text-input name="groups[{{ $groupKey }}][name]" type="text" class="mt-1 block w-full" :value="$groupName" />
-                                            </div>
-                                            @if($role->language_code !== 'en' || auth()->user()->language_code !== 'en')
+                                  @php
+                                      $groupSource = isset($groupsForView)
+                                          ? $groupsForView
+                                          : \App\Support\GroupPayloadNormalizer::forView(
+                                              old('groups', $role->groups ?? [])
+                                          );
+
+                                      $normalizedGroups = is_iterable($groupSource)
+                                          ? $groupSource
+                                          : [];
+
+                                      $authenticatedLanguage = (string) data_get(auth()->user(), 'language_code', '');
+                                  @endphp
+                                  <div id="group-items">
+                                      @foreach($normalizedGroups as $i => $group)
+                                          @php
+                                              $groupId = (string) data_get($group, 'id', '');
+                                              $fallbackIndex = is_scalar($i) ? (string) $i : (string) ($loop->index ?? $i);
+
+                                              if ($fallbackIndex === '') {
+                                                  $fallbackIndex = isset($loop)
+                                                      ? 'group_' . $loop->index
+                                                      : 'group_' . uniqid('', false);
+                                              }
+
+                                              $groupKey = $groupId !== '' ? $groupId : $fallbackIndex;
+                                              $groupName = (string) data_get($group, 'name', '');
+                                              $groupNameEn = (string) data_get($group, 'name_en', '');
+                                              $groupSlug = (string) data_get($group, 'slug', '');
+                                          @endphp
+                                          <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                              <div class="mb-4">
+                                                  <x-input-label for="group_name_{{ $groupKey }}" :value="__('messages.name')" />
+                                                  <x-text-input name="groups[{{ $groupKey }}][name]" type="text" class="mt-1 block w-full" :value="$groupName" />
+                                              </div>
+                                              @if($role->language_code !== 'en' || $authenticatedLanguage !== 'en')
                                             <div class="mb-4">
                                                 <x-input-label for="group_name_en_{{ $groupKey }}" :value="__('messages.english_name')" />
                                                 <x-text-input name="groups[{{ $groupKey }}][name_en]" type="text" class="mt-1 block w-full" :value="$groupNameEn" />
@@ -1426,7 +1443,7 @@ function addGroupField() {
             <label for="group_name_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.name') }}</label>
             <input name="groups[new_${idx}][name]" type="text" id="group_name_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
         </div>
-        @if($role->language_code !== 'en' || auth()->user()->language_code !== 'en')
+          @if($role->language_code !== 'en' || $authenticatedLanguage !== 'en')
         <div class="mb-4">
             <label for="group_name_en_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.english_name') }}</label>
             <input name="groups[new_${idx}][name_en]" type="text" id="group_name_en_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
