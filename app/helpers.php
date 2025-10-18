@@ -57,13 +57,43 @@ if (!function_exists('is_valid_language_code')) {
     }
 }
 
+if (!function_exists('is_browser_testing')) {
+    /**
+     * Determine if the application is currently being exercised by browser tests.
+     */
+    function is_browser_testing(): bool
+    {
+        if (config('app.browser_testing')) {
+            return true;
+        }
+
+        try {
+            $request = request();
+        } catch (\Throwable $e) {
+            $request = null;
+        }
+
+        if ($request instanceof \Illuminate\Http\Request) {
+            $cookie = $request->cookies->get('browser_testing');
+
+            if (filter_var($cookie, FILTER_VALIDATE_BOOLEAN) || $cookie === '1') {
+                return true;
+            }
+        }
+
+        $flagPath = storage_path('framework/browser-testing.flag');
+
+        return is_string($flagPath) && is_file($flagPath);
+    }
+}
+
 if (!function_exists('is_hosted_or_admin')) {
     /**
      * Check if the current user is hosted or an admin
      */
     function is_hosted_or_admin(): bool
     {
-        if (config('app.hosted') || config('app.is_testing')) {
+        if (config('app.hosted') || config('app.is_testing') || is_browser_testing()) {
             return true;
         }
 

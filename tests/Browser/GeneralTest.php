@@ -27,58 +27,58 @@ class GeneralTest extends DuskTestCase
             $this->setupTestAccount($browser, $name, $email, $password);
 
             // Log out
-            $browser->press($name)
-                    ->waitForText('Log Out', 5)
-                    ->clickLink('Log Out')
-                    ->waitForLocation('/login', 20)
-                    ->assertPathIs('/login');
+            $this->logoutUser($browser, $name);
 
             // Log back in
             $browser->visit('/login')
                     ->type('email', $email)
                     ->type('password', $password)
-                    ->press('LOG IN')
+                    ->click('@log-in-button')
                     ->waitForLocation('/events', 20)
                     ->assertPathIs('/events')
                     ->assertSee($name);
 
             // Create/edit venue using the trait
             $this->createTestVenue($browser);
+            $venueSlug = $this->getRoleSlug('venue', 'Venue');
+
             $browser->clickLink('Edit Venue')
-                    ->assertPathIs('/venue/edit')
+                    ->assertPathIs('/' . $venueSlug . '/edit')
                     ->type('website', 'https://google.com')
                     ->scrollIntoView('button[type="submit"]')
-                    ->press('SAVE')
-                    ->waitForLocation('/venue/schedule', 20)
+                    ->press('Save')
+                    ->waitForLocation('/' . $venueSlug . '/schedule', 20)
                     ->assertSee('google.com');
 
             // Create/edit talent using the trait
             $this->createTestTalent($browser);
+            $talentSlug = $this->getRoleSlug('talent', 'Talent');
+
             $browser->clickLink('Edit Talent')
-                    ->assertPathIs('/talent/edit')
+                    ->assertPathIs('/' . $talentSlug . '/edit')
                     ->type('website', 'https://google.com')
                     ->scrollIntoView('button[type="submit"]')
-                    ->press('SAVE')
-                    ->waitForLocation('/talent/schedule', 20)
+                    ->press('Save')
+                    ->waitForLocation('/' . $talentSlug . '/schedule', 20)
                     ->assertSee('google.com');
 
             // Create/edit event
-            $browser->visit('/talent/add-event?date=' . date('Y-m-d'));
+            $browser->visit('/' . $talentSlug . '/add-event?date=' . date('Y-m-d'));
             $this->selectExistingVenue($browser);
 
             $browser->scrollIntoView('button[type="submit"]')
-                    ->press('SAVE')
-                    ->waitForLocation('/talent/schedule', 20)
+                    ->press('Save')
+                    ->waitForLocation('/' . $talentSlug . '/schedule', 20)
                     ->assertSee('Venue');
 
             // Create/edit event
-            $browser->visit('/venue/add-event?date=' . date('Y-m-d'));
+            $browser->visit('/' . $venueSlug . '/add-event?date=' . date('Y-m-d'));
             $this->addExistingMember($browser);
 
             $browser->type('name', 'Venue Event')
                     ->scrollIntoView('button[type="submit"]')
-                    ->press('SAVE')
-                    ->waitForLocation('/venue/schedule', 20)
+                    ->press('Save')
+                    ->waitForLocation('/' . $venueSlug . '/schedule', 20)
                     ->assertSee('Venue Event');
         });
     }

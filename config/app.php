@@ -35,6 +35,8 @@ return [
     'hosted' => (bool) env('APP_HOSTED', false),
     'report_errors' => (bool) env('REPORT_ERRORS', false),
     'is_testing' => (bool) env('APP_TESTING', false),
+    'browser_testing' => (bool) env('BROWSER_TESTING', false),
+    'load_vite_assets' => (bool) env('LOAD_VITE_ASSETS', true),
 
     /*
     |--------------------------------------------------------------------------

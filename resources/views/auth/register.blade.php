@@ -228,7 +228,7 @@
             <div></div>
             @endif
 
-            <x-primary-button class="ml-4">
+            <x-primary-button dusk="sign-up-button" class="ml-4">
                 {{ __('messages.sign_up') }}
             </x-primary-button>
         </div>

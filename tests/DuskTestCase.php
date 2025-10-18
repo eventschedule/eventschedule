@@ -9,6 +9,7 @@ use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Dusk\TestCase as BaseTestCase;
+use PHPUnit\Framework\Attributes\AfterClass;
 use PHPUnit\Framework\Attributes\BeforeClass;
 
 abstract class DuskTestCase extends BaseTestCase
@@ -18,7 +19,16 @@ abstract class DuskTestCase extends BaseTestCase
      */
     protected function setUp(): void
     {
+        $this->applyBrowserEnvironmentOverrides();
+
         parent::setUp();
+
+        // Ensure feature gates relying on the "testing" flag stay open even when
+        // the Dusk environment reuses the base .env without APP_TESTING enabled.
+        $this->app['config']->set('app.is_testing', true);
+        $this->app['config']->set('app.browser_testing', true);
+        $this->app['config']->set('app.debug', true);
+        $this->app['config']->set('app.load_vite_assets', false);
 
         $this->app['config']->set('mail.default', 'log');
         $this->app['config']->set('mail.mailers.smtp.transport', 'log');
@@ -41,9 +51,102 @@ abstract class DuskTestCase extends BaseTestCase
     #[BeforeClass]
     public static function prepare(): void
     {
+        static::synchronizeDuskEnvironmentOverrides();
+        static::ensureBrowserTestingFlagFile();
+
         if (! static::runningInSail()) {
             static::startChromeDriver(['--port=9515']);
         }
+    }
+
+    #[AfterClass]
+    public static function cleanup(): void
+    {
+        static::removeBrowserTestingFlagFile();
+    }
+
+    /**
+     * Ensure the browser tests consistently run with the expected environment overrides.
+     */
+    private function applyBrowserEnvironmentOverrides(): void
+    {
+        foreach ([
+            'APP_TESTING' => 'true',
+            'BROWSER_TESTING' => 'true',
+            'APP_DEBUG' => 'true',
+            'LOAD_VITE_ASSETS' => 'false',
+        ] as $key => $value) {
+            putenv("{$key}={$value}");
+            $_ENV[$key] = $value;
+            $_SERVER[$key] = $value;
+        }
+    }
+
+    /**
+     * Persist the environment overrides to the Dusk environment file so that the
+     * HTTP server process that services browser requests sees the same values.
+     */
+    private static function synchronizeDuskEnvironmentOverrides(): void
+    {
+        $path = dirname(__DIR__) . DIRECTORY_SEPARATOR . '.env.dusk.local';
+
+        if (! is_file($path)) {
+            file_put_contents($path, '');
+        }
+
+        $contents = file_get_contents($path);
+        $contents = is_string($contents) ? $contents : '';
+
+        foreach ([
+            'APP_TESTING' => 'true',
+            'BROWSER_TESTING' => 'true',
+            'APP_DEBUG' => 'true',
+            'LOAD_VITE_ASSETS' => 'false',
+        ] as $key => $value) {
+            $pattern = "/^{$key}=.*$/m";
+
+            if (preg_match($pattern, $contents)) {
+                $contents = (string) preg_replace($pattern, "{$key}={$value}", $contents);
+            } else {
+                $contents = rtrim($contents, "\r\n");
+
+                if ($contents !== '') {
+                    $contents .= PHP_EOL;
+                }
+
+                $contents .= "{$key}={$value}" . PHP_EOL;
+            }
+        }
+
+        file_put_contents($path, $contents);
+    }
+
+    private static function ensureBrowserTestingFlagFile(): void
+    {
+        $path = static::browserTestingFlagPath();
+        $directory = dirname($path);
+
+        if (! is_dir($directory)) {
+            mkdir($directory, 0777, true);
+        }
+
+        file_put_contents($path, '1');
+    }
+
+    private static function removeBrowserTestingFlagFile(): void
+    {
+        $path = static::browserTestingFlagPath();
+
+        if (is_file($path)) {
+            @unlink($path);
+        }
+    }
+
+    private static function browserTestingFlagPath(): string
+    {
+        return dirname(__DIR__) . DIRECTORY_SEPARATOR . 'storage'
+            . DIRECTORY_SEPARATOR . 'framework'
+            . DIRECTORY_SEPARATOR . 'browser-testing.flag';
     }
 
     /**

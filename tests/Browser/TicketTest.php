@@ -31,14 +31,16 @@ class TicketTest extends DuskTestCase
             $this->createTestTalent($browser);
             $this->createTestEventWithTickets($browser);
 
+            $talentSlug = $this->getRoleSlug('talent', 'Talent');
+
             // Purchase ticket
-            $browser->visit('/talent/venue')
-                    ->press('Buy Tickets')
+            $browser->visit('/' . $talentSlug . '/venue')
+                    ->click('@buy-tickets-button')
                     ->select('#ticket-0', '1')
                     ->scrollIntoView('button[type="submit"]')
-                    ->press('CHECKOUT')
-                    ->waitForText('NUMBER OF ATTENDEES', 3)
-                    ->assertSee(strtoupper($name));
+                    ->click('@checkout-button')
+                    ->waitForText(__('messages.number_of_attendees'), 5)
+                    ->assertSee($name);
         });
     }
 }

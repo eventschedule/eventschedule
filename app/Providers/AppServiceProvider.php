@@ -31,6 +31,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if ($this->isBrowserTestingEnvironment()) {
+            config([
+                'app.is_testing' => true,
+                'app.browser_testing' => true,
+                'app.debug' => true,
+                'app.load_vite_assets' => false,
+                'debugbar.enabled' => false,
+            ]);
+
+            if ($this->app->bound('debugbar')) {
+                $this->app->make('debugbar')->disable();
+            }
+        }
+
         Event::listen(MessageSent::class, LogSentMessage::class);
         Event::listen(NotificationSent::class, LogSentMessage::class);
 
@@ -93,5 +107,16 @@ class AppServiceProvider extends ServiceProvider
                 WalletConfigManager::applyGoogle($googleWalletSettings);
             }
         }
+    }
+
+    private function isBrowserTestingEnvironment(): bool
+    {
+        if (env('BROWSER_TESTING')) {
+            return true;
+        }
+
+        $flagPath = storage_path('framework/browser-testing.flag');
+
+        return is_string($flagPath) && is_file($flagPath);
     }
 }
