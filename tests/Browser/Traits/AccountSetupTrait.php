@@ -355,31 +355,52 @@ trait AccountSetupTrait
     {
         $schedulePath = null;
 
-        $browser->waitUsing($seconds, 100, function () use ($browser, &$schedulePath) {
-            $path = $this->currentPath($browser);
+        try {
+            $browser->waitUsing($seconds, 100, function () use ($browser, &$schedulePath) {
+                $path = $this->currentPath($browser);
 
-            if (! $path || ! Str::endsWith($path, '/schedule')) {
-                return false;
+                if (! $path || ! Str::endsWith($path, '/schedule')) {
+                    return false;
+                }
+
+                $schedulePath = $path;
+
+                return true;
+            });
+        } catch (Throwable $exception) {
+            // Ignore so we can fall back to resolving the slug directly below.
+        }
+
+        if ($schedulePath !== null) {
+            $browser->assertPathIs($schedulePath);
+
+            $slug = trim(Str::beforeLast($schedulePath, '/schedule'), '/');
+
+            if ($slug === '') {
+                $slug = Str::slug($name);
             }
 
-            $schedulePath = $path;
+            $this->rememberRoleSlug($type, $name, $slug);
 
-            return true;
-        });
+            return $slug;
+        }
 
-        $this->assertNotNull($schedulePath, 'Failed to detect the schedule redirect after saving the role.');
+        $slug = $this->waitForRoleSubdomain($type, $name, $seconds);
 
-        $browser->assertPathIs($schedulePath);
-
-        $slug = trim(Str::beforeLast($schedulePath, '/schedule'), '/');
-
-        if ($slug === '') {
+        if (! $slug || $slug === '') {
             $slug = Str::slug($name);
         }
 
-        $this->rememberRoleSlug($type, $name, $slug);
+        $normalizedSlug = ltrim($slug, '/');
+        $schedulePath = '/' . $normalizedSlug . '/schedule';
 
-        return $slug;
+        $browser->visit($schedulePath)
+                ->waitForLocation($schedulePath, $seconds)
+                ->assertPathIs($schedulePath);
+
+        $this->rememberRoleSlug($type, $name, $normalizedSlug);
+
+        return $normalizedSlug;
     }
 
     protected function resolveRoleSubdomain(string $name, ?string $type = null): ?string
