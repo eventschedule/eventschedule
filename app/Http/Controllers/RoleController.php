@@ -868,7 +868,7 @@ class RoleController extends Controller
             $this->ensureUserIdentityAttributes($user, $userData, $role);
         }
 
-        $groupsForView = GroupPayloadNormalizer::forView(
+        $groupsForView = $this->prepareGroupsForView(
             session()->getOldInput('groups', [])
         );
 
@@ -1110,7 +1110,7 @@ class RoleController extends Controller
             'user' => auth()->user(),
             'role' => $role,
             'title' => __('messages.edit_' . $role->type),
-            'groupsForView' => GroupPayloadNormalizer::forView($groupsInput),
+            'groupsForView' => $this->prepareGroupsForView($groupsInput),
         ];
 
         if (function_exists('is_browser_testing') && is_browser_testing()) {
@@ -2538,6 +2538,57 @@ class RoleController extends Controller
     private function normalizeGroupInput($groups): array
     {
         return GroupPayloadNormalizer::forPersistence($groups);
+    }
+
+    /**
+     * @param  mixed  $groups
+     * @return array<int|string, array{id: string, name: string, name_en: string, slug: string}>
+     */
+    private function prepareGroupsForView($groups): array
+    {
+        try {
+            $normalized = GroupPayloadNormalizer::forView($groups);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return [];
+        }
+
+        if (! is_iterable($normalized)) {
+            return [];
+        }
+
+        $result = [];
+
+        foreach ($normalized as $key => $group) {
+            $groupArray = is_array($group) ? $group : (array) $group;
+
+            $id = $this->sanitizeGroupString($groupArray['id'] ?? null);
+
+            if ($id === '') {
+                $id = $this->sanitizeGroupString(is_scalar($key) ? $key : null);
+            }
+
+            $result[$key] = [
+                'id' => $id,
+                'name' => $this->sanitizeGroupString($groupArray['name'] ?? null),
+                'name_en' => $this->sanitizeGroupString($groupArray['name_en'] ?? null),
+                'slug' => $this->sanitizeGroupString($groupArray['slug'] ?? null),
+            ];
+        }
+
+        return $result;
+    }
+
+    private function sanitizeGroupString($value): string
+    {
+        if (! is_scalar($value)) {
+            return '';
+        }
+
+        $string = trim((string) $value);
+
+        return $string;
     }
 
     /**

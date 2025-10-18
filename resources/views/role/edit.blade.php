@@ -1117,14 +1117,8 @@
                         <div class="mb-6">
                             <div id="groups-list">
                                   @php
-                                      $groupSource = isset($groupsForView)
+                                      $normalizedGroups = is_iterable($groupsForView ?? [])
                                           ? $groupsForView
-                                          : \App\Support\GroupPayloadNormalizer::forView(
-                                              old('groups', $role->groups ?? [])
-                                          );
-
-                                      $normalizedGroups = is_iterable($groupSource)
-                                          ? $groupSource
                                           : [];
 
                                       $authenticatedLanguage = (string) data_get(auth()->user(), 'language_code', '');

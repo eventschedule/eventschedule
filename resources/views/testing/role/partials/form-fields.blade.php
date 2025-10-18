@@ -140,14 +140,8 @@
         </h2>
 
           @php
-              $groupSource = isset($groupsForView)
+              $normalizedGroups = is_iterable($groupsForView ?? [])
                   ? $groupsForView
-                  : \App\Support\GroupPayloadNormalizer::forView(
-                      old('groups', $role->groups ?? [])
-                  );
-
-              $normalizedGroups = is_iterable($groupSource)
-                  ? $groupSource
                   : [];
           @endphp
 
