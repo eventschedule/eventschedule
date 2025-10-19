@@ -1,5 +1,8 @@
 @php
-    $emailValue = old('email', optional($user)->email ?? $role->email);
+    $normalizedUserData = is_array($userData ?? null) ? $userData : [];
+    $userEmail = data_get($normalizedUserData, 'email');
+    $userEmail = is_string($userEmail) ? trim($userEmail) : null;
+    $emailValue = old('email', $role->email ?? $userEmail);
     $acceptRequests = (int) old('accept_requests', $role->accept_requests ?? 0);
 @endphp
 

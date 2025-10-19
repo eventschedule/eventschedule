@@ -864,9 +864,9 @@ class RoleController extends Controller
             }
 
             $role->name = is_string($name) ? trim($name) : '';
-
-            $this->ensureUserIdentityAttributes($user, $userData, $role);
         }
+
+        $this->ensureUserIdentityAttributes($user, $userData, $role);
 
         $groupsForView = $this->prepareGroupsForView(
             session()->getOldInput('groups', [])
@@ -877,6 +877,7 @@ class RoleController extends Controller
             'user' => $user,
             'title' => __('messages.new_' . $role->type),
             'groupsForView' => $groupsForView,
+            'userData' => $userData,
         ];
 
         if (function_exists('is_browser_testing') && is_browser_testing()) {
@@ -1100,6 +1101,10 @@ class RoleController extends Controller
 
         $role = Role::with('groups')->subdomain($subdomain)->firstOrFail();
 
+        $user = auth()->user();
+        $userData = $this->normalizeAuthenticatedUser($user);
+        $this->ensureUserIdentityAttributes($user, $userData, $role);
+
         $groupsInput = session()->getOldInput('groups');
 
         if ($groupsInput === null) {
@@ -1107,10 +1112,11 @@ class RoleController extends Controller
         }
 
         $data = [
-            'user' => auth()->user(),
+            'user' => $user,
             'role' => $role,
             'title' => __('messages.edit_' . $role->type),
             'groupsForView' => $this->prepareGroupsForView($groupsInput),
+            'userData' => $userData,
         ];
 
         if (function_exists('is_browser_testing') && is_browser_testing()) {

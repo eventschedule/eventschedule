@@ -659,7 +659,7 @@
                         <div class="mb-3">
                             <x-input-label for="email" :value="__('messages.email') . ' *'" />
                             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
-                                :value="old('email', $role->exists ? $role->email : $user->email)" required />
+                                :value="old('email', $role->exists ? $role->email : data_get($userData ?? [], 'email'))" required />
                             <x-input-error class="mt-2" :messages="$errors->get('email')" />
                         </div>
 
