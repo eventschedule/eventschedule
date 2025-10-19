@@ -3,6 +3,7 @@
 namespace Tests\Browser;
 
 use Illuminate\Foundation\Testing\DatabaseTruncation;
+use Illuminate\Support\Str;
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
 use Tests\Browser\Traits\AccountSetupTrait;
@@ -33,9 +34,17 @@ class GeneralTest extends DuskTestCase
             $browser->visit('/login')
                     ->type('email', $email)
                     ->type('password', $password)
-                    ->click('@log-in-button')
-                    ->waitForLocation('/events', 20)
-                    ->assertPathIs('/events')
+                    ->click('@log-in-button');
+
+            $currentPath = $this->waitForAnyLocation($browser, ['/events', '/login'], 20);
+
+            $this->assertNotNull($currentPath, 'Unable to determine the current path after logging in.');
+            $this->assertTrue(
+                Str::startsWith($currentPath, '/events'),
+                sprintf('Expected to reach the events dashboard after logging in, but ended on [%s].', $currentPath)
+            );
+
+            $browser->assertPathIs($currentPath)
                     ->assertSee($name);
 
             // Create/edit venue using the trait
