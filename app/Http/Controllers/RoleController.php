@@ -13,6 +13,7 @@ use Endroid\QrCode\Writer\PngWriter;
 use App\Http\Requests\RoleCreateRequest;
 use App\Http\Requests\RoleUpdateRequest;
 use App\Http\Requests\MemberAddRequest;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
@@ -868,9 +869,13 @@ class RoleController extends Controller
 
         $this->ensureUserIdentityAttributes($user, $userData, $role);
 
-        $groupsForView = $this->prepareGroupsForView(
-            session()->getOldInput('groups', [])
-        );
+        $rawGroupInput = session()->getOldInput('groups', []);
+
+        $this->logGroupPayloadDiagnostics($rawGroupInput, 'role.create.old_input');
+
+        $groupsForView = $this->prepareGroupsForView($rawGroupInput);
+
+        $this->logGroupPayloadDiagnostics($groupsForView, 'role.create.groups_for_view');
 
         $data = [
             'role' => $role,
@@ -1106,16 +1111,24 @@ class RoleController extends Controller
         $this->ensureUserIdentityAttributes($user, $userData, $role);
 
         $groupsInput = session()->getOldInput('groups');
+        $groupsSource = 'old_input';
 
         if ($groupsInput === null) {
             $groupsInput = $role->groups ?? [];
+            $groupsSource = 'database';
         }
+
+        $this->logGroupPayloadDiagnostics($groupsInput, "role.edit.source.{$groupsSource}");
+
+        $groupsForView = $this->prepareGroupsForView($groupsInput);
+
+        $this->logGroupPayloadDiagnostics($groupsForView, 'role.edit.groups_for_view');
 
         $data = [
             'user' => $user,
             'role' => $role,
             'title' => __('messages.edit_' . $role->type),
-            'groupsForView' => $this->prepareGroupsForView($groupsInput),
+            'groupsForView' => $groupsForView,
             'userData' => $userData,
         ];
 
@@ -2595,6 +2608,91 @@ class RoleController extends Controller
         $string = trim((string) $value);
 
         return $string;
+    }
+
+    private function logGroupPayloadDiagnostics($groups, string $context): void
+    {
+        try {
+            $snapshot = [
+                'context' => $context,
+                'type' => get_debug_type($groups),
+            ];
+
+            if (is_iterable($groups)) {
+                if ($groups instanceof \Traversable && ! is_array($groups)) {
+                    $groups = iterator_to_array($groups);
+                }
+
+                if (is_countable($groups)) {
+                    $snapshot['count'] = count($groups);
+                }
+
+                $snapshot['sample'] = [];
+
+                $index = 0;
+
+                foreach ($groups as $key => $item) {
+                    $snapshot['sample'][] = $this->describeGroupPayloadEntry($key, $item);
+                    $index++;
+
+                    if ($index >= 5) {
+                        break;
+                    }
+                }
+            } else {
+                $snapshot['value'] = $groups;
+            }
+
+            Log::debug('RoleController group payload diagnostics', $snapshot);
+        } catch (\Throwable $e) {
+            Log::warning('RoleController group payload diagnostics failed', [
+                'context' => $context,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    private function describeGroupPayloadEntry($key, $item): array
+    {
+        $description = [
+            'key' => is_scalar($key) ? (string) $key : $key,
+            'type' => get_debug_type($item),
+        ];
+
+        if (is_object($item)) {
+            try {
+                $properties = array_keys(get_object_vars($item));
+            } catch (\Throwable $e) {
+                $properties = ['__error' => $e->getMessage()];
+            }
+
+            $description['properties'] = $properties;
+            $description['has_name'] = property_exists($item, 'name');
+            $description['preview'] = $this->safeJsonEncode($item);
+        } elseif (is_array($item)) {
+            $description['keys'] = array_slice(array_keys($item), 0, 10);
+            $description['has_name'] = array_key_exists('name', $item) && (string) $item['name'] !== '';
+            $description['preview'] = $this->safeJsonEncode($item);
+        } else {
+            $description['value'] = $item;
+        }
+
+        return $description;
+    }
+
+    private function safeJsonEncode($value): string
+    {
+        try {
+            $encoded = json_encode($value, JSON_PARTIAL_OUTPUT_ON_ERROR);
+        } catch (\Throwable $e) {
+            return 'json_encode_error: ' . $e->getMessage();
+        }
+
+        if ($encoded === false) {
+            return 'json_encode_error';
+        }
+
+        return $encoded;
     }
 
     /**
