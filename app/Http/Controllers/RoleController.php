@@ -833,6 +833,14 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        $rawGroupInput = session()->getOldInput('groups', []);
+
+        $this->logGroupPayloadDiagnostics($rawGroupInput, 'role.create.old_input');
+
+        $groupsForView = $this->prepareGroupsForView($rawGroupInput);
+
+        $this->logGroupPayloadDiagnostics($groupsForView, 'role.create.groups_for_view');
+
         $role = new Role;
         $role->type = $type;
         $role->font_family = 'Roboto';
@@ -868,14 +876,6 @@ class RoleController extends Controller
         }
 
         $this->ensureUserIdentityAttributes($user, $userData, $role);
-
-        $rawGroupInput = session()->getOldInput('groups', []);
-
-        $this->logGroupPayloadDiagnostics($rawGroupInput, 'role.create.old_input');
-
-        $groupsForView = $this->prepareGroupsForView($rawGroupInput);
-
-        $this->logGroupPayloadDiagnostics($groupsForView, 'role.create.groups_for_view');
 
         $data = [
             'role' => $role,
@@ -2643,6 +2643,24 @@ class RoleController extends Controller
                 $snapshot['value'] = $groups;
             }
 
+            $summary = [
+                'context' => $snapshot['context'],
+                'type' => $snapshot['type'],
+            ];
+
+            if (isset($snapshot['count'])) {
+                $summary['count'] = $snapshot['count'];
+            }
+
+            if (isset($snapshot['sample']) && is_array($snapshot['sample'])) {
+                $summary['sample_count'] = count($snapshot['sample']);
+
+                if ($summary['sample_count'] > 0) {
+                    $summary['sample_preview'] = $snapshot['sample'][0];
+                }
+            }
+
+            Log::info('RoleController group payload snapshot', $summary);
             Log::debug('RoleController group payload diagnostics', $snapshot);
         } catch (\Throwable $e) {
             Log::warning('RoleController group payload diagnostics failed', [
