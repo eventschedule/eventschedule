@@ -833,6 +833,14 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        $rawGroupInput = session()->getOldInput('groups', []);
+
+        $this->logGroupPayloadDiagnostics($rawGroupInput, 'role.create.old_input');
+
+        $groupsForView = $this->prepareGroupsForView($rawGroupInput);
+
+        $this->logGroupPayloadDiagnostics($groupsForView, 'role.create.groups_for_view');
+
         $role = new Role;
         $role->type = $type;
         $role->font_family = 'Roboto';
@@ -868,14 +876,6 @@ class RoleController extends Controller
         }
 
         $this->ensureUserIdentityAttributes($user, $userData, $role);
-
-        $rawGroupInput = session()->getOldInput('groups', []);
-
-        $this->logGroupPayloadDiagnostics($rawGroupInput, 'role.create.old_input');
-
-        $groupsForView = $this->prepareGroupsForView($rawGroupInput);
-
-        $this->logGroupPayloadDiagnostics($groupsForView, 'role.create.groups_for_view');
 
         $data = [
             'role' => $role,
