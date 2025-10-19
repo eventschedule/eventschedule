@@ -557,33 +557,50 @@ trait AccountSetupTrait
             return $path === '' ? '/' : $path;
         }, $paths)));
 
-        $matched = null;
+        $initialPath = $this->currentPath($browser);
+        $stabilityThreshold = max(0.0, min(0.5, $seconds));
+        $initialMatchStartedAt = null;
+        $lastMatchedPath = null;
+        $deadline = microtime(true) + max(0, $seconds);
 
-        $browser->waitUsing($seconds, 100, function () use ($browser, $normalized, &$matched) {
+        while (microtime(true) <= $deadline) {
+            $loopStartedAt = microtime(true);
             $currentPath = $this->currentPath($browser);
 
             if ($currentPath === null) {
-                return false;
+                usleep(100000);
+                continue;
             }
 
             foreach ($normalized as $expected) {
-                if ($currentPath === $expected) {
-                    $matched = $currentPath;
+                $isExactMatch = $currentPath === $expected;
+                $isPrefixMatch = $expected !== '/' && Str::startsWith($currentPath, rtrim($expected, '/') . '/');
 
-                    return true;
+                if (! $isExactMatch && ! $isPrefixMatch) {
+                    continue;
                 }
 
-                if ($expected !== '/' && Str::startsWith($currentPath, rtrim($expected, '/') . '/')) {
-                    $matched = $currentPath;
+                $lastMatchedPath = $currentPath;
 
-                    return true;
+                if ($initialPath !== null && $currentPath === $initialPath) {
+                    if ($initialMatchStartedAt === null) {
+                        $initialMatchStartedAt = $loopStartedAt;
+                    }
+
+                    if ($loopStartedAt - $initialMatchStartedAt < $stabilityThreshold) {
+                        usleep(100000);
+                        continue 2;
+                    }
                 }
+
+                return $currentPath;
             }
 
-            return false;
-        });
+            $initialMatchStartedAt = null;
+            usleep(100000);
+        }
 
-        return $matched;
+        return $lastMatchedPath;
     }
 
     protected function currentPath(Browser $browser): ?string
