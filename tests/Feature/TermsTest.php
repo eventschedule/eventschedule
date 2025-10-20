@@ -37,4 +37,20 @@ class TermsTest extends TestCase
         $response->assertSee('This is a custom agreement.', false);
         $response->assertDontSee('Welcome to Event Schedule', false);
     }
+
+    public function test_terms_page_converts_markdown_when_html_is_missing(): void
+    {
+        $markdown = "# Legacy Terms\n\nThese terms were saved without HTML.";
+
+        Setting::setGroup('general', [
+            'terms_markdown' => $markdown,
+        ]);
+
+        $response = $this->get('/terms');
+
+        $response->assertOk();
+        $response->assertSee('Legacy Terms', false);
+        $response->assertSee('These terms were saved without HTML.', false);
+        $response->assertDontSee('Welcome to Event Schedule', false);
+    }
 }
