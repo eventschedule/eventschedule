@@ -2442,6 +2442,12 @@ class RoleController extends Controller
             }
         }
 
+        $colors = $this->extractColors($entry);
+
+        if (! empty($colors)) {
+            return implode(' → ', $colors);
+        }
+
         return null;
     }
 
@@ -3034,22 +3040,55 @@ class RoleController extends Controller
         }
 
         if (is_array($item)) {
-            foreach (['name', 'value', 'label', 'title'] as $key) {
-                if (array_key_exists($key, $item)) {
-                    $candidate = $this->determineRoleAssetName($item[$key], $original, $depth + 1);
+            $colors = $this->extractColors($item, $original, $depth + 1);
+            $colorName = empty($colors) ? null : implode(' → ', $colors);
 
-                    if (is_string($candidate) && trim($candidate) !== '') {
-                        return $candidate;
-                    }
+            foreach (['name', 'value', 'label', 'title', 'id', 'slug'] as $key) {
+                if (! array_key_exists($key, $item)) {
+                    continue;
                 }
+
+                $candidate = $this->determineRoleAssetName($item[$key], $original, $depth + 1);
+
+                if (! is_string($candidate)) {
+                    continue;
+                }
+
+                $candidate = trim($candidate);
+
+                if ($candidate === '') {
+                    continue;
+                }
+
+                if ($colorName !== null && $this->shouldDeferToColorFallback($candidate, $colors)) {
+                    continue;
+                }
+
+                return $candidate;
             }
 
             foreach ($item as $value) {
                 $candidate = $this->determineRoleAssetName($value, $original, $depth + 1);
 
-                if (is_string($candidate) && trim($candidate) !== '') {
-                    return $candidate;
+                if (! is_string($candidate)) {
+                    continue;
                 }
+
+                $candidate = trim($candidate);
+
+                if ($candidate === '') {
+                    continue;
+                }
+
+                if ($colorName !== null && $this->shouldDeferToColorFallback($candidate, $colors)) {
+                    continue;
+                }
+
+                return $candidate;
+            }
+
+            if ($colorName !== null && $colorName !== '') {
+                return $colorName;
             }
 
             return null;
@@ -3107,26 +3146,106 @@ class RoleController extends Controller
         }
 
         if (is_array($item)) {
-            foreach (['label', 'name', 'title', 'value'] as $key) {
-                if (array_key_exists($key, $item)) {
-                    $candidate = $this->determineRoleAssetLabel($item[$key], $original, $depth + 1);
+            $colors = $this->extractColors($item, $original, $depth + 1);
+            $colorLabel = empty($colors) ? null : implode(' → ', $colors);
 
-                    if (is_string($candidate) && trim($candidate) !== '') {
-                        return $candidate;
-                    }
+            foreach (['label', 'name', 'title', 'value'] as $key) {
+                if (! array_key_exists($key, $item)) {
+                    continue;
                 }
+
+                $candidate = $this->determineRoleAssetLabel($item[$key], $original, $depth + 1);
+
+                if (! is_string($candidate)) {
+                    continue;
+                }
+
+                $candidate = trim($candidate);
+
+                if ($candidate === '') {
+                    continue;
+                }
+
+                if ($colorLabel !== null && $this->shouldDeferToColorFallback($candidate, $colors)) {
+                    continue;
+                }
+
+                return $candidate;
             }
 
             foreach ($item as $value) {
                 $candidate = $this->determineRoleAssetLabel($value, $original, $depth + 1);
 
-                if (is_string($candidate) && trim($candidate) !== '') {
-                    return $candidate;
+                if (! is_string($candidate)) {
+                    continue;
                 }
+
+                $candidate = trim($candidate);
+
+                if ($candidate === '') {
+                    continue;
+                }
+
+                if ($colorLabel !== null && $this->shouldDeferToColorFallback($candidate, $colors)) {
+                    continue;
+                }
+
+                return $candidate;
+            }
+
+            if ($colorLabel !== null && $colorLabel !== '') {
+                return $colorLabel;
             }
         }
 
         return null;
+    }
+
+    private function shouldDeferToColorFallback(string $candidate, array $colors): bool
+    {
+        if (count($colors) < 2) {
+            return false;
+        }
+
+        $normalizedCandidate = $this->normalizeColorForComparison($candidate);
+
+        if ($normalizedCandidate === '') {
+            return false;
+        }
+
+        foreach ($colors as $color) {
+            if ($normalizedCandidate === $this->normalizeColorForComparison($color)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function normalizeColorForComparison(string $value): string
+    {
+        $value = trim($value);
+
+        if ($value === '') {
+            return '';
+        }
+
+        if (preg_match('/^(?:#|0x)([0-9a-f]{3,8})$/i', $value, $matches)) {
+            return strtolower('#' . $matches[1]);
+        }
+
+        if (preg_match('/^(rgb|rgba|hsl|hsla)\s*\(([^)]*)\)$/i', $value, $matches)) {
+            $prefix = strtolower($matches[1]);
+            $components = preg_replace('/\s+/', '', $matches[2]);
+
+            return $prefix . '(' . $components . ')';
+        }
+
+        if (preg_match('/^[0-9a-f]{3,8}$/i', $value)) {
+            return strtolower('#' . $value);
+        }
+
+        return '';
     }
 
     /**
