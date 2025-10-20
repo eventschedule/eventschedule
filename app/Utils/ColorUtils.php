@@ -221,6 +221,12 @@ class ColorUtils
                     return $candidate;
                 }
             }
+
+            $colors = self::extractColors($item, $depth + 1);
+
+            if (! empty($colors)) {
+                return implode(' → ', $colors);
+            }
         }
 
         return null;
@@ -285,6 +291,12 @@ class ColorUtils
                 if (is_string($candidate) && trim($candidate) !== '') {
                     return $candidate;
                 }
+            }
+
+            $colors = self::extractColors($item, $depth + 1);
+
+            if (! empty($colors)) {
+                return implode(' → ', $colors);
             }
         }
 
