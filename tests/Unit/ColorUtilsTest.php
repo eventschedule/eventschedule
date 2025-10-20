@@ -56,4 +56,29 @@ class ColorUtilsTest extends TestCase
 
         $this->assertSame('Background One', $result);
     }
+
+    public function testBackgroundImageOptionsIncludeBundledAssets(): void
+    {
+        $options = ColorUtils::backgroundImageOptions();
+
+        $this->assertNotEmpty($options);
+
+        $paths = glob(base_path('public/images/backgrounds/*.png')) ?: [];
+        $this->assertNotEmpty($paths, 'Expected bundled background images to be present');
+
+        $filenames = array_map(static function (string $path): string {
+            return pathinfo($path, PATHINFO_FILENAME);
+        }, $paths);
+
+        sort($filenames);
+
+        $keys = array_keys($options);
+        sort($keys);
+
+        $this->assertSame($filenames, $keys);
+
+        foreach ($options as $name => $label) {
+            $this->assertSame(str_replace('_', ' ', $name), $label);
+        }
+    }
 }
