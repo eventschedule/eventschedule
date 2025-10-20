@@ -246,8 +246,8 @@
                         <x-text-input name="venue_id" v-bind:value="selectedVenue.id" type="hidden" />
 
                         <div v-if="isInPerson">
-                            <div v-if="!selectedVenue || showVenueAddressFields" class="mb-6">
-                                <div v-if="!selectedVenue">
+                            <div v-show="!selectedVenue || showVenueAddressFields" class="mb-6">
+                                <div v-show="!selectedVenue">
                                     <fieldset v-if="Object.keys(venues).length > 0">
                                         <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                                             <div class="flex items-center">
@@ -265,7 +265,7 @@
                                         </div>
                                     </fieldset>
 
-                                    <div v-if="venueType === 'use_existing' || Object.keys(venues).length === 0">
+                                    <div v-show="venueType === 'use_existing' || Object.keys(venues).length === 0">
                                         <select id="selected_venue"
                                                 :required="Object.keys(venues).length > 0"
                                                 :disabled="Object.keys(venues).length === 0"
@@ -284,7 +284,7 @@
                                     </div>
                                 </div>
 
-                                <div v-if="showAddressFields()">
+                                <div v-show="showAddressFields()">
                                     <div class="mb-6">
                                         <x-input-label for="venue_name" :value="__('messages.name')" />
                                         <x-text-input id="venue_name" name="venue_name" type="text"
@@ -376,7 +376,7 @@
                             </div>
 
               
-                            <div v-else class="mb-6">
+                            <div v-show="selectedVenue && !showVenueAddressFields" class="mb-6">
                                 <div class="flex justify-between w-full">
                                     <div class="flex items-center">
                                         <span class="text-sm text-gray-900 dark:text-gray-100">
