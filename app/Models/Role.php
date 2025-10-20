@@ -312,15 +312,7 @@ class Role extends Model implements MustVerifyEmail
             return '';
         }
 
-        $disk = config('filesystems.default');
-
-        if (config('app.hosted') && $disk == 'do_spaces') {
-            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $value;
-        } else if (in_array($disk, ['local', 'public'])) {
-            return url('/storage/' . $value);
-        } else {
-            return $value;
-        }
+        return storage_asset_url($value);
     }
 
     public function getProfileImageUrlAttribute($value)
@@ -329,15 +321,7 @@ class Role extends Model implements MustVerifyEmail
             return '';
         }
 
-        $disk = config('filesystems.default');
-
-        if (config('app.hosted') && $disk == 'do_spaces') {
-            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $value;
-        } else if (in_array($disk, ['local', 'public'])) {
-            return url('/storage/' . $value);
-        } else {
-            return $value;
-        }
+        return storage_asset_url($value);
     }
 
     public function getBackgroundImageUrlAttribute($value)
@@ -346,15 +330,7 @@ class Role extends Model implements MustVerifyEmail
             return '';
         }
 
-        $disk = config('filesystems.default');
-
-        if (config('app.hosted') && $disk == 'do_spaces') {
-            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $value;
-        } else if (in_array($disk, ['local', 'public'])) {
-            return url('/storage/' . $value);
-        } else {
-            return $value;
-        }
+        return storage_asset_url($value);
     }
     
     public static function cleanSubdomain($name)

@@ -78,9 +78,22 @@
 
     @if (config('app.load_vite_assets'))
         @vite([
-        'resources/css/app.css',
-        'resources/js/app.js',
+            'resources/css/app.css',
+            'resources/js/app.js',
         ])
+    @else
+        @php($viteAssets = vite_assets([
+            'resources/css/app.css',
+            'resources/js/app.js',
+        ]))
+
+        @foreach ($viteAssets['css'] as $stylesheet)
+            <link rel="stylesheet" href="{{ $stylesheet }}">
+        @endforeach
+
+        @foreach ($viteAssets['js'] as $script)
+            <script type="module" src="{{ $script }}" defer {!! nonce_attr() !!}></script>
+        @endforeach
     @endif
 
     <style>

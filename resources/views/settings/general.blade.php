@@ -1,4 +1,89 @@
 <x-app-admin-layout>
+    @php
+        $generalSettings = $generalSettings ?? [];
+
+        if ($generalSettings instanceof \Illuminate\Support\Collection) {
+            $generalSettings = $generalSettings->toArray();
+        } elseif (is_object($generalSettings)) {
+            $generalSettings = (array) $generalSettings;
+        } elseif (! is_array($generalSettings)) {
+            $generalSettings = [];
+        }
+
+        $availableUpdateChannels = $availableUpdateChannels ?? [];
+
+        if ($availableUpdateChannels instanceof \Illuminate\Support\Collection) {
+            $availableUpdateChannels = $availableUpdateChannels->toArray();
+        } elseif (is_object($availableUpdateChannels)) {
+            $availableUpdateChannels = (array) $availableUpdateChannels;
+        }
+
+        $availableUpdateChannels = collect($availableUpdateChannels)
+            ->mapWithKeys(function ($option, $key) {
+                if (is_array($option) || is_object($option)) {
+                    $value = data_get($option, 'value', is_string($key) ? $key : null);
+                    $label = data_get($option, 'label', $value);
+                } else {
+                    $value = is_string($key) ? $key : $option;
+                    $label = $option;
+                }
+
+                if (! is_string($value)) {
+                    $value = is_scalar($value) ? (string) $value : null;
+                }
+
+                if (! is_string($label)) {
+                    $label = is_scalar($label) ? (string) $label : $value;
+                }
+
+                if ($value === null || $value === '') {
+                    return [];
+                }
+
+                return [$value => $label];
+            })
+            ->filter()
+            ->toArray();
+
+        $availableLogLevels = $availableLogLevels ?? [];
+
+        if ($availableLogLevels instanceof \Illuminate\Support\Collection) {
+            $availableLogLevels = $availableLogLevels->toArray();
+        } elseif (is_object($availableLogLevels)) {
+            $availableLogLevels = (array) $availableLogLevels;
+        }
+
+        $availableLogLevels = collect($availableLogLevels)
+            ->mapWithKeys(function ($option, $key) {
+                if (is_array($option) || is_object($option)) {
+                    $value = data_get($option, 'value', is_string($key) ? $key : null);
+                    $label = data_get($option, 'label', $value);
+                } else {
+                    $value = is_string($key) ? $key : $option;
+                    $label = $option;
+                }
+
+                if (! is_string($value)) {
+                    $value = is_scalar($value) ? (string) $value : null;
+                }
+
+                if (! is_string($label)) {
+                    $label = is_scalar($label) ? (string) $label : $value;
+                }
+
+                if ($value === null || $value === '') {
+                    return [];
+                }
+
+                return [$value => $label];
+            })
+            ->filter()
+            ->toArray();
+
+        $selectedUpdateChannel = $selectedUpdateChannel ?? null;
+        $versionInstalled = $versionInstalled ?? null;
+        $versionAvailable = $versionAvailable ?? null;
+    @endphp
     <div class="py-12">
         <div class="max-w-4xl mx-auto space-y-6">
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
@@ -30,7 +115,7 @@
                             <div>
                                 <x-input-label for="public_url" :value="__('messages.public_url')" />
                                 <x-text-input id="public_url" name="public_url" type="url" class="mt-1 block w-full"
-                                    :value="old('public_url', $generalSettings['public_url'])" autocomplete="off" />
+                                    :value="old('public_url', data_get($generalSettings, 'public_url'))" autocomplete="off" />
                                 <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                                     {{ __('messages.public_url_help') }}
                                 </p>
@@ -41,7 +126,7 @@
                                 <x-input-label for="update_repository_url" :value="__('messages.update_repository_url')" />
                                 <x-text-input id="update_repository_url" name="update_repository_url" type="url"
                                     class="mt-1 block w-full"
-                                    :value="old('update_repository_url', $generalSettings['update_repository_url'])"
+                                    :value="old('update_repository_url', data_get($generalSettings, 'update_repository_url'))"
                                     autocomplete="off" />
                                 <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                                     {{ __('messages.update_repository_url_help') }}
@@ -55,7 +140,7 @@
                                     class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]">
                                     @foreach ($availableUpdateChannels as $value => $label)
                                         <option value="{{ $value }}"
-                                            @selected(old('update_release_channel', $generalSettings['update_release_channel']) === $value)>
+                                            @selected(old('update_release_channel', data_get($generalSettings, 'update_release_channel')) === $value)>
                                             {{ $label }}
                                         </option>
                                     @endforeach
@@ -80,7 +165,7 @@
                                     <x-input-label for="log_syslog_host" :value="__('messages.log_syslog_host')" />
                                     <x-text-input id="log_syslog_host" name="log_syslog_host" type="text"
                                         class="mt-1 block w-full"
-                                        :value="old('log_syslog_host', $generalSettings['log_syslog_host'])" autocomplete="off" />
+                                        :value="old('log_syslog_host', data_get($generalSettings, 'log_syslog_host'))" autocomplete="off" />
                                     <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                                         {{ __('messages.log_syslog_host_help') }}
                                     </p>
@@ -91,7 +176,7 @@
                                     <x-input-label for="log_syslog_port" :value="__('messages.log_syslog_port')" />
                                     <x-text-input id="log_syslog_port" name="log_syslog_port" type="number" min="1"
                                         max="65535" class="mt-1 block w-full"
-                                        :value="old('log_syslog_port', $generalSettings['log_syslog_port'])" autocomplete="off" />
+                                        :value="old('log_syslog_port', data_get($generalSettings, 'log_syslog_port'))" autocomplete="off" />
                                     <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                                         {{ __('messages.log_syslog_port_help') }}
                                     </p>
@@ -105,7 +190,7 @@
                                     class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]">
                                     @foreach ($availableLogLevels as $levelValue => $label)
                                         <option value="{{ $levelValue }}"
-                                            @selected(old('log_level', $generalSettings['log_level']) === $levelValue)>
+                                            @selected(old('log_level', data_get($generalSettings, 'log_level')) === $levelValue)>
                                             {{ $label }}
                                         </option>
                                     @endforeach
