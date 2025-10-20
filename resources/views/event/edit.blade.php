@@ -5,6 +5,19 @@
         'resources/js/countrySelect.min.js',
         'resources/css/countrySelect.min.css',
     ])
+@else
+    @php($countryAssets = vite_assets([
+        'resources/js/countrySelect.min.js',
+        'resources/css/countrySelect.min.css',
+    ]))
+
+    @foreach ($countryAssets['css'] as $stylesheet)
+        <link rel="stylesheet" href="{{ $stylesheet }}">
+    @endforeach
+
+    @foreach ($countryAssets['js'] as $script)
+        <script type="module" src="{{ $script }}" defer {!! nonce_attr() !!}></script>
+    @endforeach
 @endif
 
 <!-- Step Indicator for Add Event Flow -->

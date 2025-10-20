@@ -49,6 +49,16 @@
     <!-- Scripts -->
     @if (config('app.load_vite_assets'))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        @php($authAssets = vite_assets(['resources/css/app.css', 'resources/js/app.js']))
+
+        @foreach ($authAssets['css'] as $stylesheet)
+            <link rel="stylesheet" href="{{ $stylesheet }}">
+        @endforeach
+
+        @foreach ($authAssets['js'] as $script)
+            <script type="module" src="{{ $script }}" defer {!! nonce_attr() !!}></script>
+        @endforeach
     @endif
 
     {{ isset($head) ? $head : '' }}

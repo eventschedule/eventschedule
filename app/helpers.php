@@ -160,3 +160,141 @@ if (!function_exists('app_public_url')) {
         return $cachedUrl = rtrim($url, '/');
     }
 }
+if (!function_exists('storage_asset_url')) {
+    /**
+     * Generate a public URL for a file stored on the configured filesystem disk.
+     */
+    function storage_asset_url(?string $path): string
+    {
+        if (! is_string($path) || trim($path) === '') {
+            return '';
+        }
+
+        if (preg_match('/^https?:\/\//i', $path)) {
+            return $path;
+        }
+
+        $normalized = ltrim($path, '/');
+
+        if (str_starts_with($normalized, 'storage/')) {
+            $normalized = ltrim(substr($normalized, strlen('storage/')), '/');
+        }
+
+        $disk = config('filesystems.default');
+        $diskToUse = in_array($disk, ['local', 'public'], true) ? 'public' : $disk;
+
+        try {
+            if (config()->has("filesystems.disks.{$diskToUse}")) {
+                return \Illuminate\Support\Facades\Storage::disk($diskToUse)->url($normalized);
+            }
+        } catch (\Throwable $exception) {
+            // Fall through to the manual URL construction below.
+        }
+
+        return url('/storage/' . $normalized);
+    }
+}
+
+if (!function_exists('vite_manifest')) {
+    /**
+     * Load the built Vite manifest once per request.
+     *
+     * @return array<string, mixed>
+     */
+    function vite_manifest(): array
+    {
+        static $manifest = null;
+
+        if ($manifest !== null) {
+            return $manifest;
+        }
+
+        $manifestPath = public_path('build/manifest.json');
+
+        if (! is_file($manifestPath)) {
+            return $manifest = [];
+        }
+
+        try {
+            $decoded = json_decode(file_get_contents($manifestPath), true, 512, JSON_THROW_ON_ERROR);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return $manifest = [];
+        }
+
+        return $manifest = is_array($decoded) ? $decoded : [];
+    }
+}
+
+if (!function_exists('vite_entry_paths')) {
+    /**
+     * Resolve URLs for a given Vite entry.
+     *
+     * @return array{js: array<int, string>, css: array<int, string>}
+     */
+    function vite_entry_paths(string $entry): array
+    {
+        $manifest = vite_manifest();
+        $paths = ['js' => [], 'css' => []];
+
+        if (! array_key_exists($entry, $manifest) || ! is_array($manifest[$entry])) {
+            return $paths;
+        }
+
+        $asset = $manifest[$entry];
+        $baseUrl = rtrim(url('/build'), '/');
+
+        if (! empty($asset['file']) && is_string($asset['file'])) {
+            $file = ltrim($asset['file'], '/');
+            $url = $baseUrl . '/' . $file;
+
+            if (str_ends_with($file, '.css')) {
+                $paths['css'][] = $url;
+            } else {
+                $paths['js'][] = $url;
+            }
+        }
+
+        if (! empty($asset['css']) && is_array($asset['css'])) {
+            foreach ($asset['css'] as $css) {
+                if (! is_string($css) || $css === '') {
+                    continue;
+                }
+
+                $paths['css'][] = $baseUrl . '/' . ltrim($css, '/');
+            }
+        }
+
+        return $paths;
+    }
+}
+
+if (!function_exists('vite_assets')) {
+    /**
+     * Resolve grouped Vite asset URLs for the provided entries.
+     *
+     * @param  array<int, string>  $entries
+     * @return array{js: array<int, string>, css: array<int, string>}
+     */
+    function vite_assets(array $entries): array
+    {
+        $grouped = ['js' => [], 'css' => []];
+
+        foreach ($entries as $entry) {
+            if (! is_string($entry) || $entry === '') {
+                continue;
+            }
+
+            $paths = vite_entry_paths($entry);
+
+            $grouped['js'] = array_merge($grouped['js'], $paths['js']);
+            $grouped['css'] = array_merge($grouped['css'], $paths['css']);
+        }
+
+        $grouped['js'] = array_values(array_unique($grouped['js']));
+        $grouped['css'] = array_values(array_unique($grouped['css']));
+
+        return $grouped;
+    }
+}
