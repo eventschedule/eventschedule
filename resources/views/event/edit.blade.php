@@ -1114,6 +1114,10 @@
 <script {!! nonce_attr() !!}>
   const { createApp, ref } = Vue
 
+  if (typeof window !== 'undefined') {
+    window.appReadyForTesting = false;
+  }
+
   function hasBrowserTestingCookie() {
     if (typeof document === 'undefined' || !document.cookie) {
       return false;
@@ -1790,8 +1794,16 @@
       }
 
       this.event.slug = this.eventSlug || null;
+
+      if (typeof window !== 'undefined') {
+        window.appReadyForTesting = true;
+      }
     }
   }).mount('#app')
+
+  if (typeof window !== 'undefined') {
+    window.app = app
+  }
 
   // Google Calendar sync functions
   function syncEvent(eventId) {
