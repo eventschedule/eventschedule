@@ -158,8 +158,9 @@ trait AccountSetupTrait
 
         $schedulePath = '/' . $talentSlug . '/schedule';
 
-        $browser->waitForLocation($schedulePath, 20)
-                ->assertSee($venueName);
+        $this->waitForPath($browser, $schedulePath, 20);
+
+        $browser->assertSee($venueName);
     }
 
     /**
@@ -167,7 +168,7 @@ trait AccountSetupTrait
      */
     protected function selectExistingVenue(Browser $browser): void
     {
-        $this->waitForVueApp($browser);
+        $this->waitForInteractiveDocument($browser);
 
         $browser->waitFor('#selected_venue', 20);
 
@@ -246,7 +247,7 @@ trait AccountSetupTrait
      */
     protected function addExistingMember(Browser $browser): void
     {
-        $this->waitForVueApp($browser);
+        $this->waitForInteractiveDocument($browser);
 
         $browser->waitFor('#selected_member', 20);
 
@@ -323,6 +324,22 @@ trait AccountSetupTrait
             JS);
 
             return ! empty($result) && $result[0];
+        });
+    }
+
+    /**
+     * Wait until the browser reports that the document is ready for scripted interactions.
+     */
+    protected function waitForInteractiveDocument(Browser $browser, int $seconds = 20): void
+    {
+        $browser->waitUsing($seconds, 100, function () use ($browser) {
+            $state = $browser->script('return typeof document !== "undefined" ? document.readyState : null;');
+
+            if (empty($state)) {
+                return false;
+            }
+
+            return in_array($state[0], ['interactive', 'complete'], true);
         });
     }
 
@@ -732,6 +749,24 @@ trait AccountSetupTrait
             Str::startsWith($currentPath, '/login'),
             sprintf('Expected to reach the login page after logout, but ended on [%s].', $currentPath)
         );
+    }
+
+    protected function waitForPath(Browser $browser, string $path, int $seconds = 20): Browser
+    {
+        $matchedPath = $this->waitForAnyLocation($browser, [$path], $seconds);
+
+        if ($matchedPath === null) {
+            $currentPath = $this->currentPath($browser);
+
+            $this->fail(sprintf(
+                'Timed out waiting for path [%s] within %d seconds. Last known path: [%s]',
+                $path,
+                $seconds,
+                $currentPath ?? 'unavailable'
+            ));
+        }
+
+        return $browser;
     }
 
     protected function waitForAnyLocation(Browser $browser, array $paths, int $seconds = 20): ?string

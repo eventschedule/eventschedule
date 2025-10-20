@@ -68,8 +68,9 @@ class GroupsTest extends DuskTestCase
         $browser->waitFor('input[name*="groups"][name*="name"]', 5)
                 ->type('input[name*="groups"][name*="name"]', 'Main Shows')
                 ->scrollIntoView('button[type="submit"]')
-                ->press('Save')
-                ->waitForLocation('/' . $talentSlug . '/schedule', 5);
+                ->press('Save');
+
+        $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
 
         // Add second sub-schedule
         $browser->visit('/' . $talentSlug . '/edit')
@@ -82,8 +83,9 @@ class GroupsTest extends DuskTestCase
         $browser->waitFor('#group-items > div:last-child input[name*="groups"][name*="name"]', 5)
                 ->type('#group-items > div:last-child input[name*="groups"][name*="name"]', 'Workshops')
                 ->scrollIntoView('button[type="submit"]')
-                ->press('Save')
-                ->waitForLocation('/' . $talentSlug . '/schedule', 5);
+                ->press('Save');
+
+        $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
 
         // Verify both sub-schedules were saved in database
         $role = Role::where('subdomain', $talentSlug)->first();
@@ -117,9 +119,11 @@ class GroupsTest extends DuskTestCase
                 ->scrollIntoView('select[name="current_role_group_id"]')
                 ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($mainShows->id))
                 ->scrollIntoView('button[type="submit"]')
-                ->press('Save')
-                ->waitForLocation('/' . $talentSlug . '/schedule', 5)
-                ->assertSee('Main Show Event');
+                ->press('Save');
+
+        $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
+
+        $browser->assertSee('Main Show Event');
 
         // Create second event for "Workshops" sub-schedule
         $browser->visit('/' . $talentSlug . '/add-event?date=' . date('Y-m-d'));
@@ -130,9 +134,11 @@ class GroupsTest extends DuskTestCase
                 ->scrollIntoView('select[name="current_role_group_id"]')
                 ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($workshops->id))
                 ->scrollIntoView('button[type="submit"]')
-                ->press('Save')
-                ->waitForLocation('/' . $talentSlug . '/schedule', 5)
-                ->assertSee('Workshop Event');
+                ->press('Save');
+
+        $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
+
+        $browser->assertSee('Workshop Event');
 
         // Create third event without sub-schedule
         $browser->visit('/' . $talentSlug . '/add-event?date=' . date('Y-m-d'));
@@ -141,9 +147,11 @@ class GroupsTest extends DuskTestCase
         $browser->type('name', 'General Event')
                 ->type('duration', '1')
                 ->scrollIntoView('button[type="submit"]')
-                ->press('Save')
-                ->waitForLocation('/' . $talentSlug . '/schedule', 5)
-                ->assertSee('General Event');
+                ->press('Save');
+
+        $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
+
+        $browser->assertSee('General Event');
     }
 
     /**
