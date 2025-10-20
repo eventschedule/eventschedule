@@ -245,9 +245,9 @@
 
                         <x-text-input name="venue_id" v-bind:value="selectedVenue.id" type="hidden" />
 
-                        <div v-show="isInPerson || shouldBypassPreferences">
-                            <div v-show="shouldShowVenueForm" class="mb-6">
-                                <div v-show="!selectedVenue || shouldBypassPreferences">
+                        <div :class="{ 'hidden': !(isInPerson || shouldBypassPreferences) }">
+                            <div class="mb-6" :class="{ 'hidden': !shouldShowVenueForm }">
+                                <div :class="{ 'hidden': selectedVenue && !shouldBypassPreferences }">
                                     <fieldset v-if="hasAnyVenues">
                                         <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                                             <div class="flex items-center">
@@ -265,7 +265,7 @@
                                         </div>
                                     </fieldset>
 
-                                    <div v-show="shouldShowExistingVenueDropdown">
+                                    <div :class="{ 'hidden': !shouldShowExistingVenueDropdown }">
                                         <select id="selected_venue"
                                                 :required="hasAnyVenues"
                                                 :disabled="!hasAnyVenues"
@@ -1801,14 +1801,35 @@
     }
   })
 
-  app = vueApp.mount('#app')
+  let appInstance;
 
   if (typeof window !== 'undefined') {
-    window.app = app
+    window.appBootstrapError = null;
+  }
+
+  try {
+    appInstance = vueApp.mount('#app');
+  } catch (error) {
+    if (typeof window !== 'undefined') {
+      const details = error instanceof Error ? (error.stack || error.message) : String(error);
+
+      window.appBootstrapError = details;
+      window.appReadyForTesting = true;
+    }
+
+    throw error;
+  }
+
+  app = appInstance;
+
+  if (typeof window !== 'undefined') {
+    window.app = appInstance;
 
     const markAppReady = () => {
       window.appReadyForTesting = true;
     };
+
+    markAppReady();
 
     window.setTimeout(() => {
       if (!window.appReadyForTesting) {

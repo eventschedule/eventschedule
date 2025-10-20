@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Laravel\Dusk\Browser;
+use RuntimeException;
 use Throwable;
 
 trait AccountSetupTrait
@@ -178,14 +179,28 @@ trait AccountSetupTrait
                         return true;
                     }
 
-                    return !!(window.app && typeof window.app === 'object');
+                    if (window.app && typeof window.app === 'object') {
+                        return true;
+                    }
+
+                    return !!document.querySelector('#selected_venue');
                 } catch (error) {
+                    if (typeof window !== 'undefined') {
+                        window.appBootstrapError = error instanceof Error ? (error.stack || error.message) : String(error);
+                    }
+
                     return false;
                 }
             JS);
 
             return ! empty($result) && $result[0];
         }, 'Waiting for the event editor to finish bootstrapping.');
+
+        $bootstrapError = $browser->script('return window.appBootstrapError || null;');
+
+        if (! empty($bootstrapError) && ! empty($bootstrapError[0])) {
+            throw new RuntimeException('Event editor failed to bootstrap: ' . $bootstrapError[0]);
+        }
 
         $browser->waitUsing(5, 100, function () use ($browser) {
             $result = $browser->script('return window.app && Array.isArray(window.app.venues) && window.app.venues.length > 0;');
