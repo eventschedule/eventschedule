@@ -114,6 +114,18 @@ Add the following line to your crontab to ensure scheduled tasks run automatical
 
 ---
 
+## Logging
+
+Event Schedule ships with a dedicated `syslog_server` channel for forwarding logs to a remote syslog endpoint.
+
+1. Set `LOG_CHANNEL=syslog_server` (or include `syslog_server` in `LOG_STACK`) to start using the channel.
+2. Configure the target server via `LOG_SYSLOG_HOST` and `LOG_SYSLOG_PORT` in your `.env` file or through **Settings → General** in the administration panel.
+3. Optionally adjust the minimum severity with `LOG_LEVEL` (also available under **Settings → General**) or override the facility using `LOG_SYSLOG_FACILITY`.
+
+By default, the handler emits RFC 5424-formatted messages with contextual placeholder replacement to keep structured log data intact.
+
+---
+
 You're all set! 🎉 Event Schedule should now be up and running.
 
 ## Mobile Wallet Tickets
