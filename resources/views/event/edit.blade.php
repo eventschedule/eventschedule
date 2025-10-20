@@ -880,8 +880,13 @@
                                         @if ($loop->index == 2)
                                         <option disabled>──────────</option>
                                         @endif
-                                        <option value="{{ $currency->value }}" {{ $event->ticket_currency_code == $currency->value ? 'selected' : '' }}>
-                                            {{ $currency->value }} - {{ $currency->label }}
+                                        @php
+                                            $currencyValue = data_get($currency, 'value');
+                                            $currencyLabel = data_get($currency, 'label', $currencyValue);
+                                        @endphp
+                                        @continue(empty($currencyValue))
+                                        <option value="{{ $currencyValue }}" {{ $event->ticket_currency_code == $currencyValue ? 'selected' : '' }}>
+                                            {{ $currencyValue }} - {{ $currencyLabel }}
                                         </option>
                                         @endforeach
                                     </select>
