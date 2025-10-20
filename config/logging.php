@@ -116,6 +116,13 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'role_debug' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/role_debug.log'),
+            'level' => $normalizeLogLevel('debug'),
+            'replace_placeholders' => true,
+        ],
+
         'daily' => [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
