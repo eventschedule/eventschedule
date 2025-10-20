@@ -3091,6 +3091,12 @@ class RoleController extends Controller
                 return $colorName;
             }
 
+            $colors = $this->extractColors($item, $original, $depth + 1);
+
+            if (! empty($colors)) {
+                return implode(' → ', $colors);
+            }
+
             return null;
         }
 
@@ -3195,6 +3201,12 @@ class RoleController extends Controller
 
             if ($colorLabel !== null && $colorLabel !== '') {
                 return $colorLabel;
+            }
+
+            $colors = $this->extractColors($item, $original, $depth + 1);
+
+            if (! empty($colors)) {
+                return implode(' → ', $colors);
             }
         }
 

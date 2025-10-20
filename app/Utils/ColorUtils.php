@@ -254,6 +254,12 @@ class ColorUtils
             if ($colorName !== null && $colorName !== '') {
                 return $colorName;
             }
+
+            $colors = self::extractColors($item, $depth + 1);
+
+            if (! empty($colors)) {
+                return implode(' → ', $colors);
+            }
         }
 
         return null;
@@ -351,6 +357,12 @@ class ColorUtils
 
             if ($colorLabel !== null && $colorLabel !== '') {
                 return $colorLabel;
+            }
+
+            $colors = self::extractColors($item, $depth + 1);
+
+            if (! empty($colors)) {
+                return implode(' → ', $colors);
             }
         }
 
