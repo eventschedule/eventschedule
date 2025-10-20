@@ -4,10 +4,8 @@ namespace Tests\Browser\Traits;
 
 use App\Models\Role;
 use App\Models\User;
-use App\Utils\UrlUtils;
 use Illuminate\Support\Str;
 use Laravel\Dusk\Browser;
-use RuntimeException;
 use Throwable;
 
 trait AccountSetupTrait
@@ -169,154 +167,19 @@ trait AccountSetupTrait
      */
     protected function selectExistingVenue(Browser $browser): void
     {
-        $this->ensureEventEditorReady($browser);
+        $browser->waitFor('#selected_venue', 5);
 
-        if ($this->attemptVueVenueSelection($browser)) {
-            return;
-        }
+        $browser->waitUsing(5, 100, function () use ($browser) {
+            $result = $browser->script('return window.app && Array.isArray(window.app.venues) && window.app.venues.length > 0;');
 
-        $this->fallbackSelectVenue($browser);
-    }
-
-    /**
-     * Add the first available member to the event form using Vue state
-     */
-    protected function addExistingMember(Browser $browser): void
-    {
-        if ($this->attemptVueMemberSelection($browser)) {
-            return;
-        }
-
-        $this->fallbackAddMember($browser);
-    }
-
-    protected function ensureEventEditorReady(Browser $browser): void
-    {
-        try {
-            $browser->waitUsing(10, 100, function () use ($browser) {
-                $result = $browser->script(<<<'JS'
-                    try {
-                        if (typeof window === 'undefined') {
-                            return false;
-                        }
-
-                        if (window.appReadyForTesting) {
-                            return true;
-                        }
-
-                        if (window.app && typeof window.app === 'object') {
-                            return true;
-                        }
-
-                        return !!document.querySelector('form[action*="event"]');
-                    } catch (error) {
-                        if (typeof window !== 'undefined') {
-                            window.appBootstrapError = error instanceof Error ? (error.stack || error.message) : String(error);
-                        }
-
-                        return false;
-                    }
-                JS);
-
-                return ! empty($result) && $result[0];
-            });
-        } catch (Throwable $exception) {
-            $bootstrapError = $browser->script('return window.appBootstrapError || null;');
-
-            if (! empty($bootstrapError) && ! empty($bootstrapError[0])) {
-                throw new RuntimeException('Event editor failed to bootstrap: ' . $bootstrapError[0], 0, $exception);
-            }
-        }
-    }
-
-    protected function attemptVueVenueSelection(Browser $browser): bool
-    {
-        try {
-            $browser->waitUsing(5, 100, function () use ($browser) {
-                $result = $browser->script('return window.app && Array.isArray(window.app.venues) && window.app.venues.length > 0;');
-
-                return ! empty($result) && $result[0];
-            });
-        } catch (Throwable $exception) {
-            return false;
-        }
+            return ! empty($result) && $result[0];
+        });
 
         $browser->script(<<<'JS'
             if (window.app && Array.isArray(window.app.venues) && window.app.venues.length > 0) {
                 window.app.venueType = 'use_existing';
                 window.app.selectedVenue = window.app.venues[0];
             }
-        JS);
-
-        try {
-            $browser->waitUsing(5, 100, function () use ($browser) {
-                $result = $browser->script("return (function () {\n                    var input = document.querySelector('input[name=\"venue_id\"]');\n                    return !!(input && input.value);\n                })();");
-
-                return ! empty($result) && $result[0];
-            });
-        } catch (Throwable $exception) {
-            return false;
-        }
-
-        return true;
-    }
-
-    protected function fallbackSelectVenue(Browser $browser): void
-    {
-        $venue = Role::query()->where('type', 'venue')->orderBy('name')->first();
-
-        $this->assertNotNull($venue, 'No venues are available for selection.');
-
-        $encodedVenueId = UrlUtils::encodeId($venue->id);
-        $venueLabel = addslashes($venue->name ?? '');
-
-        $browser->script(<<<JS
-            (function () {
-                var form = document.querySelector('form[action*="event"]') || document.querySelector('form');
-
-                if (!form) {
-                    return;
-                }
-
-                var venueInput = form.querySelector('input[name="venue_id"]');
-
-                if (!venueInput) {
-                    venueInput = document.createElement('input');
-                    venueInput.type = 'hidden';
-                    venueInput.name = 'venue_id';
-                    form.appendChild(venueInput);
-                }
-
-                venueInput.value = '{$encodedVenueId}';
-
-                var venueTypeInput = form.querySelector('input[name="venue_type"]');
-
-                if (!venueTypeInput) {
-                    venueTypeInput = document.createElement('input');
-                    venueTypeInput.type = 'hidden';
-                    venueTypeInput.name = 'venue_type';
-                    form.appendChild(venueTypeInput);
-                }
-
-                venueTypeInput.value = 'use_existing';
-
-                var inPerson = document.getElementById('in_person');
-
-                if (inPerson) {
-                    inPerson.checked = true;
-                }
-
-                var venueSelect = document.getElementById('selected_venue');
-
-                if (venueSelect && !venueSelect.querySelector('option[data-dusk-fallback="1"]')) {
-                    var option = document.createElement('option');
-                    option.value = '{$encodedVenueId}';
-                    option.textContent = '{$venueLabel}';
-                    option.setAttribute('data-dusk-fallback', '1');
-                    venueSelect.appendChild(option);
-                    venueSelect.value = '{$encodedVenueId}';
-                }
-            })();
         JS);
 
         $browser->waitUsing(5, 100, function () use ($browser) {
@@ -326,17 +189,16 @@ trait AccountSetupTrait
         });
     }
 
-    protected function attemptVueMemberSelection(Browser $browser): bool
+    /**
+     * Add the first available member to the event form using Vue state
+     */
+    protected function addExistingMember(Browser $browser): void
     {
-        try {
-            $browser->waitUsing(5, 100, function () use ($browser) {
-                $result = $browser->script('return window.app && Array.isArray(window.app.filteredMembers) && window.app.filteredMembers.length > 0;');
+        $browser->waitUsing(5, 100, function () use ($browser) {
+            $result = $browser->script('return window.app && Array.isArray(window.app.filteredMembers) && window.app.filteredMembers.length > 0;');
 
-                return ! empty($result) && $result[0];
-            });
-        } catch (Throwable $exception) {
-            return false;
-        }
+            return ! empty($result) && $result[0];
+        });
 
         $browser->script(<<<'JS'
             if (window.app && Array.isArray(window.app.filteredMembers) && window.app.filteredMembers.length > 0) {
@@ -349,77 +211,8 @@ trait AccountSetupTrait
             }
         JS);
 
-        try {
-            $browser->waitUsing(5, 100, function () use ($browser) {
-                $result = $browser->script('return window.app && Array.isArray(window.app.selectedMembers) && window.app.selectedMembers.length > 0;');
-
-                return ! empty($result) && $result[0];
-            });
-        } catch (Throwable $exception) {
-            return false;
-        }
-
-        return true;
-    }
-
-    protected function fallbackAddMember(Browser $browser): void
-    {
-        $member = Role::query()->where('type', 'talent')->orderBy('name')->first();
-
-        $this->assertNotNull($member, 'No members are available for selection.');
-
-        $encodedMemberId = UrlUtils::encodeId($member->id);
-        $memberName = addslashes($member->name ?? '');
-        $memberEmail = addslashes($member->email ?? '');
-
-        $browser->script(<<<JS
-            (function () {
-                var form = document.querySelector('form[action*="event"]') || document.querySelector('form');
-
-                if (!form) {
-                    return;
-                }
-
-                var container = document.getElementById('dusk-members-fallback');
-
-                if (!container) {
-                    container = document.createElement('div');
-                    container.id = 'dusk-members-fallback';
-                    container.style.display = 'none';
-                    form.appendChild(container);
-                }
-
-                container.innerHTML = '';
-
-                var nameInput = document.createElement('input');
-                nameInput.type = 'hidden';
-                nameInput.name = 'members[{$encodedMemberId}][name]';
-                nameInput.value = '{$memberName}';
-                container.appendChild(nameInput);
-
-                if ('{$memberEmail}' !== '') {
-                    var emailInput = document.createElement('input');
-                    emailInput.type = 'hidden';
-                    emailInput.name = 'members[{$encodedMemberId}][email]';
-                    emailInput.value = '{$memberEmail}';
-                    container.appendChild(emailInput);
-                }
-
-                var memberTypeInput = form.querySelector('input[name="member_type"]');
-
-                if (!memberTypeInput) {
-                    memberTypeInput = document.createElement('input');
-                    memberTypeInput.type = 'hidden';
-                    memberTypeInput.name = 'member_type';
-                    form.appendChild(memberTypeInput);
-                }
-
-                memberTypeInput.value = 'use_existing';
-            })();
-        JS);
-
         $browser->waitUsing(5, 100, function () use ($browser) {
-            $result = $browser->script("return (function () {\n                var input = document.querySelector('input[name=\"members[{$encodedMemberId}][name]\"]');\n                return !!(input && input.value);\n            })();");
+            $result = $browser->script('return window.app && Array.isArray(window.app.selectedMembers) && window.app.selectedMembers.length > 0;');
 
             return ! empty($result) && $result[0];
         });
