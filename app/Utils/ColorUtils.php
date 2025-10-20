@@ -204,22 +204,55 @@ class ColorUtils
         }
 
         if (is_array($item)) {
-            foreach (['name', 'value', 'label', 'title', 'id', 'slug'] as $key) {
-                if (array_key_exists($key, $item)) {
-                    $candidate = self::determineRoleAssetName($item[$key], $depth + 1);
+            $colors = self::extractColors($item, $depth + 1);
+            $colorName = empty($colors) ? null : implode(' → ', $colors);
 
-                    if (is_string($candidate) && trim($candidate) !== '') {
-                        return $candidate;
-                    }
+            foreach (['name', 'value', 'label', 'title', 'id', 'slug'] as $key) {
+                if (! array_key_exists($key, $item)) {
+                    continue;
                 }
+
+                $candidate = self::determineRoleAssetName($item[$key], $depth + 1);
+
+                if (! is_string($candidate)) {
+                    continue;
+                }
+
+                $candidate = trim($candidate);
+
+                if ($candidate === '') {
+                    continue;
+                }
+
+                if ($colorName !== null && self::shouldDeferToColorFallback($candidate, $colors)) {
+                    continue;
+                }
+
+                return $candidate;
             }
 
             foreach ($item as $value) {
                 $candidate = self::determineRoleAssetName($value, $depth + 1);
 
-                if (is_string($candidate) && trim($candidate) !== '') {
-                    return $candidate;
+                if (! is_string($candidate)) {
+                    continue;
                 }
+
+                $candidate = trim($candidate);
+
+                if ($candidate === '') {
+                    continue;
+                }
+
+                if ($colorName !== null && self::shouldDeferToColorFallback($candidate, $colors)) {
+                    continue;
+                }
+
+                return $candidate;
+            }
+
+            if ($colorName !== null && $colorName !== '') {
+                return $colorName;
             }
         }
 
@@ -269,22 +302,55 @@ class ColorUtils
         }
 
         if (is_array($item)) {
-            foreach (['label', 'name', 'title', 'value', 'id', 'slug'] as $key) {
-                if (array_key_exists($key, $item)) {
-                    $candidate = self::determineRoleAssetLabel($item[$key], $depth + 1);
+            $colors = self::extractColors($item, $depth + 1);
+            $colorLabel = empty($colors) ? null : implode(' → ', $colors);
 
-                    if (is_string($candidate) && trim($candidate) !== '') {
-                        return $candidate;
-                    }
+            foreach (['label', 'name', 'title', 'value', 'id', 'slug'] as $key) {
+                if (! array_key_exists($key, $item)) {
+                    continue;
                 }
+
+                $candidate = self::determineRoleAssetLabel($item[$key], $depth + 1);
+
+                if (! is_string($candidate)) {
+                    continue;
+                }
+
+                $candidate = trim($candidate);
+
+                if ($candidate === '') {
+                    continue;
+                }
+
+                if ($colorLabel !== null && self::shouldDeferToColorFallback($candidate, $colors)) {
+                    continue;
+                }
+
+                return $candidate;
             }
 
             foreach ($item as $value) {
                 $candidate = self::determineRoleAssetLabel($value, $depth + 1);
 
-                if (is_string($candidate) && trim($candidate) !== '') {
-                    return $candidate;
+                if (! is_string($candidate)) {
+                    continue;
                 }
+
+                $candidate = trim($candidate);
+
+                if ($candidate === '') {
+                    continue;
+                }
+
+                if ($colorLabel !== null && self::shouldDeferToColorFallback($candidate, $colors)) {
+                    continue;
+                }
+
+                return $candidate;
+            }
+
+            if ($colorLabel !== null && $colorLabel !== '') {
+                return $colorLabel;
             }
         }
 
@@ -348,6 +414,15 @@ class ColorUtils
         }
 
         return [];
+    }
+
+    private static function shouldDeferToColorFallback(string $candidate, array $colors): bool
+    {
+        if (count($colors) < 2) {
+            return false;
+        }
+
+        return self::isColorString($candidate);
     }
 
     private static function isColorString(string $value): bool
