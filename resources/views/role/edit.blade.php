@@ -800,9 +800,9 @@
                                 <select id="font_family" name="font_family" onchange="onChangeFont()"
                                     class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                     @foreach($fonts as $font)
-                                    <option value="{{ $font->value }}"
-                                        {{ $role->font_family == $font->value ? 'SELECTED' : '' }}>
-                                        {{ $font->label }}</option>
+                                    <option value="{{ $font['value'] }}"
+                                        {{ $role->font_family == $font['value'] ? 'SELECTED' : '' }}>
+                                        {{ $font['label'] }}</option>
                                     @endforeach
                                 </select>
                                 <x-input-error class="mt-2" :messages="$errors->get('font_family')" />
