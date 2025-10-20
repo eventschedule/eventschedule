@@ -245,10 +245,10 @@
 
                         <x-text-input name="venue_id" v-bind:value="selectedVenue.id" type="hidden" />
 
-                        <div v-if="isInPerson">
-                            <div v-show="!selectedVenue || showVenueAddressFields" class="mb-6">
-                                <div v-show="!selectedVenue">
-                                    <fieldset v-if="Object.keys(venues).length > 0">
+                        <div v-if="isInPerson || shouldBypassPreferences">
+                            <div v-show="shouldShowVenueForm" class="mb-6">
+                                <div v-show="!selectedVenue || shouldBypassPreferences">
+                                    <fieldset v-if="hasAnyVenues">
                                         <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                                             <div class="flex items-center">
                                                 <input id="use_existing_venue" name="venue_type" type="radio" value="use_existing" v-model="venueType"
@@ -265,18 +265,18 @@
                                         </div>
                                     </fieldset>
 
-                                    <div v-show="venueType === 'use_existing' || Object.keys(venues).length === 0">
+                                    <div v-show="shouldShowExistingVenueDropdown">
                                         <select id="selected_venue"
-                                                :required="Object.keys(venues).length > 0"
-                                                :disabled="Object.keys(venues).length === 0"
+                                                :required="hasAnyVenues"
+                                                :disabled="!hasAnyVenues"
                                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}"
                                                 v-model="selectedVenue">
-                                                <template v-if="Object.keys(venues).length === 0">
+                                                <template v-if="!hasAnyVenues">
                                                     <option value="" selected>{{ __('messages.no_venues_listed') }}</option>
                                                 </template>
                                                 <template v-else>
                                                     <option value="" disabled selected>{{ __('messages.please_select') }}</option>
-                                                    <option v-for="venue in venues" :key="venue.id" :value="venue">
+                                                    <option v-for="venue in availableVenues" :key="venue.id" :value="venue">
                                                         @{{ venue.name || venue.address1 }} <template v-if="venue.email">(@{{ venue.email }})</template>
                                                     </option>
                                                 </template>
@@ -1589,7 +1589,39 @@
       filteredMembers() {
         return this.members.filter(member => !this.selectedMembers.some(selected => selected.id === member.id));
       },
-      isFormValid() {        
+      availableVenues() {
+        if (Array.isArray(this.venues)) {
+          return this.venues;
+        }
+
+        if (this.venues && typeof this.venues === 'object') {
+          return Object.values(this.venues);
+        }
+
+        return [];
+      },
+      hasAnyVenues() {
+        return this.availableVenues.length > 0;
+      },
+      shouldShowVenueForm() {
+        if (this.shouldBypassPreferences) {
+          return true;
+        }
+
+        return !this.selectedVenue || this.showVenueAddressFields;
+      },
+      shouldShowExistingVenueDropdown() {
+        if (this.shouldBypassPreferences) {
+          return true;
+        }
+
+        if (!this.shouldShowVenueForm) {
+          return false;
+        }
+
+        return this.venueType === 'use_existing' || !this.hasAnyVenues;
+      },
+      isFormValid() {
         var hasSubdomain = this.venueName || this.selectedMembers.length > 0;
         var hasVenue = this.venueAddress1 || this.event.event_url;
 
@@ -1695,6 +1727,10 @@
       },
     },
     mounted() {
+      if (!Array.isArray(this.venues) && this.venues && typeof this.venues === 'object') {
+        this.venues = Object.values(this.venues);
+      }
+
       this.showMemberTypeRadio = this.selectedMembers.length === 0;
 
       if (this.event.id) {
@@ -1706,6 +1742,9 @@
         if (this.shouldBypassPreferences) {
           this.isInPerson = true;
           this.isOnline = false;
+          if (this.hasAnyVenues) {
+            this.venueType = 'use_existing';
+          }
         } else if (!this.isInPerson && !this.isOnline) {
           this.isInPerson = true;
         }
