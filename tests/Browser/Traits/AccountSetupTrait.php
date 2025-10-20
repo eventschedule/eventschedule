@@ -96,9 +96,9 @@ trait AccountSetupTrait
                 ->scrollIntoView('button[type="submit"]')
                 ->press('Save');
 
-        $this->waitForRoleScheduleRedirect($browser, 'venue', $name, 20);
+        $slug = $this->waitForRoleScheduleRedirect($browser, 'venue', $name, 20);
 
-        $this->verifyRoleEmailAddress('venue', $name);
+        $this->verifyRoleEmailAddress('venue', $name, $slug);
     }
 
     /**
@@ -116,9 +116,9 @@ trait AccountSetupTrait
                 ->scrollIntoView('button[type="submit"]')
                 ->press('Save');
 
-        $this->waitForRoleScheduleRedirect($browser, 'talent', $name, 20);
+        $slug = $this->waitForRoleScheduleRedirect($browser, 'talent', $name, 20);
 
-        $this->verifyRoleEmailAddress('talent', $name);
+        $this->verifyRoleEmailAddress('talent', $name, $slug);
     }
 
     /**
@@ -138,9 +138,9 @@ trait AccountSetupTrait
                 ->scrollIntoView('button[type="submit"]')
                 ->press('Save');
 
-        $this->waitForRoleScheduleRedirect($browser, 'curator', $name, 20);
+        $slug = $this->waitForRoleScheduleRedirect($browser, 'curator', $name, 20);
 
-        $this->verifyRoleEmailAddress('curator', $name);
+        $this->verifyRoleEmailAddress('curator', $name, $slug);
     }
 
     /**
@@ -334,22 +334,34 @@ trait AccountSetupTrait
         });
     }
 
-    protected function verifyRoleEmailAddress(string $type, string $name): void
+    protected function verifyRoleEmailAddress(string $type, string $name, ?string $slug = null): void
     {
         $typeKey = strtolower($type);
 
         $user = $this->resolveTestAccountUser();
 
-        $role = Role::query()
-            ->where('type', $typeKey)
-            ->when($user, function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })
-            ->when($name !== '', function ($query) use ($name) {
-                $query->where('name', $name);
-            })
-            ->latest('id')
-            ->first();
+        $role = null;
+
+        if ($slug !== null && $slug !== '') {
+            $role = Role::query()
+                ->where('type', $typeKey)
+                ->where('subdomain', $slug)
+                ->latest('id')
+                ->first();
+        }
+
+        if (! $role) {
+            $role = Role::query()
+                ->where('type', $typeKey)
+                ->when($user, function ($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                })
+                ->when($name !== '', function ($query) use ($name) {
+                    $query->where('name', $name);
+                })
+                ->latest('id')
+                ->first();
+        }
 
         if (! $role && $name !== '') {
             $role = Role::query()
@@ -371,12 +383,15 @@ trait AccountSetupTrait
             return;
         }
 
-        if ($role->email_verified_at) {
-            return;
+        if (! $role->email_verified_at) {
+            $role->forceFill(['email_verified_at' => Carbon::now()]);
+            $role->save();
         }
 
-        $role->forceFill(['email_verified_at' => Carbon::now()]);
-        $role->save();
+        if ($user && ! $user->email_verified_at) {
+            $user->forceFill(['email_verified_at' => Carbon::now()]);
+            $user->save();
+        }
     }
 
     /**
