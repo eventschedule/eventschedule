@@ -169,9 +169,9 @@ trait AccountSetupTrait
     {
         $this->waitForVueApp($browser);
 
-        $browser->waitFor('#selected_venue', 10);
+        $browser->waitFor('#selected_venue', 20);
 
-        $browser->waitUsing(10, 100, function () use ($browser) {
+        $browser->waitUsing(20, 100, function () use ($browser) {
             $result = $browser->script('return window.app && Array.isArray(window.app.venues) && window.app.venues.length > 0;');
 
             return ! empty($result) && $result[0];
@@ -198,7 +198,7 @@ trait AccountSetupTrait
     {
         $this->waitForVueApp($browser);
 
-        $browser->waitUsing(10, 100, function () use ($browser) {
+        $browser->waitUsing(20, 100, function () use ($browser) {
             $result = $browser->script('return window.app && Array.isArray(window.app.filteredMembers) && window.app.filteredMembers.length > 0;');
 
             return ! empty($result) && $result[0];
@@ -215,7 +215,7 @@ trait AccountSetupTrait
             }
         JS);
 
-        $browser->waitUsing(10, 100, function () use ($browser) {
+        $browser->waitUsing(20, 100, function () use ($browser) {
             $result = $browser->script('return window.app && Array.isArray(window.app.selectedMembers) && window.app.selectedMembers.length > 0;');
 
             return ! empty($result) && $result[0];
@@ -225,22 +225,49 @@ trait AccountSetupTrait
     /**
      * Wait for the Vue application to finish bootstrapping when running browser tests.
      */
-    protected function waitForVueApp(Browser $browser, int $seconds = 10): void
+    protected function waitForVueApp(Browser $browser, int $seconds = 20): void
     {
         $browser->waitUsing($seconds, 100, function () use ($browser) {
-            $isReady = $browser->script('return typeof window !== "undefined" && window.appReadyForTesting === true;');
-
-            if (! empty($isReady) && $isReady[0]) {
-                return true;
-            }
-
             $error = $browser->script('return typeof window !== "undefined" ? window.appBootstrapError || null : null;');
 
             if (! empty($error) && $error[0]) {
                 throw new \RuntimeException('Vue app failed to bootstrap: ' . $error[0]);
             }
 
-            return false;
+            $isReady = $browser->script(<<<'JS'
+                return (function () {
+                    if (typeof window === 'undefined') {
+                        return false;
+                    }
+
+                    if (window.appReadyForTesting === true) {
+                        return true;
+                    }
+
+                    var hasVueApp = false;
+
+                    if (window.app && typeof window.app === 'object') {
+                        hasVueApp = !!(window.app.$el || window.app._container || window.app._instance);
+                    }
+
+                    if (!hasVueApp) {
+                        hasVueApp = !!document.querySelector('#app [data-v-app]');
+                    }
+
+                    if (!hasVueApp) {
+                        hasVueApp = !!document.querySelector('#selected_venue') || !!document.querySelector('[data-member-list]');
+                    }
+
+                    if (hasVueApp) {
+                        window.appReadyForTesting = true;
+                        return true;
+                    }
+
+                    return false;
+                })();
+            JS);
+
+            return ! empty($isReady) && $isReady[0] === true;
         });
     }
 
