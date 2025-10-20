@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Listeners\LogSentMessage;
 use App\Models\Setting;
+use App\Support\Logging\LoggingConfigManager;
 use App\Support\MailConfigManager;
 use App\Support\UpdateConfigManager;
 use App\Support\WalletConfigManager;
@@ -93,6 +94,12 @@ class AppServiceProvider extends ServiceProvider
 
             if (!empty($mailSettings)) {
                 MailConfigManager::apply($mailSettings);
+            }
+
+            $loggingSettings = Setting::forGroup('logging');
+
+            if (!empty($loggingSettings)) {
+                LoggingConfigManager::apply($loggingSettings);
             }
 
             $appleWalletSettings = Setting::forGroup('wallet.apple');

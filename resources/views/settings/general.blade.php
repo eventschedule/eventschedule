@@ -49,6 +49,56 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('update_repository_url')" />
                             </div>
 
+                            <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
+                                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                                    {{ __('messages.logging_settings') }}
+                                </h3>
+                                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                    {{ __('messages.logging_settings_description') }}
+                                </p>
+                            </div>
+
+                            <div class="grid gap-6 sm:grid-cols-2">
+                                <div>
+                                    <x-input-label for="log_syslog_host" :value="__('messages.log_syslog_host')" />
+                                    <x-text-input id="log_syslog_host" name="log_syslog_host" type="text"
+                                        class="mt-1 block w-full"
+                                        :value="old('log_syslog_host', $generalSettings['log_syslog_host'])" autocomplete="off" />
+                                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                        {{ __('messages.log_syslog_host_help') }}
+                                    </p>
+                                    <x-input-error class="mt-2" :messages="$errors->get('log_syslog_host')" />
+                                </div>
+
+                                <div>
+                                    <x-input-label for="log_syslog_port" :value="__('messages.log_syslog_port')" />
+                                    <x-text-input id="log_syslog_port" name="log_syslog_port" type="number" min="1"
+                                        max="65535" class="mt-1 block w-full"
+                                        :value="old('log_syslog_port', $generalSettings['log_syslog_port'])" autocomplete="off" />
+                                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                        {{ __('messages.log_syslog_port_help') }}
+                                    </p>
+                                    <x-input-error class="mt-2" :messages="$errors->get('log_syslog_port')" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <x-input-label for="log_level" :value="__('messages.log_level')" />
+                                <select id="log_level" name="log_level"
+                                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]">
+                                    @foreach ($availableLogLevels as $levelValue => $label)
+                                        <option value="{{ $levelValue }}"
+                                            @selected(old('log_level', $generalSettings['log_level']) === $levelValue)>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                    {{ __('messages.log_level_help') }}
+                                </p>
+                                <x-input-error class="mt-2" :messages="$errors->get('log_level')" />
+                            </div>
+
                             <div class="flex items-center gap-4">
                                 <x-primary-button>{{ __('messages.save') }}</x-primary-button>
 

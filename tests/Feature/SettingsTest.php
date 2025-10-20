@@ -101,6 +101,59 @@ class SettingsTest extends TestCase
         $this->assertNull(config('mail.mailers.smtp.url'));
     }
 
+    public function test_admin_can_update_general_and_logging_settings(): void
+    {
+        $admin = User::factory()->create();
+
+        config([
+            'app.url' => 'https://initial.test',
+            'logging.channels.syslog_server.handler_with.host' => '127.0.0.1',
+            'logging.channels.syslog_server.handler_with.port' => 514,
+            'logging.channels.single.level' => 'debug',
+            'logging.channels.syslog_server.level' => 'debug',
+        ]);
+
+        $payload = [
+            'public_url' => 'https://events.example.com',
+            'update_repository_url' => 'https://github.com/example/eventschedule',
+            'log_syslog_host' => 'logs.example.com',
+            'log_syslog_port' => 6514,
+            'log_level' => 'error',
+        ];
+
+        $response = $this
+            ->actingAs($admin)
+            ->patch('/settings/general', $payload);
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/settings/general');
+
+        $this->assertDatabaseHas('settings', [
+            'group' => 'general',
+            'key' => 'public_url',
+            'value' => 'https://events.example.com',
+        ]);
+
+        $this->assertDatabaseHas('settings', [
+            'group' => 'logging',
+            'key' => 'syslog_host',
+            'value' => 'logs.example.com',
+        ]);
+
+        $loggingSettings = Setting::forGroup('logging');
+
+        $this->assertSame('logs.example.com', $loggingSettings['syslog_host']);
+        $this->assertSame('6514', $loggingSettings['syslog_port']);
+        $this->assertSame('error', $loggingSettings['level']);
+
+        $this->assertSame('https://events.example.com', config('app.url'));
+        $this->assertSame('logs.example.com', config('logging.channels.syslog_server.handler_with.host'));
+        $this->assertSame(6514, config('logging.channels.syslog_server.handler_with.port'));
+        $this->assertSame('error', config('logging.channels.syslog_server.level'));
+        $this->assertSame('error', config('logging.channels.single.level'));
+    }
+
     public function test_mail_settings_from_database_are_applied_during_boot(): void
     {
         $originalConfig = [
@@ -166,6 +219,30 @@ class SettingsTest extends TestCase
 
         MailConfigManager::purgeResolvedMailer($originalConfig['mail.default'] ?? null);
         config($originalConfig);
+    }
+
+    public function test_logging_settings_from_database_are_applied_during_boot(): void
+    {
+        config([
+            'logging.channels.syslog_server.handler_with.host' => '127.0.0.1',
+            'logging.channels.syslog_server.handler_with.port' => 514,
+            'logging.channels.single.level' => 'debug',
+            'logging.channels.syslog_server.level' => 'debug',
+        ]);
+
+        Setting::setGroup('logging', [
+            'syslog_host' => 'logs.internal',
+            'syslog_port' => '10514',
+            'level' => 'warning',
+        ]);
+
+        $provider = app()->getProvider(AppServiceProvider::class);
+        $provider->boot();
+
+        $this->assertSame('logs.internal', config('logging.channels.syslog_server.handler_with.host'));
+        $this->assertSame(10514, config('logging.channels.syslog_server.handler_with.port'));
+        $this->assertSame('warning', config('logging.channels.syslog_server.level'));
+        $this->assertSame('warning', config('logging.channels.single.level'));
     }
 
     public function test_admin_can_send_test_mail_successfully(): void

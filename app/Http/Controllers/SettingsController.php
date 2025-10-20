@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Setting;
+use App\Support\Logging\LogLevelNormalizer;
+use App\Support\Logging\LoggingConfigManager;
 use App\Support\MailConfigManager;
 use App\Support\MailTemplateManager;
 use App\Support\UpdateConfigManager;
@@ -59,6 +61,7 @@ class SettingsController extends Controller
 
         return view('settings.general', [
             'generalSettings' => $this->getGeneralSettings(),
+            'availableLogLevels' => LoggingConfigManager::availableLevels(),
             'versionInstalled' => $versionInstalled,
             'versionAvailable' => $versionAvailable,
         ]);
@@ -452,9 +455,14 @@ class SettingsController extends Controller
 
         $storedGeneralSettings = Setting::forGroup('general');
 
+        $logLevelKeys = array_keys(LoggingConfigManager::availableLevels());
+
         $validated = $request->validate([
             'public_url' => ['required', 'string', 'max:255', 'url'],
             'update_repository_url' => ['nullable', 'string', 'max:255', 'url'],
+            'log_syslog_host' => ['required', 'string', 'max:255'],
+            'log_syslog_port' => ['required', 'integer', 'min:1', 'max:65535'],
+            'log_level' => ['required', 'string', Rule::in($logLevelKeys)],
         ]);
 
         $publicUrl = $this->sanitizeUrl($validated['public_url']);
@@ -474,12 +482,28 @@ class SettingsController extends Controller
             'update_repository_url' => $updateRepositoryUrl,
         ]);
 
+        $syslogHost = $this->sanitizeHost($validated['log_syslog_host']);
+        $syslogPort = (int) $validated['log_syslog_port'];
+        $logLevel = LogLevelNormalizer::normalize(
+            $validated['log_level'],
+            config('logging.channels.single.level', 'debug')
+        );
+
+        $loggingSettings = [
+            'syslog_host' => $syslogHost,
+            'syslog_port' => (string) $syslogPort,
+            'level' => $logLevel,
+        ];
+
+        Setting::setGroup('logging', $loggingSettings);
+
         if ($normalizedPreviousRepositoryUrl !== $normalizedNewRepositoryUrl) {
             Cache::forget('version_available');
         }
 
         $this->applyGeneralConfig($publicUrl);
         UpdateConfigManager::apply($updateRepositoryUrl);
+        LoggingConfigManager::apply($loggingSettings);
 
         return redirect()->route('settings.general')->with('status', 'general-settings-updated');
     }
@@ -794,11 +818,25 @@ class SettingsController extends Controller
     protected function getGeneralSettings(): array
     {
         $storedGeneralSettings = Setting::forGroup('general');
+        $storedLoggingSettings = Setting::forGroup('logging');
+
+        $syslogHandlerConfig = config('logging.channels.syslog_server.handler_with', []);
+        $defaultSyslogHost = is_array($syslogHandlerConfig)
+            ? ($syslogHandlerConfig['host'] ?? '127.0.0.1')
+            : '127.0.0.1';
+        $defaultSyslogPort = is_array($syslogHandlerConfig)
+            ? ($syslogHandlerConfig['port'] ?? 514)
+            : 514;
+
+        $defaultLogLevel = config('logging.channels.single.level', 'debug');
 
         return [
             'public_url' => $storedGeneralSettings['public_url'] ?? config('app.url'),
             'update_repository_url' => $storedGeneralSettings['update_repository_url']
                 ?? config('self-update.repository_types.github.repository_url'),
+            'log_syslog_host' => $storedLoggingSettings['syslog_host'] ?? $defaultSyslogHost,
+            'log_syslog_port' => $storedLoggingSettings['syslog_port'] ?? $defaultSyslogPort,
+            'log_level' => $storedLoggingSettings['level'] ?? $defaultLogLevel,
         ];
     }
 
@@ -844,6 +882,11 @@ class SettingsController extends Controller
         $trimmed = trim($url);
 
         return rtrim($trimmed, '/');
+    }
+
+    protected function sanitizeHost(string $host): string
+    {
+        return trim($host);
     }
 
     protected function normalizeRepositoryUrl(?string $url): ?string

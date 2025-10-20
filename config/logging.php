@@ -61,6 +61,24 @@ $stackChannels = (static function ($value): array {
     return array_values(array_unique($channels));
 })(env('LOG_STACK', 'single'));
 
+$syslogServerHost = env('LOG_SYSLOG_HOST');
+
+if (is_string($syslogServerHost)) {
+    $syslogServerHost = trim($syslogServerHost);
+}
+
+if ($syslogServerHost === null || $syslogServerHost === '') {
+    $syslogServerHost = '127.0.0.1';
+}
+
+$syslogServerPort = env('LOG_SYSLOG_PORT', 514);
+
+if ($syslogServerPort === null || $syslogServerPort === '') {
+    $syslogServerPort = 514;
+} else {
+    $syslogServerPort = (int) $syslogServerPort;
+}
+
 return [
 
     /*
@@ -173,6 +191,18 @@ return [
             'level' => $normalizeLogLevel('debug'),
             'facility' => env('LOG_SYSLOG_FACILITY', LOG_USER),
             'replace_placeholders' => true,
+        ],
+
+        'syslog_server' => [
+            'driver' => 'monolog',
+            'level' => $normalizeLogLevel('debug'),
+            'handler' => SyslogUdpHandler::class,
+            'handler_with' => [
+                'host' => $syslogServerHost,
+                'port' => $syslogServerPort,
+                'facility' => env('LOG_SYSLOG_FACILITY', LOG_USER),
+            ],
+            'processors' => [PsrLogMessageProcessor::class],
         ],
 
         'errorlog' => [
