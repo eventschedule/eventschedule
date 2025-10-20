@@ -76,7 +76,7 @@ class GeneralTest extends DuskTestCase
             $browser->assertSee('google.com');
 
             // Create/edit event
-            $browser->visit('/' . $talentSlug . '/add-event?date=' . date('Y-m-d'));
+            $this->visitRoleAddEventPage($browser, $talentSlug, date('Y-m-d'), 'talent', 'Talent');
             $this->selectExistingVenue($browser);
 
             $browser->scrollIntoView('button[type="submit"]')
@@ -87,7 +87,7 @@ class GeneralTest extends DuskTestCase
             $browser->assertSee('Venue');
 
             // Create/edit event
-            $browser->visit('/' . $venueSlug . '/add-event?date=' . date('Y-m-d'));
+            $this->visitRoleAddEventPage($browser, $venueSlug, date('Y-m-d'), 'venue', 'Venue');
             $this->addExistingMember($browser);
 
             $browser->type('name', 'Venue Event')

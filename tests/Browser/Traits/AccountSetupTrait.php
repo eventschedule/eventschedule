@@ -150,7 +150,7 @@ trait AccountSetupTrait
     {
         $talentSlug = $this->getRoleSlug('talent', $talentName, 15);
 
-        $browser->visit('/' . $talentSlug . '/add-event?date=' . date('Y-m-d', strtotime('+3 days')));
+        $this->visitRoleAddEventPage($browser, $talentSlug, date('Y-m-d', strtotime('+3 days')), 'talent', $talentName);
 
         $this->selectExistingVenue($browser);
 
@@ -176,6 +176,8 @@ trait AccountSetupTrait
     protected function selectExistingVenue(Browser $browser): void
     {
         $this->waitForInteractiveDocument($browser);
+
+        $this->waitForVueApp($browser);
 
         $browser->waitFor('#selected_venue', 20);
 
@@ -247,6 +249,29 @@ trait AccountSetupTrait
 
             return ! empty($value);
         });
+    }
+
+    protected function visitRoleAddEventPage(Browser $browser, string $slug, ?string $date = null, string $roleType = 'talent', ?string $roleName = null): void
+    {
+        $normalizedSlug = trim($slug);
+
+        if ($normalizedSlug === '') {
+            $this->fail('Unable to visit add-event page because the provided slug was empty.');
+        }
+
+        $normalizedSlug = ltrim($normalizedSlug, '/');
+
+        $resolvedName = $roleName ?? ucfirst($roleType);
+        $resolvedDate = $date ?? date('Y-m-d');
+
+        $this->verifyRoleEmailAddress($roleType, $resolvedName, $normalizedSlug);
+
+        $browser->visit('/' . $normalizedSlug . '/add-event?date=' . $resolvedDate);
+
+        $this->waitForPath($browser, '/' . $normalizedSlug . '/add-event', 20);
+
+        $this->waitForInteractiveDocument($browser);
+        $this->waitForVueApp($browser);
     }
 
     /**

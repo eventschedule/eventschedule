@@ -111,7 +111,7 @@ class GroupsTest extends DuskTestCase
         $workshops = $role->groups()->where('name', 'Workshops')->first();
 
         // Create first event for "Main Shows" sub-schedule
-        $browser->visit('/' . $talentSlug . '/add-event?date=' . date('Y-m-d'));
+        $this->visitRoleAddEventPage($browser, $talentSlug, date('Y-m-d'), 'talent', 'Talent');
         $this->selectExistingVenue($browser);
 
         $browser->type('name', 'Main Show Event')
@@ -126,7 +126,7 @@ class GroupsTest extends DuskTestCase
         $browser->assertSee('Main Show Event');
 
         // Create second event for "Workshops" sub-schedule
-        $browser->visit('/' . $talentSlug . '/add-event?date=' . date('Y-m-d'));
+        $this->visitRoleAddEventPage($browser, $talentSlug, date('Y-m-d'), 'talent', 'Talent');
         $this->selectExistingVenue($browser);
 
         $browser->type('name', 'Workshop Event')
@@ -141,7 +141,7 @@ class GroupsTest extends DuskTestCase
         $browser->assertSee('Workshop Event');
 
         // Create third event without sub-schedule
-        $browser->visit('/' . $talentSlug . '/add-event?date=' . date('Y-m-d'));
+        $this->visitRoleAddEventPage($browser, $talentSlug, date('Y-m-d'), 'talent', 'Talent');
         $this->selectExistingVenue($browser);
 
         $browser->type('name', 'General Event')

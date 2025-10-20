@@ -133,7 +133,7 @@ class CuratorEventTest extends DuskTestCase
     protected function createEventForBothCurators(Browser $browser, string $talentSlug): void
     {
         // Create an event and add it to both curators
-        $browser->visit('/' . $talentSlug . '/add-event?date=' . date('Y-m-d'));
+        $this->visitRoleAddEventPage($browser, $talentSlug, date('Y-m-d'), 'talent', 'Talent');
         $this->selectExistingVenue($browser);
 
         $browser->type('duration', '2')
