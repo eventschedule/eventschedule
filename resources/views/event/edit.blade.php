@@ -1600,6 +1600,10 @@
           return true;
         }
 
+        if (this.hasAnyVenues) {
+          return true;
+        }
+
         return !this.selectedVenue || this.showVenueAddressFields;
       },
       shouldShowExistingVenueDropdown() {
@@ -1607,11 +1611,11 @@
           return true;
         }
 
-        if (!this.shouldShowVenueForm) {
-          return false;
+        if (!this.hasAnyVenues) {
+          return true;
         }
 
-        return this.venueType === 'use_existing' || !this.hasAnyVenues;
+        return this.venueType === 'use_existing';
       },
       displayEventUrl() {
         const base = this.eventUrlBase ? this.eventUrlBase.replace(/\/$/, '') : '';
