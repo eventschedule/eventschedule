@@ -1563,32 +1563,6 @@
       },
     },
     computed: {
-      displayEventUrl() {
-        const base = this.eventUrlBase ? this.eventUrlBase.replace(/\/$/, '') : '';
-        const slug = this.eventSlug || this.slugPreviewPlaceholder;
-
-        if (base) {
-          return slug ? `${base}/${slug}` : base;
-        }
-
-        return slug;
-      },
-      fullEventUrl() {
-        const base = this.eventUrlBaseAbsolute ? this.eventUrlBaseAbsolute.replace(/\/$/, '') : '';
-        const slug = this.eventSlug;
-
-        if (base && slug) {
-          return `${base}/${slug}`;
-        }
-
-        return '';
-      },
-      canUseEventUrl() {
-        return !!this.event.id && !!this.fullEventUrl;
-      },
-      filteredMembers() {
-        return this.members.filter(member => !this.selectedMembers.some(selected => selected.id === member.id));
-      },
       availableVenues() {
         if (Array.isArray(this.venues)) {
           return this.venues;
@@ -1620,6 +1594,32 @@
         }
 
         return this.venueType === 'use_existing' || !this.hasAnyVenues;
+      },
+      displayEventUrl() {
+        const base = this.eventUrlBase ? this.eventUrlBase.replace(/\/$/, '') : '';
+        const slug = this.eventSlug || this.slugPreviewPlaceholder;
+
+        if (base) {
+          return slug ? `${base}/${slug}` : base;
+        }
+
+        return slug;
+      },
+      fullEventUrl() {
+        const base = this.eventUrlBaseAbsolute ? this.eventUrlBaseAbsolute.replace(/\/$/, '') : '';
+        const slug = this.eventSlug;
+
+        if (base && slug) {
+          return `${base}/${slug}`;
+        }
+
+        return '';
+      },
+      canUseEventUrl() {
+        return !!this.event.id && !!this.fullEventUrl;
+      },
+      filteredMembers() {
+        return this.members.filter(member => !this.selectedMembers.some(selected => selected.id === member.id));
       },
       isFormValid() {
         var hasSubdomain = this.venueName || this.selectedMembers.length > 0;
