@@ -168,7 +168,7 @@ trait AccountSetupTrait
      */
     protected function selectExistingVenue(Browser $browser): void
     {
-        $this->waitForVueApp($browser);
+        $this->waitForInteractiveDocument($browser);
 
         $browser->waitFor('#selected_venue', 20);
 
@@ -247,7 +247,7 @@ trait AccountSetupTrait
      */
     protected function addExistingMember(Browser $browser): void
     {
-        $this->waitForVueApp($browser);
+        $this->waitForInteractiveDocument($browser);
 
         $browser->waitFor('#selected_member', 20);
 
@@ -324,6 +324,22 @@ trait AccountSetupTrait
             JS);
 
             return ! empty($result) && $result[0];
+        });
+    }
+
+    /**
+     * Wait until the browser reports that the document is ready for scripted interactions.
+     */
+    protected function waitForInteractiveDocument(Browser $browser, int $seconds = 20): void
+    {
+        $browser->waitUsing($seconds, 100, function () use ($browser) {
+            $state = $browser->script('return typeof document !== "undefined" ? document.readyState : null;');
+
+            if (empty($state)) {
+                return false;
+            }
+
+            return in_array($state[0], ['interactive', 'complete'], true);
         });
     }
 
