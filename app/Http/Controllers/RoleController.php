@@ -3091,12 +3091,6 @@ class RoleController extends Controller
                 return $colorName;
             }
 
-            $colors = $this->extractColors($item, $original, $depth + 1);
-
-            if (! empty($colors)) {
-                return implode(' → ', $colors);
-            }
-
             return null;
         }
 
@@ -3202,12 +3196,6 @@ class RoleController extends Controller
             if ($colorLabel !== null && $colorLabel !== '') {
                 return $colorLabel;
             }
-
-            $colors = $this->extractColors($item, $original, $depth + 1);
-
-            if (! empty($colors)) {
-                return implode(' → ', $colors);
-            }
         }
 
         return null;
@@ -3219,28 +3207,45 @@ class RoleController extends Controller
             return false;
         }
 
-        return $this->looksLikeColorString($candidate);
-    }
+        $normalizedCandidate = $this->normalizeColorForComparison($candidate);
 
-    private function looksLikeColorString(string $value): bool
-    {
-        if ($value === '') {
+        if ($normalizedCandidate === '') {
             return false;
         }
 
-        if ($value[0] === '#') {
-            return true;
-        }
-
-        if (preg_match('/^(?:rgb|rgba|hsl|hsla)\s*\(/i', $value)) {
-            return true;
-        }
-
-        if (preg_match('/^[0-9a-f]{3,8}$/i', $value)) {
-            return true;
+        foreach ($colors as $color) {
+            if ($normalizedCandidate === $this->normalizeColorForComparison($color)) {
+                return true;
+            }
         }
 
         return false;
+    }
+
+    private function normalizeColorForComparison(string $value): string
+    {
+        $value = trim($value);
+
+        if ($value === '') {
+            return '';
+        }
+
+        if (preg_match('/^(?:#|0x)([0-9a-f]{3,8})$/i', $value, $matches)) {
+            return strtolower('#' . $matches[1]);
+        }
+
+        if (preg_match('/^(rgb|rgba|hsl|hsla)\s*\(([^)]*)\)$/i', $value, $matches)) {
+            $prefix = strtolower($matches[1]);
+            $components = preg_replace('/\s+/', '', $matches[2]);
+
+            return $prefix . '(' . $components . ')';
+        }
+
+        if (preg_match('/^[0-9a-f]{3,8}$/i', $value)) {
+            return strtolower('#' . $value);
+        }
+
+        return '';
     }
 
     /**

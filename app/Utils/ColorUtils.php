@@ -254,12 +254,6 @@ class ColorUtils
             if ($colorName !== null && $colorName !== '') {
                 return $colorName;
             }
-
-            $colors = self::extractColors($item, $depth + 1);
-
-            if (! empty($colors)) {
-                return implode(' → ', $colors);
-            }
         }
 
         return null;
@@ -358,12 +352,6 @@ class ColorUtils
             if ($colorLabel !== null && $colorLabel !== '') {
                 return $colorLabel;
             }
-
-            $colors = self::extractColors($item, $depth + 1);
-
-            if (! empty($colors)) {
-                return implode(' → ', $colors);
-            }
         }
 
         return null;
@@ -434,27 +422,49 @@ class ColorUtils
             return false;
         }
 
-        return self::isColorString($candidate);
+        $normalizedCandidate = self::normalizeColorForComparison($candidate);
+
+        if ($normalizedCandidate === '') {
+            return false;
+        }
+
+        foreach ($colors as $color) {
+            if ($normalizedCandidate === self::normalizeColorForComparison($color)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static function normalizeColorForComparison(string $value): string
+    {
+        $value = trim($value);
+
+        if ($value === '') {
+            return '';
+        }
+
+        if (preg_match('/^(?:#|0x)([0-9a-f]{3,8})$/i', $value, $matches)) {
+            return strtolower('#' . $matches[1]);
+        }
+
+        if (preg_match('/^(rgb|rgba|hsl|hsla)\s*\(([^)]*)\)$/i', $value, $matches)) {
+            $prefix = strtolower($matches[1]);
+            $components = preg_replace('/\s+/', '', $matches[2]);
+
+            return $prefix . '(' . $components . ')';
+        }
+
+        if (preg_match('/^[0-9a-f]{3,8}$/i', $value)) {
+            return strtolower('#' . $value);
+        }
+
+        return '';
     }
 
     private static function isColorString(string $value): bool
     {
-        if ($value === '') {
-            return false;
-        }
-
-        if ($value[0] === '#') {
-            return true;
-        }
-
-        if (preg_match('/^(?:rgb|rgba|hsl|hsla)\s*\(/i', $value)) {
-            return true;
-        }
-
-        if (preg_match('/^[0-9a-f]{3,8}$/i', $value)) {
-            return true;
-        }
-
-        return false;
+        return self::normalizeColorForComparison($value) !== '';
     }
 }
