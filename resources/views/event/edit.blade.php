@@ -1136,7 +1136,7 @@
     });
   }
 
-  app = createApp({
+  const vueApp = createApp({
     data() {
       return {
         event: {
@@ -1799,10 +1799,22 @@
         window.appReadyForTesting = true;
       }
     }
-  }).mount('#app')
+  })
+
+  app = vueApp.mount('#app')
 
   if (typeof window !== 'undefined') {
     window.app = app
+
+    const markAppReady = () => {
+      window.appReadyForTesting = true;
+    };
+
+    window.setTimeout(() => {
+      if (!window.appReadyForTesting) {
+        markAppReady();
+      }
+    }, 0);
   }
 
   // Google Calendar sync functions

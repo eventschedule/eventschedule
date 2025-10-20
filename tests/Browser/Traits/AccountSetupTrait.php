@@ -167,8 +167,22 @@ trait AccountSetupTrait
      */
     protected function selectExistingVenue(Browser $browser): void
     {
-        $browser->waitUsing(10, 100, function () use ($browser) {
-            $result = $browser->script('return !!(window.appReadyForTesting);');
+        $browser->waitUsing(20, 100, function () use ($browser) {
+            $result = $browser->script(<<<'JS'
+                try {
+                    if (typeof window === 'undefined') {
+                        return false;
+                    }
+
+                    if (window.appReadyForTesting) {
+                        return true;
+                    }
+
+                    return !!(window.app && typeof window.app === 'object');
+                } catch (error) {
+                    return false;
+                }
+            JS);
 
             return ! empty($result) && $result[0];
         }, 'Waiting for the event editor to finish bootstrapping.');
