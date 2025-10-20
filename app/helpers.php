@@ -93,7 +93,9 @@ if (!function_exists('is_hosted_or_admin')) {
      */
     function is_hosted_or_admin(): bool
     {
-        if (config('app.hosted') || config('app.is_testing') || is_browser_testing()) {
+        $isTestingEnvironment = app()->environment('testing') || app()->runningUnitTests();
+
+        if (config('app.hosted') || config('app.is_testing') || $isTestingEnvironment || is_browser_testing()) {
             return true;
         }
 
@@ -243,11 +245,11 @@ if (!function_exists('vite_entry_paths')) {
         }
 
         $asset = $manifest[$entry];
-        $baseUrl = rtrim(url('/build'), '/');
+        $basePath = '/' . trim('build', '/');
 
         if (! empty($asset['file']) && is_string($asset['file'])) {
             $file = ltrim($asset['file'], '/');
-            $url = $baseUrl . '/' . $file;
+            $url = rtrim($basePath, '/') . '/' . $file;
 
             if (str_ends_with($file, '.css')) {
                 $paths['css'][] = $url;
@@ -262,7 +264,7 @@ if (!function_exists('vite_entry_paths')) {
                     continue;
                 }
 
-                $paths['css'][] = $baseUrl . '/' . ltrim($css, '/');
+                $paths['css'][] = rtrim($basePath, '/') . '/' . ltrim($css, '/');
             }
         }
 
