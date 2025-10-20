@@ -92,12 +92,7 @@
         }
 
         body {
-            @media (prefers-color-scheme: dark) {
-                color: #33383C !important;
-            }
-            @media (prefers-color-scheme: light) {
-                color: #33383C !important;
-            }
+            color: #33383C !important;
             font-family: '{{ isset($otherRole) && $otherRole ? $otherRole->font_family : $role->font_family }}', sans-serif !important;
             min-height: 100vh;
             background-attachment: scroll;
