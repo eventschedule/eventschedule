@@ -2442,6 +2442,12 @@ class RoleController extends Controller
             }
         }
 
+        $colors = $this->extractColors($entry);
+
+        if (! empty($colors)) {
+            return implode(' → ', $colors);
+        }
+
         return null;
     }
 
@@ -3034,7 +3040,7 @@ class RoleController extends Controller
         }
 
         if (is_array($item)) {
-            foreach (['name', 'value', 'label', 'title'] as $key) {
+            foreach (['name', 'value', 'label', 'title', 'id', 'slug'] as $key) {
                 if (array_key_exists($key, $item)) {
                     $candidate = $this->determineRoleAssetName($item[$key], $original, $depth + 1);
 
@@ -3050,6 +3056,12 @@ class RoleController extends Controller
                 if (is_string($candidate) && trim($candidate) !== '') {
                     return $candidate;
                 }
+            }
+
+            $colors = $this->extractColors($item, $original, $depth + 1);
+
+            if (! empty($colors)) {
+                return implode(' → ', $colors);
             }
 
             return null;
@@ -3123,6 +3135,12 @@ class RoleController extends Controller
                 if (is_string($candidate) && trim($candidate) !== '') {
                     return $candidate;
                 }
+            }
+
+            $colors = $this->extractColors($item, $original, $depth + 1);
+
+            if (! empty($colors)) {
+                return implode(' → ', $colors);
             }
         }
 
