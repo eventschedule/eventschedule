@@ -1117,6 +1117,7 @@
         },
         venues: @json($venues),
         members: @json($members ?? []),
+        shouldBypassPreferences: @json(is_browser_testing()),
         venueType: "{{ count($venues) > 0 ? 'use_existing' : 'create_new' }}",
         memberType: "{{ 'use_existing' }}",
         venueName: @json($selectedVenue ? $selectedVenue->name : ''),
@@ -1436,7 +1437,7 @@
                 this.isInPerson = true;
             }
         }
-        
+
         // Clear venue if in-person is unchecked
         if (type === 'in_person' && !this.isInPerson) {
             this.venueType = '{{ (count($venues) > 0 ? 'use_existing' : 'create_new'); }}';
@@ -1448,39 +1449,60 @@
             this.venueState = '';
             this.venuePostalCode = '';
         }
-        
+
         this.savePreferences();
       },
       savePreferences() {
-        localStorage.setItem('eventPreferences', JSON.stringify({
-          isInPerson: this.isInPerson,
-          isOnline: this.isOnline,
-          ticketsEnabled: this.event.tickets_enabled
-        }));
+        if (this.shouldBypassPreferences) {
+          return;
+        }
+
+        try {
+          localStorage.setItem('eventPreferences', JSON.stringify({
+            isInPerson: this.isInPerson,
+            isOnline: this.isOnline,
+            ticketsEnabled: this.event.tickets_enabled
+          }));
+        } catch (error) {
+          console.error('Error saving event preferences:', error);
+        }
       },
       loadPreferences() {
-        const preferences = JSON.parse(localStorage.getItem('eventPreferences'));
+        if (this.shouldBypassPreferences) {
+          return null;
+        }
+
+        let preferences = null;
+
+        try {
+          preferences = JSON.parse(localStorage.getItem('eventPreferences'));
+        } catch (error) {
+          preferences = null;
+        }
+
+        if (!preferences || typeof preferences !== 'object') {
+          return null;
+        }
+
         @if (! $event->exists && $selectedVenue)
         this.isInPerson = true;
-        if (preferences) {
-          this.isOnline = preferences.isOnline;          
-          @if ($role->isPro())
-            this.event.tickets_enabled = preferences.ticketsEnabled ?? false;
-          @else
-            this.event.tickets_enabled = false;
-          @endif
-        }
+        this.isOnline = preferences.isOnline;
+        @if ($role->isPro())
+          this.event.tickets_enabled = preferences.ticketsEnabled ?? false;
         @else
-        if (preferences) {
-          this.isInPerson = preferences.isInPerson;
-          this.isOnline = preferences.isOnline;
-          @if ($role->isPro())
-            this.event.tickets_enabled = preferences.ticketsEnabled ?? false;
-          @else
-            this.event.tickets_enabled = false;
-          @endif
-        }
+          this.event.tickets_enabled = false;
         @endif
+        @else
+        this.isInPerson = preferences.isInPerson;
+        this.isOnline = preferences.isOnline;
+        @if ($role->isPro())
+          this.event.tickets_enabled = preferences.ticketsEnabled ?? false;
+        @else
+          this.event.tickets_enabled = false;
+        @endif
+        @endif
+
+        return preferences;
       },
       validateForm(event) {
         const sanitizedSlug = this.slugify(this.eventSlug);
@@ -1672,9 +1694,12 @@
         this.isInPerson = !!this.event.venue || !!this.selectedVenue;
         this.isOnline = !!this.event.event_url;
       } else {
-        this.loadPreferences();
+        const preferences = this.loadPreferences();
 
-        if (!this.isInPerson && !this.isOnline) {
+        if (this.shouldBypassPreferences) {
+          this.isInPerson = true;
+          this.isOnline = false;
+        } else if (!this.isInPerson && !this.isOnline) {
           this.isInPerson = true;
         }
       }
