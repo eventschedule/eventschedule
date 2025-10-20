@@ -167,9 +167,11 @@ trait AccountSetupTrait
      */
     protected function selectExistingVenue(Browser $browser): void
     {
-        $browser->waitFor('#selected_venue', 5);
+        $this->waitForVueApp($browser);
 
-        $browser->waitUsing(5, 100, function () use ($browser) {
+        $browser->waitFor('#selected_venue', 10);
+
+        $browser->waitUsing(10, 100, function () use ($browser) {
             $result = $browser->script('return window.app && Array.isArray(window.app.venues) && window.app.venues.length > 0;');
 
             return ! empty($result) && $result[0];
@@ -182,7 +184,7 @@ trait AccountSetupTrait
             }
         JS);
 
-        $browser->waitUsing(5, 100, function () use ($browser) {
+        $browser->waitUsing(10, 100, function () use ($browser) {
             $result = $browser->script("return (function () {\n                var input = document.querySelector('input[name=\"venue_id\"]');\n                return !!(input && input.value);\n            })();");
 
             return ! empty($result) && $result[0];
@@ -194,7 +196,9 @@ trait AccountSetupTrait
      */
     protected function addExistingMember(Browser $browser): void
     {
-        $browser->waitUsing(5, 100, function () use ($browser) {
+        $this->waitForVueApp($browser);
+
+        $browser->waitUsing(10, 100, function () use ($browser) {
             $result = $browser->script('return window.app && Array.isArray(window.app.filteredMembers) && window.app.filteredMembers.length > 0;');
 
             return ! empty($result) && $result[0];
@@ -211,10 +215,32 @@ trait AccountSetupTrait
             }
         JS);
 
-        $browser->waitUsing(5, 100, function () use ($browser) {
+        $browser->waitUsing(10, 100, function () use ($browser) {
             $result = $browser->script('return window.app && Array.isArray(window.app.selectedMembers) && window.app.selectedMembers.length > 0;');
 
             return ! empty($result) && $result[0];
+        });
+    }
+
+    /**
+     * Wait for the Vue application to finish bootstrapping when running browser tests.
+     */
+    protected function waitForVueApp(Browser $browser, int $seconds = 10): void
+    {
+        $browser->waitUsing($seconds, 100, function () use ($browser) {
+            $isReady = $browser->script('return typeof window !== "undefined" && window.appReadyForTesting === true;');
+
+            if (! empty($isReady) && $isReady[0]) {
+                return true;
+            }
+
+            $error = $browser->script('return typeof window !== "undefined" ? window.appBootstrapError || null : null;');
+
+            if (! empty($error) && $error[0]) {
+                throw new \RuntimeException('Vue app failed to bootstrap: ' . $error[0]);
+            }
+
+            return false;
         });
     }
 
