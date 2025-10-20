@@ -1114,6 +1114,24 @@
 <script {!! nonce_attr() !!}>
   const { createApp, ref } = Vue
 
+  function hasBrowserTestingCookie() {
+    if (typeof document === 'undefined' || !document.cookie) {
+      return false;
+    }
+
+    return document.cookie.split(';').some(rawCookie => {
+      const cookie = rawCookie.trim().toLowerCase();
+
+      if (!cookie.startsWith('browser_testing=')) {
+        return false;
+      }
+
+      const value = cookie.split('=')[1];
+
+      return value === '1' || value === 'true';
+    });
+  }
+
   app = createApp({
     data() {
       return {
@@ -1124,7 +1142,7 @@
         },
         venues: @json($venues),
         members: @json($members ?? []),
-        shouldBypassPreferences: @json(is_browser_testing()),
+        shouldBypassPreferences: hasBrowserTestingCookie() || @json(is_browser_testing()),
         venueType: "{{ count($venues) > 0 ? 'use_existing' : 'create_new' }}",
         memberType: "{{ 'use_existing' }}",
         venueName: @json($selectedVenue ? $selectedVenue->name : ''),
@@ -1727,6 +1745,10 @@
       },
     },
     mounted() {
+      if (!this.shouldBypassPreferences && hasBrowserTestingCookie()) {
+        this.shouldBypassPreferences = true;
+      }
+
       if (!Array.isArray(this.venues) && this.venues && typeof this.venues === 'object') {
         this.venues = Object.values(this.venues);
       }
