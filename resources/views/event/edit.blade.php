@@ -248,9 +248,9 @@
                         <div v-if="isInPerson">
                             <div v-if="!selectedVenue || showVenueAddressFields" class="mb-6">
                                 <div v-if="!selectedVenue">
-                                    <fieldset v-if="Object.keys(venues).length > 0">                                
+                                    <fieldset v-if="Object.keys(venues).length > 0">
                                         <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
-                                            <div v-if="Object.keys(venues).length > 0" class="flex items-center">
+                                            <div class="flex items-center">
                                                 <input id="use_existing_venue" name="venue_type" type="radio" value="use_existing" v-model="venueType"
                                                     class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
                                                 <label for="use_existing_venue"
@@ -265,14 +265,21 @@
                                         </div>
                                     </fieldset>
 
-                                    <div v-if="venueType === 'use_existing'">
-                                        <select required id="selected_venue"
+                                    <div v-if="venueType === 'use_existing' || Object.keys(venues).length === 0">
+                                        <select id="selected_venue"
+                                                :required="Object.keys(venues).length > 0"
+                                                :disabled="Object.keys(venues).length === 0"
                                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}"
                                                 v-model="selectedVenue">
-                                                <option value="" disabled selected>{{ __('messages.please_select') }}</option>                                
-                                                <option v-for="venue in venues" :key="venue.id" :value="venue">
-                                                    @{{ venue.name || venue.address1 }} <template v-if="venue.email">(@{{ venue.email }})</template>
-                                                </option>
+                                                <template v-if="Object.keys(venues).length === 0">
+                                                    <option value="" selected>{{ __('messages.no_venues_listed') }}</option>
+                                                </template>
+                                                <template v-else>
+                                                    <option value="" disabled selected>{{ __('messages.please_select') }}</option>
+                                                    <option v-for="venue in venues" :key="venue.id" :value="venue">
+                                                        @{{ venue.name || venue.address1 }} <template v-if="venue.email">(@{{ venue.email }})</template>
+                                                    </option>
+                                                </template>
                                         </select>
                                     </div>
                                 </div>
