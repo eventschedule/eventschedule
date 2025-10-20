@@ -88,9 +88,11 @@ class CuratorEventTest extends DuskTestCase
             // Approve the event
             $browser->visit('/' . $curator1Slug . '/requests')
                     ->waitForText('Accept', 5)
-                    ->click('.test-accept-event')
-                    ->waitForLocation('/' . $curator1Slug . '/schedule', 5)
-                    ->assertSee('Talent');
+                    ->click('.test-accept-event');
+
+            $this->waitForPath($browser, '/' . $curator1Slug . '/schedule', 5);
+
+            $browser->assertSee('Talent');
 
             // Get the event from the database
             $event = \App\Models\Event::where('name', 'Talent')->latest()->first();
@@ -113,9 +115,11 @@ class CuratorEventTest extends DuskTestCase
                     ->waitForLocation($this->pathWithoutQuery($editPath), 5)
                     ->waitForText('Edit Event', 5)
                     ->scrollIntoView('button[type="submit"]')
-                    ->press('Save')
-                    ->waitForLocation('/' . $curator1Slug . '/schedule', 5)
-                    ->assertSee('Talent');
+                    ->press('Save');
+
+            $this->waitForPath($browser, '/' . $curator1Slug . '/schedule', 5);
+
+            $browser->assertSee('Talent');
             
             // Assert that the number of records remains the same
             $this->assertEquals(EventRole::count(), 4, 
@@ -149,9 +153,11 @@ class CuratorEventTest extends DuskTestCase
                 ");
 
         $browser->scrollIntoView('button[type="submit"]')
-                ->press('Save')
-                ->waitForLocation('/' . $talentSlug . '/schedule', 5)
-                ->assertSee('Talent');
+                ->press('Save');
+
+        $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
+
+        $browser->assertSee('Talent');
     }
 
     private function relativeUrl(string $url): string

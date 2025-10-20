@@ -55,9 +55,11 @@ class GeneralTest extends DuskTestCase
                     ->assertPathIs('/' . $venueSlug . '/edit')
                     ->type('website', 'https://google.com')
                     ->scrollIntoView('button[type="submit"]')
-                    ->press('Save')
-                    ->waitForLocation('/' . $venueSlug . '/schedule', 20)
-                    ->assertSee('google.com');
+                    ->press('Save');
+
+            $this->waitForPath($browser, '/' . $venueSlug . '/schedule', 20);
+
+            $browser->assertSee('google.com');
 
             // Create/edit talent using the trait
             $this->createTestTalent($browser);
@@ -67,18 +69,22 @@ class GeneralTest extends DuskTestCase
                     ->assertPathIs('/' . $talentSlug . '/edit')
                     ->type('website', 'https://google.com')
                     ->scrollIntoView('button[type="submit"]')
-                    ->press('Save')
-                    ->waitForLocation('/' . $talentSlug . '/schedule', 20)
-                    ->assertSee('google.com');
+                    ->press('Save');
+
+            $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 20);
+
+            $browser->assertSee('google.com');
 
             // Create/edit event
             $browser->visit('/' . $talentSlug . '/add-event?date=' . date('Y-m-d'));
             $this->selectExistingVenue($browser);
 
             $browser->scrollIntoView('button[type="submit"]')
-                    ->press('Save')
-                    ->waitForLocation('/' . $talentSlug . '/schedule', 20)
-                    ->assertSee('Venue');
+                    ->press('Save');
+
+            $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 20);
+
+            $browser->assertSee('Venue');
 
             // Create/edit event
             $browser->visit('/' . $venueSlug . '/add-event?date=' . date('Y-m-d'));
@@ -86,9 +92,11 @@ class GeneralTest extends DuskTestCase
 
             $browser->type('name', 'Venue Event')
                     ->scrollIntoView('button[type="submit"]')
-                    ->press('Save')
-                    ->waitForLocation('/' . $venueSlug . '/schedule', 20)
-                    ->assertSee('Venue Event');
+                    ->press('Save');
+
+            $this->waitForPath($browser, '/' . $venueSlug . '/schedule', 20);
+
+            $browser->assertSee('Venue Event');
         });
     }
 }

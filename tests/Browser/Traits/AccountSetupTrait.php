@@ -158,8 +158,9 @@ trait AccountSetupTrait
 
         $schedulePath = '/' . $talentSlug . '/schedule';
 
-        $browser->waitForLocation($schedulePath, 20)
-                ->assertSee($venueName);
+        $this->waitForPath($browser, $schedulePath, 20);
+
+        $browser->assertSee($venueName);
     }
 
     /**
@@ -732,6 +733,24 @@ trait AccountSetupTrait
             Str::startsWith($currentPath, '/login'),
             sprintf('Expected to reach the login page after logout, but ended on [%s].', $currentPath)
         );
+    }
+
+    protected function waitForPath(Browser $browser, string $path, int $seconds = 20): Browser
+    {
+        $matchedPath = $this->waitForAnyLocation($browser, [$path], $seconds);
+
+        if ($matchedPath === null) {
+            $currentPath = $this->currentPath($browser);
+
+            $this->fail(sprintf(
+                'Timed out waiting for path [%s] within %d seconds. Last known path: [%s]',
+                $path,
+                $seconds,
+                $currentPath ?? 'unavailable'
+            ));
+        }
+
+        return $browser;
     }
 
     protected function waitForAnyLocation(Browser $browser, array $paths, int $seconds = 20): ?string
