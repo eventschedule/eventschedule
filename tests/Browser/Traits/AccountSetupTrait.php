@@ -163,7 +163,7 @@ trait AccountSetupTrait
     }
 
     /**
-     * Select the first available venue for the event form using Vue state
+     * Select the first available venue for the event form.
      */
     protected function selectExistingVenue(Browser $browser): void
     {
@@ -172,51 +172,155 @@ trait AccountSetupTrait
         $browser->waitFor('#selected_venue', 20);
 
         $browser->waitUsing(20, 100, function () use ($browser) {
-            $result = $browser->script('return window.app && Array.isArray(window.app.venues) && window.app.venues.length > 0;');
+            $result = $browser->script(<<<'JS'
+                return (function () {
+                    var select = document.querySelector('#selected_venue');
 
-            return ! empty($result) && $result[0];
+                    if (!select) {
+                        return 0;
+                    }
+
+                    var usable = Array.prototype.filter.call(select.options, function (option) {
+                        if (option.value && option.value !== '') {
+                            return true;
+                        }
+
+                        return option.__value !== undefined && option.__value !== null;
+                    });
+
+                    return usable.length;
+                })();
+            JS);
+
+            return ! empty($result) && $result[0] > 0;
         });
 
         $browser->script(<<<'JS'
-            if (window.app && Array.isArray(window.app.venues) && window.app.venues.length > 0) {
-                window.app.venueType = 'use_existing';
-                window.app.selectedVenue = window.app.venues[0];
-            }
+            (function () {
+                var radio = document.querySelector('input[name="venue_type"][value="use_existing"]');
+
+                if (radio && !radio.checked) {
+                    radio.click();
+                }
+
+                var select = document.querySelector('#selected_venue');
+
+                if (!select) {
+                    return;
+                }
+
+                var options = Array.prototype.filter.call(select.options, function (option) {
+                    if (option.value && option.value !== '') {
+                        return true;
+                    }
+
+                    return option.__value !== undefined && option.__value !== null;
+                });
+
+                if (!options.length) {
+                    return;
+                }
+
+                var option = options[0];
+                var index = Array.prototype.indexOf.call(select.options, option);
+
+                if (index < 0) {
+                    return;
+                }
+
+                select.selectedIndex = index;
+                select.dispatchEvent(new Event('input', { bubbles: true }));
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+            })();
         JS);
 
         $browser->waitUsing(10, 100, function () use ($browser) {
-            $result = $browser->script("return (function () {\n                var input = document.querySelector('input[name=\"venue_id\"]');\n                return !!(input && input.value);\n            })();");
+            $value = $browser->value('input[name="venue_id"]');
 
-            return ! empty($result) && $result[0];
+            return ! empty($value);
         });
     }
 
     /**
-     * Add the first available member to the event form using Vue state
+     * Add the first available member to the event form.
      */
     protected function addExistingMember(Browser $browser): void
     {
         $this->waitForVueApp($browser);
 
-        $browser->waitUsing(20, 100, function () use ($browser) {
-            $result = $browser->script('return window.app && Array.isArray(window.app.filteredMembers) && window.app.filteredMembers.length > 0;');
+        $browser->waitFor('#selected_member', 20);
 
-            return ! empty($result) && $result[0];
+        $browser->waitUsing(20, 100, function () use ($browser) {
+            $result = $browser->script(<<<'JS'
+                return (function () {
+                    var select = document.querySelector('#selected_member');
+
+                    if (!select) {
+                        return 0;
+                    }
+
+                    var usable = Array.prototype.filter.call(select.options, function (option) {
+                        if (option.value && option.value !== '') {
+                            return true;
+                        }
+
+                        return option.__value !== undefined && option.__value !== null;
+                    });
+
+                    return usable.length;
+                })();
+            JS);
+
+            return ! empty($result) && $result[0] > 0;
         });
 
         $browser->script(<<<'JS'
-            if (window.app && Array.isArray(window.app.filteredMembers) && window.app.filteredMembers.length > 0) {
-                window.app.memberType = 'use_existing';
-                window.app.selectedMember = window.app.filteredMembers[0];
+            (function () {
+                var radio = document.querySelector('input[name="member_type"][value="use_existing"]');
 
-                if (typeof window.app.addExistingMember === 'function') {
-                    window.app.addExistingMember();
+                if (radio && !radio.checked) {
+                    radio.click();
                 }
-            }
+
+                var select = document.querySelector('#selected_member');
+
+                if (!select) {
+                    return;
+                }
+
+                var options = Array.prototype.filter.call(select.options, function (option) {
+                    if (option.value && option.value !== '') {
+                        return true;
+                    }
+
+                    return option.__value !== undefined && option.__value !== null;
+                });
+
+                if (!options.length) {
+                    return;
+                }
+
+                var option = options[0];
+                var index = Array.prototype.indexOf.call(select.options, option);
+
+                if (index < 0) {
+                    return;
+                }
+
+                select.selectedIndex = index;
+                select.dispatchEvent(new Event('input', { bubbles: true }));
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+            })();
         JS);
 
         $browser->waitUsing(20, 100, function () use ($browser) {
-            $result = $browser->script('return window.app && Array.isArray(window.app.selectedMembers) && window.app.selectedMembers.length > 0;');
+            $result = $browser->script(<<<'JS'
+                return (function () {
+                    var inputs = document.querySelectorAll('input[name^="members["][name$="[email]"]');
+
+                    return inputs.length > 0;
+                })();
+            JS);
 
             return ! empty($result) && $result[0];
         });
