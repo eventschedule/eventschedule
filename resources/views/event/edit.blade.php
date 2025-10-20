@@ -245,7 +245,7 @@
 
                         <x-text-input name="venue_id" v-bind:value="selectedVenue.id" type="hidden" />
 
-                        <div v-if="isInPerson || shouldBypassPreferences">
+                        <div v-show="isInPerson || shouldBypassPreferences">
                             <div v-show="shouldShowVenueForm" class="mb-6">
                                 <div v-show="!selectedVenue || shouldBypassPreferences">
                                     <fieldset v-if="hasAnyVenues">
