@@ -4,6 +4,7 @@ namespace Tests\Browser\Traits;
 
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Laravel\Dusk\Browser;
 use Throwable;
@@ -96,6 +97,8 @@ trait AccountSetupTrait
                 ->press('Save');
 
         $this->waitForRoleScheduleRedirect($browser, 'venue', $name, 20);
+
+        $this->verifyRoleEmailAddress('venue', $name);
     }
 
     /**
@@ -114,6 +117,8 @@ trait AccountSetupTrait
                 ->press('Save');
 
         $this->waitForRoleScheduleRedirect($browser, 'talent', $name, 20);
+
+        $this->verifyRoleEmailAddress('talent', $name);
     }
 
     /**
@@ -134,6 +139,8 @@ trait AccountSetupTrait
                 ->press('Save');
 
         $this->waitForRoleScheduleRedirect($browser, 'curator', $name, 20);
+
+        $this->verifyRoleEmailAddress('curator', $name);
     }
 
     /**
@@ -325,6 +332,51 @@ trait AccountSetupTrait
 
             return ! empty($result) && $result[0];
         });
+    }
+
+    protected function verifyRoleEmailAddress(string $type, string $name): void
+    {
+        $typeKey = strtolower($type);
+
+        $user = $this->resolveTestAccountUser();
+
+        $role = Role::query()
+            ->where('type', $typeKey)
+            ->when($user, function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->when($name !== '', function ($query) use ($name) {
+                $query->where('name', $name);
+            })
+            ->latest('id')
+            ->first();
+
+        if (! $role && $name !== '') {
+            $role = Role::query()
+                ->where('type', $typeKey)
+                ->where('name', $name)
+                ->latest('id')
+                ->first();
+        }
+
+        if (! $role && $user) {
+            $role = Role::query()
+                ->where('type', $typeKey)
+                ->where('user_id', $user->id)
+                ->latest('id')
+                ->first();
+        }
+
+        if (! $role) {
+            return;
+        }
+
+        if ($role->email_verified_at) {
+            return;
+        }
+
+        $role->forceFill(['email_verified_at' => Carbon::now()]);
+        $role->save();
     }
 
     /**
