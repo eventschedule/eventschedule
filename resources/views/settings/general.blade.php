@@ -49,6 +49,23 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('update_repository_url')" />
                             </div>
 
+                            <div>
+                                <x-input-label for="update_release_channel" :value="__('messages.update_channel')" />
+                                <select id="update_release_channel" name="update_release_channel"
+                                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]">
+                                    @foreach ($availableUpdateChannels as $value => $label)
+                                        <option value="{{ $value }}"
+                                            @selected(old('update_release_channel', $generalSettings['update_release_channel']) === $value)>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                    {{ __('messages.default_update_channel_help') }}
+                                </p>
+                                <x-input-error class="mt-2" :messages="$errors->get('update_release_channel')" />
+                            </div>
+
                             <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
                                 <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
                                     {{ __('messages.logging_settings') }}
@@ -118,6 +135,8 @@
                         @include('profile.partials.update-app-form', [
                             'version_installed' => $versionInstalled,
                             'version_available' => $versionAvailable,
+                            'availableChannels' => $availableUpdateChannels,
+                            'selectedChannel' => $selectedUpdateChannel,
                         ])
                     </div>
                 </div>

@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ReleaseChannel;
 use App\Models\Setting;
+use App\Services\ReleaseChannelService;
 use App\Support\Logging\LogLevelNormalizer;
 use App\Support\Logging\LoggingConfigManager;
 use App\Support\MailConfigManager;
 use App\Support\MailTemplateManager;
+use App\Support\ReleaseChannelManager;
 use App\Support\UpdateConfigManager;
 use App\Support\WalletConfigManager;
 use App\Utils\MarkdownUtils;
@@ -15,7 +18,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
@@ -34,9 +36,12 @@ class SettingsController extends Controller
         return view('settings.index');
     }
 
-    public function general(Request $request, UpdaterManager $updater): View
+    public function general(Request $request, UpdaterManager $updater, ReleaseChannelService $releaseChannels): View
     {
         $this->authorizeAdmin($request->user());
+
+        $generalSettings = $this->getGeneralSettings();
+        $selectedChannel = ReleaseChannel::fromString($generalSettings['update_release_channel'] ?? null);
 
         $versionInstalled = null;
         $versionAvailable = null;
@@ -46,24 +51,22 @@ class SettingsController extends Controller
 
             try {
                 if ($request->has('clear_cache')) {
-                    cache()->forget('version_available');
+                    $releaseChannels->forgetCached($selectedChannel);
                 }
 
-                $versionAvailable = cache()->remember('version_available', 3600, function () use ($updater) {
-                    \Log::info('Checking for new version');
-
-                    return $updater->source()->getVersionAvailable();
-                });
-            } catch (\Exception $e) {
+                $versionAvailable = $releaseChannels->getLatestVersion($selectedChannel);
+            } catch (Throwable $e) {
                 $versionAvailable = 'Error: failed to check version';
             }
         }
 
         return view('settings.general', [
-            'generalSettings' => $this->getGeneralSettings(),
+            'generalSettings' => $generalSettings,
             'availableLogLevels' => LoggingConfigManager::availableLevels(),
             'versionInstalled' => $versionInstalled,
             'versionAvailable' => $versionAvailable,
+            'availableUpdateChannels' => ReleaseChannel::options(),
+            'selectedUpdateChannel' => $selectedChannel->value,
         ]);
     }
 
@@ -449,11 +452,12 @@ class SettingsController extends Controller
         }
     }
 
-    public function updateGeneral(Request $request): RedirectResponse
+    public function updateGeneral(Request $request, ReleaseChannelService $releaseChannels): RedirectResponse
     {
         $this->authorizeAdmin($request->user());
 
         $storedGeneralSettings = Setting::forGroup('general');
+        $previousChannel = ReleaseChannel::fromString($storedGeneralSettings['update_release_channel'] ?? null);
 
         $logLevelKeys = array_keys(LoggingConfigManager::availableLevels());
 
@@ -463,6 +467,7 @@ class SettingsController extends Controller
             'log_syslog_host' => ['required', 'string', 'max:255'],
             'log_syslog_port' => ['required', 'integer', 'min:1', 'max:65535'],
             'log_level' => ['required', 'string', Rule::in($logLevelKeys)],
+            'update_release_channel' => ['required', 'string', Rule::in(ReleaseChannel::values())],
         ]);
 
         $publicUrl = $this->sanitizeUrl($validated['public_url']);
@@ -477,9 +482,12 @@ class SettingsController extends Controller
         $normalizedPreviousRepositoryUrl = $this->normalizeRepositoryUrl($previousRepositoryUrl);
         $normalizedNewRepositoryUrl = $this->normalizeRepositoryUrl($updateRepositoryUrl);
 
+        $channel = ReleaseChannel::fromString($validated['update_release_channel'] ?? null);
+
         Setting::setGroup('general', [
             'public_url' => $publicUrl,
             'update_repository_url' => $updateRepositoryUrl,
+            'update_release_channel' => $channel->value,
         ]);
 
         $syslogHost = $this->sanitizeHost($validated['log_syslog_host']);
@@ -497,12 +505,13 @@ class SettingsController extends Controller
 
         Setting::setGroup('logging', $loggingSettings);
 
-        if ($normalizedPreviousRepositoryUrl !== $normalizedNewRepositoryUrl) {
-            Cache::forget('version_available');
+        if ($normalizedPreviousRepositoryUrl !== $normalizedNewRepositoryUrl || $previousChannel !== $channel) {
+            $releaseChannels->forgetAll();
         }
 
         $this->applyGeneralConfig($publicUrl);
         UpdateConfigManager::apply($updateRepositoryUrl);
+        ReleaseChannelManager::apply($channel);
         LoggingConfigManager::apply($loggingSettings);
 
         return redirect()->route('settings.general')->with('status', 'general-settings-updated');
@@ -834,6 +843,9 @@ class SettingsController extends Controller
             'public_url' => $storedGeneralSettings['public_url'] ?? config('app.url'),
             'update_repository_url' => $storedGeneralSettings['update_repository_url']
                 ?? config('self-update.repository_types.github.repository_url'),
+            'update_release_channel' => ReleaseChannel::fromString(
+                $storedGeneralSettings['update_release_channel'] ?? config('self-update.release_channel')
+            )->value,
             'log_syslog_host' => $storedLoggingSettings['syslog_host'] ?? $defaultSyslogHost,
             'log_syslog_port' => $storedLoggingSettings['syslog_port'] ?? $defaultSyslogPort,
             'log_level' => $storedLoggingSettings['level'] ?? $defaultLogLevel,

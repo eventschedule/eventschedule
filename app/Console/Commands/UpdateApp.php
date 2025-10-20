@@ -2,9 +2,13 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
+use App\Enums\ReleaseChannel;
+use App\Services\ReleaseChannelService;
+use App\Support\ReleaseChannelManager;
 use Codedge\Updater\UpdaterManager;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
+use Throwable;
 class UpdateApp extends Command
 {
     /**
@@ -12,7 +16,7 @@ class UpdateApp extends Command
      *
      * @var string
      */
-    protected $signature = 'app:update';
+    protected $signature = 'app:update {--channel= : Release channel to use (production or beta)}';
 
     /**
      * The console command description.
@@ -24,32 +28,47 @@ class UpdateApp extends Command
     /**
      * Execute the console command.
      */
-    public function handle(UpdaterManager $updater)
+    public function handle(UpdaterManager $updater, ReleaseChannelService $releaseChannels)
     {
         if (config('app.hosted')) {
             $this->error('Not authorized');
-            exit;
+            return self::FAILURE;
         }
 
+        $defaultChannel = ReleaseChannelManager::current();
+        $channel = ReleaseChannel::fromString($this->option('channel') ?? $defaultChannel->value);
 
-        $this->info('Updating app, this can take a few minutes...');
+        $this->info(sprintf('Updating app via the %s channel. This can take a few minutes...', $channel->label()));
 
-        $versionAvailable = $updater->source()->getVersionAvailable();
-        $installedVersion = $updater->source()->getVersionInstalled();
-        
-        cache()->put('version_available', $versionAvailable, 3600);
+        try {
+            $versionAvailable = $releaseChannels->getLatestVersion($channel);
+            $installedVersion = $updater->source()->getVersionInstalled();
+        } catch (Throwable $exception) {
+            $this->error($exception->getMessage());
 
-        if ($versionAvailable == $installedVersion) {
+            return self::FAILURE;
+        }
+
+        if ($versionAvailable === $installedVersion) {
             $this->info('No updates available');
-            exit;
+
+            return self::SUCCESS;
         }
 
-        $release = $updater->source()->fetch($versionAvailable);
-        
-        $updater->source()->update($release);    
-        
-        Artisan::call('migrate', ['--force' => true]);
+        try {
+            $release = $updater->source()->fetch($versionAvailable);
+
+            $updater->source()->update($release);
+
+            Artisan::call('migrate', ['--force' => true]);
+        } catch (Throwable $exception) {
+            $this->error($exception->getMessage());
+
+            return self::FAILURE;
+        }
 
         $this->info('App updated successfully! ' . $versionAvailable);
+
+        return self::SUCCESS;
     }
 }

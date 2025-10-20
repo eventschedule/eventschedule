@@ -2,6 +2,15 @@ name: Build Release
 
 on:
   workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Release channel'
+        required: true
+        type: choice
+        default: production
+        options:
+          - production
+          - beta
 
 jobs:
   build:
@@ -19,6 +28,10 @@ jobs:
           php-version: '8.3'
           extensions: mbstring, intl, pdo, sqlite
           tools: composer, npm
+
+      - name: Determine release version
+        id: version
+        run: php scripts/bump-version.php "${{ github.event.inputs.channel }}"
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-ansi --no-interaction --no-scripts --no-progress --no-dev --optimize-autoloader
@@ -46,8 +59,8 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           draft: false
-          prerelease: false
-          title: "Latest Release"
-          automatic_release_tag: "2.0.2b"
+          prerelease: ${{ steps.version.outputs.prerelease == 'true' }}
+          title: "${{ steps.version.outputs.channel == 'beta' && 'Beta Release' || 'Latest Release' }}"
+          automatic_release_tag: "${{ steps.version.outputs.version }}"
           files: |
             eventschedule.zip
