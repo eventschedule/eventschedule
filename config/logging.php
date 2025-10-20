@@ -7,9 +7,14 @@ use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
 
 $rawLogLevel = env('LOG_LEVEL');
+$roleDebugLogLevel = env('ROLE_DEBUG_LOG_LEVEL');
 
 $normalizeLogLevel = static function (string $default) use ($rawLogLevel): string {
     return LogLevelNormalizer::normalize($rawLogLevel, $default);
+};
+
+$normalizeRoleDebugLogLevel = static function (string $default) use ($roleDebugLogLevel): string {
+    return LogLevelNormalizer::normalize($roleDebugLogLevel, $default);
 };
 
 $stackChannels = (static function ($value): array {
@@ -113,6 +118,13 @@ return [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
             'level' => $normalizeLogLevel('debug'),
+            'replace_placeholders' => true,
+        ],
+
+        'role_debug' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/role_debug.log'),
+            'level' => $normalizeRoleDebugLogLevel('debug'),
             'replace_placeholders' => true,
         ],
 

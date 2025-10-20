@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use DateTimeInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Models\Role;
@@ -3603,30 +3604,167 @@ class RoleController extends Controller
      */
     private function normalizeAuthenticatedUser($user): array
     {
+        $this->logRoleDebug('normalizeAuthenticatedUser.input', [
+            'value_type' => get_debug_type($user),
+            'value_preview' => $this->describeValueForLog($user),
+        ]);
+
+        $result = [];
+
         if ($user === null) {
-            return [];
+            $this->logRoleDebug('normalizeAuthenticatedUser.output', [
+                'result' => $result,
+            ]);
+
+            return $result;
         }
 
         if ($user instanceof Arrayable) {
             try {
-                return $user->toArray();
+                $result = $user->toArray();
             } catch (\Throwable $e) {
                 report($e);
+
+                $result = [];
             }
-        }
-
-        if (is_array($user)) {
-            return $user;
-        }
-
-        if (is_object($user)) {
+        } elseif (is_array($user)) {
+            $result = $user;
+        } elseif (is_object($user)) {
             try {
-                return get_object_vars($user);
+                $result = get_object_vars($user);
             } catch (\Throwable $e) {
                 report($e);
+
+                $result = [];
             }
         }
 
-        return [];
+        $this->logRoleDebug('normalizeAuthenticatedUser.output', [
+            'result' => $this->describeValueForLog($this->maskSensitiveLogValues($result)),
+        ]);
+
+        return $result;
+    }
+
+    private function logRoleDebug(string $context, array $data): void
+    {
+        try {
+            Log::channel('role_debug')->debug('RoleController diagnostics', array_merge([
+                'context' => $context,
+            ], $data));
+        } catch (\Throwable $e) {
+            Log::warning('RoleController diagnostics logging failed', [
+                'context' => $context,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * @param  mixed  $value
+     * @return mixed
+     */
+    private function describeValueForLog($value, int $depth = 0)
+    {
+        if ($value instanceof Model) {
+            return [
+                'class' => get_class($value),
+                'key' => $value->getKey(),
+                'exists' => $value->exists,
+                'attributes' => $this->describeValueForLog($this->maskSensitiveLogValues($value->getAttributes()), $depth + 1),
+            ];
+        }
+
+        if ($value instanceof Arrayable) {
+            try {
+                $value = $value->toArray();
+            } catch (\Throwable $e) {
+                return ['arrayable_error' => $e->getMessage()];
+            }
+        }
+
+        if ($value instanceof \JsonSerializable) {
+            try {
+                $value = $value->jsonSerialize();
+            } catch (\Throwable $e) {
+                return ['json_error' => $e->getMessage()];
+            }
+        }
+
+        if ($value instanceof DateTimeInterface) {
+            return $value->format(DateTimeInterface::ATOM);
+        }
+
+        if (is_array($value)) {
+            $value = $this->maskSensitiveLogValues($value);
+
+            if ($depth >= 3) {
+                return ['truncated' => true];
+            }
+
+            $result = [];
+            $count = 0;
+
+            foreach ($value as $key => $item) {
+                $count++;
+
+                if ($count > 20) {
+                    $result['__truncated__'] = true;
+
+                    break;
+                }
+
+                $result[$key] = $this->describeValueForLog($item, $depth + 1);
+            }
+
+            return $result;
+        }
+
+        if (is_object($value)) {
+            if (method_exists($value, '__toString')) {
+                try {
+                    return (string) $value;
+                } catch (\Throwable $e) {
+                    return ['class' => get_class($value), 'string_error' => $e->getMessage()];
+                }
+            }
+
+            return ['class' => get_class($value)];
+        }
+
+        if (is_resource($value)) {
+            return ['resource' => get_resource_type($value)];
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param  array<mixed>  $values
+     * @return array<mixed>
+     */
+    private function maskSensitiveLogValues(array $values): array
+    {
+        $sensitiveKeys = [
+            'password',
+            'remember_token',
+            'two_factor_secret',
+            'two_factor_recovery_codes',
+            'recovery_codes',
+        ];
+
+        foreach ($values as $key => $value) {
+            if (is_string($key) && in_array($key, $sensitiveKeys, true)) {
+                $values[$key] = '[masked]';
+
+                continue;
+            }
+
+            if (is_array($value)) {
+                $values[$key] = $this->maskSensitiveLogValues($value);
+            }
+        }
+
+        return $values;
     }
 }
