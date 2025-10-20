@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ReleaseChannel;
+use App\Services\ReleaseChannelService;
+use App\Support\ReleaseChannelManager;
 use Codedge\Updater\UpdaterManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -9,13 +12,14 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RuntimeException;
 use ZipArchive;
 class AppController extends Controller
 {
-    public function update(Request $request, UpdaterManager $updater)
+    public function update(Request $request, UpdaterManager $updater, ReleaseChannelService $releaseChannels)
     {
         if (config('app.hosted')) {
             return redirect()->back()->with('error', 'Not authorized');
@@ -23,7 +27,11 @@ class AppController extends Controller
 
         $request->validate([
             'package' => ['nullable', 'file', 'mimes:zip'],
+            'update_channel' => ['nullable', 'string', Rule::in(ReleaseChannel::values())],
         ]);
+
+        $defaultChannel = ReleaseChannelManager::current();
+        $channel = ReleaseChannel::fromString($request->input('update_channel', $defaultChannel->value));
 
         if ($request->hasFile('package')) {
             try {
@@ -36,18 +44,19 @@ class AppController extends Controller
         }
 
         try {
-            if ($updater->source()->isNewVersionAvailable()) {
-                $versionAvailable = $updater->source()->getVersionAvailable();
+            $versionInstalled = $updater->source()->getVersionInstalled();
+            $versionAvailable = $releaseChannels->getLatestVersion($channel);
 
-                $release = $updater->source()->fetch($versionAvailable);
-                
-                $updater->source()->update($release);   
-                
-                Artisan::call('migrate', ['--force' => true]);
-            } else {
+            if ($versionInstalled === $versionAvailable) {
                 return redirect()->back()->with('error', __('messages.no_new_version_available'));
-            }                
-        } catch (\Exception $e) {
+            }
+
+            $release = $updater->source()->fetch($versionAvailable);
+
+            $updater->source()->update($release);
+
+            Artisan::call('migrate', ['--force' => true]);
+        } catch (\Throwable $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
 

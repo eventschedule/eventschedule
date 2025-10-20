@@ -2,6 +2,15 @@ name: Build Release
 
 on:
   workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Release channel'
+        required: true
+        type: choice
+        default: production
+        options:
+          - production
+          - beta
 
 jobs:
   build:
@@ -12,6 +21,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -19,6 +31,26 @@ jobs:
           php-version: '8.3'
           extensions: mbstring, intl, pdo, sqlite
           tools: composer, npm
+
+      - name: Determine release version
+        id: version
+        run: php scripts/bump-version.php "${{ github.event.inputs.channel }}"
+
+      - name: Persist bumped version
+        run: |
+          if git diff --quiet --exit-code VERSION; then
+            echo "VERSION unchanged; skipping commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add VERSION
+          git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"
+          git push origin HEAD:${GITHUB_REF_NAME}
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-ansi --no-interaction --no-scripts --no-progress --no-dev --optimize-autoloader
@@ -46,8 +78,8 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           draft: false
-          prerelease: false
-          title: "Latest Release"
-          automatic_release_tag: "2.0.2b"
+          prerelease: ${{ steps.version.outputs.prerelease == 'true' }}
+          title: "${{ steps.version.outputs.channel == 'beta' && 'Beta Release' || 'Latest Release' }}"
+          automatic_release_tag: "${{ steps.version.outputs.version }}"
           files: |
             eventschedule.zip

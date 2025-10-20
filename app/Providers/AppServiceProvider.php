@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Enums\ReleaseChannel;
 use App\Listeners\LogSentMessage;
 use App\Models\Setting;
 use App\Support\Logging\LoggingConfigManager;
 use App\Support\MailConfigManager;
+use App\Support\ReleaseChannelManager;
 use App\Support\UpdateConfigManager;
 use App\Support\WalletConfigManager;
 use Illuminate\Mail\Events\MessageSent;
@@ -82,6 +84,9 @@ class AppServiceProvider extends ServiceProvider
 
         if (Schema::hasTable('settings')) {
             $generalSettings = Setting::forGroup('general');
+
+            $channel = ReleaseChannel::fromString($generalSettings['update_release_channel'] ?? config('self-update.release_channel'));
+            ReleaseChannelManager::apply($channel);
 
             UpdateConfigManager::apply($generalSettings['update_repository_url'] ?? null);
 

@@ -2,10 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ReleaseChannel;
 use App\Mail\TemplatePreview;
-use App\Providers\AppServiceProvider;
 use App\Models\Setting;
 use App\Models\User;
+use App\Providers\AppServiceProvider;
+use App\Services\ReleaseChannelService;
 use App\Support\MailConfigManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -721,6 +723,10 @@ class SettingsTest extends TestCase
         $payload = [
             'public_url' => 'https://example.org/',
             'update_repository_url' => 'https://github.com/example/repo/',
+            'update_release_channel' => 'beta',
+            'log_syslog_host' => 'syslog.example',
+            'log_syslog_port' => 5514,
+            'log_level' => 'warning',
         ];
 
         $response = $this
@@ -743,10 +749,17 @@ class SettingsTest extends TestCase
             'value' => 'https://github.com/example/repo',
         ]);
 
+        $this->assertDatabaseHas('settings', [
+            'group' => 'general',
+            'key' => 'update_release_channel',
+            'value' => 'beta',
+        ]);
+
         $generalSettings = Setting::forGroup('general');
 
         $this->assertSame('https://example.org', $generalSettings['public_url']);
         $this->assertSame('https://github.com/example/repo', $generalSettings['update_repository_url']);
+        $this->assertSame('beta', $generalSettings['update_release_channel']);
         $this->assertSame('https://example.org', config('app.url'));
     }
 
@@ -757,13 +770,19 @@ class SettingsTest extends TestCase
         Setting::setGroup('general', [
             'public_url' => 'https://initial.example',
             'update_repository_url' => 'https://github.com/example/old-repo',
+            'update_release_channel' => 'production',
         ]);
 
-        Cache::put('version_available', 'v1.0.0', 3600);
+        Cache::put(ReleaseChannelService::cacheKeyFor(ReleaseChannel::Production), ['version' => 'v1.0.0'], 3600);
+        Cache::put(ReleaseChannelService::cacheKeyFor(ReleaseChannel::Beta), ['version' => 'v2.0.0b'], 3600);
 
         $payload = [
             'public_url' => 'https://example.org/',
             'update_repository_url' => 'https://github.com/example/new-repo/',
+            'update_release_channel' => 'beta',
+            'log_syslog_host' => 'syslog.example',
+            'log_syslog_port' => 5514,
+            'log_level' => 'warning',
         ];
 
         $response = $this
@@ -774,7 +793,8 @@ class SettingsTest extends TestCase
             ->assertSessionHasNoErrors()
             ->assertRedirect('/settings/general');
 
-        $this->assertFalse(Cache::has('version_available'));
+        $this->assertFalse(Cache::has(ReleaseChannelService::cacheKeyFor(ReleaseChannel::Production)));
+        $this->assertFalse(Cache::has(ReleaseChannelService::cacheKeyFor(ReleaseChannel::Beta)));
     }
 
     public function test_admin_can_update_terms_settings(): void

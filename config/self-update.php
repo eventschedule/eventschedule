@@ -28,7 +28,21 @@ return [
     |
     */
 
-    'version_installed' => env('SELF_UPDATER_VERSION_INSTALLED', '2.0.2b'),
+    'version_installed' => env('SELF_UPDATER_VERSION_INSTALLED', (function () {
+        $versionFile = base_path('VERSION');
+
+        if (is_string($versionFile) && is_file($versionFile)) {
+            $contents = trim((string) file_get_contents($versionFile));
+
+            if ($contents !== '') {
+                return $contents;
+            }
+        }
+
+        return '0.0.0';
+    })()),
+
+    'release_channel' => env('SELF_UPDATER_RELEASE_CHANNEL', 'production'),
 
     'github_defaults' => [
         'vendor' => $defaultGithubVendor,
