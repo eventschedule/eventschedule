@@ -3518,24 +3518,55 @@ class RoleController extends Controller
         $this->assignUserAttributeIfMissing($user, 'first_name', $userData['first_name'] ?? null);
         $this->assignUserAttributeIfMissing($user, 'last_name', $userData['last_name'] ?? null);
         $this->assignUserAttributeIfMissing($user, 'email', $userData['email'] ?? null);
+
+        $this->ensureUserAttributeDefined($user, 'name');
     }
 
     private function assignUserAttributeIfMissing(object $user, string $attribute, $value): void
     {
-        if (! is_string($value)) {
-            return;
-        }
-
-        $value = trim($value);
-
-        if ($value === '') {
-            return;
-        }
-
         if ($this->userAttributeHasValue($user, $attribute)) {
             return;
         }
 
+        $stringValue = null;
+
+        if (is_string($value)) {
+            $stringValue = trim($value);
+        }
+
+        if ($stringValue === null || $stringValue === '') {
+            $this->ensureUserAttributeDefined($user, $attribute);
+
+            return;
+        }
+
+        $this->setUserAttribute($user, $attribute, $stringValue);
+    }
+
+    private function ensureUserAttributeDefined(object $user, string $attribute): void
+    {
+        if ($this->userAttributeExists($user, $attribute)) {
+            return;
+        }
+
+        $this->setUserAttribute($user, $attribute, '');
+    }
+
+    private function userAttributeExists(object $user, string $attribute): bool
+    {
+        if (property_exists($user, $attribute)) {
+            return true;
+        }
+
+        if (method_exists($user, '__isset') && $user->__isset($attribute)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function setUserAttribute(object $user, string $attribute, string $value): void
+    {
         try {
             $user->{$attribute} = $value;
         } catch (\Throwable $e) {

@@ -20,8 +20,17 @@ class TermsController extends Controller
             $storedGeneralSettings = [];
         }
 
-        $termsHtml = $storedGeneralSettings['terms_html']
-            ?? MarkdownUtils::convertToHtml(config('terms.default_markdown'));
+        $storedMarkdown = $storedGeneralSettings['terms_markdown'] ?? null;
+
+        $termsHtml = $storedGeneralSettings['terms_html'] ?? null;
+
+        if ($termsHtml === null && $storedMarkdown !== null) {
+            $termsHtml = MarkdownUtils::convertToHtml($storedMarkdown);
+        }
+
+        if ($termsHtml === null) {
+            $termsHtml = MarkdownUtils::convertToHtml(config('terms.default_markdown'));
+        }
 
         $lastUpdatedRaw = $storedGeneralSettings['terms_updated_at']
             ?? config('terms.default_last_updated');

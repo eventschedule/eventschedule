@@ -359,11 +359,11 @@ trait AccountSetupTrait
             $browser->waitUsing($seconds, 100, function () use ($browser, &$schedulePath) {
                 $path = $this->currentPath($browser);
 
-                if (! $path || ! Str::endsWith($path, '/schedule')) {
+                if (! $this->pathEndsWithSchedule($path)) {
                     return false;
                 }
 
-                $schedulePath = $path;
+                $schedulePath = $this->normalizeSchedulePath($path);
 
                 return true;
             });
@@ -392,7 +392,7 @@ trait AccountSetupTrait
         }
 
         $normalizedSlug = ltrim($slug, '/');
-        $targetPath = '/' . $normalizedSlug . '/schedule';
+        $targetPath = $this->normalizeSchedulePath('/' . $normalizedSlug . '/schedule');
         $resolvedSchedulePath = null;
 
         try {
@@ -400,27 +400,29 @@ trait AccountSetupTrait
                     ->waitUsing($seconds, 100, function () use ($browser, &$resolvedSchedulePath) {
                         $currentPath = $this->currentPath($browser);
 
-                        if (! $currentPath || ! Str::endsWith($currentPath, '/schedule')) {
+                        if (! $this->pathEndsWithSchedule($currentPath)) {
                             return false;
                         }
 
-                        $resolvedSchedulePath = $currentPath;
+                        $resolvedSchedulePath = $this->normalizeSchedulePath($currentPath);
 
                         return true;
                     });
         } catch (Throwable $exception) {
             $resolvedSchedulePath = $this->currentPath($browser);
 
-            if (! $resolvedSchedulePath || ! Str::endsWith($resolvedSchedulePath, '/schedule')) {
+            if (! $this->pathEndsWithSchedule($resolvedSchedulePath)) {
                 throw $exception;
             }
+
+            $resolvedSchedulePath = $this->normalizeSchedulePath($resolvedSchedulePath);
         }
 
         if ($resolvedSchedulePath === null) {
-            $resolvedSchedulePath = $this->currentPath($browser);
+            $resolvedSchedulePath = $this->normalizeSchedulePath($this->currentPath($browser));
         }
 
-        if (! $resolvedSchedulePath || ! Str::endsWith($resolvedSchedulePath, '/schedule')) {
+        if (! $this->pathEndsWithSchedule($resolvedSchedulePath)) {
             $resolvedSchedulePath = $targetPath;
         }
 
@@ -435,6 +437,32 @@ trait AccountSetupTrait
         $this->rememberRoleSlug($type, $name, $slug);
 
         return $slug;
+    }
+
+    protected function pathEndsWithSchedule($path): bool
+    {
+        if (! is_string($path) || $path === '') {
+            return false;
+        }
+
+        $normalized = $this->normalizeSchedulePath($path);
+
+        if ($normalized === '') {
+            return false;
+        }
+
+        return Str::endsWith($normalized, '/schedule');
+    }
+
+    protected function normalizeSchedulePath($path): string
+    {
+        if (! is_string($path) || $path === '') {
+            return '';
+        }
+
+        $normalized = rtrim($path, '/');
+
+        return $normalized === '' ? '/' : $normalized;
     }
 
     protected function resolveRoleSubdomain(string $name, ?string $type = null): ?string

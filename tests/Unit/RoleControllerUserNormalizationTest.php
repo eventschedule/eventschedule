@@ -108,6 +108,19 @@ class RoleControllerUserNormalizationTest extends TestCase
         $this->assertSame('existing@example.test', $user->email);
     }
 
+    public function testEnsureUserIdentityAttributesDefinesNameWhenDataMissing(): void
+    {
+        $controller = new RoleController(Mockery::mock(EventRepo::class));
+        $role = new \App\Models\Role();
+
+        $user = (object) [];
+
+        $this->invokeEnsureUserIdentity($controller, $user, [], $role);
+
+        $this->assertTrue(property_exists($user, 'name'));
+        $this->assertSame('', $user->name);
+    }
+
     public function testPrepareGroupsForViewHandlesStdClassWithoutName(): void
     {
         $controller = new RoleController(Mockery::mock(EventRepo::class));
