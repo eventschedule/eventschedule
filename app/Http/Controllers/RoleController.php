@@ -902,15 +902,9 @@ class RoleController extends Controller
         ] + $headerOptions;
 
         // Background images
-        $backgroundOptions = $this->loadRoleAssetOptions(
-            'storage/backgrounds.json',
-            fn ($data) => $this->prepareNameOptions($data),
-            'create.background_options'
-        );
-
         $backgroundOptions = [
             '' => __('messages.custom'),
-        ] + $backgroundOptions;
+        ] + ColorUtils::backgroundImageOptions();
 
         // Background gradients
         $gradientOptions = $this->loadRoleAssetOptions(
@@ -1150,15 +1144,9 @@ class RoleController extends Controller
 
 
         // Background images
-        $backgroundOptions = $this->loadRoleAssetOptions(
-            'storage/backgrounds.json',
-            fn ($data) => $this->prepareNameOptions($data),
-            'edit.background_options'
-        );
-
         $backgroundOptions = [
             '' => __('messages.custom'),
-        ] + $backgroundOptions;
+        ] + ColorUtils::backgroundImageOptions();
 
 
         // Background gradients

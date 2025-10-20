@@ -4,6 +4,10 @@ namespace App\Utils;
 
 class ColorUtils
 {
+    private const STATIC_BACKGROUND_IMAGES = [
+        'Abstract_Sunrise' => 'Abstract Sunrise',
+    ];
+
     public static function randomGradient()
     {
         $gradients = self::decodeJsonFile('storage/gradients.json');
@@ -38,41 +42,18 @@ class ColorUtils
 
     public static function randomBackgroundImage()
     {
-        $backgrounds = self::decodeJsonFile('storage/backgrounds.json');
-        $backgroundOptions = [];
+        $options = array_keys(self::STATIC_BACKGROUND_IMAGES);
 
-        foreach (self::yieldRoleAssetItems($backgrounds) as $background) {
-            $value = self::determineRoleAssetName($background);
-
-            if (! is_string($value)) {
-                continue;
-            }
-
-            $value = trim($value);
-
-            if ($value === '') {
-                continue;
-            }
-
-            $label = self::determineRoleAssetLabel($background);
-
-            if (! is_string($label) || trim($label) === '') {
-                $label = str_replace('_', ' ', $value);
-            } else {
-                $label = trim($label);
-            }
-
-            $backgroundOptions[$value] = $label;
-        }
-
-        if (empty($backgroundOptions)) {
+        if (empty($options)) {
             return '';
         }
 
-        $values = array_keys($backgroundOptions);
-        $random = $values[array_rand($values)];
+        return $options[array_rand($options)];
+    }
 
-        return $random;
+    public static function backgroundImageOptions(): array
+    {
+        return self::STATIC_BACKGROUND_IMAGES;
     }
 
     /**
