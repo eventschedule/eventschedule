@@ -255,6 +255,11 @@ class GoogleWalletService
     protected function resolveEventStart(Event $event, ?string $eventDate): Carbon
     {
         $startsAt = $event->getStartDateTime($eventDate);
+
+        if (! $startsAt) {
+            throw new \RuntimeException('Cannot build wallet pass for event without a start time.');
+        }
+
         $timezone = $this->resolveTimezone($event);
 
         return $startsAt->clone()->setTimezone($timezone);
