@@ -36,7 +36,7 @@
                                     formData.delete('_method');
 
                                     try {
-                                        const response = await fetch('{{ route('settings.mail.test', absolute: false) }}', {
+                                        const response = await fetch('{{ route('settings.mail.test', [], false) }}', {
                                             method: 'POST',
                                             headers: {
                                                 'Accept': 'application/json',
