@@ -106,8 +106,8 @@ class RegisteredUserController extends Controller
             config(['database.connections.mysql.username' => $request->database_username]);
             config(['database.connections.mysql.password' => $request->database_password]);
             
-            Artisan::call('migrate', ['--force' => true]);      
-            Artisan::call('storage:link');
+            Artisan::call('migrate', ['--force' => true]);
+            Artisan::call('storage:link', ['--force' => true]);
         }        
 
         if (! config('app.hosted') && ! config('app.is_testing') && User::count() > 0) {
