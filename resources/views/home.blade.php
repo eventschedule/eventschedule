@@ -128,7 +128,7 @@
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.events') }}</h2>
                     </div>
                     @if ($creationRoles->isNotEmpty())
-                        <x-primary-button type="button" x-data="" @click="$dispatch('open-modal', 'create-event')">
+                        <x-primary-button type="button" x-data="" x-on:click="$dispatch('open-modal', 'create-event')">
                             {{ __('messages.add_event') }}
                         </x-primary-button>
                     @endif
@@ -285,7 +285,7 @@
                             curators: @js($curatorOptions),
                         })"
                         class="mt-5 space-y-5"
-                        @submit.prevent="submit">
+                        x-on:submit.prevent="submit">
 
                         <div>
                             <x-input-label for="event-create-role" :value="__('messages.schedule')" />
@@ -336,7 +336,7 @@
                         </div>
 
                         <div class="flex justify-end space-x-3">
-                            <x-secondary-button type="button" @click="$dispatch('close-modal', 'create-event')">{{ __('messages.cancel') }}</x-secondary-button>
+                            <x-secondary-button type="button" x-on:click="$dispatch('close-modal', 'create-event')">{{ __('messages.cancel') }}</x-secondary-button>
                             <x-primary-button type="submit" x-bind:disabled="! canSubmit">
                                 {{ __('messages.next') }}
                             </x-primary-button>

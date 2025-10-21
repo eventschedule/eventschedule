@@ -194,7 +194,7 @@
   </h2>
 
   <form method="POST"
-        @submit="validateForm"
+        x-on:submit="validateForm"
         action="{{ $event->exists ? route('event.update', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) : route('event.store', ['subdomain' => $subdomain]) }}"
         enctype="multipart/form-data">
 
@@ -226,7 +226,7 @@
                                     <div class="flex items-center">
                                         <input id="in_person" name="event_type" type="checkbox" v-model="isInPerson"
                                             class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
-                                            @change="ensureOneChecked('in_person')">
+                                            x-on:change="ensureOneChecked('in_person')">
                                         <label for="in_person" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                             {{ __('messages.in_person') }}
                                         </label>
@@ -234,7 +234,7 @@
                                     <div class="flex items-center pl-3">
                                         <input id="online" name="event_type" type="checkbox" v-model="isOnline"
                                             class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
-                                            @change="ensureOneChecked('online')">
+                                            x-on:change="ensureOneChecked('online')">
                                         <label for="online" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                             {{ __('messages.online') }}
                                         </label>
@@ -296,7 +296,7 @@
                                         <x-input-label for="venue_email" :value="__('messages.email')" />
                                         <div class="flex mt-1">
                                             <x-text-input id="venue_email" name="venue_email" type="email" class="block w-full"
-                                                @blur="searchVenues" v-model="venueEmail" autocomplete="off" />
+                                                x-on:blur="searchVenues" v-model="venueEmail" autocomplete="off" />
                                         </div>
                                         @if (config('app.hosted'))
                                         <p class="mt-2 text-sm text-gray-500">
@@ -315,7 +315,7 @@
                                                         @{{ venue.address1 }}
                                                     </span>
                                                 </div>
-                                                <x-primary-button @click="selectVenue(venue)" type="button">
+                                                <x-primary-button x-on:click="selectVenue(venue)" type="button">
                                                     {{ __('messages.select') }}
                                                 </x-primary-button>
                                             </div>
@@ -366,7 +366,7 @@
                                             <x-secondary-button id="validate_button" onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
                                             <x-secondary-button id="accept_button" onclick="acceptAddress(event)" class="hidden">{{ __('messages.accept') }}</x-secondary-button>
                                             @endif
-                                            <x-primary-button v-if="showVenueAddressFields" type="button" @click="updateSelectedVenue()">{{ __('messages.done') }}</x-primary-button>
+                                            <x-primary-button v-if="showVenueAddressFields" type="button" x-on:click="updateSelectedVenue()">{{ __('messages.done') }}</x-primary-button>
                                         </div>
                                     </div>
 
@@ -392,10 +392,10 @@
                                         </span>
                                     </div>
                                     <div>
-                                        <x-secondary-button v-if="!selectedVenue.user_id" @click="editSelectedVenue" type="button" class="mr-2">
+                                        <x-secondary-button v-if="!selectedVenue.user_id" x-on:click="editSelectedVenue" type="button" class="mr-2">
                                             {{ __('messages.edit') }}
                                         </x-secondary-button>
-                                        <x-secondary-button @click="clearSelectedVenue" type="button">
+                                        <x-secondary-button x-on:click="clearSelectedVenue" type="button">
                                             {{ __('messages.remove') }}
                                         </x-secondary-button>
                                     </div>
@@ -432,8 +432,8 @@
                                                 <x-text-input v-bind:id="'edit_member_name_' + member.id" 
                                                     v-bind:name="'members[' + member.id + '][name]'" type="text" class="mr-2 block w-full"
                                                     v-model="selectedMembers.find(m => m.id === member.id).name" required autofocus
-                                                    @keydown.enter.prevent="editMember()" autocomplete="off" />
-                                                <x-primary-button @click="editMember()" type="button">
+                                                    x-on:keydown.enter.prevent="editMember()" autocomplete="off" />
+                                                <x-primary-button x-on:click="editMember()" type="button">
                                                     {{ __('messages.done') }}
                                                 </x-primary-button>
                                             </div>
@@ -444,14 +444,14 @@
                                             <x-input-label for="edit_member_email" :value="__('messages.email')" />
                                             <x-text-input v-bind:id="'edit_member_email_' + member.id" 
                                                 v-bind:name="'members[' + member.id + '][email]'" type="email" class="mr-2 block w-full" 
-                                                v-model="selectedMembers.find(m => m.id === member.id).email" @keydown.enter.prevent="editMember()" autocomplete="off" />
+                                                v-model="selectedMembers.find(m => m.id === member.id).email" x-on:keydown.enter.prevent="editMember()" autocomplete="off" />
                                         </div>
 
                                         <div class="mb-6">
                                             <x-input-label for="edit_member_youtube_url" :value="__('messages.youtube_video_url')" />
                                             <x-text-input v-bind:id="'edit_member_youtube_url_' + member.id" 
                                                 v-bind:name="'members[' + member.id + '][youtube_url]'" type="url" class="mr-2 block w-full" 
-                                                v-model="selectedMembers.find(m => m.id === member.id).youtube_url" @keydown.enter.prevent="editMember()" autocomplete="off" />
+                                                v-model="selectedMembers.find(m => m.id === member.id).youtube_url" x-on:keydown.enter.prevent="editMember()" autocomplete="off" />
                                         </div>
 
                                     </div>
@@ -475,10 +475,10 @@
                                             </a>
                                         </div>
                                         <div>
-                                            <x-secondary-button v-if="!member.user_id" @click="editMember(member)" type="button" class="mr-2">
+                                            <x-secondary-button v-if="!member.user_id" x-on:click="editMember(member)" type="button" class="mr-2">
                                                 {{ __('messages.edit') }}
                                             </x-secondary-button>
-                                            <x-secondary-button @click="removeMember(member)" type="button">
+                                            <x-secondary-button x-on:click="removeMember(member)" type="button">
                                                 {{ __('messages.remove') }}
                                             </x-secondary-button>
                                         </div>
@@ -511,7 +511,7 @@
                                 </fieldset>
 
                                 <div v-if="memberType === 'use_existing' && Object.keys(members).length > 0">
-                                    <select v-model="selectedMember" @change="addExistingMember" id="selected_member"
+                                    <select v-model="selectedMember" x-on:change="addExistingMember" id="selected_member"
                                         class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                         <option value="" disabled selected>{{ __('messages.please_select') }}</option>
                                         <option v-for="member in filteredMembers" :key="member.id" :value="member">
@@ -524,9 +524,9 @@
                                     <div class="mb-6">
                                         <x-input-label for="member_name" :value="__('messages.name') . ' *'" />
                                         <div class="flex mt-1">
-                                            <x-text-input id="member_name" @keydown.enter.prevent="addMember"
+                                            <x-text-input id="member_name" x-on:keydown.enter.prevent="addMember"
                                                 v-model="memberName" type="text" class="mr-2 block w-full" required autocomplete="off" />
-                                            <x-primary-button @click="addMember" type="button">
+                                            <x-primary-button x-on:click="addMember" type="button">
                                                 {{ __('messages.add') }}
                                             </x-primary-button>
                                         </div>
@@ -536,7 +536,7 @@
                                         <x-input-label for="member_email" :value="__('messages.email')" />
                                         <div class="flex mt-1">
                                             <x-text-input id="member_email" name="member_email" type="email" class="mr-2 block w-full"
-                                            @keydown.enter.prevent="addMember" @blur="searchMembers" v-model="memberEmail" autocomplete="off" />
+                                            x-on:keydown.enter.prevent="addMember" x-on:blur="searchMembers" v-model="memberEmail" autocomplete="off" />
                                         </div>
                                         @if (config('app.hosted'))
                                         <p class="mt-2 text-sm text-gray-500">
@@ -562,7 +562,7 @@
                                                         </svg>
                                                     </a>
                                                 </div>
-                                                <x-primary-button @click="selectMember(member)" type="button">
+                                                <x-primary-button x-on:click="selectMember(member)" type="button">
                                                     {{ __('messages.select') }}
                                                 </x-primary-button>
                                             </div>
@@ -571,7 +571,7 @@
 
                                     <div class="mb-6">
                                         <x-input-label for="member_youtube_url" :value="__('messages.youtube_video_url')" />
-                                        <x-text-input id="member_youtube_url" @keydown.enter.prevent="addMember"
+                                        <x-text-input id="member_youtube_url" x-on:keydown.enter.prevent="addMember"
                                             v-model="memberYoutubeUrl" type="url" class="mr-2 block w-full" autocomplete="off" />
                                     </div>
                                 
@@ -580,7 +580,7 @@
                             </div>
 
                             <div v-if="!showMemberTypeRadio" class="mt-4 flex justify-end">
-                                <x-secondary-button @click="showAddMemberForm" type="button">
+                                <x-secondary-button x-on:click="showAddMemberForm" type="button">
                                     {{ __('messages.add') }}
                                 </x-secondary-button>
                             </div>
@@ -612,7 +612,7 @@
                                 class="mt-1 block w-full"
                                 maxlength="255"
                                 v-model="eventSlug"
-                                @input="onSlugInput"
+                                x-on:input="onSlugInput"
                                 autocomplete="off" />
                             <div class="mt-2 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
                                 <span class="truncate">
@@ -630,7 +630,7 @@
                                         @{{ eventSlug || slugPreviewPlaceholder }}
                                     </template>
                                 </span>
-                                <button v-if="canUseEventUrl" type="button" @click="copyEventUrl"
+                                <button v-if="canUseEventUrl" type="button" x-on:click="copyEventUrl"
                                     class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                                     title="{{ __('messages.copy_url') }}">
                                     <template v-if="eventUrlCopied">
@@ -776,7 +776,7 @@
                                            value="{{ $curator->encodeId() }}"
                                            {{ (! $event->exists && ($role->subdomain == $curator->subdomain || session('pending_request') == $curator->subdomain || (isset($preselectedCurators) && in_array($curator->encodeId(), $preselectedCurators)))) || $event->curators->contains($curator->id) ? 'checked' : '' }}
                                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
-                                           @change="toggleCuratorGroupSelection('{{ $curator->encodeId() }}')">
+                                           x-on:change="toggleCuratorGroupSelection('{{ $curator->encodeId() }}')">
                                     <label for="curator_{{ $curator->encodeId() }}" class="ml-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
                                         {{ $curator->name }}
                                     </label>
@@ -933,7 +933,7 @@
                                                     class="mt-1 block w-full" required />
                                             </div>
                                             <div v-if="tickets.length > 1" class="flex items-end">
-                                                <x-secondary-button @click="removeTicket(index)" type="button" class="mt-1">
+                                                <x-secondary-button x-on:click="removeTicket(index)" type="button" class="mt-1">
                                                     {{ __('messages.remove') }}
                                                 </x-secondary-button>
                                             </div>
@@ -973,7 +973,7 @@
                                         </div>
                                     </div>
 
-                                    <x-secondary-button @click="addTicket" type="button" class="mt-4">
+                                    <x-secondary-button x-on:click="addTicket" type="button" class="mt-4">
                                         {{ __('messages.add_type') }}
                                     </x-secondary-button>
                                 </div>
@@ -992,7 +992,7 @@
                                             <input id="expire_unpaid_tickets_checkbox" name="expire_unpaid_tickets_checkbox" type="checkbox" 
                                                 v-model="showExpireUnpaid"
                                                 class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
-                                                @change="toggleExpireUnpaid">
+                                                x-on:change="toggleExpireUnpaid">
                                             <label for="expire_unpaid_tickets_checkbox" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                                 {{ __('messages.expire_unpaid_tickets') }}
                                             </label>

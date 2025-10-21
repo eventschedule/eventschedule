@@ -25,7 +25,7 @@
                         </a>
                     </div>
 
-                    <button type="button" x-data="" @click="$dispatch('open-modal', 'add-contact')"
+                    <button type="button" x-data="" x-on:click="$dispatch('open-modal', 'add-contact')"
                         class="inline-flex items-center justify-center gap-2 rounded-md bg-[#4E81FA] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#3a6ad6] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -123,7 +123,7 @@
                                                 </td>
                                                 <td class="whitespace-nowrap px-3 py-4 text-right text-sm text-gray-900 dark:text-gray-100">
                                                     <div class="flex justify-end gap-2">
-                                                        <button type="button" x-data="" @click="$dispatch('open-modal', '{{ $modalName }}')"
+                                                        <button type="button" x-data="" x-on:click="$dispatch('open-modal', '{{ $modalName }}')"
                                                             class="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800">
                                                             <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687 1.688a1.875 1.875 0 010 2.652l-9.545 9.546-4.06.451.451-4.06 9.546-9.545a1.875 1.875 0 012.652 0z" />
@@ -178,7 +178,7 @@
 
                                                     <div class="flex justify-end gap-3">
                                                         <button type="button" class="inline-flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
-                                                            @click="$dispatch('close-modal', '{{ $modalName }}')">
+                                                            x-on:click="$dispatch('close-modal', '{{ $modalName }}')">
                                                             {{ __('messages.cancel') }}
                                                         </button>
                                                         <button type="submit"
@@ -267,7 +267,7 @@
 
             <div class="flex justify-end gap-3">
                 <button type="button" class="inline-flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
-                    @click="$dispatch('close-modal', 'add-contact')">
+                    x-on:click="$dispatch('close-modal', 'add-contact')">
                     {{ __('messages.cancel') }}
                 </button>
                 <button type="submit"

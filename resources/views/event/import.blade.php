@@ -41,14 +41,14 @@
                                     rows="7"
                                     v-model="eventDetails"
                                     v-bind:readonly="savedEvent"
-                                    @input="handleInputChange"
-                                    @paste="handlePaste" 
-                                    @keydown="handleKeydown"
-                                    @dragenter.prevent="dragEnterDetails"
-                                    @dragover.prevent="dragOverDetails"
-                                    @dragleave.prevent="dragLeaveDetails"
-                                    @drop.prevent="handleDetailsImageDrop"
-                                    @dragend="dragEndDetails"
+                                    x-on:input="handleInputChange"
+                                    x-on:paste="handlePaste"
+                                    x-on:keydown="handleKeydown"
+                                    x-on:dragenter.prevent="dragEnterDetails"
+                                    x-on:dragover.prevent="dragOverDetails"
+                                    x-on:dragleave.prevent="dragLeaveDetails"
+                                    x-on:drop.prevent="handleDetailsImageDrop"
+                                    x-on:dragend="dragEndDetails"
                                     autofocus {{ config('services.google.gemini_key') ? '' : 'disabled' }}
                                     :class="['mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm transition-all duration-200', 
                                         isDraggingDetails ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 ring-2 ring-blue-200 dark:ring-blue-800' : '']"
@@ -57,12 +57,12 @@
                                     placeholder="{{ __('messages.drag_drop_image_or_type_text') }}"></textarea>
                                 
                                 <!-- Drop message overlay for textarea -->
-                                <div v-show="isDraggingDetails" 
-                                     @dragenter.prevent="dragEnterDetails"
-                                     @dragover.prevent="dragOverDetails"
-                                     @dragleave.prevent="dragLeaveDetails"
-                                     @drop.prevent="handleDetailsImageDrop"
-                                     @dragend="dragEndDetails"
+                                <div v-show="isDraggingDetails"
+                                     x-on:dragenter.prevent="dragEnterDetails"
+                                     x-on:dragover.prevent="dragOverDetails"
+                                     x-on:dragleave.prevent="dragLeaveDetails"
+                                     x-on:drop.prevent="handleDetailsImageDrop"
+                                     x-on:dragend="dragEndDetails"
                                      class="absolute inset-0 flex items-center justify-center bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-500 rounded-md z-10 transition-all duration-200 ease-in-out"
                                      :class="{ 'opacity-100 scale-100': isDraggingDetails, 'opacity-0 scale-95': !isDraggingDetails }">
                                     <div class="text-center">
@@ -88,8 +88,8 @@
                                     </div>
                                     
                                     <!-- Remove image button -->
-                                    <button 
-                                        @click="removeDetailsImage"
+                                    <button
+                                        x-on:click="removeDetailsImage"
                                         type="button"
                                         :class="['absolute -top-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-colors', 
                                             {{ is_rtl() ? "'-left-1'" : "'-right-1'" }}]"
@@ -101,9 +101,9 @@
                                 </div>
                                 
                                 <!-- Plus icon button for file picker -->
-                                <button 
+                                <button
                                     type="button"
-                                    @click="openDetailsFileSelector"
+                                    x-on:click="openDetailsFileSelector"
                                     :disabled="isLoading || detailsImage"
                                     :class="['absolute p-2 rounded-md transition-all duration-200 shadow-md', 
                                         {{ is_rtl() ? "'left-16'" : "'right-16'" }} + ' bottom-3',
@@ -117,9 +117,9 @@
                                 </button>
                                 
                                 <!-- Submit button with up arrow -->
-                                <button 
+                                <button
                                     type="button"
-                                    @click="handleSubmit"
+                                    x-on:click="handleSubmit"
                                     :disabled="!canSubmit || isLoading"
                                     :class="['absolute p-2 rounded-md transition-all duration-200 shadow-md', 
                                         {{ is_rtl() ? "'left-5'" : "'right-5'" }} + ' bottom-3',
@@ -184,10 +184,10 @@
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 @if (auth()->user() && auth()->user()->isAdmin())
                 <div class="flex items-center mb-3 sm:mb-0">
-                    <input type="checkbox" 
-                            id="show_all_fields" 
-                            v-model="showAllFields" 
-                            @change="saveShowAllFieldsPreference"
+                    <input type="checkbox"
+                            id="show_all_fields"
+                            v-model="showAllFields"
+                            x-on:change="saveShowAllFieldsPreference"
                             class="rounded border-gray-300 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
                     <label for="show_all_fields" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
                         {{ __('messages.show_all_fields') }}
@@ -199,7 +199,7 @@
 
                 <!-- Action buttons - now includes Save All -->
                 <div class="flex gap-2 self-end sm:self-auto">
-                    <button @click="handleSaveAll" v-if="({{ request()->has('automate') ? 'true' : 'false' }} || preview.parsed.length > 1) && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                    <button x-on:click="handleSaveAll" v-if="({{ request()->has('automate') ? 'true' : 'false' }} || preview.parsed.length > 1) && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
                         {{ __('messages.save_all') }}
                     </button>
                 </div>
@@ -209,10 +209,10 @@
 
         @if (auth()->user() && auth()->user()->isAdmin())
         <div class="flex items-center my-4">
-            <input type="checkbox" 
-                    id="show_all_fields" 
-                    v-model="showAllFields" 
-                    @change="saveShowAllFieldsPreference"
+            <input type="checkbox"
+                    id="show_all_fields"
+                    v-model="showAllFields"
+                    x-on:change="saveShowAllFieldsPreference"
                     class="rounded border-gray-300 text-blue-500 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
             <label for="show_all_fields" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
                 {{ __('messages.show_all_fields') }}
@@ -223,7 +223,7 @@
         <!-- Hidden file input for details image -->
         <input type="file"
                 ref="detailsFileInput"
-                @change="handleDetailsFileSelect"
+                x-on:change="handleDetailsFileSelect"
                 accept="image/*"
                 class="hidden">
 
@@ -272,8 +272,8 @@
                                         {{ __('messages.view') }}
                                     </a>
                                     <!-- Show Select button if event hasn't been added to curator schedule -->
-                                    <button v-if="isCurator && !preview.parsed[idx].is_curated" 
-                                            @click="handleSelect(idx)" 
+                                    <button v-if="isCurator && !preview.parsed[idx].is_curated"
+                                            x-on:click="handleSelect(idx)"
                                             type="button" 
                                             :disabled="savingEvents[idx]"
                                             :class="['px-4 py-2 rounded-md transition-colors', 
@@ -393,21 +393,21 @@
                         <!-- Add buttons at the bottom of the left column -->
                         <div class="mt-12 flex justify-end gap-2">
                             <template v-if="savedEvents[idx]">
-                                <button v-if="!savedEventData[idx]?.is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" @click="handleEdit(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                                <button v-if="!savedEventData[idx]?.is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" x-on:click="handleEdit(idx)" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
                                     {{ __('messages.edit') }}
                                 </button>
-                                <button v-if="{{ auth()->check() ? 'true' : 'false' }}" @click="handleView(idx)" type="button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
+                                <button v-if="{{ auth()->check() ? 'true' : 'false' }}" x-on:click="handleView(idx)" type="button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
                                     {{ __('messages.view') }}
                                 </button>
                             </template>
                             <template v-else>
-                                <button @click="handleRemoveEvent(idx)" v-if="preview.parsed.length > 1" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                <button x-on:click="handleRemoveEvent(idx)" v-if="preview.parsed.length > 1" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                                     {{ __('messages.remove') }}
                                 </button>
-                                <button @click="handleClear" type="button" v-if="preview.parsed.length == 1" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                <button x-on:click="handleClear" type="button" v-if="preview.parsed.length == 1" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                                     {{ __('messages.clear') }}
                                 </button>
-                                <button @click="handleSave(idx)" 
+                                <button x-on:click="handleSave(idx)"
                                         type="button" 
                                         :disabled="savingEvents[idx] || !canCreateAccount"
                                         :class="['px-4 py-2 rounded-md transition-colors', 
@@ -424,8 +424,8 @@
                                     <span v-else>{{ __('messages.save') }}</span>
                                 </button>
                                 <!--
-                                <button v-if="isCurator && preview.parsed[idx].event_url && !preview.parsed[idx].is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" 
-                                        @click="handleCurate(idx)" 
+                                <button v-if="isCurator && preview.parsed[idx].event_url && !preview.parsed[idx].is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}"
+                                        x-on:click="handleCurate(idx)"
                                         type="button" 
                                         class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
                                     {{ __('messages.curate') }}
@@ -456,7 +456,7 @@
                                 
                                 <!-- Remove image button -->
                                 <button v-if="!isLoading"
-                                        @click="removeImage(idx)" 
+                                        x-on:click="removeImage(idx)"
                                         type="button"
                                         v-bind:disabled="savedEvents[idx]"
                                         class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
@@ -468,10 +468,10 @@
 
                             <!-- Drop zone -->
                             <div v-else-if="!savedEvents[idx]"
-                                    @dragover.prevent="dragOver"
-                                    @dragleave.prevent="dragLeave"
-                                    @drop.prevent="(e) => handleDrop(e, idx)"
-                                    @click="() => openFileSelector(idx)"
+                                    x-on:dragover.prevent="dragOver"
+                                    x-on:dragleave.prevent="dragLeave"
+                                    x-on:drop.prevent="(e) => handleDrop(e, idx)"
+                                    x-on:click="() => openFileSelector(idx)"
                                     v-bind:class="['flex-grow flex items-center justify-center rounded-lg border-2 border-dashed cursor-pointer', 
                                             isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-300 dark:border-gray-600']">
                                 <div class="text-center py-10">
@@ -499,9 +499,9 @@
                             </div>
 
                             <!-- Hidden file input -->
-                            <input type="file" 
+                            <input type="file"
                                     v-bind:ref="'fileInput_' + idx"
-                                    @change="(e) => handleFileSelect(e, idx)"
+                                    x-on:change="(e) => handleFileSelect(e, idx)"
                                     accept="image/*"
                                     class="hidden">
                         </div>
@@ -529,7 +529,7 @@
                                     <div v-for="video in performer.videos.slice(0, 6)" :key="video.id" 
                                             class="border rounded-lg p-2 cursor-pointer hover:border-blue-300 transition-colors relative"
                                             :class="isVideoSelected(idx, performerIdx, video) ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-200 dark:border-gray-600'"
-                                            @click="selectVideo(idx, performerIdx, video)">
+                                            x-on:click="selectVideo(idx, performerIdx, video)">
                                         <div class="flex items-center space-x-3">
                                             <div class="w-16 h-12 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center relative flex-shrink-0">
                                                 <img v-if="video.thumbnail" :src="video.thumbnail" :alt="video.title" class="w-full h-full object-cover rounded">
@@ -561,7 +561,7 @@
                                             <!-- Watch button -->
                                             <a :href="video.url" target="_blank" 
                                                 class="inline-flex items-center text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium transition-colors flex-shrink-0"
-                                                @click.stop>
+                                                x-on:click.stop>
                                                 <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
                                                     <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                                                 </svg>

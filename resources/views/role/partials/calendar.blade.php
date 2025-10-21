@@ -203,7 +203,7 @@
                     </button>
                 </a>
             @elseif ($route == 'home' && ($canCreateEvent ?? false))
-                <button type="button" x-data="" @click="$dispatch('open-modal', 'create-event')"
+                <button type="button" x-data="" x-on:click="$dispatch('open-modal', 'create-event')"
                     class="w-full md:w-auto inline-flex items-center justify-center rounded-md shadow-sm bg-[#4E81FA] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#3A6BE0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]">
                     <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? '-mr-0.5 ml-1.5' : '-ml-0.5 mr-1.5' }} h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
@@ -279,7 +279,7 @@
                                 <a :href="getEventUrl(event, '{{ $currentDate->format('Y-m-d') }}')"
                                     class="flex has-tooltip" 
                                     :data-tooltip="getEventTooltip(event)"
-                                    @click.stop {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
+                                    x-on:click.stop {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
                                     <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900 {{ (isset($role) && $role->isRtl()) ? 'rtl' : '' }} truncate">
                                         <span :class="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'" 
                                               class="hover:underline truncate" v-text="getEventDisplayName(event)">
@@ -291,7 +291,7 @@
                                 </a>
                                 <a v-if="event.can_edit" :href="event.edit_url"
                                     class="absolute {{ (isset($role) && $role->isRtl()) ? 'left-0' : 'right-0' }} top-0 hidden group-hover:inline-block text-[#4E81FA] hover:text-[#4E81FA] hover:underline"
-                                    @click.stop>
+                                    x-on:click.stop>
                                     {{ __('messages.edit') }}
                                 </a>
                             </li>
@@ -360,7 +360,7 @@
                                     <img v-if="event.image_url" :src="event.image_url" class="h-16 w-16 flex-none rounded-lg object-cover mb-2">
                                     <a v-if="event.can_edit" :href="event.edit_url"
                                         class="text-[#4E81FA] hover:text-[#4E81FA] hover:underline"
-                                        @click.stop>
+                                        x-on:click.stop>
                                         {{ __('messages.edit') }}
                                     </a>
                                 </div>

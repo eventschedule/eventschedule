@@ -212,7 +212,7 @@
                     <p v-else>
                     <select 
                         v-model="ticket.selectedQty"
-                        @change="updateTicketQuantities"
+                        x-on:change="updateTicketQuantities"
                         class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         :name="`tickets[${ticket.id}]`" :id="`ticket-${index}`"
                     >

@@ -114,7 +114,7 @@
                                                 dropdown.style.zIndex = '1000';
                                             }
                                         }">
-                                            <button @click="open = !open; $nextTick(() => positionDropdown())" 
+                                            <button x-on:click="open = !open; $nextTick(() => positionDropdown())"
                                                     x-ref="button"
                                                     type="button" 
                                                     class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors duration-150">
@@ -126,7 +126,7 @@
 
                                             <div x-show="open" 
                                                  x-ref="dropdown"
-                                                 @click.away="open = false"
+                                                   x-on:click.away="open = false"
                                                  class="w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" 
                                                  role="menu" 
                                                  x-cloak
@@ -134,14 +134,14 @@
                                                 
                                                 <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" 
                                                    target="_blank" 
-                                                   @click="open = false"
+                                                     x-on:click="open = false"
                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150"
                                                    role="menuitem">
                                                     {{ __('messages.view_ticket') }}
                                                 </a>
 
                                                 @if($sale->status === 'unpaid')
-                                                    <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_paid')" 
+                                                      <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_paid')"
                                                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150" 
                                                             role="menuitem">
                                                         {{ __('messages.mark_paid') }}
@@ -149,7 +149,7 @@
                                                 @endif
 
                                                 @if(false && $sale->status === 'paid' && $sale->payment_method != 'cash')
-                                                    <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'refund')" 
+                                                      <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'refund')"
                                                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150" 
                                                             role="menuitem">
                                                         {{ __('messages.refund') }}
@@ -157,7 +157,7 @@
                                                 @endif
 
                                                 @if(in_array($sale->status, ['unpaid', 'paid']))
-                                                    <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'cancel')" 
+                                                      <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'cancel')"
                                                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150" 
                                                             role="menuitem">
                                                         {{ __('messages.cancel') }}
@@ -165,7 +165,7 @@
                                                 @endif
                                                 
                                                 @if(! $sale->is_deleted)
-                                                <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'delete')" 
+                                                <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'delete')"
                                                         class="block px-4 py-2 text-sm text-red-700 hover:bg-gray-100 w-full text-left transition-colors duration-150" 
                                                         role="menuitem">
                                                         {{ __('messages.delete') }}
@@ -281,7 +281,7 @@
                             dropdown.style.zIndex = '1000';
                         }
                     }">
-                        <button @click="open = !open; $nextTick(() => positionDropdown())" 
+                        <button x-on:click="open = !open; $nextTick(() => positionDropdown())"
                                 x-ref="button"
                                 type="button" 
                                 class="w-full inline-flex items-center justify-center rounded-lg bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-700 shadow-sm ring-1 ring-inset ring-blue-200 hover:bg-blue-100 transition-colors duration-150">
@@ -293,7 +293,7 @@
 
                         <div x-show="open" 
                              x-ref="dropdown"
-                             @click.away="open = false"
+                             x-on:click.away="open = false"
                              class="w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" 
                              role="menu" 
                              x-cloak
@@ -301,14 +301,14 @@
                             
                             <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" 
                                target="_blank" 
-                               @click="open = false"
+                               x-on:click="open = false"
                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150"
                                role="menuitem">
                                 {{ __('messages.view_ticket') }}
                             </a>
 
                             @if($sale->status === 'unpaid')
-                                <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_paid')" 
+                                <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_paid')"
                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150" 
                                         role="menuitem">
                                     {{ __('messages.mark_paid') }}
@@ -316,7 +316,7 @@
                             @endif
 
                             @if(false && $sale->status === 'paid' && $sale->payment_method != 'cash')
-                                <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'refund')" 
+                                <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'refund')"
                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150" 
                                         role="menuitem">
                                     {{ __('messages.refund') }}
@@ -324,7 +324,7 @@
                             @endif
 
                             @if(in_array($sale->status, ['unpaid', 'paid']))
-                                <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'cancel')" 
+                                <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'cancel')"
                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150" 
                                         role="menuitem">
                                     {{ __('messages.cancel') }}
@@ -332,7 +332,7 @@
                             @endif
                             
                             @if(! $sale->is_deleted)
-                            <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'delete')" 
+                            <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'delete')"
                                     class="block px-4 py-2 text-sm text-red-700 hover:bg-gray-100 w-full text-left transition-colors duration-150" 
                                     role="menuitem">
                                 {{ __('messages.delete') }}
