@@ -325,6 +325,7 @@ trait AccountSetupTrait
 
                 if (hidden && encodedId) {
                     hidden.value = encodedId;
+                    hidden.setAttribute('value', encodedId);
                     hidden.dispatchEvent(new Event('input', { bubbles: true }));
                     hidden.dispatchEvent(new Event('change', { bubbles: true }));
                 }
@@ -350,6 +351,9 @@ trait AccountSetupTrait
                     option.textContent = venueName || 'Selected Venue';
                     option.value = encodedId || '';
                     option.__value = venueData || encodedId || venueName || '';
+                    option._value = option.__value;
+                    option.selected = true;
+                    option.setAttribute('value', option.value);
 
                     select.value = option.value;
                     select.dispatchEvent(new Event('input', { bubbles: true }));
@@ -360,6 +364,7 @@ trait AccountSetupTrait
 
                 if (nameInput && (!nameInput.value || nameInput.value.trim() === '')) {
                     nameInput.value = venueName || '';
+                    nameInput.setAttribute('value', nameInput.value);
                 }
 
                 var app = window.app;
