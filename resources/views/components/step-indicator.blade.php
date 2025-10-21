@@ -149,7 +149,7 @@
 }
 
 /* Enhanced animations */
-@keyframes pulse-glow {
+@@keyframes pulse-glow {
     0% {
         box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
     }
@@ -163,7 +163,7 @@
 }
 
 /* Responsive improvements */
-@media (max-width: 640px) {
+@@media (max-width: 640px) {
     .step-indicator {
         padding: 1rem;
         margin: 1rem 0;
