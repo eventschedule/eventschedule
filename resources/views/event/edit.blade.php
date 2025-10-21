@@ -6,10 +6,12 @@
         'resources/css/countrySelect.min.css',
     ])
 @else
-    @php($countryAssets = vite_assets([
-        'resources/js/countrySelect.min.js',
-        'resources/css/countrySelect.min.css',
-    ]))
+    @php
+        $countryAssets = vite_assets([
+            'resources/js/countrySelect.min.js',
+            'resources/css/countrySelect.min.css',
+        ]);
+    @endphp
 
     @foreach ($countryAssets['css'] as $stylesheet)
         <link rel="stylesheet" href="{{ $stylesheet }}">
