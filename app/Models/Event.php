@@ -541,8 +541,14 @@ class Event extends Model
         $location = $this->venue ? $this->venue->bestAddress() : '';
         $duration = $this->duration > 0 ? $this->duration : 2;
         $startAt = $this->getStartDateTime($date);
+
+        if (! $startAt) {
+            return '';
+        }
+
+        $endAt = $startAt->copy()->addSeconds($duration * 3600);
         $startDate = $startAt->format('Ymd\THis\Z');
-        $endDate = $startAt->addSeconds($duration * 3600)->format('Ymd\THis\Z');
+        $endDate = $endAt->format('Ymd\THis\Z');
 
         $url = "https://calendar.google.com/calendar/r/eventedit?";
         $url .= "text=" . urlencode($title);
@@ -560,8 +566,14 @@ class Event extends Model
         $location = $this->venue ? $this->venue->bestAddress() : '';
         $duration = $this->duration > 0 ? $this->duration : 2;
         $startAt = $this->getStartDateTime($date);
+
+        if (! $startAt) {
+            return '';
+        }
+
+        $endAt = $startAt->copy()->addSeconds($duration * 3600);
         $startDate = $startAt->format('Ymd\THis\Z');
-        $endDate = $startAt->addSeconds($duration * 3600)->format('Ymd\THis\Z');
+        $endDate = $endAt->format('Ymd\THis\Z');
 
         $url = "BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\n";
         $url .= "SUMMARY:" . $title . "\n";
@@ -581,8 +593,14 @@ class Event extends Model
         $location = $this->venue ? $this->venue->bestAddress() : '';
         $duration = $this->duration > 0 ? $this->duration : 2;
         $startAt = $this->getStartDateTime($date);
+
+        if (! $startAt) {
+            return '';
+        }
+
+        $endAt = $startAt->copy()->addSeconds($duration * 3600);
         $startDate = $startAt->format('Y-m-d\TH:i:s\Z');
-        $endDate = $startAt->addSeconds($duration * 3600)->format('Y-m-d\TH:i:s\Z');
+        $endDate = $endAt->format('Y-m-d\TH:i:s\Z');
 
         $url = "https://outlook.live.com/calendar/0/deeplink/compose?";
         $url .= "subject=" . urlencode($title);
@@ -605,17 +623,44 @@ class Event extends Model
             $timezone = $this->creatorRole->timezone;
         }
 
-        $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
+        $startsAt = $this->starts_at;
+
+        if (! $startsAt) {
+            if (! $date) {
+                return null;
+            }
+
+            try {
+                $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $date . ' 00:00:00', 'UTC');
+            } catch (\Exception $exception) {
+                return null;
+            }
+        } else {
+            try {
+                if ($startsAt instanceof Carbon) {
+                    $startAt = $startsAt->copy()->setTimezone('UTC');
+                } else {
+                    $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $startsAt, 'UTC');
+                }
+            } catch (\Exception $exception) {
+                return null;
+            }
+        }
 
         if ($locale) {
-            $startAt->setTimezone($timezone);        
+            $startAt->setTimezone($timezone);
         }
 
         if ($date) {
-            $customDate = Carbon::createFromFormat('Y-m-d', $date);
-            $startAt->setDate($customDate->year, $customDate->month, $customDate->day);
+            try {
+                $customDate = Carbon::createFromFormat('Y-m-d', $date);
+                $startAt->setDate($customDate->year, $customDate->month, $customDate->day);
+            } catch (\Exception $exception) {
+                // If the provided date is invalid, return null to indicate no valid start time
+                return null;
+            }
         }
-        
+
         return $startAt;
     }
 
@@ -648,12 +693,24 @@ class Event extends Model
 
     public function isMultiDay()
     {
-        return ! $this->getStartDateTime(null, true)->isSameDay($this->getStartDateTime(null, true)->addHours($this->duration));
+        $startAt = $this->getStartDateTime(null, true);
+
+        if (! $startAt || $this->duration <= 0) {
+            return false;
+        }
+
+        $endAt = $startAt->copy()->addHours($this->duration);
+
+        return ! $startAt->isSameDay($endAt);
     }
 
     public function getStartEndTime($date = null)
     {
         $date = $this->getStartDateTime($date, true);
+
+        if (! $date) {
+            return '';
+        }
 
         if ($this->duration > 0) {
             $endDate = $date->copy()->addHours($this->duration);

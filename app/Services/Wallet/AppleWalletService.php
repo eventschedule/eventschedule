@@ -184,6 +184,11 @@ class AppleWalletService
     protected function resolveEventStart(Event $event, ?string $eventDate): Carbon
     {
         $startsAt = $event->getStartDateTime($eventDate);
+
+        if (! $startsAt) {
+            throw new \RuntimeException('Cannot build wallet pass for event without a start time.');
+        }
+
         $timezone = $this->resolveTimezone($event);
 
         return $startsAt->clone()->setTimezone($timezone);
@@ -198,7 +203,19 @@ class AppleWalletService
 
     protected function formatDisplayDate(Event $event, ?string $eventDate): string
     {
-        return $event->localStartsAt(true, $eventDate) ?: $event->getStartDateTime($eventDate)->format('F j, Y g:i A');
+        $localized = $event->localStartsAt(true, $eventDate);
+
+        if ($localized) {
+            return $localized;
+        }
+
+        $startsAt = $event->getStartDateTime($eventDate, true);
+
+        if ($startsAt) {
+            return $startsAt->format('F j, Y g:i A');
+        }
+
+        return __('messages.unscheduled');
     }
 
     /**

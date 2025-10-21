@@ -182,13 +182,19 @@ class GoogleCalendarService
             $googleEvent->setDescription($description);
 
             // Set start and end times
+            $startAt = $event->getStartDateTime();
+
+            if (! $startAt) {
+                throw new \RuntimeException('Cannot sync event without a start time to Google Calendar.');
+            }
+
             $startDateTime = new EventDateTime();
-            $startDateTime->setDateTime($event->getStartDateTime()->toRfc3339String());
+            $startDateTime->setDateTime($startAt->toRfc3339String());
             $startDateTime->setTimeZone($event->creatorRole->timezone ?? 'UTC');
             $googleEvent->setStart($startDateTime);
 
             $endDateTime = new EventDateTime();
-            $endTime = $event->getStartDateTime()->copy()->addHours($event->duration ?: 2);
+            $endTime = $startAt->copy()->addHours($event->duration ?: 2);
             $endDateTime->setDateTime($endTime->toRfc3339String());
             $endDateTime->setTimeZone($event->creatorRole->timezone ?? 'UTC');
             $googleEvent->setEnd($endDateTime);
@@ -253,13 +259,19 @@ class GoogleCalendarService
             $googleEvent->setDescription($description);
 
             // Set start and end times
+            $startAt = $event->getStartDateTime();
+
+            if (! $startAt) {
+                throw new \RuntimeException('Cannot sync event without a start time to Google Calendar.');
+            }
+
             $startDateTime = new EventDateTime();
-            $startDateTime->setDateTime($event->getStartDateTime()->toRfc3339String());
+            $startDateTime->setDateTime($startAt->toRfc3339String());
             $startDateTime->setTimeZone($event->creatorRole->timezone ?? 'UTC');
             $googleEvent->setStart($startDateTime);
 
             $endDateTime = new EventDateTime();
-            $endTime = $event->getStartDateTime()->copy()->addHours($event->duration ?: 2);
+            $endTime = $startAt->copy()->addHours($event->duration ?: 2);
             $endDateTime->setDateTime($endTime->toRfc3339String());
             $endDateTime->setTimeZone($event->creatorRole->timezone ?? 'UTC');
             $googleEvent->setEnd($endDateTime);
