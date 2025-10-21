@@ -71,7 +71,11 @@ class ClaimVenue extends Mailable
 
     public function headers(): Headers
     {
-        $role = $this->event->role();
+        $role = $this->event?->role();
+
+        if (! $role) {
+            return new Headers();
+        }
 
         return new Headers(
             text: [
@@ -84,25 +88,25 @@ class ClaimVenue extends Mailable
     protected function templateData(): array
     {
         $event = $this->event;
-        $role = $event->role();
-        $venue = $event->venue;
-        $user = $event->user;
-        $curator = $event->curator();
+        $role = $event?->role();
+        $venue = $event?->venue;
+        $user = $event?->user;
+        $curator = $event?->curator();
 
-        $venueEmail = $venue->email;
+        $venueEmail = $venue?->email;
         $encodedEmail = $venueEmail ? base64_encode($venueEmail) : null;
 
         $defaultEmail = config('mail.from.address') ?? config('mail.mailers.smtp.username') ?? 'no-reply@example.com';
         $defaultName = config('mail.from.name') ?? config('app.name');
 
         return [
-            'event_name' => $event->name,
-            'role_name' => $role->name,
-            'venue_name' => $venue->name,
-            'curator_name' => $curator ? $curator->name : '',
-            'organizer_name' => $user ? $user->name : $defaultName,
-            'organizer_email' => $user ? $user->email : $defaultEmail,
-            'event_url' => $event->getGuestUrl(),
+            'event_name' => $event?->name ?? '',
+            'role_name' => $role?->name ?? '',
+            'venue_name' => $venue?->name ?? '',
+            'curator_name' => $curator?->name ?? '',
+            'organizer_name' => $user?->name ?? $defaultName,
+            'organizer_email' => $user?->email ?? $defaultEmail,
+            'event_url' => $event?->getGuestUrl() ?? '',
             'sign_up_url' => $encodedEmail ? route('sign_up', ['email' => $encodedEmail]) : route('sign_up'),
             'unsubscribe_url' => $encodedEmail
                 ? route('role.show_unsubscribe', ['email' => $encodedEmail])

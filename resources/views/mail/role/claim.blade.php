@@ -3,9 +3,13 @@
 
 {{ $subject }}
 
-<x-mail::button :url="$event->getGuestUrl()">
+@php($eventUrl = $event?->getGuestUrl())
+
+@if ($eventUrl)
+<x-mail::button :url="$eventUrl">
 {{ __('messages.view_event') }}
 </x-mail::button>
+@endif
 
 {{ __('messages.claim_email_line1') }}
 
