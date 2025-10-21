@@ -165,6 +165,11 @@ if (!function_exists('app_public_url')) {
 if (!function_exists('storage_normalize_path')) {
     /**
      * Normalize a stored file path for consistent filesystem access.
+     *
+     * Older uploads were stored under a "public/" directory on the public disk, so
+     * we intentionally keep that prefix intact to avoid breaking existing files.
+     * Only the synthetic "storage/" prefix that appears in generated URLs is
+     * stripped so the result can be passed directly to the filesystem.
      */
     function storage_normalize_path(?string $path): string
     {
@@ -174,10 +179,8 @@ if (!function_exists('storage_normalize_path')) {
 
         $normalized = ltrim($path, '/');
 
-        foreach (['storage/', 'public/'] as $prefix) {
-            if (str_starts_with($normalized, $prefix)) {
-                $normalized = ltrim(substr($normalized, strlen($prefix)), '/');
-            }
+        while (str_starts_with($normalized, 'storage/')) {
+            $normalized = ltrim(substr($normalized, strlen('storage/')), '/');
         }
 
         return $normalized;
