@@ -1,33 +1,33 @@
 <x-app-admin-layout>
 
-    @if (config('app.load_vite_assets'))
-        @vite([
+@if (config('app.load_vite_assets'))
+    @vite([
         'resources/js/countrySelect.min.js',
         'resources/css/countrySelect.min.css',
-        ])
-    @else
-        @php($countryAssets = vite_assets([
-            'resources/js/countrySelect.min.js',
-            'resources/css/countrySelect.min.css',
-        ]))
+    ])
+@else
+    @php($countryAssets = vite_assets([
+        'resources/js/countrySelect.min.js',
+        'resources/css/countrySelect.min.css',
+    ]))
 
-        @foreach ($countryAssets['css'] as $stylesheet)
-            <link rel="stylesheet" href="{{ $stylesheet }}">
-        @endforeach
+    @foreach ($countryAssets['css'] as $stylesheet)
+        <link rel="stylesheet" href="{{ $stylesheet }}">
+    @endforeach
 
-        @foreach ($countryAssets['js'] as $script)
-            <script type="module" src="{{ $script }}" defer {!! nonce_attr() !!}></script>
-        @endforeach
-    @endif
+    @foreach ($countryAssets['js'] as $script)
+        <script type="module" src="{{ $script }}" defer {!! nonce_attr() !!}></script>
+    @endforeach
+@endif
 
-    <!-- Step Indicator for Add Event Flow -->
-    @if(session('pending_request'))
-        <div class="my-6">
-            <x-step-indicator :compact="true" />
-        </div>
-    @endif
+<!-- Step Indicator for Add Event Flow -->
+@if(session('pending_request'))
+    <div class="my-6">
+        <x-step-indicator :compact="true" />
+    </div>
+@endif
 
-    <x-slot name="head">
+<x-slot name="head">
 
         <style>
         button {
