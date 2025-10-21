@@ -277,9 +277,12 @@
                                 :class="event.can_edit ? '{{ (isset($role) && $role->isRtl()) ? 'hover:pl-8' : 'hover:pr-8' }}' : ''"
                                 v-show="isEventVisible(event)">
                                 <a :href="getEventUrl(event, '{{ $currentDate->format('Y-m-d') }}')"
-                                    class="flex has-tooltip" 
+                                    class="flex has-tooltip"
                                     :data-tooltip="getEventTooltip(event)"
-                                    x-on:click.stop {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
+                                    @click.stop
+                                    @if ($route != 'guest' || (isset($embed) && $embed))
+                                        target="_blank"
+                                    @endif>
                                     <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900 {{ (isset($role) && $role->isRtl()) ? 'rtl' : '' }} truncate">
                                         <span :class="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'" 
                                               class="hover:underline truncate" v-text="getEventDisplayName(event)">
@@ -291,7 +294,7 @@
                                 </a>
                                 <a v-if="event.can_edit" :href="event.edit_url"
                                     class="absolute {{ (isset($role) && $role->isRtl()) ? 'left-0' : 'right-0' }} top-0 hidden group-hover:inline-block text-[#4E81FA] hover:text-[#4E81FA] hover:underline"
-                                    x-on:click.stop>
+                                    @click.stop>
                                     {{ __('messages.edit') }}
                                 </a>
                             </li>
@@ -360,7 +363,7 @@
                                     <img v-if="event.image_url" :src="event.image_url" class="h-16 w-16 flex-none rounded-lg object-cover mb-2">
                                     <a v-if="event.can_edit" :href="event.edit_url"
                                         class="text-[#4E81FA] hover:text-[#4E81FA] hover:underline"
-                                        x-on:click.stop>
+                                        @click.stop>
                                         {{ __('messages.edit') }}
                                     </a>
                                 </div>
