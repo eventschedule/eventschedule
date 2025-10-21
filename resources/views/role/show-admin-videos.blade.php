@@ -42,7 +42,7 @@
                                 <div v-for="video in role.videos" :key="video.id" 
                                         class="border rounded-lg p-3 cursor-pointer hover:border-blue-300 transition-colors relative"
                                         :class="isVideoSelected(role, video) ? 'border-blue-500 bg-blue-50' : 'border-gray-200'"
-                                        @click="selectVideo(role, video)">
+                                        x-on:click="selectVideo(role, video)">
                                     <div class="aspect-video bg-gray-100 rounded mb-2 flex items-center justify-center relative">
                                         <img v-if="video.thumbnail" :src="video.thumbnail" :alt="video.title" class="w-full h-full object-cover rounded">
                                         <svg v-else class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -74,7 +74,7 @@
                                         <!-- Watch button -->
                                         <a :href="video.url" target="_blank" 
                                             class="inline-flex items-center text-xs text-red-600 hover:text-red-700 font-medium transition-colors"
-                                            @click.stop>
+                                            x-on:click.stop>
                                             <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
                                                 <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                                             </svg>
@@ -96,11 +96,11 @@
                             <div v-if="role.selectedVideos && role.selectedVideos.length > 0" class="mt-4">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center space-x-3">
-                                        <button @click="skipRole(role)" 
+                                        <button x-on:click="skipRole(role)"
                                                 class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                             {{ __('messages.skip') }}
                                         </button>
-                                        <button @click="saveVideos(role)" 
+                                        <button x-on:click="saveVideos(role)"
                                                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                             {{ __('messages.save_videos') }}
                                         </button>
@@ -113,7 +113,7 @@
                                     <div class="text-sm text-gray-600">
                                         {{ __('messages.no_videos_selected') }}
                                     </div>
-                                    <button @click="skipRole(role)" 
+                                    <button x-on:click="skipRole(role)"
                                             class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                         {{ __('messages.skip') }}
                                     </button>
@@ -127,7 +127,7 @@
                         
                         <div v-else class="text-sm text-gray-500">
                             {{ __('messages.no_videos_found') }}
-                            <button @click="skipRole(role)" 
+                            <button x-on:click="skipRole(role)"
                                     class="ml-3 inline-flex items-center px-3 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                 {{ __('messages.skip') }}
                             </button>
