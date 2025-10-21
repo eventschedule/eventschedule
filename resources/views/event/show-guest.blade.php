@@ -239,7 +239,12 @@
             </a>
           </div>
           @endif
-          @if ($event->isMultiDay())
+          @php
+            $startAt = $event->getStartDateTime($date, true);
+            $endAt = $startAt && $event->duration > 0 ? $startAt->copy()->addHours($event->duration) : null;
+          @endphp
+
+          @if ($startAt && $event->isMultiDay())
           <div
             class="flex flex-row gap-2 items-center relative text-white fill-white sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-white"
           >
@@ -258,10 +263,10 @@
                 d="M2 12C2 11.161 2 10.4153 2.0129 9.75H21.9871C22 10.4153 22 11.161 22 12V14C22 17.7712 22 19.6569 20.8284 20.8284C19.6569 22 17.7712 22 14 22H10C6.22876 22 4.34315 22 3.17157 20.8284C2 19.6569 2 17.7712 2 14V12ZM17 14C17.5523 14 18 13.5523 18 13C18 12.4477 17.5523 12 17 12C16.4477 12 16 12.4477 16 13C16 13.5523 16.4477 14 17 14ZM17 18C17.5523 18 18 17.5523 18 17C18 16.4477 17.5523 16 17 16C16.4477 16 16 16.4477 16 17C16 17.5523 16.4477 18 17 18ZM13 13C13 13.5523 12.5523 14 12 14C11.4477 14 11 13.5523 11 13C11 12.4477 11.4477 12 12 12C12.5523 12 13 12.4477 13 13ZM13 17C13 17.5523 12.5523 18 12 18C11.4477 18 11 17.5523 11 17C11 16.4477 11.4477 16 12 16C12.5523 16 13 16.4477 13 17ZM7 14C7.55228 14 8 13.5523 8 13C8 12.4477 7.55228 12 7 12C6.44772 12 6 12.4477 6 13C6 13.5523 6.44772 14 7 14ZM7 18C7.55228 18 8 17.5523 8 17C8 16.4477 7.55228 16 7 16C6.44772 16 6 16.4477 6 17C6 17.5523 6.44772 18 7 18Z"
               />
             </svg>
-            <p class="text-sm">{{ $event->getStartDateTime($date, true)->format($event->getDateTimeFormat(true)) }} - {{ $event->getStartDateTime($date, true)->addHours($event->duration)->format($event->getDateTimeFormat()) }}</p>
+            <p class="text-sm">{{ $startAt->format($event->getDateTimeFormat(true)) }}@if ($endAt) - {{ $endAt->format($event->getDateTimeFormat()) }}@endif</p>
           </div>
 
-          @else
+          @elseif ($startAt)
           <div
             class="flex flex-row gap-2 items-center relative text-white fill-white sm:pr-4 sm:after:content-[''] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-white"
           >
@@ -280,7 +285,7 @@
                 d="M2 12C2 11.161 2 10.4153 2.0129 9.75H21.9871C22 10.4153 22 11.161 22 12V14C22 17.7712 22 19.6569 20.8284 20.8284C19.6569 22 17.7712 22 14 22H10C6.22876 22 4.34315 22 3.17157 20.8284C2 19.6569 2 17.7712 2 14V12ZM17 14C17.5523 14 18 13.5523 18 13C18 12.4477 17.5523 12 17 12C16.4477 12 16 12.4477 16 13C16 13.5523 16.4477 14 17 14ZM17 18C17.5523 18 18 17.5523 18 17C18 16.4477 17.5523 16 17 16C16.4477 16 16 16.4477 16 17C16 17.5523 16.4477 18 17 18ZM13 13C13 13.5523 12.5523 14 12 14C11.4477 14 11 13.5523 11 13C11 12.4477 11.4477 12 12 12C12.5523 12 13 12.4477 13 13ZM13 17C13 17.5523 12.5523 18 12 18C11.4477 18 11 17.5523 11 17C11 16.4477 11.4477 16 12 16C12.5523 16 13 16.4477 13 17ZM7 14C7.55228 14 8 13.5523 8 13C8 12.4477 7.55228 12 7 12C6.44772 12 6 12.4477 6 13C6 13.5523 6.44772 14 7 14ZM7 18C7.55228 18 8 17.5523 8 17C8 16.4477 7.55228 16 7 16C6.44772 16 6 16.4477 6 17C6 17.5523 6.44772 18 7 18Z"
               />
             </svg>
-            <p class="text-sm">{{ $event->getStartDateTime($date, true)->format('F j, Y') }}</p>
+            <p class="text-sm">{{ $startAt->format('F j, Y') }}</p>
           </div>
           <div
             class="flex flex-row gap-2 items-center relative text-white fill-white sm:pr-4"
@@ -298,8 +303,26 @@
               />
             </svg>
             <p class="text-sm">
-              {{ $event->getStartEndTime($date) }}
+              {{ $event->getStartEndTime($date) ?: __('messages.unscheduled') }}
             </p>
+          </div>
+          @else
+          <div
+            class="flex flex-row gap-2 items-center relative text-white fill-white sm:pr-4"
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM11 7C11 6.44772 11.4477 6 12 6C12.5523 6 13 6.44772 13 7V12C13 12.5523 12.5523 13 12 13H9C8.44772 13 8 12.5523 8 12C8 11.4477 8.44772 11 9 11H11V7ZM11 17C11 16.4477 11.4477 16 12 16H12.01C12.5623 16 13.01 16.4477 13.01 17C13.01 17.5523 12.5623 18 12.01 18H12C11.4477 18 11 17.5523 11 17Z"
+              />
+            </svg>
+            <p class="text-sm">{{ __('messages.unscheduled') }}</p>
           </div>
           @endif
         </div>

@@ -155,6 +155,10 @@ class GraphicController extends Controller
         $currentDay = null;
         foreach ($events as $event) {
             $startDate = $event->getStartDateTime(null, true);
+
+            if (! $startDate) {
+                continue;
+            }
             $dayName = $startDate->format('l');
             $dateStr = $event->localStartsAt(true);
             
