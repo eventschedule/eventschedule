@@ -122,6 +122,7 @@
     
 </div>
 
+@verbatim
 <style>
 .step-indicator {
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
@@ -149,7 +150,7 @@
 }
 
 /* Enhanced animations */
-@@keyframes pulse-glow {
+@keyframes pulse-glow {
     0% {
         box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
     }
@@ -163,16 +164,16 @@
 }
 
 /* Responsive improvements */
-@@media (max-width: 640px) {
+@media (max-width: 640px) {
     .step-indicator {
         padding: 1rem;
         margin: 1rem 0;
     }
-    
+
     .step-indicator .flex {
         gap: 0.75rem;
     }
-    
+
     .step-indicator .space-x-6 {
         gap: 0.75rem;
     }
@@ -184,8 +185,9 @@
 }
 
 /* Hover effects */
-.step-indicator .hover\\:scale-110:hover {
+.step-indicator .hover\:scale-110:hover {
     transform: scale(1.1);
     transition: transform 0.2s ease;
 }
-</style> 
+</style>
+@endverbatim
