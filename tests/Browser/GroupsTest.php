@@ -58,32 +58,38 @@ class GroupsTest extends DuskTestCase
     protected function createGroups(Browser $browser, string $talentSlug): void
     {
         $browser->visit('/' . $talentSlug . '/edit')
-                ->waitForText('Subschedules', 5)
-                ->scrollIntoView('#group-items')
+                ->waitForText('Subschedules', 5);
+
+        $this->scrollIntoViewWhenPresent($browser, '#group-items')
                 ->waitForText('Subschedules', 5);
 
         // Add first sub-schedule
         $browser->script("addGroupField();");
         
         $browser->waitFor('input[name*="groups"][name*="name"]', 5)
-                ->type('input[name*="groups"][name*="name"]', 'Main Shows')
-                ->scrollIntoView('button[type="submit"]')
-                ->press('Save');
+                ->type('input[name*="groups"][name*="name"]', 'Main Shows');
+
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+        $this->pressButtonWhenPresent($browser, 'Save');
 
         $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
 
         // Add second sub-schedule
         $browser->visit('/' . $talentSlug . '/edit')
-                ->waitForText('Subschedules', 5)
-                ->scrollIntoView('#group-items')
+                ->waitForText('Subschedules', 5);
+
+        $this->scrollIntoViewWhenPresent($browser, '#group-items')
                 ->waitForText('Subschedules', 5);
 
         $browser->script("addGroupField();");
 
         $browser->waitFor('#group-items > div:last-child input[name*="groups"][name*="name"]', 5)
-                ->type('#group-items > div:last-child input[name*="groups"][name*="name"]', 'Workshops')
-                ->scrollIntoView('button[type="submit"]')
-                ->press('Save');
+                ->type('#group-items > div:last-child input[name*="groups"][name*="name"]', 'Workshops');
+
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+        $this->pressButtonWhenPresent($browser, 'Save');
 
         $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
 
@@ -111,43 +117,51 @@ class GroupsTest extends DuskTestCase
         $workshops = $role->groups()->where('name', 'Workshops')->first();
 
         // Create first event for "Main Shows" sub-schedule
-        $browser->visit('/' . $talentSlug . '/add-event?date=' . date('Y-m-d'));
+        $this->visitRoleAddEventPage($browser, $talentSlug, date('Y-m-d'), 'talent', 'Talent');
         $this->selectExistingVenue($browser);
 
         $browser->type('name', 'Main Show Event')
-                ->type('duration', '2')
-                ->scrollIntoView('select[name="current_role_group_id"]')
-                ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($mainShows->id))
-                ->scrollIntoView('button[type="submit"]')
-                ->press('Save');
+                ->type('duration', '2');
+
+        $this->scrollIntoViewWhenPresent($browser, 'select[name="current_role_group_id"]')
+                ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($mainShows->id));
+
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+        $this->pressButtonWhenPresent($browser, 'Save');
 
         $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
 
         $browser->assertSee('Main Show Event');
 
         // Create second event for "Workshops" sub-schedule
-        $browser->visit('/' . $talentSlug . '/add-event?date=' . date('Y-m-d'));
+        $this->visitRoleAddEventPage($browser, $talentSlug, date('Y-m-d'), 'talent', 'Talent');
         $this->selectExistingVenue($browser);
 
         $browser->type('name', 'Workshop Event')
-                ->type('duration', '3')
-                ->scrollIntoView('select[name="current_role_group_id"]')
-                ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($workshops->id))
-                ->scrollIntoView('button[type="submit"]')
-                ->press('Save');
+                ->type('duration', '3');
+
+        $this->scrollIntoViewWhenPresent($browser, 'select[name="current_role_group_id"]')
+                ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($workshops->id));
+
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+        $this->pressButtonWhenPresent($browser, 'Save');
 
         $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
 
         $browser->assertSee('Workshop Event');
 
         // Create third event without sub-schedule
-        $browser->visit('/' . $talentSlug . '/add-event?date=' . date('Y-m-d'));
+        $this->visitRoleAddEventPage($browser, $talentSlug, date('Y-m-d'), 'talent', 'Talent');
         $this->selectExistingVenue($browser);
 
         $browser->type('name', 'General Event')
-                ->type('duration', '1')
-                ->scrollIntoView('button[type="submit"]')
-                ->press('Save');
+                ->type('duration', '1');
+
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+        $this->pressButtonWhenPresent($browser, 'Save');
 
         $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
 

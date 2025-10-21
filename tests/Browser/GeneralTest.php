@@ -53,9 +53,11 @@ class GeneralTest extends DuskTestCase
 
             $browser->clickLink('Edit Venue')
                     ->assertPathIs('/' . $venueSlug . '/edit')
-                    ->type('website', 'https://google.com')
-                    ->scrollIntoView('button[type="submit"]')
-                    ->press('Save');
+                    ->type('website', 'https://google.com');
+
+            $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+            $this->pressButtonWhenPresent($browser, 'Save');
 
             $this->waitForPath($browser, '/' . $venueSlug . '/schedule', 20);
 
@@ -67,32 +69,37 @@ class GeneralTest extends DuskTestCase
 
             $browser->clickLink('Edit Talent')
                     ->assertPathIs('/' . $talentSlug . '/edit')
-                    ->type('website', 'https://google.com')
-                    ->scrollIntoView('button[type="submit"]')
-                    ->press('Save');
+                    ->type('website', 'https://google.com');
+
+            $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+            $this->pressButtonWhenPresent($browser, 'Save');
 
             $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 20);
 
             $browser->assertSee('google.com');
 
             // Create/edit event
-            $browser->visit('/' . $talentSlug . '/add-event?date=' . date('Y-m-d'));
+            $this->visitRoleAddEventPage($browser, $talentSlug, date('Y-m-d'), 'talent', 'Talent');
             $this->selectExistingVenue($browser);
 
-            $browser->scrollIntoView('button[type="submit"]')
-                    ->press('Save');
+            $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+            $this->pressButtonWhenPresent($browser, 'Save');
 
             $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 20);
 
             $browser->assertSee('Venue');
 
             // Create/edit event
-            $browser->visit('/' . $venueSlug . '/add-event?date=' . date('Y-m-d'));
+            $this->visitRoleAddEventPage($browser, $venueSlug, date('Y-m-d'), 'venue', 'Venue');
             $this->addExistingMember($browser);
 
-            $browser->type('name', 'Venue Event')
-                    ->scrollIntoView('button[type="submit"]')
-                    ->press('Save');
+            $browser->type('name', 'Venue Event');
+
+            $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+            $this->pressButtonWhenPresent($browser, 'Save');
 
             $this->waitForPath($browser, '/' . $venueSlug . '/schedule', 20);
 

@@ -37,7 +37,9 @@ class TicketTest extends DuskTestCase
             $browser->visit('/' . $talentSlug . '/venue')
                     ->click('@buy-tickets-button')
                     ->select('#ticket-0', '1')
-                    ->scrollIntoView('button[type="submit"]')
+                    ->waitFor('@checkout-button', 5);
+
+            $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
                     ->click('@checkout-button')
                     ->waitForText(__('messages.number_of_attendees'), 5)
                     ->assertSee($name);
