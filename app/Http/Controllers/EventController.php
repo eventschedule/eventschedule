@@ -197,6 +197,11 @@ class EventController extends Controller
             ? $categories[$event->category_id]
             : null;
 
+        $sales = $event->sales()
+            ->with(['saleTickets.ticket'])
+            ->orderByDesc('created_at')
+            ->get();
+
         return view('event.view', [
             'event' => $event,
             'venue' => $event->venue,
@@ -210,6 +215,7 @@ class EventController extends Controller
             'endAt' => $endAt,
             'recurringDays' => $recurringDays,
             'categoryName' => $categoryName,
+            'sales' => $sales,
         ]);
     }
 
