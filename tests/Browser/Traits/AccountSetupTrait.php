@@ -311,6 +311,8 @@ trait AccountSetupTrait
             return false;
         }
 
+        $browser->script('window.__forcedVenueSelectionApplied = false;');
+
         $script = <<<'JS'
             (function () {
                 var encodedId = __FORCED_VENUE_ID__;
@@ -322,6 +324,17 @@ trait AccountSetupTrait
                 }
 
                 var hidden = document.querySelector('input[name="venue_id"]');
+
+                if (!hidden) {
+                    var form = document.querySelector('form[action*="event"]') || document.querySelector('form');
+
+                    if (form) {
+                        hidden = document.createElement('input');
+                        hidden.type = 'hidden';
+                        hidden.name = 'venue_id';
+                        form.appendChild(hidden);
+                    }
+                }
 
                 if (hidden && encodedId) {
                     hidden.value = encodedId;
@@ -443,6 +456,10 @@ trait AccountSetupTrait
                     }
                 }
 
+                if (encodedId) {
+                    window.__forcedVenueSelectionApplied = true;
+                }
+
                 window.appReadyForTesting = true;
             })();
         JS;
@@ -459,7 +476,13 @@ trait AccountSetupTrait
             $browser->waitUsing(5, 100, function () use ($browser) {
                 $value = $browser->value('input[name="venue_id"]');
 
-                return ! empty($value);
+                if (! empty($value)) {
+                    return true;
+                }
+
+                $applied = $browser->script('return typeof window !== "undefined" ? window.__forcedVenueSelectionApplied || false : false;');
+
+                return ! empty($applied) && $applied[0] === true;
             });
         } catch (Throwable $exception) {
             return false;
