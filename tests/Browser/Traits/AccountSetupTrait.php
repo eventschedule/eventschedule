@@ -95,8 +95,9 @@ trait AccountSetupTrait
                 ->pause(1000)
                 ->type('address1', $address);
 
-        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
-                ->press('Save');
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+        $this->pressButtonWhenPresent($browser, 'Save');
 
         $slug = $this->waitForRoleScheduleRedirect($browser, 'venue', $name, 20);
 
@@ -116,8 +117,9 @@ trait AccountSetupTrait
                 ->type('name', $name)
                 ->pause(1000);
 
-        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
-                ->press('Save');
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+        $this->pressButtonWhenPresent($browser, 'Save');
 
         $slug = $this->waitForRoleScheduleRedirect($browser, 'talent', $name, 20);
 
@@ -140,8 +142,9 @@ trait AccountSetupTrait
         $this->scrollIntoViewWhenPresent($browser, 'input[name="accept_requests"]')
                 ->check('accept_requests');
 
-        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
-                ->press('Save');
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+        $this->pressButtonWhenPresent($browser, 'Save');
 
         $slug = $this->waitForRoleScheduleRedirect($browser, 'curator', $name, 20);
 
@@ -167,8 +170,9 @@ trait AccountSetupTrait
                 ->type('tickets[0][quantity]', '50')
                 ->type('tickets[0][description]', 'General admission ticket');
 
-        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
-                ->press('Save');
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+        $this->pressButtonWhenPresent($browser, 'Save');
 
         $schedulePath = '/' . $talentSlug . '/schedule';
 
@@ -792,7 +796,7 @@ trait AccountSetupTrait
         $this->scrollIntoViewWhenPresent($browser, '#enable_api', 5)
                 ->check('enable_api');
 
-        $browser->press('Save');
+        $this->pressButtonWhenPresent($browser, 'Save', 20, ['#enable_api + button[type="submit"]']);
 
         $apiKey = null;
 
@@ -1295,6 +1299,159 @@ trait AccountSetupTrait
         }
 
         return $browser;
+    }
+
+    protected function pressButtonWhenPresent(
+        Browser $browser,
+        string $buttonText = 'Save',
+        int $seconds = 30,
+        array $fallbackSelectors = []
+    ): Browser {
+        $normalizedText = trim($buttonText);
+        $loweredText = mb_strtolower($normalizedText);
+
+        $candidates = array_values(array_filter(array_unique(array_merge([
+            'button[type="submit"]',
+            'form button[type="submit"]',
+            'input[type="submit"]',
+            'button[aria-label*="save" i]',
+            'button[data-action*="save" i]',
+            'button[name*="save" i]',
+            'button[value*="save" i]',
+            'input[type="submit"][value*="save" i]',
+        ], $fallbackSelectors))));
+
+        $deadline = microtime(true) + max(0, $seconds);
+
+        while (microtime(true) <= $deadline) {
+            if ($normalizedText !== '') {
+                try {
+                    return $browser->press($normalizedText);
+                } catch (Throwable $exception) {
+                    // The button may not yet exist or might have different text; fall through to selector/script fallback.
+                }
+            }
+
+            foreach ($candidates as $candidate) {
+                if ($candidate === '') {
+                    continue;
+                }
+
+                try {
+                    $browser->waitFor($candidate, 1);
+                } catch (Throwable $exception) {
+                    continue;
+                }
+
+                try {
+                    $browser->click($candidate);
+
+                    return $browser;
+                } catch (Throwable $exception) {
+                    continue;
+                }
+            }
+
+            try {
+                $script = strtr(<<<'JS'
+                    return (function () {
+                        var targetText = __TARGET_TEXT__;
+                        var normalized = targetText.trim().toLowerCase();
+                        var hasTarget = normalized !== '';
+
+                        var elements = Array.prototype.slice.call(document.querySelectorAll('button, input[type="submit"], [role="button"]'));
+
+                        for (var i = 0; i < elements.length; i++) {
+                            var element = elements[i];
+
+                            if (!element || element.disabled) {
+                                continue;
+                            }
+
+                            var label = '';
+
+                            if (element.matches && element.matches('input[type="submit"]')) {
+                                label = (element.value || '').trim();
+                            } else if (typeof element.innerText === 'string' && element.innerText.trim() !== '') {
+                                label = element.innerText.trim();
+                            } else if (typeof element.textContent === 'string') {
+                                label = element.textContent.trim();
+                            }
+
+                            var ariaLabel = (element.getAttribute && element.getAttribute('aria-label')) || '';
+                            var dataLabel = (element.dataset && (element.dataset.label || element.dataset.text)) || '';
+
+                            var combined = (label + ' ' + ariaLabel + ' ' + dataLabel).trim().toLowerCase();
+
+                            if (hasTarget) {
+                                if (combined.indexOf(normalized) === -1) {
+                                    continue;
+                                }
+                            } else if (combined === '') {
+                                continue;
+                            }
+
+                            if (typeof element.scrollIntoView === 'function') {
+                                try {
+                                    element.scrollIntoView({behavior: 'instant', block: 'center', inline: 'nearest'});
+                                } catch (error) {
+                                    // Ignore scroll errors and continue.
+                                }
+                            }
+
+                            if (typeof element.click === 'function') {
+                                element.click();
+                                return true;
+                            }
+
+                            var event = document.createEvent('MouseEvents');
+                            event.initEvent('click', true, true);
+                            element.dispatchEvent(event);
+
+                            return true;
+                        }
+
+                        if (!hasTarget) {
+                            var form = document.querySelector('form');
+
+                            if (form) {
+                                try {
+                                    form.dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));
+                                } catch (error) {
+                                    // Swallow dispatch errors.
+                                }
+
+                                if (typeof form.submit === 'function') {
+                                    form.submit();
+                                }
+
+                                return true;
+                            }
+                        }
+
+                        return false;
+                    })();
+                JS, [
+                    '__TARGET_TEXT__' => json_encode($loweredText, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES),
+                ]);
+
+                $result = $browser->script($script);
+
+                if (! empty($result) && ($result[0] === true || $result[0] === 1 || $result[0] === '1')) {
+                    return $browser;
+                }
+            } catch (Throwable $exception) {
+                // Ignore script execution errors and continue retrying until the deadline expires.
+            }
+
+            usleep(100000);
+        }
+
+        $message = $normalizedText !== ''
+            ? sprintf('Unable to locate a button containing the text [%s].', $buttonText)
+            : 'Unable to locate a usable button to submit the form.';
+
+        $this->fail($message);
     }
 
     protected function currentPath(Browser $browser): ?string

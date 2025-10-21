@@ -69,8 +69,9 @@ class GroupsTest extends DuskTestCase
         $browser->waitFor('input[name*="groups"][name*="name"]', 5)
                 ->type('input[name*="groups"][name*="name"]', 'Main Shows');
 
-        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
-                ->press('Save');
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+        $this->pressButtonWhenPresent($browser, 'Save');
 
         $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
 
@@ -86,8 +87,9 @@ class GroupsTest extends DuskTestCase
         $browser->waitFor('#group-items > div:last-child input[name*="groups"][name*="name"]', 5)
                 ->type('#group-items > div:last-child input[name*="groups"][name*="name"]', 'Workshops');
 
-        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
-                ->press('Save');
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+        $this->pressButtonWhenPresent($browser, 'Save');
 
         $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
 
@@ -124,8 +126,9 @@ class GroupsTest extends DuskTestCase
         $this->scrollIntoViewWhenPresent($browser, 'select[name="current_role_group_id"]')
                 ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($mainShows->id));
 
-        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
-                ->press('Save');
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+        $this->pressButtonWhenPresent($browser, 'Save');
 
         $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
 
@@ -141,8 +144,9 @@ class GroupsTest extends DuskTestCase
         $this->scrollIntoViewWhenPresent($browser, 'select[name="current_role_group_id"]')
                 ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($workshops->id));
 
-        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
-                ->press('Save');
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+        $this->pressButtonWhenPresent($browser, 'Save');
 
         $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
 
@@ -155,8 +159,9 @@ class GroupsTest extends DuskTestCase
         $browser->type('name', 'General Event')
                 ->type('duration', '1');
 
-        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
-                ->press('Save');
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+        $this->pressButtonWhenPresent($browser, 'Save');
 
         $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
 

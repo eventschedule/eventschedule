@@ -115,8 +115,9 @@ class CuratorEventTest extends DuskTestCase
                     ->waitForLocation($this->pathWithoutQuery($editPath), 5)
                     ->waitForText('Edit Event', 5);
 
-            $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
-                    ->press('Save');
+            $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+            $this->pressButtonWhenPresent($browser, 'Save');
 
             $this->waitForPath($browser, '/' . $curator1Slug . '/schedule', 5);
 
@@ -154,8 +155,9 @@ class CuratorEventTest extends DuskTestCase
                     });
                 ");
 
-        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
-                ->press('Save');
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+        $this->pressButtonWhenPresent($browser, 'Save');
 
         $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
 

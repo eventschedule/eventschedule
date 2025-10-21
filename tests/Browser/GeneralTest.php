@@ -55,8 +55,9 @@ class GeneralTest extends DuskTestCase
                     ->assertPathIs('/' . $venueSlug . '/edit')
                     ->type('website', 'https://google.com');
 
-            $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
-                    ->press('Save');
+            $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+            $this->pressButtonWhenPresent($browser, 'Save');
 
             $this->waitForPath($browser, '/' . $venueSlug . '/schedule', 20);
 
@@ -70,8 +71,9 @@ class GeneralTest extends DuskTestCase
                     ->assertPathIs('/' . $talentSlug . '/edit')
                     ->type('website', 'https://google.com');
 
-            $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
-                    ->press('Save');
+            $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+            $this->pressButtonWhenPresent($browser, 'Save');
 
             $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 20);
 
@@ -81,8 +83,9 @@ class GeneralTest extends DuskTestCase
             $this->visitRoleAddEventPage($browser, $talentSlug, date('Y-m-d'), 'talent', 'Talent');
             $this->selectExistingVenue($browser);
 
-            $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
-                    ->press('Save');
+            $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+            $this->pressButtonWhenPresent($browser, 'Save');
 
             $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 20);
 
@@ -94,8 +97,9 @@ class GeneralTest extends DuskTestCase
 
             $browser->type('name', 'Venue Event');
 
-            $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
-                    ->press('Save');
+            $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]');
+
+            $this->pressButtonWhenPresent($browser, 'Save');
 
             $this->waitForPath($browser, '/' . $venueSlug . '/schedule', 20);
 
