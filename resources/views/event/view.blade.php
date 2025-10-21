@@ -11,6 +11,7 @@
         $remainingTicketCapacity = $hasLimitedTickets ? $event->getRemainingTicketQuantity() : null;
         $guestUrl = $event->getGuestUrl(false, null, null, true);
         $cleanGuestUrl = $guestUrl ? \App\Utils\UrlUtils::clean($guestUrl) : null;
+        $sales = $sales ?? collect();
     @endphp
 
     <div class="py-6">
@@ -199,6 +200,88 @@
                                             @endforeach
                                         </tbody>
                                     </table>
+                                </div>
+
+                                <div class="mt-8">
+                                    <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                                        {{ __('messages.ticket_purchasers') }}
+                                    </h3>
+
+                                    @if ($sales->isEmpty())
+                                        <p class="mt-3 text-sm text-gray-600 dark:text-gray-300">
+                                            {{ __('messages.no_ticket_purchasers') }}
+                                        </p>
+                                    @else
+                                        <div class="mt-4 overflow-x-auto">
+                                            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                                <thead class="bg-gray-50 dark:bg-gray-900/60 text-gray-700 dark:text-gray-200">
+                                                    <tr>
+                                                        <th scope="col" class="px-4 py-2 text-left font-medium">{{ __('messages.name') }}</th>
+                                                        <th scope="col" class="px-4 py-2 text-left font-medium">{{ __('messages.email') }}</th>
+                                                        <th scope="col" class="px-4 py-2 text-left font-medium">{{ __('messages.tickets') }}</th>
+                                                        <th scope="col" class="px-4 py-2 text-left font-medium">{{ __('messages.total') }}</th>
+                                                        <th scope="col" class="px-4 py-2 text-left font-medium">{{ __('messages.payment_method') }}</th>
+                                                        <th scope="col" class="px-4 py-2 text-left font-medium">{{ __('messages.status') }}</th>
+                                                        <th scope="col" class="px-4 py-2 text-left font-medium">{{ __('messages.date') }}</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                                    @foreach ($sales as $sale)
+                                                        @php
+                                                            $ticketSummary = $sale->saleTickets
+                                                                ->map(function ($saleTicket) {
+                                                                    $type = $saleTicket->ticket?->type ?: __('messages.ticket');
+
+                                                                    return $type . ' × ' . $saleTicket->quantity;
+                                                                })
+                                                                ->filter()
+                                                                ->implode(', ');
+
+                                                            if (! $ticketSummary) {
+                                                                $ticketSummary = __('messages.none');
+                                                            }
+
+                                                            $totalAmount = $sale->payment_amount ?? $sale->calculateTotal();
+                                                            $formattedAmount = $event->ticket_currency_code
+                                                                ? $event->ticket_currency_code . ' ' . number_format($totalAmount, 2)
+                                                                : number_format($totalAmount, 2);
+
+                                                            $saleCreatedAt = $sale->created_at
+                                                                ? $sale->created_at
+                                                                    ->copy()
+                                                                    ->timezone($timezone)
+                                                                    ->locale(app()->getLocale())
+                                                                    ->translatedFormat('M j, Y • g:i A')
+                                                                : null;
+                                                        @endphp
+                                                        <tr class="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200">
+                                                            <td class="px-4 py-2 align-top">
+                                                                <div class="font-medium text-gray-900 dark:text-gray-100">{{ $sale->name }}</div>
+                                                            </td>
+                                                            <td class="px-4 py-2 align-top">
+                                                                <a href="mailto:{{ $sale->email }}" class="text-blue-600 hover:underline dark:text-blue-400">{{ $sale->email }}</a>
+                                                            </td>
+                                                            <td class="px-4 py-2 align-top">{{ $ticketSummary }}</td>
+                                                            <td class="px-4 py-2 align-top">{{ $formattedAmount }}</td>
+                                                            <td class="px-4 py-2 align-top">{{ $sale->payment_method ? __('messages.' . $sale->payment_method) : __('messages.none') }}</td>
+                                                            <td class="px-4 py-2 align-top">
+                                                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
+                                                                    @class([
+                                                                        'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200' => $sale->status === 'paid',
+                                                                        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200' => $sale->status === 'unpaid',
+                                                                        'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200' => in_array($sale->status, ['cancelled', 'refunded', 'expired']),
+                                                                        'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' => ! in_array($sale->status, ['paid', 'unpaid', 'cancelled', 'refunded', 'expired']),
+                                                                    ])">
+                                                                    {{ __('messages.' . $sale->status) }}
+                                                                </span>
+                                                            </td>
+                                                            <td class="px-4 py-2 align-top">{{ $saleCreatedAt ?? __('messages.none') }}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
