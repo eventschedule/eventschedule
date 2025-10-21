@@ -1213,9 +1213,64 @@ trait AccountSetupTrait
         return $lastMatchedPath;
     }
 
-    protected function scrollIntoViewWhenPresent(Browser $browser, string $selector, int $seconds = 30): Browser
+    protected function scrollIntoViewWhenPresent(Browser $browser, string $selector, int $seconds = 30, array $fallbackSelectors = []): Browser
     {
-        $browser->waitFor($selector, $seconds);
+        $selector = trim($selector);
+
+        $candidates = array_values(array_filter(array_unique(array_merge([
+            $selector,
+        ], $fallbackSelectors))));
+
+        if (Str::contains($selector, 'button[type="submit"]')) {
+            $candidates = array_merge($candidates, [
+                'form button[type="submit"]',
+                'input[type="submit"]',
+            ]);
+        }
+
+        $candidates = array_values(array_filter(array_unique(array_map('trim', $candidates))));
+
+        $foundSelector = null;
+
+        foreach ($candidates as $candidate) {
+            if ($candidate === '') {
+                continue;
+            }
+
+            try {
+                $browser->waitFor($candidate, $seconds);
+                $foundSelector = $candidate;
+                break;
+            } catch (Throwable $waitException) {
+                try {
+                    $browser->waitUsing($seconds, 100, function () use ($browser, $candidate) {
+                        try {
+                            $result = $browser->script(strtr(<<<'JS'
+                                return (function () {
+                                    var selector = __SCROLL_SELECTOR__;
+                                    return !!document.querySelector(selector);
+                                })();
+                            JS, [
+                                '__SCROLL_SELECTOR__' => json_encode($candidate, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES),
+                            ]));
+                        } catch (Throwable $exception) {
+                            return false;
+                        }
+
+                        return ! empty($result) && ($result[0] === true || $result[0] === 1 || $result[0] === '1');
+                    });
+
+                    $foundSelector = $candidate;
+                    break;
+                } catch (Throwable $spinException) {
+                    continue;
+                }
+            }
+        }
+
+        if ($foundSelector === null) {
+            return $browser;
+        }
 
         $script = strtr(<<<'JS'
             (function () {
@@ -1230,7 +1285,7 @@ trait AccountSetupTrait
                 return false;
             })();
         JS, [
-            '__SELECTOR__' => json_encode($selector, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES),
+            '__SELECTOR__' => json_encode($foundSelector, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES),
         ]);
 
         try {
