@@ -1213,7 +1213,7 @@ trait AccountSetupTrait
         return $lastMatchedPath;
     }
 
-    protected function scrollIntoViewWhenPresent(Browser $browser, string $selector, int $seconds = 10): Browser
+    protected function scrollIntoViewWhenPresent(Browser $browser, string $selector, int $seconds = 30): Browser
     {
         $browser->waitFor($selector, $seconds);
 
