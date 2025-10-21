@@ -265,13 +265,15 @@
                                                             <td class="px-4 py-2 align-top">{{ $formattedAmount }}</td>
                                                             <td class="px-4 py-2 align-top">{{ $sale->payment_method ? __('messages.' . $sale->payment_method) : __('messages.none') }}</td>
                                                             <td class="px-4 py-2 align-top">
-                                                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
-                                                                    @class([
-                                                                        'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200' => $sale->status === 'paid',
-                                                                        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200' => $sale->status === 'unpaid',
-                                                                        'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200' => in_array($sale->status, ['cancelled', 'refunded', 'expired']),
-                                                                        'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' => ! in_array($sale->status, ['paid', 'unpaid', 'cancelled', 'refunded', 'expired']),
-                                                                    ])">
+                                                                @php
+                                                                    $statusClasses = match (true) {
+                                                                        $sale->status === 'paid' => 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200',
+                                                                        $sale->status === 'unpaid' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200',
+                                                                        in_array($sale->status, ['cancelled', 'refunded', 'expired']) => 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
+                                                                        default => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
+                                                                    };
+                                                                @endphp
+                                                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $statusClasses }}">
                                                                     {{ __('messages.' . $sale->status) }}
                                                                 </span>
                                                             </td>
