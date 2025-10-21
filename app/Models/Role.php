@@ -7,6 +7,8 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use App\Notifications\VerifyEmail as CustomVerifyEmail;
@@ -93,23 +95,42 @@ class Role extends Model implements MustVerifyEmail
             }
 
             $address = $model->fullAddress();
+            $addressFields = ['address1', 'address2', 'city', 'state', 'postal_code', 'country_code'];
+            $addressChanged = ! $model->exists || $model->isDirty($addressFields);
 
-            if (config('services.google.backend') && $address && $address != $model->geo_address) {
-                $urlAddress = urlencode($address);
-                $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$urlAddress}&key=" . config('services.google.backend');
-                $response = file_get_contents($url);
-                $responseData = json_decode($response, true);
+            if ($addressChanged
+                && $address
+                && $address !== $model->geo_address
+                && ($googleKey = config('services.google.backend')))
+            {
+                try {
+                    $response = Http::timeout(10)
+                        ->connectTimeout(5)
+                        ->acceptJson()
+                        ->get('https://maps.googleapis.com/maps/api/geocode/json', [
+                            'address' => $address,
+                            'key' => $googleKey,
+                        ]);
 
-                if ($responseData['status'] == 'OK') {
-                    $latitude = $responseData['results'][0]['geometry']['location']['lat'];
-                    $longitude = $responseData['results'][0]['geometry']['location']['lng'];
-                            
-                    $model->formatted_address = $responseData['results'][0]['formatted_address'];
-                    $model->google_place_id = $responseData['results'][0]['place_id'];
-                    $model->geo_address = $address;
-                    $model->geo_lat = $latitude;
-                    $model->geo_lon = $longitude;
-                }                
+                    if ($response->successful()) {
+                        $responseData = $response->json();
+
+                        if (($responseData['status'] ?? null) === 'OK' && ! empty($responseData['results'][0])) {
+                            $geometry = $responseData['results'][0]['geometry']['location'] ?? [];
+
+                            $model->formatted_address = $responseData['results'][0]['formatted_address'] ?? null;
+                            $model->google_place_id = $responseData['results'][0]['place_id'] ?? null;
+                            $model->geo_address = $address;
+                            $model->geo_lat = $geometry['lat'] ?? null;
+                            $model->geo_lon = $geometry['lng'] ?? null;
+                        }
+                    }
+                } catch (\Throwable $exception) {
+                    Log::warning('Failed to geocode role address', [
+                        'role_id' => $model->id,
+                        'exception' => $exception->getMessage(),
+                    ]);
+                }
             }
         });
 
