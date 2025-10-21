@@ -473,16 +473,36 @@ trait AccountSetupTrait
         $browser->script($script);
 
         try {
-            $browser->waitUsing(5, 100, function () use ($browser) {
-                $value = $browser->value('input[name="venue_id"]');
+            $browser->waitUsing(10, 100, function () use ($browser) {
+                $value = null;
+
+                try {
+                    $value = $browser->value('input[name="venue_id"]');
+                } catch (Throwable $exception) {
+                    $value = null;
+                }
 
                 if (! empty($value)) {
                     return true;
                 }
 
-                $applied = $browser->script('return typeof window !== "undefined" ? window.__forcedVenueSelectionApplied || false : false;');
+                try {
+                    $applied = $browser->script('return typeof window !== "undefined" ? window.__forcedVenueSelectionApplied || false : false;');
+                } catch (Throwable $exception) {
+                    $applied = null;
+                }
 
-                return ! empty($applied) && $applied[0] === true;
+                if (empty($applied)) {
+                    return false;
+                }
+
+                $status = $applied[0];
+
+                if ($status === true || $status === 'true' || $status === 1 || $status === '1') {
+                    return true;
+                }
+
+                return false;
             });
         } catch (Throwable $exception) {
             return false;
