@@ -60,35 +60,34 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        $disk = storage_public_disk();
+
         if ($request->image_type == 'profile') {
             if ($role->profile_image_url) {
-                $path = $role->getAttributes()['profile_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                $path = storage_normalize_path($role->getAttributes()['profile_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
                 }
-                Storage::delete($path);
 
                 $role->profile_image_url = null;
                 $role->save();
-            }    
+            }
         } else if ($request->image_type == 'background') {
             if ($role->background_image_url) {
-                $path = $role->getAttributes()['background_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                $path = storage_normalize_path($role->getAttributes()['background_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
                 }
-                Storage::delete($path);
 
                 $role->background_image_url = null;
                 $role->save();
-            }    
+            }
         } else if ($request->image_type == 'header') {
             if ($role->header_image_url) {
-                $path = $role->getAttributes()['header_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                $path = storage_normalize_path($role->getAttributes()['header_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
                 }
-                Storage::delete($path);
 
                 $role->header_image_url = null;
                 $role->save();
@@ -109,28 +108,27 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        $disk = storage_public_disk();
+
         if ($role->profile_image_url) {
-            $path = $role->getAttributes()['profile_image_url'];
-            if (config('filesystems.default') == 'local') {
-                $path = 'public/' . $path;
+            $path = storage_normalize_path($role->getAttributes()['profile_image_url']);
+            if ($path !== '') {
+                Storage::disk($disk)->delete($path);
             }
-            Storage::delete($path);
         }
 
         if ($role->header_image_url) {
-            $path = $role->getAttributes()['header_image_url'];
-            if (config('filesystems.default') == 'local') {
-                $path = 'public/' . $path;
+            $path = storage_normalize_path($role->getAttributes()['header_image_url']);
+            if ($path !== '') {
+                Storage::disk($disk)->delete($path);
             }
-            Storage::delete($path);
         }
 
         if ($role->background_image_url) {
-            $path = $role->getAttributes()['background_image_url'];
-            if (config('filesystems.default') == 'local') {
-                $path = 'public/' . $path;
+            $path = storage_normalize_path($role->getAttributes()['background_image_url']);
+            if ($path !== '') {
+                Storage::disk($disk)->delete($path);
             }
-            Storage::delete($path);
         }
 
         $emails = $role->members()->pluck('email');
@@ -1026,18 +1024,19 @@ class RoleController extends Controller
 
         $user->roles()->attach($role->id, ['created_at' => now(), 'level' => 'owner']);
 
+        $disk = storage_public_disk();
+
         if ($request->hasFile('profile_image')) {
             if ($role->profile_image_url) {
-                $path = $role->getAttributes()['profile_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                $path = storage_normalize_path($role->getAttributes()['profile_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
                 }
-                Storage::delete($path);
             }
 
             $file = $request->file('profile_image');
             $filename = strtolower('profile_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+            $file->storeAs('', $filename, $disk);
 
             $role->profile_image_url = $filename;
             $role->save();
@@ -1045,16 +1044,15 @@ class RoleController extends Controller
 
         if ($request->hasFile('header_image')) {
             if ($role->header_image_url) {
-                $path = $role->getAttributes()['header_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                $path = storage_normalize_path($role->getAttributes()['header_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
                 }
-                Storage::delete($path);
             }
 
             $file = $request->file('header_image');
             $filename = strtolower('header_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+            $file->storeAs('', $filename, $disk);
 
             $role->header_image_url = $filename;
             $role->save();
@@ -1065,16 +1063,15 @@ class RoleController extends Controller
             $role->save();
         } elseif ($role->background == 'image' && $request->hasFile('background_image_url')) {
             if ($role->background_image_url) {
-                $path = $role->getAttributes()['background_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                $path = storage_normalize_path($role->getAttributes()['background_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
                 }
-                Storage::delete($path);
             }
 
             $file = $request->file('background_image_url');
             $filename = strtolower('background_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+            $file->storeAs('', $filename, $disk);
 
             $role->background_image_url = $filename;
             $role->save();
@@ -1291,18 +1288,19 @@ class RoleController extends Controller
             $role->groups()->whereIn('id', $toDelete)->delete();
         }
 
+        $disk = storage_public_disk();
+
         if ($request->hasFile('profile_image')) {
             if ($role->profile_image_url) {
-                $path = $role->getAttributes()['profile_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                $path = storage_normalize_path($role->getAttributes()['profile_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
                 }
-                Storage::delete($path);
             }
-        
+
             $file = $request->file('profile_image');
             $filename = strtolower('profile_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+            $file->storeAs('', $filename, $disk);
 
             $role->profile_image_url = $filename;
             $role->save();
@@ -1310,16 +1308,15 @@ class RoleController extends Controller
 
         if ($request->hasFile('header_image_url')) {
             if ($role->header_image_url) {
-                $path = $role->getAttributes()['header_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                $path = storage_normalize_path($role->getAttributes()['header_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
                 }
-                Storage::delete($path);
             }
 
             $file = $request->file('header_image_url');
             $filename = strtolower('header_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+            $file->storeAs('', $filename, $disk);
 
             $role->header_image_url = $filename;
             $role->save();
@@ -1330,16 +1327,15 @@ class RoleController extends Controller
             $role->save();
         } elseif ($role->background == 'image' && $request->hasFile('background_image_url')) {
             if ($role->background_image_url) {
-                $path = $role->getAttributes()['background_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                $path = storage_normalize_path($role->getAttributes()['background_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
                 }
-                Storage::delete($path);
             }
 
             $file = $request->file('background_image_url');
             $filename = strtolower('background_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+            $file->storeAs('', $filename, $disk);
 
             $role->background_image_url = $filename;
             $role->save();

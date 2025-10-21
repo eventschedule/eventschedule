@@ -162,6 +162,40 @@ if (!function_exists('app_public_url')) {
         return $cachedUrl = rtrim($url, '/');
     }
 }
+if (!function_exists('storage_normalize_path')) {
+    /**
+     * Normalize a stored file path for consistent filesystem access.
+     */
+    function storage_normalize_path(?string $path): string
+    {
+        if (! is_string($path) || trim($path) === '') {
+            return '';
+        }
+
+        $normalized = ltrim($path, '/');
+
+        foreach (['storage/', 'public/'] as $prefix) {
+            if (str_starts_with($normalized, $prefix)) {
+                $normalized = ltrim(substr($normalized, strlen($prefix)), '/');
+            }
+        }
+
+        return $normalized;
+    }
+}
+
+if (!function_exists('storage_public_disk')) {
+    /**
+     * Resolve the disk that should be used for publicly accessible uploads.
+     */
+    function storage_public_disk(): string
+    {
+        $disk = config('filesystems.default');
+
+        return in_array($disk, ['local', 'public'], true) ? 'public' : $disk;
+    }
+}
+
 if (!function_exists('storage_asset_url')) {
     /**
      * Generate a public URL for a file stored on the configured filesystem disk.
@@ -176,14 +210,8 @@ if (!function_exists('storage_asset_url')) {
             return $path;
         }
 
-        $normalized = ltrim($path, '/');
-
-        if (str_starts_with($normalized, 'storage/')) {
-            $normalized = ltrim(substr($normalized, strlen('storage/')), '/');
-        }
-
-        $disk = config('filesystems.default');
-        $diskToUse = in_array($disk, ['local', 'public'], true) ? 'public' : $disk;
+        $normalized = storage_normalize_path($path);
+        $diskToUse = storage_public_disk();
 
         try {
             if (config()->has("filesystems.disks.{$diskToUse}")) {

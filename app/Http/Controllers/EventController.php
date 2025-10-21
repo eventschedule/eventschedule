@@ -48,17 +48,18 @@ class EventController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        $disk = storage_public_disk();
+
         if ($request->image_type == 'flyer') {
             if ($event->flyer_image_url) {
-                $path = $event->getAttributes()['flyer_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                $path = storage_normalize_path($event->getAttributes()['flyer_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
                 }
-                Storage::delete($path);
 
                 $event->flyer_image_url = null;
                 $event->save();
-            }    
+            }
         }
 
         return redirect(route('event.edit', ['subdomain' => $subdomain, 'hash' => $request->hash]))
@@ -928,7 +929,8 @@ class EventController extends Controller
         if ($request->social_image) {
             $file = new \Illuminate\Http\UploadedFile($request->social_image, basename($request->social_image));
             $filename = strtolower('flyer_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+            $disk = storage_public_disk();
+            $file->storeAs('', $filename, $disk);
 
             $event->flyer_image_url = $filename;
             $event->save();
@@ -957,7 +959,8 @@ class EventController extends Controller
         if ($request->social_image) {
             $file = new \Illuminate\Http\UploadedFile($request->social_image, basename($request->social_image));
             $filename = strtolower('flyer_' . Str::random(32)) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+            $disk = storage_public_disk();
+            $file->storeAs('', $filename, $disk);
 
             $event->flyer_image_url = $filename;
             $event->save();

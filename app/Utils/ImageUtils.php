@@ -119,7 +119,8 @@ class ImageUtils
         $filename = strtolower($filenamePrefix . \Illuminate\Support\Str::random(32) . '.' . $extension);
         
         $file = new \Illuminate\Http\UploadedFile($tempFile, $filenamePrefix . '.' . $extension);
-        $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+        $disk = storage_public_disk();
+        $file->storeAs('', $filename, $disk);
 
         return $filename;
     }

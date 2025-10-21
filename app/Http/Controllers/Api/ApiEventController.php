@@ -205,21 +205,22 @@ class ApiEventController extends Controller
         }
 
         if ($request->hasFile('flyer_image')) {
+            $disk = storage_public_disk();
+
             if ($event->flyer_image_url) {
-                $path = $event->getAttributes()['flyer_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                $path = storage_normalize_path($event->getAttributes()['flyer_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
                 }
-                Storage::delete($path);
             }
 
             $file = $request->file('flyer_image');
             $filename = strtolower('flyer_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+            $file->storeAs('', $filename, $disk);
 
             $event->flyer_image_url = $filename;
             $event->save();
-        }        
+        }
         
         return response()->json([
             'data' => $event->toApiData(),
