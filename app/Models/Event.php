@@ -254,8 +254,8 @@ class Event extends Model
 
     public function localStartsAt($pretty = false, $date = null, $endTime = false)
     {
-        if (! $this->starts_at) {
-            return '';
+        if (! $this->starts_at && ! $date) {
+            return $pretty ? __('messages.unscheduled') : '';
         }
 
         $subdomain = request()->subdomain;
@@ -277,6 +277,10 @@ class Event extends Model
         }
 
         $startAt = $this->getStartDateTime($date, true);
+
+        if (! $startAt) {
+            return $pretty ? __('messages.unscheduled') : '';
+        }
         
         $format = $pretty ? ($enable24 ? 'D, M jS • H:i' : 'D, M jS • g:i A') : 'Y-m-d H:i:s';
         
