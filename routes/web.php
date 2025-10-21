@@ -7,6 +7,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\GraphicController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PublicStorageController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\InvoiceNinjaController;
@@ -54,6 +55,10 @@ if (config('app.hosted')) {
     Route::match(['get', 'post'], '/update', [AppController::class, 'update'])->name('app.update');
     Route::post('/test_database', [AppController::class, 'testDatabase'])->name('app.test_database');
 }
+
+Route::get('/storage/{path}', PublicStorageController::class)
+    ->where('path', '.*')
+    ->name('storage.public');
 
 require __DIR__ . '/auth.php';
 
