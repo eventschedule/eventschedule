@@ -58,31 +58,35 @@ class GroupsTest extends DuskTestCase
     protected function createGroups(Browser $browser, string $talentSlug): void
     {
         $browser->visit('/' . $talentSlug . '/edit')
-                ->waitForText('Subschedules', 5)
-                ->scrollIntoView('#group-items')
+                ->waitForText('Subschedules', 5);
+
+        $this->scrollIntoViewWhenPresent($browser, '#group-items')
                 ->waitForText('Subschedules', 5);
 
         // Add first sub-schedule
         $browser->script("addGroupField();");
         
         $browser->waitFor('input[name*="groups"][name*="name"]', 5)
-                ->type('input[name*="groups"][name*="name"]', 'Main Shows')
-                ->scrollIntoView('button[type="submit"]')
+                ->type('input[name*="groups"][name*="name"]', 'Main Shows');
+
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
                 ->press('Save');
 
         $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
 
         // Add second sub-schedule
         $browser->visit('/' . $talentSlug . '/edit')
-                ->waitForText('Subschedules', 5)
-                ->scrollIntoView('#group-items')
+                ->waitForText('Subschedules', 5);
+
+        $this->scrollIntoViewWhenPresent($browser, '#group-items')
                 ->waitForText('Subschedules', 5);
 
         $browser->script("addGroupField();");
 
         $browser->waitFor('#group-items > div:last-child input[name*="groups"][name*="name"]', 5)
-                ->type('#group-items > div:last-child input[name*="groups"][name*="name"]', 'Workshops')
-                ->scrollIntoView('button[type="submit"]')
+                ->type('#group-items > div:last-child input[name*="groups"][name*="name"]', 'Workshops');
+
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
                 ->press('Save');
 
         $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
@@ -115,10 +119,12 @@ class GroupsTest extends DuskTestCase
         $this->selectExistingVenue($browser);
 
         $browser->type('name', 'Main Show Event')
-                ->type('duration', '2')
-                ->scrollIntoView('select[name="current_role_group_id"]')
-                ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($mainShows->id))
-                ->scrollIntoView('button[type="submit"]')
+                ->type('duration', '2');
+
+        $this->scrollIntoViewWhenPresent($browser, 'select[name="current_role_group_id"]')
+                ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($mainShows->id));
+
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
                 ->press('Save');
 
         $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
@@ -130,10 +136,12 @@ class GroupsTest extends DuskTestCase
         $this->selectExistingVenue($browser);
 
         $browser->type('name', 'Workshop Event')
-                ->type('duration', '3')
-                ->scrollIntoView('select[name="current_role_group_id"]')
-                ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($workshops->id))
-                ->scrollIntoView('button[type="submit"]')
+                ->type('duration', '3');
+
+        $this->scrollIntoViewWhenPresent($browser, 'select[name="current_role_group_id"]')
+                ->select('current_role_group_id', \App\Utils\UrlUtils::encodeId($workshops->id));
+
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
                 ->press('Save');
 
         $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);
@@ -145,8 +153,9 @@ class GroupsTest extends DuskTestCase
         $this->selectExistingVenue($browser);
 
         $browser->type('name', 'General Event')
-                ->type('duration', '1')
-                ->scrollIntoView('button[type="submit"]')
+                ->type('duration', '1');
+
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
                 ->press('Save');
 
         $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);

@@ -113,8 +113,9 @@ class CuratorEventTest extends DuskTestCase
                     ->assertPresent('@back-to-schedule-link')
                     ->visit($editPath)
                     ->waitForLocation($this->pathWithoutQuery($editPath), 5)
-                    ->waitForText('Edit Event', 5)
-                    ->scrollIntoView('button[type="submit"]')
+                    ->waitForText('Edit Event', 5);
+
+            $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
                     ->press('Save');
 
             $this->waitForPath($browser, '/' . $curator1Slug . '/schedule', 5);
@@ -136,8 +137,9 @@ class CuratorEventTest extends DuskTestCase
         $this->visitRoleAddEventPage($browser, $talentSlug, date('Y-m-d'), 'talent', 'Talent');
         $this->selectExistingVenue($browser);
 
-        $browser->type('duration', '2')
-                ->scrollIntoView('input[name="curators[]"]')
+        $browser->type('duration', '2');
+
+        $this->scrollIntoViewWhenPresent($browser, 'input[name="curators[]"]')
                 // Use curator names to find and check the checkboxes
                 ->script("
                     var labels = document.querySelectorAll('label[for^=\"curator_\"]');
@@ -152,7 +154,7 @@ class CuratorEventTest extends DuskTestCase
                     });
                 ");
 
-        $browser->scrollIntoView('button[type="submit"]')
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
                 ->press('Save');
 
         $this->waitForPath($browser, '/' . $talentSlug . '/schedule', 5);

@@ -34,8 +34,9 @@ trait AccountSetupTrait
                 ->type('name', $name)
                 ->type('email', $email)
                 ->type('password', $password)
-                ->check('terms')
-                ->scrollIntoView('button[type="submit"]')
+                ->check('terms');
+
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
                 ->click('@sign-up-button');
 
         try {
@@ -92,8 +93,9 @@ trait AccountSetupTrait
                 ->clear('name')
                 ->type('name', $name)
                 ->pause(1000)
-                ->type('address1', $address)
-                ->scrollIntoView('button[type="submit"]')
+                ->type('address1', $address);
+
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
                 ->press('Save');
 
         $slug = $this->waitForRoleScheduleRedirect($browser, 'venue', $name, 20);
@@ -112,8 +114,9 @@ trait AccountSetupTrait
                 ->waitFor('input[name="name"]', 10)
                 ->clear('name')
                 ->type('name', $name)
-                ->pause(1000)
-                ->scrollIntoView('button[type="submit"]')
+                ->pause(1000);
+
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
                 ->press('Save');
 
         $slug = $this->waitForRoleScheduleRedirect($browser, 'talent', $name, 20);
@@ -132,10 +135,12 @@ trait AccountSetupTrait
                 ->waitFor('input[name="name"]', 10)
                 ->clear('name')
                 ->type('name', $name)
-                ->pause(1000)
-                ->scrollIntoView('input[name="accept_requests"]')
-                ->check('accept_requests')
-                ->scrollIntoView('button[type="submit"]')
+                ->pause(1000);
+
+        $this->scrollIntoViewWhenPresent($browser, 'input[name="accept_requests"]')
+                ->check('accept_requests');
+
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
                 ->press('Save');
 
         $slug = $this->waitForRoleScheduleRedirect($browser, 'curator', $name, 20);
@@ -154,13 +159,15 @@ trait AccountSetupTrait
 
         $this->selectExistingVenue($browser);
 
-        $browser->type('name', $eventName)
-                ->scrollIntoView('input[name="tickets_enabled"]')
+        $browser->type('name', $eventName);
+
+        $this->scrollIntoViewWhenPresent($browser, 'input[name="tickets_enabled"]')
                 ->check('tickets_enabled')
                 ->type('tickets[0][price]', '10')
                 ->type('tickets[0][quantity]', '50')
-                ->type('tickets[0][description]', 'General admission ticket')
-                ->scrollIntoView('button[type="submit"]')
+                ->type('tickets[0][description]', 'General admission ticket');
+
+        $this->scrollIntoViewWhenPresent($browser, 'button[type="submit"]')
                 ->press('Save');
 
         $schedulePath = '/' . $talentSlug . '/schedule';
@@ -780,8 +787,9 @@ trait AccountSetupTrait
     protected function enableApi(Browser $browser): string
     {
         $browser->visit('/settings/integrations')
-                ->waitFor('#enable_api', 5)
-                ->scrollIntoView('#enable_api')
+                ->waitFor('#enable_api', 5);
+
+        $this->scrollIntoViewWhenPresent($browser, '#enable_api', 5)
                 ->check('enable_api');
 
         $browser->press('Save');
@@ -1203,6 +1211,35 @@ trait AccountSetupTrait
         }
 
         return $lastMatchedPath;
+    }
+
+    protected function scrollIntoViewWhenPresent(Browser $browser, string $selector, int $seconds = 10): Browser
+    {
+        $browser->waitFor($selector, $seconds);
+
+        $script = strtr(<<<'JS'
+            (function () {
+                var selector = __SELECTOR__;
+                var element = document.querySelector(selector);
+
+                if (element && typeof element.scrollIntoView === 'function') {
+                    element.scrollIntoView({behavior: 'instant', block: 'center', inline: 'nearest'});
+                    return true;
+                }
+
+                return false;
+            })();
+        JS, [
+            '__SELECTOR__' => json_encode($selector, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES),
+        ]);
+
+        try {
+            $browser->script($script);
+        } catch (Throwable $exception) {
+            // Ignore transient JavaScript errors when the element disappears between wait and scroll attempts.
+        }
+
+        return $browser;
     }
 
     protected function currentPath(Browser $browser): ?string
