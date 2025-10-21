@@ -5,25 +5,27 @@
         <script src="{{ asset('js/vue.global.prod.js') }}"></script>
         <script src="{{ asset('js/html5-qrcode.min.js') }}"></script>
 
-        <style>
-            #reader {
-                border: none !important;
-                box-shadow: none !important;
-            }
-            #reader video {
-                border-radius: 1rem !important;
-            }
-            #html5-qrcode-button-camera-permission {
-                @@apply bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors;
-            }
-            #html5-qrcode-button-camera-start,
-            #html5-qrcode-button-camera-stop {
-                @@apply bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors mt-2;
-            }
-            .html5-qrcode-element {
-                @@apply mb-4;
-            }
-        </style>
+        @verbatim
+            <style>
+                #reader {
+                    border: none !important;
+                    box-shadow: none !important;
+                }
+                #reader video {
+                    border-radius: 1rem !important;
+                }
+                #html5-qrcode-button-camera-permission {
+                    @apply bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors;
+                }
+                #html5-qrcode-button-camera-start,
+                #html5-qrcode-button-camera-stop {
+                    @apply bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors mt-2;
+                }
+                .html5-qrcode-element {
+                    @apply mb-4;
+                }
+            </style>
+        @endverbatim
     
     </x-slot>
 
