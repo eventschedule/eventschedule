@@ -311,7 +311,7 @@ trait AccountSetupTrait
             return false;
         }
 
-        $browser->script(<<<JS
+        $browser->script(<<<'JS'
             (function () {
                 var encodedId = {$encodedIdJson};
                 var venueData = {$roleJson};
