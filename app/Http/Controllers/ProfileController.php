@@ -39,19 +39,19 @@ class ProfileController extends Controller
 
         if ($request->hasFile('profile_image')) {
             $user = $request->user();
-            
+            $disk = storage_public_disk();
+
             if ($user->profile_image_url) {
-                $path = $user->getAttributes()['profile_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                $path = storage_normalize_path($user->getAttributes()['profile_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
                 }
-                Storage::delete($path);
             }
 
             $file = $request->file('profile_image');
             $filename = strtolower('profile_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
-            
+            $file->storeAs('', $filename, $disk);
+
             $user->profile_image_url = $filename;
             $user->save();
         }
@@ -73,40 +73,38 @@ class ProfileController extends Controller
 
         Auth::logout();
 
+        $disk = storage_public_disk();
+
         if ($user->profile_image_url) {
-            $path = $user->getAttributes()['profile_image_url'];
-            if (config('filesystems.default') == 'local') {
-                $path = 'public/' . $path;
+            $path = storage_normalize_path($user->getAttributes()['profile_image_url']);
+            if ($path !== '') {
+                Storage::disk($disk)->delete($path);
             }
-            Storage::delete($path);
         }
 
         $roles = $user->owner()->get();
 
         foreach ($roles as $role) {
             if ($role->profile_image_url) {
-                $path = $role->getAttributes()['profile_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                $path = storage_normalize_path($role->getAttributes()['profile_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
                 }
-                Storage::delete($path);
             }
-    
+
             if ($role->header_image_url) {
-                $path = $role->getAttributes()['header_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                $path = storage_normalize_path($role->getAttributes()['header_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
                 }
-                Storage::delete($path);
             }
-    
+
             if ($role->background_image_url) {
-                $path = $role->getAttributes()['background_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                $path = storage_normalize_path($role->getAttributes()['background_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
                 }
-                Storage::delete($path);
-            }    
+            }
         }
 
         $user->delete();

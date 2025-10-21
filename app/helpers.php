@@ -162,6 +162,43 @@ if (!function_exists('app_public_url')) {
         return $cachedUrl = rtrim($url, '/');
     }
 }
+if (!function_exists('storage_normalize_path')) {
+    /**
+     * Normalize a stored file path for consistent filesystem access.
+     *
+     * Older uploads were stored under a "public/" directory on the public disk, so
+     * we intentionally keep that prefix intact to avoid breaking existing files.
+     * Only the synthetic "storage/" prefix that appears in generated URLs is
+     * stripped so the result can be passed directly to the filesystem.
+     */
+    function storage_normalize_path(?string $path): string
+    {
+        if (! is_string($path) || trim($path) === '') {
+            return '';
+        }
+
+        $normalized = ltrim($path, '/');
+
+        while (str_starts_with($normalized, 'storage/')) {
+            $normalized = ltrim(substr($normalized, strlen('storage/')), '/');
+        }
+
+        return $normalized;
+    }
+}
+
+if (!function_exists('storage_public_disk')) {
+    /**
+     * Resolve the disk that should be used for publicly accessible uploads.
+     */
+    function storage_public_disk(): string
+    {
+        $disk = config('filesystems.default');
+
+        return in_array($disk, ['local', 'public'], true) ? 'public' : $disk;
+    }
+}
+
 if (!function_exists('storage_asset_url')) {
     /**
      * Generate a public URL for a file stored on the configured filesystem disk.
@@ -176,14 +213,8 @@ if (!function_exists('storage_asset_url')) {
             return $path;
         }
 
-        $normalized = ltrim($path, '/');
-
-        if (str_starts_with($normalized, 'storage/')) {
-            $normalized = ltrim(substr($normalized, strlen('storage/')), '/');
-        }
-
-        $disk = config('filesystems.default');
-        $diskToUse = in_array($disk, ['local', 'public'], true) ? 'public' : $disk;
+        $normalized = storage_normalize_path($path);
+        $diskToUse = storage_public_disk();
 
         try {
             if (config()->has("filesystems.disks.{$diskToUse}")) {
