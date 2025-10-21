@@ -311,11 +311,11 @@ trait AccountSetupTrait
             return false;
         }
 
-        $browser->script(<<<'JS'
+        $script = <<<'JS'
             (function () {
-                var encodedId = {$encodedIdJson};
-                var venueData = {$roleJson};
-                var venueName = {$roleNameJson};
+                var encodedId = __FORCED_VENUE_ID__;
+                var venueData = __FORCED_VENUE_DATA__;
+                var venueName = __FORCED_VENUE_NAME__;
 
                 if (!encodedId && venueData && venueData.id) {
                     encodedId = venueData.id;
@@ -440,7 +440,15 @@ trait AccountSetupTrait
 
                 window.appReadyForTesting = true;
             })();
-        JS);
+        JS;
+
+        $script = strtr($script, [
+            '__FORCED_VENUE_ID__' => $encodedIdJson,
+            '__FORCED_VENUE_DATA__' => $roleJson,
+            '__FORCED_VENUE_NAME__' => $roleNameJson,
+        ]);
+
+        $browser->script($script);
 
         try {
             $browser->waitUsing(5, 100, function () use ($browser) {
