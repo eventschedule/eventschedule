@@ -559,7 +559,11 @@ const calendarApp = createApp({
             return false;
         },
         isPastEvent(dateStr) {
-            const eventDate = new Date(dateStr + 'T23:59:59');
+            // Parse the date string manually to avoid timezone issues
+            const [year, month, day] = dateStr.split('-').map(Number);
+            const eventDate = new Date(year, month - 1, day); // month is 0-indexed
+            eventDate.setHours(23, 59, 59, 999);
+            
             let today = new Date();
             
             // If user has a timezone, adjust today's date to their timezone
@@ -575,14 +579,16 @@ const calendarApp = createApp({
         formatMobileDate(dateStr) {
             if (!dateStr) return '';
             
-            const eventDate = new Date(dateStr);
+            // Parse the date string manually to avoid timezone issues
+            const [year, month, day] = dateStr.split('-').map(Number);
+            const eventDate = new Date(year, month - 1, day); // month is 0-indexed
             const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
                               'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            const day = eventDate.getDate();
-            const suffix = this.getDaySuffix(day);
-            const month = monthNames[eventDate.getMonth()];
+            const dayNum = eventDate.getDate();
+            const suffix = this.getDaySuffix(dayNum);
+            const monthName = monthNames[eventDate.getMonth()];
             
-            return `${month} ${day}${suffix}`;
+            return `${monthName} ${dayNum}${suffix}`;
         },
         getDaySuffix(day) {
             if (day >= 11 && day <= 13) return 'th';

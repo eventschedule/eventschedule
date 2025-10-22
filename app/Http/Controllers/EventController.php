@@ -161,9 +161,11 @@ class EventController extends Controller
         }
 
         if ($request->date) {
-            $defaultTime = Carbon::now($user->timezone)->setTime(20, 0, 0);
-            $utcTime = $defaultTime->setTimezone('UTC');
-            $event->starts_at = $request->date . ' ' . $utcTime->format('H:i:s');
+            // Parse the date in the user's timezone and set default time to 20:00
+            $event->starts_at = Carbon::createFromFormat('Y-m-d', $request->date, $user->timezone)
+                ->setTime(20, 0, 0)
+                ->setTimezone('UTC')
+                ->format('Y-m-d H:i:s');
         }
 
         $roles = $user->roles()->get();
