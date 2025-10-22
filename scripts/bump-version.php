@@ -3,79 +3,149 @@
 
 declare(strict_types=1);
 
-$allowedChannels = ['production', 'beta'];
+const ALLOWED_CHANNELS = ['production', 'beta'];
 
-$channelInput = $argv[1] ?? null;
-
-if ($channelInput === null) {
-    fwrite(STDERR, "Usage: php scripts/bump-version.php <production|beta>\n");
-    exit(1);
+if (PHP_SAPI === 'cli' && realpath($_SERVER['SCRIPT_FILENAME'] ?? '') === realpath(__FILE__)) {
+    exit(run($argv));
 }
 
-$channel = strtolower(trim((string) $channelInput));
+function run(array $arguments): int
+{
+    $channelInput = $arguments[1] ?? null;
 
-if (! in_array($channel, $allowedChannels, true)) {
-    fwrite(STDERR, sprintf(
-        'Invalid channel "%s". Allowed values are: %s' . PHP_EOL,
-        $channel,
-        implode(', ', $allowedChannels)
+    if ($channelInput === null) {
+        fwrite(STDERR, "Usage: php scripts/bump-version.php <production|beta> [--major]\n");
+
+        return 1;
+    }
+
+    $channel = strtolower(trim((string) $channelInput));
+
+    if (! in_array($channel, ALLOWED_CHANNELS, true)) {
+        fwrite(STDERR, sprintf(
+            'Invalid channel "%s". Allowed values are: %s' . PHP_EOL,
+            $channel,
+            implode(', ', ALLOWED_CHANNELS)
+        ));
+
+        return 1;
+    }
+
+    try {
+        $forceMajor = parseFlags(array_slice($arguments, 2));
+    } catch (InvalidArgumentException $exception) {
+        fwrite(STDERR, $exception->getMessage() . PHP_EOL);
+
+        return 1;
+    }
+
+    $versionFile = dirname(__DIR__) . '/VERSION';
+
+    if (! file_exists($versionFile)) {
+        fwrite(STDERR, "Unable to locate VERSION file." . PHP_EOL);
+
+        return 1;
+    }
+
+    $currentVersion = trim((string) file_get_contents($versionFile));
+
+    if ($currentVersion === '') {
+        fwrite(STDERR, "VERSION file is empty." . PHP_EOL);
+
+        return 1;
+    }
+
+    try {
+        $nextVersion = bumpVersion($currentVersion, $channel, $forceMajor);
+    } catch (InvalidArgumentException $exception) {
+        fwrite(STDERR, $exception->getMessage() . PHP_EOL);
+
+        return 1;
+    }
+
+    if ($nextVersion === $currentVersion) {
+        fwrite(STDERR, "New version matches the current version. No changes made." . PHP_EOL);
+
+        return 1;
+    }
+
+    file_put_contents($versionFile, $nextVersion . PHP_EOL);
+
+    writeGithubOutputs($nextVersion, $channel, $forceMajor);
+
+    $details = sprintf('%s channel', $channel);
+
+    if ($forceMajor) {
+        $details .= ', major release';
+    }
+
+    fwrite(STDOUT, sprintf(
+        "Bumped version: %s -> %s (%s)\n",
+        $currentVersion,
+        $nextVersion,
+        $details
     ));
-    exit(1);
+
+    return 0;
 }
 
-$versionFile = dirname(__DIR__) . '/VERSION';
+function parseFlags(array $flags): bool
+{
+    $forceMajor = false;
 
-if (! file_exists($versionFile)) {
-    fwrite(STDERR, "Unable to locate VERSION file." . PHP_EOL);
-    exit(1);
+    foreach ($flags as $flag) {
+        if ($flag === '--major') {
+            $forceMajor = true;
+
+            continue;
+        }
+
+        if ($flag === '' || $flag === null) {
+            continue;
+        }
+
+        throw new InvalidArgumentException(sprintf('Unknown option: %s', $flag));
+    }
+
+    return $forceMajor;
 }
 
-$currentVersion = trim((string) file_get_contents($versionFile));
+function writeGithubOutputs(string $version, string $channel, bool $forceMajor): void
+{
+    $githubOutput = getenv('GITHUB_OUTPUT');
 
-if ($currentVersion === '') {
-    fwrite(STDERR, "VERSION file is empty." . PHP_EOL);
-    exit(1);
-}
+    if (! $githubOutput) {
+        return;
+    }
 
-try {
-    $nextVersion = bumpVersion($currentVersion, $channel);
-} catch (InvalidArgumentException $exception) {
-    fwrite(STDERR, $exception->getMessage() . PHP_EOL);
-    exit(1);
-}
-
-if ($nextVersion === $currentVersion) {
-    fwrite(STDERR, "New version matches the current version. No changes made." . PHP_EOL);
-    exit(1);
-}
-
-file_put_contents($versionFile, $nextVersion . PHP_EOL);
-
-if ($githubOutput = getenv('GITHUB_OUTPUT')) {
     $outputLines = [
-        'version=' . $nextVersion,
+        'version=' . $version,
         'channel=' . $channel,
         'prerelease=' . ($channel === 'beta' ? 'true' : 'false'),
+        'is_major=' . ($forceMajor ? 'true' : 'false'),
     ];
 
     file_put_contents($githubOutput, implode(PHP_EOL, $outputLines) . PHP_EOL, FILE_APPEND);
 }
 
-fwrite(STDOUT, sprintf(
-    "Bumped version: %s -> %s (%s channel)\n",
-    $currentVersion,
-    $nextVersion,
-    $channel
-));
-
-function bumpVersion(string $currentVersion, string $channel): string
+function bumpVersion(string $currentVersion, string $channel, bool $forceMajor = false): string
 {
     $parsed = parseVersion($currentVersion);
 
-    if ($channel === 'beta') {
-        if ($parsed['suffix'] !== null) {
-            $patch = $parsed['patch'] ?? 0;
+    if ($forceMajor) {
+        $nextMajor = $parsed['major'] + 1;
 
+        if ($channel === 'beta') {
+            return formatVersion($nextMajor, 0, 1, 'b');
+        }
+
+        return formatVersion($nextMajor, 0, null, null);
+    }
+
+    if ($channel === 'beta') {
+        $patch = $parsed['patch'] ?? 0;
+
+        if ($parsed['suffix'] !== null) {
             return formatVersion(
                 $parsed['major'],
                 $parsed['minor'],
@@ -85,9 +155,9 @@ function bumpVersion(string $currentVersion, string $channel): string
         }
 
         return formatVersion(
-            $parsed['major'] + 1,
-            0,
-            1,
+            $parsed['major'],
+            $parsed['minor'],
+            $patch + 1,
             'b'
         );
     }
