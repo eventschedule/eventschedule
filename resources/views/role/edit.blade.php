@@ -525,6 +525,15 @@
                             <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full text-gray-900 dark:text-gray-100"
                                 :value="old('profile_image')" accept="image/png, image/jpeg" />
                             <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
+                            <div class="mt-4">
+                                <x-media-picker
+                                    name="profile_media_variant_id"
+                                    asset-input-name="profile_media_asset_id"
+                                    context="profile"
+                                    :initial-url="$role->profile_image_url"
+                                    label="{{ __('Choose from library') }}"
+                                />
+                            </div>
                             <p id="profile_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
                                 {{ __('messages.image_size_warning') }}
                             </p>
@@ -576,11 +585,20 @@
                             </div>
 
                             <div id="custom_header_input" style="display:none" class="mt-2">
-                                <input id="header_image_url" name="header_image_url" type="file" 
-                                    class="mt-1 block w-full text-gray-900 dark:text-gray-100" 
-                                    :value="old('header_image_url')" 
+                                <input id="header_image_url" name="header_image_url" type="file"
+                                    class="mt-1 block w-full text-gray-900 dark:text-gray-100"
+                                    :value="old('header_image_url')"
                                     accept="image/png, image/jpeg" />
                                 <x-input-error class="mt-2" :messages="$errors->get('header_image_url')" />
+                                <div class="mt-4">
+                                    <x-media-picker
+                                        name="header_media_variant_id"
+                                        asset-input-name="header_media_asset_id"
+                                        context="header"
+                                        :initial-url="$role->header_image_url"
+                                        label="{{ __('Choose from library') }}"
+                                    />
+                                </div>
                                 <p id="header_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
                                     {{ __('messages.image_size_warning') }}
                                 </p>
@@ -916,6 +934,15 @@
                                         {{ __('messages.delete_image') }}
                                     </a>
                                     @endif
+                                    <div class="mt-4">
+                                        <x-media-picker
+                                            name="background_media_variant_id"
+                                            asset-input-name="background_media_asset_id"
+                                            context="background"
+                                            :initial-url="$role->background_image_url"
+                                            label="{{ __('Choose from library') }}"
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
