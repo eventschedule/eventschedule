@@ -6,7 +6,6 @@ use App\Http\Controllers\RoleContactController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\GraphicController;
-use App\Http\Controllers\MediaLibraryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PublicStorageController;
 use App\Http\Controllers\StripeController;
@@ -123,15 +122,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/tickets', [TicketController::class, 'tickets'])->name('tickets');
     Route::get('/sales', [TicketController::class, 'sales'])->name('sales');
     Route::post('/sales/action/{sale_id}', [TicketController::class, 'handleAction'])->name('sales.action');
-
-    Route::get('/media-library', [MediaLibraryController::class, 'index'])->name('media.index');
-    Route::get('/media-library/assets', [MediaLibraryController::class, 'list'])->name('media.assets.index');
-    Route::post('/media-library/assets', [MediaLibraryController::class, 'store'])->name('media.assets.store');
-    Route::post('/media-library/assets/{asset}/variants', [MediaLibraryController::class, 'storeVariant'])->name('media.assets.variants.store');
-    Route::get('/media-library/tags', [MediaLibraryController::class, 'tags'])->name('media.tags.index');
-    Route::post('/media-library/tags', [MediaLibraryController::class, 'storeTag'])->name('media.tags.store');
-    Route::post('/media-library/assets/{asset}/tags', [MediaLibraryController::class, 'syncTags'])->name('media.assets.tags.sync');
-
+    
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->name('index');
         Route::get('/general', [SettingsController::class, 'general'])->name('general');
