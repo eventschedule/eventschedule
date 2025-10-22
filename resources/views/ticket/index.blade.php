@@ -24,6 +24,9 @@
                                         <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                             {{ __('messages.status') }}
                                         </th>
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                            {{ __('messages.ticket_usage') }}
+                                        </th>
                                         <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                                             <span class="sr-only">{{ __('messages.actions') }}</span>
                                         </th>
@@ -84,6 +87,17 @@
                                                         {{ __('messages.' . $sale->status) }}
                                                     </span>
                                                 @endif
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                @php
+                                                    $usageStatus = $sale->usage_status;
+                                                    $usageClasses = $usageStatus === 'used'
+                                                        ? 'bg-orange-100 text-orange-800'
+                                                        : 'bg-green-100 text-green-800';
+                                                @endphp
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $usageClasses }}">
+                                                    {{ __('messages.ticket_status_' . $usageStatus) }}
+                                                </span>
                                             </td>
                                             <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                                 <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" target="_blank" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors duration-150">
@@ -148,22 +162,36 @@
                             </div>
 
                             <!-- Event Info -->
-                            <div class="bg-gray-50 rounded-lg p-3">
-                                <div class="text-sm font-medium text-gray-700 mb-1">{{ __('messages.venue') }}</div>
-                                @if ($sale->event->venue && $sale->event->venue->isClaimed())
-                                    <a href="{{ $sale->event->venue->getGuestUrl() }}" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium">
-                                        {{ $sale->event->venue->getDisplayName(false) }}
-                                    </a>
-                                @else
-                                    <span class="text-gray-900">{{ $sale->event->getVenueDisplayName(false) }}</span>
-                                @endif
-                            </div>
+                                <div class="bg-gray-50 rounded-lg p-3">
+                                    <div class="text-sm font-medium text-gray-700 mb-1">{{ __('messages.venue') }}</div>
+                                    @if ($sale->event->venue && $sale->event->venue->isClaimed())
+                                        <a href="{{ $sale->event->venue->getGuestUrl() }}" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium">
+                                            {{ $sale->event->venue->getDisplayName(false) }}
+                                        </a>
+                                    @else
+                                        <span class="text-gray-900">{{ $sale->event->getVenueDisplayName(false) }}</span>
+                                    @endif
+                                </div>
 
-                            <!-- Date Info -->
-                            <div class="bg-gray-50 rounded-lg p-3">
-                                <div class="text-sm font-medium text-gray-700 mb-1">{{ __('messages.date') }}</div>
-                                <div class="text-gray-900">{{ $sale->event->localStartsAt(true, $sale->event_date) }}</div>
-                            </div>
+                                <!-- Date Info -->
+                                <div class="bg-gray-50 rounded-lg p-3">
+                                    <div class="text-sm font-medium text-gray-700 mb-1">{{ __('messages.date') }}</div>
+                                    <div class="text-gray-900">{{ $sale->event->localStartsAt(true, $sale->event_date) }}</div>
+                                </div>
+
+                                <!-- Ticket Usage -->
+                                <div class="bg-gray-50 rounded-lg p-3">
+                                    <div class="text-sm font-medium text-gray-700 mb-1">{{ __('messages.ticket_usage') }}</div>
+                                    @php
+                                        $usageStatus = $sale->usage_status;
+                                        $usageClasses = $usageStatus === 'used'
+                                            ? 'bg-orange-100 text-orange-800'
+                                            : 'bg-green-100 text-green-800';
+                                    @endphp
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $usageClasses }}">
+                                        {{ __('messages.ticket_status_' . $usageStatus) }}
+                                    </span>
+                                </div>
 
                             <!-- Actions -->
                             <div class="pt-2">

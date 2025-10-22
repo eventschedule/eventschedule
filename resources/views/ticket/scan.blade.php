@@ -71,18 +71,26 @@
                         <div class="mt-6 pb-2 text-gray-700">
                             <p><span class="font-medium">{{ __('messages.attendee') }}:</span> @{{ eventDetails.attendee }}</p>
                         </div>
-                        
+
+                        <div class="mt-4">
+                            <p class="text-sm font-medium text-gray-700 mb-1">@{{ labels.heading }}</p>
+                            <span :class="['inline-flex items-center px-3 py-1 rounded-full text-sm font-medium', ticketUsageClass]">
+                                @{{ ticketUsageLabel }}
+                            </span>
+                        </div>
+
                         <div class="mt-4">
                             <div v-for="ticket in eventDetails.tickets" :key="ticket.type" class="mb-3">
                                 <h4 class="font-medium text-gray-700">@{{ ticket.type }} {{ __('messages.ticket') }}</h4>
                                 <div class="flex flex-wrap gap-2 mt-2">
-                                    <div v-for="(status, seat) in ticket.seats" 
+                                    <div v-for="(status, seat) in ticket.seats"
                                          :key="seat"
                                          :class="[
-                                             'w-12 h-12 rounded-lg flex items-center justify-center font-medium border',
+                                             'w-14 h-14 rounded-lg flex flex-col items-center justify-center font-semibold border text-xs gap-0.5',
                                              status ? 'bg-orange-100 text-orange-700 border-orange-200' : 'bg-green-100 text-green-700 border-green-200'
                                          ]">
-                                        @{{ seat }}
+                                        <span class="text-sm">@{{ seat }}</span>
+                                        <span class="text-[10px] font-medium">@{{ status ? labels.used : labels.unused }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -108,15 +116,28 @@
                     qrScanner: null,
                     scanResult: null,
                     eventDetails: null,
-                    errorMessage: null
+                    errorMessage: null,
+                    labels: {
+                        used: @json(__('messages.ticket_status_used')),
+                        unused: @json(__('messages.ticket_status_unused')),
+                        heading: @json(__('messages.ticket_usage'))
+                    }
                 }
             },
             computed: {
                 hasUsedSeats() {
                     if (!this.eventDetails) return false;
-                    return this.eventDetails.tickets.some(ticket => 
+                    return this.eventDetails.tickets.some(ticket =>
                         Object.values(ticket.seats).some(seatValue => seatValue > 0)
                     );
+                },
+                ticketUsageLabel() {
+                    return this.hasUsedSeats ? this.labels.used : this.labels.unused;
+                },
+                ticketUsageClass() {
+                    return this.hasUsedSeats
+                        ? 'bg-orange-100 text-orange-700'
+                        : 'bg-green-100 text-green-700';
                 }
             },
             methods: {

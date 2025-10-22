@@ -189,7 +189,18 @@
           <div>
             <p class="text-[44px] leading-[0.8]">{{ __('messages.ticket') }}</p>
             @foreach ($sale->saleTickets as $saleTicket)
-              <p class="text-[14px] leading-[1.2] pt-[12px]">{{ $saleTicket->ticket->type ?: __('messages.ticket') }} x {{ $saleTicket->quantity }}</p>
+              @php
+                $usageStatus = $saleTicket->usage_status;
+                $usageClasses = $usageStatus === 'used'
+                    ? 'bg-orange-100 text-orange-800'
+                    : 'bg-green-100 text-green-800';
+              @endphp
+              <div class="flex items-center justify-between text-[14px] leading-[1.2] pt-[12px]">
+                <span>{{ $saleTicket->ticket->type ?: __('messages.ticket') }} x {{ $saleTicket->quantity }}</span>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold {{ $usageClasses }}">
+                  {{ __('messages.ticket_status_' . $usageStatus) }}
+                </span>
+              </div>
             @endforeach
           </div>
           <div class="justify-center flex">

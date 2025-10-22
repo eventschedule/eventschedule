@@ -22,6 +22,32 @@ class SaleTicket extends Model
         });
     }
 
+    public function hasBeenScanned(): bool
+    {
+        if (! $this->seats) {
+            return false;
+        }
+
+        $seats = json_decode($this->seats, true);
+
+        if (! is_array($seats)) {
+            return false;
+        }
+
+        foreach ($seats as $value) {
+            if (! empty($value)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function getUsageStatusAttribute(): string
+    {
+        return $this->hasBeenScanned() ? 'used' : 'unused';
+    }
+
     public function sale()
     {
         return $this->belongsTo(Sale::class);

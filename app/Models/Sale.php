@@ -142,6 +142,20 @@ class Sale extends Model
         return $this->hasMany(SaleTicket::class);
     }
 
+    public function hasBeenScanned(): bool
+    {
+        $this->loadMissing('saleTickets');
+
+        return $this->saleTickets->contains(function (SaleTicket $saleTicket) {
+            return $saleTicket->hasBeenScanned();
+        });
+    }
+
+    public function getUsageStatusAttribute(): string
+    {
+        return $this->hasBeenScanned() ? 'used' : 'unused';
+    }
+
     public function calculateTotal()
     {
         return $this->saleTickets->sum(function ($saleTicket) {

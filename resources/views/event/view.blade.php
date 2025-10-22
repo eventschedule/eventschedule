@@ -222,6 +222,7 @@
                                                         <th scope="col" class="px-4 py-2 text-left font-medium">{{ __('messages.total') }}</th>
                                                         <th scope="col" class="px-4 py-2 text-left font-medium">{{ __('messages.payment_method') }}</th>
                                                         <th scope="col" class="px-4 py-2 text-left font-medium">{{ __('messages.status') }}</th>
+                                                        <th scope="col" class="px-4 py-2 text-left font-medium">{{ __('messages.ticket_usage') }}</th>
                                                         <th scope="col" class="px-4 py-2 text-left font-medium">{{ __('messages.date') }}</th>
                                                         <th scope="col" class="px-4 py-2 text-left font-medium">{{ __('messages.actions') }}</th>
                                                     </tr>
@@ -273,9 +274,18 @@
                                                                         in_array($sale->status, ['cancelled', 'refunded', 'expired']) => 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
                                                                         default => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
                                                                     };
+                                                                    $usageStatus = $sale->usage_status;
+                                                                    $usageClasses = $usageStatus === 'used'
+                                                                        ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-200'
+                                                                        : 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200';
                                                                 @endphp
                                                                 <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $statusClasses }}">
                                                                     {{ __('messages.' . $sale->status) }}
+                                                                </span>
+                                                            </td>
+                                                            <td class="px-4 py-2 align-top">
+                                                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $usageClasses }}">
+                                                                    {{ __('messages.ticket_status_' . $usageStatus) }}
                                                                 </span>
                                                             </td>
                                                             <td class="px-4 py-2 align-top">{{ $saleCreatedAt ?? __('messages.none') }}</td>
