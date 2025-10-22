@@ -240,6 +240,29 @@ if (!function_exists('storage_asset_url')) {
     }
 }
 
+if (!function_exists('storage_put_file_as_public')) {
+    /**
+     * Persist an uploaded file on the public disk with explicit public visibility.
+     */
+    function storage_put_file_as_public(string $disk, \Illuminate\Http\UploadedFile $file, string $filename, string $directory = ''): string
+    {
+        $directory = trim($directory, '/');
+
+        $path = \Illuminate\Support\Facades\Storage::disk($disk)->putFileAs(
+            $directory === '' ? '' : $directory,
+            $file,
+            $filename,
+            ['visibility' => 'public']
+        );
+
+        if (is_string($path) && $path !== '') {
+            return $path;
+        }
+
+        return ltrim(($directory !== '' ? $directory . '/' : '') . $filename, '/');
+    }
+}
+
 if (!function_exists('vite_manifest')) {
     /**
      * Load the built Vite manifest once per request.

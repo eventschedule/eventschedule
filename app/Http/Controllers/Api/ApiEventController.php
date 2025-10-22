@@ -216,7 +216,7 @@ class ApiEventController extends Controller
 
             $file = $request->file('flyer_image');
             $filename = strtolower('flyer_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            $file->storeAs('', $filename, $disk);
+            storage_put_file_as_public($disk, $file, $filename);
 
             $event->flyer_image_url = $filename;
             $event->save();
