@@ -7,6 +7,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\GraphicController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\PublicStorageController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\TicketController;
@@ -92,6 +93,9 @@ Route::get('/ticket/wallet/google/{event_id}/{secret}', [TicketController::class
 Route::middleware(['auth', 'verified'])->group(function () 
 {
     Route::get('/events', [HomeController::class, 'home'])->name('home');
+    Route::get('/assets/images', [ImageController::class, 'index'])->name('images.index');
+    Route::post('/assets/images', [ImageController::class, 'store'])->name('images.store');
+    Route::delete('/assets/images/{image}', [ImageController::class, 'destroy'])->name('images.destroy');
     Route::get('/events/{hash}/view', [EventController::class, 'view'])->name('events.view');
     Route::get('/events/{hash}/clone', [EventController::class, 'cloneConfirm'])->name('events.clone.confirm');
     Route::post('/events/{hash}/clone', [EventController::class, 'clone'])->name('events.clone');

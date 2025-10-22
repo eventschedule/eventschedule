@@ -10,21 +10,16 @@ return new class extends Migration
     {
         Schema::create('images', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->unique();
-            $table->string('disk')->default('images');
-            $table->string('directory')->nullable();
-            $table->string('filename');
-            $table->string('original_filename');
-            $table->string('mime_type', 128);
-            $table->unsignedBigInteger('size');
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('disk');
             $table->string('path');
-            $table->json('variants')->nullable();
-            $table->string('checksum', 64)->nullable();
-            $table->unsignedInteger('reference_count')->default(0);
+            $table->string('original_name')->nullable();
+            $table->string('mime_type')->nullable();
+            $table->unsignedBigInteger('size')->nullable();
+            $table->unsignedInteger('width')->nullable();
+            $table->unsignedInteger('height')->nullable();
             $table->timestamps();
-            $table->softDeletes();
-
-            $table->index('checksum');
+            $table->unique(['disk', 'path']);
         });
     }
 

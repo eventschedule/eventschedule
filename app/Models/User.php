@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Notifications\VerifyEmail as CustomVerifyEmail;
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -42,6 +43,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'payment_url',
         'payment_secret',
         'is_subscribed',
+        'profile_image_id',
     ];
 
     /**
@@ -131,6 +133,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function following()
     {
         return $this->roles()->wherePivot('level', 'follower');
+    }
+
+    public function profileImage(): BelongsTo
+    {
+        return $this->belongsTo(Image::class, 'profile_image_id');
     }
 
     public function venues()
@@ -237,6 +244,13 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function getProfileImageUrlAttribute($value)
     {
+        if ($this->relationLoaded('profileImage') || $this->profile_image_id) {
+            $url = optional($this->profileImage)->url();
+            if ($url) {
+                return $url;
+            }
+        }
+
         if (! $value) {
             return '';
         }

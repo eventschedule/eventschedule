@@ -4,63 +4,36 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Image extends Model
 {
     use HasFactory;
-    use SoftDeletes;
 
     protected $fillable = [
-        'uuid',
         'disk',
-        'directory',
-        'filename',
-        'original_filename',
+        'path',
+        'original_name',
         'mime_type',
         'size',
-        'path',
-        'variants',
-        'checksum',
-        'reference_count',
+        'width',
+        'height',
+        'user_id',
     ];
 
     protected $casts = [
-        'variants' => 'array',
+        'size' => 'integer',
+        'width' => 'integer',
+        'height' => 'integer',
     ];
 
-    protected $attributes = [
-        'reference_count' => 0,
-    ];
-
-    protected static function booted(): void
+    public function owner(): BelongsTo
     {
-        static::creating(function (Image $image): void {
-            if (empty($image->uuid)) {
-                $image->uuid = (string) Str::uuid();
-            }
-
-            if (empty($image->disk)) {
-                $image->disk = config('filesystems.image_storage.disk', 'images');
-            }
-        });
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function incrementReferenceCount(int $amount = 1): void
+    public function url(): string
     {
-        $this->reference_count += max(1, $amount);
-        $this->save();
-    }
-
-    public function decrementReferenceCount(int $amount = 1): void
-    {
-        $this->reference_count = max(0, $this->reference_count - max(1, $amount));
-        $this->save();
-    }
-
-    public function getVariant(string $name): ?array
-    {
-        return $this->variants[$name] ?? null;
+        return storage_asset_url($this->path);
     }
 }

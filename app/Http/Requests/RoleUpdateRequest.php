@@ -7,7 +7,6 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Utils\UrlUtils;
 use App\Rules\NoFakeEmail;
-use App\Rules\SquareImage;
 
 class RoleUpdateRequest extends FormRequest
 {
@@ -28,9 +27,10 @@ class RoleUpdateRequest extends FormRequest
             ),
             'new_subdomain' => ['required', 'string', 'max:255', 'min:4', 'max:50'],
             'custom_domain' => ['nullable', 'string', 'url', 'max:255'],
-            'profile_image' => ['image', 'max:2500', new SquareImage],
-            'background_image_url' => ['image', 'max:2500'],
-            'header_image_url' => ['image', 'max:2500'],
+            'profile_image_id' => ['nullable', 'integer', 'exists:images,id'],
+            'background_image_id' => ['nullable', 'integer', 'exists:images,id'],
+            'header_image_id' => ['nullable', 'integer', 'exists:images,id'],
+            'background_image' => ['nullable', 'string', 'max:255'],
             'contacts' => ['nullable', 'array'],
             'contacts.*.name' => ['nullable', 'string', 'max:255'],
             'contacts.*.email' => array_merge(

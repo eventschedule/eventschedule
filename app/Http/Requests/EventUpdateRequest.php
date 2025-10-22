@@ -16,7 +16,7 @@ class EventUpdateRequest extends FormRequest
     public function rules(): array
     {        
         return [
-            'flyer_image' => ['nullable', 'image', 'max:2500'],
+            'flyer_image_id' => ['nullable', 'integer', 'exists:images,id'],
             'slug' => ['nullable', 'string', 'max:255'],
         ];
     }

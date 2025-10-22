@@ -135,38 +135,6 @@
         }
     }
 
-    function previewImage(input) {
-        var preview = document.getElementById('preview_img');
-        var previewDiv = document.getElementById('image_preview');
-        var warningElement = document.getElementById('image_size_warning');
-        
-        if (input.files && input.files[0]) {
-            var reader = new FileReader();
-            
-            reader.onload = function(e) {
-                preview.src = e.target.result;
-                previewDiv.style.display = 'block';
-            }
-            
-            reader.readAsDataURL(input.files[0]);
-
-            // Check file size
-            var fileSize = input.files[0].size / 1024 / 1024; // in MB
-            if (fileSize > 2.5) {
-                warningElement.textContent = "{{ __('messages.image_size_warning') }}";
-                warningElement.style.display = 'block';
-            } else {
-                warningElement.textContent = '';
-                warningElement.style.display = 'none';
-            }
-        } else {
-            preview.src = '#';
-            previewDiv.style.display = 'none';
-            warningElement.textContent = '';
-            warningElement.style.display = 'none';
-        }
-    }
-
     </script>
 
 </x-slot>
@@ -728,26 +696,11 @@
                         </div>
                         
                         <div class="mb-6">
-                        <x-input-label for="flyer_image" :value="__('messages.flyer_image')" />
-                        <input id="flyer_image" name="flyer_image" type="file" class="mt-1 block w-full text-gray-900 dark:text-gray-100" 
-                                accept="image/png, image/jpeg" onchange="previewImage(this);" />
-                            <x-input-error class="mt-2" :messages="$errors->get('flyer_image')" />
-                            <p id="image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
-                                {{ __('messages.image_size_warning') }}
-                            </p>
-
-                            <div id="image_preview" class="mt-3" style="display: none;">
-                                <img id="preview_img" src="#" alt="Preview" style="max-height:120px" />
-                            </div>
-
-                            @if ($event->flyer_image_url)
-                            <img src="{{ $event->flyer_image_url }}" style="max-height:120px" class="pt-3" />
-                            <a href="#"
-                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.delete_image', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id), 'image_type' => 'flyer']) }}'; }"
-                                class="hover:underline text-gray-900 dark:text-gray-100">
-                                {{ __('messages.delete_image') }}
-                            </a>
-                            @endif
+                            <x-image-picker
+                                name="flyer_image_id"
+                                :label="__('messages.flyer_image')"
+                                :value="old('flyer_image_id', optional($event)->flyer_image_id)"
+                                :preview-url="optional($event)->flyer_image_url" />
                         </div>
 
                         <div class="mb-6">
