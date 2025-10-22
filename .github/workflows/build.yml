@@ -11,6 +11,11 @@ on:
         options:
           - production
           - beta
+      major_release:
+        description: 'Mark this release as a major version'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -34,7 +39,14 @@ jobs:
 
       - name: Determine release version
         id: version
-        run: php scripts/bump-version.php "${{ github.event.inputs.channel }}"
+        run: |
+          MAJOR_FLAG=""
+
+          if [ "${{ github.event.inputs.major_release }}" = "true" ]; then
+            MAJOR_FLAG="--major"
+          fi
+
+          php scripts/bump-version.php "${{ github.event.inputs.channel }}" $MAJOR_FLAG
 
       - name: Persist bumped version
         run: |
