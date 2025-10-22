@@ -7,6 +7,10 @@ Alpine.start();
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.css';
 
+// Expose flatpickr globally for legacy inline scripts that expect a global
+// reference (e.g. event create/edit pages initialising date pickers).
+window.flatpickr = flatpickr;
+
 //import Toastify from 'toastify-js';
 //import 'toastify-js/src/toastify.css';
 
