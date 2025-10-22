@@ -197,7 +197,7 @@ class ApiEventController extends Controller
     {
         $event = Event::findOrFail(UrlUtils::decodeId($event_id));
 
-        if (! $event->user_id === auth()->id()) {
+        if ($event->user_id !== auth()->id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
