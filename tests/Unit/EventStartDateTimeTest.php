@@ -36,7 +36,8 @@ class EventStartDateTimeTest extends TestCase
 
         $start = $event->getStartDateTime('2024-06-04', true);
 
-        $this->assertSame('2024-06-03', $start->format('Y-m-d'));
+        $this->assertSame('2024-06-04', $start->format('Y-m-d'));
         $this->assertSame('America/New_York', $start->getTimezone()->getName());
+        $this->assertSame('2024-06-05 00:00:00', $start->copy()->setTimezone('UTC')->format('Y-m-d H:i:s'));
     }
 }
