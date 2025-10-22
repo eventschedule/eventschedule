@@ -224,6 +224,8 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/admin/blog/{blogPost}/edit', [BlogController::class, 'edit'])->name('blog.edit');
     Route::put('/admin/blog/{blogPost}', [BlogController::class, 'update'])->name('blog.update');
     Route::delete('/admin/blog/{blogPost}', [BlogController::class, 'destroy'])->name('blog.destroy');
+    require __DIR__ . '/admin.php';
+
     Route::post('/admin/blog/generate-content', [BlogController::class, 'generateContent'])->name('blog.generate-content');
 });
 

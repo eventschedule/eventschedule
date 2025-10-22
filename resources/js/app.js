@@ -15,7 +15,7 @@ import 'easymde/dist/easymde.min.css';
 
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.html-editor').forEach(element => {
-        const easyMDE = new EasyMDE({ 
+        const easyMDE = new EasyMDE({
             element: element,
             toolbar: [
                 {
@@ -84,3 +84,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+import './admin/image-library';
