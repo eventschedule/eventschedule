@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Models\Image;
 use App\Models\Role;
 use App\Models\RoleUser;
 use App\Repos\EventRepo;
@@ -204,10 +205,32 @@ class ApiEventController extends Controller
             return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
         }
 
+        if ($request->has('flyer_image_id')) {
+            $request->validate([
+                'flyer_image_id' => ['nullable', 'integer', 'exists:images,id'],
+            ]);
+
+            $imageId = $request->input('flyer_image_id');
+
+            if ($imageId) {
+                $image = Image::find($imageId);
+
+                if ($image) {
+                    $event->flyer_image_id = $image->id;
+                    $event->flyer_image_url = $image->path;
+                    $event->save();
+                }
+            } else {
+                $event->flyer_image_id = null;
+                $event->flyer_image_url = null;
+                $event->save();
+            }
+        }
+
         if ($request->hasFile('flyer_image')) {
             $disk = storage_public_disk();
 
-            if ($event->flyer_image_url) {
+            if (! $event->flyer_image_id && $event->flyer_image_url) {
                 $path = storage_normalize_path($event->getAttributes()['flyer_image_url']);
                 if ($path !== '') {
                     Storage::disk($disk)->delete($path);
@@ -216,9 +239,22 @@ class ApiEventController extends Controller
 
             $file = $request->file('flyer_image');
             $filename = strtolower('flyer_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            storage_put_file_as_public($disk, $file, $filename);
+            $path = storage_put_file_as_public($disk, $file, $filename);
+            $dimensions = @getimagesize($file->getRealPath());
 
-            $event->flyer_image_url = $filename;
+            $image = Image::create([
+                'disk' => $disk,
+                'path' => $path,
+                'original_name' => $file->getClientOriginalName(),
+                'mime_type' => $file->getMimeType(),
+                'size' => $file->getSize(),
+                'width' => $dimensions[0] ?? null,
+                'height' => $dimensions[1] ?? null,
+                'user_id' => $event->user_id,
+            ]);
+
+            $event->flyer_image_id = $image->id;
+            $event->flyer_image_url = $image->path;
             $event->save();
         }
         

@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App\Enums\ReleaseChannel;
 use App\Listeners\LogSentMessage;
+use App\Models\Image;
 use App\Models\Setting;
+use App\Policies\ImagePolicy;
 use App\Support\Logging\LoggingConfigManager;
 use App\Support\MailConfigManager;
 use App\Support\ReleaseChannelManager;
@@ -14,6 +16,7 @@ use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -34,6 +37,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::policy(Image::class, ImagePolicy::class);
+
         if ($this->isBrowserTestingEnvironment()) {
             config([
                 'app.is_testing' => true,
