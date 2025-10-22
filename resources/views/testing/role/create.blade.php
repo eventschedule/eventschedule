@@ -8,7 +8,7 @@
             </p>
 
             <div class="mt-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <form method="POST" action="{{ route('role.store') }}">
+                <form method="POST" action="{{ route('role.store') }}" enctype="multipart/form-data">
                     @csrf
 
                     @include('testing.role.partials.form-fields', [
