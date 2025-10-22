@@ -76,6 +76,7 @@ class RoleController extends Controller
         [$idField, $urlField] = $mapping[$request->image_type];
 
         $disk = storage_public_disk();
+        $hasUsage = MediaAssetUsage::hasUsage($role, $request->image_type);
 
         if ($role->{$idField}) {
             $role->{$idField} = null;
@@ -83,7 +84,7 @@ class RoleController extends Controller
 
         if ($role->{$urlField}) {
             $path = storage_normalize_path($role->getAttributes()[$urlField] ?? null);
-            if ($path !== '') {
+            if ($path !== '' && ! $hasUsage) {
                 Storage::disk($disk)->delete($path);
             }
 
@@ -114,13 +115,16 @@ class RoleController extends Controller
         }
 
         $disk = storage_public_disk();
+        $profileHasUsage = MediaAssetUsage::hasUsage($role, 'profile');
+        $headerHasUsage = MediaAssetUsage::hasUsage($role, 'header');
+        $backgroundHasUsage = MediaAssetUsage::hasUsage($role, 'background');
 
         if ($role->profile_image_id) {
             $role->profile_image_id = null;
             $role->profile_image_url = null;
         } elseif ($role->profile_image_url) {
             $path = storage_normalize_path($role->getAttributes()['profile_image_url']);
-            if ($path !== '') {
+            if ($path !== '' && ! $profileHasUsage) {
                 Storage::disk($disk)->delete($path);
             }
         }
@@ -131,7 +135,7 @@ class RoleController extends Controller
             $role->header_image = null;
         } elseif ($role->header_image_url) {
             $path = storage_normalize_path($role->getAttributes()['header_image_url']);
-            if ($path !== '') {
+            if ($path !== '' && ! $headerHasUsage) {
                 Storage::disk($disk)->delete($path);
             }
         }
@@ -142,7 +146,7 @@ class RoleController extends Controller
             $role->background_image = null;
         } elseif ($role->background_image_url) {
             $path = storage_normalize_path($role->getAttributes()['background_image_url']);
-            if ($path !== '') {
+            if ($path !== '' && ! $backgroundHasUsage) {
                 Storage::disk($disk)->delete($path);
             }
         }
