@@ -35,7 +35,7 @@
         @elseif ($event->venue)
           <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event->venue->bestAddress()) }}" target="_blank">
             {{ $event->venue->shortAddress() }}
-        </a>
+          </a>
         @endif
       </p>
 
@@ -228,14 +228,14 @@
         class="bg-[#4e81fa26] p-[12px] sm:p-[18px] rounded-[24px] flex flex-col justify-between w-full max-w-[400px] h-[185px] mx-auto"
       >
         @if ($event->ticket_notes_html)
-        <div class="flex flex-col gap-[14px] text-[10px] uppercase leading-[1]">
-          <div>
-            <p class="mb-[8px] font-extrabold text-[#4E81FA]">{{ __('messages.notes') }}:</p>
-            <div class="font-bold text-[#151B26] custom-content">
-              {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->ticket_notes_html) !!}
+          <div class="flex flex-col gap-[14px] text-[10px] uppercase leading-[1]">
+            <div>
+              <p class="mb-[8px] font-extrabold text-[#4E81FA]">{{ __('messages.notes') }}:</p>
+              <div class="font-bold text-[#151B26] custom-content">
+                {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->ticket_notes_html) !!}
+              </div>
             </div>
           </div>
-        </div>
         @endif
 
         <div
