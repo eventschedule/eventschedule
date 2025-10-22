@@ -1042,7 +1042,7 @@ class RoleController extends Controller
             $role->save();
         }
 
-        if ($request->hasFile('header_image')) {
+        if ($request->hasFile('header_image_url')) {
             if ($role->header_image_url) {
                 $path = storage_normalize_path($role->getAttributes()['header_image_url']);
                 if ($path !== '') {
@@ -1050,10 +1050,11 @@ class RoleController extends Controller
                 }
             }
 
-            $file = $request->file('header_image');
+            $file = $request->file('header_image_url');
             $filename = strtolower('header_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
             storage_put_file_as_public($disk, $file, $filename);
 
+            $role->header_image = null;
             $role->header_image_url = $filename;
             $role->save();
         }
@@ -1318,6 +1319,7 @@ class RoleController extends Controller
             $filename = strtolower('header_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
             storage_put_file_as_public($disk, $file, $filename);
 
+            $role->header_image = null;
             $role->header_image_url = $filename;
             $role->save();
         }
