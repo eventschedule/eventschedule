@@ -75,23 +75,29 @@ class RoleController extends Controller
 
         [$idField, $urlField] = $mapping[$request->image_type];
 
-                $role->profile_image_url = null;
-                $role->save();
-                MediaAssetUsage::clearUsage($role, 'profile');
-            }
+        $disk = storage_public_disk();
 
-                $role->background_image_url = null;
-                $role->save();
-                MediaAssetUsage::clearUsage($role, 'background');
-            }
-
-                $role->header_image_url = null;
-                $role->save();
-                MediaAssetUsage::clearUsage($role, 'header');
-            }
-
-            $role->save();
+        if ($role->{$idField}) {
+            $role->{$idField} = null;
         }
+
+        if ($role->{$urlField}) {
+            $path = storage_normalize_path($role->getAttributes()[$urlField] ?? null);
+            if ($path !== '') {
+                Storage::disk($disk)->delete($path);
+            }
+
+            $role->{$urlField} = null;
+        }
+
+        if ($request->image_type === 'header') {
+            $role->header_image = null;
+        } elseif ($request->image_type === 'background') {
+            $role->background_image = null;
+        }
+
+        $role->save();
+        MediaAssetUsage::clearUsage($role, $request->image_type);
 
         return redirect(route('role.edit', ['subdomain' => $subdomain]))
                 ->with('message', __('messages.deleted_image'));
