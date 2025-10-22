@@ -267,6 +267,19 @@
                     </a>
                 </li>
 
+                <li>
+                    <a href="{{ route('media.index') }}"
+                        class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->routeIs('media.*') ? 'bg-gray-800 text-white' : '' }}">
+                        <svg class="h-6 w-6 shrink-0" viewBox="0 0 24 24" fill="none" stroke="{{ request()->routeIs('media.*') ? '#ccc' : '#666' }}" stroke-width="1.5" aria-hidden="true">
+                            <rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect>
+                            <path d="M3 16l4.5-4.5a1 1 0 0 1 1.414 0L15 18"></path>
+                            <path d="M11 13l2-2a1 1 0 0 1 1.414 0L21 18"></path>
+                            <circle cx="8" cy="9" r="1.5"></circle>
+                        </svg>
+                        {{ __('Media library') }}
+                    </a>
+                </li>
+
                 @if (config('app.hosted') && auth()->user()->isAdmin())
                 <li>
                     <a href="{{ route('blog.admin.index') }}"
