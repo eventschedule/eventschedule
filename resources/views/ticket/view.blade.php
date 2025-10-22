@@ -12,7 +12,7 @@
         class="bg-[#4e81fa26] pt-[20px] px-[15px] sm:px-[35px] pb-[20px] rounded-[24px] flex flex-col justify-between items-center w-full max-w-[400px] mx-auto"
       >
         <div
-          class="uppercase font-extrabold leading-[1.2] text-center color-[#151B26] flex flex-col items-center"
+          class="uppercase font-extrabold leading-[1.2] text-center text-[#151B26] flex flex-col items-center"
         >
           @if ($role && $role->profile_image_url)
             <img
@@ -26,7 +26,7 @@
       </div>
 
       <p
-          class="text-[12px] uppercase font-extrabold leading-[1.2] text-center color-[#151B26]"
+          class="text-[12px] uppercase font-extrabold leading-[1.2] text-center text-[#151B26]"
         >
         @if ($event->event_url)
           <a href="{{ $event->event_url }}" target="_blank">
@@ -78,7 +78,7 @@
             </svg>
 
             @php
-                $ticketStartAt = $event->getStartDateTime($sale->date, true);
+                $ticketStartAt = $event->getStartDateTime($sale->event_date, true);
             @endphp
             <p class="text-[10px]">{{ $ticketStartAt ? $ticketStartAt->format('F j, Y') : __('messages.unscheduled') }}</p>
           </div>
@@ -157,7 +157,7 @@
                 </clipPath>
               </defs>
             </svg>
-            <p class="text-[10px]">{{ $event->getStartEndTime($sale->date) ?: __('messages.unscheduled') }}</p>
+            <p class="text-[10px]">{{ $event->getStartEndTime($sale->event_date) ?: __('messages.unscheduled') }}</p>
           </div>
           <div class="flex gap-[8px] flex-row items-center">
             <svg
