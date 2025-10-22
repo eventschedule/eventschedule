@@ -25,6 +25,9 @@
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                     {{ __('messages.status') }}
                                 </th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                    {{ __('messages.ticket_usage') }}
+                                </th>
                                 <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                                     <span class="sr-only">{{ __('messages.actions') }}</span>
                                 </th>
@@ -97,6 +100,17 @@
                                             {{ __('messages.' . $sale->status) }}
                                         </span>
                                     @endif
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                    @php
+                                        $usageStatus = $sale->usage_status;
+                                        $usageClasses = $usageStatus === 'used'
+                                            ? 'bg-orange-100 text-orange-800'
+                                            : 'bg-green-100 text-green-800';
+                                    @endphp
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $usageClasses }}">
+                                        {{ __('messages.ticket_status_' . $usageStatus) }}
+                                    </span>
                                 </td>
                                 <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                     <div class="flex items-center justify-end gap-3">
@@ -263,7 +277,22 @@
                                 <span class="font-mono text-sm break-all">{{ $sale->transaction_reference }}</span>
                             @endif
                         </div>
-                    </div>                </div>
+                    </div>
+                </div>
+
+                <!-- Ticket Usage -->
+                <div class="bg-gray-50 rounded-lg p-3">
+                    <div class="text-sm font-medium text-gray-700 mb-1">{{ __('messages.ticket_usage') }}</div>
+                    @php
+                        $usageStatus = $sale->usage_status;
+                        $usageClasses = $usageStatus === 'used'
+                            ? 'bg-orange-100 text-orange-800'
+                            : 'bg-green-100 text-green-800';
+                    @endphp
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $usageClasses }}">
+                        {{ __('messages.ticket_status_' . $usageStatus) }}
+                    </span>
+                </div>
 
                 <!-- Actions -->
                 <div class="pt-2">
