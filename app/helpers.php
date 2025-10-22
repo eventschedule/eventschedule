@@ -240,6 +240,66 @@ if (!function_exists('storage_asset_url')) {
     }
 }
 
+if (!function_exists('storage_fix_public_directory_permissions')) {
+    /**
+     * Ensure the local public storage directories remain world-readable.
+     */
+    function storage_fix_public_directory_permissions(string $disk): void
+    {
+        if (! in_array($disk, ['public', 'local'], true)) {
+            return;
+        }
+
+        $paths = [
+            storage_path('app'),
+            storage_path('app/public'),
+        ];
+
+        foreach ($paths as $path) {
+            if (! is_string($path) || $path === '' || ! is_dir($path)) {
+                continue;
+            }
+
+            $currentPermissions = @fileperms($path);
+
+            if ($currentPermissions !== false) {
+                $mode = $currentPermissions & 0777;
+
+                if (($mode & 0005) === 0005) {
+                    continue;
+                }
+            }
+
+            @chmod($path, 0755);
+        }
+    }
+}
+
+if (!function_exists('storage_put_file_as_public')) {
+    /**
+     * Persist an uploaded file on the public disk with explicit public visibility.
+     */
+    function storage_put_file_as_public(string $disk, \Illuminate\Http\UploadedFile $file, string $filename, string $directory = ''): string
+    {
+        $directory = trim($directory, '/');
+
+        storage_fix_public_directory_permissions($disk);
+
+        $path = \Illuminate\Support\Facades\Storage::disk($disk)->putFileAs(
+            $directory === '' ? '' : $directory,
+            $file,
+            $filename,
+            ['visibility' => 'public']
+        );
+
+        if (is_string($path) && $path !== '') {
+            return $path;
+        }
+
+        return ltrim(($directory !== '' ? $directory . '/' : '') . $filename, '/');
+    }
+}
+
 if (!function_exists('vite_manifest')) {
     /**
      * Load the built Vite manifest once per request.

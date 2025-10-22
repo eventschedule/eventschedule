@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -15,7 +16,10 @@ class InspectStoragePermissions extends Command
      *
      * @var string
      */
-    protected $signature = 'storage:permissions {--json : Output the result as JSON.}';
+    protected $signature = 'storage:permissions
+        {--json : Output the result as JSON.}
+        {--test-public : Exercise the configured public disk to verify visibility.}
+        {--repair-public : Repair the local public disk before testing it.}';
 
     /**
      * The console command description.
@@ -38,16 +42,45 @@ class InspectStoragePermissions extends Command
             ->sortBy('path')
             ->values();
 
+        $overallResult = $this->displayResults($paths);
+
+        if ($this->option('test-public')) {
+            $overallResult = $this->testPublicDisk($this->option('repair-public')) && $overallResult;
+        }
+
+        return $overallResult ? self::SUCCESS : self::FAILURE;
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, array<string, mixed>>
+     */
+    private function scanDirectory(string $directory): Collection
+    {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS)
+        );
+
+        $items = Collection::make();
+
+        foreach ($iterator as $item) {
+            $items->push($this->describePath($item->getPathname(), $item->isDir()));
+        }
+
+        return $items->prepend($this->describePath($directory, true));
+    }
+
+    private function displayResults(Collection $paths): bool
+    {
         if ($paths->isEmpty()) {
             $this->info('No storage directories were found.');
 
-            return self::SUCCESS;
+            return true;
         }
 
         if ($this->option('json')) {
             $this->line($paths->toJson(JSON_PRETTY_PRINT));
 
-            return self::SUCCESS;
+            return $paths->every(fn ($entry) => empty($entry['issues']));
         }
 
         $rows = $paths->map(fn ($entry) => [
@@ -73,7 +106,7 @@ class InspectStoragePermissions extends Command
         if ($problematic->isEmpty()) {
             $this->info('All scanned directories and files look accessible.');
 
-            return self::SUCCESS;
+            return true;
         }
 
         $this->newLine();
@@ -83,25 +116,70 @@ class InspectStoragePermissions extends Command
         $this->line('  sudo find storage bootstrap/cache -type d -exec chmod 775 {} +');
         $this->line('  sudo find storage bootstrap/cache -type f -exec chmod 664 {} +');
 
-        return self::FAILURE;
+        return false;
     }
 
-    /**
-     * @return \Illuminate\Support\Collection<int, array<string, mixed>>
-     */
-    private function scanDirectory(string $directory): Collection
+    private function testPublicDisk(bool $repair): bool
     {
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS)
-        );
+        $disk = storage_public_disk();
 
-        $items = Collection::make();
+        $this->newLine();
+        $this->info("Testing public disk [{$disk}]");
 
-        foreach ($iterator as $item) {
-            $items->push($this->describePath($item->getPathname(), $item->isDir()));
+        if (! in_array($disk, ['public', 'local'], true)) {
+            $this->warn('Configured public disk is remote; skipping permission check.');
+
+            return true;
         }
 
-        return $items->prepend($this->describePath($directory, true));
+        if ($repair) {
+            $this->line('Attempting to repair local directory permissions...');
+            storage_fix_public_directory_permissions($disk);
+        }
+
+        $filesystem = Storage::disk($disk);
+        $probeName = '__storage_visibility_probe_' . bin2hex(random_bytes(6));
+
+        try {
+            $filesystem->put($probeName, 'probe', ['visibility' => 'public']);
+        } catch (\Throwable $exception) {
+            $this->error('Failed to write test file to the public disk: ' . $exception->getMessage());
+
+            return false;
+        }
+
+        $path = method_exists($filesystem, 'path') ? $filesystem->path($probeName) : null;
+        $readable = true;
+
+        if (is_string($path) && is_file($path)) {
+            $permissions = @fileperms($path);
+
+            if ($permissions !== false) {
+                $mode = $permissions & 0777;
+                $readable = ($mode & 0004) === 0004;
+
+                $this->line(sprintf(
+                    'Test file permissions: %s (octal %o)',
+                    $this->formatPermissions($permissions),
+                    $mode
+                ));
+            }
+
+            @unlink($path);
+            $filesystem->delete($probeName);
+        } else {
+            $filesystem->delete($probeName);
+        }
+
+        if (! $readable) {
+            $this->error('The public disk wrote a file that is not world-readable.');
+
+            return false;
+        }
+
+        $this->info('Public disk is writable and produced a world-readable file.');
+
+        return true;
     }
 
     /**

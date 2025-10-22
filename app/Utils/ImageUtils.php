@@ -120,7 +120,7 @@ class ImageUtils
         
         $file = new \Illuminate\Http\UploadedFile($tempFile, $filenamePrefix . '.' . $extension);
         $disk = storage_public_disk();
-        $file->storeAs('', $filename, $disk);
+        storage_put_file_as_public($disk, $file, $filename);
 
         return $filename;
     }
