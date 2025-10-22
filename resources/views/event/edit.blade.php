@@ -696,11 +696,35 @@
                         </div>
                         
                         <div class="mb-6">
-                            <x-image-picker
-                                name="flyer_image_id"
-                                :label="__('messages.flyer_image')"
-                                :value="old('flyer_image_id', optional($event)->flyer_image_id)"
-                                :preview-url="optional($event)->flyer_image_url" />
+                            <x-input-label for="flyer_image" :value="__('messages.flyer_image')" />
+                            <input id="flyer_image" name="flyer_image" type="file" class="mt-1 block w-full text-gray-900 dark:text-gray-100"
+                                accept="image/png, image/jpeg" onchange="previewImage(this);" />
+                            <x-input-error class="mt-2" :messages="$errors->get('flyer_image')" />
+                            <div class="mt-4">
+                                <x-media-picker
+                                    name="flyer_media_variant_id"
+                                    asset-input-name="flyer_media_asset_id"
+                                    context="flyer"
+                                    :initial-url="$event->flyer_image_url"
+                                    label="{{ __('Choose from library') }}"
+                                />
+                            </div>
+                            <p id="image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                                {{ __('messages.image_size_warning') }}
+                            </p>
+
+                            <div id="image_preview" class="mt-3" style="display: none;">
+                                <img id="preview_img" src="#" alt="Preview" style="max-height:120px" />
+                            </div>
+
+                            @if ($event->flyer_image_url)
+                            <img src="{{ $event->flyer_image_url }}" style="max-height:120px" class="pt-3" />
+                            <a href="#"
+                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.delete_image', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id), 'image_type' => 'flyer']) }}'; }"
+                                class="hover:underline text-gray-900 dark:text-gray-100">
+                                {{ __('messages.delete_image') }}
+                            </a>
+                            @endif
                         </div>
 
                         <div class="mb-6">

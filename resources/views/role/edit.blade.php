@@ -477,11 +477,33 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-image-picker
-                                name="profile_image_id"
-                                :label="__('messages.square_profile_image')"
-                                :value="old('profile_image_id', $role->profile_image_id)"
-                                :preview-url="$role->profile_image_url" />
+                            <x-input-label for="profile_image" :value="__('messages.square_profile_image')" />
+                            <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full text-gray-900 dark:text-gray-100"
+                                :value="old('profile_image')" accept="image/png, image/jpeg" />
+                            <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
+                            <div class="mt-4">
+                                <x-media-picker
+                                    name="profile_media_variant_id"
+                                    asset-input-name="profile_media_asset_id"
+                                    context="profile"
+                                    :initial-url="$role->profile_image_url"
+                                    label="{{ __('Choose from library') }}"
+                                />
+                            </div>
+                            <p id="profile_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                                {{ __('messages.image_size_warning') }}
+                            </p>
+
+                            <img id="profile_image_preview" src="#" alt="Profile Image Preview" style="max-height:120px; display:none;" class="pt-3" />
+
+                            @if ($role->profile_image_url)
+                            <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="pt-3" />
+                            <a href="#"
+                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'profile']) }}'; }"
+                                class="hover:underline text-gray-900 dark:text-gray-100">
+                                {{ __('messages.delete_image') }}
+                            </a>
+                            @endif
                         </div>
 
                         <div class="mb-6">
@@ -519,10 +541,23 @@
                             </div>
 
                             <div id="custom_header_input" style="display:none" class="mt-2">
-                                <x-image-picker
-                                    name="header_image_id"
-                                    :value="old('header_image_id', $role->header_image_id)"
-                                    :preview-url="$role->header_image_url" />
+                                <input id="header_image_url" name="header_image_url" type="file"
+                                    class="mt-1 block w-full text-gray-900 dark:text-gray-100"
+                                    :value="old('header_image_url')"
+                                    accept="image/png, image/jpeg" />
+                                <x-input-error class="mt-2" :messages="$errors->get('header_image_url')" />
+                                <div class="mt-4">
+                                    <x-media-picker
+                                        name="header_media_variant_id"
+                                        asset-input-name="header_media_asset_id"
+                                        context="header"
+                                        :initial-url="$role->header_image_url"
+                                        label="{{ __('Choose from library') }}"
+                                    />
+                                </div>
+                                <p id="header_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                                    {{ __('messages.image_size_warning') }}
+                                </p>
                             </div>
 
                         </div>
@@ -822,10 +857,34 @@
                                 </div>
 
                                 <div id="custom_image_input" style="display:none">
-                                    <x-image-picker
-                                        name="background_image_id"
-                                        :value="old('background_image_id', $role->background_image_id)"
-                                        :preview-url="$role->background_image_url" />
+                                    <input id="background_image_url" name="background_image_url" type="file" 
+                                        class="mt-1 block w-full text-gray-900 dark:text-gray-100" 
+                                        :value="old('background_image_url')" 
+                                        oninput="updatePreview()" 
+                                        accept="image/png, image/jpeg" />
+                                    <p id="background_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                                        {{ __('messages.image_size_warning') }}
+                                    </p>
+
+                                    <img id="background_image_preview" src="" alt="Background Image Preview" style="max-height:120px; display:none;" class="pt-3" />
+
+                                    @if ($role->background_image_url)
+                                    <img src="{{ $role->background_image_url }}" style="max-height:120px" class="pt-3" />
+                                    <a href="#"
+                                        onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}'; } return false;"
+                                        class="hover:underline text-gray-900 dark:text-gray-100">
+                                        {{ __('messages.delete_image') }}
+                                    </a>
+                                    @endif
+                                    <div class="mt-4">
+                                        <x-media-picker
+                                            name="background_media_variant_id"
+                                            asset-input-name="background_media_asset_id"
+                                            context="background"
+                                            :initial-url="$role->background_image_url"
+                                            label="{{ __('Choose from library') }}"
+                                        />
+                                    </div>
                                 </div>
                             </div>
 

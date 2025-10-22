@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\EventRole;
+use App\Models\MediaAssetUsage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Utils\MarkdownUtils;
@@ -129,6 +130,11 @@ class Event extends Model
     public function tickets()
     {
         return $this->hasMany(Ticket::class)->where('is_deleted', false)->orderBy('price', 'desc');
+    }
+
+    public function mediaUsages()
+    {
+        return $this->morphMany(MediaAssetUsage::class, 'usable');
     }
 
     public function user()

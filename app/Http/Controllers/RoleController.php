@@ -26,7 +26,9 @@ use App\Models\Event;
 use App\Models\User;
 use App\Models\RoleUser;
 use App\Models\EventRole;
-use App\Models\Image;
+use App\Models\MediaAsset;
+use App\Models\MediaAssetVariant;
+use App\Models\MediaAssetUsage;
 use App\Utils\UrlUtils;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
@@ -73,34 +75,19 @@ class RoleController extends Controller
 
         [$idField, $urlField] = $mapping[$request->image_type];
 
-        if ($role->{$idField}) {
-            $role->{$idField} = null;
-            $role->{$urlField} = null;
-
-            if ($request->image_type === 'header') {
-                $role->header_image = null;
+                $role->profile_image_url = null;
+                $role->save();
+                MediaAssetUsage::clearUsage($role, 'profile');
             }
 
-            if ($request->image_type === 'background') {
-                $role->background_image = null;
+                $role->background_image_url = null;
+                $role->save();
+                MediaAssetUsage::clearUsage($role, 'background');
             }
 
-            $role->save();
-        } elseif ($role->{$urlField}) {
-            $disk = storage_public_disk();
-            $path = storage_normalize_path($role->getAttributes()[$urlField]);
-            if ($path !== '') {
-                Storage::disk($disk)->delete($path);
-            }
-
-            $role->{$urlField} = null;
-
-            if ($request->image_type === 'header') {
-                $role->header_image = null;
-            }
-
-            if ($request->image_type === 'background') {
-                $role->background_image = null;
+                $role->header_image_url = null;
+                $role->save();
+                MediaAssetUsage::clearUsage($role, 'header');
             }
 
             $role->save();
@@ -1048,9 +1035,112 @@ class RoleController extends Controller
 
         $user->roles()->attach($role->id, ['created_at' => now(), 'level' => 'owner']);
 
-        if ($role->background == 'image' && $request->background_image && ! $request->exists('background_image_id')) {
+        $disk = storage_public_disk();
+
+        if ($request->hasFile('profile_image')) {
+            if ($role->profile_image_url) {
+                $path = storage_normalize_path($role->getAttributes()['profile_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
+                }
+            }
+
+            $file = $request->file('profile_image');
+            $filename = strtolower('profile_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+            storage_put_file_as_public($disk, $file, $filename);
+
+            $role->profile_image_url = $filename;
+            $role->save();
+            MediaAssetUsage::clearUsage($role, 'profile');
+        } elseif ($request->filled('profile_media_asset_id')) {
+            $asset = MediaAsset::find((int) $request->input('profile_media_asset_id'));
+
+            if ($asset) {
+                $variant = null;
+
+                if ($request->filled('profile_media_variant_id')) {
+                    $variantId = (int) $request->input('profile_media_variant_id');
+                    $variant = MediaAssetVariant::where('media_asset_id', $asset->id)->find($variantId);
+                }
+
+                $role->profile_image_url = $variant ? $variant->path : $asset->path;
+                $role->save();
+
+                MediaAssetUsage::recordUsage($role, 'profile', $asset, $variant);
+            }
+        }
+
+        if ($request->hasFile('header_image_url')) {
+            if ($role->header_image_url) {
+                $path = storage_normalize_path($role->getAttributes()['header_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
+                }
+            }
+
+            $file = $request->file('header_image_url');
+            $filename = strtolower('header_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+            storage_put_file_as_public($disk, $file, $filename);
+
+            $role->header_image = null;
+            $role->header_image_url = $filename;
+            $role->save();
+            MediaAssetUsage::clearUsage($role, 'header');
+        } elseif ($request->filled('header_media_asset_id')) {
+            $asset = MediaAsset::find((int) $request->input('header_media_asset_id'));
+
+            if ($asset) {
+                $variant = null;
+
+                if ($request->filled('header_media_variant_id')) {
+                    $variantId = (int) $request->input('header_media_variant_id');
+                    $variant = MediaAssetVariant::where('media_asset_id', $asset->id)->find($variantId);
+                }
+
+                $role->header_image = null;
+                $role->header_image_url = $variant ? $variant->path : $asset->path;
+                $role->save();
+
+                MediaAssetUsage::recordUsage($role, 'header', $asset, $variant);
+            }
+        }
+
+        if ($role->background == 'image' && $request->background_image) {
             $role->background_image = $request->background_image;
             $role->save();
+            MediaAssetUsage::clearUsage($role, 'background');
+        } elseif ($role->background == 'image' && $request->hasFile('background_image_url')) {
+            if ($role->background_image_url) {
+                $path = storage_normalize_path($role->getAttributes()['background_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
+                }
+            }
+
+            $file = $request->file('background_image_url');
+            $filename = strtolower('background_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+            storage_put_file_as_public($disk, $file, $filename);
+
+            $role->background_image_url = $filename;
+            $role->save();
+            MediaAssetUsage::clearUsage($role, 'background');
+        } elseif ($role->background == 'image' && $request->filled('background_media_asset_id')) {
+            $asset = MediaAsset::find((int) $request->input('background_media_asset_id'));
+
+            if ($asset) {
+                $variant = null;
+
+                if ($request->filled('background_media_variant_id')) {
+                    $variantId = (int) $request->input('background_media_variant_id');
+                    $variant = MediaAssetVariant::where('media_asset_id', $asset->id)->find($variantId);
+                }
+
+                $role->background_image = null;
+                $role->background_image_url = $variant ? $variant->path : $asset->path;
+                $role->save();
+
+                MediaAssetUsage::recordUsage($role, 'background', $asset, $variant);
+            }
         }
 
         if (! $role->email_verified_at) {
@@ -1265,9 +1355,112 @@ class RoleController extends Controller
             $role->groups()->whereIn('id', $toDelete)->delete();
         }
 
-        if ($role->background == 'image' && $request->background_image && ! $request->exists('background_image_id')) {
+        $disk = storage_public_disk();
+
+        if ($request->hasFile('profile_image')) {
+            if ($role->profile_image_url) {
+                $path = storage_normalize_path($role->getAttributes()['profile_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
+                }
+            }
+
+            $file = $request->file('profile_image');
+            $filename = strtolower('profile_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+            storage_put_file_as_public($disk, $file, $filename);
+
+            $role->profile_image_url = $filename;
+            $role->save();
+            MediaAssetUsage::clearUsage($role, 'profile');
+        } elseif ($request->filled('profile_media_asset_id')) {
+            $asset = MediaAsset::find((int) $request->input('profile_media_asset_id'));
+
+            if ($asset) {
+                $variant = null;
+
+                if ($request->filled('profile_media_variant_id')) {
+                    $variantId = (int) $request->input('profile_media_variant_id');
+                    $variant = MediaAssetVariant::where('media_asset_id', $asset->id)->find($variantId);
+                }
+
+                $role->profile_image_url = $variant ? $variant->path : $asset->path;
+                $role->save();
+
+                MediaAssetUsage::recordUsage($role, 'profile', $asset, $variant);
+            }
+        }
+
+        if ($request->hasFile('header_image_url')) {
+            if ($role->header_image_url) {
+                $path = storage_normalize_path($role->getAttributes()['header_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
+                }
+            }
+
+            $file = $request->file('header_image_url');
+            $filename = strtolower('header_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+            storage_put_file_as_public($disk, $file, $filename);
+
+            $role->header_image = null;
+            $role->header_image_url = $filename;
+            $role->save();
+            MediaAssetUsage::clearUsage($role, 'header');
+        } elseif ($request->filled('header_media_asset_id')) {
+            $asset = MediaAsset::find((int) $request->input('header_media_asset_id'));
+
+            if ($asset) {
+                $variant = null;
+
+                if ($request->filled('header_media_variant_id')) {
+                    $variantId = (int) $request->input('header_media_variant_id');
+                    $variant = MediaAssetVariant::where('media_asset_id', $asset->id)->find($variantId);
+                }
+
+                $role->header_image = null;
+                $role->header_image_url = $variant ? $variant->path : $asset->path;
+                $role->save();
+
+                MediaAssetUsage::recordUsage($role, 'header', $asset, $variant);
+            }
+        }
+
+        if ($role->background == 'image' && $request->background_image) {
             $role->background_image = $request->background_image;
             $role->save();
+            MediaAssetUsage::clearUsage($role, 'background');
+        } elseif ($role->background == 'image' && $request->hasFile('background_image_url')) {
+            if ($role->background_image_url) {
+                $path = storage_normalize_path($role->getAttributes()['background_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
+                }
+            }
+
+            $file = $request->file('background_image_url');
+            $filename = strtolower('background_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+            storage_put_file_as_public($disk, $file, $filename);
+
+            $role->background_image_url = $filename;
+            $role->save();
+            MediaAssetUsage::clearUsage($role, 'background');
+        } elseif ($role->background == 'image' && $request->filled('background_media_asset_id')) {
+            $asset = MediaAsset::find((int) $request->input('background_media_asset_id'));
+
+            if ($asset) {
+                $variant = null;
+
+                if ($request->filled('background_media_variant_id')) {
+                    $variantId = (int) $request->input('background_media_variant_id');
+                    $variant = MediaAssetVariant::where('media_asset_id', $asset->id)->find($variantId);
+                }
+
+                $role->background_image = null;
+                $role->background_image_url = $variant ? $variant->path : $asset->path;
+                $role->save();
+
+                MediaAssetUsage::recordUsage($role, 'background', $asset, $variant);
+            }
         }
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))

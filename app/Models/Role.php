@@ -10,6 +10,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Models\MediaAssetUsage;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use App\Notifications\VerifyEmail as CustomVerifyEmail;
@@ -768,6 +769,11 @@ class Role extends Model implements MustVerifyEmail
     public function groups()
     {
         return $this->hasMany(\App\Models\Group::class);
+    }
+
+    public function mediaUsages()
+    {
+        return $this->morphMany(MediaAssetUsage::class, 'usable');
     }
 
     /**

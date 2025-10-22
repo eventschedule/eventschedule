@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\RoleUser;
+use App\Models\MediaAssetUsage;
 use App\Models\EventRole;
 use App\Models\User;
 use App\Models\Ticket;
@@ -63,6 +64,7 @@ class EventController extends Controller
 
                 $event->flyer_image_url = null;
                 $event->save();
+                MediaAssetUsage::clearUsage($event, 'flyer');
             }
         }
 
