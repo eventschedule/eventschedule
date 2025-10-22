@@ -216,6 +216,18 @@ if (!function_exists('storage_asset_url')) {
         $normalized = storage_normalize_path($path);
         $diskToUse = storage_public_disk();
 
+        if ($normalized !== '' && $diskToUse === 'public') {
+            try {
+                if (\Illuminate\Support\Facades\Route::has('storage.public')) {
+                    return route('storage.public', ['path' => $normalized], false);
+                }
+            } catch (\Throwable $exception) {
+                // Fall back to constructing the URL manually below.
+            }
+
+            return '/' . ltrim('storage/' . $normalized, '/');
+        }
+
         try {
             if (config()->has("filesystems.disks.{$diskToUse}")) {
                 return \Illuminate\Support\Facades\Storage::disk($diskToUse)->url($normalized);
