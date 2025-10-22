@@ -31,6 +31,10 @@
       <div class="container mx-auto pt-[100px] pb-10 px-5 relative z-10">
         @php
           $ticketPurchaseUrl = $event->registration_url ?: ($event->canSellTickets() ? request()->fullUrlWithQuery(['tickets' => 'true']) : null);
+          $ticketCtaLabel = $event->registration_url
+            ? __('messages.view_event')
+            : ($event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets'));
+          $showTicketPurchaseCta = $ticketPurchaseUrl && request()->get('tickets') !== 'true';
           $shareUrl = $ticketPurchaseUrl ?: request()->fullUrl();
           $shareTitle = $translation ? $translation->name_translated : $event->translatedName();
           $startAt = $event->getStartDateTime($date, true);
@@ -362,6 +366,22 @@
       </div>
 
       <div class="flex flex-col gap-6 {{ $role->isRtl() ? 'rtl' : '' }}">
+        @if ($showTicketPurchaseCta)
+          <div class="flex justify-end">
+            <a
+              href="{{ $ticketPurchaseUrl }}"
+              dusk="buy-tickets-button"
+              @if ($event->registration_url) target="_blank" rel="noopener" @endif
+              class="inline-flex items-center justify-center gap-x-2 rounded-md bg-blue-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+            >
+              <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 2c1.04 0 2.043.24 2.94.698L8.699 11.94a1 1 0 001.414 1.414l6.243-6.243A7.963 7.963 0 0120 12c0 4.411-3.589 8-8 8s-8-3.589-8-8 3.589-8 8-8zm5.657-.657a1 1 0 010 1.414l-3.536 3.536a1 1 0 01-1.414-1.414l3.536-3.536a1 1 0 011.414 0z" />
+              </svg>
+              <span>{{ $ticketCtaLabel }}</span>
+            </a>
+          </div>
+        @endif
+
         <div class="p-6 rounded-xl flex flex-col gap-4 bg-[#F5F9FE] dark:bg-gray-800">
           <h4 class="text-[24px] leading-snug font-semibold text-gray-900 dark:text-gray-100">
             {{ __('messages.share_event') }}
