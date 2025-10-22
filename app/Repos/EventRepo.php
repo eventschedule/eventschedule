@@ -19,9 +19,6 @@ use App\Utils\NotificationUtils;
 use App\Models\Ticket;
 use App\Support\MailConfigManager;
 use App\Support\MailTemplateManager;
-use App\Models\MediaAsset;
-use App\Models\MediaAssetVariant;
-use App\Models\MediaAssetUsage;
 
 
 class EventRepo
@@ -319,26 +316,6 @@ class EventRepo
 
             $event->flyer_image_url = $filename;
             $event->save();
-
-            MediaAssetUsage::clearUsage($event, 'flyer');
-        } elseif ($request->filled('flyer_media_asset_id')) {
-            $assetId = (int) $request->input('flyer_media_asset_id');
-            $asset = MediaAsset::find($assetId);
-
-            if ($asset) {
-                $variant = null;
-
-                if ($request->filled('flyer_media_variant_id')) {
-                    $variantId = (int) $request->input('flyer_media_variant_id');
-                    $variant = MediaAssetVariant::where('media_asset_id', $asset->id)
-                        ->find($variantId);
-                }
-
-                $event->flyer_image_url = $variant ? $variant->path : $asset->path;
-                $event->save();
-
-                MediaAssetUsage::recordUsage($event, 'flyer', $asset, $variant);
-            }
         }
 
         MailConfigManager::applyFromDatabase();

@@ -12,7 +12,6 @@ import 'flatpickr/dist/flatpickr.css';
 
 import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
-import './media-picker';
 
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.html-editor').forEach(element => {

@@ -26,9 +26,6 @@ use App\Models\Event;
 use App\Models\User;
 use App\Models\RoleUser;
 use App\Models\EventRole;
-use App\Models\MediaAsset;
-use App\Models\MediaAssetVariant;
-use App\Models\MediaAssetUsage;
 use App\Utils\UrlUtils;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
@@ -74,7 +71,6 @@ class RoleController extends Controller
 
                 $role->profile_image_url = null;
                 $role->save();
-                MediaAssetUsage::clearUsage($role, 'profile');
             }
         } else if ($request->image_type == 'background') {
             if ($role->background_image_url) {
@@ -85,7 +81,6 @@ class RoleController extends Controller
 
                 $role->background_image_url = null;
                 $role->save();
-                MediaAssetUsage::clearUsage($role, 'background');
             }
         } else if ($request->image_type == 'header') {
             if ($role->header_image_url) {
@@ -96,7 +91,6 @@ class RoleController extends Controller
 
                 $role->header_image_url = null;
                 $role->save();
-                MediaAssetUsage::clearUsage($role, 'header');
             }
         }
 
@@ -1046,23 +1040,6 @@ class RoleController extends Controller
 
             $role->profile_image_url = $filename;
             $role->save();
-            MediaAssetUsage::clearUsage($role, 'profile');
-        } elseif ($request->filled('profile_media_asset_id')) {
-            $asset = MediaAsset::find((int) $request->input('profile_media_asset_id'));
-
-            if ($asset) {
-                $variant = null;
-
-                if ($request->filled('profile_media_variant_id')) {
-                    $variantId = (int) $request->input('profile_media_variant_id');
-                    $variant = MediaAssetVariant::where('media_asset_id', $asset->id)->find($variantId);
-                }
-
-                $role->profile_image_url = $variant ? $variant->path : $asset->path;
-                $role->save();
-
-                MediaAssetUsage::recordUsage($role, 'profile', $asset, $variant);
-            }
         }
 
         if ($request->hasFile('header_image_url')) {
@@ -1080,30 +1057,11 @@ class RoleController extends Controller
             $role->header_image = null;
             $role->header_image_url = $filename;
             $role->save();
-            MediaAssetUsage::clearUsage($role, 'header');
-        } elseif ($request->filled('header_media_asset_id')) {
-            $asset = MediaAsset::find((int) $request->input('header_media_asset_id'));
-
-            if ($asset) {
-                $variant = null;
-
-                if ($request->filled('header_media_variant_id')) {
-                    $variantId = (int) $request->input('header_media_variant_id');
-                    $variant = MediaAssetVariant::where('media_asset_id', $asset->id)->find($variantId);
-                }
-
-                $role->header_image = null;
-                $role->header_image_url = $variant ? $variant->path : $asset->path;
-                $role->save();
-
-                MediaAssetUsage::recordUsage($role, 'header', $asset, $variant);
-            }
         }
 
         if ($role->background == 'image' && $request->background_image) {
             $role->background_image = $request->background_image;
             $role->save();
-            MediaAssetUsage::clearUsage($role, 'background');
         } elseif ($role->background == 'image' && $request->hasFile('background_image_url')) {
             if ($role->background_image_url) {
                 $path = storage_normalize_path($role->getAttributes()['background_image_url']);
@@ -1118,24 +1076,6 @@ class RoleController extends Controller
 
             $role->background_image_url = $filename;
             $role->save();
-            MediaAssetUsage::clearUsage($role, 'background');
-        } elseif ($role->background == 'image' && $request->filled('background_media_asset_id')) {
-            $asset = MediaAsset::find((int) $request->input('background_media_asset_id'));
-
-            if ($asset) {
-                $variant = null;
-
-                if ($request->filled('background_media_variant_id')) {
-                    $variantId = (int) $request->input('background_media_variant_id');
-                    $variant = MediaAssetVariant::where('media_asset_id', $asset->id)->find($variantId);
-                }
-
-                $role->background_image = null;
-                $role->background_image_url = $variant ? $variant->path : $asset->path;
-                $role->save();
-
-                MediaAssetUsage::recordUsage($role, 'background', $asset, $variant);
-            }
         }
 
         if (! $role->email_verified_at) {
@@ -1365,23 +1305,6 @@ class RoleController extends Controller
 
             $role->profile_image_url = $filename;
             $role->save();
-            MediaAssetUsage::clearUsage($role, 'profile');
-        } elseif ($request->filled('profile_media_asset_id')) {
-            $asset = MediaAsset::find((int) $request->input('profile_media_asset_id'));
-
-            if ($asset) {
-                $variant = null;
-
-                if ($request->filled('profile_media_variant_id')) {
-                    $variantId = (int) $request->input('profile_media_variant_id');
-                    $variant = MediaAssetVariant::where('media_asset_id', $asset->id)->find($variantId);
-                }
-
-                $role->profile_image_url = $variant ? $variant->path : $asset->path;
-                $role->save();
-
-                MediaAssetUsage::recordUsage($role, 'profile', $asset, $variant);
-            }
         }
 
         if ($request->hasFile('header_image_url')) {
@@ -1399,30 +1322,11 @@ class RoleController extends Controller
             $role->header_image = null;
             $role->header_image_url = $filename;
             $role->save();
-            MediaAssetUsage::clearUsage($role, 'header');
-        } elseif ($request->filled('header_media_asset_id')) {
-            $asset = MediaAsset::find((int) $request->input('header_media_asset_id'));
-
-            if ($asset) {
-                $variant = null;
-
-                if ($request->filled('header_media_variant_id')) {
-                    $variantId = (int) $request->input('header_media_variant_id');
-                    $variant = MediaAssetVariant::where('media_asset_id', $asset->id)->find($variantId);
-                }
-
-                $role->header_image = null;
-                $role->header_image_url = $variant ? $variant->path : $asset->path;
-                $role->save();
-
-                MediaAssetUsage::recordUsage($role, 'header', $asset, $variant);
-            }
         }
 
         if ($role->background == 'image' && $request->background_image) {
             $role->background_image = $request->background_image;
             $role->save();
-            MediaAssetUsage::clearUsage($role, 'background');
         } elseif ($role->background == 'image' && $request->hasFile('background_image_url')) {
             if ($role->background_image_url) {
                 $path = storage_normalize_path($role->getAttributes()['background_image_url']);
@@ -1437,24 +1341,6 @@ class RoleController extends Controller
 
             $role->background_image_url = $filename;
             $role->save();
-            MediaAssetUsage::clearUsage($role, 'background');
-        } elseif ($role->background == 'image' && $request->filled('background_media_asset_id')) {
-            $asset = MediaAsset::find((int) $request->input('background_media_asset_id'));
-
-            if ($asset) {
-                $variant = null;
-
-                if ($request->filled('background_media_variant_id')) {
-                    $variantId = (int) $request->input('background_media_variant_id');
-                    $variant = MediaAssetVariant::where('media_asset_id', $asset->id)->find($variantId);
-                }
-
-                $role->background_image = null;
-                $role->background_image_url = $variant ? $variant->path : $asset->path;
-                $role->save();
-
-                MediaAssetUsage::recordUsage($role, 'background', $asset, $variant);
-            }
         }
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))
