@@ -59,4 +59,13 @@ class MediaAssetUsage extends Model
             ->where('context', $context)
             ->delete();
     }
+
+    public static function hasUsage(Model $model, string $context): bool
+    {
+        return static::query()
+            ->where('usable_type', $model::class)
+            ->where('usable_id', $model->getKey())
+            ->where('context', $context)
+            ->exists();
+    }
 }
