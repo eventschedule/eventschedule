@@ -308,7 +308,7 @@ class ImageLibraryService
         }
 
         $units = ['KB', 'MB', 'GB', 'TB'];
-        $bytesFloat = $bytes;
+        $bytesFloat = $bytes / 1024;
         $unitIndex = 0;
 
         while ($bytesFloat >= 1024 && $unitIndex < count($units) - 1) {
