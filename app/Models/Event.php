@@ -647,8 +647,10 @@ class Event extends Model
                 return null;
             }
 
+            $dateTimezone = $locale ? $timezone : 'UTC';
+
             try {
-                $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $date . ' 00:00:00', 'UTC');
+                $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $date . ' 00:00:00', $dateTimezone);
             } catch (\Exception $exception) {
                 return null;
             }
@@ -670,11 +672,9 @@ class Event extends Model
 
         if ($date) {
             try {
-                $customDate = Carbon::createFromFormat('Y-m-d', $date, 'UTC');
-
-                if ($locale) {
-                    $customDate->setTimezone($startAt->getTimezone());
-                }
+                $customDateTimezone = $locale ? $startAt->getTimezone() : 'UTC';
+                $customDate = Carbon::createFromFormat('Y-m-d', $date, $customDateTimezone);
+                $customDate->setTimezone($startAt->getTimezone());
 
                 $startAt->setDate($customDate->year, $customDate->month, $customDate->day);
             } catch (\Exception $exception) {
