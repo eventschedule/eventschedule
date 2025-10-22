@@ -56,3 +56,20 @@ sudo find /data/Docker/eventscheduler/bootstrap/cache -type f -exec chmod 664 {}
 This results in directory entries such as `drwxrwxr-x`, which lets PHP create and read files while preventing anonymous users from writing to the directory.
 
 After adjusting the ownership and permissions, reload the application: the `/new/talent`, `/new/venue`, and `/new/curator` pages should respond normally once Laravel can read the JSON files and write its log and cache entries.
+
+## Serving Public Assets from Storage
+
+If your web server runs as a user that is **not** part of the `www-data` group, the default `775/664` permission scheme can still block it from reading images or documents exposed via `storage/app/public`. A common symptom is that profile or event artwork responds with `404 Not Found` even though the files exist on disk.
+
+To make the assets world-readable while keeping ownership consistent, run the following commands (adjust the paths to match your deployment):
+
+```bash
+sudo chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+sudo find /var/www/html/storage -type d -exec chmod 755 {} \;
+sudo find /var/www/html/storage -type f -exec chmod 644 {} \;
+sudo chmod 755 /var/www /var/www/html /var/www/html/public
+```
+
+The first command ensures Laravel can continue writing to the directories, while the `chmod` calls grant "read" access to everyone and leave the execute bit on directories so nginx (or another HTTP server) can traverse the tree. Making the parent directories traversable is required for nginx to follow the symlink created by `php artisan storage:link`.
+
+Because `755/644` is more permissive than the earlier recommendation, prefer to scope it to the storage tree or to servers that do not share the host with untrusted users.
