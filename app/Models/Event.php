@@ -670,7 +670,12 @@ class Event extends Model
 
         if ($date) {
             try {
-                $customDate = Carbon::createFromFormat('Y-m-d', $date);
+                $customDate = Carbon::createFromFormat('Y-m-d', $date, 'UTC');
+
+                if ($locale) {
+                    $customDate->setTimezone($startAt->getTimezone());
+                }
+
                 $startAt->setDate($customDate->year, $customDate->month, $customDate->day);
             } catch (\Exception $exception) {
                 // If the provided date is invalid, return null to indicate no valid start time
