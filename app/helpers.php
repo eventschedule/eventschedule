@@ -250,27 +250,94 @@ if (!function_exists('storage_fix_public_directory_permissions')) {
             return;
         }
 
-        $paths = [
+        $ensureTraversable = static function (string $directory): void {
+            $permissions = @fileperms($directory);
+
+            if ($permissions === false) {
+                return;
+            }
+
+            $mode = $permissions & 0777;
+
+            if (($mode & 0005) === 0005) {
+                return;
+            }
+
+            @chmod($directory, $mode | 0005);
+        };
+
+        $ensureReadable = static function (string $file): void {
+            $permissions = @fileperms($file);
+
+            if ($permissions === false) {
+                return;
+            }
+
+            $mode = $permissions & 0777;
+
+            if (($mode & 0004) === 0004) {
+                return;
+            }
+
+            @chmod($file, $mode | 0004);
+        };
+
+        $paths = array_filter([
+            storage_path(),
             storage_path('app'),
             storage_path('app/public'),
-        ];
+            base_path('storage'),
+            public_path(),
+            public_path('storage'),
+            base_path(),
+            dirname(base_path()),
+        ], static function ($path) {
+            if (! is_string($path) || $path === '') {
+                return false;
+            }
+
+            if ($path === DIRECTORY_SEPARATOR) {
+                return false;
+            }
+
+            return is_dir($path);
+        });
 
         foreach ($paths as $path) {
-            if (! is_string($path) || $path === '' || ! is_dir($path)) {
+            $ensureTraversable($path);
+        }
+
+        $publicRoot = storage_path('app/public');
+
+        if (! is_string($publicRoot) || $publicRoot === '' || ! is_dir($publicRoot)) {
+            return;
+        }
+
+        $ensureTraversable($publicRoot);
+
+        try {
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($publicRoot, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::SELF_FIRST
+            );
+        } catch (\UnexpectedValueException $exception) {
+            report($exception);
+
+            return;
+        }
+
+        foreach ($iterator as $item) {
+            $path = $item->getPathname();
+
+            if ($item->isDir()) {
+                $ensureTraversable($path);
+
                 continue;
             }
 
-            $currentPermissions = @fileperms($path);
-
-            if ($currentPermissions !== false) {
-                $mode = $currentPermissions & 0777;
-
-                if (($mode & 0005) === 0005) {
-                    continue;
-                }
+            if ($item->isFile()) {
+                $ensureReadable($path);
             }
-
-            @chmod($path, 0755);
         }
     }
 }
