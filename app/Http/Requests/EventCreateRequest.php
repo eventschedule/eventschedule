@@ -16,7 +16,7 @@ class EventCreateRequest extends FormRequest
     public function rules(): array
     {        
         return [
-            'flyer_image_url' => ['image', 'max:2500'],
+            'flyer_image' => ['nullable', 'image', 'max:2500'],
             'slug' => ['nullable', 'string', 'max:255'],
         ];
     }
