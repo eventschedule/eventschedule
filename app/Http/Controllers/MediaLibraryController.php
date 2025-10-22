@@ -33,7 +33,7 @@ class MediaLibraryController extends Controller
         if ($request->filled('tag')) {
             $tag = MediaTag::where('slug', $request->string('tag'))->first();
             if ($tag) {
-                $query->whereHas('tags', fn ($builder) => $builder->where('media_tag_id', $tag->id));
+                $query->whereHas('tags', fn ($builder) => $builder->whereKey($tag->id));
             }
         }
 
