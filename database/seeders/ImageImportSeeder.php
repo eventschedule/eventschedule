@@ -60,7 +60,7 @@ class ImageImportSeeder extends Seeder
             $file->getRealPath(),
             $file->getFilename(),
             $mimeType,
-            $file->getSize(),
+            UPLOAD_ERR_OK,
             true
         );
 
