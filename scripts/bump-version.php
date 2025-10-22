@@ -136,7 +136,7 @@ function bumpVersion(string $currentVersion, string $channel, bool $forceMajor =
         $nextMajor = $parsed['major'] + 1;
 
         if ($channel === 'beta') {
-            return formatVersion($nextMajor, 0, 1, 'b');
+            return formatVersion($nextMajor, 0, null, 'b');
         }
 
         return formatVersion($nextMajor, 0, null, null);
@@ -163,6 +163,15 @@ function bumpVersion(string $currentVersion, string $channel, bool $forceMajor =
     }
 
     // Production channel
+    if ($parsed['suffix'] !== null) {
+        return formatVersion(
+            $parsed['major'],
+            $parsed['minor'],
+            $parsed['patch'],
+            null
+        );
+    }
+
     $nextMinor = $parsed['minor'] + 1;
 
     return formatVersion($parsed['major'], $nextMinor, null, null);
