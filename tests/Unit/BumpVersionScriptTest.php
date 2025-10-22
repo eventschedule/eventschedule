@@ -37,6 +37,16 @@ class BumpVersionScriptTest extends TestCase
 
     public function testMajorBetaReleaseResetsAndAddsBetaSuffix(): void
     {
-        $this->assertSame('3.0.1b', bumpVersion('2.1', 'beta', true));
+        $this->assertSame('3.0b', bumpVersion('2.1', 'beta', true));
+    }
+
+    public function testProductionReleaseFromBetaFinalizesVersion(): void
+    {
+        $this->assertSame('2.1.4', bumpVersion('2.1.4b', 'production'));
+    }
+
+    public function testProductionReleaseFromMajorBetaFinalizesVersion(): void
+    {
+        $this->assertSame('3.0', bumpVersion('3.0b', 'production'));
     }
 }
