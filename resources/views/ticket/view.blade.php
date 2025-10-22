@@ -77,7 +77,9 @@
               </defs>
             </svg>
 
-            @php($ticketStartAt = $event->getStartDateTime($sale->date, true))
+            @php
+                $ticketStartAt = $event->getStartDateTime($sale->date, true);
+            @endphp
             <p class="text-[10px]">{{ $ticketStartAt ? $ticketStartAt->format('F j, Y') : __('messages.unscheduled') }}</p>
           </div>
           <div class="flex gap-[8px] flex-row items-center">
