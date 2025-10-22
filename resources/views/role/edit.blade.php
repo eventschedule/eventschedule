@@ -94,8 +94,55 @@
             $('#language_code').val('{{ old('language_code', $role->language_code) }}');
             $('#timezone').val('{{ old('timezone', $role->timezone) }}');
             
-            $('#header_image').trigger('input');
-            
+            const headerSelect = document.getElementById('header_image');
+            const backgroundSelect = document.getElementById('background_image');
+            const headerImageInput = document.querySelector('input[name="header_image_id"]');
+            const backgroundImageInput = document.querySelector('input[name="background_image_id"]');
+            const profileImageInput = document.querySelector('input[name="profile_image_id"]');
+
+            function registerImagePickerHandler(hiddenInput, callback) {
+                if (!hiddenInput || typeof callback !== 'function') {
+                    return;
+                }
+
+                const pickerRoot = hiddenInput.closest('[data-component="image-picker"]');
+                if (!pickerRoot) {
+                    return;
+                }
+
+                pickerRoot.addEventListener('image-picker:change', callback);
+            }
+
+            if (headerImageInput && headerSelect && headerImageInput.value && headerSelect.value !== '') {
+                headerSelect.value = '';
+            }
+
+            if (backgroundImageInput && backgroundSelect && backgroundImageInput.value && backgroundSelect.value !== '') {
+                backgroundSelect.value = '';
+            }
+
+            registerImagePickerHandler(profileImageInput, () => {
+                updatePreview();
+            });
+
+            registerImagePickerHandler(headerImageInput, () => {
+                if (headerSelect) {
+                    headerSelect.value = '';
+                }
+                updateHeaderNavButtons();
+                toggleCustomHeaderInput();
+                updatePreview();
+            });
+
+            registerImagePickerHandler(backgroundImageInput, () => {
+                if (backgroundSelect) {
+                    backgroundSelect.value = '';
+                }
+                updateImageNavButtons();
+                toggleCustomImageInput();
+                updatePreview();
+            });
+
             updatePreview();
             onChangeBackground();
             onChangeCountry();
@@ -104,7 +151,7 @@
             toggleCustomImageInput();
             updateHeaderNavButtons();
             toggleCustomHeaderInput();
-            
+
             // Handle accept_requests checkbox
             const acceptRequestsCheckbox = document.querySelector('input[name="accept_requests"][type="checkbox"]');
             const requireApprovalSection = document.getElementById('require_approval_section');
@@ -124,112 +171,6 @@
                 });
             }
 
-            function previewImage(input, previewId) {
-                const preview = document.getElementById(previewId);
-                const warningElement = document.getElementById(previewId.split('_')[0] + '_image_size_warning');
-
-                if (!input || !input.files || !input.files[0]) {
-                    console.log('no file')
-                    if (preview) {
-                        preview.src = '';
-                        preview.style.display = 'none';
-                    }
-                    if (warningElement) {
-                        warningElement.textContent = '';
-                        warningElement.style.display = 'none';
-                    }
-                    updatePreview();
-                    return;
-                }
-
-                const file = input.files[0];
-                const reader = new FileReader();
-
-                reader.onloadend = function () {
-                    const img = new Image();
-                    img.onload = function() {
-                        const width = this.width;
-                        const height = this.height;
-                        const fileSize = file.size / 1024 / 1024; // in MB
-                        let warningMessage = '';
-
-                        if (fileSize > 2.5) {
-                            warningMessage += "{{ __('messages.image_size_warning') }}";
-                        }
-
-                        if (width !== height && previewId == 'profile_image_preview') {
-                            if (warningMessage) warningMessage += " ";
-                            warningMessage += "{{ __('messages.image_not_square') }}";
-                        }
-
-                        if (warningElement) {
-                            if (warningMessage) {
-                                warningElement.textContent = warningMessage;
-                                warningElement.style.display = 'block';
-                            } else {
-                                warningElement.textContent = '';
-                                warningElement.style.display = 'none';
-                            }
-                        }
-
-                        if (warningMessage == '') {
-                            preview.src = reader.result;
-                            preview.style.display = 'block';
-                            updatePreview();
-                            
-                            if (previewId === 'background_image_preview') {
-                                $('#style_background_image img:not(#background_image_preview)').hide();
-                                $('#style_background_image a').hide();
-                            }
-                        } else {
-                            preview.src = '';
-                            preview.style.display = 'none';
-                        }
-                    };
-                    img.src = reader.result;
-                }
-
-                if (file) {
-                    reader.readAsDataURL(file);
-                } else {
-                    preview.src = '';
-                    preview.style.display = 'none';
-                    if (warningElement) {
-                        warningElement.textContent = '';
-                        warningElement.style.display = 'none';
-                    }
-                    updatePreview();
-                }
-            }
-
-            $('#profile_image').on('change', function() {
-                previewImage(this, 'profile_image_preview');
-            });
-
-            $('#header_image').on('input', function() {
-                var headerImageUrl = $(this).find(':selected').val();
-                if (headerImageUrl) {
-                    headerImageUrl = "{{ asset('images/headers') }}" + '/' + headerImageUrl + '.png';
-                    $('#header_image_preview').attr('src', headerImageUrl).show();
-                    $('#delete_header_image').hide();
-                } else if ({{ $role->header_image_url ? 'true' : 'false' }}) {
-                    $('#header_image_preview').attr('src', '{{ $role->header_image_url }}').show();
-                    $('#delete_header_image').show();
-                } else {
-                    $('#header_image_preview').hide();
-                    $('#delete_header_image').hide();
-                }
-            });
-
-            $('#header_image_url').on('change', function() {
-                previewImage(this, 'header_image_preview');
-                $('#header_image_preview').show();
-            });
-
-            $('#background_image_url').on('change', function() {
-                previewImage(this, 'background_image_preview');
-                updatePreview();
-            });
         });
 
         function onChangeCountry() {
@@ -267,6 +208,19 @@
                 updatePreview();
             };
             */
+        }
+
+        function getImagePickerUrl(hiddenInput) {
+            if (!hiddenInput) {
+                return '';
+            }
+
+            const picker = hiddenInput.closest('[data-component="image-picker"]');
+            if (!picker) {
+                return '';
+            }
+
+            return picker.dataset.currentUrl || '';
         }
 
         function updatePreview() {
@@ -314,7 +268,9 @@
                 if (backgroundImageUrl) {
                     backgroundImageUrl = "{{ asset('images/backgrounds') }}" + '/' + $('#background_image').find(':selected').val() + '.png';
                 } else {
-                    backgroundImageUrl = $('#background_image_preview').attr('src') || "{{ $role->background_image_url }}";
+                    const backgroundImageInput = document.querySelector('input[name="background_image_id"]');
+                    const customBackgroundUrl = getImagePickerUrl(backgroundImageInput);
+                    backgroundImageUrl = customBackgroundUrl || "{{ $role->background_image_url }}";
                 }
 
                 $('#preview')
@@ -603,20 +559,6 @@
                                     {{ __('messages.image_size_warning') }}
                                 </p>
                             </div>
-
-                            <img id="header_image_preview" 
-                                src="{{ $role->header_image ? asset('images/headers/' . $role->header_image . '.png') : $role->header_image_url }}" 
-                                alt="Header Image Preview" 
-                                style="max-height:120px; {{ $role->header_image || $role->header_image_url ? '' : 'display:none;' }}" 
-                                class="pt-3" />
-
-                            @if ($role->header_image_url)
-                            <a href="#" id="delete_header_image" style="display: {{ $role->header_image ? 'none' : 'block' }};"
-                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}'; }"
-                                class="hover:underline text-gray-900 dark:text-gray-100">
-                                {{ __('messages.delete_image') }}
-                            </a>
-                            @endif
 
                         </div>
                     </div>

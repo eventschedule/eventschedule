@@ -63,41 +63,34 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        $disk = storage_public_disk();
+        $mapping = [
+            'profile' => ['profile_image_id', 'profile_image_url'],
+            'background' => ['background_image_id', 'background_image_url'],
+            'header' => ['header_image_id', 'header_image_url'],
+        ];
 
-        if ($request->image_type == 'profile') {
-            if ($role->profile_image_url) {
-                $path = storage_normalize_path($role->getAttributes()['profile_image_url']);
-                if ($path !== '') {
-                    Storage::disk($disk)->delete($path);
-                }
+        if (! array_key_exists($request->image_type, $mapping)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        [$idField, $urlField] = $mapping[$request->image_type];
 
                 $role->profile_image_url = null;
                 $role->save();
                 MediaAssetUsage::clearUsage($role, 'profile');
             }
-        } else if ($request->image_type == 'background') {
-            if ($role->background_image_url) {
-                $path = storage_normalize_path($role->getAttributes()['background_image_url']);
-                if ($path !== '') {
-                    Storage::disk($disk)->delete($path);
-                }
 
                 $role->background_image_url = null;
                 $role->save();
                 MediaAssetUsage::clearUsage($role, 'background');
             }
-        } else if ($request->image_type == 'header') {
-            if ($role->header_image_url) {
-                $path = storage_normalize_path($role->getAttributes()['header_image_url']);
-                if ($path !== '') {
-                    Storage::disk($disk)->delete($path);
-                }
 
                 $role->header_image_url = null;
                 $role->save();
                 MediaAssetUsage::clearUsage($role, 'header');
             }
+
+            $role->save();
         }
 
         return redirect(route('role.edit', ['subdomain' => $subdomain]))
@@ -116,21 +109,32 @@ class RoleController extends Controller
 
         $disk = storage_public_disk();
 
-        if ($role->profile_image_url) {
+        if ($role->profile_image_id) {
+            $role->profile_image_id = null;
+            $role->profile_image_url = null;
+        } elseif ($role->profile_image_url) {
             $path = storage_normalize_path($role->getAttributes()['profile_image_url']);
             if ($path !== '') {
                 Storage::disk($disk)->delete($path);
             }
         }
 
-        if ($role->header_image_url) {
+        if ($role->header_image_id) {
+            $role->header_image_id = null;
+            $role->header_image_url = null;
+            $role->header_image = null;
+        } elseif ($role->header_image_url) {
             $path = storage_normalize_path($role->getAttributes()['header_image_url']);
             if ($path !== '') {
                 Storage::disk($disk)->delete($path);
             }
         }
 
-        if ($role->background_image_url) {
+        if ($role->background_image_id) {
+            $role->background_image_id = null;
+            $role->background_image_url = null;
+            $role->background_image = null;
+        } elseif ($role->background_image_url) {
             $path = storage_normalize_path($role->getAttributes()['background_image_url']);
             if ($path !== '') {
                 Storage::disk($disk)->delete($path);
@@ -974,6 +978,7 @@ class RoleController extends Controller
             $role->import_config = $importConfig;
         }
 
+        $this->applyImageSelections($role, $request);
         $role->save();
 
         // Save groups
@@ -1264,6 +1269,7 @@ class RoleController extends Controller
             $role->import_config = $importConfig;
         }
 
+        $this->applyImageSelections($role, $request);
         $role->save();
 
         // Sync groups
@@ -3837,6 +3843,43 @@ class RoleController extends Controller
         }
 
         return $value;
+    }
+
+    private function applyImageSelections(Role $role, Request $request): void
+    {
+        $mappings = [
+            'profile_image_id' => 'profile_image_url',
+            'header_image_id' => 'header_image_url',
+            'background_image_id' => 'background_image_url',
+        ];
+
+        foreach ($mappings as $field => $urlColumn) {
+            if (! $request->exists($field)) {
+                continue;
+            }
+
+            $identifier = $request->input($field);
+
+            if ($identifier) {
+                $image = Image::find($identifier);
+
+                if ($image) {
+                    $role->{$field} = $image->id;
+                    $role->{$urlColumn} = $image->path;
+
+                    if ($field === 'header_image_id') {
+                        $role->header_image = null;
+                    }
+
+                    if ($field === 'background_image_id') {
+                        $role->background_image = null;
+                    }
+                }
+            } else {
+                $role->{$field} = null;
+                $role->{$urlColumn} = null;
+            }
+        }
     }
 
     /**

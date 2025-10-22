@@ -7,7 +7,6 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Utils\UrlUtils;
 use App\Rules\NoFakeEmail;
-use App\Rules\SquareImage;
 
 class RoleUpdateRequest extends FormRequest
 {

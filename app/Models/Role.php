@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Support\Str;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Support\Facades\Http;
@@ -27,7 +28,9 @@ class Role extends Model implements MustVerifyEmail
         'background_colors',
         'background_color',
         'background_image',
+        'background_image_id',
         'header_image',
+        'header_image_id',
         'accent_color',
         'font_color',
         'font_family',
@@ -69,6 +72,7 @@ class Role extends Model implements MustVerifyEmail
         'sync_direction',
         'request_terms',
         'contacts',
+        'profile_image_id',
     ];
 
     /**
@@ -197,6 +201,21 @@ class Role extends Model implements MustVerifyEmail
                     ->withTimestamps()
                     ->withPivot('level', 'dates_unavailable')
                     ->orderBy('name');
+    }
+
+    public function profileImage(): BelongsTo
+    {
+        return $this->belongsTo(Image::class, 'profile_image_id');
+    }
+
+    public function headerImageAsset(): BelongsTo
+    {
+        return $this->belongsTo(Image::class, 'header_image_id');
+    }
+
+    public function backgroundImageAsset(): BelongsTo
+    {
+        return $this->belongsTo(Image::class, 'background_image_id');
     }
     public function owner()
     {
@@ -330,6 +349,13 @@ class Role extends Model implements MustVerifyEmail
 
     public function getHeaderImageUrlAttribute($value)
     {
+        if ($this->relationLoaded('headerImageAsset') || $this->header_image_id) {
+            $url = optional($this->headerImageAsset)->url();
+            if ($url) {
+                return $url;
+            }
+        }
+
         if (! $value) {
             return '';
         }
@@ -339,6 +365,13 @@ class Role extends Model implements MustVerifyEmail
 
     public function getProfileImageUrlAttribute($value)
     {
+        if ($this->relationLoaded('profileImage') || $this->profile_image_id) {
+            $url = optional($this->profileImage)->url();
+            if ($url) {
+                return $url;
+            }
+        }
+
         if (! $value) {
             return '';
         }
@@ -348,6 +381,13 @@ class Role extends Model implements MustVerifyEmail
 
     public function getBackgroundImageUrlAttribute($value)
     {
+        if ($this->relationLoaded('backgroundImageAsset') || $this->background_image_id) {
+            $url = optional($this->backgroundImageAsset)->url();
+            if ($url) {
+                return $url;
+            }
+        }
+
         if (! $value) {
             return '';
         }

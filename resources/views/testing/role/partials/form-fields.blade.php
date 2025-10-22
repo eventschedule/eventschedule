@@ -138,22 +138,11 @@
     </div>
 
     <div>
-        <label for="header_image_url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            {{ __('messages.header_image') }}
-        </label>
-        <input
-            id="header_image_url"
-            name="header_image_url"
-            type="file"
-            class="mt-1 block w-full text-gray-900 dark:text-gray-100"
-            accept="image/png, image/jpeg"
-        >
-        @error('header_image_url')
-            <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-        @enderror
-        <p id="header_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
-            {{ __('messages.image_size_warning') }}
-        </p>
+        <x-image-picker
+            name="header_image_id"
+            :label="__('messages.header_image')"
+            :value="old('header_image_id', $role->header_image_id ?? null)"
+            :preview-url="$role->header_image_url ?? null" />
     </div>
 
     <div id="subschedules-section" class="space-y-4 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
@@ -284,27 +273,4 @@
         item.setAttribute('data-group-item', '');
     });
 
-    (function () {
-        const headerInput = document.getElementById('header_image_url');
-        const headerWarning = document.getElementById('header_image_size_warning');
-        const maxFileSizeKb = 2500;
-
-        if (!headerInput || !headerWarning) {
-            return;
-        }
-
-        const toggleHeaderWarning = () => {
-            const [file] = headerInput.files ?? [];
-
-            if (file && file.size > maxFileSizeKb * 1024) {
-                headerWarning.style.display = 'block';
-            } else {
-                headerWarning.style.display = 'none';
-            }
-        };
-
-        headerInput.addEventListener('change', toggleHeaderWarning);
-
-        toggleHeaderWarning();
-    })();
-</script>
+ </script>

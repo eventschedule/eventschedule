@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\EventRole;
 use App\Models\MediaAssetUsage;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -34,6 +35,7 @@ class Event extends Model
         'registration_url',
         'category_id',
         'creator_role_id',
+        'flyer_image_id',
         'google_event_id',
     ];
 
@@ -197,6 +199,11 @@ class Event extends Model
         return $this->belongsToMany(Role::class)
                     ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id')
                     ->using(EventRole::class);
+    }
+
+    public function flyerImage(): BelongsTo
+    {
+        return $this->belongsTo(Image::class, 'flyer_image_id');
     }
 
     public function curatorBySubdomain($subdomain)
@@ -732,6 +739,13 @@ class Event extends Model
 
     public function getFlyerImageUrlAttribute($value)
     {
+        if ($this->relationLoaded('flyerImage') || $this->flyer_image_id) {
+            $url = optional($this->flyerImage)->url();
+            if ($url) {
+                return $url;
+            }
+        }
+
         if (! $value) {
             return '';
         }

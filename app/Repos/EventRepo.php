@@ -3,12 +3,12 @@
 namespace App\Repos;
 
 use App\Models\Event;
+use App\Models\Image;
 use App\Models\Role;
 use App\Models\User;
 use App\Utils\ColorUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
@@ -210,7 +210,7 @@ class EventRepo
         }
 
         $event->fill($input);
-        
+
         if (! $request->event_url) {
             $event->event_url = null;
         }
@@ -227,6 +227,20 @@ class EventRepo
             $event->starts_at = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, $timezone)
                 ->setTimezone('UTC')
                 ->format('Y-m-d H:i:s');
+        }
+
+        if ($request->has('flyer_image_id')) {
+            $imageId = $request->input('flyer_image_id');
+            if ($imageId) {
+                $image = Image::find($imageId);
+                if ($image) {
+                    $event->flyer_image_id = $image->id;
+                    $event->flyer_image_url = $image->path;
+                }
+            } else {
+                $event->flyer_image_id = null;
+                $event->flyer_image_url = null;
+            }
         }
 
         /*

@@ -74,6 +74,33 @@ return [
             'endpoint' => env('DO_SPACES_ENDPOINT'),
             'visibility' => 'public',
         ],
+
+        'images' => (static function () {
+            $driver = env('IMAGES_DISK', env('FILESYSTEM_DISK', 'local'));
+
+            if ($driver === 's3') {
+                return [
+                    'driver' => 's3',
+                    'key' => env('IMAGES_AWS_ACCESS_KEY_ID', env('AWS_ACCESS_KEY_ID')),
+                    'secret' => env('IMAGES_AWS_SECRET_ACCESS_KEY', env('AWS_SECRET_ACCESS_KEY')),
+                    'region' => env('IMAGES_AWS_DEFAULT_REGION', env('AWS_DEFAULT_REGION')),
+                    'bucket' => env('IMAGES_AWS_BUCKET', env('AWS_BUCKET')),
+                    'url' => env('IMAGES_AWS_URL', env('AWS_URL')),
+                    'endpoint' => env('IMAGES_AWS_ENDPOINT', env('AWS_ENDPOINT')),
+                    'visibility' => env('IMAGES_VISIBILITY', 'public'),
+                    'use_path_style_endpoint' => env('IMAGES_AWS_USE_PATH_STYLE_ENDPOINT', env('AWS_USE_PATH_STYLE_ENDPOINT', false)),
+                    'throw' => false,
+                ];
+            }
+
+            return [
+                'driver' => 'local',
+                'root' => env('IMAGES_LOCAL_ROOT', storage_path('app/images')),
+                'url' => env('IMAGES_URL'),
+                'visibility' => env('IMAGES_VISIBILITY', 'public'),
+                'throw' => false,
+            ];
+        })(),
     ],
 
     /*
@@ -87,8 +114,21 @@ return [
     |
     */
 
-    'links' => [
+    'links' => array_filter([
         public_path('storage') => storage_path('app/public'),
+        public_path('storage/images') => env('IMAGES_DISK', env('FILESYSTEM_DISK', 'local')) === 's3'
+            ? null
+            : env('IMAGES_LOCAL_ROOT', storage_path('app/images')),
+    ], static fn ($value) => !is_null($value)),
+
+    'image_storage' => [
+        'disk' => env('IMAGES_STORAGE_DISK', 'images'),
+        'directory' => env('IMAGES_DIRECTORY', 'images/originals'),
+        'variants_directory' => env('IMAGES_VARIANTS_DIRECTORY', 'images/variants'),
+        'import_paths' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', env('IMAGES_IMPORT_PATHS', 'public/images'))
+        ))),
     ],
 
 ];

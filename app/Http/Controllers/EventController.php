@@ -30,6 +30,7 @@ use App\Http\Requests\EventUpdateRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Rules\NoFakeEmail;
+use App\Models\Image;
 
 class EventController extends Controller
 {
@@ -49,10 +50,13 @@ class EventController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        $disk = storage_public_disk();
-
         if ($request->image_type == 'flyer') {
-            if ($event->flyer_image_url) {
+            if ($event->flyer_image_id) {
+                $event->flyer_image_id = null;
+                $event->flyer_image_url = null;
+                $event->save();
+            } elseif ($event->flyer_image_url) {
+                $disk = storage_public_disk();
                 $path = storage_normalize_path($event->getAttributes()['flyer_image_url']);
                 if ($path !== '') {
                     Storage::disk($disk)->delete($path);
@@ -936,11 +940,10 @@ class EventController extends Controller
 
         if ($request->social_image) {
             $file = new \Illuminate\Http\UploadedFile($request->social_image, basename($request->social_image));
-            $filename = strtolower('flyer_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            $disk = storage_public_disk();
-            storage_put_file_as_public($disk, $file, $filename);
+            $image = $this->persistFlyerImage($file, $event->user_id);
 
-            $event->flyer_image_url = $filename;
+            $event->flyer_image_id = $image->id;
+            $event->flyer_image_url = $image->path;
             $event->save();
         }
 
@@ -966,11 +969,10 @@ class EventController extends Controller
 
         if ($request->social_image) {
             $file = new \Illuminate\Http\UploadedFile($request->social_image, basename($request->social_image));
-            $filename = strtolower('flyer_' . Str::random(32)) . '.' . $file->getClientOriginalExtension();
-            $disk = storage_public_disk();
-            storage_put_file_as_public($disk, $file, $filename);
+            $image = $this->persistFlyerImage($file, $event->user_id);
 
-            $event->flyer_image_url = $filename;
+            $event->flyer_image_id = $image->id;
+            $event->flyer_image_url = $image->path;
             $event->save();
         }
 
@@ -1018,6 +1020,25 @@ class EventController extends Controller
         Auth::login($user);
 
         return $user;
+    }
+
+    private function persistFlyerImage(\Illuminate\Http\UploadedFile $file, ?int $userId): Image
+    {
+        $disk = storage_public_disk();
+        $filename = strtolower('flyer_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+        $path = storage_put_file_as_public($disk, $file, $filename);
+        $dimensions = @getimagesize($file->getRealPath());
+
+        return Image::create([
+            'disk' => $disk,
+            'path' => $path,
+            'original_name' => $file->getClientOriginalName(),
+            'mime_type' => $file->getMimeType(),
+            'size' => $file->getSize(),
+            'width' => $dimensions[0] ?? null,
+            'height' => $dimensions[1] ?? null,
+            'user_id' => $userId,
+        ]);
     }
 
     public function uploadImage(Request $request, $subdomain)

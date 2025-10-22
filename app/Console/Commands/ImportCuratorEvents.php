@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Utils\GeminiUtils;
 use App\Utils\UrlUtils;
 use App\Utils\ImageUtils;
+use App\Models\Image;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -669,9 +670,22 @@ class ImportCuratorEvents extends Command
             if ($imageData && $imageUrl) {
                 // Use the already-downloaded image data
                 $filename = ImageUtils::saveImageData($imageData, $imageUrl);
+                $disk = storage_public_disk();
+                $path = storage_normalize_path($filename);
 
-                $event->flyer_image_url = $filename;
-                $event->save();    
+                $image = Image::firstOrCreate(
+                    ['disk' => $disk, 'path' => $path],
+                    [
+                        'original_name' => basename($imageUrl),
+                        'mime_type' => null,
+                        'size' => null,
+                        'user_id' => $curator->user_id,
+                    ]
+                );
+
+                $event->flyer_image_id = $image->id;
+                $event->flyer_image_url = $image->path;
+                $event->save();
             }
 
             if ($event) {
