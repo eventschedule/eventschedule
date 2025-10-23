@@ -1,7 +1,7 @@
 <template>
   <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
     <div
-      v-for="image in images"
+      v-for="image in safeImages"
       :key="image.id"
       class="rounded-lg border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
       :class="{ 'ring-2 ring-indigo-500': selectedId === image.id }"
@@ -57,14 +57,16 @@
         </div>
       </div>
     </div>
-    <div v-if="!images.length" class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-500">
+    <div v-if="!safeImages.length" class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-500">
       No images match the current filters.
     </div>
   </div>
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue';
+
+const props = defineProps({
   images: { type: Array, default: () => [] },
   selectable: { type: Boolean, default: false },
   selectedId: { type: [String, Number], default: null },
@@ -73,6 +75,14 @@ defineProps({
 });
 
 const emit = defineEmits(['select', 'replace', 'delete']);
+
+const safeImages = computed(() => {
+  if (!Array.isArray(props.images)) {
+    return [];
+  }
+
+  return props.images.filter((image) => image && typeof image === 'object' && image.id !== undefined && image.id !== null);
+});
 
 const onReplace = (image, event) => {
   const [file] = event.target.files || [];
