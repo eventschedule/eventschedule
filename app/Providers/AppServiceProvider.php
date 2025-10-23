@@ -60,10 +60,6 @@ class AppServiceProvider extends ServiceProvider
             Artisan::call('key:generate', ['--force' => true]);
         }
 
-        if (config('app.env') !== 'local') {
-            URL::forceScheme('https');
-        }
-
         $this->app->singleton('userRoles', function () {
             if ($user = auth()->user()) {
                 return $user->roles()->get();
@@ -122,6 +118,14 @@ class AppServiceProvider extends ServiceProvider
 
             if (!empty($googleWalletSettings)) {
                 WalletConfigManager::applyGoogle($googleWalletSettings);
+            }
+        }
+
+        if (config('app.env') !== 'local') {
+            $appUrl = config('app.url');
+
+            if (is_string($appUrl) && parse_url($appUrl, PHP_URL_SCHEME) === 'https') {
+                URL::forceScheme('https');
             }
         }
     }
