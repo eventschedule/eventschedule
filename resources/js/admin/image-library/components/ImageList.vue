@@ -64,6 +64,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { normaliseCollection } from '../utils';
 
 const props = defineProps({
   images: { type: Array, default: () => [] },
@@ -75,13 +76,7 @@ const props = defineProps({
 
 const emit = defineEmits(['select', 'replace', 'delete']);
 
-const safeImages = computed(() => {
-  if (!Array.isArray(props.images)) {
-    return [];
-  }
-
-  return props.images.filter((image) => image && typeof image === 'object' && image.id !== undefined && image.id !== null);
-});
+const safeImages = computed(() => normaliseCollection(props.images));
 
 const onReplace = (image, event) => {
   const [file] = event.target.files || [];
