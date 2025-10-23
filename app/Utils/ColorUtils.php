@@ -78,7 +78,31 @@ class ColorUtils
 
     public static function randomBackgroundImage(): string
     {
-        $options = array_keys(self::backgroundImageOptions());
+        $options = [];
+
+        if (method_exists(static::class, 'backgroundImageOptions')) {
+            try {
+                $options = call_user_func([static::class, 'backgroundImageOptions']);
+            } catch (\Throwable $exception) {
+                $options = [];
+            }
+
+            if (! is_array($options)) {
+                $options = [];
+            }
+        }
+
+        if (empty($options)) {
+            $options = self::buildBundledBackgroundImageOptions();
+
+            if (empty($options)) {
+                $options = array_keys(self::STATIC_BACKGROUND_IMAGES);
+            } else {
+                $options = array_keys($options);
+            }
+        } else {
+            $options = array_keys($options);
+        }
 
         if (empty($options)) {
             return '';
@@ -91,6 +115,20 @@ class ColorUtils
      * @return array<string, string>
      */
     public static function backgroundImageOptions(): array
+    {
+        $options = self::buildBundledBackgroundImageOptions();
+
+        if (! empty($options)) {
+            return $options;
+        }
+
+        return self::STATIC_BACKGROUND_IMAGES;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function buildBundledBackgroundImageOptions(): array
     {
         $paths = glob(public_path('images/backgrounds/*.png')) ?: [];
         $options = [];
@@ -107,11 +145,9 @@ class ColorUtils
 
         if (! empty($options)) {
             ksort($options, SORT_NATURAL | SORT_FLAG_CASE);
-
-            return $options;
         }
 
-        return self::STATIC_BACKGROUND_IMAGES;
+        return $options;
     }
 
     /**
