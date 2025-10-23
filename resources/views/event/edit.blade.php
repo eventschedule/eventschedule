@@ -1135,7 +1135,12 @@
         venues: (() => {
           const venues = @json($venues ?? []);
           if (!Array.isArray(venues)) {
-            return [];
+            if (!venues || typeof venues !== 'object') {
+              return [];
+            }
+
+            return Object.values(venues)
+              .filter(venue => venue && typeof venue === 'object' && 'id' in venue);
           }
 
           return venues.filter(venue => venue && typeof venue === 'object' && 'id' in venue);
@@ -1143,7 +1148,12 @@
         members: (() => {
           const members = @json($members ?? []);
           if (!Array.isArray(members)) {
-            return [];
+            if (!members || typeof members !== 'object') {
+              return [];
+            }
+
+            return Object.values(members)
+              .filter(member => member && typeof member === 'object' && 'id' in member);
           }
 
           return members.filter(member => member && typeof member === 'object' && 'id' in member);
@@ -1164,7 +1174,12 @@
         selectedMembers: (() => {
           const selectedMembers = @json($selectedMembers ?? []);
           if (!Array.isArray(selectedMembers)) {
-            return [];
+            if (!selectedMembers || typeof selectedMembers !== 'object') {
+              return [];
+            }
+
+            return Object.values(selectedMembers)
+              .filter(member => member && typeof member === 'object' && 'id' in member);
           }
 
           return selectedMembers.filter(member => member && typeof member === 'object' && 'id' in member);
