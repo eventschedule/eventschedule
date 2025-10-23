@@ -1,6 +1,8 @@
 import './bootstrap';
 
 import Alpine from 'alpinejs';
+import './media-picker';
+
 window.Alpine = Alpine;
 Alpine.start();
 
@@ -16,8 +18,6 @@ window.flatpickr = flatpickr;
 
 import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
-import './media-picker';
-
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.html-editor').forEach(element => {
         const easyMDE = new EasyMDE({

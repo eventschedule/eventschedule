@@ -9,12 +9,19 @@ const csrfToken = () => {
 
 const buildHeaders = (extra = {}) => ({
     'X-CSRF-TOKEN': csrfToken(),
+    'X-Requested-With': 'XMLHttpRequest',
     Accept: 'application/json',
     ...extra,
 });
 
-document.addEventListener('alpine:init', () => {
-    Alpine.data('mediaLibraryPage', (config) => ({
+const registerMediaLibraryComponents = (alpineInstance) => {
+    if (!alpineInstance || registerMediaLibraryComponents.registered) {
+        return;
+    }
+
+    registerMediaLibraryComponents.registered = true;
+
+    alpineInstance.data('mediaLibraryPage', (config) => ({
         assets: [],
         tags: [],
         pagination: {
@@ -226,7 +233,7 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 
-    Alpine.data('mediaPicker', (config) => ({
+    alpineInstance.data('mediaPicker', (config) => ({
         assets: [],
         tags: [],
         pagination: {
@@ -423,6 +430,9 @@ document.addEventListener('alpine:init', () => {
 
             const formData = new FormData();
             formData.append('file', file);
+            if (config.context) {
+                formData.append('context', config.context);
+            }
 
             try {
                 const response = await fetch(config.uploadEndpoint, {
@@ -456,4 +466,12 @@ document.addEventListener('alpine:init', () => {
             return asset.original_filename || 'Asset';
         },
     }));
-});
+};
+
+if (window.Alpine) {
+    registerMediaLibraryComponents(window.Alpine);
+} else {
+    document.addEventListener('alpine:init', () => {
+        registerMediaLibraryComponents(window.Alpine || Alpine);
+    });
+}
