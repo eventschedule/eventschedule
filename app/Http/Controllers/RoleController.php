@@ -3024,11 +3024,9 @@ class RoleController extends Controller
     {
         static $hasLoggedFallback = false;
 
-        $backgroundImageOptionsCallable = [ColorUtils::class, 'backgroundImageOptions'];
-
-        if (method_exists(ColorUtils::class, 'backgroundImageOptions') && is_callable($backgroundImageOptionsCallable)) {
-            try {
-                $options = call_user_func($backgroundImageOptionsCallable);
+        try {
+            if (method_exists(ColorUtils::class, 'backgroundImageOptions')) {
+                $options = ColorUtils::backgroundImageOptions();
 
                 if (is_array($options)) {
                     return $options;
@@ -3038,17 +3036,17 @@ class RoleController extends Controller
                     Log::warning('ColorUtils::backgroundImageOptions did not return an array. Falling back to bundled assets.');
                     $hasLoggedFallback = true;
                 }
-            } catch (\Throwable $exception) {
-                if (! $hasLoggedFallback) {
-                    Log::warning('ColorUtils::backgroundImageOptions threw an exception. Falling back to bundled assets.', [
-                        'exception' => $exception,
-                    ]);
-                    $hasLoggedFallback = true;
-                }
+            } elseif (! $hasLoggedFallback) {
+                Log::warning('ColorUtils::backgroundImageOptions is unavailable. Falling back to bundled assets.');
+                $hasLoggedFallback = true;
             }
-        } elseif (! $hasLoggedFallback) {
-            Log::warning('ColorUtils::backgroundImageOptions is unavailable. Falling back to bundled assets.');
-            $hasLoggedFallback = true;
+        } catch (\Throwable $exception) {
+            if (! $hasLoggedFallback) {
+                Log::warning('ColorUtils::backgroundImageOptions threw an exception. Falling back to bundled assets.', [
+                    'exception' => $exception,
+                ]);
+                $hasLoggedFallback = true;
+            }
         }
 
         $paths = glob(public_path('images/backgrounds/*.png')) ?: [];
