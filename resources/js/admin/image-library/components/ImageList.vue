@@ -66,7 +66,7 @@
 defineProps({
   images: { type: Array, default: () => [] },
   selectable: { type: Boolean, default: false },
-  selectedId: { type: String, default: null },
+  selectedId: { type: [String, Number], default: null },
   replacingIds: { type: Object, default: () => ({}) },
   deletingIds: { type: Object, default: () => ({}) },
 });

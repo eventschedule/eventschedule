@@ -132,6 +132,107 @@ import axios from 'axios';
 import ImageGrid from './ImageGrid.vue';
 import ImageList from './ImageList.vue';
 
+const formatBytes = (value) => {
+  const bytes = Number(value);
+
+  if (!Number.isFinite(bytes) || bytes <= 0) {
+    return null;
+  }
+
+  if (bytes < 1024) {
+    return `${Math.round(bytes)} B`;
+  }
+
+  const units = ['KB', 'MB', 'GB', 'TB'];
+  let size = bytes / 1024;
+  let unitIndex = 0;
+
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex += 1;
+  }
+
+  const fixed = size >= 10 ? Math.round(size) : Math.round(size * 10) / 10;
+
+  return `${fixed} ${units[unitIndex]}`;
+};
+
+const normaliseImage = (item) => {
+  if (!item || typeof item !== 'object') {
+    return null;
+  }
+
+  const id = item.id ?? item.uuid ?? item.image_id ?? null;
+
+  if (!id) {
+    return null;
+  }
+
+  const width = item.width ?? item.dimensions?.width ?? null;
+  const height = item.height ?? item.dimensions?.height ?? null;
+
+  const sizeValue =
+    item.size_human ??
+    item.size_label ??
+    (typeof item.size_bytes === 'number' ? formatBytes(item.size_bytes) : null) ??
+    (typeof item.size === 'number' ? formatBytes(item.size) : null);
+
+  return {
+    ...item,
+    id,
+    url: item.url ?? item.path ?? '',
+    display_name:
+      item.display_name ??
+      item.name ??
+      item.original_name ??
+      item.filename ??
+      (typeof item.url === 'string' ? item.url.split('/').pop() : `Image ${id}`),
+    size_human: sizeValue,
+    dimensions_label:
+      item.dimensions_label ?? (width && height ? `${width}×${height}` : null),
+    updated_at_human:
+      item.updated_at_human ??
+      item.updated_at ??
+      item.created_at_human ??
+      item.created_at ??
+      item.last_modified_human ??
+      null,
+    last_modified_human:
+      item.last_modified_human ??
+      item.updated_at_human ??
+      item.updated_at ??
+      item.created_at_human ??
+      item.created_at ??
+      null,
+  };
+};
+
+const normaliseCollection = (value) => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item) => normaliseImage(item))
+    .filter((item) => Boolean(item));
+};
+
+const normaliseTypes = (value) => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const deduped = Array.from(
+    new Set(
+      value
+        .map((item) => (typeof item === 'string' ? item : null))
+        .filter((item) => Boolean(item) && item.trim().length > 0),
+    ),
+  );
+
+  return deduped.sort((a, b) => a.localeCompare(b));
+};
+
 const props = defineProps({
   apiBase: { type: String, default: '/admin/images' },
   selectable: { type: Boolean, default: false },
@@ -234,13 +335,23 @@ const fetchImages = async () => {
       },
     });
 
-    images.value = data.data ?? [];
-    availableTypes.value = [...(data.filters?.available_types ?? [])].sort();
+    const items = normaliseCollection(data.data ?? data.items ?? []);
+    images.value = items;
+
+    const typesSource =
+      data.filters?.available_types ?? data.available_types ?? data.types ?? [];
+    availableTypes.value = normaliseTypes(typesSource);
 
     if (filters.type && !availableTypes.value.includes(filters.type)) {
       filters.type = '';
     }
+
+    if (selectedId.value && !items.some((item) => item.id === selectedId.value)) {
+      selectedId.value = null;
+    }
   } catch (error) {
+    images.value = [];
+    availableTypes.value = [];
     setError(extractError(error));
   } finally {
     loading.value = false;
@@ -314,6 +425,10 @@ const onDrop = async (event) => {
 };
 
 const updateBusyMap = (map, id, state) => {
+  if (!id) {
+    return;
+  }
+
   if (state) {
     map[id] = true;
   } else {
@@ -322,6 +437,11 @@ const updateBusyMap = (map, id, state) => {
 };
 
 const handleReplace = async ({ image, file }) => {
+  if (!image?.id) {
+    setError('Unable to replace the selected image. Please try again.');
+    return;
+  }
+
   updateBusyMap(replacingIds, image.id, true);
 
   const formData = new FormData();
@@ -333,7 +453,13 @@ const handleReplace = async ({ image, file }) => {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
 
-    const updated = data.data;
+    const updated = normaliseImage(data.data);
+
+    if (!updated) {
+      await fetchImages();
+      return;
+    }
+
     const index = images.value.findIndex((item) => item.id === image.id);
 
     if (index !== -1) {
@@ -350,6 +476,11 @@ const handleReplace = async ({ image, file }) => {
 };
 
 const handleDelete = async (image) => {
+  if (!image?.id) {
+    setError('Unable to delete the selected image. Please try again.');
+    return;
+  }
+
   if (!window.confirm('Delete this image permanently?')) {
     return;
   }
@@ -369,8 +500,15 @@ const handleDelete = async (image) => {
 };
 
 const handleSelect = (image) => {
-  selectedId.value = image.id;
-  emit('select', image);
+  const normalised = normaliseImage(image);
+
+  if (!normalised) {
+    setError('Unable to use the selected image. Please choose another image.');
+    return;
+  }
+
+  selectedId.value = normalised.id;
+  emit('select', normalised);
 };
 
 watch(
