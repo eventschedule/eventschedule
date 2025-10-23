@@ -285,9 +285,9 @@
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
                                     </div>
 
-                                    <div v-if="venueSearchResults.length" class="mb-6">
+                                    <div v-if="sanitizedVenueSearchResults.length" class="mb-6">
                                         <div class="space-y-2">
-                                            <div v-for="venue in venueSearchResults" :key="venue.id" class="flex items-center justify-between">
+                                            <div v-for="venue in sanitizedVenueSearchResults" :key="venue.id" class="flex items-center justify-between">
                                                 <div class="flex items-center">
                                                     <span class="text-sm text-gray-900 dark:text-gray-100 truncate">
                                                         <a :href="venue.url" target="_blank" class="hover:underline">@{{ venue.name }}</a>:
@@ -397,12 +397,12 @@
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                             {{ __('messages.event_participants') . ($role->isVenue() ? ' - ' . __('messages.optional') : '') }}
-                            <span v-if="selectedMembers.length > 1">(@{{ selectedMembers.length }})</span>
+                            <span v-if="sanitizedSelectedMembers.length > 1">(@{{ sanitizedSelectedMembers.length }})</span>
                         </h2>
 
                         <div>
-                            <div v-if="selectedMembers && selectedMembers.length > 0" class="mb-6">
-                                <div v-for="member in selectedMembers" :key="member.id" class="flex items-center justify-between mb-2">
+                            <div v-if="sanitizedSelectedMembers.length > 0" class="mb-6">
+                                <div v-for="member in sanitizedSelectedMembers" :key="member.id" class="flex items-center justify-between mb-2">
                                     <input type="hidden" v-bind:name="'members[' + member.id + '][email]'" v-bind:value="member.email" />
                                     <div v-show="editMemberId === member.id" class="w-full">
                                         <div class="mb-6">
@@ -525,9 +525,9 @@
                                         <x-input-error class="mt-2" :messages="$errors->get('member_email')" />
                                     </div>
 
-                                    <div v-if="memberSearchResults.length" class="mb-6">
+                                    <div v-if="sanitizedMemberSearchResults.length" class="mb-6">
                                         <div class="space-y-2">
-                                            <div v-for="member in memberSearchResults" :key="member.id" class="flex items-center justify-between">
+                                            <div v-for="member in sanitizedMemberSearchResults" :key="member.id" class="flex items-center justify-between">
                                                 <div class="flex items-center">
                                                     <span class="text-sm text-gray-900 dark:text-gray-100">
                                                         <a :href="member.url" target="_blank" class="hover:underline">@{{ member.name }}</a>
@@ -1382,7 +1382,7 @@
         }
 
         this.selectedMembers = this.selectedMembers.filter(m => m && m.id !== member.id);
-        if (this.selectedMembers.length === 0) {
+        if (this.sanitizedSelectedMembers.length === 0) {
           this.showMemberTypeRadio = true;
         }
       },
@@ -1632,6 +1632,27 @@
 
         return rawVenues.filter(venue => venue && typeof venue === 'object' && 'id' in venue);
       },
+      sanitizedVenueSearchResults() {
+        if (!Array.isArray(this.venueSearchResults)) {
+          return [];
+        }
+
+        return this.venueSearchResults.filter(venue => venue && typeof venue === 'object' && 'id' in venue);
+      },
+      sanitizedMemberSearchResults() {
+        if (!Array.isArray(this.memberSearchResults)) {
+          return [];
+        }
+
+        return this.memberSearchResults.filter(member => member && typeof member === 'object' && 'id' in member);
+      },
+      sanitizedSelectedMembers() {
+        if (!Array.isArray(this.selectedMembers)) {
+          return [];
+        }
+
+        return this.selectedMembers.filter(member => member && typeof member === 'object' && 'id' in member);
+      },
       hasAnyVenues() {
         return this.availableVenues.length > 0;
       },
@@ -1681,12 +1702,16 @@
         return !!this.event.id && !!this.fullEventUrl;
       },
       filteredMembers() {
+        const selectedIds = new Set(
+          this.sanitizedSelectedMembers.map(member => member.id)
+        );
+
         return this.members
           .filter(member => member && typeof member === 'object' && 'id' in member)
-          .filter(member => !this.selectedMembers.some(selected => selected && selected.id === member.id));
+          .filter(member => !selectedIds.has(member.id));
       },
       isFormValid() {
-        var hasSubdomain = this.venueName || this.selectedMembers.length > 0;
+        var hasSubdomain = this.venueName || this.sanitizedSelectedMembers.length > 0;
         var hasVenue = this.venueAddress1 || this.event.event_url;
 
         return hasSubdomain && hasVenue;
@@ -1780,7 +1805,9 @@
       },
       selectedMembers: {
         handler(newValue) {
-          const validMembers = newValue.filter(member => member && member.name);
+          const validMembers = Array.isArray(newValue)
+            ? newValue.filter(member => member && typeof member === 'object' && member.name)
+            : [];
 
           if (!this.eventName && validMembers.length === 1) {
             this.eventName = validMembers[0].name;
@@ -1801,7 +1828,7 @@
         this.venues = Object.values(this.venues);
       }
 
-      this.showMemberTypeRadio = this.selectedMembers.length === 0;
+      this.showMemberTypeRadio = this.sanitizedSelectedMembers.length === 0;
 
       if (this.event.id) {
         this.isInPerson = !!this.event.venue || !!this.selectedVenue;
@@ -1822,8 +1849,12 @@
 
       if (this.event.id) {
         this.eventName = this.event.name;
-      } else if (this.selectedMembers.length === 1) {
-        this.eventName = this.selectedMembers[0].name;
+      } else {
+        const initialMembers = this.sanitizedSelectedMembers;
+
+        if (initialMembers.length === 1) {
+          this.eventName = initialMembers[0].name;
+        }
       }
 
       // Initialize curator group selections
