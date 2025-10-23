@@ -36,7 +36,19 @@ return [
     'report_errors' => (bool) env('REPORT_ERRORS', false),
     'is_testing' => (bool) env('APP_TESTING', false),
     'browser_testing' => (bool) env('BROWSER_TESTING', false),
-    'load_vite_assets' => (bool) env('LOAD_VITE_ASSETS', true),
+    'load_vite_assets' => (static function () {
+        $configured = env('LOAD_VITE_ASSETS');
+
+        if ($configured === null) {
+            $developmentEnvironments = ['local', 'development', 'dev'];
+
+            return in_array(env('APP_ENV', 'production'), $developmentEnvironments, true);
+        }
+
+        $parsed = filter_var($configured, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
+        return $parsed ?? false;
+    })(),
 
     /*
     |--------------------------------------------------------------------------
