@@ -76,9 +76,9 @@ class ColorUtils
         return $values[$random];
     }
 
-    public static function randomBackgroundImage()
+    public static function randomBackgroundImage(): string
     {
-        $options = array_keys(self::STATIC_BACKGROUND_IMAGES);
+        $options = array_keys(self::backgroundImageOptions());
 
         if (empty($options)) {
             return '';
@@ -87,8 +87,30 @@ class ColorUtils
         return $options[array_rand($options)];
     }
 
+    /**
+     * @return array<string, string>
+     */
     public static function backgroundImageOptions(): array
     {
+        $paths = glob(public_path('images/backgrounds/*.png')) ?: [];
+        $options = [];
+
+        foreach ($paths as $path) {
+            $name = pathinfo($path, PATHINFO_FILENAME);
+
+            if (! is_string($name) || $name === '') {
+                continue;
+            }
+
+            $options[$name] = str_replace('_', ' ', $name);
+        }
+
+        if (! empty($options)) {
+            ksort($options, SORT_NATURAL | SORT_FLAG_CASE);
+
+            return $options;
+        }
+
         return self::STATIC_BACKGROUND_IMAGES;
     }
 
