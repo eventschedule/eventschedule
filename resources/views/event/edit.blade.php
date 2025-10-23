@@ -39,16 +39,25 @@
   <script src="{{ asset('js/vue.global.prod.js') }}"></script>
   <script {!! nonce_attr() !!}>
     document.addEventListener('DOMContentLoaded', function() {
-        var f = flatpickr('.datepicker', {
-            allowInput: true,
-            enableTime: true,
-            altInput: true,
-            time_24hr: "{{ $role && $role->use_24_hour_time ? 'true' : 'false' }}",
-            altFormat: "{{ $role && $role->use_24_hour_time ? 'M j, Y • H:i' : 'M j, Y • h:i K' }}",
-            dateFormat: "Y-m-d H:i:S",
-        });
-        // https://github.com/flatpickr/flatpickr/issues/892#issuecomment-604387030
-        f._input.onkeydown = () => false;
+        if (typeof flatpickr === 'function') {
+            const pickerResult = flatpickr('.datepicker', {
+                allowInput: true,
+                enableTime: true,
+                altInput: true,
+                time_24hr: "{{ $role && $role->use_24_hour_time ? 'true' : 'false' }}",
+                altFormat: "{{ $role && $role->use_24_hour_time ? 'M j, Y • H:i' : 'M j, Y • h:i K' }}",
+                dateFormat: "Y-m-d H:i:S",
+            });
+
+            const pickerInstances = Array.isArray(pickerResult) ? pickerResult : [pickerResult];
+
+            pickerInstances
+                .filter(instance => instance && instance._input)
+                .forEach(instance => {
+                    // https://github.com/flatpickr/flatpickr/issues/892#issuecomment-604387030
+                    instance._input.onkeydown = () => false;
+                });
+        }
 
         $("#venue_country").countrySelect({
             defaultCountry: "{{ $selectedVenue && $selectedVenue->country ? $selectedVenue->country : ($role && $role->country_code ? $role->country_code : '') }}",
@@ -1123,8 +1132,22 @@
           tickets_enabled: {{ $event->tickets_enabled ? 'true' : 'false' }},
           total_tickets_mode: @json($event->total_tickets_mode ?? 'individual'),
         },
-        venues: @json($venues),
-        members: @json($members ?? []),
+        venues: (() => {
+          const venues = @json($venues ?? []);
+          if (!Array.isArray(venues)) {
+            return [];
+          }
+
+          return venues.filter(venue => venue && typeof venue === 'object' && 'id' in venue);
+        })(),
+        members: (() => {
+          const members = @json($members ?? []);
+          if (!Array.isArray(members)) {
+            return [];
+          }
+
+          return members.filter(member => member && typeof member === 'object' && 'id' in member);
+        })(),
         shouldBypassPreferences: hasBrowserTestingCookie() || @json(is_browser_testing()),
         venueType: "{{ count($venues) > 0 ? 'use_existing' : 'create_new' }}",
         memberType: "{{ 'use_existing' }}",
@@ -1138,7 +1161,14 @@
         venueSearchEmail: "",
         venueSearchResults: [],
         selectedVenue: @json($selectedVenue ? $selectedVenue->toData() : ""),
-        selectedMembers: @json($selectedMembers ?? []),
+        selectedMembers: (() => {
+          const selectedMembers = @json($selectedMembers ?? []);
+          if (!Array.isArray(selectedMembers)) {
+            return [];
+          }
+
+          return selectedMembers.filter(member => member && typeof member === 'object' && 'id' in member);
+        })(),
         memberSearchResults: [],
         selectedMember: "",
         editMemberId: "",
@@ -1253,13 +1283,19 @@
         })
         .then(response => response.json())
         .then(data => {
-          this.venueSearchResults = data;
+          this.venueSearchResults = Array.isArray(data)
+            ? data.filter(venue => venue && typeof venue === 'object' && 'id' in venue)
+            : [];
         })
         .catch(error => {
           console.error('Error searching venues:', error);
         });
       },
       selectVenue(venue) {
+        if (!venue || typeof venue !== 'object') {
+          return;
+        }
+
         this.selectedVenue = venue;
         this.venueName = venue.name;
         this.venueEmail = venue.email;
@@ -1303,16 +1339,22 @@
         })
         .then(response => response.json())
         .then(data => {
-          this.memberSearchResults = data;
+          this.memberSearchResults = Array.isArray(data)
+            ? data.filter(member => member && typeof member === 'object' && 'id' in member)
+            : [];
         })
         .catch(error => {
           console.error('Error searching members:', error);
         });
       },
       selectMember(member) {
-        if (! this.selectedMembers.some(m => m.id === member.id)) {
+        if (!member || typeof member !== 'object' || !member.id) {
+          return;
+        }
+
+        if (! this.selectedMembers.some(m => m && m.id === member.id)) {
           this.selectedMembers.push(member);
-        }        
+        }
         this.memberSearchResults = [];
         this.memberEmail = "";
         this.memberName = "";
@@ -1320,7 +1362,11 @@
         this.showMemberTypeRadio = false;
       },
       removeMember(member) {
-        this.selectedMembers = this.selectedMembers.filter(m => m.id !== member.id);
+        if (!member || !member.id) {
+          return;
+        }
+
+        this.selectedMembers = this.selectedMembers.filter(m => m && m.id !== member.id);
         if (this.selectedMembers.length === 0) {
           this.showMemberTypeRadio = true;
         }
@@ -1378,7 +1424,7 @@
         this.showMemberTypeRadio = false;
       },
       addExistingMember() {
-        if (this.selectedMember && !this.selectedMembers.some(m => m.id === this.selectedMember.id)) {
+        if (this.selectedMember && this.selectedMember.id && !this.selectedMembers.some(m => m && m.id === this.selectedMember.id)) {
           this.selectedMembers.push(this.selectedMember);
           this.$nextTick(() => {
             this.selectedMember = "";
@@ -1565,15 +1611,11 @@
     },
     computed: {
       availableVenues() {
-        if (Array.isArray(this.venues)) {
-          return this.venues;
-        }
+        const rawVenues = Array.isArray(this.venues)
+          ? this.venues
+          : (this.venues && typeof this.venues === 'object' ? Object.values(this.venues) : []);
 
-        if (this.venues && typeof this.venues === 'object') {
-          return Object.values(this.venues);
-        }
-
-        return [];
+        return rawVenues.filter(venue => venue && typeof venue === 'object' && 'id' in venue);
       },
       hasAnyVenues() {
         return this.availableVenues.length > 0;
@@ -1624,7 +1666,9 @@
         return !!this.event.id && !!this.fullEventUrl;
       },
       filteredMembers() {
-        return this.members.filter(member => !this.selectedMembers.some(selected => selected.id === member.id));
+        return this.members
+          .filter(member => member && typeof member === 'object' && 'id' in member)
+          .filter(member => !this.selectedMembers.some(selected => selected && selected.id === member.id));
       },
       isFormValid() {
         var hasSubdomain = this.venueName || this.selectedMembers.length > 0;
@@ -1721,8 +1765,10 @@
       },
       selectedMembers: {
         handler(newValue) {
-          if (!this.eventName && newValue.length === 1) {
-            this.eventName = newValue[0].name;
+          const validMembers = newValue.filter(member => member && member.name);
+
+          if (!this.eventName && validMembers.length === 1) {
+            this.eventName = validMembers[0].name;
           }
         },
         deep: true
