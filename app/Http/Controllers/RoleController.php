@@ -3024,9 +3024,11 @@ class RoleController extends Controller
     {
         static $hasLoggedFallback = false;
 
+        $callable = [ColorUtils::class, 'backgroundImageOptions'];
+
         try {
-            if (method_exists(ColorUtils::class, 'backgroundImageOptions')) {
-                $options = ColorUtils::backgroundImageOptions();
+            if (is_callable($callable)) {
+                $options = call_user_func($callable);
 
                 if (is_array($options)) {
                     return $options;
