@@ -1,4 +1,3 @@
-import Alpine from 'alpinejs';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 
@@ -14,7 +13,7 @@ const buildHeaders = (extra = {}) => ({
     ...extra,
 });
 
-const registerMediaLibraryComponents = (alpineInstance) => {
+export const registerMediaLibraryComponents = (alpineInstance) => {
     if (!alpineInstance || registerMediaLibraryComponents.registered) {
         return;
     }
@@ -60,6 +59,7 @@ const registerMediaLibraryComponents = (alpineInstance) => {
 
                 const response = await fetch(`${config.assetsEndpoint}?${params.toString()}`, {
                     headers: { Accept: 'application/json' },
+                    credentials: 'same-origin',
                 });
 
                 if (!response.ok) {
@@ -80,6 +80,7 @@ const registerMediaLibraryComponents = (alpineInstance) => {
             try {
                 const response = await fetch(config.tagsEndpoint, {
                     headers: { Accept: 'application/json' },
+                    credentials: 'same-origin',
                 });
 
                 if (!response.ok) {
@@ -108,6 +109,7 @@ const registerMediaLibraryComponents = (alpineInstance) => {
                     method: 'POST',
                     headers: buildHeaders(),
                     body: formData,
+                    credentials: 'same-origin',
                 });
 
                 if (!response.ok) {
@@ -140,6 +142,7 @@ const registerMediaLibraryComponents = (alpineInstance) => {
                     method: 'POST',
                     headers: buildHeaders({ 'Content-Type': 'application/json' }),
                     body: JSON.stringify({ name }),
+                    credentials: 'same-origin',
                 });
 
                 if (!response.ok) {
@@ -179,6 +182,7 @@ const registerMediaLibraryComponents = (alpineInstance) => {
                     method: 'POST',
                     headers: buildHeaders({ 'Content-Type': 'application/json' }),
                     body: JSON.stringify({ tags: this.selectedTagIds }),
+                    credentials: 'same-origin',
                 });
 
                 if (!response.ok) {
@@ -282,6 +286,7 @@ const registerMediaLibraryComponents = (alpineInstance) => {
 
                 const response = await fetch(`${config.assetsEndpoint}?${params.toString()}`, {
                     headers: { Accept: 'application/json' },
+                    credentials: 'same-origin',
                 });
 
                 if (!response.ok) {
@@ -302,6 +307,7 @@ const registerMediaLibraryComponents = (alpineInstance) => {
             try {
                 const response = await fetch(config.tagsEndpoint, {
                     headers: { Accept: 'application/json' },
+                    credentials: 'same-origin',
                 });
 
                 if (!response.ok) {
@@ -382,6 +388,7 @@ const registerMediaLibraryComponents = (alpineInstance) => {
                         method: 'POST',
                         headers: buildHeaders(),
                         body: formData,
+                        credentials: 'same-origin',
                     });
 
                     if (!response.ok) {
@@ -439,6 +446,7 @@ const registerMediaLibraryComponents = (alpineInstance) => {
                     method: 'POST',
                     headers: buildHeaders(),
                     body: formData,
+                    credentials: 'same-origin',
                 });
 
                 if (!response.ok) {
@@ -468,10 +476,12 @@ const registerMediaLibraryComponents = (alpineInstance) => {
     }));
 };
 
-if (window.Alpine) {
-    registerMediaLibraryComponents(window.Alpine);
-} else {
-    document.addEventListener('alpine:init', () => {
-        registerMediaLibraryComponents(window.Alpine || Alpine);
-    });
+if (typeof window !== 'undefined') {
+    if (window.Alpine) {
+        registerMediaLibraryComponents(window.Alpine);
+    } else {
+        document.addEventListener('alpine:init', (event) => {
+            registerMediaLibraryComponents(event.detail || window.Alpine);
+        });
+    }
 }

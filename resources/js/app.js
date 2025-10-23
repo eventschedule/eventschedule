@@ -1,9 +1,10 @@
 import './bootstrap';
 
 import Alpine from 'alpinejs';
-import './media-picker';
+import { registerMediaLibraryComponents } from './media-picker';
 
 window.Alpine = Alpine;
+registerMediaLibraryComponents(Alpine);
 Alpine.start();
 
 import flatpickr from 'flatpickr';
