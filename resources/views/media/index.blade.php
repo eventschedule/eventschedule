@@ -5,11 +5,11 @@
 
     <div
         x-data="mediaLibraryPage({
-            assetsEndpoint: '{{ route('media.assets.index') }}',
-            uploadEndpoint: '{{ route('media.assets.store') }}',
-            tagsEndpoint: '{{ route('media.tags.index') }}',
-            createTagEndpoint: '{{ route('media.tags.store') }}',
-            syncTagsTemplate: '{{ route('media.assets.tags.sync', ['asset' => '__ID__']) }}',
+            assetsEndpoint: '{{ route('media.assets.index', [], false) }}',
+            uploadEndpoint: '{{ route('media.assets.store', [], false) }}',
+            tagsEndpoint: '{{ route('media.tags.index', [], false) }}',
+            createTagEndpoint: '{{ route('media.tags.store', [], false) }}',
+            syncTagsTemplate: '{{ route('media.assets.tags.sync', ['asset' => '__ID__'], false) }}',
         })"
         x-init="init()"
         class="space-y-6"

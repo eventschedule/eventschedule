@@ -18,11 +18,11 @@
 
 <div
     x-data="mediaPicker({
-        assetsEndpoint: '{{ route('media.assets.index') }}',
-        uploadEndpoint: '{{ route('media.assets.store') }}',
-        tagsEndpoint: '{{ route('media.tags.index') }}',
-        createTagEndpoint: '{{ route('media.tags.store') }}',
-        variantEndpointTemplate: '{{ route('media.assets.variants.store', ['asset' => '__ASSET__']) }}',
+        assetsEndpoint: '{{ route('media.assets.index', [], false) }}',
+        uploadEndpoint: '{{ route('media.assets.store', [], false) }}',
+        tagsEndpoint: '{{ route('media.tags.index', [], false) }}',
+        createTagEndpoint: '{{ route('media.tags.store', [], false) }}',
+        variantEndpointTemplate: '{{ route('media.assets.variants.store', ['asset' => '__ASSET__'], false) }}',
         context: @json($context),
         initialAssetId: {{ $initialAsset ? (int) $initialAsset : 'null' }},
         initialVariantId: {{ $initialVariant ? (int) $initialVariant : 'null' }},
