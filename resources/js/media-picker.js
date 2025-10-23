@@ -1,4 +1,3 @@
-import Alpine from 'alpinejs';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 
@@ -9,12 +8,19 @@ const csrfToken = () => {
 
 const buildHeaders = (extra = {}) => ({
     'X-CSRF-TOKEN': csrfToken(),
+    'X-Requested-With': 'XMLHttpRequest',
     Accept: 'application/json',
     ...extra,
 });
 
-document.addEventListener('alpine:init', () => {
-    Alpine.data('mediaLibraryPage', (config) => ({
+export const registerMediaLibraryComponents = (alpineInstance) => {
+    if (!alpineInstance || registerMediaLibraryComponents.registered) {
+        return;
+    }
+
+    registerMediaLibraryComponents.registered = true;
+
+    alpineInstance.data('mediaLibraryPage', (config) => ({
         assets: [],
         tags: [],
         pagination: {
@@ -53,6 +59,7 @@ document.addEventListener('alpine:init', () => {
 
                 const response = await fetch(`${config.assetsEndpoint}?${params.toString()}`, {
                     headers: { Accept: 'application/json' },
+                    credentials: 'same-origin',
                 });
 
                 if (!response.ok) {
@@ -73,6 +80,7 @@ document.addEventListener('alpine:init', () => {
             try {
                 const response = await fetch(config.tagsEndpoint, {
                     headers: { Accept: 'application/json' },
+                    credentials: 'same-origin',
                 });
 
                 if (!response.ok) {
@@ -101,6 +109,7 @@ document.addEventListener('alpine:init', () => {
                     method: 'POST',
                     headers: buildHeaders(),
                     body: formData,
+                    credentials: 'same-origin',
                 });
 
                 if (!response.ok) {
@@ -133,6 +142,7 @@ document.addEventListener('alpine:init', () => {
                     method: 'POST',
                     headers: buildHeaders({ 'Content-Type': 'application/json' }),
                     body: JSON.stringify({ name }),
+                    credentials: 'same-origin',
                 });
 
                 if (!response.ok) {
@@ -172,6 +182,7 @@ document.addEventListener('alpine:init', () => {
                     method: 'POST',
                     headers: buildHeaders({ 'Content-Type': 'application/json' }),
                     body: JSON.stringify({ tags: this.selectedTagIds }),
+                    credentials: 'same-origin',
                 });
 
                 if (!response.ok) {
@@ -226,7 +237,7 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 
-    Alpine.data('mediaPicker', (config) => ({
+    alpineInstance.data('mediaPicker', (config) => ({
         assets: [],
         tags: [],
         pagination: {
@@ -275,6 +286,7 @@ document.addEventListener('alpine:init', () => {
 
                 const response = await fetch(`${config.assetsEndpoint}?${params.toString()}`, {
                     headers: { Accept: 'application/json' },
+                    credentials: 'same-origin',
                 });
 
                 if (!response.ok) {
@@ -295,6 +307,7 @@ document.addEventListener('alpine:init', () => {
             try {
                 const response = await fetch(config.tagsEndpoint, {
                     headers: { Accept: 'application/json' },
+                    credentials: 'same-origin',
                 });
 
                 if (!response.ok) {
@@ -375,6 +388,7 @@ document.addEventListener('alpine:init', () => {
                         method: 'POST',
                         headers: buildHeaders(),
                         body: formData,
+                        credentials: 'same-origin',
                     });
 
                     if (!response.ok) {
@@ -423,12 +437,16 @@ document.addEventListener('alpine:init', () => {
 
             const formData = new FormData();
             formData.append('file', file);
+            if (config.context) {
+                formData.append('context', config.context);
+            }
 
             try {
                 const response = await fetch(config.uploadEndpoint, {
                     method: 'POST',
                     headers: buildHeaders(),
                     body: formData,
+                    credentials: 'same-origin',
                 });
 
                 if (!response.ok) {
@@ -456,4 +474,14 @@ document.addEventListener('alpine:init', () => {
             return asset.original_filename || 'Asset';
         },
     }));
-});
+};
+
+if (typeof window !== 'undefined') {
+    if (window.Alpine) {
+        registerMediaLibraryComponents(window.Alpine);
+    } else {
+        document.addEventListener('alpine:init', (event) => {
+            registerMediaLibraryComponents(event.detail || window.Alpine);
+        });
+    }
+}
