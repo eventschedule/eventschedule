@@ -28,59 +28,111 @@ const normaliseImage = (item) => {
     return null;
   }
 
-  const id = item.id ?? item.uuid ?? item.image_id ?? null;
+  const source = item.image && typeof item.image === 'object' ? { ...item, ...item.image } : item;
 
-  if (!id) {
+  const id =
+    source.id ??
+    source.uuid ??
+    source.image_id ??
+    source.identifier ??
+    null;
+
+  if (id === undefined || id === null || id === '') {
     return null;
   }
 
-  const width = item.width ?? item.dimensions?.width ?? null;
-  const height = item.height ?? item.dimensions?.height ?? null;
+  const width =
+    source.width ??
+    source.dimensions?.width ??
+    source.image_width ??
+    null;
+  const height =
+    source.height ??
+    source.dimensions?.height ??
+    source.image_height ??
+    null;
 
   const sizeValue =
-    item.size_human ??
-    item.size_label ??
-    (typeof item.size_bytes === 'number' ? formatBytes(item.size_bytes) : null) ??
-    (typeof item.size === 'number' ? formatBytes(item.size) : null);
+    source.size_human ??
+    source.size_label ??
+    (typeof source.size_bytes === 'number' ? formatBytes(source.size_bytes) : null) ??
+    (typeof source.size === 'number' ? formatBytes(source.size) : null);
+
+  const url =
+    source.url ??
+    source.path ??
+    source.image_path ??
+    (source.file?.url ?? source.file?.path) ??
+    '';
+
+  const displayName =
+    source.display_name ??
+    source.name ??
+    source.original_name ??
+    source.filename ??
+    (typeof url === 'string' && url.includes('/') ? url.split('/').pop() : null) ??
+    `Image ${id}`;
 
   return {
     ...item,
+    ...source,
     id,
-    url: item.url ?? item.path ?? '',
-    display_name:
-      item.display_name ??
-      item.name ??
-      item.original_name ??
-      item.filename ??
-      (typeof item.url === 'string' ? item.url.split('/').pop() : `Image ${id}`),
+    url,
+    display_name: displayName,
     size_human: sizeValue,
     dimensions_label:
-      item.dimensions_label ?? (width && height ? `${width}×${height}` : null),
+      source.dimensions_label ?? (width && height ? `${width}×${height}` : null),
     updated_at_human:
-      item.updated_at_human ??
-      item.updated_at ??
-      item.created_at_human ??
-      item.created_at ??
-      item.last_modified_human ??
+      source.updated_at_human ??
+      source.updated_at ??
+      source.created_at_human ??
+      source.created_at ??
+      source.last_modified_human ??
       null,
     last_modified_human:
-      item.last_modified_human ??
-      item.updated_at_human ??
-      item.updated_at ??
-      item.created_at_human ??
-      item.created_at ??
+      source.last_modified_human ??
+      source.updated_at_human ??
+      source.updated_at ??
+      source.created_at_human ??
+      source.created_at ??
       null,
   };
 };
 
-const normaliseCollection = (value) => {
-  if (!Array.isArray(value)) {
+const toIterable = (value) => {
+  if (!value) {
     return [];
   }
 
-  return value
-    .map((item) => normaliseImage(item))
-    .filter((item) => Boolean(item));
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (typeof value === 'object') {
+    if (Array.isArray(value.data)) {
+      return value.data;
+    }
+
+    return Object.values(value);
+  }
+
+  return [];
+};
+
+const normaliseCollection = (value) => {
+  const iterable = toIterable(value);
+  const seen = new Set();
+  const normalised = [];
+
+  iterable.forEach((item) => {
+    const image = normaliseImage(item);
+    if (image && !seen.has(image.id)) {
+      seen.add(image.id);
+      normalised.push(image);
+    }
+  });
+
+  return normalised;
 };
 
 const normaliseTypes = (value) => {
