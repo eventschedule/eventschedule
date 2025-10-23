@@ -10,7 +10,7 @@
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100">
-        <tr v-for="image in images" :key="image.id" class="hover:bg-slate-50">
+        <tr v-for="image in safeImages" :key="image.id" class="hover:bg-slate-50">
           <td class="px-4 py-3">
             <div class="h-20 w-20 overflow-hidden rounded border border-slate-200">
               <img :src="image.url" :alt="image.display_name" class="h-full w-full object-cover" />
@@ -52,7 +52,7 @@
             </div>
           </td>
         </tr>
-        <tr v-if="!images.length">
+        <tr v-if="!safeImages.length">
           <td colspan="4" class="px-6 py-10 text-center text-sm text-slate-500">
             No images found. Try adjusting your search or filters.
           </td>
@@ -63,7 +63,9 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue';
+
+const props = defineProps({
   images: { type: Array, default: () => [] },
   selectable: { type: Boolean, default: false },
   selectedId: { type: [String, Number], default: null },
@@ -72,6 +74,14 @@ defineProps({
 });
 
 const emit = defineEmits(['select', 'replace', 'delete']);
+
+const safeImages = computed(() => {
+  if (!Array.isArray(props.images)) {
+    return [];
+  }
+
+  return props.images.filter((image) => image && typeof image === 'object' && image.id !== undefined && image.id !== null);
+});
 
 const onReplace = (image, event) => {
   const [file] = event.target.files || [];
