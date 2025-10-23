@@ -81,4 +81,31 @@ class ColorUtilsTest extends TestCase
             $this->assertSame(str_replace('_', ' ', $name), $label);
         }
     }
+
+    public function testRandomBackgroundImageFallsBackGracefully(): void
+    {
+        $class = new class extends ColorUtils {
+            public static bool $shouldThrow = true;
+
+            public static function backgroundImageOptions(): array
+            {
+                if (self::$shouldThrow) {
+                    throw new \RuntimeException('boom');
+                }
+
+                return [];
+            }
+        };
+
+        $fqcn = get_class($class);
+        $result = $fqcn::randomBackgroundImage();
+
+        $this->assertNotSame('', $result);
+
+        $expectedOptions = array_keys(ColorUtils::backgroundImageOptions());
+        $staticOptions = array_keys((new \ReflectionClass(ColorUtils::class))->getConstant('STATIC_BACKGROUND_IMAGES'));
+        $combined = array_unique(array_merge($expectedOptions, $staticOptions));
+
+        $this->assertContains($result, $combined);
+    }
 }
