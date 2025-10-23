@@ -177,10 +177,20 @@ if (!function_exists('storage_normalize_path')) {
             return '';
         }
 
-        $normalized = ltrim($path, '/');
+        $normalized = str_replace('\\', '/', $path);
+
+        $normalized = ltrim($normalized, '/');
 
         while (str_starts_with($normalized, 'storage/')) {
             $normalized = ltrim(substr($normalized, strlen('storage/')), '/');
+        }
+
+        if ($normalized === 'app/public') {
+            return 'public';
+        }
+
+        if (str_starts_with($normalized, 'app/public/')) {
+            return substr($normalized, strlen('app/'));
         }
 
         return $normalized;
