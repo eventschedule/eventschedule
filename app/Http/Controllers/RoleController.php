@@ -922,7 +922,7 @@ class RoleController extends Controller
         // Background images
         $backgroundOptions = [
             '' => __('messages.custom'),
-        ] + ColorUtils::backgroundImageOptions();
+        ] + $this->getBackgroundImageOptions();
 
         // Background gradients
         $gradientOptions = $this->loadRoleAssetOptions(
@@ -1219,7 +1219,7 @@ class RoleController extends Controller
         // Background images
         $backgroundOptions = [
             '' => __('messages.custom'),
-        ] + ColorUtils::backgroundImageOptions();
+        ] + $this->getBackgroundImageOptions();
 
 
         // Background gradients
@@ -3012,6 +3012,58 @@ class RoleController extends Controller
 
         if (! empty($options)) {
             asort($options);
+        }
+
+        return $options;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function getBackgroundImageOptions(): array
+    {
+        static $hasLoggedFallback = false;
+
+        if (is_callable([ColorUtils::class, 'backgroundImageOptions'])) {
+            try {
+                $options = ColorUtils::backgroundImageOptions();
+
+                if (is_array($options)) {
+                    return $options;
+                }
+
+                if (! $hasLoggedFallback) {
+                    Log::warning('ColorUtils::backgroundImageOptions did not return an array. Falling back to bundled assets.');
+                    $hasLoggedFallback = true;
+                }
+            } catch (\Throwable $exception) {
+                if (! $hasLoggedFallback) {
+                    Log::warning('ColorUtils::backgroundImageOptions threw an exception. Falling back to bundled assets.', [
+                        'exception' => $exception,
+                    ]);
+                    $hasLoggedFallback = true;
+                }
+            }
+        } elseif (! $hasLoggedFallback) {
+            Log::warning('ColorUtils::backgroundImageOptions is unavailable. Falling back to bundled assets.');
+            $hasLoggedFallback = true;
+        }
+
+        $paths = glob(public_path('images/backgrounds/*.png')) ?: [];
+        $options = [];
+
+        foreach ($paths as $path) {
+            $name = pathinfo($path, PATHINFO_FILENAME);
+
+            if (! is_string($name) || $name === '') {
+                continue;
+            }
+
+            $options[$name] = str_replace('_', ' ', $name);
+        }
+
+        if (! empty($options)) {
+            ksort($options, SORT_NATURAL | SORT_FLAG_CASE);
         }
 
         return $options;
