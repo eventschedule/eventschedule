@@ -1100,7 +1100,74 @@
 </div>
 
 <script {!! nonce_attr() !!}>
-  const { createApp, ref } = Vue
+  const { createApp } = Vue;
+
+  const toIterableArray = rawCollection => {
+    if (Array.isArray(rawCollection)) {
+      return rawCollection;
+    }
+
+    if (rawCollection && typeof rawCollection === 'object') {
+      return Object.values(rawCollection);
+    }
+
+    return [];
+  };
+
+  const hasNonEmptyId = item => {
+    if (!item || typeof item !== 'object' || !('id' in item)) {
+      return false;
+    }
+
+    const { id } = item;
+
+    if (id === null || typeof id === 'undefined') {
+      return false;
+    }
+
+    if (typeof id === 'string') {
+      return id.trim().length > 0;
+    }
+
+    return true;
+  };
+
+  const sanitizeCollection = rawCollection => {
+    const seen = new Set();
+
+    return toIterableArray(rawCollection).reduce((carry, rawItem) => {
+      if (!rawItem || typeof rawItem !== 'object') {
+        return carry;
+      }
+
+      if (!hasNonEmptyId(rawItem)) {
+        return carry;
+      }
+
+      const normalizedId = typeof rawItem.id === 'string'
+        ? rawItem.id.trim()
+        : rawItem.id;
+
+      if (seen.has(normalizedId)) {
+        return carry;
+      }
+
+      seen.add(normalizedId);
+
+      if (normalizedId !== rawItem.id) {
+        carry.push({
+          ...rawItem,
+          id: normalizedId,
+        });
+
+        return carry;
+      }
+
+      carry.push(rawItem);
+
+      return carry;
+    }, []);
+  };
 
   if (typeof window !== 'undefined') {
     window.appReadyForTesting = false;
@@ -1132,32 +1199,8 @@
           tickets_enabled: {{ $event->tickets_enabled ? 'true' : 'false' }},
           total_tickets_mode: @json($event->total_tickets_mode ?? 'individual'),
         },
-        venues: (() => {
-          const venues = @json($venues ?? []);
-          if (!Array.isArray(venues)) {
-            if (!venues || typeof venues !== 'object') {
-              return [];
-            }
-
-            return Object.values(venues)
-              .filter(venue => venue && typeof venue === 'object' && 'id' in venue);
-          }
-
-          return venues.filter(venue => venue && typeof venue === 'object' && 'id' in venue);
-        })(),
-        members: (() => {
-          const members = @json($members ?? []);
-          if (!Array.isArray(members)) {
-            if (!members || typeof members !== 'object') {
-              return [];
-            }
-
-            return Object.values(members)
-              .filter(member => member && typeof member === 'object' && 'id' in member);
-          }
-
-          return members.filter(member => member && typeof member === 'object' && 'id' in member);
-        })(),
+        venues: sanitizeCollection(@json($venues ?? [])),
+        members: sanitizeCollection(@json($members ?? [])),
         shouldBypassPreferences: hasBrowserTestingCookie() || @json(is_browser_testing()),
         venueType: "{{ count($venues) > 0 ? 'use_existing' : 'create_new' }}",
         memberType: "{{ 'use_existing' }}",
@@ -1171,19 +1214,7 @@
         venueSearchEmail: "",
         venueSearchResults: [],
         selectedVenue: @json($selectedVenue ? $selectedVenue->toData() : ""),
-        selectedMembers: (() => {
-          const selectedMembers = @json($selectedMembers ?? []);
-          if (!Array.isArray(selectedMembers)) {
-            if (!selectedMembers || typeof selectedMembers !== 'object') {
-              return [];
-            }
-
-            return Object.values(selectedMembers)
-              .filter(member => member && typeof member === 'object' && 'id' in member);
-          }
-
-          return selectedMembers.filter(member => member && typeof member === 'object' && 'id' in member);
-        })(),
+        selectedMembers: sanitizeCollection(@json($selectedMembers ?? [])),
         memberSearchResults: [],
         selectedMember: "",
         editMemberId: "",
@@ -1298,9 +1329,7 @@
         })
         .then(response => response.json())
         .then(data => {
-          this.venueSearchResults = Array.isArray(data)
-            ? data.filter(venue => venue && typeof venue === 'object' && 'id' in venue)
-            : [];
+          this.venueSearchResults = sanitizeCollection(data);
         })
         .catch(error => {
           console.error('Error searching venues:', error);
@@ -1354,21 +1383,20 @@
         })
         .then(response => response.json())
         .then(data => {
-          this.memberSearchResults = Array.isArray(data)
-            ? data.filter(member => member && typeof member === 'object' && 'id' in member)
-            : [];
+          this.memberSearchResults = sanitizeCollection(data);
         })
         .catch(error => {
           console.error('Error searching members:', error);
         });
       },
       selectMember(member) {
-        if (!member || typeof member !== 'object' || !member.id) {
+        const [sanitizedMember] = sanitizeCollection([member]);
+        if (!sanitizedMember) {
           return;
         }
 
-        if (! this.selectedMembers.some(m => m && m.id === member.id)) {
-          this.selectedMembers.push(member);
+        if (! this.selectedMembers.some(m => m && m.id === sanitizedMember.id)) {
+          this.selectedMembers.push(sanitizedMember);
         }
         this.memberSearchResults = [];
         this.memberEmail = "";
@@ -1439,8 +1467,9 @@
         this.showMemberTypeRadio = false;
       },
       addExistingMember() {
-        if (this.selectedMember && this.selectedMember.id && !this.selectedMembers.some(m => m && m.id === this.selectedMember.id)) {
-          this.selectedMembers.push(this.selectedMember);
+        const [sanitizedMember] = sanitizeCollection([this.selectedMember]);
+        if (sanitizedMember && !this.selectedMembers.some(m => m && m.id === sanitizedMember.id)) {
+          this.selectedMembers.push(sanitizedMember);
           this.$nextTick(() => {
             this.selectedMember = "";
           });
@@ -1626,32 +1655,16 @@
     },
     computed: {
       availableVenues() {
-        const rawVenues = Array.isArray(this.venues)
-          ? this.venues
-          : (this.venues && typeof this.venues === 'object' ? Object.values(this.venues) : []);
-
-        return rawVenues.filter(venue => venue && typeof venue === 'object' && 'id' in venue);
+        return sanitizeCollection(this.venues);
       },
       sanitizedVenueSearchResults() {
-        if (!Array.isArray(this.venueSearchResults)) {
-          return [];
-        }
-
-        return this.venueSearchResults.filter(venue => venue && typeof venue === 'object' && 'id' in venue);
+        return sanitizeCollection(this.venueSearchResults);
       },
       sanitizedMemberSearchResults() {
-        if (!Array.isArray(this.memberSearchResults)) {
-          return [];
-        }
-
-        return this.memberSearchResults.filter(member => member && typeof member === 'object' && 'id' in member);
+        return sanitizeCollection(this.memberSearchResults);
       },
       sanitizedSelectedMembers() {
-        if (!Array.isArray(this.selectedMembers)) {
-          return [];
-        }
-
-        return this.selectedMembers.filter(member => member && typeof member === 'object' && 'id' in member);
+        return sanitizeCollection(this.selectedMembers);
       },
       hasAnyVenues() {
         return this.availableVenues.length > 0;
@@ -1706,8 +1719,7 @@
           this.sanitizedSelectedMembers.map(member => member.id)
         );
 
-        return this.members
-          .filter(member => member && typeof member === 'object' && 'id' in member)
+        return sanitizeCollection(this.members)
           .filter(member => !selectedIds.has(member.id));
       },
       isFormValid() {
@@ -1824,9 +1836,9 @@
         this.shouldBypassPreferences = true;
       }
 
-      if (!Array.isArray(this.venues) && this.venues && typeof this.venues === 'object') {
-        this.venues = Object.values(this.venues);
-      }
+      this.venues = sanitizeCollection(this.venues);
+      this.members = sanitizeCollection(this.members);
+      this.selectedMembers = sanitizeCollection(this.selectedMembers);
 
       this.showMemberTypeRadio = this.sanitizedSelectedMembers.length === 0;
 
