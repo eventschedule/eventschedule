@@ -232,6 +232,10 @@ class BlogController extends Controller
                 return $request->string('featured_image')->trim()->value();
             }
 
+            if ($request->exists('featured_media_asset_id') || $request->exists('featured_image')) {
+                return null;
+            }
+
             return $default;
         }
 
