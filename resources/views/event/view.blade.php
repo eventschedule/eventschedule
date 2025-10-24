@@ -63,29 +63,80 @@
                         </div>
 
                         <div class="flex flex-wrap items-center gap-3">
-                            @if ($guestUrl)
-                                <a href="{{ $guestUrl }}" target="_blank"
-                                   class="inline-flex items-center rounded-md border border-transparent bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700">
-                                    {{ __('messages.view_event') }}
-                                </a>
-                            @endif
-                            @if (auth()->user()->canEditEvent($event) || auth()->user()->isAdmin())
-                                <a href="{{ route('events.clone.confirm', ['hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}"
-                                   class="inline-flex items-center rounded-md border border-transparent bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700">
-                                    {{ __('messages.clone_event') }}
-                                </a>
-                            @endif
-                            <a href="{{ route('event.edit_admin', ['hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}"
-                               class="inline-flex items-center rounded-md bg-[#4E81FA] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#3A6BE0]">
-                                {{ __('messages.edit') }}
-                            </a>
-                            <form method="POST" action="{{ route('events.destroy', ['hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" onsubmit="return confirm('{{ __('messages.are_you_sure') }}');">
-                                @csrf
-                                @method('DELETE')
-                                <x-danger-button>
-                                    {{ __('messages.delete') }}
-                                </x-danger-button>
-                            </form>
+                            <div class="relative" x-data="{
+                                open: false,
+                                positionDropdown() {
+                                    if (!this.open) return;
+                                    const button = this.$refs.button;
+                                    const dropdown = this.$refs.dropdown;
+                                    const rect = button.getBoundingClientRect();
+
+                                    dropdown.style.position = 'fixed';
+                                    dropdown.style.top = `${rect.bottom + 4}px`;
+                                    dropdown.style.left = `${rect.left}px`;
+                                    dropdown.style.zIndex = '1000';
+                                },
+                                submitDelete() {
+                                    if (confirm('{{ __('messages.are_you_sure') }}')) {
+                                        this.$refs.deleteForm.submit();
+                                    }
+                                }
+                            }">
+                                <button x-on:click="open = !open; $nextTick(() => positionDropdown())"
+                                        x-ref="button"
+                                        type="button"
+                                        class="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors duration-150 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700">
+                                    {{ __('messages.select_action') }}
+                                    <svg class="ml-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+
+                                <div x-show="open"
+                                     x-ref="dropdown"
+                                     x-on:click.away="open = false"
+                                     class="w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800"
+                                     role="menu"
+                                     x-cloak
+                                     aria-orientation="vertical">
+                                    @if ($guestUrl)
+                                        <a href="{{ $guestUrl }}" target="_blank"
+                                           x-on:click="open = false"
+                                           class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150 dark:text-gray-200 dark:hover:bg-gray-700"
+                                           role="menuitem">
+                                            {{ __('messages.view_event') }}
+                                        </a>
+                                    @endif
+
+                                    @if (auth()->user()->canEditEvent($event) || auth()->user()->isAdmin())
+                                        <a href="{{ route('events.clone.confirm', ['hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}"
+                                           x-on:click="open = false"
+                                           class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150 dark:text-gray-200 dark:hover:bg-gray-700"
+                                           role="menuitem">
+                                            {{ __('messages.clone_event') }}
+                                        </a>
+                                    @endif
+
+                                    <a href="{{ route('event.edit_admin', ['hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}"
+                                       x-on:click="open = false"
+                                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150 dark:text-gray-200 dark:hover:bg-gray-700"
+                                       role="menuitem">
+                                        {{ __('messages.edit') }}
+                                    </a>
+
+                                    <button type="button"
+                                            x-on:click="open = false; submitDelete()"
+                                            class="block w-full px-4 py-2 text-left text-sm text-red-700 hover:bg-gray-100 transition-colors duration-150 dark:text-red-300 dark:hover:bg-gray-700"
+                                            role="menuitem">
+                                        {{ __('messages.delete') }}
+                                    </button>
+                                </div>
+
+                                <form x-ref="deleteForm" method="POST" action="{{ route('events.destroy', ['hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" class="hidden">
+                                    @csrf
+                                    @method('DELETE')
+                                </form>
+                            </div>
                         </div>
                     </div>
 
