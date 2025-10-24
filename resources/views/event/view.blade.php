@@ -341,45 +341,85 @@
                                                             </td>
                                                             <td class="px-4 py-2 align-top">{{ $saleCreatedAt ?? __('messages.none') }}</td>
                                                             <td class="px-4 py-2 align-top">
-                                                                <div class="flex flex-wrap gap-2">
-                                                                    <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}"
-                                                                       target="_blank"
-                                                                       class="inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">
-                                                                        {{ __('messages.view') }}
-                                                                    </a>
+                                                                <div class="relative"
+                                                                     x-data="{
+                                                                        open: false,
+                                                                        positionDropdown() {
+                                                                            if (!this.open) return;
+                                                                            const button = this.$refs.button;
+                                                                            const dropdown = this.$refs.dropdown;
+                                                                            const rect = button.getBoundingClientRect();
 
-                                                                    @if ($sale->status === 'unpaid')
-                                                                        <form method="POST" action="{{ route('sales.action', ['sale_id' => \App\Utils\UrlUtils::encodeId($sale->id)]) }}">
-                                                                            @csrf
-                                                                            <input type="hidden" name="action" value="mark_paid">
-                                                                            <button type="submit"
-                                                                                class="inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">
-                                                                                {{ __('messages.mark_paid') }}
-                                                                            </button>
-                                                                        </form>
-                                                                    @endif
+                                                                            dropdown.style.position = 'fixed';
+                                                                            dropdown.style.top = `${rect.bottom + 4}px`;
+                                                                            dropdown.style.left = `${rect.left}px`;
+                                                                            dropdown.style.zIndex = '1000';
+                                                                        }
+                                                                    }">
+                                                                    <button x-on:click="open = !open; $nextTick(() => positionDropdown())"
+                                                                            x-ref="button"
+                                                                            type="button"
+                                                                            class="inline-flex items-center rounded-md bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors duration-150 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700">
+                                                                        {{ __('messages.select_action') }}
+                                                                        <svg class="ml-2 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                                                        </svg>
+                                                                    </button>
 
-                                                                    @if (in_array($sale->status, ['unpaid', 'paid']))
-                                                                        <form method="POST" action="{{ route('sales.action', ['sale_id' => \App\Utils\UrlUtils::encodeId($sale->id)]) }}">
-                                                                            @csrf
-                                                                            <input type="hidden" name="action" value="cancel">
-                                                                            <button type="submit"
-                                                                                class="inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">
-                                                                                {{ __('messages.cancel') }}
-                                                                            </button>
-                                                                        </form>
-                                                                    @endif
+                                                                    <div x-show="open"
+                                                                         x-ref="dropdown"
+                                                                         x-on:click.away="open = false"
+                                                                         class="w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800"
+                                                                         role="menu"
+                                                                         x-cloak
+                                                                         aria-orientation="vertical">
+                                                                        <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}"
+                                                                           target="_blank"
+                                                                           x-on:click="open = false"
+                                                                           class="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150 dark:text-gray-200 dark:hover:bg-gray-700"
+                                                                           role="menuitem">
+                                                                            {{ __('messages.view') }}
+                                                                        </a>
 
-                                                                    @if (! $sale->is_deleted)
-                                                                        <form method="POST" action="{{ route('sales.action', ['sale_id' => \App\Utils\UrlUtils::encodeId($sale->id)]) }}">
-                                                                            @csrf
-                                                                            <input type="hidden" name="action" value="delete">
-                                                                            <button type="submit"
-                                                                                class="inline-flex items-center rounded-md border border-red-300 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-500 dark:text-red-400 dark:hover:bg-red-900/40">
-                                                                                {{ __('messages.delete') }}
-                                                                            </button>
-                                                                        </form>
-                                                                    @endif
+                                                                        @if ($sale->status === 'unpaid')
+                                                                            <form method="POST" action="{{ route('sales.action', ['sale_id' => \App\Utils\UrlUtils::encodeId($sale->id)]) }}">
+                                                                                @csrf
+                                                                                <input type="hidden" name="action" value="mark_paid">
+                                                                                <button type="submit"
+                                                                                        x-on:click="open = false"
+                                                                                        class="block w-full px-4 py-2 text-left text-xs text-gray-700 hover:bg-gray-100 transition-colors duration-150 dark:text-gray-200 dark:hover:bg-gray-700"
+                                                                                        role="menuitem">
+                                                                                    {{ __('messages.mark_paid') }}
+                                                                                </button>
+                                                                            </form>
+                                                                        @endif
+
+                                                                        @if (in_array($sale->status, ['unpaid', 'paid']))
+                                                                            <form method="POST" action="{{ route('sales.action', ['sale_id' => \App\Utils\UrlUtils::encodeId($sale->id)]) }}">
+                                                                                @csrf
+                                                                                <input type="hidden" name="action" value="cancel">
+                                                                                <button type="submit"
+                                                                                        x-on:click="if (!confirm(@js(__('messages.are_you_sure')))) { $event.preventDefault(); return; } open = false"
+                                                                                        class="block w-full px-4 py-2 text-left text-xs text-gray-700 hover:bg-gray-100 transition-colors duration-150 dark:text-gray-200 dark:hover:bg-gray-700"
+                                                                                        role="menuitem">
+                                                                                    {{ __('messages.cancel') }}
+                                                                                </button>
+                                                                            </form>
+                                                                        @endif
+
+                                                                        @if (! $sale->is_deleted)
+                                                                            <form method="POST" action="{{ route('sales.action', ['sale_id' => \App\Utils\UrlUtils::encodeId($sale->id)]) }}">
+                                                                                @csrf
+                                                                                <input type="hidden" name="action" value="delete">
+                                                                                <button type="submit"
+                                                                                        x-on:click="if (!confirm(@js(__('messages.are_you_sure')))) { $event.preventDefault(); return; } open = false"
+                                                                                        class="block w-full px-4 py-2 text-left text-xs text-red-700 hover:bg-gray-100 transition-colors duration-150 dark:text-red-300 dark:hover:bg-gray-700"
+                                                                                        role="menuitem">
+                                                                                    {{ __('messages.delete') }}
+                                                                                </button>
+                                                                            </form>
+                                                                        @endif
+                                                                    </div>
                                                                 </div>
                                                             </td>
                                                         </tr>
