@@ -698,6 +698,7 @@ class MediaPickerController {
         this.currentAsset = asset;
         this.showEditorContent();
         this.destroyCropper();
+        this.setUploadingState(false);
 
         const image = this.elements.cropImage;
         const initialiseCropper = () => {
@@ -714,6 +715,7 @@ class MediaPickerController {
         const handleLoad = () => {
             image.removeEventListener('load', handleLoad);
             initialiseCropper();
+            this.setUploadingState(false);
         };
 
         image.addEventListener('load', handleLoad);
@@ -723,7 +725,6 @@ class MediaPickerController {
             handleLoad();
         }
         this.highlightSelectedAsset();
-        this.setUploadingState(false);
     }
 
     destroyCropper() {
