@@ -13,10 +13,10 @@
                 function toggleMenu() {
                     const isOpen = sidebar.getAttribute('data-state') === 'open';
                     if (isOpen) {
-                        $('#sidebar').show();
+                        $('#sidebar').hide();
                         sidebar.setAttribute('data-state', 'closed');
                     } else {
-                        $('#sidebar').hide();
+                        $('#sidebar').show();
                         sidebar.setAttribute('data-state', 'open');
                     }
                 }
@@ -28,7 +28,13 @@
                     const $trigger = $(this);
                     const $container = $trigger.closest('[data-collapse-container]');
                     const contentId = $trigger.attr('aria-controls');
-                    const $content = contentId ? $('#' + contentId) : $();
+                    let $content = $container.find('[data-collapse-content]');
+
+                    if (contentId) {
+                        $content = $content.filter(function() {
+                            return $(this).attr('id') === contentId;
+                        });
+                    }
                     const $icon = $trigger.find('[data-collapse-icon]');
                     const initialOpen = $container.attr('data-collapse-state') === 'open';
 
