@@ -292,200 +292,598 @@ export const registerMediaLibraryComponents = (alpineInstance) => {
         };
     });
 
-    alpineInstance.data('mediaPicker', (config) => {
-        const api = createMediaLibraryApi(config);
+};
 
-        return {
-            assets: [],
-            tags: [],
-            pagination: createPagination(),
-            isOpen: false,
-            isLoading: false,
-            isUploading: false,
-            selectedAssetId: config.initialAssetId ?? null,
-            selectedVariantId: config.initialVariantId ?? null,
-            previewUrl: config.initialUrl || '',
-            activeTag: null,
-            currentAsset: null,
-            cropper: null,
-            search: '',
+class MediaPickerController {
+    constructor(root) {
+        this.root = root;
 
-            openModal() {
-                this.isOpen = true;
-                if (!this.assets.length) {
-                    this.fetchAssets();
-                    this.fetchTags();
-                }
-            },
+        const { dataset } = root;
+        const parseNumber = (value) => {
+            if (!value) {
+                return null;
+            }
 
-            closeModal() {
-                this.isOpen = false;
-                this.destroyCropper();
-                this.currentAsset = null;
-            },
+            const parsed = Number(value);
+            return Number.isFinite(parsed) ? parsed : null;
+        };
 
-            async fetchAssets(page = 1) {
-                this.isLoading = true;
-
-                try {
-                    const payload = await api.listAssets({
-                        page,
-                        tag: this.activeTag,
-                        search: this.search,
-                    });
-
-                    refreshAssetsFromPayload(this, payload);
-                } catch (error) {
-                    console.error('Unable to load media assets', error);
-                } finally {
-                    this.isLoading = false;
-                }
-            },
-
-            async fetchTags() {
-                try {
-                    const payload = await api.listTags();
-                    refreshTagsFromPayload(this, payload);
-                } catch (error) {
-                    console.error('Failed to load tags', error);
-                }
-            },
-
-            selectAsset(asset) {
-                this.currentAsset = asset;
-                this.destroyCropper();
-
-                this.$nextTick(() => {
-                    const image = this.$refs.cropImage;
-                    if (!image) {
-                        return;
-                    }
-
-                    image.src = asset.url;
-                    this.cropper = new Cropper(image, {
-                        viewMode: 1,
-                        responsive: true,
-                        autoCropArea: 1,
-                        movable: true,
-                        zoomable: true,
-                    });
-                });
-            },
-
-            destroyCropper() {
-                if (this.cropper) {
-                    this.cropper.destroy();
-                    this.cropper = null;
-                }
-            },
-
-            useOriginal() {
-                if (!this.currentAsset) {
-                    return;
-                }
-
-                this.selectedAssetId = this.currentAsset.id;
-                this.selectedVariantId = null;
-                this.previewUrl = this.currentAsset.url;
-                this.closeModal();
-            },
-
-            saveCrop() {
-                if (!this.cropper || !this.currentAsset) {
-                    return;
-                }
-
-                this.isUploading = true;
-
-                this.cropper.getCroppedCanvas().toBlob(async (blob) => {
-                    if (!blob) {
-                        this.isUploading = false;
-                        return;
-                    }
-
-                    const formData = new FormData();
-                    formData.append('file', blob, `${this.currentAsset.uuid || 'crop'}.png`);
-
-                    if (config.context) {
-                        formData.append('context', config.context);
-                    }
-
-                    const cropData = this.cropper.getData();
-                    if (cropData) {
-                        formData.append('crop_meta', JSON.stringify(cropData));
-                    }
-
-                    try {
-                        const payload = await api.uploadVariant(this.currentAsset.id, formData);
-                        const variant = payload.variant;
-
-                        this.selectedAssetId = this.currentAsset.id;
-                        this.selectedVariantId = variant.id;
-                        this.previewUrl = variant.url;
-                        this.closeModal();
-                    } catch (error) {
-                        console.error('Unable to save crop', error);
-                        alert(error.message || 'Unable to save crop');
-                    } finally {
-                        this.isUploading = false;
-                    }
-                }, 'image/png');
-            },
-
-            clearSelection() {
-                this.selectedAssetId = null;
-                this.selectedVariantId = null;
-                this.previewUrl = '';
-            },
-
-            changePage(page) {
-                this.pagination.current_page = page;
-                this.fetchAssets(page);
-            },
-
-            formatDimensions(asset) {
-                if (!asset.width || !asset.height) {
-                    return '';
-                }
-
-                return `${asset.width}×${asset.height}`;
-            },
-
-            async uploadFromPicker(event) {
-                const [file] = event.target.files || [];
-                event.target.value = '';
-
-                if (!file) {
-                    return;
-                }
-
-                const formData = new FormData();
-                formData.append('file', file);
-
-                if (config.context) {
-                    formData.append('context', config.context);
-                }
-
-                try {
-                    const payload = await api.uploadAsset(formData);
-                    if (payload.asset) {
-                        this.selectedAssetId = payload.asset.id;
-                        this.selectedVariantId = null;
-                        this.previewUrl = payload.asset.url;
-                        this.closeModal();
-                    }
-
-                    this.fetchAssets(1);
-                } catch (error) {
-                    console.error('Unable to upload file', error);
-                    alert(error.message || 'Unable to upload file');
-                }
-            },
-
-            variantLabel(asset) {
-                return asset.original_filename || 'Asset';
+        this.config = {
+            assetsEndpoint: dataset.assetsEndpoint,
+            uploadEndpoint: dataset.uploadEndpoint,
+            tagsEndpoint: dataset.tagsEndpoint,
+            variantEndpointTemplate: dataset.variantEndpointTemplate,
+            context: dataset.context ? dataset.context : null,
+            initialAssetId: parseNumber(dataset.initialAssetId),
+            initialVariantId: parseNumber(dataset.initialVariantId),
+            initialUrl: dataset.initialUrl || '',
+            labels: {
+                allAssets: dataset.labelAll || 'All assets',
             },
         };
+
+        this.api = createMediaLibraryApi(this.config);
+
+        this.elements = {
+            previewImage: root.querySelector('[data-role="preview-image"]'),
+            placeholder: root.querySelector('[data-role="placeholder"]'),
+            assetInput: root.querySelector('[data-role="asset-input"]'),
+            variantInput: root.querySelector('[data-role="variant-input"]'),
+            clearButton: root.querySelector('[data-action="clear"]'),
+            openButton: root.querySelector('[data-action="open"]'),
+            fileInput: root.querySelector('[data-role="file-input"]'),
+            modal: root.querySelector('[data-role="modal"]'),
+        };
+
+        const modal = this.elements.modal;
+
+        this.elements.modalCloseButtons = modal
+            ? modal.querySelectorAll('[data-action="close"]')
+            : [];
+        this.elements.tagFilter = modal?.querySelector('[data-role="tag-filter"]') || null;
+        this.elements.assetGrid = modal?.querySelector('[data-role="asset-grid"]') || null;
+        this.elements.loading = modal?.querySelector('[data-role="loading"]') || null;
+        this.elements.empty = modal?.querySelector('[data-role="empty"]') || null;
+        this.elements.pagination = modal?.querySelector('[data-role="pagination"]') || null;
+        this.elements.pageCurrent = modal?.querySelector('[data-role="page-current"]') || null;
+        this.elements.pageTotal = modal?.querySelector('[data-role="page-total"]') || null;
+        this.elements.prevButton = modal?.querySelector('[data-action="prev"]') || null;
+        this.elements.nextButton = modal?.querySelector('[data-action="next"]') || null;
+        this.elements.selectionPlaceholder = modal?.querySelector('[data-role="selection-placeholder"]') || null;
+        this.elements.editorContent = modal?.querySelector('[data-role="editor-content"]') || null;
+        this.elements.cropImage = modal?.querySelector('[data-role="crop-image"]') || null;
+        this.elements.saveButton = modal?.querySelector('[data-action="save-crop"]') || null;
+        this.elements.saveLabel = modal?.querySelector('[data-role="save-label"]') || null;
+        this.elements.savingLabel = modal?.querySelector('[data-role="saving-label"]') || null;
+        this.elements.useOriginalButton = modal?.querySelector('[data-action="use-original"]') || null;
+        this.elements.cancelButton = modal?.querySelector('[data-action="cancel"]') || null;
+
+        this.assets = [];
+        this.tags = [];
+        this.pagination = createPagination();
+        this.activeTag = null;
+        this.selectedAssetId = this.config.initialAssetId;
+        this.selectedVariantId = this.config.initialVariantId;
+        this.previewUrl = this.config.initialUrl || '';
+        this.currentAsset = null;
+        this.cropper = null;
+        this.isLoading = false;
+        this.isUploading = false;
+        this.modalOpen = false;
+        this.keydownHandler = null;
+    }
+
+    init() {
+        this.updatePreview();
+        this.registerEventListeners();
+    }
+
+    registerEventListeners() {
+        this.elements.openButton?.addEventListener('click', () => {
+            if (!this.isUploading) {
+                this.openModal();
+            }
+        });
+
+        this.elements.clearButton?.addEventListener('click', () => {
+            if (!this.isUploading) {
+                this.clearSelection();
+            }
+        });
+
+        this.elements.fileInput?.addEventListener('change', (event) => {
+            if (!this.isUploading) {
+                this.uploadFromPicker(event);
+            }
+        });
+
+        this.elements.modalCloseButtons?.forEach((button) => {
+            button.addEventListener('click', () => this.closeModal());
+        });
+
+        this.elements.prevButton?.addEventListener('click', () => {
+            if (!this.isLoading && !this.isUploading) {
+                this.changePage((this.pagination.current_page || 1) - 1);
+            }
+        });
+
+        this.elements.nextButton?.addEventListener('click', () => {
+            if (!this.isLoading && !this.isUploading) {
+                this.changePage((this.pagination.current_page || 1) + 1);
+            }
+        });
+
+        this.elements.saveButton?.addEventListener('click', () => {
+            if (!this.isUploading) {
+                this.saveCrop();
+            }
+        });
+
+        this.elements.useOriginalButton?.addEventListener('click', () => {
+            if (!this.isUploading) {
+                this.useOriginal();
+            }
+        });
+
+        this.elements.cancelButton?.addEventListener('click', () => {
+            if (!this.isUploading) {
+                this.closeModal();
+            }
+        });
+    }
+
+    updatePreview() {
+        const hasPreview = Boolean(this.previewUrl);
+
+        if (this.elements.previewImage) {
+            this.elements.previewImage.src = this.previewUrl || '';
+            this.elements.previewImage.classList.toggle('hidden', !hasPreview);
+        }
+
+        this.elements.placeholder?.classList.toggle('hidden', hasPreview);
+        this.elements.clearButton?.classList.toggle('hidden', !hasPreview);
+        if (this.elements.assetInput) {
+            this.elements.assetInput.value = this.selectedAssetId ? String(this.selectedAssetId) : '';
+        }
+        if (this.elements.variantInput) {
+            this.elements.variantInput.value = this.selectedVariantId ? String(this.selectedVariantId) : '';
+        }
+    }
+
+    openModal() {
+        if (this.modalOpen || !this.elements.modal) {
+            return;
+        }
+
+        this.modalOpen = true;
+        this.elements.modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        this.showEditorPlaceholder();
+
+        this.fetchTags();
+        this.fetchAssets(1);
+
+        this.keydownHandler = (event) => {
+            if (event.key === 'Escape') {
+                this.closeModal();
+            }
+        };
+
+        document.addEventListener('keydown', this.keydownHandler);
+    }
+
+    closeModal() {
+        if (!this.modalOpen || !this.elements.modal) {
+            return;
+        }
+
+        this.modalOpen = false;
+        this.elements.modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+
+        if (this.keydownHandler) {
+            document.removeEventListener('keydown', this.keydownHandler);
+            this.keydownHandler = null;
+        }
+
+        this.destroyCropper();
+        this.currentAsset = null;
+        this.showEditorPlaceholder();
+    }
+
+    async fetchAssets(page = 1) {
+        if (!this.elements.assetGrid) {
+            return;
+        }
+
+        this.isLoading = true;
+        this.showLoading(true);
+        this.showEmpty(false);
+
+        try {
+            const payload = await this.api.listAssets({
+                page,
+                tag: this.activeTag,
+            });
+
+            this.assets = payload.data || [];
+            this.pagination = payload.pagination || this.pagination;
+            this.renderAssets();
+            this.updatePagination();
+        } catch (error) {
+            console.error('Unable to load media assets', error);
+            alert(error.message || 'Unable to load media assets');
+        } finally {
+            this.isLoading = false;
+            this.showLoading(false);
+            this.showEmpty(this.assets.length === 0);
+        }
+    }
+
+    async fetchTags() {
+        if (!this.elements.tagFilter) {
+            return;
+        }
+
+        try {
+            const payload = await this.api.listTags();
+            this.tags = payload.data || [];
+            this.renderTags();
+        } catch (error) {
+            console.error('Failed to load tags', error);
+        }
+    }
+
+    renderTags() {
+        const container = this.elements.tagFilter;
+        if (!container) {
+            return;
+        }
+
+        container.innerHTML = '';
+
+        if (!this.tags.length) {
+            container.hidden = true;
+            return;
+        }
+
+        container.hidden = false;
+
+        const createButton = (label, slug = null) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.classList.add('px-3', 'py-1', 'rounded-full', 'text-xs');
+            button.dataset.tagSlug = slug ?? '';
+            button.textContent = label;
+            button.addEventListener('click', () => {
+                if (!this.isLoading && !this.isUploading) {
+                    this.activeTag = slug;
+                    this.fetchAssets(1);
+                    this.updateTagButtons();
+                }
+            });
+            container.appendChild(button);
+        };
+
+        createButton(this.config.labels.allAssets, null);
+        this.tags.forEach((tag) => {
+            createButton(tag.name, tag.slug);
+        });
+
+        this.updateTagButtons();
+    }
+
+    updateTagButtons() {
+        const container = this.elements.tagFilter;
+        if (!container) {
+            return;
+        }
+
+        container.querySelectorAll('button').forEach((button) => {
+            const slug = button.dataset.tagSlug || null;
+            const isActive = slug ? this.activeTag === slug : this.activeTag === null;
+
+            button.classList.toggle('bg-indigo-600', isActive);
+            button.classList.toggle('text-white', isActive);
+            button.classList.toggle('bg-gray-100', !isActive);
+            button.classList.toggle('dark:bg-gray-800', !isActive);
+            button.classList.toggle('text-gray-700', !isActive);
+            button.classList.toggle('dark:text-gray-200', !isActive);
+        });
+    }
+
+    renderAssets() {
+        const grid = this.elements.assetGrid;
+        if (!grid) {
+            return;
+        }
+
+        grid.innerHTML = '';
+
+        this.assets.forEach((asset) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.dataset.assetId = String(asset.id);
+            button.className = 'border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500';
+
+            const image = document.createElement('img');
+            image.src = asset.url;
+            image.alt = asset.original_filename || '';
+            image.className = 'w-full h-24 object-cover';
+            button.appendChild(image);
+
+            const caption = document.createElement('div');
+            caption.className = 'px-2 py-1 text-xs text-gray-600 dark:text-gray-300 truncate';
+            caption.textContent = asset.original_filename || 'Asset';
+            button.appendChild(caption);
+
+            button.addEventListener('click', () => {
+                if (!this.isUploading) {
+                    this.selectAsset(asset);
+                }
+            });
+
+            grid.appendChild(button);
+        });
+
+        this.highlightSelectedAsset();
+    }
+
+    highlightSelectedAsset() {
+        const grid = this.elements.assetGrid;
+        if (!grid) {
+            return;
+        }
+
+        grid.querySelectorAll('button[data-asset-id]').forEach((button) => {
+            const assetId = Number(button.dataset.assetId);
+            const isSelected = this.selectedAssetId != null && assetId === this.selectedAssetId;
+            button.classList.toggle('ring-2', isSelected);
+            button.classList.toggle('ring-indigo-500', isSelected);
+            button.classList.toggle('border-indigo-500', isSelected);
+        });
+    }
+
+    changePage(page) {
+        const totalPages = this.pagination.last_page || 1;
+        const nextPage = Math.min(Math.max(page, 1), totalPages);
+
+        if (nextPage === (this.pagination.current_page || 1)) {
+            return;
+        }
+
+        this.fetchAssets(nextPage);
+    }
+
+    updatePagination() {
+        const container = this.elements.pagination;
+        if (!container) {
+            return;
+        }
+
+        const total = Number(this.pagination.total || 0);
+        const perPage = Number(this.pagination.per_page || 24);
+        const current = Number(this.pagination.current_page || 1);
+        const last = Number(this.pagination.last_page || 1);
+
+        const shouldShow = total > perPage;
+        container.hidden = !shouldShow;
+
+        if (!shouldShow) {
+            return;
+        }
+
+        if (this.elements.pageCurrent) {
+            this.elements.pageCurrent.textContent = String(current);
+        }
+
+        if (this.elements.pageTotal) {
+            this.elements.pageTotal.textContent = String(Math.max(last, 1));
+        }
+
+        if (this.elements.prevButton) {
+            this.elements.prevButton.disabled = current <= 1 || this.isLoading || this.isUploading;
+        }
+
+        if (this.elements.nextButton) {
+            this.elements.nextButton.disabled = current >= last || this.isLoading || this.isUploading;
+        }
+    }
+
+    selectAsset(asset) {
+        if (!this.elements.cropImage) {
+            return;
+        }
+
+        this.currentAsset = asset;
+        this.showEditorContent();
+        this.destroyCropper();
+        this.setUploadingState(false);
+
+        const image = this.elements.cropImage;
+        const initialiseCropper = () => {
+            this.destroyCropper();
+            this.cropper = new Cropper(image, {
+                viewMode: 1,
+                responsive: true,
+                autoCropArea: 1,
+                movable: true,
+                zoomable: true,
+            });
+        };
+
+        const handleLoad = () => {
+            image.removeEventListener('load', handleLoad);
+            initialiseCropper();
+            this.setUploadingState(false);
+        };
+
+        image.addEventListener('load', handleLoad);
+        image.src = asset.url;
+
+        if (image.complete && image.naturalWidth) {
+            handleLoad();
+        }
+        this.highlightSelectedAsset();
+    }
+
+    destroyCropper() {
+        if (this.cropper) {
+            this.cropper.destroy();
+            this.cropper = null;
+        }
+    }
+
+    showEditorPlaceholder() {
+        this.elements.editorContent?.classList.add('hidden');
+        this.elements.selectionPlaceholder?.classList.remove('hidden');
+    }
+
+    showEditorContent() {
+        this.elements.selectionPlaceholder?.classList.add('hidden');
+        this.elements.editorContent?.classList.remove('hidden');
+    }
+
+    setUploadingState(isUploading) {
+        this.isUploading = isUploading;
+        if (this.elements.saveButton) {
+            this.elements.saveButton.disabled = isUploading || !this.cropper;
+        }
+
+        this.elements.useOriginalButton?.classList.toggle('opacity-70', isUploading);
+        if (this.elements.useOriginalButton) {
+            this.elements.useOriginalButton.disabled = isUploading;
+        }
+
+        if (this.elements.savingLabel && this.elements.saveLabel) {
+            this.elements.savingLabel.classList.toggle('hidden', !isUploading);
+            this.elements.saveLabel.classList.toggle('hidden', isUploading);
+        }
+
+        this.updatePagination();
+    }
+
+    useOriginal() {
+        if (!this.currentAsset) {
+            return;
+        }
+
+        this.selectedAssetId = this.currentAsset.id;
+        this.selectedVariantId = null;
+        this.previewUrl = this.currentAsset.url;
+        this.updatePreview();
+        this.closeModal();
+    }
+
+    saveCrop() {
+        if (!this.cropper || !this.currentAsset) {
+            return;
+        }
+
+        this.setUploadingState(true);
+
+        this.cropper.getCroppedCanvas().toBlob(async (blob) => {
+            if (!blob) {
+                this.setUploadingState(false);
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', blob, `${this.currentAsset.uuid || 'crop'}.png`);
+
+            if (this.config.context) {
+                formData.append('context', this.config.context);
+            }
+
+            const cropData = this.cropper.getData();
+            if (cropData) {
+                formData.append('crop_meta', JSON.stringify(cropData));
+            }
+
+            try {
+                const payload = await this.api.uploadVariant(this.currentAsset.id, formData);
+                const variant = payload.variant;
+
+                if (variant) {
+                    this.selectedAssetId = this.currentAsset.id;
+                    this.selectedVariantId = variant.id;
+                    this.previewUrl = variant.url;
+                    this.updatePreview();
+                    this.closeModal();
+                }
+            } catch (error) {
+                console.error('Unable to save crop', error);
+                alert(error.message || 'Unable to save crop');
+            } finally {
+                this.setUploadingState(false);
+            }
+        }, 'image/png');
+    }
+
+    clearSelection() {
+        this.selectedAssetId = null;
+        this.selectedVariantId = null;
+        this.previewUrl = '';
+        this.updatePreview();
+    }
+
+    async uploadFromPicker(event) {
+        const input = event.target;
+        const file = input.files?.[0];
+        input.value = '';
+
+        if (!file) {
+            return;
+        }
+
+        this.showLoading(true);
+        this.isUploading = true;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        if (this.config.context) {
+            formData.append('context', this.config.context);
+        }
+
+        try {
+            const payload = await this.api.uploadAsset(formData);
+            if (payload.asset) {
+                this.selectedAssetId = payload.asset.id;
+                this.selectedVariantId = null;
+                this.previewUrl = payload.asset.url;
+                this.updatePreview();
+                this.closeModal();
+            }
+
+            await this.fetchAssets(1);
+        } catch (error) {
+            console.error('Unable to upload file', error);
+            alert(error.message || 'Unable to upload file');
+        } finally {
+            this.isUploading = false;
+            this.showLoading(false);
+        }
+    }
+
+    showLoading(visible) {
+        this.elements.loading?.classList.toggle('hidden', !visible);
+    }
+
+    showEmpty(visible) {
+        this.elements.empty?.classList.toggle('hidden', !visible);
+    }
+}
+
+export const initMediaPickers = () => {
+    document.querySelectorAll('[data-media-picker]').forEach((root) => {
+        if (root.__mediaPickerInstance) {
+            return;
+        }
+
+        const picker = new MediaPickerController(root);
+        picker.init();
+        root.__mediaPickerInstance = picker;
     });
 };
 
@@ -496,5 +894,13 @@ if (typeof window !== 'undefined') {
         document.addEventListener('alpine:init', (event) => {
             registerMediaLibraryComponents(event.detail || window.Alpine);
         });
+    }
+
+    const bootstrapPickers = () => initMediaPickers();
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bootstrapPickers, { once: true });
+    } else {
+        bootstrapPickers();
     }
 }

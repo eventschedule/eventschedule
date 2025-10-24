@@ -1,11 +1,19 @@
 import './bootstrap';
 
 import Alpine from 'alpinejs';
-import { registerMediaLibraryComponents } from './media-picker';
+import { registerMediaLibraryComponents, initMediaPickers } from './media-picker';
 
 window.Alpine = Alpine;
 registerMediaLibraryComponents(Alpine);
 Alpine.start();
+
+const bootstrapPickers = () => initMediaPickers();
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootstrapPickers);
+} else {
+    bootstrapPickers();
+}
 
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.css';
