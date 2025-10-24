@@ -155,6 +155,8 @@ export const registerMediaLibraryComponents = (alpineInstance) => {
             showTagModal: false,
             editingAsset: null,
             selectedTagIds: [],
+            newTagName: '',
+            isCreatingTag: false,
             showDetails: false,
             detailAsset: null,
 
@@ -216,16 +218,54 @@ export const registerMediaLibraryComponents = (alpineInstance) => {
                     return;
                 }
 
-                this.createTag(name.trim());
+                this.createTag(name);
             },
 
-            async createTag(name) {
+            async createTag(name, { select = false } = {}) {
+                const value = (name || '').trim();
+
+                if (!value) {
+                    return null;
+                }
+
                 try {
-                    await api.createTag(name);
-                    this.fetchTags();
+                    const response = await api.createTag(value);
+                    const tag = response?.tag;
+
+                    if (tag) {
+                        const existing = this.tags.filter((item) => item.id !== tag.id);
+                        this.tags = [...existing, tag].sort((a, b) => a.name.localeCompare(b.name));
+
+                        if (select && !this.selectedTagIds.includes(tag.id)) {
+                            this.selectedTagIds.push(tag.id);
+                        }
+
+                        return tag;
+                    }
+
+                    await this.fetchTags();
                 } catch (error) {
                     console.error('Unable to create tag', error);
                     alert(error.message || 'Unable to create tag');
+                }
+
+                return null;
+            },
+
+            async createTagFromModal() {
+                if (this.isCreatingTag) {
+                    return;
+                }
+
+                this.isCreatingTag = true;
+
+                try {
+                    const tag = await this.createTag(this.newTagName, { select: true });
+                    if (tag) {
+                        this.newTagName = '';
+                    }
+                } finally {
+                    this.isCreatingTag = false;
                 }
             },
 
@@ -271,7 +311,10 @@ export const registerMediaLibraryComponents = (alpineInstance) => {
 
             openTagEditor(asset) {
                 this.editingAsset = asset;
-                this.selectedTagIds = asset.tags.map((tag) => tag.id);
+                const tags = Array.isArray(asset.tags) ? asset.tags : [];
+                this.selectedTagIds = tags.map((tag) => tag.id);
+                this.newTagName = '';
+                this.isCreatingTag = false;
                 this.showTagModal = true;
             },
 
@@ -279,6 +322,8 @@ export const registerMediaLibraryComponents = (alpineInstance) => {
                 this.showTagModal = false;
                 this.editingAsset = null;
                 this.selectedTagIds = [];
+                this.newTagName = '';
+                this.isCreatingTag = false;
             },
 
             toggleTag(tagId) {
