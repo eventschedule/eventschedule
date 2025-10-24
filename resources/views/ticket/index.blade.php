@@ -100,9 +100,48 @@
                                                 </span>
                                             </td>
                                             <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                                <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" target="_blank" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors duration-150">
-                                                    {{ __('messages.view_ticket') }}                                        
-                                                </a>
+                                                <div class="flex items-center justify-end gap-3">
+                                                    <div class="relative" x-data="{
+                                                        open: false,
+                                                        positionDropdown() {
+                                                            if (!this.open) return;
+                                                            const button = this.$refs.button;
+                                                            const dropdown = this.$refs.dropdown;
+                                                            const rect = button.getBoundingClientRect();
+
+                                                            dropdown.style.position = 'fixed';
+                                                            dropdown.style.top = `${rect.bottom + 4}px`;
+                                                            dropdown.style.left = `${rect.left}px`;
+                                                            dropdown.style.zIndex = '1000';
+                                                        }
+                                                    }">
+                                                        <button x-on:click="open = !open; $nextTick(() => positionDropdown())"
+                                                                x-ref="button"
+                                                                type="button"
+                                                                class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors duration-150">
+                                                            {{ __('messages.select_action') }}
+                                                            <svg class="ml-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                                            </svg>
+                                                        </button>
+
+                                                        <div x-show="open"
+                                                             x-ref="dropdown"
+                                                             x-on:click.away="open = false"
+                                                             class="w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                                                             role="menu"
+                                                             x-cloak
+                                                             aria-orientation="vertical">
+                                                            <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}"
+                                                               target="_blank"
+                                                               x-on:click="open = false"
+                                                               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150"
+                                                               role="menuitem">
+                                                                {{ __('messages.view_ticket') }}
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -195,15 +234,46 @@
 
                             <!-- Actions -->
                             <div class="pt-2">
-                                <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" 
-                                   target="_blank" 
-                                   class="w-full inline-flex items-center justify-center rounded-lg bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-700 shadow-sm ring-1 ring-inset ring-blue-200 hover:bg-blue-100 transition-colors duration-150">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                    </svg>
-                                    {{ __('messages.view_ticket') }}
-                                </a>
+                                <div class="relative" x-data="{
+                                    open: false,
+                                    positionDropdown() {
+                                        if (!this.open) return;
+                                        const button = this.$refs.button;
+                                        const dropdown = this.$refs.dropdown;
+                                        const rect = button.getBoundingClientRect();
+
+                                        dropdown.style.position = 'fixed';
+                                        dropdown.style.top = `${rect.bottom + 4}px`;
+                                        dropdown.style.left = `${rect.left}px`;
+                                        dropdown.style.zIndex = '1000';
+                                    }
+                                }">
+                                    <button x-on:click="open = !open; $nextTick(() => positionDropdown())"
+                                            x-ref="button"
+                                            type="button"
+                                            class="w-full inline-flex items-center justify-center rounded-lg bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-700 shadow-sm ring-1 ring-inset ring-blue-200 hover:bg-blue-100 transition-colors duration-150">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                                        </svg>
+                                        {{ __('messages.select_action') }}
+                                    </button>
+
+                                    <div x-show="open"
+                                         x-ref="dropdown"
+                                         x-on:click.away="open = false"
+                                         class="w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                                         role="menu"
+                                         x-cloak
+                                         aria-orientation="vertical">
+                                        <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}"
+                                           target="_blank"
+                                           x-on:click="open = false"
+                                           class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150"
+                                           role="menuitem">
+                                            {{ __('messages.view_ticket') }}
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
