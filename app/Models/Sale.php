@@ -64,14 +64,10 @@ class Sale extends Model
         $notifiedUserIds = collect();
         $organizerRoles = collect([$event->creatorRole, $event->venue])->filter();
 
-        foreach ($organizerRoles as $organizerRole) {
-            $members = NotificationUtils::roleMembers($organizerRole);
-
-            if ($members->isNotEmpty()) {
-                Notification::send($members, new TicketCancelledNotification($sale, 'organizer', $organizerRole));
-                $notifiedUserIds = $notifiedUserIds->merge($members->pluck('id'));
-            }
-        }
+        NotificationUtils::uniqueRoleMembersWithContext($organizerRoles)->each(function (array $recipient) use (&$notifiedUserIds, $sale) {
+            $recipient['user']->notify(new TicketCancelledNotification($sale, 'organizer', $recipient['role']));
+            $notifiedUserIds->push($recipient['user']->id);
+        });
 
         if ($event->user && $event->user->email && $event->user->is_subscribed !== false && ! $notifiedUserIds->contains($event->user->id)) {
             Notification::send($event->user, new TicketCancelledNotification($sale, 'organizer', $contextRole));
@@ -91,14 +87,10 @@ class Sale extends Model
         $notifiedUserIds = collect();
         $organizerRoles = collect([$event->creatorRole, $event->venue])->filter();
 
-        foreach ($organizerRoles as $organizerRole) {
-            $members = NotificationUtils::roleMembers($organizerRole);
-
-            if ($members->isNotEmpty()) {
-                Notification::send($members, new TicketPaidNotification($sale, 'organizer', $organizerRole));
-                $notifiedUserIds = $notifiedUserIds->merge($members->pluck('id'));
-            }
-        }
+        NotificationUtils::uniqueRoleMembersWithContext($organizerRoles)->each(function (array $recipient) use (&$notifiedUserIds, $sale) {
+            $recipient['user']->notify(new TicketPaidNotification($sale, 'organizer', $recipient['role']));
+            $notifiedUserIds->push($recipient['user']->id);
+        });
 
         if ($event->user && $event->user->email && $event->user->is_subscribed !== false && ! $notifiedUserIds->contains($event->user->id)) {
             Notification::send($event->user, new TicketPaidNotification($sale, 'organizer', $contextRole));
@@ -118,14 +110,10 @@ class Sale extends Model
         $notifiedUserIds = collect();
         $organizerRoles = collect([$event->creatorRole, $event->venue])->filter();
 
-        foreach ($organizerRoles as $organizerRole) {
-            $members = NotificationUtils::roleMembers($organizerRole);
-
-            if ($members->isNotEmpty()) {
-                Notification::send($members, new TicketTimeoutNotification($sale, 'organizer', $organizerRole));
-                $notifiedUserIds = $notifiedUserIds->merge($members->pluck('id'));
-            }
-        }
+        NotificationUtils::uniqueRoleMembersWithContext($organizerRoles)->each(function (array $recipient) use (&$notifiedUserIds, $sale) {
+            $recipient['user']->notify(new TicketTimeoutNotification($sale, 'organizer', $recipient['role']));
+            $notifiedUserIds->push($recipient['user']->id);
+        });
 
         if ($event->user && $event->user->email && $event->user->is_subscribed !== false && ! $notifiedUserIds->contains($event->user->id)) {
             Notification::send($event->user, new TicketTimeoutNotification($sale, 'organizer', $contextRole));

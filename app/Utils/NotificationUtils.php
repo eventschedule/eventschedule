@@ -4,6 +4,7 @@ namespace App\Utils;
 
 use App\Models\Event;
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Support\Collection;
 
 class NotificationUtils
@@ -20,6 +21,37 @@ class NotificationUtils
                     ->orWhere('users.is_subscribed', true);
             })
             ->get();
+    }
+
+    /**
+     * Retrieve unique members across one or more roles, preserving the
+     * originating role for unsubscribe context.
+     *
+     * @param  iterable<Role|null>  $roles
+     * @return Collection<int, array{user: User, role: Role}>
+     */
+    public static function uniqueRoleMembersWithContext(iterable $roles): Collection
+    {
+        $unique = collect();
+
+        foreach ($roles as $role) {
+            if (! $role instanceof Role) {
+                continue;
+            }
+
+            self::roleMembers($role)->each(function (User $member) use (&$unique, $role) {
+                $key = $member->getKey() ?: strtolower((string) $member->email);
+
+                if (! $unique->has($key)) {
+                    $unique->put($key, [
+                        'user' => $member,
+                        'role' => $role,
+                    ]);
+                }
+            });
+        }
+
+        return $unique->values();
     }
 
     /**

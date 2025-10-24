@@ -11,7 +11,6 @@ use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Notification;
 use App\Mail\ClaimRole;
 use App\Mail\ClaimVenue;
 use App\Notifications\EventAddedNotification;
@@ -415,22 +414,16 @@ class EventRepo
         if ($event->wasRecentlyCreated) {
             $event->loadMissing(['roles.members', 'venue.members']);
 
-            foreach ($event->roles as $roleModel) {
-                if ($roleModel->isTalent()) {
-                    $members = NotificationUtils::roleMembers($roleModel);
+            $talentRoles = $event->roles->filter(fn ($roleModel) => $roleModel->isTalent());
 
-                    if ($members->isNotEmpty()) {
-                        Notification::send($members, new EventAddedNotification($event, $user, 'talent', $roleModel));
-                    }
-                }
-            }
+            NotificationUtils::uniqueRoleMembersWithContext($talentRoles)->each(function (array $recipient) use ($event, $user) {
+                $recipient['user']->notify(new EventAddedNotification($event, $user, 'talent', $recipient['role']));
+            });
 
             if ($event->venue) {
-                $purchasers = NotificationUtils::roleMembers($event->venue);
-
-                if ($purchasers->isNotEmpty()) {
-                    Notification::send($purchasers, new EventAddedNotification($event, $user, 'purchaser', $event->venue));
-                }
+                NotificationUtils::uniqueRoleMembersWithContext([$event->venue])->each(function (array $recipient) use ($event, $user) {
+                    $recipient['user']->notify(new EventAddedNotification($event, $user, 'purchaser', $recipient['role']));
+                });
             }
         }
 
