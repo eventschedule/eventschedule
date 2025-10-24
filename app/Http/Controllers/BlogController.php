@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
+use App\Models\MediaAsset;
+use App\Models\MediaAssetVariant;
 use App\Utils\GeminiUtils;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
 class BlogController extends Controller
@@ -91,12 +91,14 @@ class BlogController extends Controller
             'published_at' => 'nullable|date',
             'meta_title' => 'nullable|string|max:60',
             'meta_description' => 'nullable|string|max:255',
-            'featured_image' => 'nullable|string|in:' . implode(',', array_keys(BlogPost::getAvailableHeaderImages())),
+            'featured_image' => 'nullable|string|max:255',
+            'featured_media_asset_id' => ['nullable', 'integer', 'exists:media_assets,id'],
+            'featured_media_variant_id' => ['nullable', 'integer', 'exists:media_asset_variants,id'],
             'author_name' => 'nullable|string|max:255',
             'is_published' => 'boolean',
         ]);
 
-        $data = $request->all();
+        $data = $request->except(['featured_media_asset_id', 'featured_media_variant_id']);
         
         // Handle tags
         if ($request->has('tags')) {
@@ -109,6 +111,8 @@ class BlogController extends Controller
         if ($request->is_published && !$request->published_at) {
             $data['published_at'] = now()->addSeconds(rand(-60 * 60 * 60, 0));
         }
+
+        $data['featured_image'] = $this->resolveFeaturedImagePath($request);
 
         BlogPost::create($data);
 
@@ -177,12 +181,14 @@ class BlogController extends Controller
             'published_at' => 'nullable|date',
             'meta_title' => 'nullable|string|max:60',
             'meta_description' => 'nullable|string|max:255',
-            'featured_image' => 'nullable|string|in:' . implode(',', array_keys(BlogPost::getAvailableHeaderImages())),
+            'featured_image' => 'nullable|string|max:255',
+            'featured_media_asset_id' => ['nullable', 'integer', 'exists:media_assets,id'],
+            'featured_media_variant_id' => ['nullable', 'integer', 'exists:media_asset_variants,id'],
             'author_name' => 'nullable|string|max:255',
             'is_published' => 'boolean',
         ]);
 
-        $data = $request->all();
+        $data = $request->except(['featured_media_asset_id', 'featured_media_variant_id']);
 
         // Handle tags
         if ($request->has('tags')) {
@@ -195,6 +201,8 @@ class BlogController extends Controller
         if ($request->is_published && !$request->published_at && !$blogPost->published_at) {
             $data['published_at'] = now();
         }
+
+        $data['featured_image'] = $this->resolveFeaturedImagePath($request, $blogPost->featured_image);
 
         $blogPost->update($data);
 
@@ -213,6 +221,34 @@ class BlogController extends Controller
         $blogPost->delete();
 
         return redirect()->route('blog.admin.index')->with('message', 'Blog post deleted successfully.');
+    }
+
+    protected function resolveFeaturedImagePath(Request $request, ?string $default = null): ?string
+    {
+        $assetId = $request->input('featured_media_asset_id');
+
+        if (! $assetId) {
+            if ($request->filled('featured_image')) {
+                return $request->string('featured_image')->trim()->value();
+            }
+
+            return $default;
+        }
+
+        $asset = MediaAsset::find((int) $assetId);
+
+        if (! $asset) {
+            return $default;
+        }
+
+        $variant = null;
+
+        if ($request->filled('featured_media_variant_id')) {
+            $variantId = (int) $request->input('featured_media_variant_id');
+            $variant = MediaAssetVariant::where('media_asset_id', $asset->id)->find($variantId);
+        }
+
+        return $variant ? $variant->path : $asset->path;
     }
 
     /**

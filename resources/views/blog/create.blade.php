@@ -131,6 +131,29 @@
             </div>
         </div>
 
+        @php
+            $initialFeaturedAssetId = old('featured_media_asset_id');
+            $initialFeaturedVariantId = old('featured_media_variant_id');
+            $initialFeaturedUrl = null;
+
+            if ($initialFeaturedAssetId) {
+                $asset = \App\Models\MediaAsset::find($initialFeaturedAssetId);
+
+                if ($asset) {
+                    $initialFeaturedUrl = $asset->url;
+
+                    if ($initialFeaturedVariantId) {
+                        $variant = \App\Models\MediaAssetVariant::where('media_asset_id', $asset->id)
+                            ->find($initialFeaturedVariantId);
+
+                        if ($variant) {
+                            $initialFeaturedUrl = $variant->url;
+                        }
+                    }
+                }
+            }
+        @endphp
+
         <form method="POST" action="{{ route('blog.store') }}" class="mt-8 space-y-8">
             @csrf
             
@@ -191,20 +214,23 @@
 
                         <!-- Featured Image -->
                         <div class="sm:col-span-2">
-                            <label for="featured_image" class="block text-sm font-medium leading-6 text-gray-900">Featured Image</label>
-                            <div class="mt-2">
-                                <select name="featured_image" id="featured_image"
-                                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
-                                    <option value="">No featured image</option>
-                                    @foreach(\App\Models\BlogPost::getAvailableHeaderImages() as $image => $description)
-                                        <option value="{{ $image }}" {{ old('featured_image') == $image ? 'selected' : '' }}>
-                                            {{ $description }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                            <label for="featured_media_picker" class="block text-sm font-medium leading-6 text-gray-900">Featured Image</label>
+                            <div id="featured_media_picker" class="mt-2 space-y-4">
+                                <x-media-picker
+                                    name="featured_media_variant_id"
+                                    asset-input-name="featured_media_asset_id"
+                                    context="header"
+                                    :initial-url="$initialFeaturedUrl"
+                                    :initial-asset-id="$initialFeaturedAssetId"
+                                    :initial-variant-id="$initialFeaturedVariantId"
+                                    label="{{ __('Choose from library') }}"
+                                />
                             </div>
                             <p class="mt-2 text-sm text-gray-500">Select a header image that best represents your blog post</p>
-                            @error('featured_image')
+                            @error('featured_media_asset_id')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                            @error('featured_media_variant_id')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>

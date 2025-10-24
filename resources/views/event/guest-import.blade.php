@@ -1,23 +1,18 @@
 <x-app-guest-layout :role="$role">
 
-  @if ($role->profile_image_url && ! $role->header_image && ! $role->header_image && $role->language_code == 'en')
+  @if ($role->profile_image_url && ! $role->header_image_url && $role->language_code == 'en')
   <div class="pt-8"></div>
   @endif
 
   <main>
     <div>
       <div class="container mx-auto pt-7 pb-20 px-5 max-w-2xl">
-        <div class="bg-white dark:bg-gray-800 mb-4 {{ !$role->header_image && !$role->header_image_url && $role->profile_image_url ? 'pt-16' : '' }} rounded-lg shadow-md">
+        <div class="bg-white dark:bg-gray-800 mb-4 {{ !$role->header_image_url && $role->profile_image_url ? 'pt-16' : '' }} rounded-lg shadow-md">
           <div
             class="relative before:block before:absolute before:bg-[#00000033] before:-inset-0"
           >
             
-            @if ($role->header_image)
-            <img
-              class="block max-h-72 w-full object-cover rounded-t-2xl"
-              src="{{ asset('images/headers') }}/{{ $role->header_image }}.png"
-            />
-            @elseif ($role->header_image_url)
+            @if ($role->header_image_url)
             <img
               class="block max-h-72 w-full object-cover rounded-t-2xl"
               src="{{ $role->header_image_url }}"

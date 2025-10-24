@@ -138,11 +138,16 @@
     </div>
 
     <div>
-        <x-image-picker
-            name="header_image_id"
-            :label="__('messages.header_image')"
-            :value="old('header_image_id', $role->header_image_id ?? null)"
-            :preview-url="$role->header_image_url ?? null" />
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {{ __('messages.header_image') }}
+        </label>
+        <x-media-picker
+            name="header_media_variant_id"
+            asset-input-name="header_media_asset_id"
+            context="header"
+            :initial-url="$role->header_image_url ?? null"
+            label="{{ __('Choose from library') }}"
+        />
     </div>
 
     <div id="subschedules-section" class="space-y-4 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
