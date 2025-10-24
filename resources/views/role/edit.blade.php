@@ -95,20 +95,32 @@
             $('#timezone').val('{{ old('timezone', $role->timezone) }}');
             
             const backgroundSelect = document.getElementById('background_image');
-            const backgroundImageInput = document.querySelector('input[name="background_image_id"]');
-            const profileImageInput = document.querySelector('input[name="profile_image_id"]');
+            const backgroundImageInput = document.querySelector('input[name="background_media_asset_id"]');
+            const profileImageInput = document.querySelector('input[name="profile_media_asset_id"]');
+
+            function getPickerRoot(hiddenInput) {
+                if (!hiddenInput) {
+                    return null;
+                }
+
+                return hiddenInput.closest('[data-media-picker], [data-component="image-picker"]');
+            }
 
             function registerImagePickerHandler(hiddenInput, callback) {
                 if (!hiddenInput || typeof callback !== 'function') {
                     return;
                 }
 
-                const pickerRoot = hiddenInput.closest('[data-component="image-picker"]');
+                const pickerRoot = getPickerRoot(hiddenInput);
                 if (!pickerRoot) {
                     return;
                 }
 
-                pickerRoot.addEventListener('image-picker:change', callback);
+                if (pickerRoot.matches('[data-media-picker]')) {
+                    pickerRoot.addEventListener('media-picker:change', callback);
+                } else {
+                    pickerRoot.addEventListener('image-picker:change', callback);
+                }
             }
 
             if (backgroundImageInput && backgroundSelect && backgroundImageInput.value && backgroundSelect.value !== '') {
@@ -193,14 +205,19 @@
             */
         }
 
-        function getImagePickerUrl(hiddenInput) {
+        function getPickerPreviewUrl(hiddenInput) {
             if (!hiddenInput) {
                 return '';
             }
 
-            const picker = hiddenInput.closest('[data-component="image-picker"]');
+            const picker = hiddenInput.closest('[data-media-picker], [data-component="image-picker"]');
             if (!picker) {
                 return '';
+            }
+
+            if (picker.matches('[data-media-picker]')) {
+                const previewImage = picker.querySelector('[data-role="preview-image"]');
+                return previewImage ? previewImage.getAttribute('src') || '' : '';
             }
 
             return picker.dataset.currentUrl || '';
@@ -251,8 +268,8 @@
                 if (backgroundImageUrl) {
                     backgroundImageUrl = "{{ asset('images/backgrounds') }}" + '/' + $('#background_image').find(':selected').val() + '.png';
                 } else {
-                    const backgroundImageInput = document.querySelector('input[name="background_image_id"]');
-                    const customBackgroundUrl = getImagePickerUrl(backgroundImageInput);
+                    const backgroundImageInput = document.querySelector('input[name="background_media_asset_id"]');
+                    const customBackgroundUrl = getPickerPreviewUrl(backgroundImageInput);
                     backgroundImageUrl = customBackgroundUrl || "{{ $role->background_image_url }}";
                 }
 
@@ -435,9 +452,6 @@
 
                         <div class="mb-6">
                             <x-input-label for="profile_image" :value="__('messages.square_profile_image')" />
-                            <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full text-gray-900 dark:text-gray-100"
-                                :value="old('profile_image')" accept="image/png, image/jpeg" />
-                            <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
                             <div class="mt-4">
                                 <x-media-picker
                                     name="profile_media_variant_id"
@@ -447,11 +461,6 @@
                                     label="{{ __('Choose from library') }}"
                                 />
                             </div>
-                            <p id="profile_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
-                                {{ __('messages.image_size_warning') }}
-                            </p>
-
-                            <img id="profile_image_preview" src="#" alt="Profile Image Preview" style="max-height:120px; display:none;" class="pt-3" />
 
                             @if ($role->profile_image_url)
                             <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="pt-3" />
@@ -477,17 +486,14 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('header_media_variant_id')" />
 
                                 <div>
-                                    <label for="header_image_url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        {{ __('messages.upload_new') }}
-                                    </label>
-                                    <input id="header_image_url" name="header_image_url" type="file"
-                                        class="mt-1 block w-full text-gray-900 dark:text-gray-100"
-                                        :value="old('header_image_url')"
-                                        accept="image/png, image/jpeg" />
-                                    <x-input-error class="mt-2" :messages="$errors->get('header_image_url')" />
-                                    <p id="header_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
-                                        {{ __('messages.image_size_warning') }}
-                                    </p>
+                                    @if ($role->header_image_url)
+                                    <img src="{{ $role->header_image_url }}" style="max-height:120px" class="pt-3" />
+                                    <a href="#"
+                                        onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}'; }"
+                                        class="hover:underline text-gray-900 dark:text-gray-100">
+                                        {{ __('messages.delete_image') }}
+                                    </a>
+                                    @endif
                                 </div>
                             </div>
 
@@ -788,21 +794,10 @@
                                 </div>
 
                                 <div id="custom_image_input" style="display:none">
-                                    <input id="background_image_url" name="background_image_url" type="file" 
-                                        class="mt-1 block w-full text-gray-900 dark:text-gray-100" 
-                                        :value="old('background_image_url')" 
-                                        oninput="updatePreview()" 
-                                        accept="image/png, image/jpeg" />
-                                    <p id="background_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
-                                        {{ __('messages.image_size_warning') }}
-                                    </p>
-
-                                    <img id="background_image_preview" src="" alt="Background Image Preview" style="max-height:120px; display:none;" class="pt-3" />
-
                                     @if ($role->background_image_url)
                                     <img src="{{ $role->background_image_url }}" style="max-height:120px" class="pt-3" />
                                     <a href="#"
-                                        onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}'; } return false;"
+                                        onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) {location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}'; } return false;"
                                         class="hover:underline text-gray-900 dark:text-gray-100">
                                         {{ __('messages.delete_image') }}
                                     </a>
