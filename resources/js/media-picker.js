@@ -658,9 +658,23 @@ class MediaPickerController {
         }
 
         try {
+            const previousTag = this.activeTag;
             const payload = await this.api.listTags();
             this.tags = payload.data || [];
+            const hasContextTag = this.config.context
+                && this.tags.some((tag) => tag.slug === this.config.context);
+
+            if (hasContextTag && this.activeTag !== this.config.context) {
+                this.activeTag = this.config.context;
+            } else if (this.activeTag && !this.tags.some((tag) => tag.slug === this.activeTag)) {
+                this.activeTag = null;
+            }
+
             this.renderTags();
+
+            if (this.modalOpen && previousTag !== this.activeTag) {
+                this.fetchAssets(1);
+            }
         } catch (error) {
             console.error('Failed to load tags', error);
         }

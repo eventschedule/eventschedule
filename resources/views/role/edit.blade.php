@@ -94,9 +94,7 @@
             $('#language_code').val('{{ old('language_code', $role->language_code) }}');
             $('#timezone').val('{{ old('timezone', $role->timezone) }}');
             
-            const headerSelect = document.getElementById('header_image');
             const backgroundSelect = document.getElementById('background_image');
-            const headerImageInput = document.querySelector('input[name="header_image_id"]');
             const backgroundImageInput = document.querySelector('input[name="background_image_id"]');
             const profileImageInput = document.querySelector('input[name="profile_image_id"]');
 
@@ -113,24 +111,11 @@
                 pickerRoot.addEventListener('image-picker:change', callback);
             }
 
-            if (headerImageInput && headerSelect && headerImageInput.value && headerSelect.value !== '') {
-                headerSelect.value = '';
-            }
-
             if (backgroundImageInput && backgroundSelect && backgroundImageInput.value && backgroundSelect.value !== '') {
                 backgroundSelect.value = '';
             }
 
             registerImagePickerHandler(profileImageInput, () => {
-                updatePreview();
-            });
-
-            registerImagePickerHandler(headerImageInput, () => {
-                if (headerSelect) {
-                    headerSelect.value = '';
-                }
-                updateHeaderNavButtons();
-                toggleCustomHeaderInput();
                 updatePreview();
             });
 
@@ -149,8 +134,6 @@
             onChangeFont();
             updateImageNavButtons();
             toggleCustomImageInput();
-            updateHeaderNavButtons();
-            toggleCustomHeaderInput();
 
             // Handle accept_requests checkbox
             const acceptRequestsCheckbox = document.querySelector('input[name="accept_requests"][type="checkbox"]');
@@ -390,32 +373,6 @@
             customInput.style.display = select.value === '' ? 'block' : 'none';
         }
 
-        function updateHeaderNavButtons() { 
-            const select = document.getElementById('header_image');
-            const prevButton = document.getElementById('prev_header');
-            const nextButton = document.getElementById('next_header');
-
-            prevButton.disabled = select.selectedIndex === 0;
-            nextButton.disabled = select.selectedIndex === select.options.length - 1;
-        }
-
-        function changeHeaderImage(direction) {
-            const select = document.getElementById('header_image');
-            const newIndex = select.selectedIndex + direction;
-            
-            if (newIndex >= 0 && newIndex < select.options.length) {
-                select.selectedIndex = newIndex;
-                select.dispatchEvent(new Event('input'));
-                updateHeaderNavButtons();
-            }
-        }
-
-        function toggleCustomHeaderInput() {
-            const select = document.getElementById('header_image');
-            const customInput = document.getElementById('custom_header_input');
-            customInput.style.display = select.value === '' ? 'block' : 'none';
-        }
-
 
         </script>
 
@@ -507,57 +464,31 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="header_image" :value="__('messages.header_image')" />
-                            <div class="color-select-container">
-                                <select id="header_image" name="header_image"
-                                    class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
-                                    oninput="updatePreview(); updateHeaderNavButtons(); toggleCustomHeaderInput();">
-                                    @foreach($headers as $header => $name)
-                                    <option value="{{ $header }}"
-                                        {{ $role->header_image == $header ? 'SELECTED' : '' }}>
-                                        {{ $name }}</option>
-                                    @endforeach
-                                </select>
+                            <x-input-label for="header_media_picker" :value="__('messages.header_image')" />
+                            <div class="space-y-4" id="header_media_picker">
+                                <x-media-picker
+                                    name="header_media_variant_id"
+                                    asset-input-name="header_media_asset_id"
+                                    context="header"
+                                    :initial-url="$role->header_image_url"
+                                    label="{{ __('Choose from library') }}"
+                                />
+                                <x-input-error class="mt-2" :messages="$errors->get('header_media_asset_id')" />
+                                <x-input-error class="mt-2" :messages="$errors->get('header_media_variant_id')" />
 
-                                <button type="button" 
-                                        id="prev_header" 
-                                        class="color-nav-button" 
-                                        onclick="changeHeaderImage(-1)"
-                                        title="{{ __('messages.previous') }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                                    </svg>
-                                </button>
-                                                                                
-                                <button type="button" 
-                                        id="next_header" 
-                                        class="color-nav-button" 
-                                        onclick="changeHeaderImage(1)"
-                                        title="{{ __('messages.next') }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <div id="custom_header_input" style="display:none" class="mt-2">
-                                <input id="header_image_url" name="header_image_url" type="file"
-                                    class="mt-1 block w-full text-gray-900 dark:text-gray-100"
-                                    :value="old('header_image_url')"
-                                    accept="image/png, image/jpeg" />
-                                <x-input-error class="mt-2" :messages="$errors->get('header_image_url')" />
-                                <div class="mt-4">
-                                    <x-media-picker
-                                        name="header_media_variant_id"
-                                        asset-input-name="header_media_asset_id"
-                                        context="header"
-                                        :initial-url="$role->header_image_url"
-                                        label="{{ __('Choose from library') }}"
-                                    />
+                                <div>
+                                    <label for="header_image_url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        {{ __('messages.upload_new') }}
+                                    </label>
+                                    <input id="header_image_url" name="header_image_url" type="file"
+                                        class="mt-1 block w-full text-gray-900 dark:text-gray-100"
+                                        :value="old('header_image_url')"
+                                        accept="image/png, image/jpeg" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('header_image_url')" />
+                                    <p id="header_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                                        {{ __('messages.image_size_warning') }}
+                                    </p>
                                 </div>
-                                <p id="header_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
-                                    {{ __('messages.image_size_warning') }}
-                                </p>
                             </div>
 
                         </div>

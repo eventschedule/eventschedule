@@ -6,7 +6,7 @@ The listing below illustrates a problematic layout:
 
 ```
 drw-r--r-- 5 82 82   5 Oct 16 09:52 framework
--rw-r--r-- 1 82 82   3 Oct 16 09:52 headers.json
+drw-r--r-- 5 82 82   5 Oct 16 09:52 framework
 -rw-r--r-- 1 82 82 803 Oct 16 09:52 gradients.json
 -rw-r--r-- 1 82 82 841 Oct 16 09:52 backgrounds.json
 drw-r--r-- 2 82 82   3 Oct 16 09:53 logs

@@ -26,7 +26,6 @@ class RoleCreateRequest extends FormRequest
             'custom_domain' => ['nullable', 'string', 'url', 'max:255'],
             'profile_image_id' => ['nullable', 'integer', 'exists:images,id'],
             'background_image_id' => ['nullable', 'integer', 'exists:images,id'],
-            'header_image_id' => ['nullable', 'integer', 'exists:images,id'],
             'background_image' => ['nullable', 'string', 'max:255'],
             'contacts' => ['nullable', 'array'],
             'contacts.*.name' => ['nullable', 'string', 'max:255'],

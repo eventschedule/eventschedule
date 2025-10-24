@@ -7,6 +7,7 @@ use App\Utils\ImageUtils;
 use App\Models\Role;
 use App\Models\Event;
 use App\Models\RoleUser;
+use App\Models\MediaAsset;
 use Carbon\Carbon;
 
 class GeminiUtils
@@ -778,7 +779,7 @@ class GeminiUtils
                 'tags' => ['events', 'scheduling', 'management'],
                 'meta_title' => 'Blog Post about ' . $topic,
                 'meta_description' => 'A brief summary about ' . $topic,
-                'featured_image' => 'Lets_do_Business.png'
+                'featured_image' => self::selectImageForCategory('general')
             ];
         }
     }
@@ -798,25 +799,24 @@ class GeminiUtils
             'general' => ['Lets_do_Business.png', 'All_Hands_on_Deck.png', 'Flowerful_Life.png', 'Chill_Evening.png']
         ];
 
-        $images = $imageMap[$category] ?? $imageMap['general'];
-        
-        // Get available header images (already excludes recently used ones)
-        $availableImages = \App\Models\BlogPost::getAvailableHeaderImages();
-        
-        // Filter to only include images from the current category
-        $categoryImages = array_intersect_key($availableImages, array_flip($images));
-        
-        // If no category images are available, use any available image
-        if (empty($categoryImages)) {
-            $categoryImages = $availableImages;
+        $filenames = $imageMap[$category] ?? $imageMap['general'];
+
+        $assets = MediaAsset::query()
+            ->where('folder', 'headers')
+            ->whereIn('original_filename', $filenames)
+            ->get();
+
+        if ($assets->isEmpty()) {
+            $assets = MediaAsset::query()
+                ->where('folder', 'headers')
+                ->get();
         }
-        
-        // If still no images available, fall back to any image from the category
-        if (empty($categoryImages)) {
-            $categoryImages = array_flip($images);
+
+        if ($assets->isEmpty()) {
+            return null;
         }
-        
-        return array_rand($categoryImages);
+
+        return $assets->random()->path;
     }
 
     

@@ -908,17 +908,6 @@ class RoleController extends Controller
             return view('testing.role.create', $data);
         }
 
-        // Header images
-        $headerOptions = $this->loadRoleAssetOptions(
-            'storage/headers.json',
-            fn ($data) => $this->prepareNameOptions($data),
-            'create.header_options'
-        );
-
-        $headerOptions = [
-            '' => __('messages.custom'),
-        ] + $headerOptions;
-
         // Background images
         $backgroundOptions = [
             '' => __('messages.custom'),
@@ -942,7 +931,6 @@ class RoleController extends Controller
         $data = array_merge($data, [
             'gradients' => $gradientOptions,
             'backgrounds' => $backgroundOptions,
-            'headers' => $headerOptions,
             'fonts' => $fonts,
         ]);
 
@@ -1204,17 +1192,6 @@ class RoleController extends Controller
             return view('testing.role.edit', $data);
         }
 
-        // Header images
-        $headerOptions = $this->loadRoleAssetOptions(
-            'storage/headers.json',
-            fn ($data) => $this->prepareNameOptions($data),
-            'edit.header_options'
-        );
-
-        $headerOptions = [
-            '' => __('messages.custom'),
-        ] + $headerOptions;
-
 
         // Background images
         $backgroundOptions = [
@@ -1238,7 +1215,6 @@ class RoleController extends Controller
         $data = array_merge($data, [
             'gradients' => $gradientOptions,
             'backgrounds' => $backgroundOptions,
-            'headers' => $headerOptions,
             'fonts' => $fonts,
         ]);
 
@@ -3913,7 +3889,6 @@ class RoleController extends Controller
     {
         $mappings = [
             'profile_image_id' => 'profile_image_url',
-            'header_image_id' => 'header_image_url',
             'background_image_id' => 'background_image_url',
         ];
 
@@ -3930,10 +3905,6 @@ class RoleController extends Controller
                 if ($image) {
                     $role->{$field} = $image->id;
                     $role->{$urlColumn} = $image->path;
-
-                    if ($field === 'header_image_id') {
-                        $role->header_image = null;
-                    }
 
                     if ($field === 'background_image_id') {
                         $role->background_image = null;

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use App\Models\MediaAsset;
 use Carbon\Carbon;
 
 class BlogPost extends Model
@@ -30,37 +31,6 @@ class BlogPost extends Model
         'tags' => 'array',
         'published_at' => 'datetime',
         'is_published' => 'boolean',
-    ];
-
-    // Generic header images that work well for blog posts
-    public static $availableHeaderImages = [
-        'Literature.png' => 'Literature & Writing',
-        'Lets_do_Business.png' => 'Business & Professional',
-        'Network_Summit.png' => 'Networking & Events',
-        'Synergy.png' => 'Collaboration & Teamwork',
-        'People_of_the_World.png' => 'Community & Diversity',
-        'All_Hands_on_Deck.png' => 'Team Building',
-        'Tradeshow_Expo.png' => 'Exhibitions & Shows',
-        'Yoga_and_Wellness.png' => 'Wellness & Health',
-        'Peaceful_Studio.png' => 'Mindfulness & Peace',
-        'Nature_Calls.png' => 'Nature & Outdoors',
-        'Flowerful_Life.png' => 'Life & Growth',
-        'Sports_Centre.png' => 'Sports & Fitness',
-        'Meditation.png' => 'Meditation & Spirituality',
-        'Mindful.png' => 'Mindfulness & Awareness',
-        'Fitness_Morning.png' => 'Fitness & Motivation',
-        'Chess_Vibrancy.png' => 'Strategy & Thinking',
-        'Summer_Events.png' => 'Seasonal Events',
-        'Chill_Evening.png' => 'Relaxation & Leisure',
-        'Arena.png' => 'Competition & Performance',
-        'Sports_and_Youth.png' => 'Youth & Sports',
-        'Kids_Bonanza.png' => 'Family & Children',
-        'Music_Potential.png' => 'Music & Arts',
-        'The_Stage_Awaits.png' => 'Performance & Entertainment',
-        'Ready_to_Dance.png' => 'Dance & Movement',
-        'Warming_Up.png' => 'Preparation & Warm-up',
-        'Networking_and_Bagels.png' => 'Networking & Social',
-        '5am_Club.png' => 'Productivity & Early Bird',
     ];
 
     protected static function boot()
@@ -153,12 +123,25 @@ class BlogPost extends Model
 
     public function getFeaturedImageUrlAttribute()
     {
-        if (!$this->featured_image) {
+        $value = $this->attributes['featured_image'] ?? null;
+
+        if (! is_string($value) || trim($value) === '') {
             return null;
         }
 
-        // Return the URL to the header image
-        return url('/images/headers/' . $this->featured_image);
+        $value = trim($value);
+
+        if (preg_match('/^https?:\/\//i', $value)) {
+            return $value;
+        }
+
+        if (str_contains($value, '/') || str_contains($value, '\\')) {
+            return storage_asset_url($value);
+        }
+
+        $asset = $this->resolveLegacyFeaturedImageAsset($value);
+
+        return $asset?->url;
     }
 
     public function getUrlAttribute()
@@ -166,26 +149,51 @@ class BlogPost extends Model
         return url('/blog/' . $this->slug);
     }
 
-    public static function getAvailableHeaderImages($filter = true)
+    protected function resolveLegacyFeaturedImageAsset(string $legacy): ?MediaAsset
     {
-        if (! $filter) {
-            return self::$availableHeaderImages;
+        static $cache = [];
+
+        $legacy = trim($legacy);
+
+        if ($legacy === '') {
+            return null;
         }
 
-        // Get the last 2 used featured images from the database
-        $recentlyUsedImages = self::whereNotNull('featured_image')
-            ->where('featured_image', '!=', '')
-            ->orderBy('created_at', 'desc')
-            ->limit(2)
-            ->pluck('featured_image')
-            ->toArray();
+        if (! array_key_exists($legacy, $cache)) {
+            $candidates = [$legacy];
 
-        // Filter out the recently used images from available options
-        $availableImages = self::$availableHeaderImages;
-        foreach ($recentlyUsedImages as $usedImage) {
-            unset($availableImages[$usedImage]);
+            if (! str_contains($legacy, '.')) {
+                $candidates[] = $legacy . '.png';
+                $candidates[] = $legacy . '.jpg';
+                $candidates[] = $legacy . '.jpeg';
+            }
+
+            $cache[$legacy] = MediaAsset::query()
+                ->where('folder', 'headers')
+                ->whereIn('original_filename', $candidates)
+                ->orderByDesc('id')
+                ->first();
         }
 
-        return $availableImages;
+        return $cache[$legacy];
+    }
+
+    public function featuredImageAsset(): ?MediaAsset
+    {
+        $value = $this->attributes['featured_image'] ?? null;
+
+        if (! is_string($value) || trim($value) === '') {
+            return null;
+        }
+
+        $value = trim($value);
+
+        if (str_contains($value, '/') || str_contains($value, '\\')) {
+            $normalized = storage_normalize_path($value);
+
+            return MediaAsset::where('path', $normalized)->first();
+        }
+
+        return $this->resolveLegacyFeaturedImageAsset($value);
     }
 }

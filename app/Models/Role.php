@@ -10,6 +10,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Models\MediaAsset;
 use App\Models\MediaAssetUsage;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
@@ -356,11 +357,50 @@ class Role extends Model implements MustVerifyEmail
             }
         }
 
-        if (! $value) {
-            return '';
+        if ($value) {
+            return storage_asset_url($value);
         }
 
-        return storage_asset_url($value);
+        if ($this->header_image) {
+            $legacyUrl = $this->resolveLegacyHeaderMediaUrl();
+
+            if ($legacyUrl) {
+                return $legacyUrl;
+            }
+        }
+
+        return '';
+    }
+
+    private function resolveLegacyHeaderMediaUrl(): ?string
+    {
+        static $cache = [];
+
+        $legacy = trim((string) $this->header_image);
+
+        if ($legacy === '') {
+            return null;
+        }
+
+        if (! array_key_exists($legacy, $cache)) {
+            $candidates = [$legacy];
+
+            if (! str_contains($legacy, '.')) {
+                $candidates[] = $legacy . '.png';
+                $candidates[] = $legacy . '.jpg';
+                $candidates[] = $legacy . '.jpeg';
+            }
+
+            $asset = MediaAsset::query()
+                ->where('folder', 'headers')
+                ->whereIn('original_filename', $candidates)
+                ->orderByDesc('id')
+                ->first();
+
+            $cache[$legacy] = $asset?->url;
+        }
+
+        return $cache[$legacy];
     }
 
     public function getProfileImageUrlAttribute($value)
