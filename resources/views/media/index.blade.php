@@ -130,13 +130,37 @@
             <div class="absolute inset-0 bg-gray-900/60" @click="closeTagEditor"></div>
             <div class="relative bg-white dark:bg-gray-900 rounded-lg shadow-lg w-full max-w-md p-6 space-y-4">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Edit tags') }}</h3>
-                <div class="space-y-2">
+                <div class="space-y-2 max-h-52 overflow-y-auto">
+                    <template x-if="!tags.length">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No tags yet. Create one below to get started.') }}</p>
+                    </template>
                     <template x-for="tag in tags" :key="tag.id">
                         <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
                             <input type="checkbox" :value="tag.id" @change="toggleTag(tag.id)" :checked="selectedTagIds.includes(tag.id)">
                             <span x-text="tag.name"></span>
                         </label>
                     </template>
+                </div>
+                <div class="pt-3 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                    <label for="new-tag-name" class="block text-sm font-medium text-gray-700 dark:text-gray-200">{{ __('Add a new tag') }}</label>
+                    <div class="flex items-center gap-2">
+                        <input
+                            id="new-tag-name"
+                            type="text"
+                            x-model="newTagName"
+                            @keydown.enter.prevent="createTagFromModal"
+                            class="flex-1 rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
+                            placeholder="{{ __('New tag name') }}"
+                        >
+                        <button
+                            type="button"
+                            class="px-3 py-2 bg-indigo-600 text-white rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            :disabled="!newTagName || !newTagName.trim() || isCreatingTag"
+                            @click="createTagFromModal"
+                        >
+                            {{ __('Add') }}
+                        </button>
+                    </div>
                 </div>
                 <div class="flex justify-end gap-2">
                     <button type="button" class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200" @click="closeTagEditor">{{ __('Cancel') }}</button>
