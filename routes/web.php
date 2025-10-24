@@ -134,6 +134,9 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::post('/media-library/assets/{asset}/variants', [MediaLibraryController::class, 'storeVariant'])->name('media.assets.variants.store');
     Route::get('/media-library/tags', [MediaLibraryController::class, 'tags'])->name('media.tags.index');
     Route::post('/media-library/tags', [MediaLibraryController::class, 'storeTag'])->name('media.tags.store');
+    Route::delete('/media-library/tags/{tag}', [MediaLibraryController::class, 'destroyTag'])
+        ->whereNumber('tag')
+        ->name('media.tags.destroy');
     Route::post('/media-library/assets/{asset}/tags', [MediaLibraryController::class, 'syncTags'])->name('media.assets.tags.sync');
 
     Route::prefix('settings')->name('settings.')->group(function () {

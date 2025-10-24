@@ -109,6 +109,13 @@ const createMediaLibraryApi = (config) => ({
         });
     },
 
+    async deleteTag(tagId) {
+        const endpoint = config.deleteTagTemplate.replace('__ID__', tagId);
+        return requestJson(endpoint, {
+            method: 'DELETE',
+        });
+    },
+
     async syncTags(assetId, tags) {
         const endpoint = config.syncTagsTemplate.replace('__ID__', assetId);
         return requestJson(endpoint, {
@@ -222,6 +229,46 @@ export const registerMediaLibraryComponents = (alpineInstance) => {
                 }
             },
 
+            async removeTag(tag) {
+                if (!tag) {
+                    return;
+                }
+
+                const confirmed = window.confirm(`Remove tag "${tag.name}"?`);
+                if (!confirmed) {
+                    return;
+                }
+
+                try {
+                    await api.deleteTag(tag.id);
+                    const wasActive = this.activeTag === tag.slug;
+
+                    this.tags = this.tags.filter((item) => item.id !== tag.id);
+                    this.assets = this.assets.map((asset) => ({
+                        ...asset,
+                        tags: (asset.tags || []).filter((assetTag) => assetTag.id !== tag.id),
+                    }));
+
+                    if (this.detailAsset) {
+                        this.detailAsset.tags = (this.detailAsset.tags || []).filter((assetTag) => assetTag.id !== tag.id);
+                    }
+
+                    if (this.editingAsset) {
+                        this.editingAsset.tags = (this.editingAsset.tags || []).filter((assetTag) => assetTag.id !== tag.id);
+                        this.selectedTagIds = this.selectedTagIds.filter((id) => id !== tag.id);
+                    }
+
+                    if (wasActive) {
+                        this.activeTag = null;
+                        this.pagination.current_page = 1;
+                        await this.fetchAssets(1);
+                    }
+                } catch (error) {
+                    console.error('Unable to delete tag', error);
+                    alert(error.message || 'Unable to delete tag');
+                }
+            },
+
             openTagEditor(asset) {
                 this.editingAsset = asset;
                 this.selectedTagIds = asset.tags.map((tag) => tag.id);
@@ -312,6 +359,7 @@ class MediaPickerController {
             assetsEndpoint: dataset.assetsEndpoint,
             uploadEndpoint: dataset.uploadEndpoint,
             tagsEndpoint: dataset.tagsEndpoint,
+            deleteTagTemplate: dataset.deleteTagTemplate,
             variantEndpointTemplate: dataset.variantEndpointTemplate,
             context: dataset.context ? dataset.context : null,
             initialAssetId: parseNumber(dataset.initialAssetId),

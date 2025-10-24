@@ -218,6 +218,15 @@ class MediaLibraryController extends Controller
         ], 201);
     }
 
+    public function destroyTag(MediaTag $tag): JsonResponse
+    {
+        $tag->delete();
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
+
     public function syncTags(Request $request, MediaAsset $asset): JsonResponse
     {
         $validated = $request->validate([

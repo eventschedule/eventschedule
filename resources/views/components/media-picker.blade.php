@@ -22,6 +22,7 @@
     data-assets-endpoint="{{ route('media.assets.index', [], false) }}"
     data-upload-endpoint="{{ route('media.assets.store', [], false) }}"
     data-tags-endpoint="{{ route('media.tags.index', [], false) }}"
+    data-delete-tag-template="{{ route('media.tags.destroy', ['tag' => '__ID__'], false) }}"
     data-variant-endpoint-template="{{ route('media.assets.variants.store', ['asset' => '__ASSET__'], false) }}"
     data-context="{{ e($context ?? '') }}"
     data-initial-asset-id="{{ $initialAsset ? (int) $initialAsset : '' }}"

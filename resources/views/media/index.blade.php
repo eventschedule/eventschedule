@@ -9,6 +9,7 @@
             uploadEndpoint: '{{ route('media.assets.store', [], false) }}',
             tagsEndpoint: '{{ route('media.tags.index', [], false) }}',
             createTagEndpoint: '{{ route('media.tags.store', [], false) }}',
+            deleteTagTemplate: '{{ route('media.tags.destroy', ['tag' => '__ID__'], false) }}',
             syncTagsTemplate: '{{ route('media.assets.tags.sync', ['asset' => '__ID__'], false) }}',
         })"
         x-init="init()"
@@ -53,13 +54,26 @@
                     {{ __('All assets') }}
                 </button>
                 <template x-for="tag in tags" :key="tag.id">
-                    <button
-                        type="button"
-                        class="px-3 py-1 rounded-full text-sm"
+                    <div
+                        class="inline-flex items-center gap-1 rounded-full text-sm"
                         :class="activeTag === tag.slug ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200'"
-                        @click="activeTag = tag.slug; fetchAssets()"
-                        x-text="tag.name"
-                    ></button>
+                    >
+                        <button
+                            type="button"
+                            class="px-3 py-1"
+                            @click="activeTag = tag.slug; fetchAssets()"
+                            x-text="tag.name"
+                        ></button>
+                        <button
+                            type="button"
+                            class="px-2 py-1 text-xs"
+                            :class="activeTag === tag.slug ? 'text-white/80 hover:text-white' : 'text-gray-500 hover:text-red-600 dark:hover:text-red-400'"
+                            @click.stop="removeTag(tag)"
+                        >
+                            <span aria-hidden="true">&times;</span>
+                            <span class="sr-only">{{ __('Remove tag') }}</span>
+                        </button>
+                    </div>
                 </template>
             </div>
         </div>
