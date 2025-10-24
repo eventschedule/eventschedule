@@ -29,20 +29,29 @@
     <form method="POST" action="{{ route('app.update') }}" enctype="multipart/form-data" class="mt-6">
         @csrf
 
-        <div>
-            <x-input-label for="update_channel" :value="__('messages.update_channel')" />
-            <select id="update_channel" name="update_channel"
-                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]">
-                @foreach ($availableChannels as $value => $label)
-                    <option value="{{ $value }}" @selected(old('update_channel', $selectedChannel) === $value)>
-                        {{ $label }}
-                    </option>
-                @endforeach
-            </select>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                {{ __('messages.update_channel_help') }}
-            </p>
-        </div>
+        @php
+            $showUpdateChannel = $showUpdateChannel ?? false;
+            $selectedChannel = old('update_channel', $selectedChannel ?? null);
+        @endphp
+
+        @if ($showUpdateChannel && ! empty($availableChannels))
+            <div>
+                <x-input-label for="update_channel" :value="__('messages.update_channel')" />
+                <select id="update_channel" name="update_channel"
+                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]">
+                    @foreach ($availableChannels as $value => $label)
+                        <option value="{{ $value }}" @selected($selectedChannel === $value)>
+                            {{ $label }}
+                        </option>
+                    @endforeach
+                </select>
+                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    {{ __('messages.update_channel_help') }}
+                </p>
+            </div>
+        @elseif ($selectedChannel)
+            <input type="hidden" name="update_channel" value="{{ $selectedChannel }}">
+        @endif
 
         <div class="mt-4">
             <x-input-label for="package" :value="__('Upload release ZIP (optional)')" />
