@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Support\MailConfigManager;
 use App\Utils\UrlUtils;
 use Illuminate\Auth\Notifications\VerifyEmail as BaseVerifyEmail;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -20,11 +21,22 @@ class VerifyEmail extends BaseVerifyEmail
     protected $notifiable;
 
     public function __construct($type = 'user', $subdomain = '')
-    {        
+    {
         $this->type = $type;
         $this->subdomain = $subdomain;
     }
-    
+
+    public function via($notifiable)
+    {
+        MailConfigManager::applyFromDatabase();
+
+        if (config('mail.disable_delivery')) {
+            return [];
+        }
+
+        return parent::via($notifiable);
+    }
+
     public function toMail($notifiable)
     {
         $this->notifiable = $notifiable;

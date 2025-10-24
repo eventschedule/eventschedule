@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\User;
+use App\Support\MailConfigManager;
 use App\Utils\NotificationUtils;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -29,6 +30,12 @@ class EventAddedNotification extends Notification
 
     public function via(object $notifiable): array
     {
+        MailConfigManager::applyFromDatabase();
+
+        if (config('mail.disable_delivery')) {
+            return [];
+        }
+
         return ['mail'];
     }
 
