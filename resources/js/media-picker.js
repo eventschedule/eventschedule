@@ -580,6 +580,19 @@ class MediaPickerController {
         if (this.elements.variantInput) {
             this.elements.variantInput.value = this.selectedVariantId ? String(this.selectedVariantId) : '';
         }
+
+        const eventDetail = {
+            assetId: this.selectedAssetId,
+            variantId: this.selectedVariantId,
+            url: this.previewUrl || null,
+        };
+
+        this.root.dispatchEvent(
+            new CustomEvent('media-picker:change', {
+                bubbles: true,
+                detail: eventDetail,
+            }),
+        );
     }
 
     openModal() {
