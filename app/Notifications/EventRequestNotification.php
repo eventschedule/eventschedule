@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Support\MailConfigManager;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -30,6 +31,12 @@ class EventRequestNotification extends Notification
      */
     public function via(object $notifiable): array
     {
+        MailConfigManager::applyFromDatabase();
+
+        if (config('mail.disable_delivery')) {
+            return [];
+        }
+
         return ['mail'];
     }
 
