@@ -157,6 +157,14 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('mail_from_address')" />
                             </div>
 
+                            <div>
+                                <x-checkbox name="mail_disable_delivery" label="{{ __('messages.mail_disable_delivery') }}"
+                                    :checked="old('mail_disable_delivery', $mailSettings['disable_delivery'])" />
+                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                    {{ __('messages.mail_disable_delivery_help') }}
+                                </p>
+                            </div>
+
                             <div class="flex flex-wrap items-center gap-4">
                                 <x-primary-button>{{ __('messages.save') }}</x-primary-button>
 

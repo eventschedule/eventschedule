@@ -201,6 +201,14 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('log_level')" />
                             </div>
 
+                            <div>
+                                <x-checkbox name="log_disabled" label="{{ __('messages.log_disabled') }}"
+                                    :checked="old('log_disabled', data_get($generalSettings, 'log_disabled'))" />
+                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                    {{ __('messages.log_disabled_help') }}
+                                </p>
+                            </div>
+
                             <div class="flex items-center gap-4">
                                 <x-primary-button>{{ __('messages.save') }}</x-primary-button>
 
