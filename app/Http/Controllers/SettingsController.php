@@ -467,6 +467,7 @@ class SettingsController extends Controller
             'log_syslog_host' => ['required', 'string', 'max:255'],
             'log_syslog_port' => ['required', 'integer', 'min:1', 'max:65535'],
             'log_level' => ['required', 'string', Rule::in($logLevelKeys)],
+            'log_disabled' => ['nullable', 'boolean'],
             'update_release_channel' => ['required', 'string', Rule::in(ReleaseChannel::values())],
         ]);
 
@@ -501,6 +502,7 @@ class SettingsController extends Controller
             'syslog_host' => $syslogHost,
             'syslog_port' => (string) $syslogPort,
             'level' => $logLevel,
+            'disabled' => $request->boolean('log_disabled') ? '1' : '0',
         ];
 
         Setting::setGroup('logging', $loggingSettings);
@@ -849,6 +851,9 @@ class SettingsController extends Controller
             'log_syslog_host' => $storedLoggingSettings['syslog_host'] ?? $defaultSyslogHost,
             'log_syslog_port' => $storedLoggingSettings['syslog_port'] ?? $defaultSyslogPort,
             'log_level' => $storedLoggingSettings['level'] ?? $defaultLogLevel,
+            'log_disabled' => array_key_exists('disabled', $storedLoggingSettings)
+                ? $this->toBoolean($storedLoggingSettings['disabled'])
+                : false,
         ];
     }
 
@@ -946,6 +951,7 @@ class SettingsController extends Controller
             'mail_encryption' => ['nullable', Rule::in(['tls', 'ssl', ''])],
             'mail_from_address' => ['required', 'email', 'max:255'],
             'mail_from_name' => ['required', 'string', 'max:255'],
+            'mail_disable_delivery' => ['nullable', 'boolean'],
         ]);
     }
 
@@ -966,6 +972,7 @@ class SettingsController extends Controller
             'encryption' => $this->nullableTrim($validated['mail_encryption'] ?? null),
             'from_address' => trim($validated['mail_from_address']),
             'from_name' => trim($validated['mail_from_name']),
+            'disable_delivery' => $request->boolean('mail_disable_delivery') ? '1' : '0',
         ];
     }
 }

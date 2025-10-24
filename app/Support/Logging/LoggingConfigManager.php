@@ -5,6 +5,7 @@ namespace App\Support\Logging;
 use App\Models\Setting;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Schema;
+use Monolog\Handler\NullHandler;
 
 class LoggingConfigManager
 {
@@ -21,6 +22,17 @@ class LoggingConfigManager
         'syslog_server',
         'errorlog',
     ];
+
+    private static ?string $originalDefaultChannel = null;
+
+    /**
+     * @var array<int, string>|null
+     */
+    private static ?array $originalStackChannels = null;
+
+    private static ?array $originalRoleDebugChannel = null;
+
+    private static bool $loggingDisabled = false;
 
     /**
      * Apply logging configuration from the database if the settings table exists.
@@ -47,6 +59,8 @@ class LoggingConfigManager
     {
         $normalized = static::normalizeSettings($settings);
 
+        static::captureOriginalConfiguration();
+
         if (Arr::exists($normalized, 'syslog_host')) {
             config(['logging.channels.syslog_server.handler_with.host' => $normalized['syslog_host']]);
         }
@@ -58,6 +72,14 @@ class LoggingConfigManager
         if (Arr::exists($normalized, 'level')) {
             foreach (self::CHANNELS_WITH_LEVEL as $channel) {
                 config(["logging.channels.{$channel}.level" => $normalized['level']]);
+            }
+        }
+
+        if (Arr::exists($normalized, 'disabled')) {
+            if ($normalized['disabled']) {
+                static::disableLogging();
+            } else {
+                static::restoreLogging();
             }
         }
     }
@@ -108,9 +130,117 @@ class LoggingConfigManager
             $normalized['level'] = LogLevelNormalizer::normalize($settings['level'], $defaultLevel);
         }
 
+        if (Arr::exists($settings, 'disabled')) {
+            $disabled = static::toBoolean($settings['disabled']);
+
+            if ($disabled !== null) {
+                $normalized['disabled'] = $disabled;
+            }
+        }
+
         return array_filter(
             $normalized,
             static fn ($value) => $value !== null
         );
+    }
+
+    protected static function captureOriginalConfiguration(): void
+    {
+        if (self::$originalDefaultChannel === null) {
+            self::$originalDefaultChannel = config('logging.default');
+        }
+
+        if (self::$originalStackChannels === null) {
+            $stackChannels = config('logging.channels.stack.channels');
+
+            if (is_array($stackChannels)) {
+                self::$originalStackChannels = $stackChannels;
+            }
+        }
+
+        if (self::$originalRoleDebugChannel === null) {
+            $roleDebug = config('logging.channels.role_debug');
+
+            if (is_array($roleDebug)) {
+                self::$originalRoleDebugChannel = $roleDebug;
+            }
+        }
+    }
+
+    protected static function disableLogging(): void
+    {
+        if (self::$loggingDisabled) {
+            return;
+        }
+
+        config(['logging.default' => 'null']);
+        config(['logging.channels.stack.channels' => ['null']]);
+
+        $roleDebug = self::$originalRoleDebugChannel ?? config('logging.channels.role_debug');
+
+        if (! is_array($roleDebug)) {
+            $roleDebug = [];
+        }
+
+        $roleDebug['driver'] = 'monolog';
+        $roleDebug['handler'] = NullHandler::class;
+        $roleDebug['handler_with'] = [];
+
+        unset($roleDebug['path']);
+
+        config(['logging.channels.role_debug' => $roleDebug]);
+
+        self::$loggingDisabled = true;
+    }
+
+    protected static function restoreLogging(): void
+    {
+        if (! self::$loggingDisabled) {
+            return;
+        }
+
+        $defaultChannel = self::$originalDefaultChannel ?? 'stack';
+        config(['logging.default' => $defaultChannel]);
+
+        if (self::$originalStackChannels !== null) {
+            config(['logging.channels.stack.channels' => self::$originalStackChannels]);
+        }
+
+        if (self::$originalRoleDebugChannel !== null) {
+            config(['logging.channels.role_debug' => self::$originalRoleDebugChannel]);
+        }
+
+        self::$loggingDisabled = false;
+    }
+
+    protected static function toBoolean(mixed $value): ?bool
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_numeric($value)) {
+            return (bool) $value;
+        }
+
+        $normalized = strtolower(trim((string) $value));
+
+        if ($normalized === '') {
+            return null;
+        }
+
+        if (in_array($normalized, ['1', 'true', 'yes', 'on'], true)) {
+            return true;
+        }
+
+        if (in_array($normalized, ['0', 'false', 'no', 'off'], true)) {
+            return false;
+        }
+
+        return null;
     }
 }

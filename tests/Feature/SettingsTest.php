@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Illuminate\Mail\Message;
+use Monolog\Handler\NullHandler;
 use Mockery;
 use RuntimeException;
 use Tests\TestCase;
@@ -71,6 +72,7 @@ class SettingsTest extends TestCase
             'mail_encryption' => 'tls',
             'mail_from_address' => 'no-reply@example.com',
             'mail_from_name' => 'Event Schedule',
+            'mail_disable_delivery' => '0',
         ];
 
         $response = $this
@@ -101,6 +103,40 @@ class SettingsTest extends TestCase
         $this->assertSame('no-reply@example.com', config('mail.from.address'));
         $this->assertSame('Event Schedule', config('mail.from.name'));
         $this->assertNull(config('mail.mailers.smtp.url'));
+        $this->assertFalse(config('mail.disable_delivery'));
+    }
+
+    public function test_admin_can_disable_mail_delivery(): void
+    {
+        $admin = User::factory()->create();
+
+        $payload = [
+            'mail_mailer' => 'smtp',
+            'mail_host' => 'smtp.mailtrap.io',
+            'mail_port' => 2525,
+            'mail_username' => 'mailer@example.com',
+            'mail_password' => 'secret-password',
+            'mail_encryption' => 'tls',
+            'mail_from_address' => 'no-reply@example.com',
+            'mail_from_name' => 'Event Schedule',
+            'mail_disable_delivery' => '1',
+        ];
+
+        $response = $this
+            ->actingAs($admin)
+            ->patch('/settings/email', $payload);
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/settings/email');
+
+        $this->assertDatabaseHas('settings', [
+            'group' => 'mail',
+            'key' => 'disable_delivery',
+            'value' => '1',
+        ]);
+
+        $this->assertTrue(config('mail.disable_delivery'));
     }
 
     public function test_admin_can_update_general_and_logging_settings(): void
@@ -118,9 +154,11 @@ class SettingsTest extends TestCase
         $payload = [
             'public_url' => 'https://events.example.com',
             'update_repository_url' => 'https://github.com/example/eventschedule',
+            'update_release_channel' => 'beta',
             'log_syslog_host' => 'logs.example.com',
             'log_syslog_port' => 6514,
             'log_level' => 'error',
+            'log_disabled' => '0',
         ];
 
         $response = $this
@@ -143,6 +181,12 @@ class SettingsTest extends TestCase
             'value' => 'logs.example.com',
         ]);
 
+        $this->assertDatabaseHas('settings', [
+            'group' => 'logging',
+            'key' => 'disabled',
+            'value' => '0',
+        ]);
+
         $loggingSettings = Setting::forGroup('logging');
 
         $this->assertSame('logs.example.com', $loggingSettings['syslog_host']);
@@ -154,6 +198,85 @@ class SettingsTest extends TestCase
         $this->assertSame(6514, config('logging.channels.syslog_server.handler_with.port'));
         $this->assertSame('error', config('logging.channels.syslog_server.level'));
         $this->assertSame('error', config('logging.channels.single.level'));
+        $this->assertNotSame('null', config('logging.default'));
+    }
+
+    public function test_admin_can_disable_and_reenable_logging(): void
+    {
+        $admin = User::factory()->create();
+
+        config([
+            'logging.default' => 'stack',
+            'logging.channels.stack.channels' => ['single', 'syslog_server'],
+            'logging.channels.role_debug' => [
+                'driver' => 'single',
+                'path' => storage_path('logs/role_debug.log'),
+                'level' => 'debug',
+                'replace_placeholders' => true,
+            ],
+            'logging.channels.syslog_server.handler_with.host' => '127.0.0.1',
+            'logging.channels.syslog_server.handler_with.port' => 514,
+            'logging.channels.single.level' => 'debug',
+            'logging.channels.syslog_server.level' => 'debug',
+        ]);
+
+        $expectedDefault = config('logging.default');
+        $expectedStackChannels = config('logging.channels.stack.channels');
+        $expectedRoleDebug = config('logging.channels.role_debug');
+
+        $disablePayload = [
+            'public_url' => 'https://events.example.com',
+            'update_repository_url' => 'https://github.com/example/eventschedule',
+            'update_release_channel' => 'beta',
+            'log_syslog_host' => 'logs.example.com',
+            'log_syslog_port' => 6514,
+            'log_level' => 'error',
+            'log_disabled' => '1',
+        ];
+
+        $this
+            ->actingAs($admin)
+            ->patch('/settings/general', $disablePayload)
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/settings/general');
+
+        $this->assertSame('null', config('logging.default'));
+        $this->assertSame(['null'], config('logging.channels.stack.channels'));
+        $roleDebugConfig = config('logging.channels.role_debug');
+        $this->assertSame('monolog', $roleDebugConfig['driver'] ?? null);
+        $this->assertSame(NullHandler::class, $roleDebugConfig['handler'] ?? null);
+
+        $this->assertDatabaseHas('settings', [
+            'group' => 'logging',
+            'key' => 'disabled',
+            'value' => '1',
+        ]);
+
+        $enablePayload = [
+            'public_url' => 'https://events.example.com',
+            'update_repository_url' => 'https://github.com/example/eventschedule',
+            'update_release_channel' => 'beta',
+            'log_syslog_host' => 'logs.example.com',
+            'log_syslog_port' => 6514,
+            'log_level' => 'warning',
+            'log_disabled' => '0',
+        ];
+
+        $this
+            ->actingAs($admin)
+            ->patch('/settings/general', $enablePayload)
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/settings/general');
+
+        $this->assertSame($expectedDefault, config('logging.default'));
+        $this->assertSame($expectedStackChannels, config('logging.channels.stack.channels'));
+        $this->assertSame($expectedRoleDebug, config('logging.channels.role_debug'));
+
+        $this->assertDatabaseHas('settings', [
+            'group' => 'logging',
+            'key' => 'disabled',
+            'value' => '0',
+        ]);
     }
 
     public function test_mail_settings_from_database_are_applied_during_boot(): void
