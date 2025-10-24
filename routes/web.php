@@ -131,6 +131,9 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/media-library', [MediaLibraryController::class, 'index'])->name('media.index');
     Route::get('/media-library/assets', [MediaLibraryController::class, 'list'])->name('media.assets.index');
     Route::post('/media-library/assets', [MediaLibraryController::class, 'store'])->name('media.assets.store');
+    Route::delete('/media-library/assets/{asset}', [MediaLibraryController::class, 'destroy'])
+        ->whereNumber('asset')
+        ->name('media.assets.destroy');
     Route::post('/media-library/assets/{asset}/variants', [MediaLibraryController::class, 'storeVariant'])->name('media.assets.variants.store');
     Route::get('/media-library/tags', [MediaLibraryController::class, 'tags'])->name('media.tags.index');
     Route::post('/media-library/tags', [MediaLibraryController::class, 'storeTag'])->name('media.tags.store');

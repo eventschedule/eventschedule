@@ -101,6 +101,13 @@ const createMediaLibraryApi = (config) => ({
         });
     },
 
+    async deleteAsset(assetId) {
+        const endpoint = config.deleteAssetTemplate.replace('__ID__', assetId);
+        return requestJson(endpoint, {
+            method: 'DELETE',
+        });
+    },
+
     async createTag(name) {
         return requestJson(config.createTagEndpoint, {
             method: 'POST',
@@ -357,6 +364,38 @@ export const registerMediaLibraryComponents = (alpineInstance) => {
             closeDetails() {
                 this.detailAsset = null;
                 this.showDetails = false;
+            },
+
+            async deleteAsset(asset) {
+                if (!asset) {
+                    return;
+                }
+
+                const confirmed = window.confirm(`Delete "${asset.original_filename}"? This action cannot be undone.`);
+                if (!confirmed) {
+                    return;
+                }
+
+                const currentPage = Number(this.pagination.current_page) || 1;
+                const perPage = Number(this.pagination.per_page) || 24;
+                const updatedTotal = Math.max(0, (Number(this.pagination.total) || 0) - 1);
+                const lastPageAfterDeletion = Math.max(1, Math.ceil(updatedTotal / perPage));
+                const targetPage = Math.min(currentPage, lastPageAfterDeletion);
+
+                try {
+                    await api.deleteAsset(asset.id);
+                    this.assets = this.assets.filter((item) => item.id !== asset.id);
+                    this.pagination.total = updatedTotal;
+
+                    if (this.detailAsset && this.detailAsset.id === asset.id) {
+                        this.closeDetails();
+                    }
+
+                    await this.fetchAssets(targetPage);
+                } catch (error) {
+                    console.error('Unable to delete asset', error);
+                    alert(error.message || 'Unable to delete asset');
+                }
             },
 
             changePage(page) {
