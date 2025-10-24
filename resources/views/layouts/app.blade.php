@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head class="h-full bg-white">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full" data-theme="system">
+<head>
     <title>{{ $title ?? 'Event Schedule' }}</title>
     <!-- Version: {{ config('self-update.version_installed') }} -->
     <meta charset="utf-8">
@@ -30,6 +30,36 @@
         <meta name="twitter:image:alt" content="Event Schedule">
         <meta name="twitter:card" content="summary_large_image">
     @endif    
+
+    <script {!! nonce_attr() !!}>
+        (() => {
+            const storageKey = 'theme';
+            const root = document.documentElement;
+            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+            const getPreference = () => {
+                const stored = window.localStorage.getItem(storageKey);
+                if (stored === 'light' || stored === 'dark' || stored === 'system') {
+                    return stored;
+                }
+
+                return 'system';
+            };
+
+            const applyPreference = (preference) => {
+                const resolved = preference === 'system'
+                    ? (mediaQuery.matches ? 'dark' : 'light')
+                    : preference;
+
+                root.classList.toggle('dark', resolved === 'dark');
+                root.dataset.themePreference = preference;
+                root.dataset.themeResolved = resolved;
+                root.style.colorScheme = resolved;
+            };
+
+            applyPreference(getPreference());
+        })();
+    </script>
 
     <script src="{{ asset('js/jquery.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/toastify-js.js') }}"></script>
@@ -153,44 +183,46 @@
             font-family: sans-serif !important;
             position: absolute;
             padding: 5px 10px;
-            background: #333;
-            color: #fff;
+            background-color: var(--color-surface-muted);
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-border);
             border-radius: 4px;
             display: none;
             font-size: 12px;
             z-index: 9999;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
         }
 
         /* EasyMDE Toolbar Fixes */
         .editor-toolbar {
-            background-color: #f8f9fa !important; /* Temporarily change to light gray for debugging */
-            border-bottom: 1px solid #d1d5db !important;
+            background-color: var(--color-surface-muted) !important;
+            border-bottom: 1px solid var(--color-border) !important;
         }
 
         .editor-toolbar button,
         .editor-toolbar a,
         .editor-toolbar .fa,
         .editor-toolbar i {
-            color: #374151 !important;
+            color: var(--color-text-primary) !important;
             background-color: transparent !important;
             border: none !important;
-            text-shadow: 0 0 1px rgba(0,0,0,0.5) !important; /* Add text shadow for visibility */
+            text-shadow: none !important;
         }
 
         .editor-toolbar button:hover,
         .editor-toolbar a:hover {
-            background-color: #f3f4f6 !important;
-            color: #111827 !important;
+            background-color: var(--color-surface) !important;
+            color: var(--color-text-primary) !important;
         }
 
         .editor-toolbar button.active,
         .editor-toolbar a.active {
-            background-color: #e5e7eb !important;
-            color: #111827 !important;
+            background-color: var(--color-surface-muted) !important;
+            color: var(--color-text-primary) !important;
         }
 
         .editor-toolbar .separator {
-            border-left: 1px solid #d1d5db !important;
+            border-left: 1px solid var(--color-border) !important;
             border-right: none !important;
             color: transparent !important;
             font-size: 0 !important;
@@ -204,27 +236,27 @@
         /* Additional EasyMDE icon fixes */
         .editor-toolbar button:before,
         .editor-toolbar a:before {
-            color: #374151 !important;
-            text-shadow: 0 0 1px rgba(0,0,0,0.5) !important;
+            color: var(--color-text-primary) !important;
+            text-shadow: none !important;
         }
 
         .editor-toolbar button:hover:before,
         .editor-toolbar a:hover:before {
-            color: #111827 !important;
+            color: var(--color-text-primary) !important;
         }
 
         /* More specific EasyMDE fixes for different icon types */
         .CodeMirror .editor-toolbar > * {
-            color: #374151 !important;
+            color: var(--color-text-primary) !important;
         }
 
         .editor-toolbar > * {
-            color: #374151 !important;
+            color: var(--color-text-primary) !important;
         }
 
         .editor-toolbar > button > i,
         .editor-toolbar > a > i {
-            color: #374151 !important;
+            color: var(--color-text-primary) !important;
         }
 
         /* Force visibility of all toolbar elements */
@@ -327,7 +359,19 @@
     {{ isset($head) ? $head : '' }}
 
 </head> 
-<body class="font-sans antialiased h-full bg-gray-50">
+<body class="font-sans h-full bg-gray-50 text-gray-900 transition-colors duration-200 dark:bg-gray-950 dark:text-gray-100">
+
+    <div data-theme-floating-wrapper class="fixed bottom-4 right-4 z-40">
+        <label for="theme-preference-floating" class="sr-only">{{ __('Theme') }}</label>
+        <div class="rounded-full bg-white/90 p-2 shadow-lg ring-1 ring-gray-200 backdrop-blur dark:bg-gray-900/90 dark:ring-gray-700">
+            <select id="theme-preference-floating" data-theme-select data-theme-floating
+                class="rounded-full border border-transparent bg-transparent px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors duration-150 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-gray-100 dark:focus:border-indigo-400">
+                <option value="system">{{ __('System') }}</option>
+                <option value="light">{{ __('Light') }}</option>
+                <option value="dark">{{ __('Dark') }}</option>
+            </select>
+        </div>
+    </div>
 
     {{ $slot }}
 
