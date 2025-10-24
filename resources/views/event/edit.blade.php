@@ -911,7 +911,7 @@
                                                     class="mt-1 block w-full" required />
                                             </div>
                                             <div v-if="tickets.length > 1" class="flex items-end">
-                                                <x-secondary-button x-on:click="removeTicket(index)" type="button" class="mt-1">
+                                    <x-secondary-button @click="removeTicket(index)" type="button" class="mt-1">
                                                     {{ __('messages.remove') }}
                                                 </x-secondary-button>
                                             </div>
@@ -951,7 +951,7 @@
                                         </div>
                                     </div>
 
-                                    <x-secondary-button x-on:click="addTicket" type="button" class="mt-4">
+                                    <x-secondary-button @click="addTicket" type="button" class="mt-4">
                                         {{ __('messages.add_type') }}
                                     </x-secondary-button>
                                 </div>
