@@ -144,6 +144,21 @@ class MediaLibraryController extends Controller
         ], 201);
     }
 
+    public function destroy(MediaAsset $asset): JsonResponse
+    {
+        if ($asset->usages()->exists()) {
+            return response()->json([
+                'message' => 'This asset is currently in use and cannot be deleted.',
+            ], 422);
+        }
+
+        $asset->delete();
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
+
     public function storeVariant(Request $request, MediaAsset $asset): JsonResponse
     {
         $validated = $request->validate([

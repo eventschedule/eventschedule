@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 
 class MediaAsset extends Model
 {
@@ -38,6 +40,22 @@ class MediaAsset extends Model
             if (empty($asset->uuid)) {
                 $asset->uuid = (string) Str::uuid();
             }
+        });
+
+        static::deleting(function (MediaAsset $asset): void {
+            $disk = $asset->disk ?: storage_public_disk();
+
+            if ($asset->path) {
+                try {
+                    Storage::disk($disk)->delete($asset->path);
+                } catch (Throwable $exception) {
+                    report($exception);
+                }
+            }
+
+            $asset->variants()->get()->each(function (MediaAssetVariant $variant): void {
+                $variant->delete();
+            });
         });
     }
 

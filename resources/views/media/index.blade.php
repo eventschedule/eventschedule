@@ -11,6 +11,7 @@
             createTagEndpoint: '{{ route('media.tags.store', [], false) }}',
             deleteTagTemplate: '{{ route('media.tags.destroy', ['tag' => '__ID__'], false) }}',
             syncTagsTemplate: '{{ route('media.assets.tags.sync', ['asset' => '__ID__'], false) }}',
+            deleteAssetTemplate: '{{ route('media.assets.destroy', ['asset' => '__ID__'], false) }}',
         })"
         x-init="init()"
         class="space-y-6"
@@ -104,6 +105,7 @@
                             <div class="mt-auto flex items-center gap-2 pt-2">
                                 <button type="button" class="text-sm text-indigo-600 hover:text-indigo-500" @click="openTagEditor(asset)">{{ __('Edit tags') }}</button>
                                 <button type="button" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-500" @click="openDetails(asset)">{{ __('Details') }}</button>
+                                <button type="button" class="ml-auto text-sm text-red-600 hover:text-red-500" @click="deleteAsset(asset)">{{ __('Delete') }}</button>
                             </div>
                         </div>
                     </div>
@@ -214,6 +216,11 @@
                                     </div>
                                 </template>
                             </div>
+                        </div>
+                        <div>
+                            <button type="button" class="inline-flex items-center justify-center rounded-md border border-red-200 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50" @click="deleteAsset(detailAsset)">
+                                {{ __('Delete asset') }}
+                            </button>
                         </div>
                     </div>
                 </template>
