@@ -75,7 +75,7 @@
     <div>
         <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
         <div data-state="closed" id="sidebar" class="relative z-50 hidden" role="dialog" aria-modal="true">
-            <div class="fixed inset-0 bg-gray-900/80" aria-hidden="true"></div>
+            <div class="fixed inset-0 bg-gray-900/80 dark:bg-black/70" aria-hidden="true"></div>
 
             <div class="fixed inset-0 flex">
                 <div class="relative mr-16 flex w-full max-w-xs flex-1">
@@ -90,9 +90,9 @@
                     </div>
 
                     <!-- Sidebar component, swap this element with another sidebar if you like -->
-                    <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-4 ring-1 ring-white/10">
+                    <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4 text-gray-900 ring-1 ring-black/10 dark:bg-gray-950 dark:text-gray-100 dark:ring-white/10">
 
-                        @include('layouts.navigation')                        
+                        @include('layouts.navigation')
 
                     </div>
                 </div>
@@ -102,7 +102,7 @@
         <!-- Static sidebar for desktop -->
         <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
             <!-- Sidebar component, swap this element with another sidebar if you like -->
-            <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-4">
+            <div class="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4 dark:border-gray-800 dark:bg-gray-950">
 
                 @include('layouts.navigation')
 
@@ -111,8 +111,8 @@
 
         <div class="lg:pl-72 flex flex-col min-h-screen">
             <div
-                class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
-                <button id="open-sidebar" type="button" class="-m-2.5 p-2.5 text-gray-700 lg:hidden">
+                class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900 dark:shadow-black/30 sm:gap-x-6 sm:px-6 lg:px-8">
+                <button id="open-sidebar" type="button" class="-m-2.5 p-2.5 text-gray-700 transition-colors duration-150 hover:text-gray-900 lg:hidden dark:text-gray-200 dark:hover:text-gray-50">
                     <span class="sr-only">{{ __('messages.open_sidebar') }}</span>
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                         aria-hidden="true">
@@ -122,7 +122,7 @@
                 </button>
 
                 <!-- Separator -->
-                <div class="h-6 w-px bg-gray-900/10 lg:hidden" aria-hidden="true"></div>
+                <div class="h-6 w-px bg-gray-900/10 lg:hidden dark:bg-white/10" aria-hidden="true"></div>
 
                 <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
                     <div class="relative flex flex-1"></div>
@@ -149,8 +149,18 @@
                         -->
 
                         <!-- Separator -->
-                        <div class="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-900/10" aria-hidden="true"></div>
+                        <div class="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-900/10 dark:lg:bg-white/10" aria-hidden="true"></div>
 
+
+                        <div class="flex items-center">
+                            <label for="theme-preference" class="sr-only">{{ __('Theme') }}</label>
+                            <select id="theme-preference" data-theme-select
+                                class="rounded-md border border-gray-300 bg-white px-2.5 py-1 text-sm font-medium text-gray-700 shadow-sm transition-colors duration-150 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-indigo-400">
+                                <option value="system">{{ __('System') }}</option>
+                                <option value="light">{{ __('Light') }}</option>
+                                <option value="dark">{{ __('Dark') }}</option>
+                            </select>
+                        </div>
 
                         <!-- Settings Dropdown -->
                         <div class="sm:flex sm:items-center sm:ms-6">
@@ -163,7 +173,7 @@
                                         $displayName = $userName !== '' ? $userName : $userEmail;
                                     @endphp
                                     <button
-                                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150 dark:bg-gray-800 dark:text-gray-200 dark:hover:text-gray-100">
                                         <div>{{ $displayName }}</div>
 
                                         <div class="ms-1">
