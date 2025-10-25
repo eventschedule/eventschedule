@@ -8,6 +8,7 @@ use App\Support\ReleaseChannelManager;
 use Codedge\Updater\UpdaterManager;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
+use RuntimeException;
 use Throwable;
 class UpdateApp extends Command
 {
@@ -60,7 +61,13 @@ class UpdateApp extends Command
         try {
             $release = $updater->source()->fetch($releaseTag);
 
-            $updater->source()->update($release);
+            $updateResult = $updater->source()->update($release);
+
+            if ($updateResult === false) {
+                throw new RuntimeException(
+                    'The update could not be installed. Please check the application logs for more details.'
+                );
+            }
 
             Artisan::call('migrate', ['--force' => true]);
         } catch (Throwable $exception) {
