@@ -128,9 +128,9 @@
 
                         <form method="post" action="{{ route('settings.branding.update') }}" class="mt-6 space-y-6"
                             x-data="brandingColorForm({
-                                colors: @json($currentColors),
-                                defaults: @json($defaultColors),
-                                palettes: @json($colorPalettes),
+                                colors: @js($currentColors),
+                                defaults: @js($defaultColors),
+                                palettes: @js($colorPalettes),
                             })"
                             x-init="init()">
                             @csrf
