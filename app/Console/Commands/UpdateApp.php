@@ -41,7 +41,9 @@ class UpdateApp extends Command
         $this->info(sprintf('Updating app via the %s channel. This can take a few minutes...', $channel->label()));
 
         try {
-            $versionAvailable = $releaseChannels->getLatestVersion($channel);
+            $latestRelease = $releaseChannels->getLatestRelease($channel);
+            $versionAvailable = $latestRelease['version'];
+            $releaseTag = $latestRelease['tag'];
             $installedVersion = $updater->source()->getVersionInstalled();
         } catch (Throwable $exception) {
             $this->error($exception->getMessage());
@@ -56,7 +58,7 @@ class UpdateApp extends Command
         }
 
         try {
-            $release = $updater->source()->fetch($versionAvailable);
+            $release = $updater->source()->fetch($releaseTag);
 
             $updater->source()->update($release);
 

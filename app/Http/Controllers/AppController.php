@@ -45,13 +45,15 @@ class AppController extends Controller
 
         try {
             $versionInstalled = $updater->source()->getVersionInstalled();
-            $versionAvailable = $releaseChannels->getLatestVersion($channel);
+            $latestRelease = $releaseChannels->getLatestRelease($channel);
+            $versionAvailable = $latestRelease['version'];
+            $releaseTag = $latestRelease['tag'];
 
             if ($versionInstalled === $versionAvailable) {
                 return redirect()->back()->with('error', __('messages.no_new_version_available'));
             }
 
-            $release = $updater->source()->fetch($versionAvailable);
+            $release = $updater->source()->fetch($releaseTag);
 
             $updater->source()->update($release);
 
