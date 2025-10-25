@@ -2,7 +2,7 @@
 
     <x-slot name="head">
         <link rel="preconnect" href="https://rsms.me/">
-        <link rel="stylesheet" href="https://rsms.me/inter/inter.css">        
+        <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
 
         <script {!! nonce_attr() !!}>
             $(document).ready(function() {
@@ -71,6 +71,8 @@
 
         {{ isset($head) ? $head : '' }}
     </x-slot>
+
+    <x-slot name="footer"></x-slot>
 
     <div>
         <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
@@ -228,14 +230,12 @@
                 </div>
             </main>
 
-            <div class="mt-auto pb-8 px-8 text-sm text-gray-500">                
-                @if (config('app.hosted'))                
-                    {!! str_replace(':email', '<a href="mailto:contact@eventschedule.com?subject=Feedback" class="hover:underline">contact@eventschedule.com</a>', __('messages.questions_or_suggestions')) !!}
+            <div class="mt-auto pb-8 px-8 text-sm text-gray-500">
+                {!! str_replace(':link', '<a href="https://www.eventschedule.com" class="hover:underline" target="_blank">EventSchedule</a>', __('messages.powered_by_eventschedule')) !!}
+                @if (config('app.hosted'))
+                    • {!! str_replace(':email', '<a href="mailto:contact@eventschedule.com?subject=Feedback" class="hover:underline">contact@eventschedule.com</a>', __('messages.questions_or_suggestions')) !!}
                 @else
-                    <!-- Per the AAL license, please do not remove the link to Event Schedule -->
-                    {!! str_replace(':link', '<a href="https://www.eventschedule.com" class="hover:underline" target="_blank">eventschedule.com</a>', __('messages.powered_by_eventschedule')) !!} 
-                    • 
-                    <a href="{{ config('self-update.repository_types.github.repository_url') }}" target="_blank" class="hover:underline">{{ config('self-update.version_installed') }}</a>
+                    • <a href="{{ config('self-update.repository_types.github.repository_url') }}" target="_blank" class="hover:underline">{{ config('self-update.version_installed') }}</a>
                 @endif
             </div>
 

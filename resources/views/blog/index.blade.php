@@ -17,7 +17,12 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="w-full flex flex-col sm:flex-row items-center gap-4 sm:gap-8 mb-4 text-center sm:text-left">
                 <a href="https://www.eventschedule.com" class="hover:opacity-80 transition-opacity flex-shrink-0 flex justify-center sm:block">
-                    <img class="h-12 w-auto sm:h-14 mb-4 sm:mb-0" src="{{ url('images/light_logo.png') }}" alt="EventSchedule Logo"/>
+                    @php($blogLogoAlt = branding_logo_alt())
+                    @if (config('branding.logo_path'))
+                        <img class="h-12 w-auto sm:h-14 mb-4 sm:mb-0" src="{{ branding_logo_url() }}" alt="{{ $blogLogoAlt }}" />
+                    @else
+                        <img class="h-12 w-auto sm:h-14 mb-4 sm:mb-0" src="{{ branding_logo_url('light') }}" alt="{{ $blogLogoAlt }}" />
+                    @endif
                 </a>
                 <div class="w-full h-px bg-gray-600 sm:w-px sm:h-14 sm:bg-gray-600"></div>
                 <div class="flex-1 min-w-0">

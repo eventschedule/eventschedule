@@ -78,6 +78,8 @@
 
         <div class="pt-20"></div>
     </div>
+
+    @include('branding.powered-by')
 </body>
 
 </html>

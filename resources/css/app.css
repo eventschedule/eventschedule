@@ -14,6 +14,15 @@
         --color-border: theme('colors.gray.200');
         --color-text-primary: theme('colors.gray.900');
         --color-text-muted: theme('colors.gray.600');
+        --brand-primary: #4E81FA;
+        --brand-primary-rgb: 78, 129, 250;
+        --brand-primary-10: rgba(78, 129, 250, 0.1);
+        --brand-primary-20: rgba(78, 129, 250, 0.2);
+        --brand-primary-50: rgba(78, 129, 250, 0.5);
+        --brand-primary-light: #9DB9FF;
+        --brand-secondary: #365FCC;
+        --brand-tertiary: #3A6BE0;
+        --brand-on-primary: #FFFFFF;
     }
 
     .dark {
@@ -35,10 +44,11 @@
     }
 
     a {
-        @apply text-indigo-600 transition-colors duration-150 dark:text-indigo-400;
+        color: var(--brand-primary);
+        transition: color 150ms ease-in-out;
     }
 
     a:hover {
-        @apply text-indigo-500 dark:text-indigo-300;
+        color: var(--brand-secondary);
     }
 }

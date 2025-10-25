@@ -23,6 +23,8 @@
         <link rel="canonical" href="{{ url()->current() }}">
         
         <!-- Structured Data -->
+        @php($structuredLogo = branding_logo_url('light'))
+
         <script type="application/ld+json">
         {
             "@context": "https://schema.org",
@@ -39,7 +41,7 @@
                 "name": "Event Schedule",
                 "logo": {
                     "@type": "ImageObject",
-                    "url": "{{ url('/images/light_logo.png') }}"
+                    "url": "{{ $structuredLogo }}"
                 }
             },
             "datePublished": "{{ $post->published_at ? $post->published_at->toISOString() : '' }}",
@@ -112,9 +114,9 @@
             <!-- CTA Card -->
             <div class="mb-8">
                 <a href="https://www.eventschedule.com" class="block group">
-                    <div class="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 rounded-lg p-6 shadow-md transform transition-all duration-300 group-hover:shadow-lg" style="--tw-scale-x: 1; --tw-scale-y: 1;">
+                    <div class="rounded-lg p-6 shadow-md text-white transition-all duration-300 group-hover:shadow-lg brand-gradient-card" style="--tw-scale-x: 1; --tw-scale-y: 1; background: linear-gradient(90deg, var(--brand-secondary), var(--brand-primary));">
                         <style>
-                            .group:hover .bg-gradient-to-r {
+                            .group:hover .brand-gradient-card {
                                 transform: scale(1.03);
                             }
                         </style>

@@ -55,6 +55,7 @@ You agree not to:
 * All Platform content, trademarks, and branding remain the property of their respective owners.
 * Organizers grant us a limited license to host, display, and distribute event materials for the purpose of operating the Platform.
 * You may not reproduce, resell, or exploit any portion of the Platform without express written permission.
+* You must keep the "Powered by EventSchedule" attribution visible on all user-facing screens of the Platform.
 
 ## 8. Privacy
 
