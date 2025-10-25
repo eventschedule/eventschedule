@@ -3,6 +3,9 @@
 
 declare(strict_types=1);
 
+use DateTimeImmutable;
+use DateTimeZone;
+
 const ALLOWED_CHANNELS = ['production', 'beta'];
 
 if (PHP_SAPI === 'cli' && realpath($_SERVER['SCRIPT_FILENAME'] ?? '') === realpath(__FILE__)) {
@@ -130,84 +133,98 @@ function writeGithubOutputs(string $version, string $channel, bool $forceMajor):
 
 function bumpVersion(string $currentVersion, string $channel, bool $forceMajor = false): string
 {
-    $parsed = parseVersion($currentVersion);
+    $suffix = $channel === 'beta' ? 'b' : 'p';
+    $currentDate = resolveVersionDate();
+
+    $parsed = null;
+
+    try {
+        $parsed = parseVersion($currentVersion);
+    } catch (InvalidArgumentException $exception) {
+        if (! isLegacyVersion($currentVersion)) {
+            throw $exception;
+        }
+    }
 
     if ($forceMajor) {
-        $nextMajor = $parsed['major'] + 1;
-
-        if ($channel === 'beta') {
-            return formatVersion($nextMajor, 0, null, 'b');
-        }
-
-        return formatVersion($nextMajor, 0, null, null);
+        return formatVersion($currentDate, 1, $suffix);
     }
 
-    if ($channel === 'beta') {
-        $patch = $parsed['patch'] ?? 0;
-
-        if ($parsed['suffix'] !== null) {
-            return formatVersion(
-                $parsed['major'],
-                $parsed['minor'],
-                $patch + 1,
-                $parsed['suffix']
-            );
-        }
-
-        return formatVersion(
-            $parsed['major'],
-            $parsed['minor'],
-            $patch + 1,
-            'b'
-        );
+    if ($parsed !== null
+        && $parsed['date'] === $currentDate
+        && $parsed['suffix'] === $suffix
+    ) {
+        $sequence = $parsed['sequence'] + 1;
+    } else {
+        $sequence = 1;
     }
 
-    // Production channel
-    if ($parsed['suffix'] !== null) {
-        return formatVersion(
-            $parsed['major'],
-            $parsed['minor'],
-            $parsed['patch'],
-            null
-        );
-    }
-
-    $nextMinor = $parsed['minor'] + 1;
-
-    return formatVersion($parsed['major'], $nextMinor, null, null);
+    return formatVersion($currentDate, $sequence, $suffix);
 }
 
 function parseVersion(string $version): array
 {
-    $pattern = '/^(?<major>\d+)\.(?<minor>\d+)(?:\.(?<patch>\d+))?(?<suffix>[a-z])?$/i';
+    $pattern = '/^(?<date>\d{8})-(?<sequence>\d{2,})(?<suffix>[bp])$/i';
 
-    if (! preg_match($pattern, $version, $matches)) {
+    if (preg_match($pattern, $version, $matches) !== 1) {
         throw new InvalidArgumentException(sprintf('Invalid version format: %s', $version));
     }
 
+    $date = $matches['date'];
+    $sequence = (int) $matches['sequence'];
+    $suffix = strtolower($matches['suffix']);
+
+    if (! validateVersionDate($date)) {
+        throw new InvalidArgumentException(sprintf('Invalid version date: %s', $version));
+    }
+
+    if ($sequence < 1) {
+        throw new InvalidArgumentException(sprintf('Invalid version sequence: %s', $version));
+    }
+
     return [
-        'major' => (int) $matches['major'],
-        'minor' => (int) $matches['minor'],
-        'patch' => array_key_exists('patch', $matches) && $matches['patch'] !== ''
-            ? (int) $matches['patch']
-            : null,
-        'suffix' => array_key_exists('suffix', $matches) && $matches['suffix'] !== ''
-            ? strtolower($matches['suffix'])
-            : null,
+        'date' => $date,
+        'sequence' => $sequence,
+        'suffix' => $suffix,
     ];
 }
 
-function formatVersion(int $major, int $minor, ?int $patch, ?string $suffix): string
+function formatVersion(string $date, int $sequence, string $suffix): string
 {
-    $version = sprintf('%d.%d', $major, $minor);
+    return sprintf('%s-%02d%s', $date, $sequence, $suffix);
+}
 
-    if ($patch !== null) {
-        $version .= '.' . $patch;
+function resolveVersionDate(): string
+{
+    $override = getenv('BUMP_VERSION_DATE');
+
+    if (is_string($override) && $override !== '') {
+        $override = trim($override);
+
+        if (! preg_match('/^\d{8}$/', $override)) {
+            throw new InvalidArgumentException('BUMP_VERSION_DATE must be in Ymd format (e.g. 20251024).');
+        }
+
+        if (! validateVersionDate($override)) {
+            throw new InvalidArgumentException(sprintf('Invalid BUMP_VERSION_DATE value: %s', $override));
+        }
+
+        return $override;
     }
 
-    if ($suffix !== null && $suffix !== '') {
-        $version .= $suffix;
-    }
+    return (new DateTimeImmutable('now', new DateTimeZone('UTC')))->format('Ymd');
+}
 
-    return $version;
+function validateVersionDate(string $date): bool
+{
+    $year = (int) substr($date, 0, 4);
+    $month = (int) substr($date, 4, 2);
+    $day = (int) substr($date, 6, 2);
+
+    return checkdate($month, $day, $year);
+}
+
+function isLegacyVersion(string $version): bool
+{
+    return preg_match('/^\d+\.\d+(?:\.\d+)?[a-z]?$/i', $version) === 1;
 }

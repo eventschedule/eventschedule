@@ -32,14 +32,14 @@ class UpdateAppCommandTest extends TestCase
         $releaseChannels = Mockery::mock(ReleaseChannelService::class);
 
         $updater->shouldReceive('source')->times(3)->andReturn($source);
-        $source->shouldReceive('getVersionInstalled')->once()->andReturn('1.0.0');
+        $source->shouldReceive('getVersionInstalled')->once()->andReturn('20251023-01p');
 
         $releaseChannels->shouldReceive('getLatestRelease')->once()->andReturn([
-            'version' => '2.0.0',
-            'tag' => 'v2.0.0',
+            'version' => '20251024-01p',
+            'tag' => 'v20251024-01p',
         ]);
 
-        $source->shouldReceive('fetch')->once()->with('v2.0.0')->andReturn('release');
+        $source->shouldReceive('fetch')->once()->with('v20251024-01p')->andReturn('release');
         $source->shouldReceive('update')->once()->with('release')->andReturn(false);
 
         $this->app->instance(UpdaterManager::class, $updater);

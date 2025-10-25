@@ -10,43 +10,45 @@ require_once __DIR__ . '/../../scripts/bump-version.php';
 
 class BumpVersionScriptTest extends TestCase
 {
-    public function testBetaReleaseFromProductionVersionAddsPatchAndSuffix(): void
+    protected function tearDown(): void
     {
-        $this->assertSame('2.1.1b', bumpVersion('2.1', 'beta'));
+        putenv('BUMP_VERSION_DATE');
+
+        parent::tearDown();
     }
 
-    public function testSubsequentBetaReleaseIncrementsPatch(): void
+    public function testBetaReleaseFromProductionVersionStartsNewSequenceForCurrentDate(): void
     {
-        $this->assertSame('2.1.2b', bumpVersion('2.1.1b', 'beta'));
+        putenv('BUMP_VERSION_DATE=20251024');
+
+        $this->assertSame('20251024-01b', bumpVersion('20251023-05p', 'beta'));
     }
 
-    public function testBetaReleaseFromPatchedProductionVersionIncrementsPatch(): void
+    public function testSubsequentBetaReleaseIncrementsSequence(): void
     {
-        $this->assertSame('2.1.4b', bumpVersion('2.1.3', 'beta'));
+        putenv('BUMP_VERSION_DATE=20251024');
+
+        $this->assertSame('20251024-02b', bumpVersion('20251024-01b', 'beta'));
     }
 
-    public function testProductionReleaseIncrementsMinor(): void
+    public function testProductionReleaseResetsSequenceForNewChannel(): void
     {
-        $this->assertSame('2.2', bumpVersion('2.1', 'production'));
+        putenv('BUMP_VERSION_DATE=20251024');
+
+        $this->assertSame('20251024-01p', bumpVersion('20251024-02b', 'production'));
     }
 
-    public function testMajorProductionReleaseResetsMinorVersion(): void
+    public function testMajorFlagForcesNewDailySequence(): void
     {
-        $this->assertSame('3.0', bumpVersion('2.1', 'production', true));
+        putenv('BUMP_VERSION_DATE=20251024');
+
+        $this->assertSame('20251024-01p', bumpVersion('20251024-05p', 'production', true));
     }
 
-    public function testMajorBetaReleaseResetsAndAddsBetaSuffix(): void
+    public function testLegacyVersionFormatFallsBackToCurrentDate(): void
     {
-        $this->assertSame('3.0b', bumpVersion('2.1', 'beta', true));
-    }
+        putenv('BUMP_VERSION_DATE=20251024');
 
-    public function testProductionReleaseFromBetaFinalizesVersion(): void
-    {
-        $this->assertSame('2.1.4', bumpVersion('2.1.4b', 'production'));
-    }
-
-    public function testProductionReleaseFromMajorBetaFinalizesVersion(): void
-    {
-        $this->assertSame('3.0', bumpVersion('3.0b', 'production'));
+        $this->assertSame('20251024-01b', bumpVersion('5.0.17b', 'beta'));
     }
 }
