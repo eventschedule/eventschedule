@@ -91,7 +91,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: false
           prerelease: ${{ steps.version.outputs.prerelease == 'true' }}
-          make_latest: ${{ steps.version.outputs.channel == 'beta' && 'legacy' || 'true' }}
+          # Always mark the generated release as the latest so beta builds update the
+          # "Latest" pre-release tag on GitHub instead of leaving the previous beta.
+          make_latest: true
           name: "${{ steps.version.outputs.channel == 'beta' && 'Beta Release' || 'Latest Release' }}"
           tag_name: "${{ steps.version.outputs.version }}"
           files: |
