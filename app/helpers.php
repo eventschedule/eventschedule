@@ -26,19 +26,33 @@ if (!function_exists('get_translated_categories')) {
      */
     function get_translated_categories(): array
     {
+        static $cached = null;
+
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        try {
+            $options = \App\Models\EventType::optionsForLocale();
+
+            if (! empty($options)) {
+                return $cached = $options;
+            }
+        } catch (\Throwable $exception) {
+            // Fallback to configuration-defined categories below.
+        }
+
         $categories = config('app.event_categories', []);
         $translatedCategories = [];
-        
+
         foreach ($categories as $id => $englishName) {
-            // Convert category name to translation key format
-            // First replace " & " with "_&_", then replace remaining spaces with "_"
             $key = strtolower($englishName);
             $key = str_replace(' & ', '_&_', $key);
             $key = str_replace(' ', '_', $key);
             $translatedCategories[$id] = __("messages.{$key}");
         }
-        
-        return $translatedCategories;
+
+        return $cached = $translatedCategories;
     }
 }
 

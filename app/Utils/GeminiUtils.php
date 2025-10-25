@@ -2,12 +2,13 @@
 
 namespace App\Utils;
 
-use App\Utils\UrlUtils;
-use App\Utils\ImageUtils;
+use App\Models\EventType;
 use App\Models\Role;
 use App\Models\Event;
 use App\Models\RoleUser;
 use App\Models\MediaAsset;
+use App\Utils\ImageUtils;
+use App\Utils\UrlUtils;
 use Carbon\Carbon;
 
 class GeminiUtils
@@ -175,9 +176,41 @@ class GeminiUtils
         }
 
         // Get available categories
-        $categories = config('app.event_categories', []);
+        $categories = [];
+        $categoryVariants = [];
+
+        try {
+            $eventTypes = EventType::ordered();
+
+            if ($eventTypes->isNotEmpty()) {
+                foreach ($eventTypes as $eventType) {
+                    $categories[$eventType->id] = $eventType->translatedName('en');
+
+                    $variants = $eventType->translations ?? [];
+                    $variants['name'] = $eventType->name;
+                    $variants['en'] = $eventType->translatedName('en');
+
+                    $categoryVariants[$eventType->id] = collect($variants)
+                        ->filter(fn ($value) => is_string($value) && $value !== '')
+                        ->unique()
+                        ->values()
+                        ->all();
+                }
+            }
+        } catch (\Throwable $exception) {
+            // Fall back to configuration-defined categories below.
+        }
+
+        if (empty($categories)) {
+            $fallbackCategories = config('app.event_categories', []);
+
+            foreach ($fallbackCategories as $id => $name) {
+                $categories[$id] = $name;
+                $categoryVariants[$id] = [$name];
+            }
+        }
+
         $categoryNames = array_values($categories);
-        $categoryIds = array_keys($categories);
 
         // Define fields and their descriptions
         $fields = [
@@ -262,44 +295,51 @@ class GeminiUtils
             if (!empty($item['category_name'])) {
                 $categoryName = trim($item['category_name']);
                 $categoryId = null;
-                
-                // Try exact match first
-                foreach ($categories as $id => $name) {
-                    if (strcasecmp($name, $categoryName) === 0) {
-                        $categoryId = $id;
-                        break;
-                    }
-                }
-                
-                // If no exact match, try partial match
-                if (!$categoryId) {
-                    foreach ($categories as $id => $name) {
-                        if (stripos($name, $categoryName) !== false || stripos($categoryName, $name) !== false) {
+
+                // Try exact match first across all known variants
+                foreach ($categoryVariants as $id => $names) {
+                    foreach ($names as $name) {
+                        if (strcasecmp($name, $categoryName) === 0) {
                             $categoryId = $id;
-                            break;
+                            break 2;
                         }
                     }
                 }
-                
+
+                // If no exact match, try partial match
+                if (!$categoryId) {
+                    foreach ($categoryVariants as $id => $names) {
+                        foreach ($names as $name) {
+                            if (stripos($name, $categoryName) !== false || stripos($categoryName, $name) !== false) {
+                                $categoryId = $id;
+                                break 2;
+                            }
+                        }
+                    }
+                }
+
                 // If still no match, try fuzzy matching
                 if (!$categoryId) {
                     $bestMatch = null;
                     $bestScore = 0;
-                    
-                    foreach ($categories as $id => $name) {
-                        $score = similar_text(strtolower($name), strtolower($categoryName), $percent);
-                        if ($percent > $bestScore) {
-                            $bestScore = $percent;
-                            $bestMatch = $id;
+
+                    foreach ($categoryVariants as $id => $names) {
+                        foreach ($names as $name) {
+                            $score = similar_text(strtolower($name), strtolower($categoryName), $percent);
+
+                            if ($percent > $bestScore) {
+                                $bestScore = $percent;
+                                $bestMatch = $id;
+                            }
                         }
                     }
-                    
+
                     // Only use fuzzy match if similarity is above 70%
                     if ($bestScore > 70) {
                         $categoryId = $bestMatch;
                     }
                 }
-                
+
                 $data[$key]['category_id'] = $categoryId;
                 unset($data[$key]['category_name']);
             }

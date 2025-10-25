@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\EventTypeController;
 use App\Http\Controllers\RoleContactController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\EventController;
@@ -161,6 +162,15 @@ Route::middleware(['auth', 'verified'])->group(function ()
         Route::post('/email/test', [SettingsController::class, 'testMail'])->name('mail.test');
         Route::patch('/email-templates/{template}', [SettingsController::class, 'updateMailTemplate'])->name('mail_templates.update');
         Route::post('/email-templates/{template}/test', [SettingsController::class, 'testMailTemplate'])->name('mail_templates.test');
+
+        Route::get('/event-types', [EventTypeController::class, 'index'])->name('event_types.index');
+        Route::post('/event-types', [EventTypeController::class, 'store'])->name('event_types.store');
+        Route::patch('/event-types/{eventType}', [EventTypeController::class, 'update'])
+            ->whereNumber('eventType')
+            ->name('event_types.update');
+        Route::delete('/event-types/{eventType}', [EventTypeController::class, 'destroy'])
+            ->whereNumber('eventType')
+            ->name('event_types.destroy');
     });
 
     Route::get('/account', [ProfileController::class, 'edit'])->name('profile.edit');
