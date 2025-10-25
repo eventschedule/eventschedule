@@ -5,7 +5,6 @@ namespace Tests\Feature\Support;
 use App\Support\BrandingManager;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class BrandingManagerTest extends TestCase
@@ -64,8 +63,6 @@ class BrandingManagerTest extends TestCase
             'root' => storage_path('app/s3'),
             'url' => 'https://cdn.example.test',
         ]);
-
-        Storage::fake('s3');
 
         BrandingManager::apply([
             'logo_path' => 'branding/logo.svg',
