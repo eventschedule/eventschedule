@@ -78,10 +78,6 @@ class ApiEventController extends Controller
             $request->merge(['members' => [$encodedRoleId => ['name' => $role->name]]]);
         }   
 
-        if (! $role->isPro()) {
-            return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
-        }
-
         if (! auth()->user()->isMember($subdomain)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
@@ -230,10 +226,6 @@ class ApiEventController extends Controller
 
         if ($event->user_id !== auth()->id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
-        if (! $event->isPro()) {
-            return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
         }
 
         if ($request->has('flyer_image_id')) {
