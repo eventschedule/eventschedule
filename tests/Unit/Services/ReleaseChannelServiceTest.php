@@ -14,13 +14,13 @@ class ReleaseChannelServiceTest extends TestCase
         $service = new ReleaseChannelService();
 
         $normalized = $this->normalizeReleaseData($service, [
-            'tag_name' => 'v5.0.16',
-            'name' => 'Release v5.0.16',
+            'tag_name' => 'v20251024-01p',
+            'name' => 'Release v20251024-01p',
             'prerelease' => false,
         ]);
 
-        $this->assertSame('5.0.16', $normalized['version']);
-        $this->assertSame('v5.0.16', $normalized['tag']);
+        $this->assertSame('20251024-01p', $normalized['version']);
+        $this->assertSame('v20251024-01p', $normalized['tag']);
     }
 
     public function testNormalizeReleaseDataPreservesVersionWithoutLeadingV(): void
@@ -28,13 +28,13 @@ class ReleaseChannelServiceTest extends TestCase
         $service = new ReleaseChannelService();
 
         $normalized = $this->normalizeReleaseData($service, [
-            'tag_name' => '5.0.16-beta1',
-            'name' => '5.0.16-beta1',
+            'tag_name' => '20251024-01b',
+            'name' => '20251024-01b',
             'prerelease' => true,
         ]);
 
-        $this->assertSame('5.0.16-beta1', $normalized['version']);
-        $this->assertSame('5.0.16-beta1', $normalized['tag']);
+        $this->assertSame('20251024-01b', $normalized['version']);
+        $this->assertSame('20251024-01b', $normalized['tag']);
     }
 
     public function testNormalizeReleaseDataRequiresTagName(): void

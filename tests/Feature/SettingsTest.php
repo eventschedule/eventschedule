@@ -896,8 +896,8 @@ class SettingsTest extends TestCase
             'update_release_channel' => 'production',
         ]);
 
-        Cache::put(ReleaseChannelService::cacheKeyFor(ReleaseChannel::Production), ['version' => 'v1.0.0'], 3600);
-        Cache::put(ReleaseChannelService::cacheKeyFor(ReleaseChannel::Beta), ['version' => 'v2.0.0b'], 3600);
+        Cache::put(ReleaseChannelService::cacheKeyFor(ReleaseChannel::Production), ['version' => 'v20251024-01p'], 3600);
+        Cache::put(ReleaseChannelService::cacheKeyFor(ReleaseChannel::Beta), ['version' => 'v20251024-01b'], 3600);
 
         $payload = [
             'public_url' => 'https://example.org/',
