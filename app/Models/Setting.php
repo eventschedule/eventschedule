@@ -38,6 +38,13 @@ class Setting extends Model
         Cache::forget(static::cacheKey($group));
     }
 
+    public static function clearGroup(string $group): void
+    {
+        static::query()->where('group', $group)->delete();
+
+        Cache::forget(static::cacheKey($group));
+    }
+
     protected static function cacheKey(string $group): string
     {
         return "settings.{$group}";

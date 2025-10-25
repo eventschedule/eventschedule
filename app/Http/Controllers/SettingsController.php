@@ -549,7 +549,7 @@ class SettingsController extends Controller
                 $this->deleteStoredFile($previousLogoPath, $previousLogoDisk);
             }
 
-            Setting::setGroup('branding', []);
+            Setting::clearGroup('branding');
             BrandingManager::apply();
 
             return redirect()->route('settings.branding')->with('status', 'branding-settings-reset');
