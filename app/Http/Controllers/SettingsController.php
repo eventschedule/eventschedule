@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ReleaseChannel;
+use App\Models\MediaAsset;
+use App\Models\MediaAssetVariant;
 use App\Models\Setting;
 use App\Services\ReleaseChannelService;
 use App\Rules\AccessibleColor;
@@ -65,12 +67,20 @@ class SettingsController extends Controller
 
         return view('settings.general', [
             'generalSettings' => $generalSettings,
-            'brandingSettings' => $this->getBrandingSettings(),
             'availableLogLevels' => LoggingConfigManager::availableLevels(),
             'versionInstalled' => $versionInstalled,
             'versionAvailable' => $versionAvailable,
             'availableUpdateChannels' => ReleaseChannel::options(),
             'selectedUpdateChannel' => $selectedChannel->value,
+        ]);
+    }
+
+    public function branding(Request $request): View
+    {
+        $this->authorizeAdmin($request->user());
+
+        return view('settings.branding', [
+            'brandingSettings' => $this->getBrandingSettings(),
             'languageOptions' => $this->getSupportedLanguageOptions(),
         ]);
     }
@@ -462,12 +472,9 @@ class SettingsController extends Controller
         $this->authorizeAdmin($request->user());
 
         $storedGeneralSettings = Setting::forGroup('general');
-        $storedBrandingSettings = Setting::forGroup('branding');
         $previousChannel = ReleaseChannel::fromString($storedGeneralSettings['update_release_channel'] ?? null);
 
         $logLevelKeys = array_keys(LoggingConfigManager::availableLevels());
-        $languageOptions = $this->getSupportedLanguageOptions();
-        $supportedLanguageCodes = array_keys($languageOptions);
 
         $validated = $request->validate([
             'public_url' => ['required', 'string', 'max:255', 'url'],
@@ -477,13 +484,6 @@ class SettingsController extends Controller
             'log_level' => ['required', 'string', Rule::in($logLevelKeys)],
             'log_disabled' => ['nullable', 'boolean'],
             'update_release_channel' => ['required', 'string', Rule::in(ReleaseChannel::values())],
-            'branding_logo' => ['nullable', 'mimes:jpg,jpeg,png,webp,svg', 'max:4096'],
-            'branding_logo_alt' => ['nullable', 'string', 'max:255'],
-            'branding_remove_logo' => ['nullable', 'boolean'],
-            'branding_primary_color' => ['required', new AccessibleColor(__('messages.branding_primary_color'))],
-            'branding_secondary_color' => ['required', new AccessibleColor(__('messages.branding_secondary_color'))],
-            'branding_tertiary_color' => ['required', new AccessibleColor(__('messages.branding_tertiary_color'))],
-            'branding_default_language' => ['required', 'string', Rule::in($supportedLanguageCodes)],
         ]);
 
         $publicUrl = $this->sanitizeUrl($validated['public_url']);
@@ -522,19 +522,111 @@ class SettingsController extends Controller
 
         Setting::setGroup('logging', $loggingSettings);
 
-        $brandingDisk = storage_public_disk();
-        $logoPath = $storedBrandingSettings['logo_path'] ?? null;
-        $logoDisk = $storedBrandingSettings['logo_disk'] ?? $brandingDisk;
-
-        if ($request->boolean('branding_remove_logo')) {
-            $this->deleteStoredFile($logoPath, $logoDisk);
-            $logoPath = null;
-            $logoDisk = $brandingDisk;
+        if ($normalizedPreviousRepositoryUrl !== $normalizedNewRepositoryUrl || $previousChannel !== $channel) {
+            $releaseChannels->forgetAll();
         }
 
-        if ($request->file('branding_logo')) {
-            $logoDisk = $brandingDisk;
-            $logoPath = $this->storeUploadedFile($request->file('branding_logo'), 'branding', $logoPath, $logoDisk);
+        $this->applyGeneralConfig($publicUrl);
+        UpdateConfigManager::apply($updateRepositoryUrl);
+        ReleaseChannelManager::apply($channel);
+        LoggingConfigManager::apply($loggingSettings);
+
+        return redirect()->route('settings.general')->with('status', 'general-settings-updated');
+    }
+
+    public function updateBranding(Request $request): RedirectResponse
+    {
+        $this->authorizeAdmin($request->user());
+
+        $storedBrandingSettings = Setting::forGroup('branding');
+
+        if ($request->boolean('reset_branding')) {
+            $previousLogoPath = $storedBrandingSettings['logo_path'] ?? null;
+            $previousLogoDisk = $storedBrandingSettings['logo_disk'] ?? null;
+            $previousMediaAssetId = $storedBrandingSettings['logo_media_asset_id'] ?? null;
+
+            if ($previousLogoPath && empty($previousMediaAssetId)) {
+                $this->deleteStoredFile($previousLogoPath, $previousLogoDisk);
+            }
+
+            Setting::setGroup('branding', []);
+            BrandingManager::apply();
+
+            return redirect()->route('settings.branding')->with('status', 'branding-settings-reset');
+        }
+
+        $languageOptions = $this->getSupportedLanguageOptions();
+        $supportedLanguageCodes = array_keys($languageOptions);
+
+        $validated = $request->validate([
+            'branding_logo_media_asset_id' => ['nullable', 'integer', 'exists:media_assets,id'],
+            'branding_logo_media_variant_id' => ['nullable', 'integer', 'exists:media_asset_variants,id'],
+            'branding_logo_alt' => ['nullable', 'string', 'max:255'],
+            'branding_primary_color' => ['required', new AccessibleColor(__('messages.branding_primary_color'))],
+            'branding_secondary_color' => ['required', new AccessibleColor(__('messages.branding_secondary_color'))],
+            'branding_tertiary_color' => ['required', new AccessibleColor(__('messages.branding_tertiary_color'))],
+            'branding_default_language' => ['required', 'string', Rule::in($supportedLanguageCodes)],
+        ]);
+
+        $logoAssetId = $request->input('branding_logo_media_asset_id');
+        $logoVariantId = $request->input('branding_logo_media_variant_id');
+
+        if ($logoVariantId && ! $logoAssetId) {
+            throw ValidationException::withMessages([
+                'branding_logo_media_variant_id' => __('messages.branding_logo_variant_mismatch'),
+            ]);
+        }
+
+        $previousLogoPath = $storedBrandingSettings['logo_path'] ?? null;
+        $previousLogoDisk = $storedBrandingSettings['logo_disk'] ?? null;
+        $previousMediaAssetId = $storedBrandingSettings['logo_media_asset_id'] ?? null;
+
+        $logoPath = $previousLogoPath;
+        $logoDisk = $previousLogoDisk;
+        $logoMediaAssetId = $storedBrandingSettings['logo_media_asset_id'] ?? null;
+        $logoMediaVariantId = $storedBrandingSettings['logo_media_variant_id'] ?? null;
+
+        if ($logoAssetId) {
+            $asset = MediaAsset::find((int) $logoAssetId);
+
+            if (! $asset) {
+                throw ValidationException::withMessages([
+                    'branding_logo_media_asset_id' => __('messages.branding_logo_missing'),
+                ]);
+            }
+
+            if ($previousLogoPath && empty($previousMediaAssetId)) {
+                $this->deleteStoredFile($previousLogoPath, $previousLogoDisk);
+            }
+
+            $logoMediaAssetId = $asset->id;
+            $logoMediaVariantId = null;
+            $logoPath = $asset->path;
+            $logoDisk = $asset->disk ?: storage_public_disk();
+
+            if ($logoVariantId) {
+                $variant = MediaAssetVariant::where('media_asset_id', $asset->id)
+                    ->find((int) $logoVariantId);
+
+                if (! $variant) {
+                    throw ValidationException::withMessages([
+                        'branding_logo_media_variant_id' => __('messages.branding_logo_variant_mismatch'),
+                    ]);
+                }
+
+                $logoMediaVariantId = $variant->id;
+                $logoPath = $variant->path;
+                $logoDisk = $variant->disk ?: $logoDisk;
+            }
+        } elseif ($request->exists('branding_logo_media_asset_id')) {
+            if ($previousLogoPath && empty($previousMediaAssetId)) {
+                $this->deleteStoredFile($previousLogoPath, $previousLogoDisk);
+            }
+
+            $logoPath = null;
+            $logoDisk = null;
+            $logoMediaAssetId = null;
+            $logoMediaVariantId = null;
         }
 
         $logoAlt = $this->nullableTrim($validated['branding_logo_alt'] ?? null);
@@ -550,8 +642,10 @@ class SettingsController extends Controller
 
         $brandingSettings = [
             'logo_path' => $logoPath,
-            'logo_disk' => $logoPath ? $logoDisk : null,
+            'logo_disk' => $logoPath ? ($logoDisk ?: storage_public_disk()) : null,
             'logo_alt' => $logoAlt,
+            'logo_media_asset_id' => $logoMediaAssetId ? (int) $logoMediaAssetId : null,
+            'logo_media_variant_id' => $logoMediaVariantId ? (int) $logoMediaVariantId : null,
             'primary_color' => $primaryColor,
             'secondary_color' => $secondaryColor,
             'tertiary_color' => $tertiaryColor,
@@ -559,18 +653,9 @@ class SettingsController extends Controller
         ];
 
         Setting::setGroup('branding', $brandingSettings);
-
-        if ($normalizedPreviousRepositoryUrl !== $normalizedNewRepositoryUrl || $previousChannel !== $channel) {
-            $releaseChannels->forgetAll();
-        }
-
-        $this->applyGeneralConfig($publicUrl);
-        UpdateConfigManager::apply($updateRepositoryUrl);
-        ReleaseChannelManager::apply($channel);
-        LoggingConfigManager::apply($loggingSettings);
         BrandingManager::apply($brandingSettings);
 
-        return redirect()->route('settings.general')->with('status', 'general-settings-updated');
+        return redirect()->route('settings.branding')->with('status', 'branding-settings-updated');
     }
 
     public function updateTerms(Request $request): RedirectResponse
@@ -927,6 +1012,10 @@ class SettingsController extends Controller
         $logoPath = $storedBrandingSettings['logo_path'] ?? null;
         $logoDisk = $storedBrandingSettings['logo_disk'] ?? null;
         $logoUrl = data_get($resolvedBranding, 'logo_url');
+        $logoMediaAssetId = $storedBrandingSettings['logo_media_asset_id']
+            ?? data_get($resolvedBranding, 'logo_media_asset_id');
+        $logoMediaVariantId = $storedBrandingSettings['logo_media_variant_id']
+            ?? data_get($resolvedBranding, 'logo_media_variant_id');
 
         if (! $logoUrl) {
             if ($logoPath) {
@@ -952,6 +1041,8 @@ class SettingsController extends Controller
             'logo_path' => $logoPath,
             'logo_disk' => $logoDisk,
             'logo_url' => $logoUrl,
+            'logo_media_asset_id' => $logoMediaAssetId ? (int) $logoMediaAssetId : null,
+            'logo_media_variant_id' => $logoMediaVariantId ? (int) $logoMediaVariantId : null,
             'logo_alt' => $storedBrandingSettings['logo_alt']
                 ?? data_get($resolvedBranding, 'logo_alt', branding_logo_alt()),
             'primary_color' => $storedBrandingSettings['primary_color']

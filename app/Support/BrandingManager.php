@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Support\ColorUtils;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
@@ -26,6 +27,8 @@ class BrandingManager
         $logoPath = Arr::get($settings, 'logo_path', $defaults['logo_path']);
         $logoDisk = Arr::get($settings, 'logo_disk', $defaults['logo_disk']);
         $logoAlt = Arr::get($settings, 'logo_alt', $defaults['logo_alt']);
+        $logoMediaAssetId = Arr::get($settings, 'logo_media_asset_id');
+        $logoMediaVariantId = Arr::get($settings, 'logo_media_variant_id');
 
         $primary = ColorUtils::normalizeHexColor(
             Arr::get($settings, 'primary_color', $defaults['primary_color'])
@@ -56,6 +59,8 @@ class BrandingManager
             'logo_alt' => is_string($logoAlt) && trim($logoAlt) !== ''
                 ? trim($logoAlt)
                 : 'Event Schedule',
+            'logo_media_asset_id' => $logoMediaAssetId ? (int) $logoMediaAssetId : null,
+            'logo_media_variant_id' => $logoMediaVariantId ? (int) $logoMediaVariantId : null,
             'colors' => [
                 'primary' => $primary,
                 'secondary' => $secondary,
