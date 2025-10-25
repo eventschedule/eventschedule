@@ -64,9 +64,13 @@ function run(array $arguments): int
     }
 
     if ($nextVersion === $currentVersion) {
-        fwrite(STDERR, "New version matches the current version. No changes made." . PHP_EOL);
+        try {
+            $nextVersion = forceIncrementVersion($currentVersion, $channel);
+        } catch (InvalidArgumentException $exception) {
+            fwrite(STDERR, $exception->getMessage() . PHP_EOL);
 
-        return 1;
+            return 1;
+        }
     }
 
     file_put_contents($versionFile, $nextVersion . PHP_EOL);
@@ -151,6 +155,30 @@ function bumpVersion(string $currentVersion, string $channel, bool $forceMajor =
         && $parsed['date'] === $currentDate
         && $parsed['suffix'] === $suffix
     ) {
+        $sequence = $parsed['sequence'] + 1;
+    } else {
+        $sequence = 1;
+    }
+
+    return formatVersion($currentDate, $sequence, $suffix);
+}
+
+function forceIncrementVersion(string $currentVersion, string $channel): string
+{
+    $suffix = $channel === 'beta' ? 'b' : 'p';
+    $currentDate = resolveVersionDate();
+
+    try {
+        $parsed = parseVersion($currentVersion);
+    } catch (InvalidArgumentException $exception) {
+        if (! isLegacyVersion($currentVersion)) {
+            throw $exception;
+        }
+
+        return formatVersion($currentDate, 1, $suffix);
+    }
+
+    if ($parsed['date'] === $currentDate && $parsed['suffix'] === $suffix) {
         $sequence = $parsed['sequence'] + 1;
     } else {
         $sequence = 1;
