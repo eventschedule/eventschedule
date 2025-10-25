@@ -3,9 +3,6 @@
 
 declare(strict_types=1);
 
-use DateTimeImmutable;
-use DateTimeZone;
-
 const ALLOWED_CHANNELS = ['production', 'beta'];
 
 if (PHP_SAPI === 'cli' && realpath($_SERVER['SCRIPT_FILENAME'] ?? '') === realpath(__FILE__)) {
@@ -212,7 +209,7 @@ function resolveVersionDate(): string
         return $override;
     }
 
-    return (new DateTimeImmutable('now', new DateTimeZone('UTC')))->format('Ymd');
+    return (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format('Ymd');
 }
 
 function validateVersionDate(string $date): bool
