@@ -5,6 +5,9 @@
     $tertiary = data_get($branding, 'colors.tertiary', '#374151');
     $primaryRgb = data_get($branding, 'colors.primary_rgb', '31, 41, 55');
     $primaryLight = data_get($branding, 'colors.primary_light', '#848991');
+    $onPrimary = data_get($branding, 'colors.on_primary', '#FFFFFF');
+    $onSecondary = data_get($branding, 'colors.on_secondary', '#FFFFFF');
+    $onTertiary = data_get($branding, 'colors.on_tertiary', '#FFFFFF');
 @endphp
 <style>
     :root {
@@ -16,7 +19,9 @@
         --brand-primary-light: {{ $primaryLight }};
         --brand-secondary: {{ $secondary }};
         --brand-tertiary: {{ $tertiary }};
-        --brand-on-primary: #FFFFFF;
+        --brand-on-primary: {{ $onPrimary }};
+        --brand-on-secondary: {{ $onSecondary }};
+        --brand-on-tertiary: {{ $onTertiary }};
     }
 
     .text-\[\#4E81FA\],
@@ -45,7 +50,7 @@
     .dark .dark\:bg-\[\#4E81FA\],
     .dark .dark\:focus\:bg-\[\#4E81FA\]:focus {
         background-color: var(--brand-primary) !important;
-        color: inherit;
+        color: var(--brand-on-primary) !important;
     }
 
     .bg-\[\#4E81FA\]\/10,
@@ -69,12 +74,14 @@
     .hover\:bg-\[\#3A6BE0\]:hover,
     .dark .dark\:hover\:bg-\[\#3A6BE0\]:hover {
         background-color: var(--brand-tertiary) !important;
+        color: var(--brand-on-tertiary) !important;
     }
 
     .hover\:bg-\[\#365fcc\]:hover,
     .dark .dark\:hover\:bg-\[\#365fcc\]:hover,
     .focus\:bg-\[\#365fcc\]:focus {
         background-color: var(--brand-secondary) !important;
+        color: var(--brand-on-secondary) !important;
     }
 
     .border-\[\#4E81FA\],
@@ -104,5 +111,6 @@
     .hover\:file\:bg-\[\#365fcc\]:hover::file-selector-button,
     .dark .dark\:hover\:file\:bg-\[\#365fcc\]:hover::file-selector-button {
         background-color: var(--brand-secondary) !important;
+        color: var(--brand-on-secondary) !important;
     }
 </style>

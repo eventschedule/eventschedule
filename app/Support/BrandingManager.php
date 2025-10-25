@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Storage;
 
 class BrandingManager
 {
+    public const BUTTON_TEXT_COLOR_CANDIDATES = ['#FFFFFF', '#111827'];
+
     public static function apply(?array $settings = null): void
     {
         $settings = $settings ?? [];
@@ -45,6 +47,12 @@ class BrandingManager
         $primaryRgb = ColorUtils::hexToRgbString($primary) ?? '31, 41, 55';
         $primaryLight = ColorUtils::mix($primary, '#FFFFFF', 0.55) ?? '#848991';
 
+        $textColorCandidates = self::BUTTON_TEXT_COLOR_CANDIDATES;
+
+        $onPrimary = ColorUtils::bestContrastingColor($primary, $textColorCandidates)['color'] ?? '#FFFFFF';
+        $onSecondary = ColorUtils::bestContrastingColor($secondary, $textColorCandidates)['color'] ?? '#FFFFFF';
+        $onTertiary = ColorUtils::bestContrastingColor($tertiary, $textColorCandidates)['color'] ?? '#FFFFFF';
+
         $defaultLanguage = Arr::get($settings, 'default_language', $defaults['default_language']);
         if (! is_valid_language_code($defaultLanguage)) {
             $defaultLanguage = config('app.fallback_locale', 'en');
@@ -67,6 +75,9 @@ class BrandingManager
                 'tertiary' => $tertiary,
                 'primary_rgb' => $primaryRgb,
                 'primary_light' => $primaryLight,
+                'on_primary' => $onPrimary,
+                'on_secondary' => $onSecondary,
+                'on_tertiary' => $onTertiary,
             ],
             'default_language' => $defaultLanguage,
         ];
