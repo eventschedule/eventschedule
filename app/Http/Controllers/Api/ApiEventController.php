@@ -4,14 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Models\EventType;
 use App\Models\Image;
 use App\Models\Role;
 use App\Models\RoleUser;
 use App\Repos\EventRepo;
-use Illuminate\Http\Request;
 use App\Utils\UrlUtils;
-use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ApiEventController extends Controller
 {
@@ -109,18 +110,48 @@ class ApiEventController extends Controller
         }
 
         // Handle category name to category_id conversion
-        if ($request->has('category_name') && !$request->has('category_id')) {
-            $categorySlug = Str::slug($request->category_name);
-            $categories = config('app.event_categories', []);
+        if ($request->has('category_name') && ! $request->has('category_id')) {
+            $categoryName = trim((string) $request->category_name);
+            $categorySlug = Str::slug($categoryName);
             $categoryId = null;
-            
-            foreach ($categories as $id => $name) {
-                if (Str::slug($name) === $categorySlug) {
-                    $categoryId = $id;
-                    break;
+
+            try {
+                $eventTypes = EventType::ordered();
+            } catch (\Throwable $exception) {
+                $eventTypes = collect();
+            }
+
+            if ($eventTypes->isNotEmpty()) {
+                foreach ($eventTypes as $eventType) {
+                    if (Str::slug($eventType->name) === $categorySlug || Str::slug($eventType->translatedName('en')) === $categorySlug) {
+                        $categoryId = $eventType->id;
+                        break;
+                    }
+
+                    foreach (($eventType->translations ?? []) as $translation) {
+                        if (! is_string($translation)) {
+                            continue;
+                        }
+
+                        if (Str::slug($translation) === $categorySlug) {
+                            $categoryId = $eventType->id;
+                            break 2;
+                        }
+                    }
                 }
             }
-            
+
+            if (! $categoryId) {
+                $fallbackCategories = config('app.event_categories', []);
+
+                foreach ($fallbackCategories as $id => $name) {
+                    if (Str::slug($name) === $categorySlug) {
+                        $categoryId = $id;
+                        break;
+                    }
+                }
+            }
+
             if ($categoryId) {
                 $request->merge(['category_id' => $categoryId]);
             } else {

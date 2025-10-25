@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
+use App\Jobs\SyncEventToGoogleCalendar;
 use App\Models\EventRole;
+use App\Models\EventType;
 use App\Models\MediaAssetUsage;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
-use App\Jobs\SyncEventToGoogleCalendar;
 use Illuminate\Support\Str;
 
 class Event extends Model
@@ -182,6 +183,11 @@ class Event extends Model
     public function creatorRole()
     {
         return $this->belongsTo(Role::class, 'creator_role_id');
+    }
+
+    public function eventType(): BelongsTo
+    {
+        return $this->belongsTo(EventType::class, 'category_id');
     }
 
     public function curator()
