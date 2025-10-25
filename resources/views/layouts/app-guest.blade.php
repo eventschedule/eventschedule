@@ -107,7 +107,7 @@
                     @if ($otherRole->background_image)
                         background-image: url("{{ asset('images/backgrounds/' . $otherRole->background_image . '.png') }}");
                     @else
-                        background-image: url("{{ $otherRole->background_image_url }}");
+                        background-image: url("{{ storage_asset_url($otherRole->background_image_url) }}");
                     @endif
                     background-size: cover;
                     background-position: center;
@@ -127,11 +127,11 @@
                             @endif
                         url("{{ asset('images/backgrounds/' . $role->background_image . '.png') }}");
                     @else
-                        background-image: 
+                        background-image:
                             @if (request()->graphic)
                                 linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
                             @endif
-                        url("{{ $role->background_image_url }}");
+                        url("{{ storage_asset_url($role->background_image_url) }}");
                     @endif
                     background-size: cover;
                     background-position: center;

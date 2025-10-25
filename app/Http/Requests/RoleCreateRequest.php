@@ -27,6 +27,8 @@ class RoleCreateRequest extends FormRequest
             'profile_image_id' => ['nullable', 'integer', 'exists:images,id'],
             'background_image_id' => ['nullable', 'integer', 'exists:images,id'],
             'background_image' => ['nullable', 'string', 'max:255'],
+            'background_media_asset_id' => ['nullable', 'integer', 'exists:media_assets,id'],
+            'background_media_variant_id' => ['nullable', 'integer', 'exists:media_asset_variants,id'],
             'contacts' => ['nullable', 'array'],
             'contacts.*.name' => ['nullable', 'string', 'max:255'],
             'contacts.*.email' => array_merge(

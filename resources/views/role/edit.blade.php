@@ -29,6 +29,16 @@
     </div>
 @endif
 
+@php
+    $backgroundDefaults = is_array($backgroundMediaDefaults ?? null) ? $backgroundMediaDefaults : [];
+    $initialBackgroundAssetId = old('background_media_asset_id', $backgroundDefaults['asset_id'] ?? null);
+    $initialBackgroundVariantId = old('background_media_variant_id', $backgroundDefaults['variant_id'] ?? null);
+    $initialBackgroundUrl = $backgroundDefaults['url']
+        ?? ($role->background_image
+            ? asset('images/backgrounds/' . $role->background_image . '.png')
+            : ($role->background_image_url ? storage_asset_url($role->background_image_url) : ''));
+@endphp
+
 <x-slot name="head">
 
         <style>
@@ -84,6 +94,8 @@
         </style>
 
         <script {!! nonce_attr() !!}>
+        const fallbackBackgroundUrl = @json($initialBackgroundUrl);
+
         document.addEventListener('DOMContentLoaded', () => {
             $("#country").countrySelect({
                 defaultCountry: '{{ old('country_code', $role->country_code) }}',
@@ -93,8 +105,7 @@
             $('#font_family').val('{{ old('font_family', $role->font_family) }}');
             $('#language_code').val('{{ old('language_code', $role->language_code) }}');
             $('#timezone').val('{{ old('timezone', $role->timezone) }}');
-            
-            const backgroundSelect = document.getElementById('background_image');
+
             const backgroundImageInput = document.querySelector('input[name="background_media_asset_id"]');
             const profileImageInput = document.querySelector('input[name="profile_media_asset_id"]');
 
@@ -123,20 +134,11 @@
                 }
             }
 
-            if (backgroundImageInput && backgroundSelect && backgroundImageInput.value && backgroundSelect.value !== '') {
-                backgroundSelect.value = '';
-            }
-
             registerImagePickerHandler(profileImageInput, () => {
                 updatePreview();
             });
 
             registerImagePickerHandler(backgroundImageInput, () => {
-                if (backgroundSelect) {
-                    backgroundSelect.value = '';
-                }
-                updateImageNavButtons();
-                toggleCustomImageInput();
                 updatePreview();
             });
 
@@ -144,8 +146,6 @@
             onChangeBackground();
             onChangeCountry();
             onChangeFont();
-            updateImageNavButtons();
-            toggleCustomImageInput();
 
             // Handle accept_requests checkbox
             const acceptRequestsCheckbox = document.querySelector('input[name="accept_requests"][type="checkbox"]');
@@ -263,19 +263,16 @@
                     .css('background-color', '')
                     .css('background-image', gradient);
             } else if (background == 'image') {
+                const backgroundImageInput = document.querySelector('input[name="background_media_asset_id"]');
+                let backgroundImageUrl = getPickerPreviewUrl(backgroundImageInput);
 
-                var backgroundImageUrl = $('#background_image').find(':selected').val();
-                if (backgroundImageUrl) {
-                    backgroundImageUrl = "{{ asset('images/backgrounds') }}" + '/' + $('#background_image').find(':selected').val() + '.png';
-                } else {
-                    const backgroundImageInput = document.querySelector('input[name="background_media_asset_id"]');
-                    const customBackgroundUrl = getPickerPreviewUrl(backgroundImageInput);
-                    backgroundImageUrl = customBackgroundUrl || "{{ $role->background_image_url }}";
+                if (!backgroundImageUrl) {
+                    backgroundImageUrl = fallbackBackgroundUrl || '';
                 }
 
                 $('#preview')
                     .css('background-color', '')
-                    .css('background-image', 'url("' + backgroundImageUrl + '")');
+                    .css('background-image', backgroundImageUrl ? 'url("' + backgroundImageUrl + '")' : '');
             } else {
                 $('#preview').css('background-image', '')
                     .css('background-color', backgroundColor);
@@ -363,33 +360,6 @@
                 updateColorNavButtons();
             }
         }
-
-        function updateImageNavButtons() { 
-            const select = document.getElementById('background_image');
-            const prevButton = document.getElementById('prev_image');
-            const nextButton = document.getElementById('next_image');
-
-            prevButton.disabled = select.selectedIndex === 0;
-            nextButton.disabled = select.selectedIndex === select.options.length - 1;
-        }
-
-        function changeBackgroundImage(direction) {
-            const select = document.getElementById('background_image');
-            const newIndex = select.selectedIndex + direction;
-            
-            if (newIndex >= 0 && newIndex < select.options.length) {
-                select.selectedIndex = newIndex;
-                select.dispatchEvent(new Event('input'));
-                updateImageNavButtons();
-            }
-        }
-
-        function toggleCustomImageInput() {
-            const select = document.getElementById('background_image');
-            const customInput = document.getElementById('custom_image_input');
-            customInput.style.display = select.value === '' ? 'block' : 'none';
-        }
-
 
         </script>
 
@@ -759,59 +729,29 @@
                             </div>
 
                             <div class="mb-6" id="style_background_image" style="display:none">
-                                <x-input-label for="image" :value="__('messages.image')" />
-                                <div class="color-select-container">
-                                    <select id="background_image" name="background_image"
-                                        class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm w-64 max-w-64"
-                                        oninput="onChangeBackground(); updatePreview(); updateImageNavButtons(); toggleCustomImageInput();">
-                                        @foreach($backgrounds as $background => $name)
-                                        <option value="{{ $background }}"
-                                            {{ $role->background_image == $background ? 'SELECTED' : '' }}>
-                                            {{ $name }}</option>
-                                        @endforeach
-                                    </select>
-
-                                    <button type="button" 
-                                            id="prev_image" 
-                                            class="color-nav-button" 
-                                            onclick="changeBackgroundImage(-1)"
-                                            title="{{ __('messages.previous') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                                        </svg>
-                                    </button>
-                                                                                
-                                    <button type="button" 
-                                            id="next_image" 
-                                            class="color-nav-button" 
-                                            onclick="changeBackgroundImage(1)"
-                                            title="{{ __('messages.next') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                                        </svg>
-                                    </button>
-        
+                                <x-input-label for="background_media_asset_id" :value="__('messages.image')" />
+                                <div class="mt-3">
+                                    <x-media-picker
+                                        name="background_media_variant_id"
+                                        asset-input-name="background_media_asset_id"
+                                        context="background"
+                                        :initial-url="$initialBackgroundUrl"
+                                        :initial-asset-id="$initialBackgroundAssetId"
+                                        :initial-variant-id="$initialBackgroundVariantId"
+                                        label="{{ __('Choose from library') }}"
+                                    />
                                 </div>
-
-                                <div id="custom_image_input" style="display:none">
-                                    @if ($role->background_image_url)
-                                    <img src="{{ $role->background_image_url }}" style="max-height:120px" class="pt-3" />
+                                <x-input-error class="mt-2" :messages="$errors->get('background_media_asset_id')" />
+                                <x-input-error class="mt-2" :messages="$errors->get('background_media_variant_id')" />
+                                @if ($role->background_image_url)
+                                <div class="mt-3">
                                     <a href="#"
-                                        onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) {location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}'; } return false;"
+                                        onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}'; } return false;"
                                         class="hover:underline text-gray-900 dark:text-gray-100">
                                         {{ __('messages.delete_image') }}
                                     </a>
-                                    @endif
-                                    <div class="mt-4">
-                                        <x-media-picker
-                                            name="background_media_variant_id"
-                                            asset-input-name="background_media_asset_id"
-                                            context="background"
-                                            :initial-url="$role->background_image_url"
-                                            label="{{ __('Choose from library') }}"
-                                        />
-                                    </div>
                                 </div>
+                                @endif
                             </div>
 
                             <div id="style_background_gradient" style="display:none">

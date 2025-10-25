@@ -29,6 +29,7 @@ use App\Models\EventRole;
 use App\Models\MediaAsset;
 use App\Models\MediaAssetVariant;
 use App\Models\MediaAssetUsage;
+use App\Support\ScheduleBackgroundManager;
 use App\Utils\UrlUtils;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
@@ -868,8 +869,15 @@ class RoleController extends Controller
         $role->background = 'image';
         $role->background_color = '#888888';
         $role->background_colors = ColorUtils::randomGradient();
-        $role->background_image = ColorUtils::randomBackgroundImage();
         $role->background_rotation = rand(0, 359);
+        $backgroundDefaults = $this->prepareBackgroundMediaDefaults($role, true);
+
+        if (! ($backgroundDefaults['asset_id'] ?? null) && ! ($backgroundDefaults['url'] ?? null)) {
+            $role->background_image = ColorUtils::randomBackgroundImage();
+            if ($role->background_image) {
+                $backgroundDefaults['url'] = asset('images/backgrounds/' . $role->background_image . '.png');
+            }
+        }
         $user = auth()->user();
         $userData = $this->normalizeAuthenticatedUser($user);
 
@@ -902,16 +910,12 @@ class RoleController extends Controller
             'title' => __('messages.new_' . $role->type),
             'groupsForView' => $groupsForView,
             'userData' => $userData,
+            'backgroundMediaDefaults' => $backgroundDefaults,
         ];
 
         if (function_exists('is_browser_testing') && is_browser_testing()) {
             return view('testing.role.create', $data);
         }
-
-        // Background images
-        $backgroundOptions = [
-            '' => __('messages.custom'),
-        ] + $this->getBackgroundImageOptions();
 
         // Background gradients
         $gradientOptions = $this->loadRoleAssetOptions(
@@ -930,7 +934,6 @@ class RoleController extends Controller
 
         $data = array_merge($data, [
             'gradients' => $gradientOptions,
-            'backgrounds' => $backgroundOptions,
             'fonts' => $fonts,
         ]);
 
@@ -1180,24 +1183,20 @@ class RoleController extends Controller
 
         $this->logGroupPayloadDiagnostics($groupsForView, 'role.edit.groups_for_view');
 
+        $backgroundDefaults = $this->prepareBackgroundMediaDefaults($role);
+
         $data = [
             'user' => $user,
             'role' => $role,
             'title' => __('messages.edit_' . $role->type),
             'groupsForView' => $groupsForView,
             'userData' => $userData,
+            'backgroundMediaDefaults' => $backgroundDefaults,
         ];
 
         if (function_exists('is_browser_testing') && is_browser_testing()) {
             return view('testing.role.edit', $data);
         }
-
-
-        // Background images
-        $backgroundOptions = [
-            '' => __('messages.custom'),
-        ] + $this->getBackgroundImageOptions();
-
 
         // Background gradients
         $gradientOptions = $this->loadRoleAssetOptions(
@@ -1214,7 +1213,6 @@ class RoleController extends Controller
 
         $data = array_merge($data, [
             'gradients' => $gradientOptions,
-            'backgrounds' => $backgroundOptions,
             'fonts' => $fonts,
         ]);
 
@@ -2996,57 +2994,6 @@ class RoleController extends Controller
     /**
      * @return array<string, string>
      */
-    private function getBackgroundImageOptions(): array
-    {
-        static $hasLoggedFallback = false;
-
-        $callable = [ColorUtils::class, 'backgroundImageOptions'];
-
-        try {
-            if (is_callable($callable)) {
-                $options = call_user_func($callable);
-
-                if (is_array($options)) {
-                    return $options;
-                }
-
-                if (! $hasLoggedFallback) {
-                    Log::warning('ColorUtils::backgroundImageOptions did not return an array. Falling back to bundled assets.');
-                    $hasLoggedFallback = true;
-                }
-            } elseif (! $hasLoggedFallback) {
-                Log::warning('ColorUtils::backgroundImageOptions is unavailable. Falling back to bundled assets.');
-                $hasLoggedFallback = true;
-            }
-        } catch (\Throwable $exception) {
-            if (! $hasLoggedFallback) {
-                Log::warning('ColorUtils::backgroundImageOptions threw an exception. Falling back to bundled assets.', [
-                    'exception' => $exception,
-                ]);
-                $hasLoggedFallback = true;
-            }
-        }
-
-        $paths = glob(public_path('images/backgrounds/*.png')) ?: [];
-        $options = [];
-
-        foreach ($paths as $path) {
-            $name = pathinfo($path, PATHINFO_FILENAME);
-
-            if (! is_string($name) || $name === '') {
-                continue;
-            }
-
-            $options[$name] = str_replace('_', ' ', $name);
-        }
-
-        if (! empty($options)) {
-            ksort($options, SORT_NATURAL | SORT_FLAG_CASE);
-        }
-
-        return $options;
-    }
-
     /**
      * @param  iterable<mixed>|null  $items
      * @return array<int, array{value: string, label: string}>
@@ -3883,6 +3830,72 @@ class RoleController extends Controller
         }
 
         return $value;
+    }
+
+    /**
+     * Determine the default media picker values for schedule backgrounds.
+     *
+     * @return array{asset_id: int|null, variant_id: int|null, url: string|null}
+     */
+    private function prepareBackgroundMediaDefaults(Role $role, bool $preferRandom = false): array
+    {
+        $selectedAsset = null;
+        $selectedVariant = null;
+        $initialUrl = null;
+
+        if ($role->exists) {
+            $usage = $role->mediaUsages()
+                ->where('context', 'background')
+                ->with(['asset.variants', 'variant'])
+                ->latest()
+                ->first();
+
+            if ($usage && $usage->asset) {
+                $selectedAsset = $usage->asset;
+                $selectedVariant = $usage->variant;
+                $initialUrl = $selectedVariant?->url ?? $usage->asset->url;
+            }
+        }
+
+        if (! $selectedAsset && $role->background_image) {
+            $selectedAsset = ScheduleBackgroundManager::findBackgroundByIdentifier($role->background_image);
+        }
+
+        $backgroundAssets = ScheduleBackgroundManager::backgroundAssets();
+
+        if (! $initialUrl && $role->exists && $role->background_image_url) {
+            $initialUrl = storage_asset_url($role->background_image_url);
+        }
+
+        if (! $selectedAsset && ! $role->exists && $preferRandom) {
+            $selectedAsset = $backgroundAssets->isNotEmpty() ? $backgroundAssets->random() : null;
+        }
+
+        if (! $selectedAsset && $backgroundAssets->isNotEmpty()) {
+            $selectedAsset = $backgroundAssets->first();
+        }
+
+        if ($selectedAsset) {
+            $matched = $backgroundAssets->firstWhere('id', $selectedAsset->getKey());
+
+            if ($matched) {
+                $selectedAsset = $matched;
+            } elseif (! $selectedAsset->relationLoaded('variants')) {
+                $selectedAsset->load('variants');
+            }
+
+            if (! $initialUrl) {
+                $initialUrl = $selectedVariant?->url ?? $selectedAsset->url;
+            }
+        } elseif (! $initialUrl && $role->background_image) {
+            $initialUrl = asset('images/backgrounds/' . $role->background_image . '.png');
+        }
+
+        return [
+            'asset_id' => $selectedAsset?->getKey(),
+            'variant_id' => $selectedVariant?->getKey(),
+            'url' => $initialUrl,
+        ];
     }
 
     private function applyImageSelections(Role $role, Request $request): void
