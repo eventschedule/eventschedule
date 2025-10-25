@@ -18,9 +18,9 @@ class BrandingManager
             'logo_path' => config('branding.logo_path'),
             'logo_disk' => config('branding.logo_disk'),
             'logo_alt' => config('branding.logo_alt', 'Event Schedule'),
-            'primary_color' => data_get(config('branding'), 'colors.primary', '#4E81FA'),
-            'secondary_color' => data_get(config('branding'), 'colors.secondary', '#365FCC'),
-            'tertiary_color' => data_get(config('branding'), 'colors.tertiary', '#3A6BE0'),
+            'primary_color' => data_get(config('branding'), 'colors.primary', '#1F2937'),
+            'secondary_color' => data_get(config('branding'), 'colors.secondary', '#111827'),
+            'tertiary_color' => data_get(config('branding'), 'colors.tertiary', '#374151'),
             'default_language' => config('branding.default_language', config('app.fallback_locale', 'en')),
         ];
 
@@ -32,18 +32,18 @@ class BrandingManager
 
         $primary = ColorUtils::normalizeHexColor(
             Arr::get($settings, 'primary_color', $defaults['primary_color'])
-        ) ?? '#4E81FA';
+        ) ?? '#1F2937';
 
         $secondary = ColorUtils::normalizeHexColor(
             Arr::get($settings, 'secondary_color', $defaults['secondary_color'])
-        ) ?? '#365FCC';
+        ) ?? '#111827';
 
         $tertiary = ColorUtils::normalizeHexColor(
             Arr::get($settings, 'tertiary_color', $defaults['tertiary_color'])
-        ) ?? '#3A6BE0';
+        ) ?? '#374151';
 
-        $primaryRgb = ColorUtils::hexToRgbString($primary) ?? '78, 129, 250';
-        $primaryLight = ColorUtils::mix($primary, '#FFFFFF', 0.55) ?? '#9DB9FF';
+        $primaryRgb = ColorUtils::hexToRgbString($primary) ?? '31, 41, 55';
+        $primaryLight = ColorUtils::mix($primary, '#FFFFFF', 0.55) ?? '#848991';
 
         $defaultLanguage = Arr::get($settings, 'default_language', $defaults['default_language']);
         if (! is_valid_language_code($defaultLanguage)) {

@@ -82,6 +82,7 @@ class SettingsController extends Controller
         return view('settings.branding', [
             'brandingSettings' => $this->getBrandingSettings(),
             'languageOptions' => $this->getSupportedLanguageOptions(),
+            'colorPalettes' => $this->getBrandingPalettes(),
         ]);
     }
 
@@ -630,9 +631,9 @@ class SettingsController extends Controller
         }
 
         $logoAlt = $this->nullableTrim($validated['branding_logo_alt'] ?? null);
-        $primaryColor = ColorUtils::normalizeHexColor($validated['branding_primary_color']) ?? '#4E81FA';
-        $secondaryColor = ColorUtils::normalizeHexColor($validated['branding_secondary_color']) ?? '#365FCC';
-        $tertiaryColor = ColorUtils::normalizeHexColor($validated['branding_tertiary_color']) ?? '#3A6BE0';
+        $primaryColor = ColorUtils::normalizeHexColor($validated['branding_primary_color']) ?? '#1F2937';
+        $secondaryColor = ColorUtils::normalizeHexColor($validated['branding_secondary_color']) ?? '#111827';
+        $tertiaryColor = ColorUtils::normalizeHexColor($validated['branding_tertiary_color']) ?? '#374151';
 
         $defaultLanguage = $validated['branding_default_language'] ?? config('app.fallback_locale', 'en');
 
@@ -1046,14 +1047,91 @@ class SettingsController extends Controller
             'logo_alt' => $storedBrandingSettings['logo_alt']
                 ?? data_get($resolvedBranding, 'logo_alt', branding_logo_alt()),
             'primary_color' => $storedBrandingSettings['primary_color']
-                ?? data_get($resolvedBranding, 'colors.primary', '#4E81FA'),
+                ?? data_get($resolvedBranding, 'colors.primary', '#1F2937'),
             'secondary_color' => $storedBrandingSettings['secondary_color']
-                ?? data_get($resolvedBranding, 'colors.secondary', '#365FCC'),
+                ?? data_get($resolvedBranding, 'colors.secondary', '#111827'),
             'tertiary_color' => $storedBrandingSettings['tertiary_color']
-                ?? data_get($resolvedBranding, 'colors.tertiary', '#3A6BE0'),
+                ?? data_get($resolvedBranding, 'colors.tertiary', '#374151'),
             'default_language' => $storedBrandingSettings['default_language']
                 ?? data_get($resolvedBranding, 'default_language', config('app.locale', 'en')),
         ];
+    }
+
+    protected function getBrandingPalettes(): array
+    {
+        $palettes = [
+            [
+                'key' => 'monochrome',
+                'label' => __('messages.branding_palette_monochrome'),
+                'description' => __('messages.branding_palette_monochrome_description'),
+                'colors' => [
+                    'primary' => '#1F2937',
+                    'secondary' => '#111827',
+                    'tertiary' => '#374151',
+                ],
+            ],
+            [
+                'key' => 'red',
+                'label' => __('messages.branding_palette_red'),
+                'description' => __('messages.branding_palette_red_description'),
+                'colors' => [
+                    'primary' => '#B91C1C',
+                    'secondary' => '#991B1B',
+                    'tertiary' => '#DC2626',
+                ],
+            ],
+            [
+                'key' => 'orange',
+                'label' => __('messages.branding_palette_orange'),
+                'description' => __('messages.branding_palette_orange_description'),
+                'colors' => [
+                    'primary' => '#C2410C',
+                    'secondary' => '#9A3412',
+                    'tertiary' => '#EA580C',
+                ],
+            ],
+            [
+                'key' => 'yellow',
+                'label' => __('messages.branding_palette_yellow'),
+                'description' => __('messages.branding_palette_yellow_description'),
+                'colors' => [
+                    'primary' => '#B45309',
+                    'secondary' => '#92400E',
+                    'tertiary' => '#F59E0B',
+                ],
+            ],
+            [
+                'key' => 'green',
+                'label' => __('messages.branding_palette_green'),
+                'description' => __('messages.branding_palette_green_description'),
+                'colors' => [
+                    'primary' => '#15803D',
+                    'secondary' => '#166534',
+                    'tertiary' => '#16A34A',
+                ],
+            ],
+            [
+                'key' => 'blue',
+                'label' => __('messages.branding_palette_blue'),
+                'description' => __('messages.branding_palette_blue_description'),
+                'colors' => [
+                    'primary' => '#1D4ED8',
+                    'secondary' => '#1E40AF',
+                    'tertiary' => '#3B82F6',
+                ],
+            ],
+        ];
+
+        foreach ($palettes as &$palette) {
+            $primary = $palette['colors']['primary'];
+
+            $palette['colors']['primary_rgb'] = ColorUtils::hexToRgbString($primary) ?? '31, 41, 55';
+            $palette['colors']['primary_light'] = ColorUtils::mix($primary, '#FFFFFF', 0.55) ?? '#848991';
+        }
+
+        unset($palette);
+
+        return array_values($palettes);
     }
 
     protected function getTermsSettings(): array

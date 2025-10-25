@@ -1,10 +1,10 @@
 @php
     $branding = config('branding', []);
-    $primary = data_get($branding, 'colors.primary', '#4E81FA');
-    $secondary = data_get($branding, 'colors.secondary', '#365FCC');
-    $tertiary = data_get($branding, 'colors.tertiary', '#3A6BE0');
-    $primaryRgb = data_get($branding, 'colors.primary_rgb', '78, 129, 250');
-    $primaryLight = data_get($branding, 'colors.primary_light', '#9DB9FF');
+    $primary = data_get($branding, 'colors.primary', '#1F2937');
+    $secondary = data_get($branding, 'colors.secondary', '#111827');
+    $tertiary = data_get($branding, 'colors.tertiary', '#374151');
+    $primaryRgb = data_get($branding, 'colors.primary_rgb', '31, 41, 55');
+    $primaryLight = data_get($branding, 'colors.primary_light', '#848991');
 @endphp
 <style>
     :root {
