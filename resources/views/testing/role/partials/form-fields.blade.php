@@ -12,7 +12,14 @@
 <input type="hidden" name="background" value="{{ old('background', $role->background) }}">
 <input type="hidden" name="background_colors" value="{{ old('background_colors', $role->background_colors) }}">
 <input type="hidden" name="background_color" value="{{ old('background_color', $role->background_color) }}">
+@php
+    $backgroundDefaults = is_array($backgroundMediaDefaults ?? null) ? $backgroundMediaDefaults : [];
+    $backgroundMediaAssetId = old('background_media_asset_id', $backgroundDefaults['asset_id'] ?? null);
+    $backgroundMediaVariantId = old('background_media_variant_id', $backgroundDefaults['variant_id'] ?? null);
+@endphp
 <input type="hidden" name="background_image" value="{{ old('background_image', $role->background_image) }}">
+<input type="hidden" name="background_media_asset_id" value="{{ $backgroundMediaAssetId ? (int) $backgroundMediaAssetId : '' }}">
+<input type="hidden" name="background_media_variant_id" value="{{ $backgroundMediaVariantId ? (int) $backgroundMediaVariantId : '' }}">
 <input type="hidden" name="accent_color" value="{{ old('accent_color', $role->accent_color) }}">
 <input type="hidden" name="font_color" value="{{ old('font_color', $role->font_color) }}">
 <input type="hidden" name="font_family" value="{{ old('font_family', $role->font_family) }}">
