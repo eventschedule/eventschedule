@@ -90,7 +90,7 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           draft: false
-          prerelease: ${{ steps.version.outputs.prerelease == 'true' }}
+          prerelease: ${{ steps.version.outputs.prerelease }}
           title: "${{ steps.version.outputs.channel == 'beta' && 'Beta Release' || 'Latest Release' }}"
           automatic_release_tag: "${{ steps.version.outputs.version }}"
           files: |

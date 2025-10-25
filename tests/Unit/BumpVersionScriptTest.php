@@ -13,6 +13,7 @@ class BumpVersionScriptTest extends TestCase
     protected function tearDown(): void
     {
         putenv('BUMP_VERSION_DATE');
+        putenv('GITHUB_OUTPUT');
 
         parent::tearDown();
     }
@@ -50,5 +51,35 @@ class BumpVersionScriptTest extends TestCase
         putenv('BUMP_VERSION_DATE=20251024');
 
         $this->assertSame('20251024-01b', bumpVersion('5.0.17b', 'beta'));
+    }
+
+    public function testGithubOutputsMarkBetaReleasesAsPrereleases(): void
+    {
+        $outputFile = tempnam(sys_get_temp_dir(), 'gho_');
+
+        $this->assertIsString($outputFile);
+
+        putenv('GITHUB_OUTPUT=' . $outputFile);
+
+        writeGithubOutputs('20251024-01b', 'beta', false);
+
+        $this->assertStringContainsString('prerelease=true', (string) file_get_contents($outputFile));
+
+        @unlink($outputFile);
+    }
+
+    public function testGithubOutputsMarkProductionReleasesAsStable(): void
+    {
+        $outputFile = tempnam(sys_get_temp_dir(), 'gho_');
+
+        $this->assertIsString($outputFile);
+
+        putenv('GITHUB_OUTPUT=' . $outputFile);
+
+        writeGithubOutputs('20251024-01p', 'production', false);
+
+        $this->assertStringContainsString('prerelease=false', (string) file_get_contents($outputFile));
+
+        @unlink($outputFile);
     }
 }
