@@ -47,10 +47,19 @@
     $pillActive = 'border-indigo-500 bg-indigo-500 text-white';
 @endphp
 
+@php
+    $navigationLogo = config('branding.logo_path');
+    $logoAlt = branding_logo_alt();
+@endphp
+
 <a href="https://www.eventschedule.com" class="block">
     <div class="flex h-16 shrink-0 items-center pt-2">
-        <img class="h-10 w-auto dark:hidden" src="{{ url('images/light_logo.png') }}" alt="Event Schedule">
-        <img class="hidden h-10 w-auto dark:block" src="{{ url('images/dark_logo.png') }}" alt="Event Schedule">
+        @if ($navigationLogo)
+            <img class="h-10 w-auto" src="{{ branding_logo_url() }}" alt="{{ $logoAlt }}">
+        @else
+            <img class="h-10 w-auto dark:hidden" src="{{ branding_logo_url('light') }}" alt="{{ $logoAlt }}">
+            <img class="hidden h-10 w-auto dark:block" src="{{ branding_logo_url('dark') }}" alt="{{ $logoAlt }}">
+        @endif
     </div>
 </a>
 <nav class="flex flex-1 flex-col">

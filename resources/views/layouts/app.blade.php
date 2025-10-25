@@ -356,9 +356,11 @@
 
     </script>
 
+    @include('branding.styles')
+
     {{ isset($head) ? $head : '' }}
 
-</head> 
+</head>
 <body class="font-sans h-full bg-gray-50 text-gray-900 transition-colors duration-200 dark:bg-gray-950 dark:text-gray-100">
 
     <div data-theme-floating-wrapper class="fixed bottom-4 right-4 z-40">
@@ -374,6 +376,12 @@
     </div>
 
     {{ $slot }}
+
+    @if (isset($footer))
+        {{ $footer }}
+    @else
+        @include('branding.powered-by')
+    @endif
 
 </body>
 </html>

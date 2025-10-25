@@ -199,21 +199,30 @@
         {{ $slot }}
     </div>
 
-    @if (! request()->embed && $role->showBranding())
-    <footer class="bg-gray-800">
-      <div
-        class="container mx-auto flex flex-row justify-center items-center py-5 px-5"
-      >
-        <p class="text-[#F5F9FE] text-base text-center">
-            <!-- Per the AAL license, please do not remove the link to Event Schedule -->
-            {!! str_replace(':link', '<a href="https://www.eventschedule.com" target="_blank" class="hover:underline">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}
-            @if (config('app.hosted'))
-                •
-                {!! __('messages.supported_by', ['link' => '<a href="https://invoiceninja.com" target="_blank" class="hover:underline" title="Leading small-business platform to manage invoices, expenses & tasks">Invoice Ninja</a>']) !!}
-            @endif
-        </p>
-      </div>
-    </footer>
-    @endif
+    <x-slot name="footer">
+        @if (request()->embed)
+            <div class="py-3 text-center text-xs text-gray-500 dark:text-gray-400">
+                {!! str_replace(':link', '<a href="https://www.eventschedule.com" class="hover:underline" target="_blank">EventSchedule</a>', __('messages.powered_by_eventschedule')) !!}
+            </div>
+        @else
+            <footer class="bg-gray-800">
+                <div class="container mx-auto flex flex-row justify-center items-center py-5 px-5">
+                    <p class="text-[#F5F9FE] text-sm sm:text-base text-center">
+                        {!! str_replace(':link', '<a href="https://www.eventschedule.com" target="_blank" class="hover:underline">EventSchedule</a>', __('messages.powered_by_eventschedule')) !!}
+                        @if ($role->showBranding())
+                            <span class="block sm:inline sm:ml-2">
+                                {!! str_replace(':link', '<a href="https://www.eventschedule.com" target="_blank" class="hover:underline">eventschedule.com</a>', __('messages.try_event_schedule')) !!}
+                            </span>
+                            @if (config('app.hosted'))
+                                <span class="block sm:inline sm:ml-2">
+                                    {!! __('messages.supported_by', ['link' => '<a href="https://invoiceninja.com" target="_blank" class="hover:underline" title="Leading small-business platform to manage invoices, expenses & tasks">Invoice Ninja</a>']) !!}
+                                </span>
+                            @endif
+                        @endif
+                    </p>
+                </div>
+            </footer>
+        @endif
+    </x-slot>
 
 </x-app-layout>

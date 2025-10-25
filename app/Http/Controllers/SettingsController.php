@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Enums\ReleaseChannel;
 use App\Models\Setting;
 use App\Services\ReleaseChannelService;
+use App\Rules\AccessibleColor;
+use App\Support\BrandingManager;
+use App\Support\ColorUtils;
 use App\Support\Logging\LogLevelNormalizer;
 use App\Support\Logging\LoggingConfigManager;
 use App\Support\MailConfigManager;
@@ -62,11 +65,13 @@ class SettingsController extends Controller
 
         return view('settings.general', [
             'generalSettings' => $generalSettings,
+            'brandingSettings' => $this->getBrandingSettings(),
             'availableLogLevels' => LoggingConfigManager::availableLevels(),
             'versionInstalled' => $versionInstalled,
             'versionAvailable' => $versionAvailable,
             'availableUpdateChannels' => ReleaseChannel::options(),
             'selectedUpdateChannel' => $selectedChannel->value,
+            'languageOptions' => $this->getSupportedLanguageOptions(),
         ]);
     }
 
@@ -457,9 +462,12 @@ class SettingsController extends Controller
         $this->authorizeAdmin($request->user());
 
         $storedGeneralSettings = Setting::forGroup('general');
+        $storedBrandingSettings = Setting::forGroup('branding');
         $previousChannel = ReleaseChannel::fromString($storedGeneralSettings['update_release_channel'] ?? null);
 
         $logLevelKeys = array_keys(LoggingConfigManager::availableLevels());
+        $languageOptions = $this->getSupportedLanguageOptions();
+        $supportedLanguageCodes = array_keys($languageOptions);
 
         $validated = $request->validate([
             'public_url' => ['required', 'string', 'max:255', 'url'],
@@ -469,6 +477,13 @@ class SettingsController extends Controller
             'log_level' => ['required', 'string', Rule::in($logLevelKeys)],
             'log_disabled' => ['nullable', 'boolean'],
             'update_release_channel' => ['required', 'string', Rule::in(ReleaseChannel::values())],
+            'branding_logo' => ['nullable', 'mimes:jpg,jpeg,png,webp,svg', 'max:4096'],
+            'branding_logo_alt' => ['nullable', 'string', 'max:255'],
+            'branding_remove_logo' => ['nullable', 'boolean'],
+            'branding_primary_color' => ['required', new AccessibleColor(__('messages.branding_primary_color'))],
+            'branding_secondary_color' => ['required', new AccessibleColor(__('messages.branding_secondary_color'))],
+            'branding_tertiary_color' => ['required', new AccessibleColor(__('messages.branding_tertiary_color'))],
+            'branding_default_language' => ['required', 'string', Rule::in($supportedLanguageCodes)],
         ]);
 
         $publicUrl = $this->sanitizeUrl($validated['public_url']);
@@ -507,6 +522,44 @@ class SettingsController extends Controller
 
         Setting::setGroup('logging', $loggingSettings);
 
+        $brandingDisk = storage_public_disk();
+        $logoPath = $storedBrandingSettings['logo_path'] ?? null;
+        $logoDisk = $storedBrandingSettings['logo_disk'] ?? $brandingDisk;
+
+        if ($request->boolean('branding_remove_logo')) {
+            $this->deleteStoredFile($logoPath, $logoDisk);
+            $logoPath = null;
+            $logoDisk = $brandingDisk;
+        }
+
+        if ($request->file('branding_logo')) {
+            $logoDisk = $brandingDisk;
+            $logoPath = $this->storeUploadedFile($request->file('branding_logo'), 'branding', $logoPath, $logoDisk);
+        }
+
+        $logoAlt = $this->nullableTrim($validated['branding_logo_alt'] ?? null);
+        $primaryColor = ColorUtils::normalizeHexColor($validated['branding_primary_color']) ?? '#4E81FA';
+        $secondaryColor = ColorUtils::normalizeHexColor($validated['branding_secondary_color']) ?? '#365FCC';
+        $tertiaryColor = ColorUtils::normalizeHexColor($validated['branding_tertiary_color']) ?? '#3A6BE0';
+
+        $defaultLanguage = $validated['branding_default_language'] ?? config('app.fallback_locale', 'en');
+
+        if (! is_valid_language_code($defaultLanguage)) {
+            $defaultLanguage = config('app.fallback_locale', 'en');
+        }
+
+        $brandingSettings = [
+            'logo_path' => $logoPath,
+            'logo_disk' => $logoPath ? $logoDisk : null,
+            'logo_alt' => $logoAlt,
+            'primary_color' => $primaryColor,
+            'secondary_color' => $secondaryColor,
+            'tertiary_color' => $tertiaryColor,
+            'default_language' => $defaultLanguage,
+        ];
+
+        Setting::setGroup('branding', $brandingSettings);
+
         if ($normalizedPreviousRepositoryUrl !== $normalizedNewRepositoryUrl || $previousChannel !== $channel) {
             $releaseChannels->forgetAll();
         }
@@ -515,6 +568,7 @@ class SettingsController extends Controller
         UpdateConfigManager::apply($updateRepositoryUrl);
         ReleaseChannelManager::apply($channel);
         LoggingConfigManager::apply($loggingSettings);
+        BrandingManager::apply($brandingSettings);
 
         return redirect()->route('settings.general')->with('status', 'general-settings-updated');
     }
@@ -768,25 +822,33 @@ class SettingsController extends Controller
         ];
     }
 
-    protected function storeUploadedFile(?UploadedFile $file, string $directory, ?string $existingRelativePath = null): ?string
+    protected function storeUploadedFile(
+        ?UploadedFile $file,
+        string $directory,
+        ?string $existingRelativePath = null,
+        ?string $disk = null
+    ): ?string
     {
         if (! $file) {
             return $existingRelativePath;
         }
 
+        $diskName = $disk ?: 'local';
+
         if ($existingRelativePath) {
-            $this->deleteStoredFile($existingRelativePath);
+            $this->deleteStoredFile($existingRelativePath, $diskName);
         }
 
-        $path = $file->store($directory);
+        $path = $file->store($directory, $diskName);
 
         return $path ?: $existingRelativePath;
     }
 
-    protected function deleteStoredFile(?string $relativePath): void
+    protected function deleteStoredFile(?string $relativePath, ?string $disk = null): void
     {
         if ($relativePath) {
-            Storage::disk('local')->delete($relativePath);
+            $diskName = $disk ?: 'local';
+            Storage::disk($diskName)->delete($relativePath);
         }
     }
 
@@ -857,6 +919,52 @@ class SettingsController extends Controller
         ];
     }
 
+    protected function getBrandingSettings(): array
+    {
+        $storedBrandingSettings = Setting::forGroup('branding');
+        $resolvedBranding = config('branding', []);
+
+        $logoPath = $storedBrandingSettings['logo_path'] ?? null;
+        $logoDisk = $storedBrandingSettings['logo_disk'] ?? null;
+        $logoUrl = data_get($resolvedBranding, 'logo_url');
+
+        if (! $logoUrl) {
+            if ($logoPath) {
+                $diskName = $logoDisk ?: storage_public_disk();
+
+                if ($diskName === storage_public_disk()) {
+                    $logoUrl = storage_asset_url($logoPath);
+                } else {
+                    try {
+                        $logoUrl = Storage::disk($diskName)->url($logoPath);
+                    } catch (\Throwable $exception) {
+                        $logoUrl = null;
+                    }
+                }
+            }
+
+            if (! $logoUrl) {
+                $logoUrl = branding_logo_url();
+            }
+        }
+
+        return [
+            'logo_path' => $logoPath,
+            'logo_disk' => $logoDisk,
+            'logo_url' => $logoUrl,
+            'logo_alt' => $storedBrandingSettings['logo_alt']
+                ?? data_get($resolvedBranding, 'logo_alt', branding_logo_alt()),
+            'primary_color' => $storedBrandingSettings['primary_color']
+                ?? data_get($resolvedBranding, 'colors.primary', '#4E81FA'),
+            'secondary_color' => $storedBrandingSettings['secondary_color']
+                ?? data_get($resolvedBranding, 'colors.secondary', '#365FCC'),
+            'tertiary_color' => $storedBrandingSettings['tertiary_color']
+                ?? data_get($resolvedBranding, 'colors.tertiary', '#3A6BE0'),
+            'default_language' => $storedBrandingSettings['default_language']
+                ?? data_get($resolvedBranding, 'default_language', config('app.locale', 'en')),
+        ];
+    }
+
     protected function getTermsSettings(): array
     {
         $storedGeneralSettings = Setting::forGroup('general');
@@ -865,6 +973,28 @@ class SettingsController extends Controller
             'terms_markdown' => $storedGeneralSettings['terms_markdown']
                 ?? config('terms.default_markdown'),
         ];
+    }
+
+    protected function getSupportedLanguageOptions(): array
+    {
+        return collect(config('app.supported_languages', ['en']))
+            ->filter()
+            ->mapWithKeys(function ($code) {
+                $code = is_string($code) ? strtolower(trim($code)) : null;
+
+                if (! $code) {
+                    return [];
+                }
+
+                $label = trans("messages.language_name_{$code}");
+
+                if ($label === "messages.language_name_{$code}") {
+                    $label = strtoupper($code);
+                }
+
+                return [$code => $label];
+            })
+            ->toArray();
     }
 
     protected function authorizeAdmin($user): void

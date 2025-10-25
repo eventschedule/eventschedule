@@ -7,6 +7,7 @@ use App\Listeners\LogSentMessage;
 use App\Models\Image;
 use App\Models\Setting;
 use App\Policies\ImagePolicy;
+use App\Support\BrandingManager;
 use App\Support\Logging\LoggingConfigManager;
 use App\Support\MailConfigManager;
 use App\Support\ReleaseChannelManager;
@@ -38,6 +39,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::policy(Image::class, ImagePolicy::class);
+
+        BrandingManager::apply();
 
         if ($this->isBrowserTestingEnvironment()) {
             config([
@@ -119,6 +122,10 @@ class AppServiceProvider extends ServiceProvider
             if (!empty($googleWalletSettings)) {
                 WalletConfigManager::applyGoogle($googleWalletSettings);
             }
+
+            $brandingSettings = Setting::forGroup('branding');
+
+            BrandingManager::apply($brandingSettings);
         }
 
         if (config('app.env') !== 'local') {

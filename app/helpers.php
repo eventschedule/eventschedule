@@ -250,6 +250,44 @@ if (!function_exists('storage_asset_url')) {
     }
 }
 
+if (!function_exists('branding_logo_url')) {
+    /**
+     * Resolve the appropriate branding logo URL for the given variant.
+     */
+    function branding_logo_url(string $variant = 'light'): string
+    {
+        $configured = config('branding.logo_url');
+
+        if (is_string($configured) && trim($configured) !== '') {
+            return $configured;
+        }
+
+        $variant = strtolower($variant);
+
+        if ($variant === 'dark') {
+            return url('images/dark_logo.png');
+        }
+
+        return url('images/light_logo.png');
+    }
+}
+
+if (!function_exists('branding_logo_alt')) {
+    /**
+     * Retrieve the configured alternative text for the branding logo.
+     */
+    function branding_logo_alt(): string
+    {
+        $alt = config('branding.logo_alt', 'Event Schedule');
+
+        if (! is_string($alt) || trim($alt) === '') {
+            return 'Event Schedule';
+        }
+
+        return trim($alt);
+    }
+}
+
 if (!function_exists('storage_fix_public_directory_permissions')) {
     /**
      * Ensure the local public storage directories remain world-readable.
