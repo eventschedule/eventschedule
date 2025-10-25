@@ -138,10 +138,26 @@ class ReleaseChannelService
             throw new RuntimeException('Release data is missing the tag_name attribute.');
         }
 
+        $tag = (string) $release['tag_name'];
+
         return [
-            'version' => (string) $release['tag_name'],
+            'version' => $this->normalizeVersionString($tag),
+            'tag' => $tag,
             'name' => (string) ($release['name'] ?? $release['tag_name']),
             'prerelease' => (bool) ($release['prerelease'] ?? false),
         ];
+    }
+
+    private function normalizeVersionString(string $tag): string
+    {
+        if ($tag === '') {
+            return $tag;
+        }
+
+        if (preg_match('/^v(.+)/i', $tag, $matches) === 1) {
+            return $matches[1];
+        }
+
+        return $tag;
     }
 }
