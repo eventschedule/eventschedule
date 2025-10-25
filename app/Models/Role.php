@@ -663,29 +663,51 @@ class Role extends Model implements MustVerifyEmail
 
     public function toApiData()
     {
-        $data = new \stdClass;
+        $this->loadMissing(['groups']);
 
-        if (! $this->isPro()) {
-            return $data;
-        }
-
-        $data->id = UrlUtils::encodeId($this->id);
-        $data->url = $this->getGuestUrl();
-        $data->type = $this->type;
-        $data->name = $this->name;
-        $data->email = $this->email;
-        $data->website = $this->website;
-        $data->description = $this->description;
+        $data = [
+            'id' => UrlUtils::encodeId($this->id),
+            'url' => $this->getGuestUrl(),
+            'type' => $this->type,
+            'subdomain' => $this->subdomain,
+            'name' => $this->name,
+            'email' => $this->email,
+            'website' => $this->website,
+            'description' => $this->description,
+            'timezone' => $this->timezone,
+            'language_code' => $this->language_code,
+            'country_code' => $this->country_code,
+            'plan_type' => $this->plan_type,
+            'plan_expires' => $this->plan_expires,
+            'contacts' => $this->contacts,
+            'import_config' => $this->import_config,
+            'accept_requests' => (bool) $this->accept_requests,
+            'request_terms' => $this->request_terms,
+            'youtube_links' => $this->youtube_links ? json_decode($this->youtube_links, true) : [],
+            'groups' => $this->groups->map(function ($group) {
+                return [
+                    'id' => $group->encodeId(),
+                    'name' => $group->name,
+                    'name_en' => $group->name_en,
+                    'slug' => $group->slug,
+                ];
+            })->values()->all(),
+        ];
 
         if ($this->isVenue()) {
-            $data->address1 = $this->address1;
-            $data->city = $this->city;
-            $data->state = $this->state;
-            $data->postal_code = $this->postal_code;
-            $data->country_code = $this->country_code;
+            $data['address1'] = $this->address1;
+            $data['address2'] = $this->address2;
+            $data['city'] = $this->city;
+            $data['state'] = $this->state;
+            $data['postal_code'] = $this->postal_code;
+            $data['country_code'] = $this->country_code;
         }
-                
-        return $data;
+
+        if ($this->isTalent()) {
+            $data['youtube_url'] = $this->getFirstVideoUrl();
+        }
+
+        return (object) $data;
     }
 
     public function isPro()

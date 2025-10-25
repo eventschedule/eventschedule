@@ -798,29 +798,75 @@ class Event extends Model
 
     public function toApiData()
     {
-        $data = new \stdClass;
+        $this->loadMissing(['tickets', 'roles.groups', 'flyerImage', 'eventType', 'creatorRole']);
 
-        if (! $this->isPro()) {
-            return $data;
-        }
+        $primaryRole = $this->creatorRole ?: $this->roles->first();
 
-        $data->id = UrlUtils::encodeId($this->id);
-        $data->url = $this->getGuestUrl();
-        $data->name = $this->name;
-        $data->description = $this->description;
-        $data->starts_at = $this->starts_at;
-        $data->duration = $this->duration;
-        $data->venue_id = $this->venue ? UrlUtils::encodeId($this->venue->id) : null;
+        $data = [
+            'id' => UrlUtils::encodeId($this->id),
+            'url' => $this->getGuestUrl(),
+            'slug' => $this->slug,
+            'name' => $this->name,
+            'description' => $this->description,
+            'description_html' => $this->description_html,
+            'starts_at' => $this->starts_at ? Carbon::parse($this->starts_at)->format('Y-m-d H:i:s') : null,
+            'duration' => $this->duration,
+            'timezone' => $primaryRole ? $primaryRole->timezone : null,
+            'venue_id' => $this->venue ? UrlUtils::encodeId($this->venue->id) : null,
+            'venue' => $this->venue ? $this->venue->toApiData() : null,
+            'tickets_enabled' => (bool) $this->tickets_enabled,
+            'ticket_currency_code' => $this->ticket_currency_code,
+            'total_tickets_mode' => $this->total_tickets_mode,
+            'ticket_notes' => $this->ticket_notes,
+            'ticket_notes_html' => $this->ticket_notes_html,
+            'registration_url' => $this->registration_url,
+            'event_url' => $this->event_url,
+            'payment_method' => $this->payment_method,
+            'payment_instructions' => $this->payment_instructions,
+            'payment_instructions_html' => $this->payment_instructions_html,
+            'flyer_image_url' => $this->flyer_image_url,
+            'category' => $this->eventType ? [
+                'id' => $this->eventType->id,
+                'name' => $this->eventType->name,
+            ] : null,
+        ];
 
-        $data->members = $this->members()->mapWithKeys(function ($member) {
+        $data['members'] = $this->members()->mapWithKeys(function ($member) {
             return [UrlUtils::encodeId($member->id) => [
                 'name' => $member->name,
                 'email' => $member->email,
                 'youtube_url' => $member->getFirstVideoUrl(),
             ]];
-        });
+        })->toArray();
 
-        return $data;
+        $data['tickets'] = $this->tickets->map(function ($ticket) {
+            return [
+                'id' => UrlUtils::encodeId($ticket->id),
+                'type' => $ticket->type,
+                'price' => $ticket->price,
+                'quantity' => $ticket->quantity,
+                'sold' => $ticket->sold ? json_decode($ticket->sold, true) : [],
+                'description' => $ticket->description,
+            ];
+        })->values()->all();
+
+        $data['schedules'] = $this->roles->map(function ($role) {
+            return [
+                'id' => UrlUtils::encodeId($role->id),
+                'name' => $role->name,
+                'type' => $role->type,
+                'subdomain' => $role->subdomain,
+                'pivot' => $role->pivot ? [
+                    'group_id' => $role->pivot->group_id ? UrlUtils::encodeId($role->pivot->group_id) : null,
+                    'is_accepted' => $role->pivot->is_accepted,
+                ] : null,
+            ];
+        })->values()->all();
+
+        $curator = $this->curator();
+        $data['curator_role'] = $curator ? $curator->toApiData() : null;
+
+        return (object) $data;
     }
 
     public function hasSameTicketQuantities()

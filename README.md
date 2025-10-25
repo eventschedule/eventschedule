@@ -45,6 +45,10 @@
 - 🚀 **Automatic App Updates:** Keep the platform up to date effortlessly with one-click automatic updates.
 - 🧭 **Streamlined Admin Navigation:** Reach Venues, Talent, and Curators from top-level menus while keeping their detailed sub-navigation intact.
 
+## API Reference
+
+Comprehensive request/response samples for every REST endpoint, including authentication and failure handling, are available in [docs/API_REFERENCE.md](docs/API_REFERENCE.md).
+
 <div style="display: flex; gap: 10px;">
     <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_1.png?raw=true" width="49%" alt="Guest > Schedule">
     <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_2.png?raw=true" width="49%" alt="Guest > Event">
