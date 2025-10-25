@@ -1087,7 +1087,7 @@ class SettingsController extends Controller
                 'colors' => [
                     'primary' => '#C2410C',
                     'secondary' => '#9A3412',
-                    'tertiary' => '#EA580C',
+                    'tertiary' => '#BB4F06',
                 ],
             ],
             [
@@ -1097,7 +1097,7 @@ class SettingsController extends Controller
                 'colors' => [
                     'primary' => '#B45309',
                     'secondary' => '#92400E',
-                    'tertiary' => '#F59E0B',
+                    'tertiary' => '#A16207',
                 ],
             ],
             [
@@ -1107,7 +1107,7 @@ class SettingsController extends Controller
                 'colors' => [
                     'primary' => '#15803D',
                     'secondary' => '#166534',
-                    'tertiary' => '#16A34A',
+                    'tertiary' => '#0B7A34',
                 ],
             ],
             [
@@ -1117,7 +1117,7 @@ class SettingsController extends Controller
                 'colors' => [
                     'primary' => '#1D4ED8',
                     'secondary' => '#1E40AF',
-                    'tertiary' => '#3B82F6',
+                    'tertiary' => '#2563EB',
                 ],
             ],
         ];
