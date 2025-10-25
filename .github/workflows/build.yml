@@ -91,6 +91,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: false
           prerelease: ${{ steps.version.outputs.prerelease == 'true' }}
+          make_latest: ${{ steps.version.outputs.channel == 'beta' && 'legacy' || 'true' }}
           name: "${{ steps.version.outputs.channel == 'beta' && 'Beta Release' || 'Latest Release' }}"
           tag_name: "${{ steps.version.outputs.version }}"
           files: |
