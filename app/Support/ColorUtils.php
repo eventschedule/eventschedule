@@ -126,4 +126,38 @@ class ColorUtils
 
         return sprintf('#%02X%02X%02X', $mixed[0], $mixed[1], $mixed[2]);
     }
+
+    public static function bestContrastingColor(string $hex, array $candidates): ?array
+    {
+        $base = self::normalizeHexColor($hex);
+
+        if ($base === null) {
+            return null;
+        }
+
+        $best = null;
+
+        foreach ($candidates as $candidate) {
+            $candidateHex = self::normalizeHexColor($candidate);
+
+            if ($candidateHex === null) {
+                continue;
+            }
+
+            $ratio = self::contrastRatio($base, $candidateHex);
+
+            if ($ratio === null) {
+                continue;
+            }
+
+            if ($best === null || $ratio > $best['ratio']) {
+                $best = [
+                    'color' => $candidateHex,
+                    'ratio' => $ratio,
+                ];
+            }
+        }
+
+        return $best;
+    }
 }

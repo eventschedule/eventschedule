@@ -23,6 +23,8 @@
         --brand-secondary: #111827;
         --brand-tertiary: #374151;
         --brand-on-primary: #FFFFFF;
+        --brand-on-secondary: #FFFFFF;
+        --brand-on-tertiary: #FFFFFF;
     }
 
     .dark {

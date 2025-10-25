@@ -559,13 +559,31 @@ class SettingsController extends Controller
         $languageOptions = $this->getSupportedLanguageOptions();
         $supportedLanguageCodes = array_keys($languageOptions);
 
+        $buttonTextColors = [];
+
+        foreach (BrandingManager::BUTTON_TEXT_COLOR_CANDIDATES as $candidate) {
+            $normalizedCandidate = ColorUtils::normalizeHexColor($candidate);
+
+            if ($normalizedCandidate === null) {
+                continue;
+            }
+
+            $label = match ($normalizedCandidate) {
+                '#FFFFFF' => __('messages.branding_contrast_text_white'),
+                '#111827' => __('messages.branding_contrast_text_charcoal'),
+                default => $normalizedCandidate,
+            };
+
+            $buttonTextColors[$normalizedCandidate] = $label;
+        }
+
         $validated = $request->validate([
             'branding_logo_media_asset_id' => ['nullable', 'integer', 'exists:media_assets,id'],
             'branding_logo_media_variant_id' => ['nullable', 'integer', 'exists:media_asset_variants,id'],
             'branding_logo_alt' => ['nullable', 'string', 'max:255'],
-            'branding_primary_color' => ['required', new AccessibleColor(__('messages.branding_primary_color'))],
-            'branding_secondary_color' => ['required', new AccessibleColor(__('messages.branding_secondary_color'))],
-            'branding_tertiary_color' => ['required', new AccessibleColor(__('messages.branding_tertiary_color'))],
+            'branding_primary_color' => ['required', new AccessibleColor(__('messages.branding_primary_color'), 4.5, $buttonTextColors)],
+            'branding_secondary_color' => ['required', new AccessibleColor(__('messages.branding_secondary_color'), 4.5, $buttonTextColors)],
+            'branding_tertiary_color' => ['required', new AccessibleColor(__('messages.branding_tertiary_color'), 4.5, $buttonTextColors)],
             'branding_default_language' => ['required', 'string', Rule::in($supportedLanguageCodes)],
         ]);
 
