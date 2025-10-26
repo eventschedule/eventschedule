@@ -1,6 +1,6 @@
 import { createApp } from 'vue';
-import ImageLibraryManager from './components/ImageLibraryManager.vue';
-import ImagePickerModal from './components/ImagePickerModal.vue';
+import ImageLibraryManager from './components/ImageLibraryManager.js';
+import ImagePickerModal from './components/ImagePickerModal.js';
 
 const mountComponent = (selector, component, propResolver = () => ({})) => {
   document.querySelectorAll(selector).forEach((element) => {
