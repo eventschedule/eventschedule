@@ -244,11 +244,7 @@ class AppleWalletService
             throw new RuntimeException('Unable to read Apple Wallet certificate.');
         }
 
-        $certificates = [];
-
-        if (! openssl_pkcs12_read($certificateContents, $certificates, $this->certificatePassword ?? '')) {
-            throw new RuntimeException('Unable to parse Apple Wallet certificate.');
-        }
+        $certificates = $this->loadCertificates($certificateContents);
 
         $manifestPath = $this->createTempFile($this->encodeJson($manifest));
         $signaturePath = tempnam(sys_get_temp_dir(), 'pkpass-signature-') ?: throw new RuntimeException('Unable to create signature file.');
@@ -293,6 +289,61 @@ class AppleWalletService
         }
 
         return $signature;
+    }
+
+    /**
+     * @return array{cert: mixed, pkey: mixed}
+     */
+    protected function loadCertificates(string $certificateContents): array
+    {
+        $password = $this->certificatePassword ?? '';
+        $certificates = [];
+
+        if (@openssl_pkcs12_read($certificateContents, $certificates, $password)) {
+            if (! empty($certificates['cert']) && ! empty($certificates['pkey'])) {
+                return $certificates;
+            }
+        }
+
+        $pemCertificates = $this->parsePemCertificateBundle($certificateContents, $password);
+
+        if ($pemCertificates !== null) {
+            return $pemCertificates;
+        }
+
+        throw new RuntimeException('Unable to parse Apple Wallet certificate.');
+    }
+
+    /**
+     * Attempt to parse a PEM bundle that includes the certificate and private key.
+     *
+     * @return array{cert: string, pkey: resource|string}|null
+     */
+    protected function parsePemCertificateBundle(string $contents, string $password): ?array
+    {
+        $certificatePattern = '/-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----/s';
+        $privateKeyPattern = '/-----BEGIN (?:RSA |EC |ENCRYPTED )?PRIVATE KEY-----.*?-----END (?:RSA |EC |ENCRYPTED )?PRIVATE KEY-----/s';
+
+        if (! preg_match_all($certificatePattern, $contents, $certificateMatches) || empty($certificateMatches[0])) {
+            return null;
+        }
+
+        if (! preg_match($privateKeyPattern, $contents, $privateKeyMatch)) {
+            return null;
+        }
+
+        $privateKey = @openssl_pkey_get_private($privateKeyMatch[0], $password === '' ? null : $password);
+
+        if ($privateKey === false) {
+            return null;
+        }
+
+        $certificateChain = implode(PHP_EOL, array_map('trim', $certificateMatches[0]));
+
+        return [
+            'cert' => $certificateChain,
+            'pkey' => $privateKey,
+        ];
     }
 
     /**
