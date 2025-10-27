@@ -509,6 +509,21 @@ class AppleWalletService
             return null;
         }
 
+        $passwordPath = tempnam(sys_get_temp_dir(), 'pkpass-password-');
+
+        if ($passwordPath === false) {
+            @unlink($inputPath);
+            @unlink($outputPath);
+            return null;
+        }
+
+        if (file_put_contents($passwordPath, $password . PHP_EOL) === false) {
+            @unlink($inputPath);
+            @unlink($outputPath);
+            @unlink($passwordPath);
+            return null;
+        }
+
         $command = [
             'openssl',
             'pkcs12',
@@ -526,13 +541,12 @@ class AppleWalletService
         $command[] = '-passout';
         $command[] = 'pass:';
         $command[] = '-passin';
-        $command[] = 'fd:3';
+        $command[] = 'file:' . $passwordPath;
 
         $descriptorSpec = [
             0 => ['pipe', 'r'],
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
-            3 => ['pipe', 'r'],
         ];
 
         $process = @proc_open($command, $descriptorSpec, $pipes);
@@ -540,11 +554,10 @@ class AppleWalletService
         if (! is_resource($process)) {
             @unlink($inputPath);
             @unlink($outputPath);
+            @unlink($passwordPath);
             return null;
         }
 
-        fwrite($pipes[3], $password . PHP_EOL);
-        fclose($pipes[3]);
         fclose($pipes[0]);
         $stdout = stream_get_contents($pipes[1]) ?: '';
         fclose($pipes[1]);
@@ -557,6 +570,7 @@ class AppleWalletService
 
         @unlink($inputPath);
         @unlink($outputPath);
+        @unlink($passwordPath);
 
         if ($exitCode !== 0 || $pemContents === false || trim($pemContents) === '') {
             $message = trim($stderr ?: $stdout);
