@@ -110,7 +110,7 @@ class AppleWalletService
     protected function buildPassPayload(Sale $sale): array
     {
         $event = $sale->event;
-        $startsAt = $this->resolveEventStart($event, $sale->event_date);
+        $startsAt = $this->resolveEventStart($event, $sale);
         $relevantDate = $startsAt->copy()->setTimezone('UTC')->format('Y-m-d\TH:i:s\Z');
         $ticketSummary = $sale->saleTickets->map(function ($saleTicket) {
             $name = $saleTicket->ticket->type ?: __('messages.ticket');
@@ -199,17 +199,33 @@ class AppleWalletService
         return strtoupper(substr(hash('sha256', $sale->id . '|' . $sale->secret), 0, 32));
     }
 
-    protected function resolveEventStart(Event $event, ?string $eventDate): Carbon
+    protected function resolveEventStart(Event $event, Sale $sale): Carbon
     {
-        $startsAt = $event->getStartDateTime($eventDate);
+        $startsAt = $event->getStartDateTime($sale->event_date);
 
-        if (! $startsAt) {
-            throw new \RuntimeException('Cannot build wallet pass for event without a start time.');
+        if ($startsAt) {
+            $timezone = $this->resolveTimezone($event);
+
+            return $startsAt->clone()->setTimezone($timezone);
         }
 
+        $fallback = $this->resolveFallbackStart($event, $sale);
         $timezone = $this->resolveTimezone($event);
 
-        return $startsAt->clone()->setTimezone($timezone);
+        return $fallback->setTimezone($timezone);
+    }
+
+    protected function resolveFallbackStart(Event $event, Sale $sale): Carbon
+    {
+        if ($sale->created_at instanceof Carbon) {
+            return $sale->created_at->clone();
+        }
+
+        if ($event->created_at instanceof Carbon) {
+            return $event->created_at->clone();
+        }
+
+        return Carbon::now();
     }
 
     protected function resolveTimezone(Event $event): string
