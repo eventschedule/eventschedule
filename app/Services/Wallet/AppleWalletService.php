@@ -679,13 +679,17 @@ class AppleWalletService
         $chain = [];
         $fingerprints = [];
 
-        $primary = $this->exportCertificateToPem($certificates['cert'] ?? null);
+        $primaryPem = $this->exportCertificateToPem($certificates['cert'] ?? null);
 
-        if ($primary === null) {
+        if ($primaryPem === null) {
             return null;
         }
 
-        $this->appendCertificateToChain($chain, $fingerprints, $primary);
+        $primaryFingerprint = preg_replace('/\s+/', '', $primaryPem) ?? '';
+
+        if ($primaryFingerprint !== '') {
+            $fingerprints[sha1($primaryFingerprint)] = true;
+        }
 
         foreach ($certificates['extracerts'] as $extra) {
             $pem = $this->exportCertificateToPem($extra);
