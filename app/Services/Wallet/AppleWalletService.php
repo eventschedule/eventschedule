@@ -903,14 +903,22 @@ class AppleWalletService
 
             $parsed = @openssl_x509_read($certificate);
 
-            if ($parsed === false) {
-                return null;
+            if ($parsed !== false) {
+                $exported = '';
+
+                if (@openssl_x509_export($parsed, $exported)) {
+                    return trim($exported);
+                }
             }
 
-            $exported = '';
+            $maybeBase64 = preg_replace('/\s+/', '', $trimmed) ?? '';
 
-            if (@openssl_x509_export($parsed, $exported)) {
-                return trim($exported);
+            if ($maybeBase64 !== '') {
+                $decoded = base64_decode($maybeBase64, true);
+
+                if ($decoded !== false && $decoded !== '') {
+                    return $this->exportCertificateToPem($decoded);
+                }
             }
 
             return null;
