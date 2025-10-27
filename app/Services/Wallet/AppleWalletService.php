@@ -319,6 +319,20 @@ class AppleWalletService
             }
         }
 
+        $cliCertificates = $this->tryExtractCertificatesWithOpenSslCli($certificateContents, $password, $errors);
+
+        if ($cliCertificates !== null) {
+            return $cliCertificates;
+        }
+
+        if ($decoded !== null) {
+            $cliCertificates = $this->tryExtractCertificatesWithOpenSslCli($decoded, $password, $errors);
+
+            if ($cliCertificates !== null) {
+                return $cliCertificates;
+            }
+        }
+
         $pemCertificates = $this->parsePemCertificateBundle($certificateContents, $password, $errors);
 
         if ($pemCertificates !== null) {
@@ -472,6 +486,105 @@ class AppleWalletService
         }
 
         return $messages;
+    }
+
+    /**
+     * Attempt to extract the certificate using the OpenSSL CLI as a fallback when
+     * the PHP extension cannot load legacy algorithms required by some PKCS#12 bundles.
+     *
+     * @param  array<int, string>  $errors
+     * @return array{cert: string, pkey: resource|string}|null
+     */
+    protected function tryExtractCertificatesWithOpenSslCli(string $contents, string $password, array &$errors): ?array
+    {
+        if (! $this->canUseOpenSslCli()) {
+            return null;
+        }
+
+        $inputPath = $this->createTempFile($contents);
+        $outputPath = tempnam(sys_get_temp_dir(), 'pkpass-cli-');
+
+        if ($outputPath === false) {
+            @unlink($inputPath);
+            return null;
+        }
+
+        $command = [
+            'openssl',
+            'pkcs12',
+            '-in',
+            $inputPath,
+            '-out',
+            $outputPath,
+            '-nodes',
+        ];
+
+        if (defined('OPENSSL_VERSION_NUMBER') && OPENSSL_VERSION_NUMBER >= 0x30000000) {
+            $command[] = '-legacy';
+        }
+
+        $command[] = '-passout';
+        $command[] = 'pass:';
+        $command[] = '-passin';
+        $command[] = 'pass:' . $password;
+
+        $descriptorSpec = [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ];
+
+        $process = @proc_open($command, $descriptorSpec, $pipes);
+
+        if (! is_resource($process)) {
+            @unlink($inputPath);
+            @unlink($outputPath);
+            return null;
+        }
+
+        fclose($pipes[0]);
+        $stdout = stream_get_contents($pipes[1]) ?: '';
+        fclose($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]) ?: '';
+        fclose($pipes[2]);
+
+        $exitCode = proc_close($process);
+
+        $pemContents = file_get_contents($outputPath);
+
+        @unlink($inputPath);
+        @unlink($outputPath);
+
+        if ($exitCode !== 0 || $pemContents === false || trim($pemContents) === '') {
+            $message = trim($stderr ?: $stdout);
+
+            if ($message !== '') {
+                $errors[] = $message;
+            }
+
+            return null;
+        }
+
+        return $this->parsePemCertificateBundle($pemContents, '', $errors);
+    }
+
+    protected function canUseOpenSslCli(): bool
+    {
+        if (! function_exists('proc_open')) {
+            return false;
+        }
+
+        $disabled = ini_get('disable_functions');
+
+        if ($disabled) {
+            $disabledFunctions = array_map('trim', explode(',', $disabled));
+
+            if (in_array('proc_open', $disabledFunctions, true)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     protected function ensureOpenSslLegacyProvider(): void
