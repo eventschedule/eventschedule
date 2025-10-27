@@ -43,7 +43,7 @@ class AppleWalletServiceTest extends TestCase
                 'certificate_password' => "  ",
                 'wwdr_certificate_path' => " \t{$wwdrPath} ",
                 'pass_type_identifier' => " pass.com.eventschedule.sample ",
-                'team_identifier' => " TEAM12345AB \n",
+                'team_identifier' => " TEAM12345A \n",
                 'organization_name' => " Example Org \n",
                 'background_color' => "  rgb(78,129,250)  ",
                 'foreground_color' => " rgb(255,255,255) ",
