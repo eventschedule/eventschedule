@@ -135,7 +135,7 @@ class UrlUtils
 
         // Use cURL instead of file_get_contents for better security control
         $ch = curl_init();
-        curl_setopt_array($ch, array_merge([
+        curl_setopt_array($ch, self::getCurlSslOptions() + [
             CURLOPT_URL => $lookup_url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => 10,
@@ -145,7 +145,7 @@ class UrlUtils
             CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
             CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
             CURLOPT_FOLLOWLOCATION => true,
-        ], self::getCurlSslOptions()));
+        ]);
         
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -238,7 +238,7 @@ class UrlUtils
 
         try {
             $ch = curl_init($url);
-            curl_setopt_array($ch, array_merge([
+            curl_setopt_array($ch, self::getCurlSslOptions() + [
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_MAXREDIRS => 3, // Reduced from 10
@@ -254,7 +254,7 @@ class UrlUtils
                 CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
                 CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
                 CURLOPT_MAXFILESIZE => 10485760, // 10MB limit
-            ], self::getCurlSslOptions()));
+            ]);
 
             $response = curl_exec($ch);
             
@@ -345,7 +345,7 @@ class UrlUtils
     private static function downloadImageSecurely($imageUrl)
     {
         $ch = curl_init();
-        curl_setopt_array($ch, array_merge([
+        curl_setopt_array($ch, self::getCurlSslOptions() + [
             CURLOPT_URL => $imageUrl,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => 10,
@@ -355,7 +355,7 @@ class UrlUtils
             CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
             CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
             CURLOPT_MAXFILESIZE => 5242880, // 5MB limit for images
-        ], self::getCurlSslOptions()));
+        ]);
 
         $imageData = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
