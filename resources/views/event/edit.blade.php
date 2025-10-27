@@ -1598,7 +1598,10 @@
         this.event.slug = sanitizedSlug || null;
 
         if (! this.isFormValid) {
-          event.preventDefault();
+          if (event && typeof event.preventDefault === 'function') {
+            event.preventDefault();
+          }
+
           alert("{{ __('messages.please_select_venue_or_participant') }}");
         }
       },
@@ -1713,10 +1716,11 @@
           .filter(member => !selectedIds.has(member.id));
       },
       isFormValid() {
-        var hasSubdomain = this.venueName || this.sanitizedSelectedMembers.length > 0;
-        var hasVenue = this.venueAddress1 || this.event.event_url;
+        const hasVenueSelection = !!this.selectedVenue || !!this.venueName;
+        const hasParticipants = this.sanitizedSelectedMembers.length > 0;
+        const hasLocationDetails = !!this.venueAddress1 || !!this.event.event_url;
 
-        return hasSubdomain && hasVenue;
+        return (hasVenueSelection || hasParticipants) && hasLocationDetails;
       },
       hasLimitedPaidTickets() {
         return this.tickets.some(ticket => ticket.price > 0 && ticket.quantity > 0);
