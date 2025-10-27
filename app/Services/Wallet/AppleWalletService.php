@@ -631,19 +631,12 @@ class AppleWalletService
             return;
         }
 
-        putenv('OPENSSL_CONF=' . $path);
+        self::setEnvironmentVariable('OPENSSL_CONF', $path);
 
         if (self::$legacyProviderOriginalModules === null) {
-            $modulePaths = [
-                '/usr/lib/ssl/ossl-modules',
-                '/usr/lib64/ossl-modules',
-                '/usr/lib/x86_64-linux-gnu/ossl-modules',
-                '/opt/homebrew/opt/openssl@3/lib/ossl-modules',
-            ];
-
-            foreach ($modulePaths as $modulePath) {
+            foreach ($this->resolveOpenSslModuleDirectories() as $modulePath) {
                 if (is_dir($modulePath)) {
-                    putenv('OPENSSL_MODULES=' . $modulePath);
+                    self::setEnvironmentVariable('OPENSSL_MODULES', $modulePath);
                     break;
                 }
             }
@@ -658,21 +651,70 @@ class AppleWalletService
             }
 
             if (self::$legacyProviderOriginalConfig !== null) {
-                putenv('OPENSSL_CONF=' . self::$legacyProviderOriginalConfig);
+                self::setEnvironmentVariable('OPENSSL_CONF', self::$legacyProviderOriginalConfig);
             } else {
-                putenv('OPENSSL_CONF');
+                self::setEnvironmentVariable('OPENSSL_CONF', null);
             }
 
             if (self::$legacyProviderOriginalModules !== null) {
-                putenv('OPENSSL_MODULES=' . self::$legacyProviderOriginalModules);
+                self::setEnvironmentVariable('OPENSSL_MODULES', self::$legacyProviderOriginalModules);
             } else {
-                putenv('OPENSSL_MODULES');
+                self::setEnvironmentVariable('OPENSSL_MODULES', null);
             }
 
             self::$legacyProviderOriginalConfig = null;
             self::$legacyProviderOriginalModules = null;
             self::$legacyProviderInitialized = false;
         });
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function resolveOpenSslModuleDirectories(): array
+    {
+        $paths = [
+            '/usr/lib/ssl/ossl-modules',
+            '/usr/lib64/ossl-modules',
+            '/usr/lib/x86_64-linux-gnu/ossl-modules',
+            '/opt/homebrew/opt/openssl@3/lib/ossl-modules',
+        ];
+
+        $patterns = [
+            '/usr/lib*/ossl-modules',
+            '/usr/local/lib*/ossl-modules',
+            '/opt/*/lib/ossl-modules',
+        ];
+
+        foreach ($patterns as $pattern) {
+            $matches = glob($pattern, GLOB_ONLYDIR);
+
+            if (! $matches) {
+                continue;
+            }
+
+            foreach ($matches as $match) {
+                if (is_string($match) && $match !== '') {
+                    $paths[] = $match;
+                }
+            }
+        }
+
+        return array_values(array_unique($paths));
+    }
+
+    protected static function setEnvironmentVariable(string $name, ?string $value): void
+    {
+        if ($value === null || $value === '') {
+            putenv($name);
+            unset($_ENV[$name], $_SERVER[$name]);
+
+            return;
+        }
+
+        putenv($name . '=' . $value);
+        $_ENV[$name] = $value;
+        $_SERVER[$name] = $value;
     }
 
     /**
