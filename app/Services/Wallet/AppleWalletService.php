@@ -60,7 +60,10 @@ class AppleWalletService
         return true;
     }
 
-    protected function sanitizeConfigValue(?string $value): ?string
+    /**
+     * @param  mixed  $value
+     */
+    protected function sanitizeConfigValue($value): ?string
     {
         if (! is_string($value)) {
             return null;
