@@ -249,9 +249,88 @@ class AppleWalletService
         }
 
         $certificates = $this->loadCertificates($certificateContents);
-
         $manifestPath = $this->createTempFile($this->encodeJson($manifest));
-        $signaturePath = tempnam(sys_get_temp_dir(), 'pkpass-signature-') ?: throw new RuntimeException('Unable to create signature file.');
+
+        try {
+            $cmsSignature = $this->tryCmsManifestSignature($manifestPath, $certificates);
+
+            if ($cmsSignature !== null) {
+                return $cmsSignature;
+            }
+
+            return $this->signManifestWithPkcs7($manifestPath, $certificates);
+        } finally {
+            @unlink($manifestPath);
+        }
+    }
+
+    /**
+     * @param  array{cert: mixed, pkey: mixed}  $certificates
+     */
+    protected function tryCmsManifestSignature(string $manifestPath, array $certificates): ?string
+    {
+        if (! function_exists('openssl_cms_sign')) {
+            return null;
+        }
+
+        $signaturePath = tempnam(sys_get_temp_dir(), 'pkpass-signature-');
+
+        if ($signaturePath === false) {
+            throw new RuntimeException('Unable to create signature file.');
+        }
+
+        $flags = 0;
+
+        if (defined('OPENSSL_CMS_BINARY')) {
+            $flags |= constant('OPENSSL_CMS_BINARY');
+        }
+
+        if (defined('OPENSSL_CMS_DETACHED')) {
+            $flags |= constant('OPENSSL_CMS_DETACHED');
+        }
+
+        $encoding = defined('OPENSSL_ENCODING_DER') ? constant('OPENSSL_ENCODING_DER') : 0;
+
+        $result = @openssl_cms_sign(
+            $manifestPath,
+            $signaturePath,
+            $certificates['cert'] ?? null,
+            $certificates['pkey'] ?? null,
+            [],
+            $flags,
+            $encoding,
+            $this->wwdrCertificatePath ?? ''
+        );
+
+        $signatureContents = null;
+
+        if ($result) {
+            $signatureContents = file_get_contents($signaturePath);
+        }
+
+        @unlink($signaturePath);
+
+        if (! $result || $signatureContents === false) {
+            return null;
+        }
+
+        if ($signatureContents === '') {
+            return null;
+        }
+
+        return $signatureContents;
+    }
+
+    /**
+     * @param  array{cert: mixed, pkey: mixed}  $certificates
+     */
+    protected function signManifestWithPkcs7(string $manifestPath, array $certificates): string
+    {
+        $signaturePath = tempnam(sys_get_temp_dir(), 'pkpass-signature-');
+
+        if ($signaturePath === false) {
+            throw new RuntimeException('Unable to create signature file.');
+        }
 
         $signingResult = openssl_pkcs7_sign(
             $manifestPath,
@@ -264,14 +343,12 @@ class AppleWalletService
         );
 
         if (! $signingResult) {
-            @unlink($manifestPath);
             @unlink($signaturePath);
             throw new RuntimeException('Unable to sign Apple Wallet manifest.');
         }
 
         $signatureContents = file_get_contents($signaturePath);
 
-        @unlink($manifestPath);
         @unlink($signaturePath);
 
         if ($signatureContents === false) {
