@@ -185,6 +185,8 @@ return [
     'public_url_help' => 'This URL is used when generating public links for schedules, events, and emails.',
     'update_repository_url' => 'Update repository URL',
     'update_repository_url_help' => 'Set the repository URL that should be checked for new releases. Leave blank to use the default.',
+    'verify_download_ssl' => 'Verify SSL certificates for external downloads',
+    'verify_download_ssl_help' => 'Keep this enabled to validate HTTPS certificates when fetching updates and remote assets. Disable temporarily if your local environment lacks trusted certificate authorities.',
     'general_settings_saved' => 'General settings saved successfully.',
     'logging_settings' => 'Logging',
     'logging_settings_description' => 'Configure the syslog relay target and minimum severity for application logs.',
