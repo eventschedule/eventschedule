@@ -81,10 +81,10 @@ class AppleWalletService
 
         $baseFiles = [
             'pass.json' => $this->encodeJson($payload),
-            'icon.png' => $this->createIcon($sale->event, 58),
-            'icon@2x.png' => $this->createIcon($sale->event, 116),
-            'logo.png' => $this->createIcon($sale->event, 160),
-            'logo@2x.png' => $this->createIcon($sale->event, 320),
+            'icon.png' => $this->createPassImage($sale->event, 58, 58),
+            'icon@2x.png' => $this->createPassImage($sale->event, 116, 116),
+            'logo.png' => $this->createPassImage($sale->event, 160, 50),
+            'logo@2x.png' => $this->createPassImage($sale->event, 320, 100),
         ];
 
         $manifest = $this->createManifest($baseFiles);
@@ -764,19 +764,22 @@ class AppleWalletService
         return $binary;
     }
 
-    protected function createIcon(Event $event, int $size): string
+    /**
+     * Generate a solid colour PNG asset that matches Apple's required dimensions.
+     */
+    protected function createPassImage(Event $event, int $width, int $height): string
     {
-        $image = imagecreatetruecolor($size, $size);
+        $image = imagecreatetruecolor($width, $height);
 
         if (! $image) {
-            throw new RuntimeException('Unable to create wallet icon image.');
+            throw new RuntimeException('Unable to create wallet image asset.');
         }
 
         imagealphablending($image, true);
         imagesavealpha($image, true);
 
         $background = $this->allocateColor($image, $event->creatorRole?->accent_color ?? '#4E81FA');
-        imagefilledrectangle($image, 0, 0, $size, $size, $background);
+        imagefilledrectangle($image, 0, 0, $width, $height, $background);
 
         $textColor = imagecolorallocatealpha($image, 255, 255, 255, 40);
         $initials = $this->resolveInitials($event);
@@ -784,8 +787,8 @@ class AppleWalletService
         $font = 5;
         $textWidth = imagefontwidth($font) * strlen($initials);
         $textHeight = imagefontheight($font);
-        $x = (int) max(0, ($size - $textWidth) / 2);
-        $y = (int) max(0, ($size - $textHeight) / 2);
+        $x = (int) max(0, ($width - $textWidth) / 2);
+        $y = (int) max(0, ($height - $textHeight) / 2);
 
         imagestring($image, $font, $x, $y, $initials, $textColor);
 
