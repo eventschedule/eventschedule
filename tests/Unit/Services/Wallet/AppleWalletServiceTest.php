@@ -11,7 +11,8 @@ class AppleWalletServiceTest extends TestCase
     public function testItParsesBase64EncodedPkcs12Certificates(): void
     {
         $password = 'secret-pass';
-        $pkcs12 = $this->generatePkcs12Certificate($password);
+        $bundle = $this->generatePkcs12CertificateBundle($password);
+        $pkcs12 = $bundle['pkcs12'];
         $base64 = base64_encode($pkcs12);
 
         $service = $this->makeService($password);
@@ -79,12 +80,51 @@ class AppleWalletServiceTest extends TestCase
         $this->assertSame($binary, $service->exposeConvertSignatureToBinary($binary));
     }
 
+    public function testItGeneratesDerEncodedSignatureWhenCmsIsAvailable(): void
+    {
+        if (! function_exists('openssl_cms_sign')) {
+            $this->markTestSkipped('openssl_cms_sign not available in this environment.');
+        }
+
+        $password = 'secret-pass';
+        $bundle = $this->generatePkcs12CertificateBundle($password);
+
+        $certificatePath = tempnam(sys_get_temp_dir(), 'wallet-test-cert-');
+        $wwdrPath = tempnam(sys_get_temp_dir(), 'wallet-test-wwdr-');
+
+        $this->assertNotFalse($certificatePath, 'Unable to create temporary certificate path.');
+        $this->assertNotFalse($wwdrPath, 'Unable to create temporary WWDR path.');
+
+        file_put_contents($certificatePath, $bundle['pkcs12']);
+        file_put_contents($wwdrPath, $bundle['certificate']);
+
+        $service = $this->makeService($password);
+        $service->setCertificatePath($certificatePath);
+        $service->setWwdrCertificatePath($wwdrPath);
+
+        $signature = $service->exposeSignManifest(['pass.json' => sha1('payload')]);
+
+        @unlink($certificatePath);
+        @unlink($wwdrPath);
+
+        $this->assertNotEmpty($signature, 'Signature should not be empty.');
+        $this->assertSame(0x30, ord($signature[0]), 'CMS signature should start with a DER sequence.');
+    }
+
     protected function makeService(?string $password): AppleWalletServiceForTests
     {
         return new AppleWalletServiceForTests($password);
     }
 
     protected function generatePkcs12Certificate(string $password): string
+    {
+        return $this->generatePkcs12CertificateBundle($password)['pkcs12'];
+    }
+
+    /**
+     * @return array{pkcs12: string, certificate: string}
+     */
+    protected function generatePkcs12CertificateBundle(string $password): array
     {
         $privateKey = openssl_pkey_new([
             'private_key_type' => OPENSSL_KEYTYPE_RSA,
@@ -101,7 +141,15 @@ class AppleWalletServiceTest extends TestCase
 
         $this->assertTrue($result, 'Failed to export PKCS12 certificate for test.');
 
-        return $exported;
+        $certificatePem = '';
+        $pemExported = openssl_x509_export($certificate, $certificatePem);
+
+        $this->assertTrue($pemExported, 'Failed to export certificate to PEM.');
+
+        return [
+            'pkcs12' => $exported,
+            'certificate' => $certificatePem,
+        ];
     }
 }
 
@@ -110,6 +158,7 @@ class AppleWalletServiceForTests extends AppleWalletService
     public function __construct(?string $password)
     {
         $this->certificatePassword = $password;
+        $this->enabled = true;
     }
 
     /**
@@ -128,5 +177,20 @@ class AppleWalletServiceForTests extends AppleWalletService
     public function exposeConvertSignatureToBinary(string $signature): string
     {
         return $this->convertSignatureToBinary($signature);
+    }
+
+    public function setCertificatePath(?string $path): void
+    {
+        $this->certificatePath = $path;
+    }
+
+    public function setWwdrCertificatePath(?string $path): void
+    {
+        $this->wwdrCertificatePath = $path;
+    }
+
+    public function exposeSignManifest(array $manifest): string
+    {
+        return $this->signManifest($manifest);
     }
 }
