@@ -24,6 +24,43 @@ class AppleWalletServiceTest extends TestCase
         $this->assertIsArray($certificates['extracerts'] ?? null);
     }
 
+    public function testItConsidersTrimmedConfigurationValuesWhenCheckingAvailability(): void
+    {
+        $original = config('wallet.apple');
+        $certificatePath = tempnam(sys_get_temp_dir(), 'wallet-cert-');
+        $wwdrPath = tempnam(sys_get_temp_dir(), 'wallet-wwdr-');
+
+        $this->assertNotFalse($certificatePath, 'Unable to create temporary certificate path.');
+        $this->assertNotFalse($wwdrPath, 'Unable to create temporary WWDR path.');
+
+        try {
+            config(['wallet.apple' => [
+                'enabled' => true,
+                'certificate_path' => $certificatePath . "  \n",
+                'certificate_password' => "  ",
+                'wwdr_certificate_path' => " \t{$wwdrPath} ",
+                'pass_type_identifier' => " pass.com.eventschedule.sample ",
+                'team_identifier' => " TEAM12345 \n",
+                'organization_name' => " Example Org \n",
+                'background_color' => "  rgb(78,129,250)  ",
+                'foreground_color' => " rgb(255,255,255) ",
+                'label_color' => " rgb(0,0,0) ",
+            ]]);
+
+            $service = new AppleWalletService();
+
+            $this->assertTrue($service->isConfigured(), 'Trimmed configuration should satisfy Apple Wallet requirements.');
+        } finally {
+            config(['wallet.apple' => $original]);
+            if (is_string($certificatePath)) {
+                @unlink($certificatePath);
+            }
+            if (is_string($wwdrPath)) {
+                @unlink($wwdrPath);
+            }
+        }
+    }
+
     public function testItGeneratesWalletAssetsWithExpectedDimensions(): void
     {
         $event = new Event(['name' => 'Sample Event']);
