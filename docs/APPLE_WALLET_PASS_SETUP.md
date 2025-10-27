@@ -24,8 +24,9 @@ Apple Wallet passes must be signed with a certificate generated for your Pass Ty
 > **Tip:** Convert the `.p12` file into a PEM pair if your deployment environment requires it:
 >
 > ```bash
-> openssl pkcs12 -in Certificates.p12 -out PassCertificate.pem -clcerts -nokeys
-> openssl pkcs12 -in Certificates.p12 -out PassKey.pem -nocerts -nodes
+> # OpenSSL 3 (macOS 12+/Homebrew) requires the `-legacy` flag for RC2-encrypted bundles
+> openssl pkcs12 -in Certificates.p12 -out PassCertificate.pem -clcerts -nokeys -legacy
+> openssl pkcs12 -in Certificates.p12 -out PassKey.pem -nocerts -nodes -legacy
 > ```
 
 ## 3. Prepare Pass Assets

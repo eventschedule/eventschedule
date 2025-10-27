@@ -250,24 +250,28 @@ class AppleWalletService
 
         $certificates = $this->loadCertificates($certificateContents);
         $manifestPath = $this->createTempFile($this->encodeJson($manifest));
+        $chainPath = $this->createSignerCertificateChainFile($certificates);
 
         try {
-            $cmsSignature = $this->tryCmsManifestSignature($manifestPath, $certificates);
+            $cmsSignature = $this->tryCmsManifestSignature($manifestPath, $certificates, $chainPath);
 
             if ($cmsSignature !== null) {
                 return $cmsSignature;
             }
 
-            return $this->signManifestWithPkcs7($manifestPath, $certificates);
+            return $this->signManifestWithPkcs7($manifestPath, $certificates, $chainPath);
         } finally {
             @unlink($manifestPath);
+            if ($chainPath !== null) {
+                @unlink($chainPath);
+            }
         }
     }
 
     /**
-     * @param  array{cert: mixed, pkey: mixed}  $certificates
+     * @param  array{cert: mixed, pkey: mixed, extracerts?: array<int, mixed>}  $certificates
      */
-    protected function tryCmsManifestSignature(string $manifestPath, array $certificates): ?string
+    protected function tryCmsManifestSignature(string $manifestPath, array $certificates, ?string $chainPath = null): ?string
     {
         if (! function_exists('openssl_cms_sign')) {
             return null;
@@ -303,7 +307,7 @@ class AppleWalletService
             [],
             $flags,
             $encoding,
-            $this->wwdrCertificatePath ?? ''
+            $chainPath ?: ($this->wwdrCertificatePath ?? '')
         );
 
         $signatureContents = null;
@@ -352,9 +356,9 @@ class AppleWalletService
     }
 
     /**
-     * @param  array{cert: mixed, pkey: mixed}  $certificates
+     * @param  array{cert: mixed, pkey: mixed, extracerts?: array<int, mixed>}  $certificates
      */
-    protected function signManifestWithPkcs7(string $manifestPath, array $certificates): string
+    protected function signManifestWithPkcs7(string $manifestPath, array $certificates, ?string $chainPath = null): string
     {
         $signaturePath = tempnam(sys_get_temp_dir(), 'pkpass-signature-');
 
@@ -369,7 +373,7 @@ class AppleWalletService
             $certificates['pkey'] ?? null,
             [],
             PKCS7_BINARY | PKCS7_DETACHED,
-            $this->wwdrCertificatePath
+            $chainPath ?: $this->wwdrCertificatePath
         );
 
         if (! $signingResult) {
@@ -386,6 +390,137 @@ class AppleWalletService
         }
 
         return $this->convertSignatureToBinary($signatureContents);
+    }
+
+    /**
+     * @param  array{cert: mixed, pkey: mixed, extracerts: array<int, mixed>}  $certificates
+     */
+    protected function createSignerCertificateChainFile(array $certificates): ?string
+    {
+        $chain = $this->buildSignerCertificateChain($certificates);
+
+        if ($chain === null || trim($chain) === '') {
+            return null;
+        }
+
+        $path = tempnam(sys_get_temp_dir(), 'pkpass-chain-');
+
+        if ($path === false) {
+            return null;
+        }
+
+        if (@file_put_contents($path, $chain) === false) {
+            @unlink($path);
+            return null;
+        }
+
+        return $path;
+    }
+
+    /**
+     * @param  array{cert: mixed, pkey: mixed, extracerts: array<int, mixed>}  $certificates
+     */
+    protected function buildSignerCertificateChain(array $certificates): ?string
+    {
+        $chain = [];
+        $fingerprints = [];
+
+        $primary = $this->exportCertificateToPem($certificates['cert'] ?? null);
+
+        if ($primary === null) {
+            return null;
+        }
+
+        $this->appendCertificateToChain($chain, $fingerprints, $primary);
+
+        foreach ($certificates['extracerts'] as $extra) {
+            $pem = $this->exportCertificateToPem($extra);
+
+            if ($pem !== null) {
+                $this->appendCertificateToChain($chain, $fingerprints, $pem);
+            }
+        }
+
+        if ($this->wwdrCertificatePath && file_exists($this->wwdrCertificatePath)) {
+            $wwdrContents = @file_get_contents($this->wwdrCertificatePath);
+
+            if ($wwdrContents !== false) {
+                $wwdrPem = $this->exportCertificateToPem($wwdrContents);
+
+                if ($wwdrPem !== null) {
+                    $this->appendCertificateToChain($chain, $fingerprints, $wwdrPem);
+                }
+            }
+        }
+
+        if (empty($chain)) {
+            return null;
+        }
+
+        return implode(PHP_EOL . PHP_EOL, array_map('trim', $chain));
+    }
+
+    protected function appendCertificateToChain(array &$chain, array &$fingerprints, string $certificate): void
+    {
+        $normalized = preg_replace('/\s+/', '', $certificate) ?? '';
+
+        if ($normalized === '') {
+            return;
+        }
+
+        $fingerprint = sha1($normalized);
+
+        if (isset($fingerprints[$fingerprint])) {
+            return;
+        }
+
+        $chain[] = trim($certificate);
+        $fingerprints[$fingerprint] = true;
+    }
+
+    protected function exportCertificateToPem(mixed $certificate): ?string
+    {
+        if ($certificate === null) {
+            return null;
+        }
+
+        $this->ensureOpenSslLegacyProvider();
+
+        if (is_string($certificate)) {
+            $trimmed = trim($certificate);
+
+            if ($trimmed === '') {
+                return null;
+            }
+
+            if (str_contains($trimmed, '-----BEGIN CERTIFICATE-----')) {
+                return $trimmed;
+            }
+
+            $parsed = @openssl_x509_read($certificate);
+
+            if ($parsed === false) {
+                return null;
+            }
+
+            $exported = '';
+
+            if (@openssl_x509_export($parsed, $exported)) {
+                return trim($exported);
+            }
+
+            return null;
+        }
+
+        if (is_resource($certificate) || is_object($certificate)) {
+            $exported = '';
+
+            if (@openssl_x509_export($certificate, $exported)) {
+                return trim($exported);
+            }
+        }
+
+        return null;
     }
 
     protected function convertSignatureToBinary(string $signature): string
@@ -429,7 +564,7 @@ class AppleWalletService
     }
 
     /**
-     * @return array{cert: mixed, pkey: mixed}
+     * @return array{cert: mixed, pkey: mixed, extracerts: array<int, mixed>}
      */
     protected function loadCertificates(string $certificateContents): array
     {
@@ -439,7 +574,7 @@ class AppleWalletService
         $pkcs12 = $this->tryParsePkcs12Certificate($certificateContents, $password, $errors);
 
         if ($pkcs12 !== null) {
-            return $pkcs12;
+            return $this->normalizeCertificateResult($pkcs12);
         }
 
         $decoded = $this->decodeCertificateIfNeeded($certificateContents);
@@ -448,35 +583,35 @@ class AppleWalletService
             $pkcs12 = $this->tryParsePkcs12Certificate($decoded, $password, $errors);
 
             if ($pkcs12 !== null) {
-                return $pkcs12;
+                return $this->normalizeCertificateResult($pkcs12);
             }
         }
 
         $cliCertificates = $this->tryExtractCertificatesWithOpenSslCli($certificateContents, $password, $errors);
 
         if ($cliCertificates !== null) {
-            return $cliCertificates;
+            return $this->normalizeCertificateResult($cliCertificates);
         }
 
         if ($decoded !== null) {
             $cliCertificates = $this->tryExtractCertificatesWithOpenSslCli($decoded, $password, $errors);
 
             if ($cliCertificates !== null) {
-                return $cliCertificates;
+                return $this->normalizeCertificateResult($cliCertificates);
             }
         }
 
         $pemCertificates = $this->parsePemCertificateBundle($certificateContents, $password, $errors);
 
         if ($pemCertificates !== null) {
-            return $pemCertificates;
+            return $this->normalizeCertificateResult($pemCertificates);
         }
 
         if ($decoded !== null) {
             $pemCertificates = $this->parsePemCertificateBundle($decoded, $password, $errors);
 
             if ($pemCertificates !== null) {
-                return $pemCertificates;
+                return $this->normalizeCertificateResult($pemCertificates);
             }
         }
 
@@ -486,10 +621,27 @@ class AppleWalletService
     }
 
     /**
+     * @param  array{cert: mixed, pkey: mixed, extracerts?: array<int, mixed>}  $certificates
+     * @return array{cert: mixed, pkey: mixed, extracerts: array<int, mixed>}
+     */
+    protected function normalizeCertificateResult(array $certificates): array
+    {
+        $extras = [];
+
+        if (! empty($certificates['extracerts']) && is_array($certificates['extracerts'])) {
+            $extras = array_values($certificates['extracerts']);
+        }
+
+        $certificates['extracerts'] = $extras;
+
+        return $certificates;
+    }
+
+    /**
      * Attempt to parse a PEM bundle that includes the certificate and private key.
      *
      * @param  array<int, string>  $errors
-     * @return array{cert: string, pkey: resource|string}|null
+     * @return array{cert: string, pkey: resource|string, extracerts: array<int, string>}|null
      */
     protected function parsePemCertificateBundle(string $contents, string $password, array &$errors = []): ?array
     {
@@ -513,17 +665,23 @@ class AppleWalletService
             return null;
         }
 
-        $certificateChain = implode(PHP_EOL, array_map('trim', $certificateMatches[0]));
+        $certificateBlocks = array_map('trim', $certificateMatches[0]);
+        $primaryCertificate = array_shift($certificateBlocks);
+
+        if ($primaryCertificate === null) {
+            return null;
+        }
 
         return [
-            'cert' => $certificateChain,
+            'cert' => $primaryCertificate,
             'pkey' => $privateKey,
+            'extracerts' => array_values($certificateBlocks),
         ];
     }
 
     /**
      * @param  array<int, string>  $errors
-     * @return array{cert: string|resource, pkey: string|resource}|null
+     * @return array{cert: string|resource, pkey: string|resource, extracerts: array<int, mixed>}|null
      */
     protected function tryParsePkcs12Certificate(string $contents, string $password, array &$errors): ?array
     {
@@ -533,7 +691,17 @@ class AppleWalletService
 
         if (@openssl_pkcs12_read($contents, $certificates, $password)) {
             if (! empty($certificates['cert']) && ! empty($certificates['pkey'])) {
-                return $certificates;
+                $extras = [];
+
+                if (! empty($certificates['extracerts']) && is_array($certificates['extracerts'])) {
+                    $extras = array_values($certificates['extracerts']);
+                }
+
+                return [
+                    'cert' => $certificates['cert'],
+                    'pkey' => $certificates['pkey'],
+                    'extracerts' => $extras,
+                ];
             }
         }
 
@@ -626,7 +794,7 @@ class AppleWalletService
      * the PHP extension cannot load legacy algorithms required by some PKCS#12 bundles.
      *
      * @param  array<int, string>  $errors
-     * @return array{cert: string, pkey: resource|string}|null
+     * @return array{cert: string, pkey: resource|string, extracerts: array<int, string>}|null
      */
     protected function tryExtractCertificatesWithOpenSslCli(string $contents, string $password, array &$errors): ?array
     {

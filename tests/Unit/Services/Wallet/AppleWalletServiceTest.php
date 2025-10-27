@@ -21,6 +21,7 @@ class AppleWalletServiceTest extends TestCase
 
         $this->assertNotEmpty($certificates['cert'] ?? null);
         $this->assertNotEmpty($certificates['pkey'] ?? null);
+        $this->assertIsArray($certificates['extracerts'] ?? null);
     }
 
     public function testItGeneratesWalletAssetsWithExpectedDimensions(): void
@@ -141,6 +142,48 @@ class AppleWalletServiceTest extends TestCase
         $this->assertSame(0x30, ord($signature[0]), 'PKCS#7 signature should start with a DER sequence.');
     }
 
+    public function testItBuildsSignerCertificateChainFileWithIntermediate(): void
+    {
+        $password = 'secret-pass';
+        $bundle = $this->generatePkcs12CertificateBundle($password);
+        $wwdrPem = $this->generateStandaloneCertificatePem();
+
+        $service = $this->makeService($password);
+
+        $certificatePath = tempnam(sys_get_temp_dir(), 'wallet-test-cert-');
+        $wwdrPath = tempnam(sys_get_temp_dir(), 'wallet-test-wwdr-');
+
+        $this->assertNotFalse($certificatePath, 'Unable to create temporary certificate path.');
+        $this->assertNotFalse($wwdrPath, 'Unable to create temporary WWDR path.');
+
+        file_put_contents($certificatePath, $bundle['pkcs12']);
+        file_put_contents($wwdrPath, $wwdrPem);
+
+        $service->setCertificatePath($certificatePath);
+        $service->setWwdrCertificatePath($wwdrPath);
+
+        $certificates = $service->exposeLoadCertificates($bundle['pkcs12']);
+        $chainPath = $service->exposeCreateSignerCertificateChainFile($certificates);
+
+        @unlink($certificatePath);
+        @unlink($wwdrPath);
+
+        $this->assertNotNull($chainPath, 'Signer chain file should be generated.');
+
+        $contents = $chainPath ? file_get_contents($chainPath) : false;
+
+        if ($chainPath) {
+            @unlink($chainPath);
+        }
+
+        $this->assertNotFalse($contents, 'Unable to read signer chain file.');
+        $this->assertSame(
+            2,
+            substr_count((string) $contents, '-----BEGIN CERTIFICATE-----'),
+            'Signer chain should include both the pass certificate and WWDR intermediate.'
+        );
+    }
+
     public function testItFallsBackToPkcs7WhenCmsSignatureIsNotDerEncoded(): void
     {
         if (! function_exists('openssl_cms_sign')) {
@@ -219,6 +262,31 @@ class AppleWalletServiceTest extends TestCase
             'certificate' => $certificatePem,
         ];
     }
+
+    protected function generateStandaloneCertificatePem(): string
+    {
+        $privateKey = openssl_pkey_new([
+            'private_key_type' => OPENSSL_KEYTYPE_RSA,
+            'private_key_bits' => 2048,
+        ]);
+
+        $this->assertNotFalse($privateKey, 'Failed to generate WWDR private key for test.');
+
+        $csr = openssl_csr_new(['commonName' => 'EventSchedule WWDR Test'], $privateKey);
+
+        $this->assertNotFalse($csr, 'Failed to create WWDR CSR for test.');
+
+        $certificate = openssl_csr_sign($csr, null, $privateKey, 365);
+
+        $this->assertNotFalse($certificate, 'Failed to sign WWDR certificate for test.');
+
+        $pem = '';
+        $exported = openssl_x509_export($certificate, $pem);
+
+        $this->assertTrue($exported, 'Failed to export WWDR certificate to PEM.');
+
+        return $pem;
+    }
 }
 
 class AppleWalletServiceForTests extends AppleWalletService
@@ -253,6 +321,11 @@ class AppleWalletServiceForTests extends AppleWalletService
     public function exposeConvertSignatureToBinary(string $signature): string
     {
         return $this->convertSignatureToBinary($signature);
+    }
+
+    public function exposeCreateSignerCertificateChainFile(array $certificates): ?string
+    {
+        return $this->createSignerCertificateChainFile($certificates);
     }
 
     public function setCertificatePath(?string $path): void
@@ -306,10 +379,10 @@ class AppleWalletServiceForTests extends AppleWalletService
     /**
      * @param  array{cert: mixed, pkey: mixed}  $certificates
      */
-    protected function signManifestWithPkcs7(string $manifestPath, array $certificates): string
+    protected function signManifestWithPkcs7(string $manifestPath, array $certificates, ?string $chainPath = null): string
     {
         $this->pkcs7Used = true;
 
-        return parent::signManifestWithPkcs7($manifestPath, $certificates);
+        return parent::signManifestWithPkcs7($manifestPath, $certificates, $chainPath);
     }
 }
