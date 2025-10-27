@@ -27,6 +27,21 @@ class AppleWalletServiceTest extends TestCase
         $this->assertIsArray($certificates['extracerts'] ?? null);
     }
 
+    public function testItParsesBase64EncodedCertificatesIntoPem(): void
+    {
+        $service = $this->makeService(null);
+        $pem = $this->generateStandaloneCertificatePem();
+        $base64 = preg_replace('/-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----|\s+/', '', $pem) ?? '';
+
+        $this->assertNotSame('', $base64, 'Base64 certificate contents should not be empty.');
+
+        $converted = $service->exposeExportCertificateToPem($base64);
+
+        $this->assertNotNull($converted, 'Base64 encoded certificate should be converted to PEM.');
+        $this->assertIsString($converted, 'Converted certificate should be represented as a PEM string.');
+        $this->assertSame(trim($pem), trim($converted), 'Converted certificate should match original PEM.');
+    }
+
     public function testItConsidersTrimmedConfigurationValuesWhenCheckingAvailability(): void
     {
         $original = config('wallet.apple');
@@ -465,6 +480,11 @@ class AppleWalletServiceForTests extends AppleWalletService
     public function exposeCreateSignerCertificateChainFile(array $certificates): ?string
     {
         return $this->createSignerCertificateChainFile($certificates);
+    }
+
+    public function exposeExportCertificateToPem(string $certificate): ?string
+    {
+        return $this->exportCertificateToPem($certificate);
     }
 
     public function exposeParsePemCertificateBundle(string $contents, string $password): ?array
