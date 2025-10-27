@@ -3,7 +3,10 @@
 namespace Tests\Unit\Services\Wallet;
 
 use App\Models\Event;
+use App\Models\Role;
+use App\Models\Sale;
 use App\Services\Wallet\AppleWalletService;
+use Carbon\Carbon;
 use Tests\TestCase;
 
 class AppleWalletServiceTest extends TestCase
@@ -177,6 +180,26 @@ class AppleWalletServiceTest extends TestCase
         $this->assertNull($service->capturedCmsSignature, 'CMS signature should not be produced when DER encoding is unavailable.');
         $this->assertNotEmpty($signature, 'Signature should not be empty.');
         $this->assertSame(0x30, ord($signature[0]), 'PKCS#7 signature should start with a DER sequence.');
+    }
+
+    public function testItFallsBackToSaleTimestampWhenEventStartMissing(): void
+    {
+        $event = new Event(['name' => 'Unscheduled Meetup']);
+        $event->setRelation('creatorRole', new Role(['timezone' => 'America/New_York']));
+
+        $sale = new Sale(['event_date' => null]);
+        $sale->created_at = Carbon::create(2024, 2, 1, 15, 0, 0, 'UTC');
+
+        $service = $this->makeService(null);
+
+        $resolved = $service->exposeResolveEventStart($event, $sale);
+
+        $this->assertSame('America/New_York', $resolved->getTimezone()->getName(), 'Resolved start should respect event timezone.');
+        $this->assertSame(
+            $sale->created_at->timestamp,
+            $resolved->copy()->setTimezone('UTC')->timestamp,
+            'Fallback start should match the sale creation moment.'
+        );
     }
 
     public function testItBuildsSignerCertificateChainFileWithIntermediate(): void
@@ -391,6 +414,11 @@ class AppleWalletServiceForTests extends AppleWalletService
         $this->capturedCmsSignature = null;
 
         return $this->signManifest($manifest);
+    }
+
+    public function exposeResolveEventStart(Event $event, Sale $sale): Carbon
+    {
+        return $this->resolveEventStart($event, $sale);
     }
 
     protected function cmsSupportsDerEncoding(): bool
