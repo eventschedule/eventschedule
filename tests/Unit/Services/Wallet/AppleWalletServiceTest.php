@@ -43,7 +43,7 @@ class AppleWalletServiceTest extends TestCase
                 'certificate_password' => "  ",
                 'wwdr_certificate_path' => " \t{$wwdrPath} ",
                 'pass_type_identifier' => " pass.com.eventschedule.sample ",
-                'team_identifier' => " TEAM12345 \n",
+                'team_identifier' => " TEAM12345A \n",
                 'organization_name' => " Example Org \n",
                 'background_color' => "  rgb(78,129,250)  ",
                 'foreground_color' => " rgb(255,255,255) ",
@@ -58,6 +58,50 @@ class AppleWalletServiceTest extends TestCase
             if (is_string($certificatePath)) {
                 @unlink($certificatePath);
             }
+            if (is_string($wwdrPath)) {
+                @unlink($wwdrPath);
+            }
+        }
+    }
+
+    public function testItRejectsInvalidTeamIdentifier(): void
+    {
+        $original = config('wallet.apple');
+        $certificatePath = tempnam(sys_get_temp_dir(), 'wallet-cert-');
+        $wwdrPath = tempnam(sys_get_temp_dir(), 'wallet-wwdr-');
+
+        $this->assertNotFalse($certificatePath, 'Unable to create temporary certificate path.');
+        $this->assertNotFalse($wwdrPath, 'Unable to create temporary WWDR path.');
+
+        try {
+            if (is_string($certificatePath)) {
+                touch($certificatePath);
+            }
+
+            if (is_string($wwdrPath)) {
+                touch($wwdrPath);
+            }
+
+            config(['wallet.apple' => [
+                'enabled' => true,
+                'certificate_path' => $certificatePath,
+                'certificate_password' => null,
+                'wwdr_certificate_path' => $wwdrPath,
+                'pass_type_identifier' => 'pass.com.eventschedule.sample',
+                'team_identifier' => 'InvalidTeam',
+                'organization_name' => 'Example Org',
+            ]]);
+
+            $service = new AppleWalletService();
+
+            $this->assertFalse($service->isConfigured(), 'Invalid team identifier should prevent Apple Wallet from configuring.');
+        } finally {
+            config(['wallet.apple' => $original]);
+
+            if (is_string($certificatePath)) {
+                @unlink($certificatePath);
+            }
+
             if (is_string($wwdrPath)) {
                 @unlink($wwdrPath);
             }

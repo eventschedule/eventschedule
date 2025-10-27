@@ -40,7 +40,8 @@ class AppleWalletService
         $this->certificatePassword = $this->sanitizeConfigValue($config['certificate_password'] ?? null);
         $this->wwdrCertificatePath = $this->sanitizeConfigValue($config['wwdr_certificate_path'] ?? null);
         $this->passTypeIdentifier = $this->sanitizeConfigValue($config['pass_type_identifier'] ?? null);
-        $this->teamIdentifier = $this->sanitizeConfigValue($config['team_identifier'] ?? null);
+        $teamIdentifier = $this->sanitizeConfigValue($config['team_identifier'] ?? null);
+        $this->teamIdentifier = $teamIdentifier !== null ? strtoupper($teamIdentifier) : null;
         $this->organizationName = $this->sanitizeConfigValue($config['organization_name'] ?? config('app.name')) ?? config('app.name');
         $this->backgroundColor = $this->sanitizeConfigValue($config['background_color'] ?? 'rgb(78,129,250)') ?? 'rgb(78,129,250)';
         $this->foregroundColor = $this->sanitizeConfigValue($config['foreground_color'] ?? 'rgb(255,255,255)') ?? 'rgb(255,255,255)';
@@ -79,6 +80,14 @@ class AppleWalletService
 
         if (! $this->teamIdentifier) {
             $missing[] = 'team_identifier';
+        }
+
+        if ($this->teamIdentifier && ! $this->isValidTeamIdentifier($this->teamIdentifier)) {
+            $this->logDebug('Apple Wallet team identifier is invalid.', [
+                'team_identifier' => $this->teamIdentifier,
+            ]);
+
+            return false;
         }
 
         if (! $this->wwdrCertificatePath) {
@@ -122,6 +131,11 @@ class AppleWalletService
         $trimmed = trim($value);
 
         return $trimmed === '' ? null : $trimmed;
+    }
+
+    protected function isValidTeamIdentifier(string $teamIdentifier): bool
+    {
+        return preg_match('/^[A-Z0-9]{10}$/', $teamIdentifier) === 1;
     }
 
     protected function logDebug(string $message, array $context = []): void
