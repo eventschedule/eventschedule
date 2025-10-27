@@ -12,6 +12,8 @@ return [
         'background_color' => env('APPLE_WALLET_BACKGROUND_COLOR', 'rgb(78,129,250)'),
         'foreground_color' => env('APPLE_WALLET_FOREGROUND_COLOR', 'rgb(255,255,255)'),
         'label_color' => env('APPLE_WALLET_LABEL_COLOR', 'rgb(255,255,255)'),
+        'debug' => env('APPLE_WALLET_DEBUG', env('APP_DEBUG', false)),
+        'log_channel' => env('APPLE_WALLET_LOG_CHANNEL'),
     ],
 
     'google' => [

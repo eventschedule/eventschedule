@@ -7,6 +7,7 @@ Use this checklist after deploying a build that touches Apple Wallet signing or 
 1. **Confirm configuration**
    - `php artisan tinker --execute="dump(config('wallet.apple'))"` to ensure the pass type identifier, team identifier, certificate paths, and password values are present.
    - On the server, verify the referenced certificate files exist and have the correct permissions (`ls -l /path/to/certs`).
+   - (Optional) Enable verbose logging by setting `APPLE_WALLET_DEBUG=true` (and optionally `APPLE_WALLET_LOG_CHANNEL=<channel>`). Review `storage/logs/laravel.log` or the configured channel while exercising the flow.
 2. **Clear cache** (if you changed configuration):
    ```bash
    php artisan config:clear
