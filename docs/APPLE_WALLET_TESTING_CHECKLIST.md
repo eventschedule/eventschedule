@@ -45,12 +45,16 @@ Use this checklist after deploying a build that touches Apple Wallet signing or 
    unzip -p test.pkpass signature > signature
    unzip -p test.pkpass manifest.json > manifest.json
    ```
-2. Verify the detached signature with OpenSSL (requires the WWDR intermediate and Apple Root CA):
+2. Verify the detached signature with OpenSSL. Concatenate your pass certificate with the WWDR intermediate first so OpenSSL can locate the signer:
+   ```bash
+   cat /path/to/PassCertificate.pem /path/to/WWDR.pem > /path/to/pass_chain.pem
+   ```
+   Then run the verification (requires the WWDR intermediate and Apple Root CA):
    ```bash
    openssl smime -verify -inform DER \
      -in signature \
      -content manifest.json \
-     -certfile /path/to/WWDR.pem \
+     -certfile /path/to/pass_chain.pem \
      -CAfile /path/to/AppleRootCA.pem \
      -nointern -noverify > /dev/null
    ```
