@@ -532,7 +532,7 @@ class AppleWalletService
             0 => ['pipe', 'r'],
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
-            3 => ['pipe', 'w'],
+            3 => ['pipe', 'r'],
         ];
 
         $process = @proc_open($command, $descriptorSpec, $pipes);
