@@ -533,14 +533,22 @@ class TicketController extends Controller
 
         $filename = Str::slug($event->name . '-' . $sale->id) . '.pkpass';
 
-        return response($pass, 200, [
-            'Content-Type' => 'application/vnd.apple.pkpass',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-            'Content-Transfer-Encoding' => 'binary',
-            'Content-Length' => strlen($pass),
-            'Cache-Control' => 'no-store, no-cache, must-revalidate',
-            'Pragma' => 'no-cache',
-        ]);
+        $passLength = strlen($pass);
+
+        return response()->streamDownload(
+            static function () use ($pass): void {
+                echo $pass;
+            },
+            $filename,
+            [
+                'Content-Type' => 'application/vnd.apple.pkpass',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Content-Transfer-Encoding' => 'binary',
+                'Cache-Control' => 'no-store, no-cache, must-revalidate',
+                'Pragma' => 'no-cache',
+                'Content-Length' => (string) $passLength,
+            ]
+        );
     }
 
     public function googleWallet($eventId, $secret, GoogleWalletService $googleWalletService)
