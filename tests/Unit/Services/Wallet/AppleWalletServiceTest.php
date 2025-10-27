@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services\Wallet;
 
+use App\Models\Event;
 use App\Services\Wallet\AppleWalletService;
 use Tests\TestCase;
 
@@ -19,6 +20,26 @@ class AppleWalletServiceTest extends TestCase
 
         $this->assertNotEmpty($certificates['cert'] ?? null);
         $this->assertNotEmpty($certificates['pkey'] ?? null);
+    }
+
+    public function testItGeneratesWalletAssetsWithExpectedDimensions(): void
+    {
+        $event = new Event(['name' => 'Sample Event']);
+        $service = $this->makeService(null);
+
+        $icon = $service->exposeCreatePassImage($event, 58, 58);
+        $iconImage = imagecreatefromstring($icon);
+        $this->assertNotFalse($iconImage, 'Icon PNG is invalid.');
+        $this->assertSame(58, imagesx($iconImage));
+        $this->assertSame(58, imagesy($iconImage));
+        imagedestroy($iconImage);
+
+        $logo = $service->exposeCreatePassImage($event, 160, 50);
+        $logoImage = imagecreatefromstring($logo);
+        $this->assertNotFalse($logoImage, 'Logo PNG is invalid.');
+        $this->assertSame(160, imagesx($logoImage));
+        $this->assertSame(50, imagesy($logoImage));
+        imagedestroy($logoImage);
     }
 
     protected function makeService(?string $password): AppleWalletServiceForTests
@@ -60,5 +81,10 @@ class AppleWalletServiceForTests extends AppleWalletService
     public function exposeLoadCertificates(string $contents): array
     {
         return $this->loadCertificates($contents);
+    }
+
+    public function exposeCreatePassImage(Event $event, int $width, int $height): string
+    {
+        return $this->createPassImage($event, $width, $height);
     }
 }
