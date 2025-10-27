@@ -143,6 +143,7 @@ Event Schedule can generate Apple Wallet passes and Google Wallet tickets for pa
 3. Download the latest Apple WWDR certificate and set `APPLE_WALLET_WWDR_CERTIFICATE_PATH` to its location.
 4. Specify your Pass Type Identifier (`APPLE_WALLET_PASS_TYPE_IDENTIFIER`) and Apple Developer Team ID (`APPLE_WALLET_TEAM_IDENTIFIER`).
 5. Optionally customize the organization name and colors with the remaining `APPLE_WALLET_*` variables.
+6. When debugging, set `APPLE_WALLET_DEBUG=true` and (optionally) `APPLE_WALLET_DEBUG_DUMP_PATH` to capture per-sale pass artifacts on disk.
 
 ### Google Wallet
 

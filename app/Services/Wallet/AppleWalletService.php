@@ -14,7 +14,7 @@ use Throwable;
 
 class AppleWalletService
 {
-    protected bool $enabled;
+    protected bool $enabled = false;
     protected ?string $certificatePath;
     protected ?string $certificatePassword;
     protected ?string $wwdrCertificatePath;
@@ -24,8 +24,9 @@ class AppleWalletService
     protected string $backgroundColor;
     protected string $foregroundColor;
     protected string $labelColor;
-    protected bool $debugEnabled;
+    protected bool $debugEnabled = false;
     protected ?string $logChannel;
+    protected ?string $debugDumpPath = null;
     protected static bool $legacyProviderInitialized = false;
     protected static ?string $legacyProviderConfigPath = null;
     protected static ?string $legacyProviderOriginalConfig = null;
@@ -48,6 +49,12 @@ class AppleWalletService
         $this->labelColor = $this->sanitizeConfigValue($config['label_color'] ?? 'rgb(255,255,255)') ?? 'rgb(255,255,255)';
         $this->debugEnabled = (bool) ($config['debug'] ?? config('app.debug'));
         $this->logChannel = $this->sanitizeConfigValue($config['log_channel'] ?? null);
+        $debugDumpPath = $config['debug_dump_path'] ?? storage_path('app/wallet/debug-dumps');
+        $this->debugDumpPath = $this->sanitizeConfigValue($debugDumpPath);
+
+        if ($this->debugDumpPath !== null) {
+            $this->debugDumpPath = rtrim($this->debugDumpPath, DIRECTORY_SEPARATOR);
+        }
 
         $this->logDebug('Apple Wallet service configured.', [
             'enabled' => $this->enabled,
@@ -57,6 +64,8 @@ class AppleWalletService
             'wwdr_certificate_exists' => $this->wwdrCertificatePath ? file_exists($this->wwdrCertificatePath) : null,
             'pass_type_identifier' => $this->passTypeIdentifier,
             'team_identifier' => $this->teamIdentifier,
+            'debug_enabled' => $this->debugEnabled,
+            'debug_dump_path' => $this->debugDumpPath,
         ]);
     }
 
@@ -236,6 +245,18 @@ class AppleWalletService
 
         $sale->loadMissing('event.creatorRole', 'event.venue', 'saleTickets.ticket');
 
+        $eventTimezone = $sale->event ? $this->resolveTimezone($sale->event) : null;
+
+        $this->logDebug('Apple Wallet sale context loaded.', [
+            'sale_id' => $sale->id,
+            'event_id' => $sale->event_id,
+            'event_timezone' => $eventTimezone,
+            'event_date' => $sale->event_date,
+            'sale_created_at' => $sale->created_at instanceof Carbon ? $sale->created_at->toIso8601String() : null,
+            'ticket_count' => $sale->saleTickets->sum('quantity'),
+            'ticket_breakdown' => $this->summarizeTickets($sale),
+        ]);
+
         if (! $sale->event) {
             $this->logDebug('Sale does not have an associated event when generating Apple Wallet pass.', [
                 'sale_id' => $sale->id,
@@ -251,6 +272,7 @@ class AppleWalletService
             'serial_number' => $payload['serialNumber'] ?? null,
             'relevant_date' => $payload['relevantDate'] ?? null,
             'location_count' => isset($payload['locations']) ? count($payload['locations']) : 0,
+            'payload_summary' => $this->summarizePayloadForLog($payload),
         ]);
 
         $baseFiles = [
@@ -261,8 +283,25 @@ class AppleWalletService
             'logo@2x.png' => $this->createPassImage($sale->event, 320, 100),
         ];
 
+        $this->logDebug('Apple Wallet pass base assets generated.', [
+            'sale_id' => $sale->id,
+            'asset_details' => $this->summarizeFiles($baseFiles),
+        ]);
+
         $manifest = $this->createManifest($baseFiles);
+
+        $this->logDebug('Apple Wallet manifest prepared.', [
+            'sale_id' => $sale->id,
+            'manifest' => $this->summarizeManifest($manifest),
+        ]);
+
         $signature = $this->signManifest($manifest);
+
+        $this->logDebug('Apple Wallet manifest signature generated.', [
+            'sale_id' => $sale->id,
+            'signature_bytes' => strlen($signature),
+            'signature_sha1' => sha1($signature),
+        ]);
 
         $this->logDebug('Apple Wallet manifest signed successfully.', [
             'sale_id' => $sale->id,
@@ -271,9 +310,12 @@ class AppleWalletService
 
         $package = $this->createPackage($baseFiles, $manifest, $signature);
 
+        $this->dumpDebugArtifacts($sale, $payload, $baseFiles, $manifest, $signature, $package);
+
         $this->logDebug('Apple Wallet pass package created.', [
             'sale_id' => $sale->id,
             'package_size' => strlen($package),
+            'package_sha1' => sha1($package),
         ]);
 
         return $package;
@@ -289,6 +331,15 @@ class AppleWalletService
 
             return trim($name) . ' x ' . $saleTicket->quantity;
         })->implode(', ');
+
+        $this->logDebug('Apple Wallet pass timing resolved.', [
+            'sale_id' => $sale->id,
+            'event_id' => $event->id,
+            'starts_at_local' => $startsAt->toIso8601String(),
+            'starts_at_utc' => $startsAt->copy()->setTimezone('UTC')->toIso8601String(),
+            'relevant_date' => $relevantDate,
+            'event_timezone' => $this->resolveTimezone($event),
+        ]);
 
         $fields = [
             'formatVersion' => 1,
@@ -364,6 +415,77 @@ class AppleWalletService
         }
 
         return $fields;
+    }
+
+    protected function summarizeTickets(Sale $sale): array
+    {
+        if (! $sale->relationLoaded('saleTickets')) {
+            return [];
+        }
+
+        return $sale->saleTickets->map(function ($saleTicket) {
+            $ticket = $saleTicket->ticket;
+
+            return [
+                'sale_ticket_id' => $saleTicket->id,
+                'ticket_id' => $ticket?->id,
+                'ticket_name' => $ticket?->type ?: $ticket?->name,
+                'quantity' => $saleTicket->quantity,
+            ];
+        })->values()->all();
+    }
+
+    protected function summarizePayloadForLog(array $payload): array
+    {
+        return [
+            'pass_type_identifier' => $payload['passTypeIdentifier'] ?? null,
+            'team_identifier' => $payload['teamIdentifier'] ?? null,
+            'serial_number' => $payload['serialNumber'] ?? null,
+            'relevant_date' => $payload['relevantDate'] ?? null,
+            'location_count' => isset($payload['locations']) ? count($payload['locations']) : 0,
+            'primary_fields' => count($payload['eventTicket']['primaryFields'] ?? []),
+            'secondary_fields' => count($payload['eventTicket']['secondaryFields'] ?? []),
+            'auxiliary_fields' => count($payload['eventTicket']['auxiliaryFields'] ?? []),
+            'back_fields' => count($payload['eventTicket']['backFields'] ?? []),
+            'barcode_message_length' => isset($payload['barcode']['message']) ? strlen((string) $payload['barcode']['message']) : 0,
+        ];
+    }
+
+    /**
+     * @param  array<string, string>  $files
+     * @return array<int, array<string, int|string>>
+     */
+    protected function summarizeFiles(array $files): array
+    {
+        $summary = [];
+
+        foreach ($files as $filename => $contents) {
+            $summary[] = [
+                'filename' => $filename,
+                'bytes' => strlen($contents),
+                'sha1' => sha1($contents),
+            ];
+        }
+
+        return $summary;
+    }
+
+    /**
+     * @param  array<string, string>  $manifest
+     * @return array<int, array<string, string>>
+     */
+    protected function summarizeManifest(array $manifest): array
+    {
+        $summary = [];
+
+        foreach ($manifest as $filename => $hash) {
+            $summary[] = [
+                'filename' => $filename,
+                'sha1' => $hash,
+            ];
+        }
+
+        return $summary;
     }
 
     protected function buildSerialNumber(Sale $sale): string
@@ -474,6 +596,8 @@ class AppleWalletService
             if ($cmsSignature !== null) {
                 $this->logDebug('Manifest signed using openssl_cms_sign.', [
                     'chain_path' => $chainPath,
+                    'signature_length' => strlen($cmsSignature),
+                    'signature_sha1' => sha1($cmsSignature),
                 ]);
 
                 return $cmsSignature;
@@ -481,7 +605,14 @@ class AppleWalletService
 
             $this->logDebug('Falling back to PKCS#7 manifest signing.');
 
-            return $this->signManifestWithPkcs7($manifestPath, $certificates, $chainPath);
+            $fallbackSignature = $this->signManifestWithPkcs7($manifestPath, $certificates, $chainPath);
+
+            $this->logDebug('PKCS#7 fallback signature produced.', [
+                'signature_length' => strlen($fallbackSignature),
+                'signature_sha1' => sha1($fallbackSignature),
+            ]);
+
+            return $fallbackSignature;
         } finally {
             @unlink($manifestPath);
             if ($chainPath !== null) {
@@ -633,7 +764,14 @@ class AppleWalletService
             'signature_length' => strlen($signatureContents),
         ]);
 
-        return $this->convertSignatureToBinary($signatureContents);
+        $binarySignature = $this->convertSignatureToBinary($signatureContents);
+
+        $this->logDebug('PKCS#7 manifest signature normalized to binary.', [
+            'signature_length' => strlen($binarySignature),
+            'signature_sha1' => sha1($binarySignature),
+        ]);
+
+        return $binarySignature;
     }
 
     /**
@@ -1498,6 +1636,110 @@ class AppleWalletService
         }
 
         return $locations;
+    }
+
+    protected function dumpDebugArtifacts(Sale $sale, array $payload, array $files, array $manifest, string $signature, string $package): void
+    {
+        if (! $this->debugEnabled || ! $this->debugDumpPath) {
+            return;
+        }
+
+        try {
+            $timestamp = Carbon::now('UTC');
+            $directory = implode(DIRECTORY_SEPARATOR, [
+                $this->debugDumpPath,
+                sprintf(
+                    'sale-%s-%s-%s',
+                    $sale->id,
+                    $this->sanitizeFilesystemSegment($payload['serialNumber'] ?? 'unknown'),
+                    $timestamp->format('Ymd_His')
+                ),
+            ]);
+
+            if (! is_dir($directory) && ! @mkdir($directory, 0775, true) && ! is_dir($directory)) {
+                throw new RuntimeException('Unable to create Apple Wallet debug dump directory.');
+            }
+
+            $assetsDirectory = $directory . DIRECTORY_SEPARATOR . 'assets';
+
+            if (! is_dir($assetsDirectory) && ! @mkdir($assetsDirectory, 0775, true) && ! is_dir($assetsDirectory)) {
+                throw new RuntimeException('Unable to create Apple Wallet debug assets directory.');
+            }
+
+            foreach ($files as $filename => $contents) {
+                $this->writeDebugFile($assetsDirectory . DIRECTORY_SEPARATOR . $filename, $contents);
+            }
+
+            $this->writeDebugFile($directory . DIRECTORY_SEPARATOR . 'payload.json', $this->encodeJsonPretty($payload));
+            $this->writeDebugFile($directory . DIRECTORY_SEPARATOR . 'manifest.json', $this->encodeJsonPretty($manifest));
+            $this->writeDebugFile($directory . DIRECTORY_SEPARATOR . 'signature.bin', $signature);
+            $this->writeDebugFile($directory . DIRECTORY_SEPARATOR . 'package.pkpass', $package);
+
+            $metadata = [
+                'sale_id' => $sale->id,
+                'event_id' => $sale->event_id,
+                'serial_number' => $payload['serialNumber'] ?? null,
+                'generated_at' => $timestamp->toIso8601String(),
+                'asset_details' => $this->summarizeFiles($files),
+                'manifest' => $this->summarizeManifest($manifest),
+                'payload_summary' => $this->summarizePayloadForLog($payload),
+                'signature_sha1' => sha1($signature),
+                'signature_bytes' => strlen($signature),
+                'package_sha1' => sha1($package),
+                'package_bytes' => strlen($package),
+                'dump_path' => $directory,
+            ];
+
+            $this->writeDebugFile($directory . DIRECTORY_SEPARATOR . 'metadata.json', $this->encodeJsonPretty($metadata));
+
+            $this->logDebug('Apple Wallet debug artifacts written to disk.', [
+                'sale_id' => $sale->id,
+                'dump_path' => $directory,
+                'serial_number' => $payload['serialNumber'] ?? null,
+                'package_bytes' => strlen($package),
+            ]);
+        } catch (Throwable $exception) {
+            $this->logDebug('Failed to write Apple Wallet debug artifacts.', [
+                'sale_id' => $sale->id,
+                'error' => $exception->getMessage(),
+            ]);
+        }
+    }
+
+    protected function sanitizeFilesystemSegment(?string $value): string
+    {
+        if ($value === null || $value === '') {
+            return 'unknown';
+        }
+
+        $sanitized = preg_replace('/[^A-Za-z0-9._-]+/', '-', $value) ?: 'unknown';
+        $trimmed = trim($sanitized, '-');
+
+        if ($trimmed === '') {
+            return 'unknown';
+        }
+
+        return substr($trimmed, 0, 64);
+    }
+
+    protected function encodeJsonPretty(array $data): string
+    {
+        $json = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+
+        if ($json === false) {
+            throw new RuntimeException('Unable to encode Apple Wallet payload.');
+        }
+
+        return $json;
+    }
+
+    protected function writeDebugFile(string $path, string $contents): void
+    {
+        $bytes = @file_put_contents($path, $contents);
+
+        if ($bytes === false) {
+            throw new RuntimeException(sprintf('Unable to write Apple Wallet debug file [%s].', $path));
+        }
     }
 
     protected function encodeJson(array $data): string
