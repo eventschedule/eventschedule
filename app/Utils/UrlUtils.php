@@ -135,19 +135,17 @@ class UrlUtils
 
         // Use cURL instead of file_get_contents for better security control
         $ch = curl_init();
-        curl_setopt_array($ch, [
+        curl_setopt_array($ch, array_merge([
             CURLOPT_URL => $lookup_url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => 10,
             CURLOPT_CONNECTTIMEOUT => 5,
             CURLOPT_MAXREDIRS => 3,
             CURLOPT_USERAGENT => 'EventSchedule/1.0',
-            CURLOPT_SSL_VERIFYPEER => true,
-            CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
             CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
             CURLOPT_FOLLOWLOCATION => true,
-        ]);
+        ], self::getCurlSslOptions()));
         
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -240,7 +238,7 @@ class UrlUtils
 
         try {
             $ch = curl_init($url);
-            curl_setopt_array($ch, [
+            curl_setopt_array($ch, array_merge([
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_MAXREDIRS => 3, // Reduced from 10
@@ -253,12 +251,10 @@ class UrlUtils
                 ],
                 CURLOPT_HEADER => true,
                 // Security settings
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2,
                 CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
                 CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
                 CURLOPT_MAXFILESIZE => 10485760, // 10MB limit
-            ]);
+            ], self::getCurlSslOptions()));
 
             $response = curl_exec($ch);
             
@@ -331,24 +327,35 @@ class UrlUtils
     }
 
     /**
+     * Build SSL options for curl requests with optional verification toggle.
+     */
+    private static function getCurlSslOptions(): array
+    {
+        $verify = (bool) config('url_utils.verify_ssl', true);
+
+        return [
+            CURLOPT_SSL_VERIFYPEER => $verify,
+            CURLOPT_SSL_VERIFYHOST => $verify ? 2 : 0,
+        ];
+    }
+
+    /**
      * Securely download image with size and type validation
      */
     private static function downloadImageSecurely($imageUrl)
     {
         $ch = curl_init();
-        curl_setopt_array($ch, [
+        curl_setopt_array($ch, array_merge([
             CURLOPT_URL => $imageUrl,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => 10,
             CURLOPT_CONNECTTIMEOUT => 5,
             CURLOPT_MAXREDIRS => 2,
             CURLOPT_USERAGENT => 'EventSchedule/1.0',
-            CURLOPT_SSL_VERIFYPEER => true,
-            CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
             CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
             CURLOPT_MAXFILESIZE => 5242880, // 5MB limit for images
-        ]);
+        ], self::getCurlSslOptions()));
 
         $imageData = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
