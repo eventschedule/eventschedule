@@ -111,6 +111,74 @@ class AppleWalletServiceTest extends TestCase
         $this->assertSame(0x30, ord($signature[0]), 'CMS signature should start with a DER sequence.');
     }
 
+    public function testItFallsBackToPkcs7WhenCmsDerEncodingUnavailable(): void
+    {
+        $password = 'secret-pass';
+        $bundle = $this->generatePkcs12CertificateBundle($password);
+
+        $certificatePath = tempnam(sys_get_temp_dir(), 'wallet-test-cert-');
+        $wwdrPath = tempnam(sys_get_temp_dir(), 'wallet-test-wwdr-');
+
+        $this->assertNotFalse($certificatePath, 'Unable to create temporary certificate path.');
+        $this->assertNotFalse($wwdrPath, 'Unable to create temporary WWDR path.');
+
+        file_put_contents($certificatePath, $bundle['pkcs12']);
+        file_put_contents($wwdrPath, $bundle['certificate']);
+
+        $service = $this->makeService($password);
+        $service->setCertificatePath($certificatePath);
+        $service->setWwdrCertificatePath($wwdrPath);
+        $service->setCmsDerAvailable(false);
+
+        $signature = $service->exposeSignManifest(['pass.json' => sha1('payload')]);
+
+        @unlink($certificatePath);
+        @unlink($wwdrPath);
+
+        $this->assertTrue($service->pkcs7Used, 'PKCS#7 signing should be used when CMS DER encoding is unavailable.');
+        $this->assertNull($service->capturedCmsSignature, 'CMS signature should not be produced when DER encoding is unavailable.');
+        $this->assertNotEmpty($signature, 'Signature should not be empty.');
+        $this->assertSame(0x30, ord($signature[0]), 'PKCS#7 signature should start with a DER sequence.');
+    }
+
+    public function testItFallsBackToPkcs7WhenCmsSignatureIsNotDerEncoded(): void
+    {
+        if (! function_exists('openssl_cms_sign')) {
+            $this->markTestSkipped('openssl_cms_sign not available in this environment.');
+        }
+
+        if (! defined('OPENSSL_ENCODING_DER')) {
+            $this->markTestSkipped('OPENSSL_ENCODING_DER not available in this environment.');
+        }
+
+        $password = 'secret-pass';
+        $bundle = $this->generatePkcs12CertificateBundle($password);
+
+        $certificatePath = tempnam(sys_get_temp_dir(), 'wallet-test-cert-');
+        $wwdrPath = tempnam(sys_get_temp_dir(), 'wallet-test-wwdr-');
+
+        $this->assertNotFalse($certificatePath, 'Unable to create temporary certificate path.');
+        $this->assertNotFalse($wwdrPath, 'Unable to create temporary WWDR path.');
+
+        file_put_contents($certificatePath, $bundle['pkcs12']);
+        file_put_contents($wwdrPath, $bundle['certificate']);
+
+        $service = $this->makeService($password);
+        $service->setCertificatePath($certificatePath);
+        $service->setWwdrCertificatePath($wwdrPath);
+        $service->setCmsSignatureAppearsDer(false);
+
+        $signature = $service->exposeSignManifest(['pass.json' => sha1('payload')]);
+
+        @unlink($certificatePath);
+        @unlink($wwdrPath);
+
+        $this->assertTrue($service->pkcs7Used, 'PKCS#7 signing should be used when CMS signature is not DER encoded.');
+        $this->assertNotNull($service->capturedCmsSignature, 'CMS signature contents should be captured for inspection.');
+        $this->assertNotEmpty($signature, 'Signature should not be empty.');
+        $this->assertSame(0x30, ord($signature[0]), 'PKCS#7 signature should start with a DER sequence.');
+    }
+
     protected function makeService(?string $password): AppleWalletServiceForTests
     {
         return new AppleWalletServiceForTests($password);
@@ -155,6 +223,14 @@ class AppleWalletServiceTest extends TestCase
 
 class AppleWalletServiceForTests extends AppleWalletService
 {
+    public bool $pkcs7Used = false;
+
+    public ?string $capturedCmsSignature = null;
+
+    private bool $cmsDerEncodingAvailable = true;
+
+    private bool $cmsSignatureAppearsDerValue = true;
+
     public function __construct(?string $password)
     {
         $this->certificatePassword = $password;
@@ -189,8 +265,51 @@ class AppleWalletServiceForTests extends AppleWalletService
         $this->wwdrCertificatePath = $path;
     }
 
+    public function setCmsDerAvailable(bool $available): void
+    {
+        $this->cmsDerEncodingAvailable = $available;
+    }
+
+    public function setCmsSignatureAppearsDer(bool $appearsDer): void
+    {
+        $this->cmsSignatureAppearsDerValue = $appearsDer;
+    }
+
     public function exposeSignManifest(array $manifest): string
     {
+        $this->pkcs7Used = false;
+        $this->capturedCmsSignature = null;
+
         return $this->signManifest($manifest);
+    }
+
+    protected function cmsSupportsDerEncoding(): bool
+    {
+        if (! $this->cmsDerEncodingAvailable) {
+            return false;
+        }
+
+        return parent::cmsSupportsDerEncoding();
+    }
+
+    protected function cmsSignatureAppearsDer(string $signature): bool
+    {
+        $this->capturedCmsSignature = $signature;
+
+        if (! $this->cmsSignatureAppearsDerValue) {
+            return false;
+        }
+
+        return parent::cmsSignatureAppearsDer($signature);
+    }
+
+    /**
+     * @param  array{cert: mixed, pkey: mixed}  $certificates
+     */
+    protected function signManifestWithPkcs7(string $manifestPath, array $certificates): string
+    {
+        $this->pkcs7Used = true;
+
+        return parent::signManifestWithPkcs7($manifestPath, $certificates);
     }
 }

@@ -273,6 +273,10 @@ class AppleWalletService
             return null;
         }
 
+        if (! $this->cmsSupportsDerEncoding()) {
+            return null;
+        }
+
         $signaturePath = tempnam(sys_get_temp_dir(), 'pkpass-signature-');
 
         if ($signaturePath === false) {
@@ -318,7 +322,33 @@ class AppleWalletService
             return null;
         }
 
+        if (! $this->cmsSignatureAppearsDer($signatureContents)) {
+            return null;
+        }
+
         return $signatureContents;
+    }
+
+    protected function cmsSupportsDerEncoding(): bool
+    {
+        return defined('OPENSSL_ENCODING_DER');
+    }
+
+    protected function cmsSignatureAppearsDer(string $signature): bool
+    {
+        if (str_contains($signature, '-----BEGIN')) {
+            return false;
+        }
+
+        if (preg_match('/Content-Transfer-Encoding:\s*base64/i', $signature)) {
+            return false;
+        }
+
+        if (preg_match('/^MIME-Version:\s*1\.0/im', $signature)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
