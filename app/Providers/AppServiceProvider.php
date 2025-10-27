@@ -12,6 +12,7 @@ use App\Support\Logging\LoggingConfigManager;
 use App\Support\MailConfigManager;
 use App\Support\ReleaseChannelManager;
 use App\Support\UpdateConfigManager;
+use App\Support\UrlUtilsConfigManager;
 use App\Support\WalletConfigManager;
 use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Notifications\Events\NotificationSent;
@@ -93,6 +94,10 @@ class AppServiceProvider extends ServiceProvider
             ReleaseChannelManager::apply($channel);
 
             UpdateConfigManager::apply($generalSettings['update_repository_url'] ?? null);
+
+            if (array_key_exists('url_utils_verify_ssl', $generalSettings)) {
+                UrlUtilsConfigManager::apply($generalSettings['url_utils_verify_ssl']);
+            }
 
             if (!empty($generalSettings['public_url'])) {
                 config(['app.url' => $generalSettings['public_url']]);

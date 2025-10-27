@@ -151,6 +151,16 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('update_release_channel')" />
                             </div>
 
+                            <div>
+                                <x-checkbox name="url_utils_verify_ssl"
+                                    label="{{ __('messages.verify_download_ssl') }}"
+                                    :checked="old('url_utils_verify_ssl', data_get($generalSettings, 'url_utils_verify_ssl'))" />
+                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                    {{ __('messages.verify_download_ssl_help') }}
+                                </p>
+                                <x-input-error class="mt-2" :messages="$errors->get('url_utils_verify_ssl')" />
+                            </div>
+
                             <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
                                 <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
                                     {{ __('messages.logging_settings') }}

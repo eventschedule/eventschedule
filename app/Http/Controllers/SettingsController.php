@@ -16,6 +16,7 @@ use App\Support\MailConfigManager;
 use App\Support\MailTemplateManager;
 use App\Support\ReleaseChannelManager;
 use App\Support\UpdateConfigManager;
+use App\Support\UrlUtilsConfigManager;
 use App\Support\WalletConfigManager;
 use App\Utils\MarkdownUtils;
 use Codedge\Updater\UpdaterManager;
@@ -485,6 +486,7 @@ class SettingsController extends Controller
             'log_level' => ['required', 'string', Rule::in($logLevelKeys)],
             'log_disabled' => ['nullable', 'boolean'],
             'update_release_channel' => ['required', 'string', Rule::in(ReleaseChannel::values())],
+            'url_utils_verify_ssl' => ['nullable', 'boolean'],
         ]);
 
         $publicUrl = $this->sanitizeUrl($validated['public_url']);
@@ -505,6 +507,7 @@ class SettingsController extends Controller
             'public_url' => $publicUrl,
             'update_repository_url' => $updateRepositoryUrl,
             'update_release_channel' => $channel->value,
+            'url_utils_verify_ssl' => $request->boolean('url_utils_verify_ssl') ? '1' : '0',
         ]);
 
         $syslogHost = $this->sanitizeHost($validated['log_syslog_host']);
@@ -531,6 +534,7 @@ class SettingsController extends Controller
         UpdateConfigManager::apply($updateRepositoryUrl);
         ReleaseChannelManager::apply($channel);
         LoggingConfigManager::apply($loggingSettings);
+        UrlUtilsConfigManager::apply($request->boolean('url_utils_verify_ssl'));
 
         return redirect()->route('settings.general')->with('status', 'general-settings-updated');
     }
@@ -1020,6 +1024,9 @@ class SettingsController extends Controller
             'log_disabled' => array_key_exists('disabled', $storedLoggingSettings)
                 ? $this->toBoolean($storedLoggingSettings['disabled'])
                 : false,
+            'url_utils_verify_ssl' => array_key_exists('url_utils_verify_ssl', $storedGeneralSettings)
+                ? $this->toBoolean($storedGeneralSettings['url_utils_verify_ssl'])
+                : $this->toBoolean(config('url_utils.verify_ssl', true)),
         ];
     }
 
