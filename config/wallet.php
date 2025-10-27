@@ -14,6 +14,7 @@ return [
         'label_color' => env('APPLE_WALLET_LABEL_COLOR', 'rgb(255,255,255)'),
         'debug' => env('APPLE_WALLET_DEBUG', env('APP_DEBUG', false)),
         'log_channel' => env('APPLE_WALLET_LOG_CHANNEL'),
+        'debug_dump_path' => env('APPLE_WALLET_DEBUG_DUMP_PATH', storage_path('app/wallet/debug-dumps')),
     ],
 
     'google' => [
