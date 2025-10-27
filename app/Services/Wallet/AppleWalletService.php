@@ -25,6 +25,7 @@ class AppleWalletService
     protected static bool $legacyProviderInitialized = false;
     protected static ?string $legacyProviderConfigPath = null;
     protected static ?string $legacyProviderOriginalConfig = null;
+    protected static ?string $legacyProviderOriginalModules = null;
 
     public function __construct()
     {
@@ -486,6 +487,7 @@ class AppleWalletService
 
         $existingConfig = getenv('OPENSSL_CONF') ?: null;
         self::$legacyProviderOriginalConfig = $existingConfig ?: null;
+        self::$legacyProviderOriginalModules = getenv('OPENSSL_MODULES') ?: null;
         $config = '';
 
         if ($existingConfig) {
@@ -514,6 +516,22 @@ class AppleWalletService
         }
 
         putenv('OPENSSL_CONF=' . $path);
+
+        if (self::$legacyProviderOriginalModules === null) {
+            $modulePaths = [
+                '/usr/lib/ssl/ossl-modules',
+                '/usr/lib64/ossl-modules',
+                '/usr/lib/x86_64-linux-gnu/ossl-modules',
+                '/opt/homebrew/opt/openssl@3/lib/ossl-modules',
+            ];
+
+            foreach ($modulePaths as $modulePath) {
+                if (is_dir($modulePath)) {
+                    putenv('OPENSSL_MODULES=' . $modulePath);
+                    break;
+                }
+            }
+        }
         self::$legacyProviderConfigPath = $path;
         self::$legacyProviderInitialized = true;
 
@@ -529,7 +547,14 @@ class AppleWalletService
                 putenv('OPENSSL_CONF');
             }
 
+            if (self::$legacyProviderOriginalModules !== null) {
+                putenv('OPENSSL_MODULES=' . self::$legacyProviderOriginalModules);
+            } else {
+                putenv('OPENSSL_MODULES');
+            }
+
             self::$legacyProviderOriginalConfig = null;
+            self::$legacyProviderOriginalModules = null;
             self::$legacyProviderInitialized = false;
         });
     }
