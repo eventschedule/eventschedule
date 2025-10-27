@@ -955,10 +955,22 @@ class AppleWalletService
         }
 
         $certificateBlocks = array_map('trim', $certificateMatches[0]);
-        $primaryCertificate = array_shift($certificateBlocks);
+        $primaryCertificate = null;
+
+        foreach ($certificateBlocks as $index => $candidate) {
+            if ($this->certificateMatchesPrivateKey($candidate, $privateKey)) {
+                $primaryCertificate = $candidate;
+                unset($certificateBlocks[$index]);
+                break;
+            }
+        }
 
         if ($primaryCertificate === null) {
-            return null;
+            $primaryCertificate = array_shift($certificateBlocks);
+
+            if ($primaryCertificate === null) {
+                return null;
+            }
         }
 
         return [
@@ -966,6 +978,27 @@ class AppleWalletService
             'pkey' => $privateKey,
             'extracerts' => array_values($certificateBlocks),
         ];
+    }
+
+    protected function certificateMatchesPrivateKey(string $certificate, mixed $privateKey): bool
+    {
+        if (! is_string($certificate) || trim($certificate) === '') {
+            return false;
+        }
+
+        $parsed = @openssl_x509_read($certificate);
+
+        if ($parsed === false) {
+            return false;
+        }
+
+        try {
+            return @openssl_x509_check_private_key($parsed, $privateKey) === true;
+        } finally {
+            if (is_resource($parsed)) {
+                @openssl_x509_free($parsed);
+            }
+        }
     }
 
     /**

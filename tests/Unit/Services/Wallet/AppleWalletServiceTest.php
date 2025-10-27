@@ -288,6 +288,35 @@ class AppleWalletServiceTest extends TestCase
         );
     }
 
+    public function testItChoosesCertificateMatchingPrivateKeyFromPemBundles(): void
+    {
+        $password = 'secret-pass';
+        $bundle = $this->generatePkcs12CertificateBundle($password);
+        $wwdrPem = $this->generateStandaloneCertificatePem();
+
+        $pemBundle = implode(PHP_EOL . PHP_EOL, [
+            trim($wwdrPem),
+            trim($bundle['certificate']),
+            trim($bundle['private_key']),
+        ]);
+
+        $service = $this->makeService($password);
+        $parsed = $service->exposeParsePemCertificateBundle($pemBundle, $password);
+
+        $this->assertNotNull($parsed, 'PEM bundle should be parsed successfully.');
+        $this->assertSame(
+            trim($bundle['certificate']),
+            trim($parsed['cert']),
+            'Primary certificate should match the private key when parsing PEM bundles.'
+        );
+        $this->assertNotEmpty($parsed['extracerts'], 'Additional certificates should be retained.');
+        $this->assertSame(
+            trim($wwdrPem),
+            trim($parsed['extracerts'][0]),
+            'Remaining certificates should include the non-matching PEM blocks.'
+        );
+    }
+
     public function testItFallsBackToPkcs7WhenCmsSignatureIsNotDerEncoded(): void
     {
         if (! function_exists('openssl_cms_sign')) {
@@ -337,7 +366,7 @@ class AppleWalletServiceTest extends TestCase
     }
 
     /**
-     * @return array{pkcs12: string, certificate: string}
+     * @return array{pkcs12: string, certificate: string, private_key: string}
      */
     protected function generatePkcs12CertificateBundle(string $password): array
     {
@@ -361,9 +390,15 @@ class AppleWalletServiceTest extends TestCase
 
         $this->assertTrue($pemExported, 'Failed to export certificate to PEM.');
 
+        $privateKeyPem = '';
+        $keyExported = openssl_pkey_export($privateKey, $privateKeyPem, $password);
+
+        $this->assertTrue($keyExported, 'Failed to export private key to PEM.');
+
         return [
             'pkcs12' => $exported,
             'certificate' => $certificatePem,
+            'private_key' => $privateKeyPem,
         ];
     }
 
@@ -430,6 +465,13 @@ class AppleWalletServiceForTests extends AppleWalletService
     public function exposeCreateSignerCertificateChainFile(array $certificates): ?string
     {
         return $this->createSignerCertificateChainFile($certificates);
+    }
+
+    public function exposeParsePemCertificateBundle(string $contents, string $password): ?array
+    {
+        $errors = [];
+
+        return $this->parsePemCertificateBundle($contents, $password, $errors);
     }
 
     public function setCertificatePath(?string $path): void
