@@ -22,6 +22,9 @@ class AppleWalletService
     protected string $backgroundColor;
     protected string $foregroundColor;
     protected string $labelColor;
+    protected static bool $legacyProviderInitialized = false;
+    protected static ?string $legacyProviderConfigPath = null;
+    protected static ?string $legacyProviderOriginalConfig = null;
 
     public function __construct()
     {
@@ -342,6 +345,8 @@ class AppleWalletService
      */
     protected function parsePemCertificateBundle(string $contents, string $password, array &$errors = []): ?array
     {
+        $this->ensureOpenSslLegacyProvider();
+
         $certificatePattern = '/-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----/s';
         $privateKeyPattern = '/-----BEGIN (?:RSA |EC |ENCRYPTED )?PRIVATE KEY-----.*?-----END (?:RSA |EC |ENCRYPTED )?PRIVATE KEY-----/s';
 
@@ -374,6 +379,8 @@ class AppleWalletService
      */
     protected function tryParsePkcs12Certificate(string $contents, string $password, array &$errors): ?array
     {
+        $this->ensureOpenSslLegacyProvider();
+
         $certificates = [];
 
         if (@openssl_pkcs12_read($contents, $certificates, $password)) {
@@ -464,6 +471,67 @@ class AppleWalletService
         }
 
         return $messages;
+    }
+
+    protected function ensureOpenSslLegacyProvider(): void
+    {
+        if (self::$legacyProviderInitialized) {
+            return;
+        }
+
+        if (! defined('OPENSSL_VERSION_NUMBER') || OPENSSL_VERSION_NUMBER < 0x30000000) {
+            self::$legacyProviderInitialized = true;
+            return;
+        }
+
+        $existingConfig = getenv('OPENSSL_CONF') ?: null;
+        self::$legacyProviderOriginalConfig = $existingConfig ?: null;
+        $config = '';
+
+        if ($existingConfig) {
+            $escapedConfigPath = str_replace(["\\", "\""], ["\\\\", "\\\""], $existingConfig);
+            $config .= '.include = "' . $escapedConfigPath . '"' . PHP_EOL;
+        }
+
+        $config .= 'openssl_conf = pkpass_conf' . PHP_EOL;
+
+        $config .= PHP_EOL . '[pkpass_conf]' . PHP_EOL . 'providers = provider_sect' . PHP_EOL . PHP_EOL
+            . '[provider_sect]' . PHP_EOL . 'default = default_sect' . PHP_EOL . 'legacy = legacy_sect' . PHP_EOL . PHP_EOL
+            . '[default_sect]' . PHP_EOL . 'activate = 1' . PHP_EOL . PHP_EOL
+            . '[legacy_sect]' . PHP_EOL . 'activate = 1' . PHP_EOL;
+
+        $path = tempnam(sys_get_temp_dir(), 'openssl-conf-');
+
+        if ($path === false) {
+            return;
+        }
+
+        $bytes = @file_put_contents($path, $config);
+
+        if ($bytes === false) {
+            @unlink($path);
+            return;
+        }
+
+        putenv('OPENSSL_CONF=' . $path);
+        self::$legacyProviderConfigPath = $path;
+        self::$legacyProviderInitialized = true;
+
+        register_shutdown_function(static function (): void {
+            if (self::$legacyProviderConfigPath) {
+                @unlink(self::$legacyProviderConfigPath);
+                self::$legacyProviderConfigPath = null;
+            }
+
+            if (self::$legacyProviderOriginalConfig !== null) {
+                putenv('OPENSSL_CONF=' . self::$legacyProviderOriginalConfig);
+            } else {
+                putenv('OPENSSL_CONF');
+            }
+
+            self::$legacyProviderOriginalConfig = null;
+            self::$legacyProviderInitialized = false;
+        });
     }
 
     /**
