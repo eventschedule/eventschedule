@@ -297,29 +297,50 @@ class AppleWalletService
     protected function loadCertificates(string $certificateContents): array
     {
         $password = $this->certificatePassword ?? '';
-        $certificates = [];
+        $errors = [];
 
-        if (@openssl_pkcs12_read($certificateContents, $certificates, $password)) {
-            if (! empty($certificates['cert']) && ! empty($certificates['pkey'])) {
-                return $certificates;
+        $pkcs12 = $this->tryParsePkcs12Certificate($certificateContents, $password, $errors);
+
+        if ($pkcs12 !== null) {
+            return $pkcs12;
+        }
+
+        $decoded = $this->decodeCertificateIfNeeded($certificateContents);
+
+        if ($decoded !== null) {
+            $pkcs12 = $this->tryParsePkcs12Certificate($decoded, $password, $errors);
+
+            if ($pkcs12 !== null) {
+                return $pkcs12;
             }
         }
 
-        $pemCertificates = $this->parsePemCertificateBundle($certificateContents, $password);
+        $pemCertificates = $this->parsePemCertificateBundle($certificateContents, $password, $errors);
 
         if ($pemCertificates !== null) {
             return $pemCertificates;
         }
 
-        throw new RuntimeException('Unable to parse Apple Wallet certificate.');
+        if ($decoded !== null) {
+            $pemCertificates = $this->parsePemCertificateBundle($decoded, $password, $errors);
+
+            if ($pemCertificates !== null) {
+                return $pemCertificates;
+            }
+        }
+
+        $errorDetails = $this->formatOpenSslErrors($errors);
+
+        throw new RuntimeException(trim('Unable to parse Apple Wallet certificate. ' . $errorDetails));
     }
 
     /**
      * Attempt to parse a PEM bundle that includes the certificate and private key.
      *
+     * @param  array<int, string>  $errors
      * @return array{cert: string, pkey: resource|string}|null
      */
-    protected function parsePemCertificateBundle(string $contents, string $password): ?array
+    protected function parsePemCertificateBundle(string $contents, string $password, array &$errors = []): ?array
     {
         $certificatePattern = '/-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----/s';
         $privateKeyPattern = '/-----BEGIN (?:RSA |EC |ENCRYPTED )?PRIVATE KEY-----.*?-----END (?:RSA |EC |ENCRYPTED )?PRIVATE KEY-----/s';
@@ -335,6 +356,7 @@ class AppleWalletService
         $privateKey = @openssl_pkey_get_private($privateKeyMatch[0], $password === '' ? null : $password);
 
         if ($privateKey === false) {
+            $errors = array_merge($errors, $this->drainOpenSslErrors());
             return null;
         }
 
@@ -344,6 +366,104 @@ class AppleWalletService
             'cert' => $certificateChain,
             'pkey' => $privateKey,
         ];
+    }
+
+    /**
+     * @param  array<int, string>  $errors
+     * @return array{cert: string|resource, pkey: string|resource}|null
+     */
+    protected function tryParsePkcs12Certificate(string $contents, string $password, array &$errors): ?array
+    {
+        $certificates = [];
+
+        if (@openssl_pkcs12_read($contents, $certificates, $password)) {
+            if (! empty($certificates['cert']) && ! empty($certificates['pkey'])) {
+                return $certificates;
+            }
+        }
+
+        $errors = array_merge($errors, $this->drainOpenSslErrors());
+
+        return null;
+    }
+
+    protected function decodeCertificateIfNeeded(string $contents): ?string
+    {
+        $trimmed = trim($contents);
+
+        if ($trimmed === '') {
+            return null;
+        }
+
+        if (str_contains($trimmed, '\0')) {
+            return null;
+        }
+
+        if (str_starts_with($trimmed, 'data:')) {
+            $separator = strpos($trimmed, ',');
+
+            if ($separator === false) {
+                return null;
+            }
+
+            $metadata = substr($trimmed, 0, $separator);
+
+            if (! str_contains(strtolower($metadata), ';base64')) {
+                return null;
+            }
+
+            $trimmed = substr($trimmed, $separator + 1);
+        }
+
+        if (str_contains($trimmed, '-----BEGIN PKCS12-----')) {
+            $trimmed = preg_replace('/-----BEGIN PKCS12-----|-----END PKCS12-----/i', '', $trimmed) ?? $trimmed;
+        }
+
+        $normalized = preg_replace('/\s+/', '', $trimmed);
+
+        if ($normalized === null || $normalized === '') {
+            return null;
+        }
+
+        if (preg_match('/^[A-Za-z0-9+\/=]+$/', $normalized) !== 1) {
+            return null;
+        }
+
+        $decoded = base64_decode($normalized, true);
+
+        if ($decoded === false || $decoded === '') {
+            return null;
+        }
+
+        return $decoded;
+    }
+
+    /**
+     * @param  array<int, string>  $errors
+     */
+    protected function formatOpenSslErrors(array $errors): string
+    {
+        $messages = array_values(array_unique(array_filter($errors)));
+
+        if (empty($messages)) {
+            return '';
+        }
+
+        return 'OpenSSL errors: ' . implode('; ', $messages);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function drainOpenSslErrors(): array
+    {
+        $messages = [];
+
+        while (($error = openssl_error_string()) !== false) {
+            $messages[] = $error;
+        }
+
+        return $messages;
     }
 
     /**
