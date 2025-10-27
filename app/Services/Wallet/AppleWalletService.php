@@ -526,12 +526,13 @@ class AppleWalletService
         $command[] = '-passout';
         $command[] = 'pass:';
         $command[] = '-passin';
-        $command[] = 'pass:' . $password;
+        $command[] = 'fd:3';
 
         $descriptorSpec = [
             0 => ['pipe', 'r'],
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
+            3 => ['pipe', 'w'],
         ];
 
         $process = @proc_open($command, $descriptorSpec, $pipes);
@@ -542,6 +543,8 @@ class AppleWalletService
             return null;
         }
 
+        fwrite($pipes[3], $password . PHP_EOL);
+        fclose($pipes[3]);
         fclose($pipes[0]);
         $stdout = stream_get_contents($pipes[1]) ?: '';
         fclose($pipes[1]);
