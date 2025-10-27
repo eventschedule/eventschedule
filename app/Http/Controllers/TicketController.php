@@ -536,6 +536,10 @@ class TicketController extends Controller
         return response($pass, 200, [
             'Content-Type' => 'application/vnd.apple.pkpass',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Transfer-Encoding' => 'binary',
+            'Content-Length' => strlen($pass),
+            'Cache-Control' => 'no-store, no-cache, must-revalidate',
+            'Pragma' => 'no-cache',
         ]);
     }
 
