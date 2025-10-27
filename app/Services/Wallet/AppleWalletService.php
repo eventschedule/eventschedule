@@ -6,9 +6,11 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RuntimeException;
 use ZipArchive;
+use Throwable;
 
 class AppleWalletService
 {
@@ -22,6 +24,8 @@ class AppleWalletService
     protected string $backgroundColor;
     protected string $foregroundColor;
     protected string $labelColor;
+    protected bool $debugEnabled;
+    protected ?string $logChannel;
     protected static bool $legacyProviderInitialized = false;
     protected static ?string $legacyProviderConfigPath = null;
     protected static ?string $legacyProviderOriginalConfig = null;
@@ -41,19 +45,65 @@ class AppleWalletService
         $this->backgroundColor = $this->sanitizeConfigValue($config['background_color'] ?? 'rgb(78,129,250)') ?? 'rgb(78,129,250)';
         $this->foregroundColor = $this->sanitizeConfigValue($config['foreground_color'] ?? 'rgb(255,255,255)') ?? 'rgb(255,255,255)';
         $this->labelColor = $this->sanitizeConfigValue($config['label_color'] ?? 'rgb(255,255,255)') ?? 'rgb(255,255,255)';
+        $this->debugEnabled = (bool) ($config['debug'] ?? config('app.debug'));
+        $this->logChannel = $this->sanitizeConfigValue($config['log_channel'] ?? null);
+
+        $this->logDebug('Apple Wallet service configured.', [
+            'enabled' => $this->enabled,
+            'certificate_path' => $this->certificatePath,
+            'certificate_exists' => $this->certificatePath ? file_exists($this->certificatePath) : null,
+            'wwdr_certificate_path' => $this->wwdrCertificatePath,
+            'wwdr_certificate_exists' => $this->wwdrCertificatePath ? file_exists($this->wwdrCertificatePath) : null,
+            'pass_type_identifier' => $this->passTypeIdentifier,
+            'team_identifier' => $this->teamIdentifier,
+        ]);
     }
 
     public function isConfigured(): bool
     {
         if (! $this->enabled) {
+            $this->logDebug('Apple Wallet is disabled in configuration.');
+
             return false;
         }
 
-        if (! $this->certificatePath || ! $this->passTypeIdentifier || ! $this->teamIdentifier || ! $this->wwdrCertificatePath) {
+        $missing = [];
+
+        if (! $this->certificatePath) {
+            $missing[] = 'certificate_path';
+        }
+
+        if (! $this->passTypeIdentifier) {
+            $missing[] = 'pass_type_identifier';
+        }
+
+        if (! $this->teamIdentifier) {
+            $missing[] = 'team_identifier';
+        }
+
+        if (! $this->wwdrCertificatePath) {
+            $missing[] = 'wwdr_certificate_path';
+        }
+
+        if ($missing !== []) {
+            $this->logDebug('Apple Wallet configuration is missing required values.', ['missing' => $missing]);
+
             return false;
         }
 
-        if (! file_exists($this->certificatePath) || ! file_exists($this->wwdrCertificatePath)) {
+        $missingFiles = [];
+
+        if ($this->certificatePath && ! file_exists($this->certificatePath)) {
+            $missingFiles['certificate_path'] = $this->certificatePath;
+        }
+
+        if ($this->wwdrCertificatePath && ! file_exists($this->wwdrCertificatePath)) {
+            $missingFiles['wwdr_certificate_path'] = $this->wwdrCertificatePath;
+        }
+
+        if ($missingFiles !== []) {
+            $this->logDebug('Apple Wallet certificate files are missing.', ['files' => $missingFiles]);
+
             return false;
         }
 
@@ -74,13 +124,98 @@ class AppleWalletService
         return $trimmed === '' ? null : $trimmed;
     }
 
+    protected function logDebug(string $message, array $context = []): void
+    {
+        if (! $this->debugEnabled) {
+            return;
+        }
+
+        $context = $this->prepareLogContext($context);
+
+        try {
+            if ($this->logChannel) {
+                Log::channel($this->logChannel)->debug($message, $context);
+
+                return;
+            }
+        } catch (Throwable $exception) {
+            try {
+                Log::debug('Failed to write Apple Wallet debug message to configured channel.', [
+                    'channel' => $this->logChannel,
+                    'error' => $exception->getMessage(),
+                ]);
+            } catch (Throwable $inner) {
+                // Swallow logging failures to avoid masking the original issue.
+            }
+        }
+
+        try {
+            Log::debug($message, $context);
+        } catch (Throwable $exception) {
+            // Swallow logging failures to avoid masking the original issue.
+        }
+    }
+
+    protected function prepareLogContext(array $context): array
+    {
+        $redactedKeys = [
+            'certificate_password',
+            'password',
+        ];
+
+        foreach ($context as $key => $value) {
+            if (in_array($key, $redactedKeys, true)) {
+                $context[$key] = '[redacted]';
+                continue;
+            }
+
+            if (is_object($value)) {
+                if (method_exists($value, 'toArray')) {
+                    $context[$key] = $value->toArray();
+                } elseif (method_exists($value, '__toString')) {
+                    $context[$key] = (string) $value;
+                } else {
+                    $context[$key] = get_class($value);
+                }
+            } elseif (is_resource($value)) {
+                $context[$key] = sprintf('resource(%s)', get_resource_type($value));
+            }
+        }
+
+        return $context;
+    }
+
     public function isAvailableForSale(Sale $sale): bool
     {
-        return $this->isConfigured() && $sale->status === 'paid';
+        if (! $this->isConfigured()) {
+            $this->logDebug('Apple Wallet is not available for this sale because configuration is incomplete.', [
+                'sale_id' => $sale->id,
+                'sale_status' => $sale->status,
+            ]);
+
+            return false;
+        }
+
+        if ($sale->status !== 'paid') {
+            $this->logDebug('Apple Wallet is not available for this sale because it is not paid.', [
+                'sale_id' => $sale->id,
+                'sale_status' => $sale->status,
+            ]);
+
+            return false;
+        }
+
+        return true;
     }
 
     public function generateTicketPass(Sale $sale): string
     {
+        $this->logDebug('Starting Apple Wallet pass generation.', [
+            'sale_id' => $sale->id,
+            'event_id' => $sale->event_id,
+            'sale_status' => $sale->status,
+        ]);
+
         if (! $this->isAvailableForSale($sale)) {
             throw new RuntimeException('Apple Wallet is not configured for this sale.');
         }
@@ -88,10 +223,21 @@ class AppleWalletService
         $sale->loadMissing('event.creatorRole', 'event.venue', 'saleTickets.ticket');
 
         if (! $sale->event) {
+            $this->logDebug('Sale does not have an associated event when generating Apple Wallet pass.', [
+                'sale_id' => $sale->id,
+            ]);
+
             throw new RuntimeException('Sale event is not available.');
         }
 
         $payload = $this->buildPassPayload($sale);
+
+        $this->logDebug('Apple Wallet pass payload generated.', [
+            'sale_id' => $sale->id,
+            'serial_number' => $payload['serialNumber'] ?? null,
+            'relevant_date' => $payload['relevantDate'] ?? null,
+            'location_count' => isset($payload['locations']) ? count($payload['locations']) : 0,
+        ]);
 
         $baseFiles = [
             'pass.json' => $this->encodeJson($payload),
@@ -104,7 +250,19 @@ class AppleWalletService
         $manifest = $this->createManifest($baseFiles);
         $signature = $this->signManifest($manifest);
 
-        return $this->createPackage($baseFiles, $manifest, $signature);
+        $this->logDebug('Apple Wallet manifest signed successfully.', [
+            'sale_id' => $sale->id,
+            'manifest_files' => array_keys($manifest),
+        ]);
+
+        $package = $this->createPackage($baseFiles, $manifest, $signature);
+
+        $this->logDebug('Apple Wallet pass package created.', [
+            'sale_id' => $sale->id,
+            'package_size' => strlen($package),
+        ]);
+
+        return $package;
     }
 
     protected function buildPassPayload(Sale $sale): array
@@ -272,22 +430,42 @@ class AppleWalletService
      */
     protected function signManifest(array $manifest): string
     {
+        $this->logDebug('Signing Apple Wallet manifest.', [
+            'manifest_files' => array_keys($manifest),
+            'certificate_path' => $this->certificatePath,
+        ]);
+
         $certificateContents = file_get_contents($this->certificatePath ?? '');
 
         if ($certificateContents === false) {
             throw new RuntimeException('Unable to read Apple Wallet certificate.');
         }
 
+        $this->logDebug('Apple Wallet certificate loaded for signing.', [
+            'certificate_bytes' => strlen($certificateContents),
+        ]);
+
         $certificates = $this->loadCertificates($certificateContents);
         $manifestPath = $this->createTempFile($this->encodeJson($manifest));
         $chainPath = $this->createSignerCertificateChainFile($certificates);
+
+        $this->logDebug('Generated manifest signing workspace.', [
+            'manifest_path' => $manifestPath,
+            'chain_path' => $chainPath,
+        ]);
 
         try {
             $cmsSignature = $this->tryCmsManifestSignature($manifestPath, $certificates, $chainPath);
 
             if ($cmsSignature !== null) {
+                $this->logDebug('Manifest signed using openssl_cms_sign.', [
+                    'chain_path' => $chainPath,
+                ]);
+
                 return $cmsSignature;
             }
+
+            $this->logDebug('Falling back to PKCS#7 manifest signing.');
 
             return $this->signManifestWithPkcs7($manifestPath, $certificates, $chainPath);
         } finally {
@@ -304,10 +482,14 @@ class AppleWalletService
     protected function tryCmsManifestSignature(string $manifestPath, array $certificates, ?string $chainPath = null): ?string
     {
         if (! function_exists('openssl_cms_sign')) {
+            $this->logDebug('openssl_cms_sign is not available; skipping CMS signature path.');
+
             return null;
         }
 
         if (! $this->cmsSupportsDerEncoding()) {
+            $this->logDebug('openssl_cms_sign does not support DER encoding; skipping CMS signature path.');
+
             return null;
         }
 
@@ -349,14 +531,22 @@ class AppleWalletService
         @unlink($signaturePath);
 
         if (! $result || $signatureContents === false) {
+            $this->logDebug('openssl_cms_sign failed to generate a signature. Falling back to PKCS#7.', [
+                'result' => $result,
+            ]);
+
             return null;
         }
 
         if ($signatureContents === '') {
+            $this->logDebug('openssl_cms_sign returned an empty signature.');
+
             return null;
         }
 
         if (! $this->cmsSignatureAppearsDer($signatureContents)) {
+            $this->logDebug('openssl_cms_sign produced a signature that does not appear to be DER encoded.');
+
             return null;
         }
 
@@ -396,6 +586,11 @@ class AppleWalletService
             throw new RuntimeException('Unable to create signature file.');
         }
 
+        $this->logDebug('Attempting PKCS#7 manifest signature.', [
+            'manifest_path' => $manifestPath,
+            'chain_path' => $chainPath,
+        ]);
+
         $signingResult = openssl_pkcs7_sign(
             $manifestPath,
             $signaturePath,
@@ -408,6 +603,7 @@ class AppleWalletService
 
         if (! $signingResult) {
             @unlink($signaturePath);
+            $this->logDebug('openssl_pkcs7_sign failed to generate a signature.');
             throw new RuntimeException('Unable to sign Apple Wallet manifest.');
         }
 
@@ -418,6 +614,10 @@ class AppleWalletService
         if ($signatureContents === false) {
             throw new RuntimeException('Unable to read Apple Wallet signature.');
         }
+
+        $this->logDebug('PKCS#7 manifest signature created successfully.', [
+            'signature_length' => strlen($signatureContents),
+        ]);
 
         return $this->convertSignatureToBinary($signatureContents);
     }
@@ -430,19 +630,29 @@ class AppleWalletService
         $chain = $this->buildSignerCertificateChain($certificates);
 
         if ($chain === null || trim($chain) === '') {
+            $this->logDebug('No signer certificate chain was generated.');
+
             return null;
         }
 
         $path = tempnam(sys_get_temp_dir(), 'pkpass-chain-');
 
         if ($path === false) {
+            $this->logDebug('Unable to allocate temporary file for signer certificate chain.');
+
             return null;
         }
 
         if (@file_put_contents($path, $chain) === false) {
             @unlink($path);
+            $this->logDebug('Unable to write signer certificate chain to temporary file.');
             return null;
         }
+
+        $this->logDebug('Signer certificate chain file created.', [
+            'chain_path' => $path,
+            'chain_length' => strlen($chain),
+        ]);
 
         return $path;
     }
@@ -484,10 +694,18 @@ class AppleWalletService
         }
 
         if (empty($chain)) {
+            $this->logDebug('Signer certificate chain is empty after processing certificates.');
+
             return null;
         }
 
-        return implode(PHP_EOL . PHP_EOL, array_map('trim', $chain));
+        $finalChain = implode(PHP_EOL . PHP_EOL, array_map('trim', $chain));
+
+        $this->logDebug('Signer certificate chain built.', [
+            'certificate_count' => count($chain),
+        ]);
+
+        return $finalChain;
     }
 
     protected function appendCertificateToChain(array &$chain, array &$fingerprints, string $certificate): void
@@ -601,18 +819,29 @@ class AppleWalletService
         $password = $this->certificatePassword ?? '';
         $errors = [];
 
+        $this->logDebug('Attempting to load Apple Wallet certificate bundle.', [
+            'password_provided' => $password !== '',
+            'content_length' => strlen($certificateContents),
+        ]);
+
         $pkcs12 = $this->tryParsePkcs12Certificate($certificateContents, $password, $errors);
 
         if ($pkcs12 !== null) {
+            $this->logDebug('Loaded Apple Wallet certificate using openssl_pkcs12_read.');
+
             return $this->normalizeCertificateResult($pkcs12);
         }
 
         $decoded = $this->decodeCertificateIfNeeded($certificateContents);
 
         if ($decoded !== null) {
+            $this->logDebug('Detected base64-encoded certificate. Retrying PKCS#12 parse after decoding.');
+
             $pkcs12 = $this->tryParsePkcs12Certificate($decoded, $password, $errors);
 
             if ($pkcs12 !== null) {
+                $this->logDebug('Loaded Apple Wallet certificate using openssl_pkcs12_read after decoding.');
+
                 return $this->normalizeCertificateResult($pkcs12);
             }
         }
@@ -620,6 +849,8 @@ class AppleWalletService
         $cliCertificates = $this->tryExtractCertificatesWithOpenSslCli($certificateContents, $password, $errors);
 
         if ($cliCertificates !== null) {
+            $this->logDebug('Loaded Apple Wallet certificate using OpenSSL CLI fallback.');
+
             return $this->normalizeCertificateResult($cliCertificates);
         }
 
@@ -627,6 +858,8 @@ class AppleWalletService
             $cliCertificates = $this->tryExtractCertificatesWithOpenSslCli($decoded, $password, $errors);
 
             if ($cliCertificates !== null) {
+                $this->logDebug('Loaded Apple Wallet certificate using OpenSSL CLI fallback after decoding.');
+
                 return $this->normalizeCertificateResult($cliCertificates);
             }
         }
@@ -634,6 +867,8 @@ class AppleWalletService
         $pemCertificates = $this->parsePemCertificateBundle($certificateContents, $password, $errors);
 
         if ($pemCertificates !== null) {
+            $this->logDebug('Loaded Apple Wallet certificate from PEM bundle.');
+
             return $this->normalizeCertificateResult($pemCertificates);
         }
 
@@ -641,11 +876,17 @@ class AppleWalletService
             $pemCertificates = $this->parsePemCertificateBundle($decoded, $password, $errors);
 
             if ($pemCertificates !== null) {
+                $this->logDebug('Loaded Apple Wallet certificate from PEM bundle after decoding.');
+
                 return $this->normalizeCertificateResult($pemCertificates);
             }
         }
 
         $errorDetails = $this->formatOpenSslErrors($errors);
+
+        $this->logDebug('Unable to parse Apple Wallet certificate after trying all strategies.', [
+            'errors' => $errorDetails,
+        ]);
 
         throw new RuntimeException(trim('Unable to parse Apple Wallet certificate. ' . $errorDetails));
     }
@@ -829,14 +1070,20 @@ class AppleWalletService
     protected function tryExtractCertificatesWithOpenSslCli(string $contents, string $password, array &$errors): ?array
     {
         if (! $this->canUseOpenSslCli()) {
+            $this->logDebug('Skipping OpenSSL CLI extraction because the CLI is not available.');
+
             return null;
         }
+
+        $this->logDebug('Attempting to extract Apple Wallet certificate with OpenSSL CLI.');
 
         $inputPath = $this->createTempFile($contents);
         $outputPath = tempnam(sys_get_temp_dir(), 'pkpass-cli-');
 
         if ($outputPath === false) {
             @unlink($inputPath);
+            $this->logDebug('Failed to allocate output path for OpenSSL CLI extraction.');
+
             return null;
         }
 
@@ -845,6 +1092,8 @@ class AppleWalletService
         if ($passwordPath === false) {
             @unlink($inputPath);
             @unlink($outputPath);
+            $this->logDebug('Failed to allocate password path for OpenSSL CLI extraction.');
+
             return null;
         }
 
@@ -852,6 +1101,8 @@ class AppleWalletService
             @unlink($inputPath);
             @unlink($outputPath);
             @unlink($passwordPath);
+            $this->logDebug('Failed to write OpenSSL CLI password file.');
+
             return null;
         }
 
@@ -886,6 +1137,8 @@ class AppleWalletService
             @unlink($inputPath);
             @unlink($outputPath);
             @unlink($passwordPath);
+            $this->logDebug('Unable to start OpenSSL CLI process.');
+
             return null;
         }
 
@@ -910,8 +1163,19 @@ class AppleWalletService
                 $errors[] = $message;
             }
 
+            $this->logDebug('OpenSSL CLI extraction failed.', [
+                'exit_code' => $exitCode,
+                'stderr' => $stderr !== '' ? $stderr : null,
+                'stdout' => $stdout !== '' ? $stdout : null,
+            ]);
+
             return null;
         }
+
+        $this->logDebug('OpenSSL CLI extraction succeeded.', [
+            'exit_code' => $exitCode,
+            'output_length' => strlen($pemContents),
+        ]);
 
         return $this->parsePemCertificateBundle($pemContents, '', $errors);
     }
