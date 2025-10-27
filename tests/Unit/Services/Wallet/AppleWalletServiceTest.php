@@ -42,6 +42,43 @@ class AppleWalletServiceTest extends TestCase
         imagedestroy($logoImage);
     }
 
+    public function testItConvertsPemEncodedSignatureToBinary(): void
+    {
+        $binary = random_bytes(64);
+        $base64 = chunk_split(base64_encode($binary));
+        $pem = "-----BEGIN PKCS7-----\n{$base64}-----END PKCS7-----";
+
+        $service = $this->makeService(null);
+
+        $this->assertSame($binary, $service->exposeConvertSignatureToBinary($pem));
+    }
+
+    public function testItConvertsMimeEncodedSignatureToBinary(): void
+    {
+        $binary = random_bytes(64);
+        $base64 = chunk_split(base64_encode($binary));
+        $mime = implode("\n", [
+            'MIME-Version: 1.0',
+            'Content-Type: application/x-pkcs7-signature; name="smime.p7s"',
+            'Content-Transfer-Encoding: base64',
+            '',
+            trim($base64),
+            '--boundary--',
+        ]);
+
+        $service = $this->makeService(null);
+
+        $this->assertSame($binary, $service->exposeConvertSignatureToBinary($mime));
+    }
+
+    public function testItReturnsBinarySignatureUnchanged(): void
+    {
+        $binary = random_bytes(64);
+        $service = $this->makeService(null);
+
+        $this->assertSame($binary, $service->exposeConvertSignatureToBinary($binary));
+    }
+
     protected function makeService(?string $password): AppleWalletServiceForTests
     {
         return new AppleWalletServiceForTests($password);
@@ -86,5 +123,10 @@ class AppleWalletServiceForTests extends AppleWalletService
     public function exposeCreatePassImage(Event $event, int $width, int $height): string
     {
         return $this->createPassImage($event, $width, $height);
+    }
+
+    public function exposeConvertSignatureToBinary(string $signature): string
+    {
+        return $this->convertSignatureToBinary($signature);
     }
 }

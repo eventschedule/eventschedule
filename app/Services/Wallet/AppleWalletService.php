@@ -288,6 +288,32 @@ class AppleWalletService
             $signature = base64_decode($signature, true) ?: '';
         }
 
+        if (preg_match('/Content-Transfer-Encoding:\s*base64/i', $signature)) {
+            $parts = preg_split("/\r?\n\r?\n/", $signature, 2);
+            $body = $parts[1] ?? '';
+            $body = preg_replace('/^--.*$/m', '', $body) ?? '';
+            $body = preg_replace('/\s+/', '', $body) ?? '';
+            $decoded = $body !== '' ? base64_decode($body, true) : '';
+
+            if ($decoded !== '') {
+                return $decoded;
+            }
+        }
+
+        $maybeBase64 = preg_replace('/\s+/', '', $signature) ?? '';
+
+        if ($maybeBase64 !== '') {
+            $decoded = base64_decode($maybeBase64, true) ?: '';
+
+            if ($decoded !== '') {
+                return $decoded;
+            }
+        }
+
+        if ($signature !== '' && preg_match('/[^\x09\x0A\x0D\x20-\x7E]/', $signature)) {
+            return $signature;
+        }
+
         if ($signature === '') {
             throw new RuntimeException('Invalid Apple Wallet signature content.');
         }
