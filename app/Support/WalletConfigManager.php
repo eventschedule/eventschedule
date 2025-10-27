@@ -54,7 +54,11 @@ class WalletConfigManager
         }
 
         if (array_key_exists('certificate_password', $settings)) {
-            $overrides['certificate_password'] = $settings['certificate_password'];
+            $password = static::sanitizeString($settings['certificate_password']);
+
+            if ($password !== null) {
+                $overrides['certificate_password'] = $password;
+            }
         }
 
         foreach ([
@@ -65,8 +69,12 @@ class WalletConfigManager
             'foreground_color',
             'label_color',
         ] as $key) {
-            if (array_key_exists($key, $settings) && $settings[$key] !== null) {
-                $overrides[$key] = $settings[$key];
+            if (array_key_exists($key, $settings)) {
+                $value = static::sanitizeString($settings[$key]);
+
+                if ($value !== null) {
+                    $overrides[$key] = $value;
+                }
             }
         }
 
@@ -88,7 +96,11 @@ class WalletConfigManager
             'service_account_json',
         ] as $key) {
             if (array_key_exists($key, $settings)) {
-                $overrides[$key] = $settings[$key];
+                $value = static::sanitizeString($settings[$key]);
+
+                if ($value !== null) {
+                    $overrides[$key] = $value;
+                }
             }
         }
 
@@ -101,10 +113,23 @@ class WalletConfigManager
 
     protected static function resolveStoragePath(?string $relativePath): ?string
     {
-        if (empty($relativePath)) {
+        $relativePath = static::sanitizeString($relativePath);
+
+        if ($relativePath === null) {
             return null;
         }
 
         return storage_path('app/' . ltrim($relativePath, '/'));
+    }
+
+    protected static function sanitizeString(mixed $value): ?string
+    {
+        if (! is_string($value)) {
+            return null;
+        }
+
+        $trimmed = trim($value);
+
+        return $trimmed === '' ? null : $trimmed;
     }
 }

@@ -32,15 +32,15 @@ class AppleWalletService
         $config = config('wallet.apple');
 
         $this->enabled = (bool) ($config['enabled'] ?? false);
-        $this->certificatePath = $config['certificate_path'] ?? null;
-        $this->certificatePassword = $config['certificate_password'] ?? null;
-        $this->wwdrCertificatePath = $config['wwdr_certificate_path'] ?? null;
-        $this->passTypeIdentifier = $config['pass_type_identifier'] ?? null;
-        $this->teamIdentifier = $config['team_identifier'] ?? null;
-        $this->organizationName = $config['organization_name'] ?? config('app.name');
-        $this->backgroundColor = $config['background_color'] ?? 'rgb(78,129,250)';
-        $this->foregroundColor = $config['foreground_color'] ?? 'rgb(255,255,255)';
-        $this->labelColor = $config['label_color'] ?? 'rgb(255,255,255)';
+        $this->certificatePath = $this->sanitizeConfigValue($config['certificate_path'] ?? null);
+        $this->certificatePassword = $this->sanitizeConfigValue($config['certificate_password'] ?? null);
+        $this->wwdrCertificatePath = $this->sanitizeConfigValue($config['wwdr_certificate_path'] ?? null);
+        $this->passTypeIdentifier = $this->sanitizeConfigValue($config['pass_type_identifier'] ?? null);
+        $this->teamIdentifier = $this->sanitizeConfigValue($config['team_identifier'] ?? null);
+        $this->organizationName = $this->sanitizeConfigValue($config['organization_name'] ?? config('app.name')) ?? config('app.name');
+        $this->backgroundColor = $this->sanitizeConfigValue($config['background_color'] ?? 'rgb(78,129,250)') ?? 'rgb(78,129,250)';
+        $this->foregroundColor = $this->sanitizeConfigValue($config['foreground_color'] ?? 'rgb(255,255,255)') ?? 'rgb(255,255,255)';
+        $this->labelColor = $this->sanitizeConfigValue($config['label_color'] ?? 'rgb(255,255,255)') ?? 'rgb(255,255,255)';
     }
 
     public function isConfigured(): bool
@@ -58,6 +58,17 @@ class AppleWalletService
         }
 
         return true;
+    }
+
+    protected function sanitizeConfigValue(?string $value): ?string
+    {
+        if (! is_string($value)) {
+            return null;
+        }
+
+        $trimmed = trim($value);
+
+        return $trimmed === '' ? null : $trimmed;
     }
 
     public function isAvailableForSale(Sale $sale): bool
