@@ -8,6 +8,7 @@ use App\Notifications\RequestDeclinedNotification;
 use App\Notifications\RequestAcceptedNotification;
 use App\Notifications\DeletedEventNotification;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use App\Utils\ColorUtils;
@@ -500,15 +501,36 @@ class EventController extends Controller
 
     public function edit(Request $request, $subdomain, $hash)
     {
+        $user = $request->user();
+
         if (! is_hosted_or_admin()) {
+            Log::notice('EventController.edit.denied_not_hosted_or_admin', [
+                'hash' => $hash,
+                'subdomain' => $subdomain,
+                'user_id' => optional($user)->id,
+            ]);
+
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::with(['creatorRole', 'curators'])->findOrFail($event_id);
-        $user = $request->user();
+
+        Log::info('EventController.edit.attempt', [
+            'event_id' => $event->id,
+            'hash' => $hash,
+            'requested_subdomain' => $subdomain,
+            'user_id' => optional($user)->id,
+        ]);
 
         if (! $user->canEditEvent($event)) {
+            Log::warning('EventController.edit.denied_cannot_edit', [
+                'event_id' => $event->id,
+                'hash' => $hash,
+                'requested_subdomain' => $subdomain,
+                'user_id' => optional($user)->id,
+            ]);
+
             return redirect()->back();
         }
 
@@ -565,8 +587,17 @@ class EventController extends Controller
         $currencies = json_decode($currencies);
 
         $eventUrlData = $event->getGuestUrlData($subdomain, false, true);
-        $matchingEvent = $this->eventRepo->getEvent($eventUrlData['subdomain'], $eventUrlData['slug'], false);        
+        $matchingEvent = $this->eventRepo->getEvent($eventUrlData['subdomain'], $eventUrlData['slug'], false);
         $isUnique = ! $matchingEvent || $matchingEvent->id == $event->id ? true : false;
+
+        Log::info('EventController.edit.authorized', [
+            'event_id' => $event->id,
+            'hash' => $hash,
+            'requested_subdomain' => $subdomain,
+            'effective_subdomain' => $effectiveSubdomain,
+            'user_id' => optional($user)->id,
+            'is_unique_slug' => $isUnique,
+        ]);
 
         return view('event/edit', [
             'role' => $role,
