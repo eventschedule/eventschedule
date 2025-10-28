@@ -589,11 +589,17 @@ class AppleWalletService
         if ($chainPath === null && $this->wwdrCertificatePath !== null) {
             $normalizedWwdrPath = $this->createTemporaryPemCertificateFromPath($this->wwdrCertificatePath);
 
-            if ($normalizedWwdrPath !== null) {
-                $this->logDebug('Using normalized WWDR certificate for manifest signing.', [
-                    'chain_path' => $normalizedWwdrPath,
+            if ($normalizedWwdrPath === null) {
+                $this->logDebug('Failed to normalize WWDR certificate for manifest signing.', [
+                    'source_path' => $this->wwdrCertificatePath,
                 ]);
+
+                throw new RuntimeException('Unable to normalize WWDR certificate for manifest signing.');
             }
+
+            $this->logDebug('Using normalized WWDR certificate for manifest signing.', [
+                'chain_path' => $normalizedWwdrPath,
+            ]);
         }
 
         $this->logDebug('Generated manifest signing workspace.', [
