@@ -16,6 +16,23 @@ class EventUpdateRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'flyer_media_asset_id' => $this->normalizeNullableInteger($this->input('flyer_media_asset_id')),
+            'flyer_media_variant_id' => $this->normalizeNullableInteger($this->input('flyer_media_variant_id')),
+        ]);
+    }
+
+    protected function normalizeNullableInteger($value)
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return is_numeric($value) ? (int) $value : $value;
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
