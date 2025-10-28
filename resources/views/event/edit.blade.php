@@ -374,12 +374,12 @@
                                         <x-secondary-button v-if="!selectedVenue.user_id" x-on:click="editSelectedVenue" type="button" class="mr-2">
                                             {{ __('messages.edit') }}
                                         </x-secondary-button>
-                                        <x-secondary-button x-on:click="clearSelectedVenue" type="button">
+                                        <x-secondary-button @click="clearSelectedVenue()" type="button">
                                             {{ __('messages.remove') }}
                                         </x-secondary-button>
                                     </div>
                                 </div>
-                            </div>                        
+                            </div>
 
                         </div>
 
