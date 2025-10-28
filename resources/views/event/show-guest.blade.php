@@ -35,7 +35,7 @@
             ? __('messages.view_event')
             : ($event->areTicketsFree() ? __('messages.get_tickets') : __('messages.buy_tickets'));
           $showTicketPurchaseCta = $ticketPurchaseUrl && request()->get('tickets') !== 'true';
-          $shareUrl = $ticketPurchaseUrl ?: request()->fullUrl();
+          $shareUrl = $event->getGuestUrl($role->subdomain, $date) ?: request()->fullUrlWithoutQuery('tickets');
           $shareTitle = $translation ? $translation->name_translated : $event->translatedName();
           $startAt = $event->getStartDateTime($date, true);
           $endAt = $startAt && $event->duration > 0 ? $startAt->copy()->addHours($event->duration) : null;
