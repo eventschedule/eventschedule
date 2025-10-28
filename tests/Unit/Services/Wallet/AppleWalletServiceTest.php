@@ -269,6 +269,45 @@ class AppleWalletServiceTest extends TestCase
         @unlink($wwdrPath);
     }
 
+    public function testItNormalizesDerEncodedWwdrCertificateUsingCliFallback(): void
+    {
+        $password = 'secret-pass';
+        $bundle = $this->generatePkcs12CertificateBundle($password);
+        $wwdrPem = $this->generateStandaloneCertificatePem();
+
+        $der = base64_decode(preg_replace('/-+BEGIN CERTIFICATE-+|-+END CERTIFICATE-+|\s+/', '', $wwdrPem) ?? '', true);
+
+        $this->assertNotFalse($der, 'Failed to convert WWDR certificate to DER.');
+        $der = (string) $der;
+        $this->assertNotEmpty($der, 'DER-encoded WWDR certificate should not be empty.');
+
+        $service = $this->makeService($password);
+
+        if (! $service->exposeCanUseOpenSslCli()) {
+            $this->markTestSkipped('OpenSSL CLI is required to normalize DER certificates.');
+        }
+
+        $certificatePath = tempnam(sys_get_temp_dir(), 'wallet-test-cert-');
+        $wwdrPath = tempnam(sys_get_temp_dir(), 'wallet-test-wwdr-');
+
+        $this->assertNotFalse($certificatePath, 'Unable to create temporary certificate path.');
+        $this->assertNotFalse($wwdrPath, 'Unable to create temporary WWDR path.');
+
+        file_put_contents($certificatePath, $bundle['pkcs12']);
+        file_put_contents($wwdrPath, $der);
+
+        $service->setCertificatePath($certificatePath);
+        $service->setWwdrCertificatePath($wwdrPath);
+
+        $signature = $service->exposeSignManifest(['pass.json' => sha1('payload')]);
+
+        $this->assertNotEmpty($signature, 'Signature should not be empty when DER WWDR certificate is provided.');
+        $this->assertSame(0x30, ord($signature[0]), 'PKCS#7 signature should start with a DER sequence.');
+
+        @unlink($certificatePath);
+        @unlink($wwdrPath);
+    }
+
     public function testItFallsBackToSaleTimestampWhenEventStartMissing(): void
     {
         $event = new Event(['name' => 'Unscheduled Meetup']);
@@ -530,6 +569,11 @@ class AppleWalletServiceForTests extends AppleWalletService
     public function setWwdrCertificatePath(?string $path): void
     {
         $this->wwdrCertificatePath = $path;
+    }
+
+    public function exposeCanUseOpenSslCli(): bool
+    {
+        return $this->canUseOpenSslCli();
     }
 
     public function setCmsDerAvailable(bool $available): void
