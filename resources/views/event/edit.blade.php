@@ -1633,8 +1633,24 @@
           event.preventDefault();
 
           this.$nextTick(() => {
-            if (formElement) {
-              formElement.submit();
+            if (!formElement) {
+              return;
+            }
+
+            try {
+              if (typeof formElement.requestSubmit === 'function') {
+                formElement.requestSubmit();
+              } else {
+                formElement.submit();
+              }
+            } catch (submissionError) {
+              console.error('Event form submission failed, attempting fallback submit.', submissionError);
+
+              try {
+                formElement.submit();
+              } catch (fallbackError) {
+                console.error('Event form fallback submission failed.', fallbackError);
+              }
             }
           });
         }
