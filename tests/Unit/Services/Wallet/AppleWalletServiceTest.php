@@ -241,6 +241,34 @@ class AppleWalletServiceTest extends TestCase
         $this->assertSame(0x30, ord($signature[0]), 'PKCS#7 signature should start with a DER sequence.');
     }
 
+    public function testItDoesNotDeleteOriginalPemWwdrCertificate(): void
+    {
+        $password = 'secret-pass';
+        $bundle = $this->generatePkcs12CertificateBundle($password);
+        $wwdrPem = $this->generateStandaloneCertificatePem();
+
+        $certificatePath = tempnam(sys_get_temp_dir(), 'wallet-test-cert-');
+        $wwdrPath = tempnam(sys_get_temp_dir(), 'wallet-test-wwdr-');
+
+        $this->assertNotFalse($certificatePath, 'Unable to create temporary certificate path.');
+        $this->assertNotFalse($wwdrPath, 'Unable to create temporary WWDR path.');
+
+        file_put_contents($certificatePath, $bundle['pkcs12']);
+        file_put_contents($wwdrPath, $wwdrPem);
+
+        $service = $this->makeService($password);
+        $service->setCertificatePath($certificatePath);
+        $service->setWwdrCertificatePath($wwdrPath);
+
+        $signature = $service->exposeSignManifest(['pass.json' => sha1('payload')]);
+
+        $this->assertFileExists($wwdrPath, 'WWDR certificate should remain on disk when already PEM encoded.');
+        $this->assertNotEmpty($signature, 'Signature should not be empty.');
+
+        @unlink($certificatePath);
+        @unlink($wwdrPath);
+    }
+
     public function testItFallsBackToSaleTimestampWhenEventStartMissing(): void
     {
         $event = new Event(['name' => 'Unscheduled Meetup']);
