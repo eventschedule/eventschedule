@@ -585,6 +585,7 @@ class AppleWalletService
         $manifestPath = $this->createTempFile($this->encodeJson($manifest));
         $chainPath = $this->createSignerCertificateChainFile($certificates);
         $normalizedWwdrPath = null;
+        $cleanupNormalizedWwdrPath = false;
 
         if ($chainPath === null && $this->wwdrCertificatePath !== null) {
             $normalizedWwdrPath = $this->createTemporaryPemCertificateFromPath($this->wwdrCertificatePath);
@@ -600,6 +601,11 @@ class AppleWalletService
             $this->logDebug('Using normalized WWDR certificate for manifest signing.', [
                 'chain_path' => $normalizedWwdrPath,
             ]);
+
+            $cleanupNormalizedWwdrPath = ! $this->pathsReferToSameFile(
+                $normalizedWwdrPath,
+                $this->wwdrCertificatePath
+            );
         }
 
         $this->logDebug('Generated manifest signing workspace.', [
@@ -643,7 +649,7 @@ class AppleWalletService
             if ($chainPath !== null) {
                 @unlink($chainPath);
             }
-            if ($normalizedWwdrPath !== null) {
+            if ($cleanupNormalizedWwdrPath && $normalizedWwdrPath !== null) {
                 @unlink($normalizedWwdrPath);
             }
         }
@@ -868,6 +874,22 @@ class AppleWalletService
         ]);
 
         return $temporaryPath;
+    }
+
+    protected function pathsReferToSameFile(string $first, string $second): bool
+    {
+        if ($first === $second) {
+            return true;
+        }
+
+        $firstRealPath = @realpath($first);
+        $secondRealPath = @realpath($second);
+
+        if ($firstRealPath !== false && $secondRealPath !== false) {
+            return $firstRealPath === $secondRealPath;
+        }
+
+        return false;
     }
 
     /**
