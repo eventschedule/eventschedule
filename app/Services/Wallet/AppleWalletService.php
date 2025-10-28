@@ -840,6 +840,14 @@ class AppleWalletService
 
         $pem = $this->exportCertificateToPem($contents);
 
+        if (($pem === null || trim($pem) === '') && $contents !== '') {
+            $this->logDebug('Attempting to normalize WWDR certificate using OpenSSL CLI.', [
+                'path' => $path,
+            ]);
+
+            $pem = $this->convertCertificateToPemUsingOpenSslCli($contents, $path);
+        }
+
         if ($pem === null || trim($pem) === '') {
             $this->logDebug('Failed to normalize WWDR certificate to PEM format.', [
                 'path' => $path,
@@ -1373,6 +1381,90 @@ class AppleWalletService
         }
 
         return $messages;
+    }
+
+    protected function convertCertificateToPemUsingOpenSslCli(string $contents, string $sourcePath): ?string
+    {
+        if (! $this->canUseOpenSslCli()) {
+            $this->logDebug('Skipping OpenSSL CLI certificate normalization because the CLI is not available.', [
+                'source_path' => $sourcePath,
+            ]);
+
+            return null;
+        }
+
+        $inputPath = $this->createTempFile($contents);
+        $outputPath = tempnam(sys_get_temp_dir(), 'pkpass-wwdr-pem-');
+
+        if ($outputPath === false) {
+            @unlink($inputPath);
+            $this->logDebug('Failed to allocate output path for OpenSSL CLI certificate normalization.', [
+                'source_path' => $sourcePath,
+            ]);
+
+            return null;
+        }
+
+        $command = [
+            'openssl',
+            'x509',
+            '-inform',
+            'DER',
+            '-in',
+            $inputPath,
+            '-outform',
+            'PEM',
+            '-out',
+            $outputPath,
+        ];
+
+        $descriptorSpec = [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ];
+
+        $process = @proc_open($command, $descriptorSpec, $pipes);
+
+        if (! is_resource($process)) {
+            @unlink($inputPath);
+            @unlink($outputPath);
+            $this->logDebug('Unable to start OpenSSL CLI process for certificate normalization.', [
+                'source_path' => $sourcePath,
+            ]);
+
+            return null;
+        }
+
+        fclose($pipes[0]);
+        $stdout = stream_get_contents($pipes[1]) ?: '';
+        fclose($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]) ?: '';
+        fclose($pipes[2]);
+
+        $exitCode = proc_close($process);
+        $pemContents = file_get_contents($outputPath);
+
+        @unlink($inputPath);
+        @unlink($outputPath);
+
+        if ($exitCode !== 0 || $pemContents === false || trim((string) $pemContents) === '') {
+            $this->logDebug('OpenSSL CLI certificate normalization failed.', [
+                'source_path' => $sourcePath,
+                'exit_code' => $exitCode,
+                'stderr' => $stderr !== '' ? $stderr : null,
+                'stdout' => $stdout !== '' ? $stdout : null,
+            ]);
+
+            return null;
+        }
+
+        $this->logDebug('OpenSSL CLI certificate normalization succeeded.', [
+            'source_path' => $sourcePath,
+            'length' => strlen($pemContents),
+        ]);
+
+        return trim((string) $pemContents);
     }
 
     /**
