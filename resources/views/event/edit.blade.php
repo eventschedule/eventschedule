@@ -246,8 +246,8 @@
 
                                     <div :class="{ 'hidden': !shouldShowExistingVenueDropdown }">
                                         <select id="selected_venue"
-                                                :required="hasAnyVenues"
-                                                :disabled="!hasAnyVenues"
+                                                :required="hasAnyVenues && shouldShowExistingVenueDropdown"
+                                                :disabled="!hasAnyVenues || !shouldShowExistingVenueDropdown"
                                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}"
                                                 v-model="selectedVenue">
                                                 <template v-if="!hasAnyVenues">
