@@ -822,6 +822,16 @@ class AppleWalletService
             return null;
         }
 
+        $trimmedContents = trim($contents);
+
+        if ($trimmedContents !== '' && str_contains($trimmedContents, '-----BEGIN CERTIFICATE-----')) {
+            $this->logDebug('WWDR certificate already in PEM format; using original file path.', [
+                'path' => $path,
+            ]);
+
+            return $path;
+        }
+
         $pem = $this->exportCertificateToPem($contents);
 
         if ($pem === null || trim($pem) === '') {
@@ -835,9 +845,11 @@ class AppleWalletService
         $temporaryPath = tempnam(sys_get_temp_dir(), 'pkpass-wwdr-');
 
         if ($temporaryPath === false) {
-            $this->logDebug('Unable to allocate temporary PEM file for WWDR certificate.');
+            $temporaryPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pkpass-wwdr-', true) . '.pem';
 
-            return null;
+            $this->logDebug('tempnam failed when allocating temporary PEM file for WWDR certificate; using manual path fallback.', [
+                'fallback_path' => $temporaryPath,
+            ]);
         }
 
         if (@file_put_contents($temporaryPath, $pem) === false) {
