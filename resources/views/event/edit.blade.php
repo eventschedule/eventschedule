@@ -1735,6 +1735,10 @@
         return !this.selectedVenue || this.showVenueAddressFields;
       },
       shouldShowExistingVenueDropdown() {
+        if (this.selectedVenue && !this.shouldBypassPreferences) {
+          return false;
+        }
+
         if (this.shouldBypassPreferences) {
           return true;
         }
