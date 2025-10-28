@@ -1181,6 +1181,29 @@
     });
   }
 
+  const formatTicketPrice = value => {
+    if (value === null || typeof value === 'undefined' || value === '') {
+      return '';
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.replace(/,/g, '');
+      const numeric = Number(normalized);
+
+      if (Number.isFinite(numeric)) {
+        return numeric.toFixed(2);
+      }
+
+      return '';
+    }
+
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value.toFixed(2);
+    }
+
+    return '';
+  };
+
   const vueApp = createApp({
     data() {
       return {
@@ -1223,17 +1246,7 @@
         eventUrlBaseAbsolute: @json($absoluteEventUrlBase),
         tickets: @json($event->tickets ?? [new Ticket()]).map(ticket => ({
           ...ticket,
-          /*
-          price: new Intl.NumberFormat('{{ app()->getLocale() }}', {
-            style: 'currency',
-            currency: '{{ $event->ticket_currency_code ?? "USD" }}'
-          }).format(ticket.price).toString().replace(/[^\d.,]/g, '')         
-          */
-         price: new Intl.NumberFormat('{{ app()->getLocale() }}', {
-            style: 'decimal',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          }).format(ticket.price)
+          price: formatTicketPrice(ticket.price)
         })),
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
         soldLabel: "{{ __('messages.sold_reserved') }}",
@@ -1593,6 +1606,11 @@
         return preferences;
       },
       validateForm(event) {
+        this.tickets = this.tickets.map(ticket => ({
+          ...ticket,
+          price: formatTicketPrice(ticket.price)
+        }));
+
         const sanitizedSlug = this.slugify(this.eventSlug);
         this.eventSlug = sanitizedSlug;
         this.event.slug = sanitizedSlug || null;
