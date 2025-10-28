@@ -1,5 +1,91 @@
-<div class="mt-8 flow-root">
+<div class="mt-8 flow-root" data-sales-table-root data-current-page="{{ $sales->currentPage() }}" data-total-pages="{{ $sales->lastPage() }}">
     @if($sales->count() > 0)
+    @php
+        $filterCustomer = request('filter_customer', '');
+        $filterEvent = request('filter_event', '');
+        $filterTotalMin = request('filter_total_min', '');
+        $filterTotalMax = request('filter_total_max', '');
+        $filterTransaction = request('filter_transaction', '');
+        $filterStatus = request('filter_status', '');
+        $filterUsage = request('filter_usage', '');
+    @endphp
+
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-4" data-bulk-action-bar>
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4">
+            <div class="flex items-center gap-3 flex-wrap">
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                    <input type="checkbox" id="select-all-sales" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                    <span>{{ __('messages.select_all') }}</span>
+                </label>
+                <span class="text-sm text-gray-500" data-selected-count data-selected-count-label="{{ __('messages.selected_sales', ['count' => ':count']) }}">{{ __('messages.selected_sales', ['count' => 0]) }}</span>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full md:w-auto">
+                <select id="bulk-action-select" class="w-full sm:w-56 rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="">{{ __('messages.select_action') }}</option>
+                    <option value="mark_paid">{{ __('messages.mark_paid') }}</option>
+                    <option value="cancel">{{ __('messages.cancel') }}</option>
+                    <option value="delete">{{ __('messages.delete') }}</option>
+                </select>
+
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button id="apply-bulk-action" type="button" class="inline-flex justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 w-full sm:w-auto">
+                        {{ __('messages.apply') }}
+                    </button>
+                    <button type="button" class="text-sm text-indigo-600 hover:text-indigo-500" data-clear-filters>
+                        {{ __('messages.clear_filters') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-4 md:hidden" data-mobile-filters>
+        <div class="p-4 space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">{{ __('messages.customer') }}</label>
+                <input type="text" name="filter_customer" value="{{ $filterCustomer }}" placeholder="{{ __('messages.customer') }}" class="mt-1 block w-full rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" data-column-filter data-filter-key="customer">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">{{ __('messages.event') }}</label>
+                <input type="text" name="filter_event" value="{{ $filterEvent }}" placeholder="{{ __('messages.event') }}" class="mt-1 block w-full rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" data-column-filter data-filter-key="event">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">{{ __('messages.total') }}</label>
+                <div class="mt-1 grid grid-cols-2 gap-2">
+                    <input type="number" step="0.01" name="filter_total_min" value="{{ $filterTotalMin }}" placeholder="{{ __('messages.min') ?? 'Min' }}" class="rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" data-column-filter data-filter-key="total_min">
+                    <input type="number" step="0.01" name="filter_total_max" value="{{ $filterTotalMax }}" placeholder="{{ __('messages.max') ?? 'Max' }}" class="rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" data-column-filter data-filter-key="total_max">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">{{ __('messages.transaction_reference') }}</label>
+                <input type="text" name="filter_transaction" value="{{ $filterTransaction }}" placeholder="{{ __('messages.transaction_reference') }}" class="mt-1 block w-full rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" data-column-filter data-filter-key="transaction">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">{{ __('messages.status') }}</label>
+                    <select name="filter_status" class="mt-1 block w-full rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" data-column-filter data-filter-key="status">
+                        <option value="">{{ __('messages.all_statuses') }}</option>
+                        <option value="paid" @selected($filterStatus === 'paid')>{{ __('messages.paid') }}</option>
+                        <option value="unpaid" @selected($filterStatus === 'unpaid')>{{ __('messages.unpaid') }}</option>
+                        <option value="cancelled" @selected($filterStatus === 'cancelled')>{{ __('messages.cancelled') }}</option>
+                        <option value="refunded" @selected($filterStatus === 'refunded')>{{ __('messages.refunded') }}</option>
+                        <option value="expired" @selected($filterStatus === 'expired')>{{ __('messages.expired') }}</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">{{ __('messages.ticket_usage') }}</label>
+                    <select name="filter_usage" class="mt-1 block w-full rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" data-column-filter data-filter-key="usage">
+                        <option value="">{{ __('messages.all_usage_states') }}</option>
+                        <option value="unused" @selected($filterUsage === 'unused')>{{ __('messages.ticket_status_unused') }}</option>
+                        <option value="used" @selected($filterUsage === 'used')>{{ __('messages.ticket_status_used') }}</option>
+                    </select>
+                </div>
+            </div>
+            <button type="button" class="text-sm font-semibold text-indigo-600 hover:text-indigo-500" data-clear-filters>{{ __('messages.clear_filters') }}</button>
+        </div>
+    </div>
+
     <!-- Desktop Table View -->
     <div class="hidden md:block -mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
@@ -8,11 +94,14 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" 
+                                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6 w-12">
+                                    <span class="sr-only">{{ __('messages.select') }}</span>
+                                </th>
+                                <th scope="col"
                                     class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
                                     {{ __('messages.customer') }}
                                 </th>
-                                <th scope="col" 
+                                <th scope="col"
                                     class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
                                     {{ __('messages.event') }}
                                 </th>
@@ -32,10 +121,51 @@
                                     <span class="sr-only">{{ __('messages.actions') }}</span>
                                 </th>
                             </tr>
+                            <tr class="bg-white">
+                                <th class="py-2 pl-4 pr-3 sm:pl-6"></th>
+                                <th class="py-2 pl-4 pr-3 sm:pl-6">
+                                    <input type="text" name="filter_customer" value="{{ $filterCustomer }}" placeholder="{{ __('messages.customer') }}" class="mt-1 block w-full rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" data-column-filter data-filter-key="customer">
+                                </th>
+                                <th class="py-2 pl-4 pr-3 sm:pl-6">
+                                    <input type="text" name="filter_event" value="{{ $filterEvent }}" placeholder="{{ __('messages.event') }}" class="mt-1 block w-full rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" data-column-filter data-filter-key="event">
+                                </th>
+                                <th class="px-3 py-2">
+                                    <div class="flex items-center gap-2">
+                                        <input type="number" step="0.01" name="filter_total_min" value="{{ $filterTotalMin }}" placeholder="{{ __('messages.min') ?? 'Min' }}" class="w-full rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" data-column-filter data-filter-key="total_min">
+                                        <input type="number" step="0.01" name="filter_total_max" value="{{ $filterTotalMax }}" placeholder="{{ __('messages.max') ?? 'Max' }}" class="w-full rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" data-column-filter data-filter-key="total_max">
+                                    </div>
+                                </th>
+                                <th class="px-3 py-2">
+                                    <input type="text" name="filter_transaction" value="{{ $filterTransaction }}" placeholder="{{ __('messages.transaction_reference') }}" class="mt-1 block w-full rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" data-column-filter data-filter-key="transaction">
+                                </th>
+                                <th class="px-3 py-2">
+                                    <select name="filter_status" class="mt-1 block w-full rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" data-column-filter data-filter-key="status">
+                                        <option value="">{{ __('messages.all_statuses') }}</option>
+                                        <option value="paid" @selected($filterStatus === 'paid')>{{ __('messages.paid') }}</option>
+                                        <option value="unpaid" @selected($filterStatus === 'unpaid')>{{ __('messages.unpaid') }}</option>
+                                        <option value="cancelled" @selected($filterStatus === 'cancelled')>{{ __('messages.cancelled') }}</option>
+                                        <option value="refunded" @selected($filterStatus === 'refunded')>{{ __('messages.refunded') }}</option>
+                                        <option value="expired" @selected($filterStatus === 'expired')>{{ __('messages.expired') }}</option>
+                                    </select>
+                                </th>
+                                <th class="px-3 py-2">
+                                    <select name="filter_usage" class="mt-1 block w-full rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" data-column-filter data-filter-key="usage">
+                                        <option value="">{{ __('messages.all_usage_states') }}</option>
+                                        <option value="unused" @selected($filterUsage === 'unused')>{{ __('messages.ticket_status_unused') }}</option>
+                                        <option value="used" @selected($filterUsage === 'used')>{{ __('messages.ticket_status_used') }}</option>
+                                    </select>
+                                </th>
+                                <th class="py-2 pl-3 pr-4 text-right text-sm sm:pr-6">
+                                    <button type="button" class="text-sm font-semibold text-indigo-600 hover:text-indigo-500" data-clear-filters>{{ __('messages.clear_filters') }}</button>
+                                </th>
+                            </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 bg-white">
                             @foreach ($sales as $sale)
-                            <tr class="bg-white hover:bg-gray-50 transition-colors duration-150">
+                            <tr class="bg-white hover:bg-gray-50 transition-colors duration-150" data-sale-id="{{ \App\Utils\UrlUtils::encodeId($sale->id) }}">
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-6">
+                                    <input type="checkbox" value="{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" class="sale-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                </td>
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                                     <div class="flex flex-col">
                                         <span class="font-semibold">{{ $sale->name }}</span>
@@ -201,13 +331,18 @@
     <!-- Mobile List View -->
     <div class="md:hidden space-y-4">
         @foreach ($sales as $sale)
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow duration-200">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow duration-200" data-sale-id="{{ \App\Utils\UrlUtils::encodeId($sale->id) }}">
             <div class="space-y-4">
                 <!-- Header with Status -->
-                <div class="flex items-start justify-between">
-                    <div class="flex-1">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ $sale->name }}</h3>
-                        <a href="mailto:{{ $sale->email }}" class="text-blue-600 hover:text-blue-800 text-sm">{{ $sale->email }}</a>
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-start gap-3 flex-1">
+                        <div class="pt-1">
+                            <input type="checkbox" value="{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" class="sale-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ $sale->name }}</h3>
+                            <a href="mailto:{{ $sale->email }}" class="text-blue-600 hover:text-blue-800 text-sm">{{ $sale->email }}</a>
+                        </div>
                     </div>
                     <div class="ml-4">
                         @if($sale->status === 'paid')
@@ -376,7 +511,7 @@
     </div>
 
     <div class="mt-6 px-4">
-        {{ $sales->links() }}
+        {{ $sales->appends(request()->query())->links() }}
     </div>
     @else
     <div class="text-center py-12">

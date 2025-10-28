@@ -35,72 +35,339 @@
 
 <script {!! nonce_attr() !!}>
 let timeoutId;
+let columnFilterTimeoutId;
 const filterInput = document.getElementById('filter');
 const clearButton = document.getElementById('clear-filter');
+let globalFilterValue = filterInput ? filterInput.value : '';
+const selectedSales = new Set();
+const columnFilterState = {};
+let currentPage = Number(new URLSearchParams(window.location.search).get('page') || 1);
 
-// Show/hide clear button based on input content
-filterInput.addEventListener('input', function(e) {
-    clearTimeout(timeoutId);
-    clearButton.style.display = e.target.value ? 'block' : 'none';
-    
-    timeoutId = setTimeout(() => {
-        updateResults(e.target.value);
-    }, 500);
-});
+const filterKeyToParam = {
+    customer: 'filter_customer',
+    event: 'filter_event',
+    total_min: 'filter_total_min',
+    total_max: 'filter_total_max',
+    transaction: 'filter_transaction',
+    status: 'filter_status',
+    usage: 'filter_usage',
+};
 
-// Clear input and trigger search immediately
-clearButton.addEventListener('click', function() {
-    filterInput.value = '';
-    clearButton.style.display = 'none';
-    updateResults(''); // Call directly without timeout
-});
+initializeGlobalFilter();
+initializeSalesTableInteractions();
 
-function updateResults(value) {
-    fetch(`${window.location.pathname}?filter=${encodeURIComponent(value)}`, {
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
+function initializeGlobalFilter() {
+    if (!filterInput) {
+        return;
+    }
+
+    updateGlobalFilterVisibility();
+
+    filterInput.addEventListener('input', (event) => {
+        clearTimeout(timeoutId);
+        globalFilterValue = event.target.value;
+        updateGlobalFilterVisibility();
+        timeoutId = setTimeout(() => {
+            updateResults({ page: 1 });
+        }, 500);
+    });
+
+    if (clearButton) {
+        clearButton.addEventListener('click', () => {
+            filterInput.value = '';
+            globalFilterValue = '';
+            updateGlobalFilterVisibility();
+            updateResults({ page: 1 });
+        });
+    }
+}
+
+function updateGlobalFilterVisibility() {
+    if (!clearButton || !filterInput) {
+        return;
+    }
+
+    clearButton.style.display = filterInput.value ? 'block' : 'none';
+}
+
+function initializeSalesTableInteractions() {
+    const salesTable = document.getElementById('sales-table');
+    if (!salesTable) {
+        return;
+    }
+
+    const root = salesTable.querySelector('[data-sales-table-root]');
+    if (!root) {
+        return;
+    }
+
+    currentPage = parseInt(root.dataset.currentPage || '1', 10) || 1;
+
+    const columnFilters = root.querySelectorAll('[data-column-filter]');
+    columnFilters.forEach((input) => {
+        const key = input.dataset.filterKey;
+        if (!key || !filterKeyToParam[key]) {
+            return;
         }
-    })
-    .then(response => response.text())
-    .then(html => {
-        const salesTable = document.getElementById('sales-table');
-        if (salesTable) {
-            salesTable.innerHTML = html;
+
+        columnFilterState[key] = input.value ?? '';
+        syncColumnInputs(root, key, columnFilterState[key], input);
+
+        if (input.tagName === 'SELECT') {
+            input.addEventListener('change', (event) => {
+                columnFilterState[key] = event.target.value;
+                syncColumnInputs(root, key, event.target.value, event.target);
+                updateResults({ page: 1 });
+            });
+        } else {
+            input.addEventListener('input', (event) => {
+                columnFilterState[key] = event.target.value;
+                syncColumnInputs(root, key, event.target.value, event.target);
+                scheduleColumnUpdate();
+            });
+        }
+    });
+
+    const clearFilterButtons = root.querySelectorAll('[data-clear-filters]');
+    clearFilterButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            resetColumnFilters(root);
+            updateResults({ page: 1 });
+        });
+    });
+
+    const saleCheckboxes = root.querySelectorAll('.sale-checkbox');
+    saleCheckboxes.forEach((checkbox) => {
+        checkbox.checked = selectedSales.has(checkbox.value);
+        checkbox.addEventListener('change', (event) => {
+            if (event.target.checked) {
+                selectedSales.add(event.target.value);
+            } else {
+                selectedSales.delete(event.target.value);
+            }
+            updateSelectAllState(root);
+            updateSelectedCount(root);
+        });
+    });
+
+    const selectAll = root.querySelector('#select-all-sales');
+    if (selectAll) {
+        updateSelectAllState(root);
+        selectAll.addEventListener('change', (event) => {
+            toggleSelectAll(root, event.target.checked);
+        });
+    }
+
+    updateSelectedCount(root);
+
+    const bulkActionButton = root.querySelector('#apply-bulk-action');
+    if (bulkActionButton) {
+        bulkActionButton.addEventListener('click', () => {
+            const actionSelect = root.querySelector('#bulk-action-select');
+            if (!actionSelect) {
+                return;
+            }
+
+            const action = actionSelect.value;
+            if (!action) {
+                alert('{{ __('messages.no_action_selected') }}');
+                return;
+            }
+
+            if (selectedSales.size === 0) {
+                alert('{{ __('messages.no_sales_selected') }}');
+                return;
+            }
+
+            executeAction(action, Array.from(selectedSales));
+        });
+    }
+
+    const paginationLinks = root.querySelectorAll('.pagination a');
+    paginationLinks.forEach((link) => {
+        link.addEventListener('click', (event) => {
+            event.preventDefault();
+            const url = new URL(event.currentTarget.href);
+            const page = parseInt(url.searchParams.get('page') || '1', 10);
+            updateResults({ page });
+        });
+    });
+}
+
+function scheduleColumnUpdate() {
+    clearTimeout(columnFilterTimeoutId);
+    columnFilterTimeoutId = setTimeout(() => {
+        updateResults({ page: 1 });
+    }, 400);
+}
+
+function resetColumnFilters(root) {
+    Object.keys(filterKeyToParam).forEach((key) => {
+        columnFilterState[key] = '';
+    });
+
+    root.querySelectorAll('[data-column-filter]').forEach((input) => {
+        input.value = '';
+    });
+
+    selectedSales.clear();
+    updateSelectedCount(root);
+    updateSelectAllState(root);
+}
+
+function syncColumnInputs(root, key, value, source) {
+    root.querySelectorAll(`[data-column-filter][data-filter-key="${key}"]`).forEach((input) => {
+        if (input !== source) {
+            input.value = value;
         }
     });
 }
 
-function handleAction(saleId, action) {
-    if (!confirm('{{ __("messages.are_you_sure") }}')) {
+function updateSelectedCount(root) {
+    const counter = root.querySelector('[data-selected-count]');
+    if (!counter) {
         return;
     }
 
-    fetch(`/sales/action/${saleId}`, {
+    const template = counter.getAttribute('data-selected-count-label') || '{{ __('messages.selected_sales', ['count' => ':count']) }}';
+    counter.textContent = template.replace(':count', selectedSales.size);
+}
+
+function updateSelectAllState(root) {
+    const selectAll = root.querySelector('#select-all-sales');
+    if (!selectAll) {
+        return;
+    }
+
+    const checkboxes = root.querySelectorAll('.sale-checkbox');
+    if (checkboxes.length === 0) {
+        selectAll.checked = false;
+        selectAll.indeterminate = false;
+        return;
+    }
+
+    let checkedCount = 0;
+    checkboxes.forEach((checkbox) => {
+        if (selectedSales.has(checkbox.value)) {
+            checkbox.checked = true;
+            checkedCount += 1;
+        } else {
+            checkbox.checked = false;
+        }
+    });
+
+    selectAll.checked = checkedCount === checkboxes.length;
+    selectAll.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+}
+
+function toggleSelectAll(root, shouldSelect) {
+    const checkboxes = root.querySelectorAll('.sale-checkbox');
+    checkboxes.forEach((checkbox) => {
+        checkbox.checked = shouldSelect;
+        if (shouldSelect) {
+            selectedSales.add(checkbox.value);
+        } else {
+            selectedSales.delete(checkbox.value);
+        }
+    });
+
+    updateSelectAllState(root);
+    updateSelectedCount(root);
+}
+
+function updateResults(options = {}) {
+    const salesTable = document.getElementById('sales-table');
+    if (!salesTable) {
+        return;
+    }
+
+    const root = salesTable.querySelector('[data-sales-table-root]');
+    if (root) {
+        selectedSales.clear();
+        updateSelectedCount(root);
+        updateSelectAllState(root);
+    }
+
+    const params = new URLSearchParams();
+    if (globalFilterValue) {
+        params.set('filter', globalFilterValue);
+    }
+
+    Object.entries(columnFilterState).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+            const paramName = filterKeyToParam[key];
+            if (paramName) {
+                params.set(paramName, value);
+            }
+        }
+    });
+
+    const page = options.page ? Number(options.page) : 1;
+    currentPage = page;
+    if (page && page > 1) {
+        params.set('page', page);
+    }
+
+    const queryString = params.toString();
+    const url = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
+
+    fetch(url, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+        .then((response) => response.text())
+        .then((html) => {
+            salesTable.innerHTML = html;
+            initializeSalesTableInteractions();
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('{{ __('messages.an_error_occurred') }}');
+        });
+}
+
+function executeAction(action, saleIds) {
+    if (!Array.isArray(saleIds) || saleIds.length === 0) {
+        return;
+    }
+
+    if (!confirm('{{ __('messages.are_you_sure') }}')) {
+        return;
+    }
+
+    fetch(`{{ route('sales.actions') }}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             'X-Requested-With': 'XMLHttpRequest'
         },
-        body: JSON.stringify({ action: action })
+        body: JSON.stringify({
+            action: action,
+            sale_ids: saleIds,
+        })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            alert(data.error);
-        } else {
-            // Refresh the table
-            updateResults(document.getElementById('filter').value);
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
 
-            var message = '';
-            if (action === 'mark_paid') {
-                message = '{{ __("messages.mark_paid_success") }}';
-            } else if (action === 'refund') {
-                message = '{{ __("messages.refund_success") }}';
-            } else if (action === 'cancel') {
-                message = '{{ __("messages.cancel_success") }}';
-            } else if (action === 'delete') {
-                message = '{{ __("messages.delete_success") }}';
+            selectedSales.clear();
+            updateResults({ page: currentPage });
+
+            const messages = {
+                mark_paid: '{{ __('messages.mark_paid_success') }}',
+                refund: '{{ __('messages.refund_success') }}',
+                cancel: '{{ __('messages.cancel_success') }}',
+                delete: '{{ __('messages.delete_success') }}',
+            };
+
+            let message = messages[action] || '';
+            if (saleIds.length > 1 && message) {
+                message += ' {{ __('messages.bulk_action_success') }}';
             }
 
             if (message) {
@@ -114,12 +381,14 @@ function handleAction(saleId, action) {
                     }
                 }).showToast();
             }
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('{{ __("messages.an_error_occurred") }}');
-    });
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('{{ __('messages.an_error_occurred') }}');
+        });
 }
 
+function handleAction(saleId, action) {
+    executeAction(action, [saleId]);
+}
 </script>
