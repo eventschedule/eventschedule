@@ -19,6 +19,7 @@ use App\Utils\NotificationUtils;
 use App\Rules\NoFakeEmail;
 use App\Services\Wallet\AppleWalletService;
 use App\Services\Wallet\GoogleWalletService;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -27,6 +28,8 @@ use App\Notifications\TicketSaleNotification;
 
 class TicketController extends Controller
 {
+    private const SALE_ACTIONS = ['mark_paid', 'refund', 'cancel', 'delete'];
+
     public function tickets()
     {
         $user = auth()->user();
@@ -48,23 +51,80 @@ class TicketController extends Controller
     {
         $user = auth()->user();
         $filter = strtolower(request()->filter);
-        
+
+        $columnFilters = [
+            'customer' => trim((string) request()->input('filter_customer', '')),
+            'event' => trim((string) request()->input('filter_event', '')),
+            'total_min' => request()->input('filter_total_min'),
+            'total_max' => request()->input('filter_total_max'),
+            'transaction' => trim((string) request()->input('filter_transaction', '')),
+            'status' => trim((string) request()->input('filter_status', '')),
+            'usage' => trim((string) request()->input('filter_usage', '')),
+        ];
+
         $query = Sale::with('event', 'saleTickets')
             ->where('is_deleted', false)
             ->whereHas('event', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             });
-            
+
         if ($filter) {
             $query->where(function($q) use ($filter) {
                 $q->where('status', 'LIKE', "%{$filter}%")
-                  ->orWhere('transaction_reference', 'LIKE', "%{$filter}%") 
+                  ->orWhere('transaction_reference', 'LIKE', "%{$filter}%")
                   ->orWhere('email', 'LIKE', "%{$filter}%")
                   ->orWhere('name', 'LIKE', "%{$filter}%")
                   ->orWhereHas('event', function($q) use ($filter) {
                       $q->where('name', 'LIKE', "%{$filter}%");
                   });
             });
+        }
+
+        if ($columnFilters['customer']) {
+            $customerFilter = $columnFilters['customer'];
+            $query->where(function($q) use ($customerFilter) {
+                $q->where('name', 'LIKE', "%{$customerFilter}%")
+                  ->orWhere('email', 'LIKE', "%{$customerFilter}%");
+            });
+        }
+
+        if ($columnFilters['event']) {
+            $eventFilter = $columnFilters['event'];
+            $query->whereHas('event', function($q) use ($eventFilter) {
+                $q->where('name', 'LIKE', "%{$eventFilter}%");
+            });
+        }
+
+        if ($columnFilters['total_min'] !== null && $columnFilters['total_min'] !== '' && is_numeric($columnFilters['total_min'])) {
+            $min = (float) $columnFilters['total_min'];
+            $query->where('payment_amount', '>=', $min);
+        }
+
+        if ($columnFilters['total_max'] !== null && $columnFilters['total_max'] !== '' && is_numeric($columnFilters['total_max'])) {
+            $max = (float) $columnFilters['total_max'];
+            $query->where('payment_amount', '<=', $max);
+        }
+
+        if ($columnFilters['transaction']) {
+            $transactionFilter = $columnFilters['transaction'];
+            $query->where('transaction_reference', 'LIKE', "%{$transactionFilter}%");
+        }
+
+        if ($columnFilters['status'] && in_array($columnFilters['status'], ['unpaid', 'paid', 'cancelled', 'refunded', 'expired'])) {
+            $query->where('status', $columnFilters['status']);
+        }
+
+        if ($columnFilters['usage'] && in_array($columnFilters['usage'], ['used', 'unused'], true)) {
+            $usageQuery = clone $query;
+            $matchingIds = $usageQuery->get()->filter(function (Sale $sale) use ($columnFilters) {
+                return $sale->usage_status === $columnFilters['usage'];
+            })->pluck('id');
+
+            if ($matchingIds->isEmpty()) {
+                $query->whereRaw('0 = 1');
+            } else {
+                $query->whereIn('id', $matchingIds);
+            }
         }
 
         $count = $query->count();
@@ -567,14 +627,75 @@ class TicketController extends Controller
 
     public function handleAction(Request $request, $sale_id)
     {
+        $request->validate([
+            'action' => ['required', Rule::in(self::SALE_ACTIONS)],
+        ]);
+
         $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
         $user = auth()->user();
-        
+
         if ($user->id != $sale->event->user_id) {
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
-        switch ($request->action) {
+        $this->processSaleAction($sale, $request->action, $user);
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', __('messages.action_completed'));
+    }
+
+    public function handleBulkAction(Request $request)
+    {
+        $validated = $request->validate([
+            'sale_ids' => ['required', 'array'],
+            'sale_ids.*' => ['string'],
+            'action' => ['required', Rule::in(self::SALE_ACTIONS)],
+        ]);
+
+        $user = auth()->user();
+
+        $decodedIds = collect($validated['sale_ids'])
+            ->map(function ($encodedId) {
+                try {
+                    return UrlUtils::decodeId($encodedId);
+                } catch (\Throwable $exception) {
+                    return null;
+                }
+            })
+            ->filter()
+            ->values();
+
+        if ($decodedIds->isEmpty()) {
+            return response()->json(['error' => __('messages.no_sales_selected')], 422);
+        }
+
+        $sales = Sale::with('event')
+            ->whereIn('id', $decodedIds)
+            ->whereHas('event', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->get();
+
+        if ($sales->isEmpty()) {
+            return response()->json(['error' => __('messages.no_sales_available_for_action')], 403);
+        }
+
+        $sales->each(function (Sale $sale) use ($validated, $user) {
+            $this->processSaleAction($sale, $validated['action'], $user);
+        });
+
+        return response()->json([
+            'success' => true,
+            'processed' => $sales->count(),
+        ]);
+    }
+
+    private function processSaleAction(Sale $sale, string $action, User $user): void
+    {
+        switch ($action) {
             case 'mark_paid':
                 if ($sale->status === 'unpaid') {
                     $previousStatus = $sale->status;
@@ -597,14 +718,14 @@ class TicketController extends Controller
                     ]);
                 }
                 break;
-            
+
             case 'refund':
                 if ($sale->status === 'paid') {
                     $sale->status = 'refunded';
                     $sale->save();
                 }
                 break;
-            
+
             case 'cancel':
                 if (in_array($sale->status, ['unpaid', 'paid'])) {
                     $sale->status = 'cancelled';
@@ -617,12 +738,6 @@ class TicketController extends Controller
                 $sale->save();
                 break;
         }
-
-        if ($request->ajax()) {
-            return response()->json(['success' => true]);
-        }
-        
-        return back()->with('success', __('messages.action_completed'));
     }
 
     private function sendTicketSaleNotifications(Sale $sale): void
