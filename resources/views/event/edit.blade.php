@@ -1597,7 +1597,7 @@
         this.eventSlug = sanitizedSlug;
         this.event.slug = sanitizedSlug || null;
 
-        if (! this.isFormValid) {
+        if (! this.event.id && ! this.isFormValid) {
           if (event && typeof event.preventDefault === 'function') {
             event.preventDefault();
           }
