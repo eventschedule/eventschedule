@@ -584,18 +584,33 @@ class AppleWalletService
         $certificates = $this->loadCertificates($certificateContents);
         $manifestPath = $this->createTempFile($this->encodeJson($manifest));
         $chainPath = $this->createSignerCertificateChainFile($certificates);
+        $normalizedWwdrPath = null;
+
+        if ($chainPath === null && $this->wwdrCertificatePath !== null) {
+            $normalizedWwdrPath = $this->createTemporaryPemCertificateFromPath($this->wwdrCertificatePath);
+
+            if ($normalizedWwdrPath !== null) {
+                $this->logDebug('Using normalized WWDR certificate for manifest signing.', [
+                    'chain_path' => $normalizedWwdrPath,
+                ]);
+            }
+        }
 
         $this->logDebug('Generated manifest signing workspace.', [
             'manifest_path' => $manifestPath,
-            'chain_path' => $chainPath,
+            'chain_path' => $chainPath ?? $normalizedWwdrPath,
         ]);
 
         try {
-            $cmsSignature = $this->tryCmsManifestSignature($manifestPath, $certificates, $chainPath);
+            $cmsSignature = $this->tryCmsManifestSignature(
+                $manifestPath,
+                $certificates,
+                $chainPath ?? $normalizedWwdrPath
+            );
 
             if ($cmsSignature !== null) {
                 $this->logDebug('Manifest signed using openssl_cms_sign.', [
-                    'chain_path' => $chainPath,
+                    'chain_path' => $chainPath ?? $normalizedWwdrPath,
                     'signature_length' => strlen($cmsSignature),
                     'signature_sha1' => sha1($cmsSignature),
                 ]);
@@ -605,7 +620,11 @@ class AppleWalletService
 
             $this->logDebug('Falling back to PKCS#7 manifest signing.');
 
-            $fallbackSignature = $this->signManifestWithPkcs7($manifestPath, $certificates, $chainPath);
+            $fallbackSignature = $this->signManifestWithPkcs7(
+                $manifestPath,
+                $certificates,
+                $chainPath ?? $normalizedWwdrPath
+            );
 
             $this->logDebug('PKCS#7 fallback signature produced.', [
                 'signature_length' => strlen($fallbackSignature),
@@ -617,6 +636,9 @@ class AppleWalletService
             @unlink($manifestPath);
             if ($chainPath !== null) {
                 @unlink($chainPath);
+            }
+            if ($normalizedWwdrPath !== null) {
+                @unlink($normalizedWwdrPath);
             }
         }
     }
@@ -664,7 +686,7 @@ class AppleWalletService
             [],
             $flags,
             $encoding,
-            $chainPath ?: ($this->wwdrCertificatePath ?? '')
+            $chainPath
         );
 
         $signatureContents = null;
@@ -743,7 +765,7 @@ class AppleWalletService
             $certificates['pkey'] ?? null,
             [],
             PKCS7_BINARY | PKCS7_DETACHED,
-            $chainPath ?: $this->wwdrCertificatePath
+            $chainPath
         );
 
         if (! $signingResult) {
@@ -772,6 +794,62 @@ class AppleWalletService
         ]);
 
         return $binarySignature;
+    }
+
+    protected function createTemporaryPemCertificateFromPath(string $path): ?string
+    {
+        if (! file_exists($path)) {
+            $this->logDebug('WWDR certificate path does not exist for normalization.', [
+                'path' => $path,
+            ]);
+
+            return null;
+        }
+
+        $contents = @file_get_contents($path);
+
+        if ($contents === false || $contents === '') {
+            $this->logDebug('Unable to read WWDR certificate for normalization.', [
+                'path' => $path,
+            ]);
+
+            return null;
+        }
+
+        $pem = $this->exportCertificateToPem($contents);
+
+        if ($pem === null || trim($pem) === '') {
+            $this->logDebug('Failed to normalize WWDR certificate to PEM format.', [
+                'path' => $path,
+            ]);
+
+            return null;
+        }
+
+        $temporaryPath = tempnam(sys_get_temp_dir(), 'pkpass-wwdr-');
+
+        if ($temporaryPath === false) {
+            $this->logDebug('Unable to allocate temporary PEM file for WWDR certificate.');
+
+            return null;
+        }
+
+        if (@file_put_contents($temporaryPath, $pem) === false) {
+            @unlink($temporaryPath);
+            $this->logDebug('Unable to write normalized WWDR certificate to temporary file.', [
+                'path' => $path,
+            ]);
+
+            return null;
+        }
+
+        $this->logDebug('Normalized WWDR certificate written to temporary PEM file.', [
+            'source_path' => $path,
+            'temporary_path' => $temporaryPath,
+            'length' => strlen($pem),
+        ]);
+
+        return $temporaryPath;
     }
 
     /**
