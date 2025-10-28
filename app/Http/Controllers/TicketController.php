@@ -734,8 +734,20 @@ class TicketController extends Controller
                 break;
 
             case 'delete':
-                $sale->is_deleted = true;
-                $sale->save();
+                if (! $sale->is_deleted) {
+                    if (! in_array($sale->status, ['cancelled', 'refunded', 'expired'])) {
+                        $sale->loadMissing('saleTickets.ticket');
+
+                        foreach ($sale->saleTickets as $saleTicket) {
+                            if ($saleTicket->ticket) {
+                                $saleTicket->ticket->updateSold($sale->event_date, -$saleTicket->quantity);
+                            }
+                        }
+                    }
+
+                    $sale->is_deleted = true;
+                    $sale->save();
+                }
                 break;
         }
     }
