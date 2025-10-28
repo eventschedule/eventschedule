@@ -359,7 +359,7 @@
                                 <div class="flex justify-between w-full">
                                     <div class="flex items-center">
                                         <span class="text-sm text-gray-900 dark:text-gray-100">
-                                            <template v-if="selectedVenue.url">
+                                            <template v-if="selectedVenue && selectedVenue.url">
                                                 <a :href="selectedVenue.url" target="_blank" class="hover:underline">@{{ venueName || venueAddress1 }}</a>
                                             </template>
                                             <template v-else>
@@ -371,7 +371,7 @@
                                         </span>
                                     </div>
                                     <div>
-                                        <x-secondary-button v-if="!selectedVenue.user_id" x-on:click="editSelectedVenue" type="button" class="mr-2">
+                                        <x-secondary-button v-if="selectedVenue && !selectedVenue.user_id" x-on:click="editSelectedVenue" type="button" class="mr-2">
                                             {{ __('messages.edit') }}
                                         </x-secondary-button>
                                         <x-secondary-button @click="clearSelectedVenue()" type="button">
