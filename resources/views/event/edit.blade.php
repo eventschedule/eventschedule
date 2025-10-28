@@ -1226,7 +1226,7 @@
         venueCountryCode: @json($selectedVenue ? $selectedVenue->country_code : ''),
         venueSearchEmail: "",
         venueSearchResults: [],
-        selectedVenue: @json($selectedVenue ? $selectedVenue->toData() : ""),
+        selectedVenue: @json($selectedVenue ? $selectedVenue->toData() : null),
         selectedMembers: sanitizeCollection(@json($selectedMembers ?? [])),
         memberSearchResults: [],
         selectedMember: "",
@@ -1297,8 +1297,38 @@
           }, 2000);
         });
       },
-      clearSelectedVenue() {
-        this.selectedVenue = "";
+      clearSelectedVenue({ preserveVenueType = false } = {}) {
+        this.selectedVenue = null;
+        if (this.event) {
+          this.event.venue = null;
+        }
+
+        this.venueName = "";
+        this.venueEmail = "";
+        this.venueAddress1 = "";
+        this.venueCity = "";
+        this.venueState = "";
+        this.venuePostalCode = "";
+        this.venueCountryCode = "";
+        this.venueSearchEmail = "";
+        this.venueSearchResults = [];
+        this.showVenueAddressFields = preserveVenueType ? this.showVenueAddressFields : !this.hasAnyVenues;
+
+        if (!preserveVenueType) {
+          if (this.hasAnyVenues && this.venueType !== 'use_existing') {
+            this.venueType = 'use_existing';
+          } else if (!this.hasAnyVenues && this.venueType !== 'create_new') {
+            this.venueType = 'create_new';
+          }
+        }
+
+        this.$nextTick(() => {
+          if (typeof window !== 'undefined' && typeof $ !== 'undefined' && typeof $.fn.countrySelect === 'function') {
+            $('#venue_country').countrySelect({
+              defaultCountry: this.venueCountryCode || "{{ $role && $role->country_code ? $role->country_code : '' }}",
+            });
+          }
+        });
       },
       editSelectedVenue() {
         this.showVenueAddressFields = true;
@@ -1542,14 +1572,7 @@
 
         // Clear venue if in-person is unchecked
         if (type === 'in_person' && !this.isInPerson) {
-            this.venueType = '{{ (count($venues) > 0 ? 'use_existing' : 'create_new'); }}';
-            this.selectedVenue = '';
-            this.venueName = '';
-            this.venueEmail = '';
-            this.venueAddress1 = '';
-            this.venueCity = '';
-            this.venueState = '';
-            this.venuePostalCode = '';
+            this.clearSelectedVenue();
         }
 
         this.savePreferences();
@@ -1844,7 +1867,10 @@
         this.venueSearchResults = [];
 
         if (newValue !== 'use_existing') {
-          this.clearSelectedVenue();
+          this.clearSelectedVenue({ preserveVenueType: true });
+          this.showVenueAddressFields = true;
+        } else {
+          this.showVenueAddressFields = false;
         }
 
         this.$nextTick(() => {
@@ -1859,6 +1885,9 @@
         this.memberName = "";
       },
       selectedVenue() {
+        if (this.event) {
+          this.event.venue = this.selectedVenue || null;
+        }
         this.venueName = this.selectedVenue ? this.selectedVenue.name : "";
         this.venueEmail = this.selectedVenue ? this.selectedVenue.email : "";
         this.venueAddress1 = this.selectedVenue ? this.selectedVenue.address1 : "";
