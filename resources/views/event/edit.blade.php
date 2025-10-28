@@ -1606,6 +1606,10 @@
         return preferences;
       },
       validateForm(event) {
+        const formElement = event && event.target instanceof HTMLFormElement
+          ? event.target
+          : null;
+
         this.tickets = this.tickets.map(ticket => ({
           ...ticket,
           price: formatTicketPrice(ticket.price)
@@ -1621,6 +1625,18 @@
           }
 
           alert("{{ __('messages.please_select_venue_or_participant') }}");
+
+          return;
+        }
+
+        if (event && typeof event.preventDefault === 'function') {
+          event.preventDefault();
+
+          this.$nextTick(() => {
+            if (formElement) {
+              formElement.submit();
+            }
+          });
         }
       },
       addTicket() {
