@@ -21,413 +21,466 @@ use App\Support\MailTemplateManager;
 use App\Models\MediaAsset;
 use App\Models\MediaAssetVariant;
 use App\Models\MediaAssetUsage;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 
 class EventRepo
 {
     public function saveEvent($currentRole, $request, $event = null)
     {
-        $user = $request->user();
-        $venue = null;
+        $context = [
+            'event_id' => $event?->id,
+            'current_role_id' => $currentRole?->id,
+            'user_id' => $request->user()?->id,
+        ];
 
-        // Set creator_role_id to the current role
-        $creatorRoleId = $currentRole ? $currentRole->id : null;
+        $inputSummary = [
+            'name' => $request->input('name'),
+            'name_en' => $request->input('name_en'),
+            'schedule_type' => $request->input('schedule_type'),
+            'starts_at' => $request->input('starts_at'),
+            'tickets_enabled' => (bool) $request->input('tickets_enabled'),
+            'members_count' => is_array($request->input('members')) ? count($request->input('members')) : 0,
+            'curators_count' => is_array($request->input('curators')) ? count($request->input('curators')) : 0,
+        ];
 
-        if ($request->venue_id) {
-            $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
-        }
+        Log::info('EventRepo.saveEvent.start', $context + ['input_summary' => $inputSummary]);
 
-        if (! $user) {
-            $user = $currentRole->user;
-        }
+        try {
+            $user = $request->user();
+            $venue = null;
 
-        if ($request->venue_address1) {
-            if (! $venue) {
-                $venue = new Role;
-                $venue->name = $request->venue_name ?? null;
-                $venue->name_en = $request->venue_name_en ?? null;
-                $venue->email = $request->venue_email ?? null;
-                $venue->subdomain = Role::generateSubdomain($request->venue_name);
-                $venue->type = 'venue';
-                $venue->name = $request->venue_name ?? null;
-                $venue->address1 = $request->venue_address1;
-                $venue->address2 = $request->venue_address2;
-                $venue->city = $request->venue_city;
-                $venue->state = $request->venue_state;
-                $venue->postal_code = $request->venue_postal_code;
-                $venue->country_code = $request->venue_country_code ? $request->venue_country_code : $currentRole->country_code;
-                $venue->language_code = $request->venue_language_code ? $request->venue_language_code : $currentRole->language_code;
-                $venue->timezone = $currentRole->timezone;
-                $venue->background_colors = ColorUtils::randomGradient();
-                $venue->background_rotation = rand(0, 359);
-                $venue->font_color = '#ffffff';
-                $venue->save();
-                $venue->refresh();
-                
-                $matchingUser = false;
-                
-                if ($venue->email && $matchingUser = User::whereEmail($venue->email)->first()) {
-                    $venue->user_id = $matchingUser->id;
-                    $venue->email_verified_at = $matchingUser->email_verified_at;
-                    $venue->save();
-                    
-                    $matchingUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
-                }
+            // Set creator_role_id to the current role
+            $creatorRoleId = $currentRole ? $currentRole->id : null;
 
-                if (! $matchingUser || $matchingUser->id != $user->id) { 
-                    $user->roles()->attach($venue->id, ['level' => 'follower', 'created_at' => now()]);
-                }
-            } else if ($venue && ! $venue->isClaimed()) {
-                if ($request->venue_email) {
-                    $venue->email = $request->venue_email;
-                }
-                
-                $venue->name = $request->venue_name ?? null;
-                $venue->address1 = $request->venue_address1;
-                $venue->address2 = $request->venue_address2;
-                $venue->city = $request->venue_city;
-                $venue->state = $request->venue_state;
-                $venue->postal_code = $request->venue_postal_code;
-                $venue->country_code = $request->venue_country_code;
-                $venue->save();
+            if ($request->venue_id) {
+                $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
             }
-        }
 
-        $roles = [];
-        $roleIds = [];
+            if (! $user) {
+                $user = $currentRole->user;
+            }
 
-        if ($request->members) {
-            foreach ($request->members as $memberId => $member) {
-                if (! $memberId || strpos($memberId, 'new_') === 0) {
-                    $role = new Role;
-                    $role->name = $member['name'];
-                    $role->email = isset($member['email']) && $member['email'] !== '' ? $member['email'] : null;
-                    $role->subdomain = Role::generateSubdomain($member['name']);
-                    $role->type = $request->role_type ? $request->role_type : 'talent';
-                    $role->timezone = $currentRole->timezone;
-                    $role->language_code = $request->language_code ? $request->language_code : $currentRole->language_code;
-                    $role->country_code = $request->country_code ? $request->country_code : $currentRole->country_code;
-                    $role->background_colors = ColorUtils::randomGradient();
-                    $role->background_rotation = rand(0, 359);
-                    $role->font_color = '#ffffff';
+            if ($request->venue_address1) {
+                if (! $venue) {
+                    Log::debug('EventRepo.saveEvent.creatingVenue', $context + ['venue_email' => $request->venue_email]);
 
-                    $links = [];
-                    if (! empty($member['youtube_url'])) {
-                        $urlInfo = UrlUtils::getUrlInfo($member['youtube_url']);
-                        if ($urlInfo !== null) {
-                            $links[] = $urlInfo;
-                        }
+                    $venue = new Role;
+                    $venue->name = $request->venue_name ?? null;
+                    $venue->name_en = $request->venue_name_en ?? null;
+                    $venue->email = $request->venue_email ?? null;
+                    $venue->subdomain = Role::generateSubdomain($request->venue_name);
+                    $venue->type = 'venue';
+                    $venue->name = $request->venue_name ?? null;
+                    $venue->address1 = $request->venue_address1;
+                    $venue->address2 = $request->venue_address2;
+                    $venue->city = $request->venue_city;
+                    $venue->state = $request->venue_state;
+                    $venue->postal_code = $request->venue_postal_code;
+                    $venue->country_code = $request->venue_country_code ? $request->venue_country_code : $currentRole->country_code;
+                    $venue->language_code = $request->venue_language_code ? $request->venue_language_code : $currentRole->language_code;
+                    $venue->timezone = $currentRole->timezone;
+                    $venue->background_colors = ColorUtils::randomGradient();
+                    $venue->background_rotation = rand(0, 359);
+                    $venue->font_color = '#ffffff';
+                    $venue->save();
+                    $venue->refresh();
+
+                    $matchingUser = false;
+
+                    if ($venue->email && $matchingUser = User::whereEmail($venue->email)->first()) {
+                        $venue->user_id = $matchingUser->id;
+                        $venue->email_verified_at = $matchingUser->email_verified_at;
+                        $venue->save();
+
+                        $matchingUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
                     }
-                    if (count($links)) {
-                        $role->youtube_links = json_encode($links);
+
+                    if (! $matchingUser || $matchingUser->id != $user->id) {
+                        $user->roles()->attach($venue->id, ['level' => 'follower', 'created_at' => now()]);
+                    }
+                } else if ($venue && ! $venue->isClaimed()) {
+                    if ($request->venue_email) {
+                        $venue->email = $request->venue_email;
                     }
 
-                    $role->save();
-                    $role->refresh();
+                    $venue->name = $request->venue_name ?? null;
+                    $venue->address1 = $request->venue_address1;
+                    $venue->address2 = $request->venue_address2;
+                    $venue->city = $request->venue_city;
+                    $venue->state = $request->venue_state;
+                    $venue->postal_code = $request->venue_postal_code;
+                    $venue->country_code = $request->venue_country_code;
+                    $venue->save();
 
-                    if ($matchingUser = User::whereEmail($role->email)->first()) {
-                        $role->user_id = $matchingUser->id;
-                        $role->email_verified_at = $matchingUser->email_verified_at;
-                        $role->save();
-                        $matchingUser->roles()->attach($role->id, ['level' => 'owner', 'created_at' => now()]);
-                    }
+                    Log::debug('EventRepo.saveEvent.updatedVenue', $context + ['venue_id' => $venue->id]);
+                }
+            }
 
-                    if (! $matchingUser || $matchingUser->id != $user->id) { 
-                        $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
-                    }
-                } else {
-                    $roleId = UrlUtils::decodeId($memberId);
-                    $role = Role::findOrFail($roleId);
+            $roles = [];
+            $roleIds = [];
 
-                    if (! $role->isClaimed()) {
-                        if (! empty($member['name'])) {
-                            $role->name = $member['name'];
-                        }
+            if ($request->members) {
+                foreach ($request->members as $memberId => $member) {
+                    if (! $memberId || strpos($memberId, 'new_') === 0) {
+                        $role = new Role;
+                        $role->name = $member['name'];
+                        $role->email = isset($member['email']) && $member['email'] !== '' ? $member['email'] : null;
+                        $role->subdomain = Role::generateSubdomain($member['name']);
+                        $role->type = $request->role_type ? $request->role_type : 'talent';
+                        $role->timezone = $currentRole->timezone;
+                        $role->language_code = $request->language_code ? $request->language_code : $currentRole->language_code;
+                        $role->country_code = $request->country_code ? $request->country_code : $currentRole->country_code;
+                        $role->background_colors = ColorUtils::randomGradient();
+                        $role->background_rotation = rand(0, 359);
+                        $role->font_color = '#ffffff';
 
-                        if (! empty($member['email'])) {
-                            $role->email = $member['email'];
-                        }
-                        
-                        $links = $role->youtube_links ? json_decode($role->youtube_links, true) : [];
-
+                        $links = [];
                         if (! empty($member['youtube_url'])) {
                             $urlInfo = UrlUtils::getUrlInfo($member['youtube_url']);
                             if ($urlInfo !== null) {
-                                $links = [$urlInfo];
+                                $links[] = $urlInfo;
                             }
-
+                        }
+                        if (count($links)) {
                             $role->youtube_links = json_encode($links);
                         }
 
                         $role->save();
+                        $role->refresh();
+
+                        if ($matchingUser = User::whereEmail($role->email)->first()) {
+                            $role->user_id = $matchingUser->id;
+                            $role->email_verified_at = $matchingUser->email_verified_at;
+                            $role->save();
+                            $matchingUser->roles()->attach($role->id, ['level' => 'owner', 'created_at' => now()]);
+                        }
+
+                        if (! $matchingUser || $matchingUser->id != $user->id) {
+                            $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
+                        }
+                    } else {
+                        $roleId = UrlUtils::decodeId($memberId);
+                        $role = Role::findOrFail($roleId);
+
+                        if (! $role->isClaimed()) {
+                            if (! empty($member['name'])) {
+                                $role->name = $member['name'];
+                            }
+
+                            if (! empty($member['email'])) {
+                                $role->email = $member['email'];
+                            }
+
+                            $links = $role->youtube_links ? json_decode($role->youtube_links, true) : [];
+
+                            if (! empty($member['youtube_url'])) {
+                                $urlInfo = UrlUtils::getUrlInfo($member['youtube_url']);
+                                if ($urlInfo !== null) {
+                                    $links = [$urlInfo];
+                                }
+
+                                $role->youtube_links = json_encode($links);
+                            }
+
+                            $role->save();
+                        }
+                    }
+
+                    $roles[] = $role;
+                    $roleIds[] = $role->id;
+                }
+            }
+
+            // Ensure current role is included if it's not already in the list
+            if ($currentRole && ! in_array($currentRole->id, $roleIds)) {
+                $roles[] = $currentRole;
+                $roleIds[] = $currentRole->id;
+            }
+
+            $venueId = $venue ? $venue->id : null;
+
+            if (! $event) {
+                Log::debug('EventRepo.saveEvent.creatingEvent', $context + ['venue_id' => $venueId]);
+
+                $event = new Event;
+                $event->user_id = $user->id;
+                $event->creator_role_id = $creatorRoleId;
+
+                if ($request->name_en) {
+                    $event->slug = \Str::slug($request->name_en);
+                } else {
+                    $event->slug = \Str::slug($request->name);
+                }
+
+                if (! $event->slug) {
+                    $event->slug = strtolower(\Str::random(5));
+                }
+            }
+
+            $input = $request->all();
+
+            if (array_key_exists('slug', $input)) {
+                $slugValue = $input['slug'];
+
+                if ($slugValue !== null) {
+                    $slugValue = Str::slug($slugValue);
+                }
+
+                if ($slugValue === '') {
+                    $slugValue = null;
+                }
+
+                $input['slug'] = $slugValue;
+            }
+
+            $event->fill($input);
+
+            if (! $request->event_url) {
+                $event->event_url = null;
+            }
+
+            $days_of_week = '';
+            $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+            foreach ($days as $index => $day) {
+                $days_of_week .= request()->has('days_of_week_' . $index) ? '1' : '0';
+            }
+            $event->days_of_week = request()->schedule_type == 'recurring' ? $days_of_week : null;
+
+            if ($event->starts_at) {
+                $timezone = $user->timezone;
+                $event->starts_at = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, $timezone)
+                    ->setTimezone('UTC')
+                    ->format('Y-m-d H:i:s');
+            }
+
+            if ($request->has('flyer_image_id')) {
+                $imageId = $request->input('flyer_image_id');
+                if ($imageId) {
+                    $image = Image::find($imageId);
+                    if ($image) {
+                        $event->flyer_image_id = $image->id;
+                        $event->flyer_image_url = $image->path;
+                    }
+                } else {
+                    $event->flyer_image_id = null;
+                    $event->flyer_image_url = null;
+                }
+            }
+
+            /*
+            if (auth()->user()->isMember($venue->subdomain) || !$venue->user_id) {
+                $event->is_accepted = true;
+                $message = __('messages.event_created');
+            } else {
+                //$subdomain = $role->subdomain;
+                $message = __('messages.event_requested');
+
+                $emails = $venue->members()->pluck('email');
+                //Notification::route('mail', $emails)->notify(new EventRequestNotification($venue, $role));
+            }
+            */
+
+            Log::debug('EventRepo.saveEvent.persistingEvent', $context + ['changes' => Arr::except($event->getDirty(), ['updated_at'])]);
+
+            $event->save();
+
+            if ($venue) {
+                $roles[] = $venue;
+                $roleIds[] = $venue->id;
+            }
+
+            $selectedCurators = $request->input('curators', []);
+            $selectedCurators = array_map(function($id) {
+                return UrlUtils::decodeId($id);
+            }, $selectedCurators);
+
+            // If editing an existing event, preserve curators that the current user can't see
+            if ($event && $event->exists) {
+                $existingCurators = $event->roles()->where('roles.type', 'curator')->pluck('roles.id')->toArray();
+                $userCurators = $user->curators()->pluck('roles.id')->toArray();
+
+                // Find curators that exist on the event but the user can't edit
+                $preservedCurators = array_diff($existingCurators, $userCurators);
+
+                // Add preserved curators to the selected curators
+                foreach ($preservedCurators as $curatorId) {
+                    if (!in_array($curatorId, $selectedCurators)) {
+                        $selectedCurators[] = $curatorId;
+                    }
+                }
+            }
+
+            foreach ($selectedCurators as $curatorId) {
+                $curator = Role::find($curatorId);
+                if ($curator) {
+                    $roles[] = $curator;
+                    $roleIds[] = $curator->id;
+                }
+            }
+
+            $event->roles()->sync($roleIds);
+
+            $curatorGroups = $request->input('curator_groups', []);
+
+            foreach ($roles as $role) {
+                if ((auth()->user() && $user->isMember($role->subdomain)) || ($role->accept_requests && ! $role->require_approval)) {
+                    $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
+                }
+
+                // If this is a curator and curator_groups is provided, add it to the pivot
+                if ($role && $role->isCurator()) {
+                    $curatorEncodedId = UrlUtils::encodeId($role->id);
+                    if (isset($curatorGroups[$curatorEncodedId]) && $curatorGroups[$curatorEncodedId]) {
+                        $groupId = UrlUtils::decodeId($curatorGroups[$curatorEncodedId]);
+                        $event->roles()->updateExistingPivot($role->id, ['group_id' => $groupId]);
                     }
                 }
 
-                $roles[] = $role;
-                $roleIds[] = $role->id;
-            }
-        }
-
-        // Ensure current role is included if it's not already in the list
-        if ($currentRole && ! in_array($currentRole->id, $roleIds)) {
-            $roles[] = $currentRole;
-            $roleIds[] = $currentRole->id;
-        }
-
-        $venueId = $venue ? $venue->id : null;
-
-        if (! $event) {
-            $event = new Event;       
-            $event->user_id = $user->id;
-            $event->creator_role_id = $creatorRoleId;
-
-            if ($request->name_en) {
-                $event->slug = \Str::slug($request->name_en);
-            } else {
-                $event->slug = \Str::slug($request->name);
-            }
-
-            if (! $event->slug) {
-                $event->slug = strtolower(\Str::random(5));
-            }
-        }
-
-        $input = $request->all();
-
-        if (array_key_exists('slug', $input)) {
-            $slugValue = $input['slug'];
-
-            if ($slugValue !== null) {
-                $slugValue = Str::slug($slugValue);
-            }
-
-            if ($slugValue === '') {
-                $slugValue = null;
-            }
-
-            $input['slug'] = $slugValue;
-        }
-
-        $event->fill($input);
-
-        if (! $request->event_url) {
-            $event->event_url = null;
-        }
-
-        $days_of_week = '';
-        $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-        foreach ($days as $index => $day) {
-            $days_of_week .= request()->has('days_of_week_' . $index) ? '1' : '0';
-        }
-        $event->days_of_week = request()->schedule_type == 'recurring' ? $days_of_week : null;
-
-        if ($event->starts_at) {
-            $timezone = $user->timezone;
-            $event->starts_at = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, $timezone)
-                ->setTimezone('UTC')
-                ->format('Y-m-d H:i:s');
-        }
-
-        if ($request->has('flyer_image_id')) {
-            $imageId = $request->input('flyer_image_id');
-            if ($imageId) {
-                $image = Image::find($imageId);
-                if ($image) {
-                    $event->flyer_image_id = $image->id;
-                    $event->flyer_image_url = $image->path;
-                }
-            } else {
-                $event->flyer_image_id = null;
-                $event->flyer_image_url = null;
-            }
-        }
-
-        /*
-        if (auth()->user()->isMember($venue->subdomain) || !$venue->user_id) {
-            $event->is_accepted = true;
-            $message = __('messages.event_created');
-        } else {
-            //$subdomain = $role->subdomain;
-            $message = __('messages.event_requested');
-
-            $emails = $venue->members()->pluck('email');
-            //Notification::route('mail', $emails)->notify(new EventRequestNotification($venue, $role));
-        }
-        */
-
-        $event->save();        
-
-        if ($venue) {
-            $roles[] = $venue;
-            $roleIds[] = $venue->id;
-        }
-
-        $selectedCurators = $request->input('curators', []);
-        $selectedCurators = array_map(function($id) {
-            return UrlUtils::decodeId($id);
-        }, $selectedCurators);
-
-        // If editing an existing event, preserve curators that the current user can't see
-        if ($event && $event->exists) {
-            $existingCurators = $event->roles()->where('roles.type', 'curator')->pluck('roles.id')->toArray();
-            $userCurators = $user->curators()->pluck('roles.id')->toArray();
-            
-            // Find curators that exist on the event but the user can't edit
-            $preservedCurators = array_diff($existingCurators, $userCurators);
-            
-            // Add preserved curators to the selected curators
-            foreach ($preservedCurators as $curatorId) {
-                if (!in_array($curatorId, $selectedCurators)) {
-                    $selectedCurators[] = $curatorId;
-                }
-            }
-        }
-
-        foreach ($selectedCurators as $curatorId) {
-            $curator = Role::find($curatorId);
-            if ($curator) {
-                $roles[] = $curator;
-                $roleIds[] = $curator->id;
-            }
-        }
-
-        $event->roles()->sync($roleIds);
-        
-        $curatorGroups = $request->input('curator_groups', []);
-        
-        foreach ($roles as $role) {
-            if ((auth()->user() && $user->isMember($role->subdomain)) || ($role->accept_requests && ! $role->require_approval)) {
-                $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);            
-            }
-                        
-            // If this is a curator and curator_groups is provided, add it to the pivot
-            if ($role && $role->isCurator()) {
-                $curatorEncodedId = UrlUtils::encodeId($role->id);
-                if (isset($curatorGroups[$curatorEncodedId]) && $curatorGroups[$curatorEncodedId]) {
-                    $groupId = UrlUtils::decodeId($curatorGroups[$curatorEncodedId]);
+                // If this is the current role and current_role_group_id is provided, add it to the pivot
+                if ($role && $role->id === $currentRole->id && $request->has('current_role_group_id') && $request->current_role_group_id) {
+                    $groupId = UrlUtils::decodeId($request->current_role_group_id);
                     $event->roles()->updateExistingPivot($role->id, ['group_id' => $groupId]);
                 }
             }
-            
-            // If this is the current role and current_role_group_id is provided, add it to the pivot
-            if ($role && $role->id === $currentRole->id && $request->has('current_role_group_id') && $request->current_role_group_id) {
-                $groupId = UrlUtils::decodeId($request->current_role_group_id);
-                $event->roles()->updateExistingPivot($role->id, ['group_id' => $groupId]);
-            }            
-        }
-        
-        if ($request->hasFile('flyer_image')) {
-            $disk = storage_public_disk();
 
-            if ($event->flyer_image_url) {
-                $path = storage_normalize_path($event->getAttributes()['flyer_image_url']);
-                if ($path !== '') {
-                    Storage::disk($disk)->delete($path);
-                }
-            }
+            if ($request->hasFile('flyer_image')) {
+                $disk = storage_public_disk();
 
-            $file = $request->file('flyer_image');
-            $filename = strtolower('flyer_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
-            storage_put_file_as_public($disk, $file, $filename);
-
-            $event->flyer_image_url = $filename;
-            $event->save();
-
-            MediaAssetUsage::clearUsage($event, 'flyer');
-        } elseif ($request->filled('flyer_media_asset_id')) {
-            $assetId = (int) $request->input('flyer_media_asset_id');
-            $asset = MediaAsset::find($assetId);
-
-            if ($asset) {
-                $variant = null;
-
-                if ($request->filled('flyer_media_variant_id')) {
-                    $variantId = (int) $request->input('flyer_media_variant_id');
-                    $variant = MediaAssetVariant::where('media_asset_id', $asset->id)
-                        ->find($variantId);
+                if ($event->flyer_image_url) {
+                    $path = storage_normalize_path($event->getAttributes()['flyer_image_url']);
+                    if ($path !== '') {
+                        Storage::disk($disk)->delete($path);
+                    }
                 }
 
-                $event->flyer_image_url = $variant ? $variant->path : $asset->path;
+                $file = $request->file('flyer_image');
+                $filename = strtolower('flyer_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
+                storage_put_file_as_public($disk, $file, $filename);
+
+                $event->flyer_image_url = $filename;
                 $event->save();
 
-                MediaAssetUsage::recordUsage($event, 'flyer', $asset, $variant);
+                MediaAssetUsage::clearUsage($event, 'flyer');
+
+                Log::debug('EventRepo.saveEvent.flyerUploaded', $context + ['flyer_path' => $filename]);
+            } elseif ($request->filled('flyer_media_asset_id')) {
+                $assetId = (int) $request->input('flyer_media_asset_id');
+                $asset = MediaAsset::find($assetId);
+
+                if ($asset) {
+                    $variant = null;
+
+                    if ($request->filled('flyer_media_variant_id')) {
+                        $variantId = (int) $request->input('flyer_media_variant_id');
+                        $variant = MediaAssetVariant::where('media_asset_id', $asset->id)
+                            ->find($variantId);
+                    }
+
+                    $event->flyer_image_url = $variant ? $variant->path : $asset->path;
+                    $event->save();
+
+                    MediaAssetUsage::recordUsage($event, 'flyer', $asset, $variant);
+
+                    Log::debug('EventRepo.saveEvent.flyerLinked', $context + ['asset_id' => $asset->id, 'variant_id' => $variant?->id]);
+                }
             }
-        }
 
-        MailConfigManager::applyFromDatabase();
+            MailConfigManager::applyFromDatabase();
 
-        if (! config('mail.disable_delivery')) {
-            $templates = app(MailTemplateManager::class);
+            if (! config('mail.disable_delivery')) {
+                $templates = app(MailTemplateManager::class);
 
-            foreach ($roles as $role) {
-                if ($event->wasRecentlyCreated && ! $role->isClaimed() && $role->is_subscribed && $role->email) {
-                    if ($role->isVenue()) {
-                        if ($templates->enabled('claim_venue')) {
-                            Mail::to($role->email)->send(new ClaimVenue($event));
-                        }
-                    } elseif ($role->isTalent()) {
-                        if ($templates->enabled('claim_role')) {
-                            Mail::to($role->email)->send(new ClaimRole($event));
+                foreach ($roles as $role) {
+                    if ($event->wasRecentlyCreated && ! $role->isClaimed() && $role->is_subscribed && $role->email) {
+                        if ($role->isVenue()) {
+                            if ($templates->enabled('claim_venue')) {
+                                Mail::to($role->email)->send(new ClaimVenue($event));
+                            }
+                        } elseif ($role->isTalent()) {
+                            if ($templates->enabled('claim_role')) {
+                                Mail::to($role->email)->send(new ClaimRole($event));
+                            }
                         }
                     }
                 }
             }
-        }
 
-        if ($event->tickets_enabled) {
-            $ticketData = $request->input('tickets', []);
-            $ticketIds = [];
+            if ($event->tickets_enabled) {
+                $ticketData = $request->input('tickets', []);
+                $ticketIds = [];
 
-            foreach ($ticketData as $data) {
-                if (!empty($data['id'])) {
-                    $ticket = Ticket::find($data['id']);
-                    $ticketIds[] = $ticket->id;
-                    if ($ticket && $ticket->event_id == $event->id) {
-                        $ticket->update([
+                foreach ($ticketData as $data) {
+                    if (!empty($data['id'])) {
+                        $ticket = Ticket::find($data['id']);
+                        $ticketIds[] = $ticket->id;
+                        if ($ticket && $ticket->event_id == $event->id) {
+                            $ticket->update([
+                                'type' => $data['type'] ?? null,
+                                'quantity' => $data['quantity'] ?? null,
+                                'price' => $data['price'] ?? null,
+                                'description' => $data['description'] ?? null
+                            ]);
+                        }
+                    } else {
+                        $ticket = Ticket::create([
+                            'event_id' => $event->id,
                             'type' => $data['type'] ?? null,
                             'quantity' => $data['quantity'] ?? null,
                             'price' => $data['price'] ?? null,
                             'description' => $data['description'] ?? null
                         ]);
+                        $ticketIds[] = $ticket->id;
                     }
-                } else {
-                    $ticket = Ticket::create([
-                        'event_id' => $event->id,
-                        'type' => $data['type'] ?? null,
-                        'quantity' => $data['quantity'] ?? null, 
-                        'price' => $data['price'] ?? null,
-                        'description' => $data['description'] ?? null
-                    ]);
-                    $ticketIds[] = $ticket->id;
+                }
+
+                $event->tickets()
+                    ->whereNotIn('id', $ticketIds)
+                    ->update(['is_deleted' => true]);
+
+                Log::debug('EventRepo.saveEvent.ticketsProcessed', $context + ['ticket_ids' => $ticketIds]);
+            } else {
+                $event->tickets()->update(['is_deleted' => true]);
+                Log::debug('EventRepo.saveEvent.ticketsDisabled', $context);
+            }
+
+            $event->load('tickets');
+
+            if ($event->wasRecentlyCreated) {
+                $event->loadMissing(['roles.members', 'venue.members']);
+
+                $talentRoles = $event->roles->filter(fn ($roleModel) => $roleModel->isTalent());
+
+                NotificationUtils::uniqueRoleMembersWithContext($talentRoles)->each(function (array $recipient) use ($event, $user) {
+                    $recipient['user']->notify(new EventAddedNotification($event, $user, 'talent', $recipient['role']));
+                });
+
+                if ($event->venue) {
+                    NotificationUtils::uniqueRoleMembersWithContext([$event->venue])->each(function (array $recipient) use ($event, $user) {
+                        $recipient['user']->notify(new EventAddedNotification($event, $user, 'purchaser', $recipient['role']));
+                    });
                 }
             }
 
-            $event->tickets()
-                ->whereNotIn('id', $ticketIds)
-                ->update(['is_deleted' => true]);
-        } else {
-            $event->tickets()->update(['is_deleted' => true]);
+            Log::info('EventRepo.saveEvent.success', $context + [
+                'event_id' => $event->id,
+                'was_recently_created' => $event->wasRecentlyCreated,
+                'tickets_enabled' => (bool) $event->tickets_enabled,
+                'role_ids' => $roleIds,
+                'curator_ids' => array_values($selectedCurators),
+            ]);
+
+            return $event;
+        } catch (\Throwable $exception) {
+            Log::error('EventRepo.saveEvent.failed', $context + [
+                'exception_message' => $exception->getMessage(),
+                'exception_class' => get_class($exception),
+            ]);
+
+            throw $exception;
         }
-
-        $event->load('tickets');
-
-        if ($event->wasRecentlyCreated) {
-            $event->loadMissing(['roles.members', 'venue.members']);
-
-            $talentRoles = $event->roles->filter(fn ($roleModel) => $roleModel->isTalent());
-
-            NotificationUtils::uniqueRoleMembersWithContext($talentRoles)->each(function (array $recipient) use ($event, $user) {
-                $recipient['user']->notify(new EventAddedNotification($event, $user, 'talent', $recipient['role']));
-            });
-
-            if ($event->venue) {
-                NotificationUtils::uniqueRoleMembersWithContext([$event->venue])->each(function (array $recipient) use ($event, $user) {
-                    $recipient['user']->notify(new EventAddedNotification($event, $user, 'purchaser', $recipient['role']));
-                });
-            }
-        }
-
-        return $event;
     }
 
     public function getEvent($subdomain, $slug, $date = null)
