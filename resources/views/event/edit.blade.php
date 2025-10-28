@@ -1252,6 +1252,7 @@
         soldLabel: "{{ __('messages.sold_reserved') }}",
         isRecurring: @json($event->days_of_week ? true : false),
         eventUrlCopied: false,
+        isProgrammaticSubmitPending: false,
       }
     },
     methods: {
@@ -1610,6 +1611,11 @@
           ? event.target
           : null;
 
+        if (this.isProgrammaticSubmitPending && event && event.isTrusted === false) {
+          this.isProgrammaticSubmitPending = false;
+          return;
+        }
+
         this.tickets = this.tickets.map(ticket => ({
           ...ticket,
           price: formatTicketPrice(ticket.price)
@@ -1632,8 +1638,10 @@
         if (event && typeof event.preventDefault === 'function') {
           event.preventDefault();
 
+          this.isProgrammaticSubmitPending = true;
           this.$nextTick(() => {
             if (!formElement) {
+              this.isProgrammaticSubmitPending = false;
               return;
             }
 
@@ -1642,6 +1650,7 @@
                 formElement.requestSubmit();
               } else {
                 formElement.submit();
+                this.isProgrammaticSubmitPending = false;
               }
             } catch (submissionError) {
               console.error('Event form submission failed, attempting fallback submit.', submissionError);
@@ -1650,6 +1659,8 @@
                 formElement.submit();
               } catch (fallbackError) {
                 console.error('Event form fallback submission failed.', fallbackError);
+              } finally {
+                this.isProgrammaticSubmitPending = false;
               }
             }
           });
