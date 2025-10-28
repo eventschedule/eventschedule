@@ -619,23 +619,65 @@ class EventController extends Controller
 
     public function update(EventUpdateRequest $request, $subdomain, $hash)
     {
+        $user = $request->user();
+
         if (! is_hosted_or_admin()) {
+            Log::notice('EventController.update.denied_not_hosted_or_admin', [
+                'hash' => $hash,
+                'subdomain' => $subdomain,
+                'user_id' => optional($user)->id,
+            ]);
+
             return redirect()->back()->with('error', __('messages.not_authorized'));
-        }   
+        }
 
         $event_id = UrlUtils::decodeId($hash);
-        $event = Event::with(['creatorRole', 'curators'])->findOrFail($event_id);
+        $event = Event::with(['creatorRole', 'curators', 'tickets'])->findOrFail($event_id);
+
+        Log::info('EventController.update.attempt', [
+            'event_id' => $event->id,
+            'hash' => $hash,
+            'subdomain' => $subdomain,
+            'user_id' => optional($user)->id,
+        ]);
 
         if (! $request->user()->canEditEvent($event)) {
+            Log::warning('EventController.update.denied_cannot_edit', [
+                'event_id' => $event->id,
+                'hash' => $hash,
+                'subdomain' => $subdomain,
+                'user_id' => optional($user)->id,
+            ]);
+
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-        
-        $this->eventRepo->saveEvent($role, $request, $event);
+
+        try {
+            $event = $this->eventRepo->saveEvent($role, $request, $event);
+
+            Log::info('EventController.update.saved', [
+                'event_id' => $event->id,
+                'hash' => $hash,
+                'subdomain' => $subdomain,
+                'user_id' => optional($user)->id,
+                'tickets_enabled' => (bool) $event->tickets_enabled,
+            ]);
+        } catch (\Throwable $exception) {
+            Log::error('EventController.update.failed', [
+                'event_id' => $event->id,
+                'hash' => $hash,
+                'subdomain' => $subdomain,
+                'user_id' => optional($user)->id,
+                'exception_message' => $exception->getMessage(),
+                'exception_class' => get_class($exception),
+            ]);
+
+            throw $exception;
+        }
 
         if ($request->has('save_default_tickets')) {
-            $role = Role::subdomain($subdomain)->firstOrFail();
             $defaultTickets = [
                 'currency_code' => $event->ticket_currency_code,
                 'payment_method' => $event->payment_method,
@@ -654,6 +696,13 @@ class EventController extends Controller
             ];
             $role->default_tickets = json_encode($defaultTickets);
             $role->save();
+
+            Log::info('EventController.update.saved_default_tickets', [
+                'event_id' => $event->id,
+                'role_id' => $role->id,
+                'subdomain' => $subdomain,
+                'user_id' => optional($user)->id,
+            ]);
         }
 
         if ($event->starts_at) {
@@ -662,18 +711,33 @@ class EventController extends Controller
             $date = Carbon::now();
         }
 
-        // A user may be using a different subdomain to edit an event 
+        // A user may be using a different subdomain to edit an event
         // if they clicked on the edit link from the guest view
         if (! auth()->user()->isMember($subdomain)) {
+            Log::warning('EventController.update.redirected_not_member', [
+                'event_id' => $event->id,
+                'hash' => $hash,
+                'subdomain' => $subdomain,
+                'user_id' => optional($user)->id,
+            ]);
+
             return redirect(route('home'));
         }
 
         $data = [
-            'subdomain' => $subdomain, 
+            'subdomain' => $subdomain,
             'tab' => 'schedule',
             'month' => $date->month,
             'year' => $date->year,
         ];
+
+        Log::info('EventController.update.redirecting', [
+            'event_id' => $event->id,
+            'hash' => $hash,
+            'subdomain' => $subdomain,
+            'user_id' => optional($user)->id,
+            'redirect' => $data,
+        ]);
 
         return redirect(route('role.view_admin', $data))
                 ->with('message', __('messages.event_updated'));
