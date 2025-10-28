@@ -408,9 +408,9 @@
                                         <div class="mb-6">
                                             <x-input-label :value="__('messages.name') . ' *'" />
                                             <div class="flex mt-1">
-                                                <x-text-input v-bind:id="'edit_member_name_' + member.id" 
+                                                <x-text-input v-bind:id="'edit_member_name_' + member.id"
                                                     v-bind:name="'members[' + member.id + '][name]'" type="text" class="mr-2 block w-full"
-                                                    v-model="selectedMembers.find(m => m.id === member.id).name" required autofocus
+                                                    v-model="member.name" required autofocus
                                                     x-on:keydown.enter.prevent="editMember()" autocomplete="off" />
                                                 <x-primary-button x-on:click="editMember()" type="button">
                                                     {{ __('messages.done') }}
@@ -421,16 +421,16 @@
 
                                         <div class="mb-6">  
                                             <x-input-label for="edit_member_email" :value="__('messages.email')" />
-                                            <x-text-input v-bind:id="'edit_member_email_' + member.id" 
-                                                v-bind:name="'members[' + member.id + '][email]'" type="email" class="mr-2 block w-full" 
-                                                v-model="selectedMembers.find(m => m.id === member.id).email" x-on:keydown.enter.prevent="editMember()" autocomplete="off" />
+                                            <x-text-input v-bind:id="'edit_member_email_' + member.id"
+                                                v-bind:name="'members[' + member.id + '][email]'" type="email" class="mr-2 block w-full"
+                                                v-model="member.email" x-on:keydown.enter.prevent="editMember()" autocomplete="off" />
                                         </div>
 
                                         <div class="mb-6">
                                             <x-input-label for="edit_member_youtube_url" :value="__('messages.youtube_video_url')" />
-                                            <x-text-input v-bind:id="'edit_member_youtube_url_' + member.id" 
-                                                v-bind:name="'members[' + member.id + '][youtube_url]'" type="url" class="mr-2 block w-full" 
-                                                v-model="selectedMembers.find(m => m.id === member.id).youtube_url" x-on:keydown.enter.prevent="editMember()" autocomplete="off" />
+                                            <x-text-input v-bind:id="'edit_member_youtube_url_' + member.id"
+                                                v-bind:name="'members[' + member.id + '][youtube_url]'" type="url" class="mr-2 block w-full"
+                                                v-model="member.youtube_url" x-on:keydown.enter.prevent="editMember()" autocomplete="off" />
                                         </div>
 
                                     </div>
@@ -1443,7 +1443,13 @@
           return;
         }
 
-        this.selectedMembers = this.selectedMembers.filter(m => m && m.id !== member.id);
+        const removedMemberId = member.id;
+
+        this.selectedMembers = this.selectedMembers.filter(m => m && m.id !== removedMemberId);
+
+        if (this.editMemberId === removedMemberId) {
+          this.editMemberId = "";
+        }
         if (this.sanitizedSelectedMembers.length === 0) {
           this.showMemberTypeRadio = true;
         }
