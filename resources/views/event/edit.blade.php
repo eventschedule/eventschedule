@@ -1834,10 +1834,14 @@
 
         this.event.slug = newValue || null;
       },
-      venueType() {
+      venueType(newValue) {
         this.venueEmail = "";
         this.venueSearchEmail = "";
         this.venueSearchResults = [];
+
+        if (newValue !== 'use_existing') {
+          this.clearSelectedVenue();
+        }
 
         this.$nextTick(() => {
             $("#venue_country").countrySelect({
