@@ -202,7 +202,7 @@ class GoogleWalletService
                 ],
                 [
                     'header' => __('messages.number_of_attendees'),
-                    'body' => (string) $entry->seat_number,
+                    'body' => '1',
                 ],
                 $ticketNotes ? [
                     'header' => __('messages.notes'),
