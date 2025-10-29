@@ -187,6 +187,8 @@
         </div>
         @php
           $focusedEntryId = $focusedEntry->id ?? null;
+          $isViewingSingleTicket = $focusedEntryId !== null;
+          $totalEntries = $sale->saleTickets->sum(fn ($saleTicket) => $saleTicket->entries->count());
         @endphp
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-[18px] gap-y-[12px] mt-[20px]">
           <div>
@@ -212,9 +214,20 @@
                 {{ __('messages.add_tickets_to_wallet') }}
               </p>
             @endif
+            @if ($isViewingSingleTicket && $totalEntries > 1)
+              <a
+                href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}"
+                class="text-[10px] text-white/70 underline"
+              >
+                {{ __('messages.back_to_all_tickets') }}
+              </a>
+            @endif
             <div class="flex flex-col gap-[12px] w-full">
               @foreach ($sale->saleTickets as $saleTicket)
                 @foreach ($saleTicket->entries->sortBy('seat_number') as $entry)
+                  @if ($isViewingSingleTicket && $entry->id !== $focusedEntryId)
+                    @continue
+                  @endif
                   @php
                     $entryLabel = ($saleTicket->ticket->type ?: __('messages.ticket')) . ' #' . $entry->seat_number;
                     $isFocused = $focusedEntryId === $entry->id;

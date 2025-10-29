@@ -633,6 +633,7 @@ return [
     'event_support_contact' => 'Event Support Contact',
     'ticket' => 'Ticket',
     'view_tickets' => 'View Tickets',
+    'back_to_all_tickets' => 'Back to all tickets',
     'order_number' => 'Order Number',
     'notes' => 'Notes',
     'add_to_apple_wallet' => 'Add to Apple Wallet',
