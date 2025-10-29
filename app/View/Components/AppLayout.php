@@ -11,6 +11,7 @@ class AppLayout extends Component
 {
     public function __construct(
         public string $title = 'Event Schedule',
+        public bool $forceLight = false,
     ) {}
 
     /**
