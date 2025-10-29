@@ -381,17 +381,19 @@
 </head>
 <body class="font-sans h-full bg-gray-50 text-gray-900 transition-colors duration-200 dark:bg-gray-950 dark:text-gray-100">
 
-    <div data-theme-floating-wrapper class="fixed bottom-4 right-4 z-40">
-        <label for="theme-preference-floating" class="sr-only">{{ __('Theme') }}</label>
-        <div class="rounded-full bg-white/90 p-2 shadow-lg ring-1 ring-gray-200 backdrop-blur dark:bg-gray-900/90 dark:ring-gray-700">
-            <select id="theme-preference-floating" data-theme-select data-theme-floating
-                class="rounded-full border border-transparent bg-transparent px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors duration-150 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-gray-100 dark:focus:border-indigo-400">
-                <option value="system">{{ __('System') }}</option>
-                <option value="light">{{ __('Light') }}</option>
-                <option value="dark">{{ __('Dark') }}</option>
-            </select>
+    @unless ($forceLight ?? false)
+        <div data-theme-floating-wrapper class="fixed bottom-4 right-4 z-40">
+            <label for="theme-preference-floating" class="sr-only">{{ __('Theme') }}</label>
+            <div class="rounded-full bg-white/90 p-2 shadow-lg ring-1 ring-gray-200 backdrop-blur dark:bg-gray-900/90 dark:ring-gray-700">
+                <select id="theme-preference-floating" data-theme-select data-theme-floating
+                    class="rounded-full border border-transparent bg-transparent px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors duration-150 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-gray-100 dark:focus:border-indigo-400">
+                    <option value="system">{{ __('System') }}</option>
+                    <option value="light">{{ __('Light') }}</option>
+                    <option value="dark">{{ __('Dark') }}</option>
+                </select>
+            </div>
         </div>
-    </div>
+    @endunless
 
     {{ $slot }}
 
