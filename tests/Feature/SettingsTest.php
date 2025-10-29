@@ -151,23 +151,28 @@ class SettingsTest extends TestCase
             'logging.channels.syslog_server.level' => 'debug',
         ]);
 
-        $payload = [
+        $generalPayload = [
             'public_url' => 'https://events.example.com',
-            'update_repository_url' => 'https://github.com/example/eventschedule',
-            'update_release_channel' => 'beta',
+        ];
+
+        $this
+            ->actingAs($admin)
+            ->patch('/settings/general', $generalPayload)
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/settings/general');
+
+        $loggingPayload = [
             'log_syslog_host' => 'logs.example.com',
             'log_syslog_port' => 6514,
             'log_level' => 'error',
             'log_disabled' => '0',
         ];
 
-        $response = $this
+        $this
             ->actingAs($admin)
-            ->patch('/settings/general', $payload);
-
-        $response
+            ->patch('/settings/logging', $loggingPayload)
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/settings/general');
+            ->assertRedirect('/settings/logging');
 
         $this->assertDatabaseHas('settings', [
             'group' => 'general',
@@ -225,9 +230,6 @@ class SettingsTest extends TestCase
         $expectedRoleDebug = config('logging.channels.role_debug');
 
         $disablePayload = [
-            'public_url' => 'https://events.example.com',
-            'update_repository_url' => 'https://github.com/example/eventschedule',
-            'update_release_channel' => 'beta',
             'log_syslog_host' => 'logs.example.com',
             'log_syslog_port' => 6514,
             'log_level' => 'error',
@@ -236,9 +238,9 @@ class SettingsTest extends TestCase
 
         $this
             ->actingAs($admin)
-            ->patch('/settings/general', $disablePayload)
+            ->patch('/settings/logging', $disablePayload)
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/settings/general');
+            ->assertRedirect('/settings/logging');
 
         $this->assertSame('null', config('logging.default'));
         $this->assertSame(['null'], config('logging.channels.stack.channels'));
@@ -253,9 +255,6 @@ class SettingsTest extends TestCase
         ]);
 
         $enablePayload = [
-            'public_url' => 'https://events.example.com',
-            'update_repository_url' => 'https://github.com/example/eventschedule',
-            'update_release_channel' => 'beta',
             'log_syslog_host' => 'logs.example.com',
             'log_syslog_port' => 6514,
             'log_level' => 'warning',
@@ -264,9 +263,9 @@ class SettingsTest extends TestCase
 
         $this
             ->actingAs($admin)
-            ->patch('/settings/general', $enablePayload)
+            ->patch('/settings/logging', $enablePayload)
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/settings/general');
+            ->assertRedirect('/settings/logging');
 
         $this->assertSame($expectedDefault, config('logging.default'));
         $this->assertSame($expectedStackChannels, config('logging.channels.stack.channels'));
@@ -845,11 +844,6 @@ class SettingsTest extends TestCase
 
         $payload = [
             'public_url' => 'https://example.org/',
-            'update_repository_url' => 'https://github.com/example/repo/',
-            'update_release_channel' => 'beta',
-            'log_syslog_host' => 'syslog.example',
-            'log_syslog_port' => 5514,
-            'log_level' => 'warning',
         ];
 
         $response = $this
@@ -866,6 +860,30 @@ class SettingsTest extends TestCase
             'value' => 'https://example.org',
         ]);
 
+        $generalSettings = Setting::forGroup('general');
+
+        $this->assertSame('https://example.org', $generalSettings['public_url']);
+        $this->assertSame('https://example.org', config('app.url'));
+    }
+
+    public function test_admin_can_update_update_settings(): void
+    {
+        $admin = User::factory()->create();
+
+        $payload = [
+            'update_repository_url' => 'https://github.com/example/repo/',
+            'update_release_channel' => 'beta',
+            'url_utils_verify_ssl' => '1',
+        ];
+
+        $response = $this
+            ->actingAs($admin)
+            ->patch('/settings/updates', $payload);
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/settings/updates');
+
         $this->assertDatabaseHas('settings', [
             'group' => 'general',
             'key' => 'update_repository_url',
@@ -878,12 +896,17 @@ class SettingsTest extends TestCase
             'value' => 'beta',
         ]);
 
+        $this->assertDatabaseHas('settings', [
+            'group' => 'general',
+            'key' => 'url_utils_verify_ssl',
+            'value' => '1',
+        ]);
+
         $generalSettings = Setting::forGroup('general');
 
-        $this->assertSame('https://example.org', $generalSettings['public_url']);
         $this->assertSame('https://github.com/example/repo', $generalSettings['update_repository_url']);
         $this->assertSame('beta', $generalSettings['update_release_channel']);
-        $this->assertSame('https://example.org', config('app.url'));
+        $this->assertTrue((bool) $generalSettings['url_utils_verify_ssl']);
     }
 
     public function test_updating_repository_url_clears_cached_version_information(): void
@@ -900,21 +923,18 @@ class SettingsTest extends TestCase
         Cache::put(ReleaseChannelService::cacheKeyFor(ReleaseChannel::Beta), ['version' => 'v20251024-01b'], 3600);
 
         $payload = [
-            'public_url' => 'https://example.org/',
             'update_repository_url' => 'https://github.com/example/new-repo/',
             'update_release_channel' => 'beta',
-            'log_syslog_host' => 'syslog.example',
-            'log_syslog_port' => 5514,
-            'log_level' => 'warning',
+            'url_utils_verify_ssl' => '1',
         ];
 
         $response = $this
             ->actingAs($admin)
-            ->patch('/settings/general', $payload);
+            ->patch('/settings/updates', $payload);
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/settings/general');
+            ->assertRedirect('/settings/updates');
 
         $this->assertFalse(Cache::has(ReleaseChannelService::cacheKeyFor(ReleaseChannel::Production)));
         $this->assertFalse(Cache::has(ReleaseChannelService::cacheKeyFor(ReleaseChannel::Beta)));

@@ -42,12 +42,21 @@ class SettingsController extends Controller
         return view('settings.index');
     }
 
-    public function general(Request $request, UpdaterManager $updater, ReleaseChannelService $releaseChannels): View
+    public function general(Request $request): View
     {
         $this->authorizeAdmin($request->user());
 
-        $generalSettings = $this->getGeneralSettings();
-        $selectedChannel = ReleaseChannel::fromString($generalSettings['update_release_channel'] ?? null);
+        return view('settings.general', [
+            'generalSettings' => $this->getGeneralSettings(),
+        ]);
+    }
+
+    public function updates(Request $request, UpdaterManager $updater, ReleaseChannelService $releaseChannels): View
+    {
+        $this->authorizeAdmin($request->user());
+
+        $updateSettings = $this->getUpdateSettings();
+        $selectedChannel = ReleaseChannel::fromString($updateSettings['update_release_channel'] ?? null);
 
         $versionInstalled = null;
         $versionAvailable = null;
@@ -66,13 +75,22 @@ class SettingsController extends Controller
             }
         }
 
-        return view('settings.general', [
-            'generalSettings' => $generalSettings,
-            'availableLogLevels' => LoggingConfigManager::availableLevels(),
+        return view('settings.updates', [
+            'updateSettings' => $updateSettings,
+            'availableUpdateChannels' => ReleaseChannel::options(),
             'versionInstalled' => $versionInstalled,
             'versionAvailable' => $versionAvailable,
-            'availableUpdateChannels' => ReleaseChannel::options(),
             'selectedUpdateChannel' => $selectedChannel->value,
+        ]);
+    }
+
+    public function logging(Request $request): View
+    {
+        $this->authorizeAdmin($request->user());
+
+        return view('settings.logging', [
+            'loggingSettings' => $this->getLoggingSettings(),
+            'availableLogLevels' => LoggingConfigManager::availableLevels(),
         ]);
     }
 
@@ -141,7 +159,7 @@ class SettingsController extends Controller
         ]);
     }
 
-    public function email(Request $request): View
+    public function email(Request $request, MailTemplateManager $mailTemplates): View
     {
         $this->authorizeAdmin($request->user());
 
@@ -158,6 +176,7 @@ class SettingsController extends Controller
                 'tls' => 'TLS',
                 'ssl' => 'SSL',
             ],
+            'mailTemplates' => $mailTemplates->all(),
         ]);
     }
 
@@ -165,9 +184,7 @@ class SettingsController extends Controller
     {
         $this->authorizeAdmin($request->user());
 
-        return view('settings.email-templates', [
-            'mailTemplates' => $mailTemplates->all(),
-        ]);
+        return redirect()->route('settings.email');
     }
 
     public function showEmailTemplate(Request $request, MailTemplateManager $mailTemplates, string $template): View
@@ -469,27 +486,37 @@ class SettingsController extends Controller
         }
     }
 
-    public function updateGeneral(Request $request, ReleaseChannelService $releaseChannels): RedirectResponse
+    public function updateGeneral(Request $request): RedirectResponse
+    {
+        $this->authorizeAdmin($request->user());
+
+        $validated = $request->validate([
+            'public_url' => ['required', 'string', 'max:255', 'url'],
+        ]);
+
+        $publicUrl = $this->sanitizeUrl($validated['public_url']);
+
+        Setting::setGroup('general', [
+            'public_url' => $publicUrl,
+        ]);
+
+        $this->applyGeneralConfig($publicUrl);
+
+        return redirect()->route('settings.general')->with('status', 'general-settings-updated');
+    }
+
+    public function updateUpdates(Request $request, ReleaseChannelService $releaseChannels): RedirectResponse
     {
         $this->authorizeAdmin($request->user());
 
         $storedGeneralSettings = Setting::forGroup('general');
         $previousChannel = ReleaseChannel::fromString($storedGeneralSettings['update_release_channel'] ?? null);
 
-        $logLevelKeys = array_keys(LoggingConfigManager::availableLevels());
-
         $validated = $request->validate([
-            'public_url' => ['required', 'string', 'max:255', 'url'],
             'update_repository_url' => ['nullable', 'string', 'max:255', 'url'],
-            'log_syslog_host' => ['required', 'string', 'max:255'],
-            'log_syslog_port' => ['required', 'integer', 'min:1', 'max:65535'],
-            'log_level' => ['required', 'string', Rule::in($logLevelKeys)],
-            'log_disabled' => ['nullable', 'boolean'],
             'update_release_channel' => ['required', 'string', Rule::in(ReleaseChannel::values())],
             'url_utils_verify_ssl' => ['nullable', 'boolean'],
         ]);
-
-        $publicUrl = $this->sanitizeUrl($validated['public_url']);
 
         $updateRepositoryUrl = $this->nullableTrim($validated['update_repository_url'] ?? null);
 
@@ -504,10 +531,33 @@ class SettingsController extends Controller
         $channel = ReleaseChannel::fromString($validated['update_release_channel'] ?? null);
 
         Setting::setGroup('general', [
-            'public_url' => $publicUrl,
             'update_repository_url' => $updateRepositoryUrl,
             'update_release_channel' => $channel->value,
             'url_utils_verify_ssl' => $request->boolean('url_utils_verify_ssl') ? '1' : '0',
+        ]);
+
+        if ($normalizedPreviousRepositoryUrl !== $normalizedNewRepositoryUrl || $previousChannel !== $channel) {
+            $releaseChannels->forgetAll();
+        }
+
+        UpdateConfigManager::apply($updateRepositoryUrl);
+        ReleaseChannelManager::apply($channel);
+        UrlUtilsConfigManager::apply($request->boolean('url_utils_verify_ssl'));
+
+        return redirect()->route('settings.updates')->with('status', 'update-settings-updated');
+    }
+
+    public function updateLogging(Request $request): RedirectResponse
+    {
+        $this->authorizeAdmin($request->user());
+
+        $logLevelKeys = array_keys(LoggingConfigManager::availableLevels());
+
+        $validated = $request->validate([
+            'log_syslog_host' => ['required', 'string', 'max:255'],
+            'log_syslog_port' => ['required', 'integer', 'min:1', 'max:65535'],
+            'log_level' => ['required', 'string', Rule::in($logLevelKeys)],
+            'log_disabled' => ['nullable', 'boolean'],
         ]);
 
         $syslogHost = $this->sanitizeHost($validated['log_syslog_host']);
@@ -526,17 +576,9 @@ class SettingsController extends Controller
 
         Setting::setGroup('logging', $loggingSettings);
 
-        if ($normalizedPreviousRepositoryUrl !== $normalizedNewRepositoryUrl || $previousChannel !== $channel) {
-            $releaseChannels->forgetAll();
-        }
-
-        $this->applyGeneralConfig($publicUrl);
-        UpdateConfigManager::apply($updateRepositoryUrl);
-        ReleaseChannelManager::apply($channel);
         LoggingConfigManager::apply($loggingSettings);
-        UrlUtilsConfigManager::apply($request->boolean('url_utils_verify_ssl'));
 
-        return redirect()->route('settings.general')->with('status', 'general-settings-updated');
+        return redirect()->route('settings.logging')->with('status', 'logging-settings-updated');
     }
 
     public function updateBranding(Request $request): RedirectResponse
@@ -999,6 +1041,30 @@ class SettingsController extends Controller
     protected function getGeneralSettings(): array
     {
         $storedGeneralSettings = Setting::forGroup('general');
+
+        return [
+            'public_url' => $storedGeneralSettings['public_url'] ?? config('app.url'),
+        ];
+    }
+
+    protected function getUpdateSettings(): array
+    {
+        $storedGeneralSettings = Setting::forGroup('general');
+
+        return [
+            'update_repository_url' => $storedGeneralSettings['update_repository_url']
+                ?? config('self-update.repository_types.github.repository_url'),
+            'update_release_channel' => ReleaseChannel::fromString(
+                $storedGeneralSettings['update_release_channel'] ?? config('self-update.release_channel')
+            )->value,
+            'url_utils_verify_ssl' => array_key_exists('url_utils_verify_ssl', $storedGeneralSettings)
+                ? $this->toBoolean($storedGeneralSettings['url_utils_verify_ssl'])
+                : $this->toBoolean(config('url_utils.verify_ssl', true)),
+        ];
+    }
+
+    protected function getLoggingSettings(): array
+    {
         $storedLoggingSettings = Setting::forGroup('logging');
 
         $syslogHandlerConfig = config('logging.channels.syslog_server.handler_with', []);
@@ -1012,21 +1078,12 @@ class SettingsController extends Controller
         $defaultLogLevel = config('logging.channels.single.level', 'debug');
 
         return [
-            'public_url' => $storedGeneralSettings['public_url'] ?? config('app.url'),
-            'update_repository_url' => $storedGeneralSettings['update_repository_url']
-                ?? config('self-update.repository_types.github.repository_url'),
-            'update_release_channel' => ReleaseChannel::fromString(
-                $storedGeneralSettings['update_release_channel'] ?? config('self-update.release_channel')
-            )->value,
             'log_syslog_host' => $storedLoggingSettings['syslog_host'] ?? $defaultSyslogHost,
             'log_syslog_port' => $storedLoggingSettings['syslog_port'] ?? $defaultSyslogPort,
             'log_level' => $storedLoggingSettings['level'] ?? $defaultLogLevel,
             'log_disabled' => array_key_exists('disabled', $storedLoggingSettings)
                 ? $this->toBoolean($storedLoggingSettings['disabled'])
                 : false,
-            'url_utils_verify_ssl' => array_key_exists('url_utils_verify_ssl', $storedGeneralSettings)
-                ? $this->toBoolean($storedGeneralSettings['url_utils_verify_ssl'])
-                : $this->toBoolean(config('url_utils.verify_ssl', true)),
         ];
     }
 

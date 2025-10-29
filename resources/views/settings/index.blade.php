@@ -37,6 +37,50 @@
                                 </span>
                             </a>
 
+                            <a href="{{ route('settings.updates') }}"
+                               class="group flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-6 transition hover:border-[#4E81FA] hover:shadow dark:border-gray-700 dark:bg-gray-800 dark:hover:border-[#4E81FA]">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div>
+                                        <h3 class="text-base font-semibold text-gray-900 transition group-hover:text-[#4E81FA] dark:text-gray-100">
+                                            {{ __('messages.update_settings') }}
+                                        </h3>
+                                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                            {{ __('messages.update_settings_short_description') }}
+                                        </p>
+                                    </div>
+                                    <span class="text-gray-300 transition group-hover:text-[#4E81FA] dark:text-gray-600">
+                                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                        </svg>
+                                    </span>
+                                </div>
+                                <span class="mt-auto text-sm font-medium text-[#4E81FA]">
+                                    {{ __('messages.view_details') }}
+                                </span>
+                            </a>
+
+                            <a href="{{ route('settings.logging') }}"
+                               class="group flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-6 transition hover:border-[#4E81FA] hover:shadow dark:border-gray-700 dark:bg-gray-800 dark:hover:border-[#4E81FA]">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div>
+                                        <h3 class="text-base font-semibold text-gray-900 transition group-hover:text-[#4E81FA] dark:text-gray-100">
+                                            {{ __('messages.logging_settings') }}
+                                        </h3>
+                                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                            {{ __('messages.logging_settings_short_description') }}
+                                        </p>
+                                    </div>
+                                    <span class="text-gray-300 transition group-hover:text-[#4E81FA] dark:text-gray-600">
+                                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                        </svg>
+                                    </span>
+                                </div>
+                                <span class="mt-auto text-sm font-medium text-[#4E81FA]">
+                                    {{ __('messages.view_details') }}
+                                </span>
+                            </a>
+
                             <a href="{{ route('settings.event_types.index') }}"
                                class="group flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-6 transition hover:border-[#4E81FA] hover:shadow dark:border-gray-700 dark:bg-gray-800 dark:hover:border-[#4E81FA]">
                                 <div class="flex items-start justify-between gap-3">
@@ -155,29 +199,7 @@
                                             {{ __('messages.email_settings') }}
                                         </h3>
                                         <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                            {{ __('messages.email_settings_description') }}
-                                        </p>
-                                    </div>
-                                    <span class="text-gray-300 transition group-hover:text-[#4E81FA] dark:text-gray-600">
-                                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                                        </svg>
-                                    </span>
-                                </div>
-                                <span class="mt-auto text-sm font-medium text-[#4E81FA]">
-                                    {{ __('messages.view_details') }}
-                                </span>
-                            </a>
-
-                            <a href="{{ route('settings.email_templates') }}"
-                               class="group flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-6 transition hover:border-[#4E81FA] hover:shadow dark:border-gray-700 dark:bg-gray-800 dark:hover:border-[#4E81FA]">
-                                <div class="flex items-start justify-between gap-3">
-                                    <div>
-                                        <h3 class="text-base font-semibold text-gray-900 transition group-hover:text-[#4E81FA] dark:text-gray-100">
-                                            {{ __('messages.email_templates') }}
-                                        </h3>
-                                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                            {{ __('messages.email_templates_description') }}
+                                            {{ __('messages.email_settings_combined_description') }}
                                         </p>
                                     </div>
                                     <span class="text-gray-300 transition group-hover:text-[#4E81FA] dark:text-gray-600">
