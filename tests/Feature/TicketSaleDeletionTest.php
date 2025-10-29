@@ -86,11 +86,17 @@ class TicketSaleDeletionTest extends TestCase
             'subdomain' => $creatorRole->subdomain,
         ]);
 
-        $sale->saleTickets()->create([
+        $saleTicket = $sale->saleTickets()->create([
             'ticket_id' => $ticket->id,
             'quantity' => 4,
-            'seats' => json_encode(array_fill(0, 4, null)),
         ]);
+
+        $saleTicket->entries()->createMany(collect(range(1, 4))->map(function ($seat) {
+            return [
+                'seat_number' => $seat,
+                'secret' => Str::lower(Str::random(32)),
+            ];
+        })->all());
 
         $ticket->refresh();
         $sold = json_decode($ticket->sold, true);
@@ -176,11 +182,17 @@ class TicketSaleDeletionTest extends TestCase
             'subdomain' => $creatorRole->subdomain,
         ]);
 
-        $sale->saleTickets()->create([
+        $saleTicket = $sale->saleTickets()->create([
             'ticket_id' => $ticket->id,
             'quantity' => 2,
-            'seats' => json_encode(array_fill(0, 2, null)),
         ]);
+
+        $saleTicket->entries()->createMany(collect(range(1, 2))->map(function ($seat) {
+            return [
+                'seat_number' => $seat,
+                'secret' => Str::lower(Str::random(32)),
+            ];
+        })->all());
 
         $sale->status = 'cancelled';
         $sale->save();

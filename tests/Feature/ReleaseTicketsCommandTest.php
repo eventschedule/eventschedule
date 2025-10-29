@@ -88,11 +88,17 @@ class ReleaseTicketsCommandTest extends TestCase
             'subdomain' => $creatorRole->subdomain,
         ]);
 
-        $sale->saleTickets()->create([
+        $saleTicket = $sale->saleTickets()->create([
             'ticket_id' => $ticket->id,
             'quantity' => 3,
-            'seats' => json_encode(array_fill(1, 3, null)),
         ]);
+
+        $saleTicket->entries()->createMany(collect(range(1, 3))->map(function ($seat) {
+            return [
+                'seat_number' => $seat,
+                'secret' => Str::lower(Str::random(32)),
+            ];
+        })->all());
 
         $sale->payment_amount = 30;
         $sale->save();
@@ -198,11 +204,17 @@ class ReleaseTicketsCommandTest extends TestCase
             'subdomain' => $creatorRole->subdomain,
         ]);
 
-        $sale->saleTickets()->create([
+        $saleTicket = $sale->saleTickets()->create([
             'ticket_id' => $ticket->id,
             'quantity' => 2,
-            'seats' => json_encode(array_fill(1, 2, null)),
         ]);
+
+        $saleTicket->entries()->createMany(collect(range(1, 2))->map(function ($seat) {
+            return [
+                'seat_number' => $seat,
+                'secret' => Str::lower(Str::random(32)),
+            ];
+        })->all());
 
         Carbon::setTestNow(Carbon::parse('2024-02-10 12:00:00'));
 

@@ -10,6 +10,7 @@ use App\Models\Role;
 use App\Models\Sale;
 use App\Models\Event;
 use App\Models\SaleTicket;
+use App\Models\SaleTicketEntry;
 use App\Utils\UrlUtils;
 use Stripe\StripeClient;
 use Endroid\QrCode\QrCode;
@@ -235,12 +236,22 @@ class TicketController extends Controller
 
         foreach($request->tickets as $ticketId => $quantity) {
             if ($quantity > 0) {
-                $sale->saleTickets()->create([
+                $saleTicket = $sale->saleTickets()->create([
                     'sale_id' => $sale->id,
                     'ticket_id' => UrlUtils::decodeId($ticketId),
                     'quantity' => $quantity,
-                    'seats' => json_encode(array_fill(1, $quantity, null)),
                 ]);
+
+                $entries = [];
+
+                for ($seat = 1; $seat <= $quantity; $seat++) {
+                    $entries[] = [
+                        'seat_number' => $seat,
+                        'secret' => strtolower(Str::random(32)),
+                    ];
+                }
+
+                $saleTicket->entries()->createMany($entries);
             }
         }
 
@@ -370,7 +381,21 @@ class TicketController extends Controller
             ];
         }
 
-        $qrCodeUrl = route('ticket.qr_code', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+        $sale->loadMissing('saleTickets.entries');
+
+        $entry = $this->resolveSingleEntry($sale);
+
+        if (! $entry) {
+            $entry = $sale->saleTickets
+                ->flatMap(function (SaleTicket $saleTicket) {
+                    return $saleTicket->entries;
+                })
+                ->first();
+        }
+
+        $qrSecret = $entry?->secret ?? $sale->secret;
+
+        $qrCodeUrl = route('ticket.qr_code', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $qrSecret]);
         $invoice = $invoiceNinja->createInvoice($client['id'], $lineItems, $qrCodeUrl, $sendEmail);
 
         $sale->transaction_reference = $invoice['id'];
@@ -483,18 +508,20 @@ class TicketController extends Controller
             return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
         }
 
-        $sale = Sale::where('event_id', $event->id)
-                    ->where('secret', $secret)
-                    ->first();
+        [$sale, $entry] = $this->resolveSaleAndEntry($event, $secret, true);
 
         if (! $sale) {
+            return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
+        }
+
+        if (! $entry) {
             return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
         }
 
         if (! $user->canEditEvent($event)) {
             return response()->json(['error' => __('messages.you_are_not_authorized_to_scan_this_ticket')], 200);
         }
-        
+
         if (Carbon::parse($sale->event_date)->format('Y-m-d') !== now()->format('Y-m-d')) {
             return response()->json(['error' => __('messages.this_ticket_is_not_valid_for_today')], 200);
         }
@@ -508,6 +535,13 @@ class TicketController extends Controller
         }
 
         $data = new \stdClass();
+        if (! $entry->scanned_at) {
+            $entry->scanned_at = now();
+            $entry->save();
+        }
+
+        $sale->load(['saleTickets.ticket', 'saleTickets.entries']);
+
         $data->attendee = $sale->name;
         $data->event = $event->name;
         $data->date = $event->localStartsAt(true, $sale->event_date);
@@ -516,33 +550,38 @@ class TicketController extends Controller
         foreach ($sale->saleTickets as $saleTicket) {
             $data->tickets[] = [
                 'type' => $saleTicket->ticket->type,
-                'seats' => json_decode($saleTicket->seats, true),
+                'seats' => $saleTicket->entries->sortBy('seat_number')->mapWithKeys(function (SaleTicketEntry $entryItem) {
+                    return [
+                        $entryItem->seat_number => $entryItem->scanned_at
+                            ? $entryItem->scanned_at->timestamp
+                            : 0,
+                    ];
+                })->toArray(),
             ];
         }
 
-        foreach ($sale->saleTickets as $saleTicket) {
-            $seats = $saleTicket->seats;
-            if ($seats) {
-                $seats = json_decode($seats, true);
-                foreach ($seats as $key => $value) {
-                    if (! $value) {
-                        $seats[$key] = time();
-                    }
-                }
-                $saleTicket->seats = json_encode($seats);
-                $saleTicket->save();
-            }
-        }
-        
         return response()->json($data);
     }
 
     public function qrCode($eventId, $secret)
     {
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
-        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
+        [$sale, $entry] = $this->resolveSaleAndEntry($event, $secret);
+        if (! $sale) {
+            abort(404);
+        }
 
-        $url = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $secret]);
+        $sale->loadMissing(['saleTickets.entries']);
+
+        if (! $entry) {
+            $entry = $this->resolveSingleEntry($sale);
+        }
+
+        if (! $entry) {
+            abort(404);
+        }
+
+        $url = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $entry->secret]);
 
         $qrCode = QrCode::create($url)            
             ->setSize(200)
@@ -561,37 +600,58 @@ class TicketController extends Controller
     public function view($eventId, $secret, AppleWalletService $appleWalletService, GoogleWalletService $googleWalletService)
     {
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
-        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
+        [$sale, $focusedEntry] = $this->resolveSaleAndEntry($event, $secret);
+
+        if (! $sale) {
+            abort(404);
+        }
+
+        $sale->loadMissing(['saleTickets.ticket', 'saleTickets.entries']);
+
         $role = $event->role();
+        $appleWalletAvailable = $appleWalletService->isAvailableForSale($sale);
+        $googleWalletAvailable = $googleWalletService->isAvailableForSale($sale);
 
-        $appleWalletUrl = $appleWalletService->isAvailableForSale($sale)
-            ? route('ticket.wallet.apple', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret])
-            : null;
-        $googleWalletUrl = $googleWalletService->isAvailableForSale($sale)
-            ? route('ticket.wallet.google', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret])
-            : null;
-
-        return view('ticket.view', compact('event', 'sale', 'role', 'appleWalletUrl', 'googleWalletUrl'));
+        return view('ticket.view', [
+            'event' => $event,
+            'sale' => $sale,
+            'role' => $role,
+            'appleWalletAvailable' => $appleWalletAvailable,
+            'googleWalletAvailable' => $googleWalletAvailable,
+            'focusedEntry' => $focusedEntry,
+        ]);
     }
 
     public function appleWallet($eventId, $secret, AppleWalletService $appleWalletService)
     {
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
-        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
+        [$sale, $entry] = $this->resolveSaleAndEntry($event, $secret);
+        if (! $sale) {
+            abort(404);
+        }
+        $sale->loadMissing(['saleTickets.ticket', 'saleTickets.entries']);
 
         if (! $appleWalletService->isAvailableForSale($sale)) {
             abort(404);
         }
 
         try {
-            $pass = $appleWalletService->generateTicketPass($sale);
+            if (! $entry) {
+                $entry = $this->resolveSingleEntry($sale);
+            }
+
+            if (! $entry) {
+                abort(404);
+            }
+
+            $pass = $appleWalletService->generateTicketPass($sale, $entry);
         } catch (\Throwable $exception) {
             report($exception);
 
             abort(500, __('messages.unable_to_generate_wallet_pass'));
         }
 
-        $filename = Str::slug($event->name . '-' . $sale->id) . '.pkpass';
+        $filename = Str::slug($event->name . '-' . $sale->id . '-' . $entry->seat_number) . '.pkpass';
 
         $passLength = strlen($pass);
 
@@ -608,14 +668,26 @@ class TicketController extends Controller
     public function googleWallet($eventId, $secret, GoogleWalletService $googleWalletService)
     {
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
-        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
+        [$sale, $entry] = $this->resolveSaleAndEntry($event, $secret);
+        if (! $sale) {
+            abort(404);
+        }
+        $sale->loadMissing(['saleTickets.ticket', 'saleTickets.entries']);
 
         if (! $googleWalletService->isAvailableForSale($sale)) {
             abort(404);
         }
 
         try {
-            $link = $googleWalletService->createSaveLink($sale);
+            if (! $entry) {
+                $entry = $this->resolveSingleEntry($sale);
+            }
+
+            if (! $entry) {
+                abort(404);
+            }
+
+            $link = $googleWalletService->createSaveLink($sale, $entry);
         } catch (\Throwable $exception) {
             report($exception);
 
@@ -750,6 +822,60 @@ class TicketController extends Controller
                 }
                 break;
         }
+    }
+
+    private function resolveSaleAndEntry(Event $event, string $secret, bool $requireEntry = false): array
+    {
+        $saleQuery = Sale::where('event_id', $event->id)
+            ->where('secret', $secret);
+
+        if ($requireEntry) {
+            $saleQuery->with(['saleTickets.entries']);
+        }
+
+        $sale = $saleQuery->first();
+
+        if ($sale) {
+            $entry = null;
+
+            if ($requireEntry) {
+                $entry = $this->resolveSingleEntry($sale);
+            }
+
+            return [$sale, $entry];
+        }
+
+        $entry = SaleTicketEntry::with('saleTicket.sale')
+            ->where('secret', $secret)
+            ->first();
+
+        if (! $entry || ! $entry->saleTicket || ! $entry->saleTicket->sale) {
+            return [null, null];
+        }
+
+        $sale = $entry->saleTicket->sale;
+
+        if ($sale->event_id !== $event->id) {
+            return [null, null];
+        }
+
+        return [$sale, $entry];
+    }
+
+    private function resolveSingleEntry(Sale $sale): ?SaleTicketEntry
+    {
+        $sale->loadMissing('saleTickets.entries');
+
+        $entries = $sale->saleTickets
+            ->flatMap(function (SaleTicket $saleTicket) {
+                return $saleTicket->entries;
+            });
+
+        if ($entries->count() === 1) {
+            return $entries->first();
+        }
+
+        return null;
     }
 
     private function sendTicketSaleNotifications(Sale $sale): void

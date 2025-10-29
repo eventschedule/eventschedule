@@ -11,7 +11,6 @@ class SaleTicket extends Model
     protected $fillable = [
         'sale_id',
         'ticket_id',
-        'seats',
         'quantity',
     ];
 
@@ -22,29 +21,26 @@ class SaleTicket extends Model
         });
     }
 
+    public function entries()
+    {
+        return $this->hasMany(SaleTicketEntry::class);
+    }
+
     public function hasBeenScanned(): bool
     {
-        if (! $this->seats) {
-            return false;
-        }
-
-        $seats = json_decode($this->seats, true);
-
-        if (! is_array($seats)) {
-            return false;
-        }
-
-        foreach ($seats as $value) {
-            if (! empty($value)) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->entries()->whereNotNull('scanned_at')->exists();
     }
 
     public function getUsageStatusAttribute(): string
     {
+        if ($this->relationLoaded('entries')) {
+            $scanned = $this->entries->contains(function (SaleTicketEntry $entry) {
+                return $entry->scanned_at !== null;
+            });
+
+            return $scanned ? 'used' : 'unused';
+        }
+
         return $this->hasBeenScanned() ? 'used' : 'unused';
     }
 

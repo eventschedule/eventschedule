@@ -185,7 +185,10 @@
             <p class="text-[10px]">{{ __('messages.number_of_attendees') }}: {{ $sale->quantity() }}</p>
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-x-[18px] gap-y-[12px] mt-[20px]">
+        @php
+          $focusedEntryId = $focusedEntry->id ?? null;
+        @endphp
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-[18px] gap-y-[12px] mt-[20px]">
           <div>
             <p class="text-[44px] leading-[0.8]">{{ __('messages.ticket') }}</p>
             @foreach ($sale->saleTickets as $saleTicket)
@@ -203,39 +206,62 @@
               </div>
             @endforeach
           </div>
-          <div class="justify-center flex">
-            <img class="w-[82px] h-[82px]" src="{{ route('ticket.qr_code', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}" alt="QR Code" />
+          <div class="flex flex-col items-center gap-[12px]">
+            @if ($appleWalletAvailable || $googleWalletAvailable)
+              <p class="text-[11px] font-semibold uppercase text-white/80 text-center">
+                {{ __('messages.add_tickets_to_wallet') }}
+              </p>
+            @endif
+            <div class="flex flex-col gap-[12px] w-full">
+              @foreach ($sale->saleTickets as $saleTicket)
+                @foreach ($saleTicket->entries->sortBy('seat_number') as $entry)
+                  @php
+                    $entryLabel = ($saleTicket->ticket->type ?: __('messages.ticket')) . ' #' . $entry->seat_number;
+                    $isFocused = $focusedEntryId === $entry->id;
+                    $cardHighlight = $isFocused ? 'ring-2 ring-white/70' : '';
+                  @endphp
+                  <div class="flex flex-col items-center bg-white/10 rounded-[16px] px-4 py-3 text-center gap-[8px] {{ $cardHighlight }}">
+                    <p class="text-[11px] font-semibold uppercase text-white/70">{{ $entryLabel }}</p>
+                    <img
+                      class="w-[82px] h-[82px]"
+                      src="{{ route('ticket.qr_code', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $entry->secret]) }}"
+                      alt="QR Code"
+                    />
+                    <a
+                      href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $entry->secret]) }}"
+                      class="text-[10px] text-white/70 underline"
+                    >
+                      {{ __('messages.view_ticket') }}
+                    </a>
+                    @if ($appleWalletAvailable || $googleWalletAvailable)
+                      <div class="flex flex-col sm:flex-row gap-[6px] justify-center">
+                        @if ($appleWalletAvailable)
+                          <a
+                            href="{{ route('ticket.wallet.apple', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $entry->secret]) }}"
+                            class="inline-flex items-center justify-center rounded-full border border-white/70 px-3 py-1 text-[10px] font-semibold uppercase text-white hover:bg-white hover:text-[#4E81FA] transition-colors duration-150"
+                          >
+                            {{ __('messages.add_to_apple_wallet') }}
+                          </a>
+                        @endif
+                        @if ($googleWalletAvailable)
+                          <a
+                            href="{{ route('ticket.wallet.google', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $entry->secret]) }}"
+                            class="inline-flex items-center justify-center rounded-full border border-white/70 px-3 py-1 text-[10px] font-semibold uppercase text-white hover:bg-white hover:text-[#4E81FA] transition-colors duration-150"
+                            target="_blank"
+                            rel="noopener"
+                          >
+                            {{ __('messages.save_to_google_wallet') }}
+                          </a>
+                        @endif
+                      </div>
+                    @endif
+                  </div>
+                @endforeach
+              @endforeach
+            </div>
           </div>
         </div>
       </div>
-
-      @if ($appleWalletUrl || $googleWalletUrl)
-        <div class="bg-white border border-[#4E81FA] p-[18px] rounded-[24px] flex flex-col gap-[12px] w-full max-w-[400px] mx-auto text-center">
-          <p class="text-[11px] font-semibold uppercase text-[#4E81FA]">
-            {{ __('messages.add_tickets_to_wallet') }}
-          </p>
-          <div class="flex flex-col sm:flex-row gap-[10px] justify-center">
-            @if ($appleWalletUrl)
-              <a
-                href="{{ $appleWalletUrl }}"
-                class="inline-flex items-center justify-center rounded-full border border-[#4E81FA] px-4 py-2 text-[11px] font-semibold uppercase text-[#4E81FA] hover:bg-[#4E81FA] hover:text-white transition-colors duration-150"
-              >
-                {{ __('messages.add_to_apple_wallet') }}
-              </a>
-            @endif
-            @if ($googleWalletUrl)
-              <a
-                href="{{ $googleWalletUrl }}"
-                class="inline-flex items-center justify-center rounded-full border border-[#4E81FA] px-4 py-2 text-[11px] font-semibold uppercase text-[#4E81FA] hover:bg-[#4E81FA] hover:text-white transition-colors duration-150"
-                target="_blank"
-                rel="noopener"
-              >
-                {{ __('messages.save_to_google_wallet') }}
-              </a>
-            @endif
-          </div>
-        </div>
-      @endif
 
       <div
         class="bg-[#4e81fa26] p-[12px] sm:p-[18px] rounded-[24px] flex flex-col justify-between w-full max-w-[400px] h-[185px] mx-auto"
