@@ -381,7 +381,18 @@ class TicketController extends Controller
             ];
         }
 
+        $sale->loadMissing('saleTickets.entries');
+
         $entry = $this->resolveSingleEntry($sale);
+
+        if (! $entry) {
+            $entry = $sale->saleTickets
+                ->flatMap(function (SaleTicket $saleTicket) {
+                    return $saleTicket->entries;
+                })
+                ->first();
+        }
+
         $qrSecret = $entry?->secret ?? $sale->secret;
 
         $qrCodeUrl = route('ticket.qr_code', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $qrSecret]);
@@ -556,6 +567,10 @@ class TicketController extends Controller
     {
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
         [$sale, $entry] = $this->resolveSaleAndEntry($event, $secret);
+        if (! $sale) {
+            abort(404);
+        }
+
         $sale->loadMissing(['saleTickets.entries']);
 
         if (! $entry) {
@@ -587,6 +602,10 @@ class TicketController extends Controller
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
         [$sale, $focusedEntry] = $this->resolveSaleAndEntry($event, $secret);
 
+        if (! $sale) {
+            abort(404);
+        }
+
         $sale->loadMissing(['saleTickets.ticket', 'saleTickets.entries']);
 
         $role = $event->role();
@@ -607,6 +626,9 @@ class TicketController extends Controller
     {
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
         [$sale, $entry] = $this->resolveSaleAndEntry($event, $secret);
+        if (! $sale) {
+            abort(404);
+        }
         $sale->loadMissing(['saleTickets.ticket', 'saleTickets.entries']);
 
         if (! $appleWalletService->isAvailableForSale($sale)) {
@@ -647,6 +669,9 @@ class TicketController extends Controller
     {
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
         [$sale, $entry] = $this->resolveSaleAndEntry($event, $secret);
+        if (! $sale) {
+            abort(404);
+        }
         $sale->loadMissing(['saleTickets.ticket', 'saleTickets.entries']);
 
         if (! $googleWalletService->isAvailableForSale($sale)) {
