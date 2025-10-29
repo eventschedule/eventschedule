@@ -147,6 +147,8 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->name('index');
         Route::get('/general', [SettingsController::class, 'general'])->name('general');
+        Route::get('/updates', [SettingsController::class, 'updates'])->name('updates');
+        Route::get('/logging', [SettingsController::class, 'logging'])->name('logging');
         Route::get('/branding', [SettingsController::class, 'branding'])->name('branding');
         Route::get('/terms', [SettingsController::class, 'terms'])->name('terms');
         Route::get('/integrations', [SettingsController::class, 'integrations'])->name('integrations');
@@ -155,6 +157,8 @@ Route::middleware(['auth', 'verified'])->group(function ()
         Route::get('/email-templates', [SettingsController::class, 'emailTemplates'])->name('email_templates');
         Route::get('/email-templates/{template}', [SettingsController::class, 'showEmailTemplate'])->name('email_templates.show');
         Route::patch('/general', [SettingsController::class, 'updateGeneral'])->name('general.update');
+        Route::patch('/updates', [SettingsController::class, 'updateUpdates'])->name('updates.update');
+        Route::patch('/logging', [SettingsController::class, 'updateLogging'])->name('logging.update');
         Route::patch('/branding', [SettingsController::class, 'updateBranding'])->name('branding.update');
         Route::patch('/terms', [SettingsController::class, 'updateTerms'])->name('terms.update');
         Route::patch('/wallet/apple', [SettingsController::class, 'updateAppleWallet'])->name('wallet.apple.update');

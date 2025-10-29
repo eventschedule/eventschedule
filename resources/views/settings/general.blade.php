@@ -10,79 +10,6 @@
             $generalSettings = [];
         }
 
-        $availableUpdateChannels = $availableUpdateChannels ?? [];
-
-        if ($availableUpdateChannels instanceof \Illuminate\Support\Collection) {
-            $availableUpdateChannels = $availableUpdateChannels->toArray();
-        } elseif (is_object($availableUpdateChannels)) {
-            $availableUpdateChannels = (array) $availableUpdateChannels;
-        }
-
-        $availableUpdateChannels = collect($availableUpdateChannels)
-            ->mapWithKeys(function ($option, $key) {
-                if (is_array($option) || is_object($option)) {
-                    $value = data_get($option, 'value', is_string($key) ? $key : null);
-                    $label = data_get($option, 'label', $value);
-                } else {
-                    $value = is_string($key) ? $key : $option;
-                    $label = $option;
-                }
-
-                if (! is_string($value)) {
-                    $value = is_scalar($value) ? (string) $value : null;
-                }
-
-                if (! is_string($label)) {
-                    $label = is_scalar($label) ? (string) $label : $value;
-                }
-
-                if ($value === null || $value === '') {
-                    return [];
-                }
-
-                return [$value => $label];
-            })
-            ->filter()
-            ->toArray();
-
-        $availableLogLevels = $availableLogLevels ?? [];
-
-        if ($availableLogLevels instanceof \Illuminate\Support\Collection) {
-            $availableLogLevels = $availableLogLevels->toArray();
-        } elseif (is_object($availableLogLevels)) {
-            $availableLogLevels = (array) $availableLogLevels;
-        }
-
-        $availableLogLevels = collect($availableLogLevels)
-            ->mapWithKeys(function ($option, $key) {
-                if (is_array($option) || is_object($option)) {
-                    $value = data_get($option, 'value', is_string($key) ? $key : null);
-                    $label = data_get($option, 'label', $value);
-                } else {
-                    $value = is_string($key) ? $key : $option;
-                    $label = $option;
-                }
-
-                if (! is_string($value)) {
-                    $value = is_scalar($value) ? (string) $value : null;
-                }
-
-                if (! is_string($label)) {
-                    $label = is_scalar($label) ? (string) $label : $value;
-                }
-
-                if ($value === null || $value === '') {
-                    return [];
-                }
-
-                return [$value => $label];
-            })
-            ->filter()
-            ->toArray();
-
-        $selectedUpdateChannel = $selectedUpdateChannel ?? null;
-        $versionInstalled = $versionInstalled ?? null;
-        $versionAvailable = $versionAvailable ?? null;
     @endphp
     <div class="py-12">
         <div class="max-w-4xl mx-auto space-y-6">
@@ -122,103 +49,6 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('public_url')" />
                             </div>
 
-                            <div>
-                                <x-input-label for="update_repository_url" :value="__('messages.update_repository_url')" />
-                                <x-text-input id="update_repository_url" name="update_repository_url" type="url"
-                                    class="mt-1 block w-full"
-                                    :value="old('update_repository_url', data_get($generalSettings, 'update_repository_url'))"
-                                    autocomplete="off" />
-                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                    {{ __('messages.update_repository_url_help') }}
-                                </p>
-                                <x-input-error class="mt-2" :messages="$errors->get('update_repository_url')" />
-                            </div>
-
-                            <div>
-                                <x-input-label for="update_release_channel" :value="__('messages.update_channel')" />
-                                <select id="update_release_channel" name="update_release_channel"
-                                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]">
-                                    @foreach ($availableUpdateChannels as $value => $label)
-                                        <option value="{{ $value }}"
-                                            @selected(old('update_release_channel', data_get($generalSettings, 'update_release_channel')) === $value)>
-                                            {{ $label }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                    {{ __('messages.default_update_channel_help') }}
-                                </p>
-                                <x-input-error class="mt-2" :messages="$errors->get('update_release_channel')" />
-                            </div>
-
-                            <div>
-                                <x-checkbox name="url_utils_verify_ssl"
-                                    label="{{ __('messages.verify_download_ssl') }}"
-                                    :checked="old('url_utils_verify_ssl', data_get($generalSettings, 'url_utils_verify_ssl'))" />
-                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                    {{ __('messages.verify_download_ssl_help') }}
-                                </p>
-                                <x-input-error class="mt-2" :messages="$errors->get('url_utils_verify_ssl')" />
-                            </div>
-
-                            <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
-                                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
-                                    {{ __('messages.logging_settings') }}
-                                </h3>
-                                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                                    {{ __('messages.logging_settings_description') }}
-                                </p>
-                            </div>
-
-                            <div class="grid gap-6 sm:grid-cols-2">
-                                <div>
-                                    <x-input-label for="log_syslog_host" :value="__('messages.log_syslog_host')" />
-                                    <x-text-input id="log_syslog_host" name="log_syslog_host" type="text"
-                                        class="mt-1 block w-full"
-                                        :value="old('log_syslog_host', data_get($generalSettings, 'log_syslog_host'))" autocomplete="off" />
-                                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                        {{ __('messages.log_syslog_host_help') }}
-                                    </p>
-                                    <x-input-error class="mt-2" :messages="$errors->get('log_syslog_host')" />
-                                </div>
-
-                                <div>
-                                    <x-input-label for="log_syslog_port" :value="__('messages.log_syslog_port')" />
-                                    <x-text-input id="log_syslog_port" name="log_syslog_port" type="number" min="1"
-                                        max="65535" class="mt-1 block w-full"
-                                        :value="old('log_syslog_port', data_get($generalSettings, 'log_syslog_port'))" autocomplete="off" />
-                                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                        {{ __('messages.log_syslog_port_help') }}
-                                    </p>
-                                    <x-input-error class="mt-2" :messages="$errors->get('log_syslog_port')" />
-                                </div>
-                            </div>
-
-                            <div>
-                                <x-input-label for="log_level" :value="__('messages.log_level')" />
-                                <select id="log_level" name="log_level"
-                                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]">
-                                    @foreach ($availableLogLevels as $levelValue => $label)
-                                        <option value="{{ $levelValue }}"
-                                            @selected(old('log_level', data_get($generalSettings, 'log_level')) === $levelValue)>
-                                            {{ $label }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                    {{ __('messages.log_level_help') }}
-                                </p>
-                                <x-input-error class="mt-2" :messages="$errors->get('log_level')" />
-                            </div>
-
-                            <div>
-                                <x-checkbox name="log_disabled" label="{{ __('messages.log_disabled') }}"
-                                    :checked="old('log_disabled', data_get($generalSettings, 'log_disabled'))" />
-                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                    {{ __('messages.log_disabled_help') }}
-                                </p>
-                            </div>
-
                             <div class="flex items-center gap-4">
                                 <x-primary-button>{{ __('messages.save') }}</x-primary-button>
 
@@ -231,19 +61,6 @@
                     </section>
                 </div>
             </div>
-
-            @if (! config('app.hosted') && ! config('app.testing'))
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
-                    <div class="max-w-3xl">
-                        @include('profile.partials.update-app-form', [
-                            'version_installed' => $versionInstalled,
-                            'version_available' => $versionAvailable,
-                            'availableChannels' => $availableUpdateChannels,
-                            'selectedChannel' => $selectedUpdateChannel,
-                        ])
-                    </div>
-                </div>
-            @endif
         </div>
     </div>
 </x-app-admin-layout>
