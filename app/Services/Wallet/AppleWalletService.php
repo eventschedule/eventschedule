@@ -404,9 +404,9 @@ class AppleWalletService
                         'value' => (string) $sale->id,
                     ],
                     $entry ? [
-                        'key' => 'seat',
+                        'key' => 'attendees',
                         'label' => __('messages.number_of_attendees'),
-                        'value' => (string) $entry->seat_number,
+                        'value' => '1',
                     ] : null,
                 ])),
                 'backFields' => [

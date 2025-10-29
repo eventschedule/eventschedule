@@ -5,6 +5,9 @@ namespace Tests\Unit\Services\Wallet;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Models\SaleTicket;
+use App\Models\SaleTicketEntry;
+use App\Models\Ticket;
 use App\Services\Wallet\AppleWalletService;
 use Carbon\Carbon;
 use Tests\TestCase;
@@ -239,6 +242,51 @@ class AppleWalletServiceTest extends TestCase
         $this->assertNull($service->capturedCmsSignature, 'CMS signature should not be produced when DER encoding is unavailable.');
         $this->assertNotEmpty($signature, 'Signature should not be empty.');
         $this->assertSame(0x30, ord($signature[0]), 'PKCS#7 signature should start with a DER sequence.');
+    }
+
+    public function testEntryPassShowsSingleAttendeeCount(): void
+    {
+        $service = $this->makeService(null);
+
+        $event = new Event([
+            'id' => 42,
+            'name' => 'Sample Event',
+            'starts_at' => Carbon::parse('2025-05-01 18:00:00'),
+        ]);
+        $event->setRelation('creatorRole', new Role(['timezone' => 'America/New_York']));
+        $event->setRelation('roles', collect());
+
+        $sale = new Sale([
+            'id' => 1001,
+            'secret' => 'sale-secret',
+            'event_date' => '2025-05-01',
+            'name' => 'Taylor Attendee',
+        ]);
+        $sale->setRelation('event', $event);
+
+        $ticket = new Ticket(['type' => 'General Admission']);
+
+        $saleTicket = new SaleTicket(['quantity' => 2]);
+        $saleTicket->setRelation('sale', $sale);
+        $saleTicket->setRelation('ticket', $ticket);
+
+        $entry = new SaleTicketEntry([
+            'seat_number' => 2,
+            'secret' => 'entry-secret',
+        ]);
+        $entry->setRelation('saleTicket', $saleTicket);
+
+        $saleTicket->setRelation('entries', collect([$entry]));
+        $sale->setRelation('saleTickets', collect([$saleTicket]));
+
+        $payload = $service->exposeBuildPassPayload($sale, $entry);
+
+        $auxiliaryFields = collect($payload['eventTicket']['auxiliaryFields']);
+        $attendeeField = $auxiliaryFields->firstWhere('key', 'attendees');
+
+        $this->assertNotNull($attendeeField, 'Pass payload should include attendee count field.');
+        $this->assertSame('1', $attendeeField['value']);
+        $this->assertSame(__('messages.number_of_attendees'), $attendeeField['label']);
     }
 
     public function testItDoesNotDeleteOriginalPemWwdrCertificate(): void
@@ -592,6 +640,11 @@ class AppleWalletServiceForTests extends AppleWalletService
         $this->capturedCmsSignature = null;
 
         return $this->signManifest($manifest);
+    }
+
+    public function exposeBuildPassPayload(Sale $sale, ?SaleTicketEntry $entry = null): array
+    {
+        return $this->buildPassPayload($sale, $entry);
     }
 
     public function exposeResolveEventStart(Event $event, Sale $sale): Carbon
