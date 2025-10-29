@@ -120,24 +120,34 @@ class TicketPaidNotification extends Notification
     protected function walletLinksMarkdown(): string
     {
         $links = [];
-        $sale = $this->sale->loadMissing('event');
+        $sale = $this->sale->loadMissing(['event', 'saleTickets.ticket', 'saleTickets.entries']);
 
         $appleWallet = app(AppleWalletService::class);
-
-        if ($appleWallet->isAvailableForSale($sale)) {
-            $links[] = '[' . __('messages.add_to_apple_wallet') . '](' . route('ticket.wallet.apple', [
-                'event_id' => UrlUtils::encodeId($sale->event_id),
-                'secret' => $sale->secret,
-            ]) . ')';
-        }
+        $appleAvailable = $appleWallet->isAvailableForSale($sale);
 
         $googleWallet = app(GoogleWalletService::class);
+        $googleAvailable = $googleWallet->isAvailableForSale($sale);
 
-        if ($googleWallet->isAvailableForSale($sale)) {
-            $links[] = '[' . __('messages.save_to_google_wallet') . '](' . route('ticket.wallet.google', [
-                'event_id' => UrlUtils::encodeId($sale->event_id),
-                'secret' => $sale->secret,
-            ]) . ')';
+        foreach ($sale->saleTickets as $saleTicket) {
+            $baseLabel = $saleTicket->ticket->type ?: __('messages.ticket');
+
+            foreach ($saleTicket->entries->sortBy('seat_number') as $entry) {
+                $label = trim($baseLabel) . ' #' . $entry->seat_number;
+
+                if ($appleAvailable) {
+                    $links[] = '[' . $label . ' — ' . __('messages.add_to_apple_wallet') . '](' . route('ticket.wallet.apple', [
+                        'event_id' => UrlUtils::encodeId($sale->event_id),
+                        'secret' => $entry->secret,
+                    ]) . ')';
+                }
+
+                if ($googleAvailable) {
+                    $links[] = '[' . $label . ' — ' . __('messages.save_to_google_wallet') . '](' . route('ticket.wallet.google', [
+                        'event_id' => UrlUtils::encodeId($sale->event_id),
+                        'secret' => $entry->secret,
+                    ]) . ')';
+                }
+            }
         }
 
         return implode("\n\n", $links);

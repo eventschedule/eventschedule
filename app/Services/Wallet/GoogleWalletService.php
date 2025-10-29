@@ -5,6 +5,7 @@ namespace App\Services\Wallet;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Models\SaleTicketEntry;
 use Carbon\Carbon;
 use Google\Client as GoogleClient;
 use Illuminate\Support\Str;
@@ -53,13 +54,13 @@ class GoogleWalletService
         return $this->isConfigured() && $sale->status === 'paid';
     }
 
-    public function createSaveLink(Sale $sale): string
+    public function createSaveLink(Sale $sale, SaleTicketEntry $entry): string
     {
         if (! $this->isAvailableForSale($sale)) {
             throw new RuntimeException('Google Wallet is not configured for this sale.');
         }
 
-        $sale->loadMissing('event.creatorRole', 'event.venue', 'saleTickets.ticket');
+        $sale->loadMissing('event.creatorRole', 'event.venue', 'saleTickets.ticket', 'saleTickets.entries');
 
         if (! $sale->event) {
             throw new RuntimeException('Sale event is not available.');
@@ -72,7 +73,7 @@ class GoogleWalletService
             throw new RuntimeException('Google Wallet credentials are missing the client email.');
         }
 
-        $payload = $this->buildPayload($sale);
+        $payload = $this->buildPayload($sale, $entry);
 
         $claims = [
             'iss' => $clientEmail,
@@ -128,16 +129,12 @@ class GoogleWalletService
         throw new RuntimeException('Google Wallet service account credentials are invalid.');
     }
 
-    protected function buildPayload(Sale $sale): array
+    protected function buildPayload(Sale $sale, SaleTicketEntry $entry): array
     {
         $event = $sale->event;
         $classId = $this->resolveClassId($event);
-        $objectId = $this->resolveObjectId($sale);
-        $ticketSummary = $sale->saleTickets->map(function ($saleTicket) {
-            $name = $saleTicket->ticket->type ?: __('messages.ticket');
-
-            return trim($name) . ' x ' . $saleTicket->quantity;
-        })->implode(', ');
+        $objectId = $this->resolveObjectId($sale, $entry);
+        $ticketSummary = $this->summarizeEntry($entry);
 
         $start = $this->resolveEventStart($event, $sale);
         $end = $this->resolveEventEnd($event, $start);
@@ -175,10 +172,10 @@ class GoogleWalletService
             'state' => 'ACTIVE',
             'barcode' => [
                 'type' => 'QR_CODE',
-                'value' => $sale->secret,
+                'value' => $entry->secret,
             ],
             'ticketHolderName' => $this->resolveTicketHolder($sale),
-            'ticketNumber' => (string) $sale->id,
+            'ticketNumber' => (string) ($sale->id . '-' . $entry->seat_number),
             'eventStartDateTime' => [
                 'dateTime' => $this->formatDateTime($start),
                 'timeZone' => $timezone,
@@ -192,7 +189,7 @@ class GoogleWalletService
                     [
                         'uri' => route('ticket.view', [
                             'event_id' => $event->hashedId(),
-                            'secret' => $sale->secret,
+                            'secret' => $entry->secret,
                         ]),
                         'description' => __('messages.view_tickets'),
                     ],
@@ -200,8 +197,12 @@ class GoogleWalletService
             ],
             'textModulesData' => array_values(array_filter([
                 [
-                    'header' => __('messages.tickets'),
+                    'header' => __('messages.ticket'),
                     'body' => $ticketSummary ?: (string) $sale->quantity(),
+                ],
+                [
+                    'header' => __('messages.number_of_attendees'),
+                    'body' => (string) $entry->seat_number,
                 ],
                 $ticketNotes ? [
                     'header' => __('messages.notes'),
@@ -245,11 +246,21 @@ class GoogleWalletService
         return $this->issuerId . '.' . $suffix . '-' . $eventSlug;
     }
 
-    protected function resolveObjectId(Sale $sale): string
+    protected function resolveObjectId(Sale $sale, SaleTicketEntry $entry): string
     {
-        $suffix = 'sale-' . $sale->id . '-' . substr($sale->secret, 0, 6);
+        $suffix = 'sale-' . $sale->id . '-' . substr($entry->secret, 0, 6);
 
         return $this->issuerId . '.' . $suffix;
+    }
+
+    protected function summarizeEntry(SaleTicketEntry $entry): string
+    {
+        $entry->loadMissing('saleTicket.ticket');
+
+        $ticket = $entry->saleTicket->ticket ?? null;
+        $name = $ticket?->type ?: $ticket?->name ?: __('messages.ticket');
+
+        return trim($name) . ' #' . $entry->seat_number;
     }
 
     protected function resolveEventStart(Event $event, Sale $sale): Carbon

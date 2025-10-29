@@ -5,6 +5,7 @@ namespace App\Services\Wallet;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Models\SaleTicketEntry;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -231,7 +232,7 @@ class AppleWalletService
         return true;
     }
 
-    public function generateTicketPass(Sale $sale): string
+    public function generateTicketPass(Sale $sale, ?SaleTicketEntry $entry = null): string
     {
         $this->logDebug('Starting Apple Wallet pass generation.', [
             'sale_id' => $sale->id,
@@ -243,7 +244,7 @@ class AppleWalletService
             throw new RuntimeException('Apple Wallet is not configured for this sale.');
         }
 
-        $sale->loadMissing('event.creatorRole', 'event.venue', 'saleTickets.ticket');
+        $sale->loadMissing('event.creatorRole', 'event.venue', 'saleTickets.ticket', 'saleTickets.entries');
 
         $eventTimezone = $sale->event ? $this->resolveTimezone($sale->event) : null;
 
@@ -265,7 +266,7 @@ class AppleWalletService
             throw new RuntimeException('Sale event is not available.');
         }
 
-        $payload = $this->buildPassPayload($sale);
+        $payload = $this->buildPassPayload($sale, $entry);
 
         $this->logDebug('Apple Wallet pass payload generated.', [
             'sale_id' => $sale->id,
@@ -321,16 +322,18 @@ class AppleWalletService
         return $package;
     }
 
-    protected function buildPassPayload(Sale $sale): array
+    protected function buildPassPayload(Sale $sale, ?SaleTicketEntry $entry = null): array
     {
         $event = $sale->event;
         $startsAt = $this->resolveEventStart($event, $sale);
         $relevantDate = $startsAt->copy()->setTimezone('UTC')->format('Y-m-d\TH:i:s\Z');
-        $ticketSummary = $sale->saleTickets->map(function ($saleTicket) {
-            $name = $saleTicket->ticket->type ?: __('messages.ticket');
+        $ticketSummary = $entry
+            ? $this->summarizeEntry($entry)
+            : $sale->saleTickets->map(function ($saleTicket) {
+                $name = $saleTicket->ticket->type ?: __('messages.ticket');
 
-            return trim($name) . ' x ' . $saleTicket->quantity;
-        })->implode(', ');
+                return trim($name) . ' x ' . $saleTicket->quantity;
+            })->implode(', ');
 
         $this->logDebug('Apple Wallet pass timing resolved.', [
             'sale_id' => $sale->id,
@@ -344,7 +347,7 @@ class AppleWalletService
         $fields = [
             'formatVersion' => 1,
             'passTypeIdentifier' => $this->passTypeIdentifier,
-            'serialNumber' => $this->buildSerialNumber($sale),
+            'serialNumber' => $this->buildSerialNumber($sale, $entry),
             'teamIdentifier' => $this->teamIdentifier,
             'organizationName' => $this->organizationName,
             'description' => $event->name,
@@ -355,7 +358,7 @@ class AppleWalletService
             'labelColor' => $this->labelColor,
             'barcode' => [
                 'format' => 'PKBarcodeFormatQR',
-                'message' => $sale->secret,
+                'message' => $entry ? $entry->secret : $sale->secret,
                 'messageEncoding' => 'utf-8',
             ],
             'eventTicket' => [
@@ -384,16 +387,27 @@ class AppleWalletService
                     ] : null,
                 ])),
                 'auxiliaryFields' => array_values(array_filter([
-                    [
-                        'key' => 'tickets',
-                        'label' => __('messages.tickets'),
-                        'value' => $ticketSummary ?: $sale->quantity(),
-                    ],
+                    $entry
+                        ? [
+                            'key' => 'ticket-type',
+                            'label' => __('messages.ticket'),
+                            'value' => $ticketSummary,
+                        ]
+                        : [
+                            'key' => 'tickets',
+                            'label' => __('messages.tickets'),
+                            'value' => $ticketSummary ?: $sale->quantity(),
+                        ],
                     [
                         'key' => 'order',
                         'label' => __('messages.order_number'),
                         'value' => (string) $sale->id,
                     ],
+                    $entry ? [
+                        'key' => 'seat',
+                        'label' => __('messages.number_of_attendees'),
+                        'value' => (string) $entry->seat_number,
+                    ] : null,
                 ])),
                 'backFields' => [
                     [
@@ -401,7 +415,7 @@ class AppleWalletService
                         'label' => __('messages.ticket'),
                         'value' => route('ticket.view', [
                             'event_id' => $event->hashedId(),
-                            'secret' => $sale->secret,
+                            'secret' => $entry ? $entry->secret : $sale->secret,
                         ]),
                     ],
                 ],
@@ -433,6 +447,14 @@ class AppleWalletService
                 'quantity' => $saleTicket->quantity,
             ];
         })->values()->all();
+    }
+
+    protected function summarizeEntry(SaleTicketEntry $entry): string
+    {
+        $ticket = $entry->saleTicket->ticket;
+        $name = $ticket?->type ?: $ticket?->name ?: __('messages.ticket');
+
+        return trim($name) . ' #' . $entry->seat_number;
     }
 
     protected function summarizePayloadForLog(array $payload): array
@@ -488,9 +510,15 @@ class AppleWalletService
         return $summary;
     }
 
-    protected function buildSerialNumber(Sale $sale): string
+    protected function buildSerialNumber(Sale $sale, ?SaleTicketEntry $entry = null): string
     {
-        return strtoupper(substr(hash('sha256', $sale->id . '|' . $sale->secret), 0, 32));
+        $seed = $sale->id . '|' . $sale->secret;
+
+        if ($entry) {
+            $seed .= '|' . $entry->secret;
+        }
+
+        return strtoupper(substr(hash('sha256', $seed), 0, 32));
     }
 
     protected function resolveEventStart(Event $event, Sale $sale): Carbon
