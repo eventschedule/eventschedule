@@ -33,6 +33,7 @@ class Event extends Model
         'payment_method',
         'payment_instructions',
         'expire_unpaid_tickets',
+        'remind_unpaid_tickets_every',
         'registration_url',
         'category_id',
         'creator_role_id',

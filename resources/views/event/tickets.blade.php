@@ -263,6 +263,16 @@
             </div>
         @endif
 
+        @if ($event->remind_unpaid_tickets_every > 0)
+            <div class="mt-8">
+                @if ($event->remind_unpaid_tickets_every == 1)
+                    {{ __('messages.payment_reminder_every_hour') }}
+                @else
+                    {{ __('messages.payment_reminder_every_hours', ['count' => $event->remind_unpaid_tickets_every]) }}
+                @endif
+            </div>
+        @endif
+
 
     </form>
 </div>
