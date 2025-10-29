@@ -1,4 +1,4 @@
-<x-app-layout :title="$role->name . ' | Event Schedule'">
+<x-app-layout :title="$role->name . ' | Event Schedule'" :force-light="true">
 
     <noscript>
       <div style="background: #fff3cd; color: #856404; padding: 16px; text-align: center; font-size: 1rem;">

@@ -1,5 +1,10 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full" data-theme="system">
+<html
+    lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+    class="h-full"
+    data-theme="{{ ($forceLight ?? false) ? 'light' : 'system' }}"
+    @if ($forceLight ?? false) data-force-theme="light" @endif
+>
 <head>
     <title>{{ $title ?? 'Event Schedule' }}</title>
     <!-- Version: {{ config('self-update.version_installed') }} -->
@@ -36,8 +41,13 @@
             const storageKey = 'theme';
             const root = document.documentElement;
             const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            const forceLight = @json($forceLight ?? false);
 
             const getPreference = () => {
+                if (forceLight) {
+                    return 'light';
+                }
+
                 const stored = window.localStorage.getItem(storageKey);
                 if (stored === 'light' || stored === 'dark' || stored === 'system') {
                     return stored;
@@ -46,13 +56,21 @@
                 return 'system';
             };
 
-            const applyPreference = (preference) => {
-                const resolved = preference === 'system'
+            const resolvePreference = (preference) => {
+                if (forceLight) {
+                    return 'light';
+                }
+
+                return preference === 'system'
                     ? (mediaQuery.matches ? 'dark' : 'light')
                     : preference;
+            };
+
+            const applyPreference = (preference) => {
+                const resolved = resolvePreference(preference);
 
                 root.classList.toggle('dark', resolved === 'dark');
-                root.dataset.themePreference = preference;
+                root.dataset.themePreference = forceLight ? 'light' : preference;
                 root.dataset.themeResolved = resolved;
                 root.style.colorScheme = resolved;
             };

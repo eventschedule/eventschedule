@@ -9,10 +9,15 @@ Alpine.start();
 
 const themeStorageKey = 'theme';
 const themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+const forcedTheme = document.documentElement.dataset.forceTheme;
 
 const isValidTheme = (value) => ['light', 'dark', 'system'].includes(value);
 
 const getStoredThemePreference = () => {
+    if (isValidTheme(forcedTheme)) {
+        return forcedTheme;
+    }
+
     const stored = window.localStorage.getItem(themeStorageKey);
 
     if (isValidTheme(stored)) {
@@ -26,6 +31,10 @@ let lastResolvedTheme = null;
 let lastThemePreference = null;
 
 const resolveTheme = (preference) => {
+    if (isValidTheme(forcedTheme)) {
+        return forcedTheme;
+    }
+
     if (preference === 'system') {
         return themeMediaQuery.matches ? 'dark' : 'light';
     }
@@ -47,7 +56,7 @@ const applyThemePreference = (preference, { notify = true } = {}) => {
     const root = document.documentElement;
 
     root.classList.toggle('dark', resolved === 'dark');
-    root.dataset.themePreference = preference;
+    root.dataset.themePreference = isValidTheme(forcedTheme) ? forcedTheme : preference;
     root.dataset.themeResolved = resolved;
     root.style.colorScheme = resolved;
 
@@ -60,6 +69,15 @@ const applyThemePreference = (preference, { notify = true } = {}) => {
 };
 
 const setThemePreference = (preference) => {
+    if (isValidTheme(forcedTheme)) {
+        if (isValidTheme(preference)) {
+            window.localStorage.setItem(themeStorageKey, preference);
+        }
+
+        applyThemePreference(forcedTheme);
+        return;
+    }
+
     if (!isValidTheme(preference)) {
         return;
     }
