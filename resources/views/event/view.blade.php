@@ -329,6 +329,20 @@
                                                                     $usageClasses = $usageStatus === 'used'
                                                                         ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-200'
                                                                         : 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200';
+                                                                    $entryDetails = $sale->saleTickets->flatMap(function ($saleTicket) {
+                                                                        $ticketLabel = $saleTicket->ticket->type ?: __('messages.ticket');
+
+                                                                        return $saleTicket->entries->map(function ($entry) use ($ticketLabel) {
+                                                                            return [
+                                                                                'id' => $entry->id,
+                                                                                'label' => $ticketLabel . ' #' . $entry->seat_number,
+                                                                                'seat' => (int) $entry->seat_number,
+                                                                                'used' => $entry->scanned_at !== null,
+                                                                                'used_at' => $entry->scanned_at,
+                                                                            ];
+                                                                        });
+                                                                    })->sortBy('seat')->values();
+                                                                    $unusedEntries = $entryDetails->filter(fn ($entry) => ! $entry['used']);
                                                                 @endphp
                                                                 <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $statusClasses }}">
                                                                     {{ __('messages.' . $sale->status) }}
@@ -341,7 +355,7 @@
                                                             </td>
                                                             <td class="px-4 py-2 align-top">{{ $saleCreatedAt ?? __('messages.none') }}</td>
                                                             <td class="px-4 py-2 align-top">
-                                                                <div class="relative"
+                                                                    <div class="relative"
                                                                      x-data="{
                                                                         open: false,
                                                                         positionDropdown() {
@@ -380,6 +394,15 @@
                                                                            role="menuitem">
                                                                             {{ __('messages.view') }}
                                                                         </a>
+
+                                                                        @if ($unusedEntries->isNotEmpty())
+                                                                            <button type="button"
+                                                                                    x-on:click="$dispatch('open-modal', 'mark-ticket-used-{{ $sale->id }}'); open = false"
+                                                                                    class="block w-full px-4 py-2 text-left text-xs text-gray-700 hover:bg-gray-100 transition-colors duration-150 dark:text-gray-200 dark:hover:bg-gray-700"
+                                                                                    role="menuitem">
+                                                                                {{ __('messages.mark_tickets_as_used') }}
+                                                                            </button>
+                                                                        @endif
 
                                                                         @if ($sale->status === 'unpaid')
                                                                             <form method="POST" action="{{ route('sales.action', ['sale_id' => \App\Utils\UrlUtils::encodeId($sale->id)]) }}">
@@ -423,6 +446,58 @@
                                                                 </div>
                                                             </td>
                                                         </tr>
+                                                        @if ($unusedEntries->isNotEmpty())
+                                                            <x-modal name="mark-ticket-used-{{ $sale->id }}" focusable>
+                                                                <form method="POST" action="{{ route('sales.mark_used', ['sale_id' => \App\Utils\UrlUtils::encodeId($sale->id)]) }}" class="p-6" x-data="{ mode: 'all' }">
+                                                                    @csrf
+                                                                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                                                                        {{ __('messages.mark_tickets_as_used') }}
+                                                                    </h2>
+                                                                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                                                                        {{ __('messages.mark_tickets_as_used_description') }}
+                                                                    </p>
+
+                                                                    <div class="mt-4 space-y-3">
+                                                                        <label class="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-200">
+                                                                            <input type="radio" name="mode" value="all" class="mt-1" x-model="mode">
+                                                                            <span>{{ __('messages.mark_all_tickets_as_used') }}</span>
+                                                                        </label>
+
+                                                                        <label class="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-200">
+                                                                            <input type="radio" name="mode" value="partial" class="mt-1" x-model="mode">
+                                                                            <span>{{ __('messages.choose_specific_tickets_to_mark_as_used') }}</span>
+                                                                        </label>
+                                                                    </div>
+
+                                                                    <div class="mt-4" x-show="mode === 'partial'" x-cloak>
+                                                                        <div class="max-h-48 overflow-y-auto divide-y divide-gray-200 dark:divide-gray-700">
+                                                                            @foreach ($entryDetails as $entry)
+                                                                                <label class="flex items-center justify-between gap-4 py-2 text-sm text-gray-700 dark:text-gray-200">
+                                                                                    <div>
+                                                                                        <div class="font-medium">{{ $entry['label'] }}</div>
+                                                                                        @if ($entry['used'])
+                                                                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.already_marked_as_used') }}</div>
+                                                                                        @endif
+                                                                                    </div>
+                                                                                    <input type="checkbox" name="entries[]" value="{{ $entry['id'] }}" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                                                                           @if ($entry['used']) disabled @endif>
+                                                                                </label>
+                                                                            @endforeach
+                                                                        </div>
+                                                                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.used_tickets_cannot_be_selected') }}</p>
+                                                                    </div>
+
+                                                                    <div class="mt-6 flex justify-end gap-3">
+                                                                        <button type="button"
+                                                                                class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors duration-150 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                                                                                x-on:click="$dispatch('close-modal', 'mark-ticket-used-{{ $sale->id }}')">
+                                                                            {{ __('messages.cancel') }}
+                                                                        </button>
+                                                                        <x-primary-button>{{ __('messages.mark_as_used') }}</x-primary-button>
+                                                                    </div>
+                                                                </form>
+                                                            </x-modal>
+                                                        @endif
                                                     @endforeach
                                                 </tbody>
                                             </table>

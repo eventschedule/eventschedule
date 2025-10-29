@@ -719,6 +719,59 @@ class TicketController extends Controller
         return back()->with('success', __('messages.action_completed'));
     }
 
+    public function markUsed(Request $request, $sale_id)
+    {
+        $sale = Sale::with(['event', 'saleTickets.entries'])
+            ->findOrFail(UrlUtils::decodeId($sale_id));
+
+        $user = $request->user();
+
+        if (! $user || ! $user->canEditEvent($sale->event)) {
+            return back()->with('error', __('messages.unauthorized'));
+        }
+
+        $validated = $request->validate([
+            'mode' => ['required', Rule::in(['all', 'partial'])],
+            'entries' => ['required_if:mode,partial', 'array'],
+            'entries.*' => ['integer'],
+        ]);
+
+        $entries = $sale->saleTickets
+            ->flatMap(function (SaleTicket $saleTicket) {
+                return $saleTicket->entries;
+            });
+
+        if ($entries->isEmpty()) {
+            return back()->with('error', __('messages.no_tickets_to_mark_as_used'));
+        }
+
+        if ($validated['mode'] === 'all') {
+            $entriesToMark = $entries->filter(function (SaleTicketEntry $entry) {
+                return $entry->scanned_at === null;
+            });
+        } else {
+            $selectedIds = collect($validated['entries'])->map(function ($id) {
+                return (int) $id;
+            });
+
+            $entriesToMark = $entries->filter(function (SaleTicketEntry $entry) use ($selectedIds) {
+                return $selectedIds->contains($entry->id) && $entry->scanned_at === null;
+            });
+        }
+
+        if ($entriesToMark->isEmpty()) {
+            return back()->with('error', __('messages.no_tickets_to_mark_as_used'));
+        }
+
+        $timestamp = now();
+
+        $entriesToMark->each(function (SaleTicketEntry $entry) use ($timestamp) {
+            $entry->forceFill(['scanned_at' => $timestamp])->save();
+        });
+
+        return back()->with('success', __('messages.mark_used_success'));
+    }
+
     public function handleBulkAction(Request $request)
     {
         $validated = $request->validate([
