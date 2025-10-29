@@ -128,6 +128,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/tickets', [TicketController::class, 'tickets'])->name('tickets');
     Route::get('/sales', [TicketController::class, 'sales'])->name('sales');
     Route::post('/sales/action/{sale_id}', [TicketController::class, 'handleAction'])->name('sales.action');
+    Route::post('/sales/{sale_id}/mark-used', [TicketController::class, 'markUsed'])->name('sales.mark_used');
     Route::post('/sales/actions', [TicketController::class, 'handleBulkAction'])->name('sales.actions');
 
     Route::get('/media-library', [MediaLibraryController::class, 'index'])->name('media.index');

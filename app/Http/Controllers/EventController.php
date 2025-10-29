@@ -197,7 +197,7 @@ class EventController extends Controller
             : null;
 
         $sales = $event->sales()
-            ->with(['saleTickets.ticket'])
+            ->with(['saleTickets.ticket', 'saleTickets.entries'])
             ->orderByDesc('created_at')
             ->get();
 
