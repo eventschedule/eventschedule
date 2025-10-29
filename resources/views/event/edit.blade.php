@@ -988,6 +988,33 @@
                                     <div v-else>
                                         <input type="hidden" name="expire_unpaid_tickets" value="0"/>
                                     </div>
+
+                                    <div class="mb-6">
+                                        <div class="flex items-center">
+                                            <input id="remind_unpaid_tickets_checkbox" name="remind_unpaid_tickets_checkbox" type="checkbox"
+                                                v-model="showRemindUnpaid"
+                                                class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
+                                                x-on:change="toggleRemindUnpaid">
+                                            <label for="remind_unpaid_tickets_checkbox" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                                {{ __('messages.remind_unpaid_tickets') }}
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-6" v-if="showRemindUnpaid">
+                                        <x-input-label for="remind_unpaid_tickets_every" :value="__('messages.remind_every_number_of_hours')" />
+                                        <x-text-input id="remind_unpaid_tickets_every" name="remind_unpaid_tickets_every" type="number" class="mt-1 block w-full"
+                                            :value="old('remind_unpaid_tickets_every', $event->remind_unpaid_tickets_every)"
+                                            v-model="event.remind_unpaid_tickets_every"
+                                            autocomplete="off" />
+                                        <p class="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                                            {{ __('messages.remind_unpaid_tickets_help') }}
+                                        </p>
+                                        <x-input-error class="mt-2" :messages="$errors->get('remind_unpaid_tickets_every')" />
+                                    </div>
+                                    <div v-else>
+                                        <input type="hidden" name="remind_unpaid_tickets_every" value="0"/>
+                                    </div>
                                 </div>
 
                                 @if ($user->isMember($subdomain))
@@ -1249,6 +1276,7 @@
           price: formatTicketPrice(ticket.price)
         })),
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
+        showRemindUnpaid: @json($event->remind_unpaid_tickets_every > 0),
         soldLabel: "{{ __('messages.sold_reserved') }}",
         isRecurring: @json($event->days_of_week ? true : false),
         eventUrlCopied: false,
@@ -1712,6 +1740,13 @@
           this.event.expire_unpaid_tickets = 24;
         } else {
           this.event.expire_unpaid_tickets = 0;
+        }
+      },
+      toggleRemindUnpaid() {
+        if (! this.event.remind_unpaid_tickets_every) {
+          this.event.remind_unpaid_tickets_every = 12;
+        } else {
+          this.event.remind_unpaid_tickets_every = 0;
         }
       },
       toggleCuratorGroupSelection(curatorId) {

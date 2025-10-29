@@ -140,6 +140,47 @@ MD,
                 ':app_name' => 'The application name configured in settings.',
             ],
         ],
+        'ticket_reminder_purchaser' => [
+            'label' => 'Ticket payment reminder (purchaser)',
+            'description' => 'Sent to attendees to remind them to complete payment for an unpaid reservation.',
+            'enabled' => true,
+            'subject' => 'Reminder: Complete your ticket reservation for :event_name',
+            'body' => <<<'MD'
+# Hello!
+
+:subject_line
+
+- **Event:** :event_name
+- **Date:** :event_date
+- **Tickets:** :ticket_quantity
+- **Total Reserved:** :amount_total
+- **Order #:** :order_reference
+
+Complete your payment to keep your tickets. Reminders are sent every :reminder_interval_hours hour(s) until payment is received.
+
+[Complete Payment](:ticket_view_url)
+
+:payment_instructions_section
+
+[View Event](:event_url)
+
+Thanks,
+:app_name
+MD,
+            'placeholders' => [
+                ':subject_line' => 'The email subject line with placeholders applied.',
+                ':event_name' => 'Name of the event.',
+                ':event_date' => 'Date of the event, or "Date to be announced" when not available.',
+                ':ticket_quantity' => 'Number of tickets reserved in the order.',
+                ':amount_total' => 'Total amount reserved or paid, including the currency.',
+                ':event_url' => 'Public link where the recipient can view the event.',
+                ':ticket_view_url' => 'Private link where the purchaser can view their order and tickets.',
+                ':order_reference' => 'Internal reference number for the order.',
+                ':app_name' => 'The application name configured in settings.',
+                ':reminder_interval_hours' => 'Number of hours between payment reminder emails.',
+                ':payment_instructions_section' => 'Payment instructions defined on the event, including a translated heading when available.',
+            ],
+        ],
         'ticket_timeout_purchaser' => [
             'label' => 'Ticket reservation timeout (purchaser)',
             'description' => 'Sent to attendees when an unpaid ticket reservation expires.',

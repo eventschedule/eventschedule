@@ -11,6 +11,10 @@ use App\Utils\NotificationUtils;
 
 class Sale extends Model
 {
+    protected $casts = [
+        'last_reminder_sent_at' => 'datetime',
+    ];
+
     protected $fillable = [
         'event_id',
         'name',

@@ -216,6 +216,18 @@ class MailTemplateManager
                 'order_reference' => '12345',
                 'app_name' => $appName,
             ],
+            'ticket_reminder_purchaser' => [
+                'event_name' => 'Sample Event',
+                'event_date' => 'June 1, 2024 at 8:00 PM',
+                'ticket_quantity' => 2,
+                'amount_total' => '98.00 USD',
+                'event_url' => $baseUrl . '/events/sample-event',
+                'ticket_view_url' => $baseUrl . '/tickets/sample-order',
+                'order_reference' => '12345',
+                'app_name' => $appName,
+                'reminder_interval_hours' => 12,
+                'payment_instructions_section' => "Payment Instructions:\n\nPay at the door\n",
+            ],
             'ticket_timeout_purchaser' => [
                 'event_name' => 'Sample Event',
                 'event_date' => 'June 1, 2024 at 8:00 PM',
