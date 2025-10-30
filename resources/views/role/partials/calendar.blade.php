@@ -451,9 +451,9 @@ const calendarApp = createApp({
             }
             today.setHours(0, 0, 0, 0);
             
-            // Calculate upcoming dates for the next 6 months
+            // Calculate upcoming dates for the next 4 months
             const endDate = new Date(today);
-            endDate.setMonth(endDate.getMonth() + 6);
+            endDate.setMonth(endDate.getMonth() + 4);
             
             // Process all filtered events
             this.filteredEvents.forEach(event => {
