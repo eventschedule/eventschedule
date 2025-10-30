@@ -440,27 +440,61 @@ const calendarApp = createApp({
             })).sort((a, b) => a.name.localeCompare(b.name));
         },
         mobileEventsList() {
-            // Create a mobile-friendly events list that includes all occurrences of recurring events
+            // Create a mobile-friendly events list that includes all upcoming occurrences
             const mobileEvents = [];
             
-            // Process each date in the events map
-            Object.keys(this.eventsMap).forEach(dateStr => {
-                const eventIds = this.eventsMap[dateStr];
-                
-                // Get the events for this date
-                const eventsForDate = this.filteredEvents.filter(event => {
-                    return eventIds.includes(event.id);
-                });
-                
-                // Add each event with its occurrence date
-                eventsForDate.forEach(event => {
-                    mobileEvents.push({
-                        ...event,
-                        occurrenceDate: dateStr,
-                        // Create a unique key for recurring events
-                        uniqueKey: event.days_of_week ? `${event.id}-${dateStr}` : event.id
-                    });
-                });
+            // Get today's date
+            let today = new Date();
+            if (this.userTimezone) {
+                const userNow = new Date().toLocaleString("en-US", {timeZone: this.userTimezone});
+                today = new Date(userNow);
+            }
+            today.setHours(0, 0, 0, 0);
+            
+            // Calculate upcoming dates for the next 6 months
+            const endDate = new Date(today);
+            endDate.setMonth(endDate.getMonth() + 6);
+            
+            // Process all filtered events
+            this.filteredEvents.forEach(event => {
+                if (event.days_of_week && event.days_of_week.length > 0) {
+                    // Recurring event - generate all occurrences
+                    const currentDate = new Date(today);
+                    
+                    while (currentDate <= endDate) {
+                        const dayOfWeek = currentDate.getDay(); // 0 = Sunday, 6 = Saturday
+                        
+                        if (event.days_of_week.includes(dayOfWeek)) {
+                            const dateStr = currentDate.getFullYear() + '-' + 
+                                          String(currentDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                                          String(currentDate.getDate()).padStart(2, '0');
+                            
+                            mobileEvents.push({
+                                ...event,
+                                occurrenceDate: dateStr,
+                                uniqueKey: `${event.id}-${dateStr}`
+                            });
+                        }
+                        
+                        currentDate.setDate(currentDate.getDate() + 1);
+                    }
+                } else if (event.starts_at || event.local_date) {
+                    // One-time event
+                    const eventDate = event.local_date || event.utc_date;
+                    if (eventDate) {
+                        const [year, month, day] = eventDate.split('-').map(Number);
+                        const checkDate = new Date(year, month - 1, day);
+                        checkDate.setHours(0, 0, 0, 0);
+                        
+                        if (checkDate >= today && checkDate <= endDate) {
+                            mobileEvents.push({
+                                ...event,
+                                occurrenceDate: eventDate,
+                                uniqueKey: event.id
+                            });
+                        }
+                    }
+                }
             });
             
             // Sort by date, then by time
