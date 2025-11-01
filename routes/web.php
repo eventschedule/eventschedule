@@ -99,6 +99,9 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::post('/assets/images', [ImageController::class, 'store'])->name('images.store');
     Route::delete('/assets/images/{image}', [ImageController::class, 'destroy'])->name('images.destroy');
     Route::get('/events/{hash}/view', [EventController::class, 'view'])->name('events.view');
+    Route::get('/events/{hash}/sales/export/{format}', [TicketController::class, 'exportEventSales'])
+        ->whereIn('format', ['csv', 'xlsx'])
+        ->name('events.sales.export');
     Route::get('/events/{hash}/clone', [EventController::class, 'cloneConfirm'])->name('events.clone.confirm');
     Route::post('/events/{hash}/clone', [EventController::class, 'clone'])->name('events.clone');
     Route::delete('/events/{hash}', [EventController::class, 'destroyFromHome'])->name('events.destroy');
@@ -127,6 +130,9 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/pages', [RoleController::class, 'pages'])->name('role.pages');
     Route::get('/tickets', [TicketController::class, 'tickets'])->name('tickets');
     Route::get('/sales', [TicketController::class, 'sales'])->name('sales');
+    Route::get('/sales/export/{format}', [TicketController::class, 'exportSales'])
+        ->whereIn('format', ['csv', 'xlsx'])
+        ->name('sales.export');
     Route::post('/sales/action/{sale_id}', [TicketController::class, 'handleAction'])->name('sales.action');
     Route::post('/sales/{sale_id}/mark-used', [TicketController::class, 'markUsed'])->name('sales.mark_used');
     Route::post('/sales/actions', [TicketController::class, 'handleBulkAction'])->name('sales.actions');
