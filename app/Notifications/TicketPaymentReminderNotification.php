@@ -69,6 +69,18 @@ class TicketPaymentReminderNotification extends Notification
             $paymentInstructionsSection = __('messages.payment_instructions') . ":\n\n" . trim($event->payment_instructions) . "\n";
         }
 
+        $expireAfterHours = (int) ($event->expire_unpaid_tickets ?? 0);
+
+        $ticketExpiryNotice = '';
+
+        if ($expireAfterHours > 0) {
+            $ticketExpiryNotice = $expireAfterHours === 1
+                ? __('messages.payment_must_be_completed_within_hour')
+                : __('messages.payment_must_be_completed_within_hours', ['count' => $expireAfterHours]);
+
+            $ticketExpiryNotice .= "\n\n";
+        }
+
         $data = [
             'event_name' => $eventName,
             'event_date' => $eventDate,
@@ -82,6 +94,7 @@ class TicketPaymentReminderNotification extends Notification
             'app_name' => config('app.name'),
             'reminder_interval_hours' => (int) ($event->remind_unpaid_tickets_every ?? 0),
             'payment_instructions_section' => $paymentInstructionsSection,
+            'ticket_expiry_notice' => $ticketExpiryNotice,
         ];
 
         $subject = $templates->renderSubject($templateKey, $data);

@@ -156,7 +156,7 @@ MD,
 - **Total Reserved:** :amount_total
 - **Order #:** :order_reference
 
-Complete your payment to keep your tickets. Reminders are sent every :reminder_interval_hours hour(s) until payment is received.
+:ticket_expiry_noticeComplete your payment to keep your tickets. Reminders are sent every :reminder_interval_hours hour(s) until payment is received.
 
 [Complete Payment](:ticket_view_url)
 
@@ -179,6 +179,7 @@ MD,
                 ':app_name' => 'The application name configured in settings.',
                 ':reminder_interval_hours' => 'Number of hours between payment reminder emails.',
                 ':payment_instructions_section' => 'Payment instructions defined on the event, including a translated heading when available.',
+                ':ticket_expiry_notice' => 'Optional notice describing when the reservation will expire.',
             ],
         ],
         'ticket_timeout_purchaser' => [
