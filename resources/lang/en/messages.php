@@ -97,6 +97,7 @@ return [
     'contact_deleted_successfully' => 'Contact deleted successfully.',
     'contact_requires_details' => 'Enter at least one contact detail.',
     'no_contacts_added' => 'No contacts added yet.',
+    'export' => 'Export',
     'export_csv' => 'Export CSV',
     'export_excel' => 'Export Excel',
     'select_role' => 'Select role',
