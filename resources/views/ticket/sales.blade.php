@@ -1,10 +1,13 @@
 <x-app-admin-layout>
+    @php
+        $exportQuery = request()->except('page');
+    @endphp
 
     <div class="mt-8 flow-root">
         <div class="flex flex-col sm:flex-row sm:justify-between gap-4">
             <div class="flex-1">
                 <div class="relative">
-                    <x-text-input type="text" name="filter" id="filter" placeholder="{{ __('messages.filter') }}" 
+                    <x-text-input type="text" name="filter" id="filter" placeholder="{{ __('messages.filter') }}"
                         value="{{ request()->filter }}" autocomplete="off"/>
                     <button type="button" id="clear-filter" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" style="display: none;">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -14,16 +17,35 @@
                 </div>
             </div>
 
-            <a href="{{ route('ticket.scan') }}" class="w-full sm:w-auto">
-                <button type="button"
-                    class="w-full sm:w-auto inline-flex items-center justify-center rounded-md shadow-sm bg-[#4E81FA] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#3A6BE0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]">
-                    <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                        <path
-                            d="M4,4H10V10H4V4M20,4V10H14V4H20M14,15H16V13H14V11H16V13H18V11H20V13H18V15H20V18H18V20H16V18H13V20H11V16H14V15M16,15V18H18V15H16M4,20V14H10V20H4M6,6V8H8V6H6M16,6V8H18V6H16M6,16V18H8V16H6M4,11H6V13H4V11M9,11H13V15H11V13H9V11M11,6H13V10H11V6M2,2V6H0V2A2,2 0 0,1 2,0H6V2H2M22,0A2,2 0 0,1 24,2V6H22V2H18V0H22M2,18V22H6V24H2A2,2 0 0,1 0,22V18H2M22,22V18H24V22A2,2 0 0,1 22,24H18V22H22Z" />
-                    </svg>
-                    <span class="ml-1">{{ __('messages.scan_ticket') }}</span>
-                </button>
-            </a>
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+                <div class="flex flex-wrap gap-2">
+                    <a href="{{ route('sales.export', array_merge($exportQuery, ['format' => 'csv'])) }}"
+                        class="inline-flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16.5v2.25A1.25 1.25 0 005.25 20h13.5A1.25 1.25 0 0020 18.75V16.5M16 12l-4 4m0 0l-4-4m4 4V3" />
+                        </svg>
+                        {{ __('messages.export_csv') }}
+                    </a>
+                    <a href="{{ route('sales.export', array_merge($exportQuery, ['format' => 'xlsx'])) }}"
+                        class="inline-flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16.5v2.25A1.25 1.25 0 005.25 20h13.5A1.25 1.25 0 0020 18.75V16.5M16 12l-4 4m0 0l-4-4m4 4V3" />
+                        </svg>
+                        {{ __('messages.export_excel') }}
+                    </a>
+                </div>
+
+                <a href="{{ route('ticket.scan') }}" class="w-full sm:w-auto">
+                    <button type="button"
+                        class="w-full sm:w-auto inline-flex items-center justify-center rounded-md shadow-sm bg-[#4E81FA] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#3A6BE0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]">
+                        <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M4,4H10V10H4V4M20,4V10H14V4H20M14,15H16V13H14V11H16V13H18V11H20V13H18V15H20V18H18V20H16V18H13V20H11V16H14V15M16,15V18H18V15H16M4,20V14H10V20H4M6,6V8H8V6H6M16,6V8H18V6H16M6,16V18H8V16H6M4,11H6V13H4V11M9,11H13V15H11V13H9V11M11,6H13V10H11V6M2,2V6H0V2A2,2 0 0,1 2,0H6V2H2M22,0A2,2 0 0,1 24,2V6H22V2H18V0H22M2,18V22H6V24H2A2,2 0 0,1 0,22V18H2M22,22V18H24V22A2,2 0 0,1 22,24H18V22H22Z" />
+                        </svg>
+                        <span class="ml-1">{{ __('messages.scan_ticket') }}</span>
+                    </button>
+                </a>
+            </div>
         </div>
     </div>
 

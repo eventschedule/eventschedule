@@ -3,14 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Role;
+use App\Utils\SimpleSpreadsheetExporter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Symfony\Component\HttpFoundation\StreamedResponse;
-use ZipArchive;
 
 class RoleContactController extends Controller
 {
@@ -139,11 +138,20 @@ class RoleContactController extends Controller
 
         $rows = $this->buildExportRows($roles, $typeLabels);
 
+        $timestamp = now()->format('Ymd-His');
+
         if ($format === 'csv') {
-            return $this->exportCsv($rows);
+            return SimpleSpreadsheetExporter::downloadCsv(
+                $rows,
+                'contacts-' . $timestamp . '.csv'
+            );
         }
 
-        return $this->exportXlsx($rows);
+        return SimpleSpreadsheetExporter::downloadXlsx(
+            $rows,
+            'contacts-' . $timestamp . '.xlsx',
+            __('messages.contacts')
+        );
     }
 
     protected function findRoleForUser(Request $request, ?int $roleId): Role
@@ -204,139 +212,4 @@ class RoleContactController extends Controller
         return $rows;
     }
 
-    protected function exportCsv(array $rows): StreamedResponse
-    {
-        $response = new StreamedResponse(function () use ($rows) {
-            $handle = fopen('php://output', 'w');
-
-            foreach ($rows as $row) {
-                fputcsv($handle, $row);
-            }
-
-            fclose($handle);
-        });
-
-        $response->headers->set('Content-Type', 'text/csv');
-        $response->headers->set(
-            'Content-Disposition',
-            'attachment; filename="contacts-' . now()->format('Ymd-His') . '.csv"'
-        );
-
-        return $response;
-    }
-
-    protected function exportXlsx(array $rows)
-    {
-        $path = tempnam(sys_get_temp_dir(), 'contacts');
-
-        if ($path === false) {
-            abort(500, 'Unable to create temporary file.');
-        }
-
-        $zip = new ZipArchive();
-
-        if ($zip->open($path, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
-            @unlink($path);
-            abort(500, 'Unable to create spreadsheet archive.');
-        }
-
-        $zip->addFromString('[Content_Types].xml', $this->contentTypesXml());
-        $zip->addFromString('_rels/.rels', $this->rootRelsXml());
-        $zip->addFromString('xl/_rels/workbook.xml.rels', $this->workbookRelsXml());
-        $zip->addFromString('xl/workbook.xml', $this->workbookXml());
-        $zip->addFromString('xl/worksheets/sheet1.xml', $this->sheetXml($rows));
-
-        $zip->close();
-
-        $response = response()->download($path, 'contacts-' . now()->format('Ymd-His') . '.xlsx', [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ]);
-
-        return $response->deleteFileAfterSend(true);
-    }
-
-    protected function contentTypesXml(): string
-    {
-        return <<<XML
-<?xml version="1.0" encoding="UTF-8"?>
-<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
-    <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-    <Default Extension="xml" ContentType="application/xml"/>
-    <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
-    <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
-</Types>
-XML;
-    }
-
-    protected function rootRelsXml(): string
-    {
-        return <<<XML
-<?xml version="1.0" encoding="UTF-8"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-    <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
-</Relationships>
-XML;
-    }
-
-    protected function workbookRelsXml(): string
-    {
-        return <<<XML
-<?xml version="1.0" encoding="UTF-8"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-    <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
-</Relationships>
-XML;
-    }
-
-    protected function workbookXml(): string
-    {
-        return <<<XML
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
-    <sheets>
-        <sheet name="Contacts" sheetId="1" r:id="rId1"/>
-    </sheets>
-</workbook>
-XML;
-    }
-
-    protected function sheetXml(array $rows): string
-    {
-        $xmlRows = [];
-
-        foreach ($rows as $rowIndex => $row) {
-            $cells = [];
-
-            foreach ($row as $columnIndex => $value) {
-                $columnLetter = $this->columnLetter($columnIndex + 1);
-                $cells[] = '<c r="' . $columnLetter . ($rowIndex + 1) . '" t="inlineStr"><is><t>'
-                    . htmlspecialchars((string) $value, ENT_XML1 | ENT_COMPAT, 'UTF-8')
-                    . '</t></is></c>';
-            }
-
-            $xmlRows[] = '<row r="' . ($rowIndex + 1) . '">' . implode('', $cells) . '</row>';
-        }
-
-        $sheetData = implode('', $xmlRows);
-
-        return <<<XML
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
-    <sheetData>{$sheetData}</sheetData>
-</worksheet>
-XML;
-    }
-
-    protected function columnLetter(int $index): string
-    {
-        $letter = '';
-
-        while ($index > 0) {
-            $index--;
-            $letter = chr(($index % 26) + 65) . $letter;
-            $index = intdiv($index, 26);
-        }
-
-        return $letter;
-    }
 }

@@ -263,6 +263,22 @@
                                             {{ __('messages.no_ticket_purchasers') }}
                                         </p>
                                     @else
+                                        <div class="mt-4 flex flex-wrap items-center justify-end gap-3">
+                                            <a href="{{ route('events.sales.export', ['hash' => \App\Utils\UrlUtils::encodeId($event->id), 'format' => 'csv']) }}"
+                                                class="inline-flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800">
+                                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16.5v2.25A1.25 1.25 0 005.25 20h13.5A1.25 1.25 0 0020 18.75V16.5M16 12l-4 4m0 0l-4-4m4 4V3" />
+                                                </svg>
+                                                {{ __('messages.export_csv') }}
+                                            </a>
+                                            <a href="{{ route('events.sales.export', ['hash' => \App\Utils\UrlUtils::encodeId($event->id), 'format' => 'xlsx']) }}"
+                                                class="inline-flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800">
+                                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16.5v2.25A1.25 1.25 0 005.25 20h13.5A1.25 1.25 0 0020 18.75V16.5M16 12l-4 4m0 0l-4-4m4 4V3" />
+                                                </svg>
+                                                {{ __('messages.export_excel') }}
+                                            </a>
+                                        </div>
                                         <div class="mt-4 overflow-x-auto">
                                             <table class="min-w-full divide-y divide-gray-200 text-sm">
                                                 <thead class="bg-gray-50 dark:bg-gray-900/60 text-gray-700 dark:text-gray-200">

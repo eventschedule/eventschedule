@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\Role;
@@ -11,6 +12,7 @@ use App\Models\Sale;
 use App\Models\Event;
 use App\Models\SaleTicket;
 use App\Models\SaleTicketEntry;
+use App\Utils\SimpleSpreadsheetExporter;
 use App\Utils\UrlUtils;
 use Stripe\StripeClient;
 use Endroid\QrCode\QrCode;
@@ -48,74 +50,165 @@ class TicketController extends Controller
         return view('ticket.index', compact('sales'));
     }
 
-    public function sales()
+    public function sales(Request $request)
     {
-        $user = auth()->user();
-        $filter = strtolower(request()->filter);
+        $user = $request->user();
+
+        $query = $this->buildSalesQuery($request, $user);
+
+        $count = (clone $query)->count();
+        $sales = $query->orderByDesc('created_at')
+            ->paginate(50, ['*'], 'page');
+
+        if ($request->ajax()) {
+            return view('ticket.sales_table', compact('sales'));
+        }
+
+        return view('ticket.sales', compact('sales', 'count'));
+    }
+
+    public function exportSales(Request $request, string $format)
+    {
+        $format = strtolower($format);
+
+        if (! in_array($format, ['csv', 'xlsx'], true)) {
+            abort(404);
+        }
+
+        $user = $request->user();
+        $query = $this->buildSalesQuery($request, $user);
+        $sales = $query->orderByDesc('created_at')->get();
+
+        $timezone = $user->timezone ?? config('app.timezone');
+        $rows = $this->buildSalesExportRows($sales, $timezone, true);
+        $timestamp = now()->format('Ymd-His');
+
+        if ($format === 'csv') {
+            return SimpleSpreadsheetExporter::downloadCsv(
+                $rows,
+                'ticket-sales-' . $timestamp . '.csv'
+            );
+        }
+
+        return SimpleSpreadsheetExporter::downloadXlsx(
+            $rows,
+            'ticket-sales-' . $timestamp . '.xlsx',
+            __('messages.sales')
+        );
+    }
+
+    public function exportEventSales(Request $request, string $hash, string $format)
+    {
+        $format = strtolower($format);
+
+        if (! in_array($format, ['csv', 'xlsx'], true)) {
+            abort(404);
+        }
+
+        $eventId = UrlUtils::decodeId($hash);
+        $event = Event::with(['user'])->findOrFail($eventId);
+
+        if (! $request->user()->canEditEvent($event)) {
+            abort(403);
+        }
+
+        $sales = $event->sales()
+            ->with(['event', 'saleTickets.ticket'])
+            ->orderByDesc('created_at')
+            ->get();
+
+        $timezone = $request->user()->timezone ?? config('app.timezone');
+        $rows = $this->buildSalesExportRows($sales, $timezone, false);
+        $timestamp = now()->format('Ymd-His');
+
+        $eventName = $event->translatedName() ?: $event->name ?: 'event';
+        $eventSlug = Str::slug($eventName);
+
+        if ($eventSlug === '') {
+            $eventSlug = 'event';
+        }
+
+        $baseName = $eventSlug . '-ticket-sales-' . $timestamp;
+
+        if ($format === 'csv') {
+            return SimpleSpreadsheetExporter::downloadCsv(
+                $rows,
+                $baseName . '.csv'
+            );
+        }
+
+        return SimpleSpreadsheetExporter::downloadXlsx(
+            $rows,
+            $baseName . '.xlsx',
+            __('messages.ticket_purchasers')
+        );
+    }
+
+    protected function buildSalesQuery(Request $request, User $user)
+    {
+        $filter = strtolower((string) $request->input('filter', ''));
 
         $columnFilters = [
-            'customer' => trim((string) request()->input('filter_customer', '')),
-            'event' => trim((string) request()->input('filter_event', '')),
-            'total_min' => request()->input('filter_total_min'),
-            'total_max' => request()->input('filter_total_max'),
-            'transaction' => trim((string) request()->input('filter_transaction', '')),
-            'status' => trim((string) request()->input('filter_status', '')),
-            'usage' => trim((string) request()->input('filter_usage', '')),
+            'customer' => trim((string) $request->input('filter_customer', '')),
+            'event' => trim((string) $request->input('filter_event', '')),
+            'total_min' => $request->input('filter_total_min'),
+            'total_max' => $request->input('filter_total_max'),
+            'transaction' => trim((string) $request->input('filter_transaction', '')),
+            'status' => trim((string) $request->input('filter_status', '')),
+            'usage' => trim((string) $request->input('filter_usage', '')),
         ];
 
-        $query = Sale::with('event', 'saleTickets')
+        $query = Sale::with(['event', 'saleTickets.ticket'])
             ->where('is_deleted', false)
-            ->whereHas('event', function($query) use ($user) {
+            ->whereHas('event', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             });
 
-        if ($filter) {
-            $query->where(function($q) use ($filter) {
+        if ($filter !== '') {
+            $query->where(function ($q) use ($filter) {
                 $q->where('status', 'LIKE', "%{$filter}%")
-                  ->orWhere('transaction_reference', 'LIKE', "%{$filter}%")
-                  ->orWhere('email', 'LIKE', "%{$filter}%")
-                  ->orWhere('name', 'LIKE', "%{$filter}%")
-                  ->orWhereHas('event', function($q) use ($filter) {
-                      $q->where('name', 'LIKE', "%{$filter}%");
-                  });
+                    ->orWhere('transaction_reference', 'LIKE', "%{$filter}%")
+                    ->orWhere('email', 'LIKE', "%{$filter}%")
+                    ->orWhere('name', 'LIKE', "%{$filter}%")
+                    ->orWhereHas('event', function ($q) use ($filter) {
+                        $q->where('name', 'LIKE', "%{$filter}%");
+                    });
             });
         }
 
-        if ($columnFilters['customer']) {
+        if ($columnFilters['customer'] !== '') {
             $customerFilter = $columnFilters['customer'];
-            $query->where(function($q) use ($customerFilter) {
+            $query->where(function ($q) use ($customerFilter) {
                 $q->where('name', 'LIKE', "%{$customerFilter}%")
-                  ->orWhere('email', 'LIKE', "%{$customerFilter}%");
+                    ->orWhere('email', 'LIKE', "%{$customerFilter}%");
             });
         }
 
-        if ($columnFilters['event']) {
+        if ($columnFilters['event'] !== '') {
             $eventFilter = $columnFilters['event'];
-            $query->whereHas('event', function($q) use ($eventFilter) {
+            $query->whereHas('event', function ($q) use ($eventFilter) {
                 $q->where('name', 'LIKE', "%{$eventFilter}%");
             });
         }
 
         if ($columnFilters['total_min'] !== null && $columnFilters['total_min'] !== '' && is_numeric($columnFilters['total_min'])) {
-            $min = (float) $columnFilters['total_min'];
-            $query->where('payment_amount', '>=', $min);
+            $query->where('payment_amount', '>=', (float) $columnFilters['total_min']);
         }
 
         if ($columnFilters['total_max'] !== null && $columnFilters['total_max'] !== '' && is_numeric($columnFilters['total_max'])) {
-            $max = (float) $columnFilters['total_max'];
-            $query->where('payment_amount', '<=', $max);
+            $query->where('payment_amount', '<=', (float) $columnFilters['total_max']);
         }
 
-        if ($columnFilters['transaction']) {
+        if ($columnFilters['transaction'] !== '') {
             $transactionFilter = $columnFilters['transaction'];
             $query->where('transaction_reference', 'LIKE', "%{$transactionFilter}%");
         }
 
-        if ($columnFilters['status'] && in_array($columnFilters['status'], ['unpaid', 'paid', 'cancelled', 'refunded', 'expired'])) {
+        if ($columnFilters['status'] !== '' && in_array($columnFilters['status'], ['unpaid', 'paid', 'cancelled', 'refunded', 'expired'])) {
             $query->where('status', $columnFilters['status']);
         }
 
-        if ($columnFilters['usage'] && in_array($columnFilters['usage'], ['used', 'unused'], true)) {
+        if ($columnFilters['usage'] !== '' && in_array($columnFilters['usage'], ['used', 'unused'], true)) {
             $usageQuery = clone $query;
             $matchingIds = $usageQuery->get()->filter(function (Sale $sale) use ($columnFilters) {
                 return $sale->usage_status === $columnFilters['usage'];
@@ -128,15 +221,102 @@ class TicketController extends Controller
             }
         }
 
-        $count = $query->count();
-        $sales = $query->orderBy('created_at', 'DESC')
-                    ->paginate(50, ['*'], 'page');
+        return $query;
+    }
 
-        if (request()->ajax()) {
-            return view('ticket.sales_table', compact('sales'));
-        } else {
-            return view('ticket.sales', compact('sales', 'count'));
+    protected function buildSalesExportRows(Collection $sales, string $timezone, bool $includeEventColumn): array
+    {
+        $headers = [
+            __('messages.name'),
+            __('messages.email'),
+        ];
+
+        if ($includeEventColumn) {
+            $headers[] = __('messages.event');
         }
+
+        $headers = array_merge($headers, [
+            __('messages.tickets'),
+            __('messages.quantity'),
+            __('messages.total'),
+            __('messages.currency'),
+            __('messages.payment_method'),
+            __('messages.status'),
+            __('messages.ticket_usage'),
+            __('messages.transaction_reference'),
+            __('messages.date'),
+        ]);
+
+        $rows = [$headers];
+
+        foreach ($sales as $sale) {
+            $ticketSummary = $sale->saleTickets
+                ->map(function (SaleTicket $saleTicket) {
+                    $type = $saleTicket->ticket?->type ?: __('messages.ticket');
+
+                    return $type . ' × ' . $saleTicket->quantity;
+                })
+                ->filter()
+                ->implode(', ');
+
+            if ($ticketSummary === '') {
+                $ticketSummary = __('messages.none');
+            }
+
+            $totalAmount = $sale->payment_amount ?? $sale->calculateTotal();
+            $currency = $sale->event?->ticket_currency_code ?: '';
+
+            $paymentMethod = $sale->payment_method ? trans('messages.' . $sale->payment_method) : __('messages.none');
+
+            if ($sale->payment_method && $paymentMethod === 'messages.' . $sale->payment_method) {
+                $paymentMethod = ucfirst($sale->payment_method);
+            }
+
+            $statusLabel = $sale->status ? trans('messages.' . $sale->status) : __('messages.none');
+
+            if ($sale->status && $statusLabel === 'messages.' . $sale->status) {
+                $statusLabel = ucfirst($sale->status);
+            }
+
+            $usageLabel = $sale->usage_status === 'used'
+                ? __('messages.ticket_status_used')
+                : __('messages.ticket_status_unused');
+
+            $transactionReference = $sale->transaction_reference ?: '';
+
+            if ($transactionReference === '') {
+                $transactionReference = __('messages.none');
+            } elseif ($transactionReference === __('messages.manual_payment')) {
+                $transactionReference = __('messages.manual_payment');
+            }
+
+            $date = $sale->created_at
+                ? $sale->created_at->copy()->timezone($timezone)->format('Y-m-d H:i:s')
+                : '';
+
+            $row = [
+                $sale->name,
+                $sale->email,
+            ];
+
+            if ($includeEventColumn) {
+                $row[] = $sale->event?->translatedName() ?? $sale->event?->name ?? '';
+            }
+
+            $row[] = $ticketSummary;
+            $row[] = $sale->quantity();
+            $row[] = number_format((float) $totalAmount, 2, '.', '');
+            $row[] = $currency;
+            $row[] = $paymentMethod;
+            $row[] = $statusLabel;
+            $row[] = $usageLabel;
+            $row[] = $transactionReference;
+            $row[] = $date;
+
+            $rows[] = $row;
+        }
+
+        return $rows;
     }
 
     public function checkout(Request $request, $subdomain)
