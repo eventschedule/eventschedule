@@ -325,7 +325,12 @@ class AppleWalletService
     protected function buildPassPayload(Sale $sale, ?SaleTicketEntry $entry = null): array
     {
         $event = $sale->event;
-        $startsAt = $this->resolveEventStart($event, $sale);
+        $timezone = $this->resolveTimezone($event);
+        $scheduledStart = $event->getStartDateTime($sale->event_date);
+        $hasScheduledStart = $scheduledStart !== null;
+        $startsAt = $hasScheduledStart
+            ? $scheduledStart->clone()->setTimezone($timezone)
+            : $this->resolveFallbackStart($event, $sale)->setTimezone($timezone);
         $relevantDate = $startsAt->copy()->setTimezone('UTC')->format('Y-m-d\TH:i:s\Z');
         $ticketSummary = $entry
             ? $this->summarizeEntry($entry)
@@ -338,13 +343,14 @@ class AppleWalletService
         $this->logDebug('Apple Wallet pass timing resolved.', [
             'sale_id' => $sale->id,
             'event_id' => $event->id,
+            'has_scheduled_start' => $hasScheduledStart,
             'starts_at_local' => $startsAt->toIso8601String(),
             'starts_at_utc' => $startsAt->copy()->setTimezone('UTC')->toIso8601String(),
             'relevant_date' => $relevantDate,
-            'event_timezone' => $this->resolveTimezone($event),
+            'event_timezone' => $timezone,
         ]);
 
-        $branding = $this->resolvePassBranding($event, $startsAt);
+        $branding = $this->resolvePassBranding($event, $hasScheduledStart ? $startsAt : null, $hasScheduledStart);
 
         $headerFields = array_values(array_filter([
             $event->venue && $event->venue->name
@@ -360,7 +366,9 @@ class AppleWalletService
             [
                 'key' => 'event-datetime',
                 'label' => __('messages.date_and_time'),
-                'value' => $this->formatDisplayDateTime($event, $startsAt),
+                'value' => $hasScheduledStart
+                    ? $this->formatDisplayDateTime($event, $startsAt)
+                    : __('messages.unscheduled'),
             ],
             $sale->name
                 ? [
@@ -382,7 +390,7 @@ class AppleWalletService
             'primaryFields' => [
                 [
                     'key' => 'event-name',
-                    'label' => $startsAt->format('D, M j'),
+                    'label' => $hasScheduledStart ? $startsAt->format('D, M j') : __('messages.event'),
                     'value' => $event->name,
                 ],
             ],
@@ -612,16 +620,24 @@ class AppleWalletService
         return $formatted;
     }
 
-    protected function resolvePassBranding(Event $event, Carbon $startsAt): array
+    protected function resolvePassBranding(Event $event, ?Carbon $startsAt, bool $hasScheduledStart): array
     {
         [$backgroundColor, $foregroundColor, $labelColor] = $this->resolvePassColors($event);
 
         $organizationBase = $event->creatorRole?->name ?: $event->name ?: $this->organizationName;
         $organizationName = Str::limit($organizationBase, 48) ?: $this->organizationName;
 
+        $dateDescription = null;
+
+        if ($hasScheduledStart && $startsAt) {
+            $dateDescription = $this->formatDisplayDateTime($event, $startsAt);
+        } elseif (! $hasScheduledStart) {
+            $dateDescription = __('messages.unscheduled');
+        }
+
         $descriptionParts = array_filter([
             $event->name,
-            $this->formatDisplayDateTime($event, $startsAt),
+            $dateDescription,
             $event->venue?->shortAddress() ?: $event->venue?->name,
         ]);
 
