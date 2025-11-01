@@ -344,82 +344,108 @@ class AppleWalletService
             'event_timezone' => $this->resolveTimezone($event),
         ]);
 
+        $branding = $this->resolvePassBranding($event, $startsAt);
+
+        $headerFields = array_values(array_filter([
+            $event->venue && $event->venue->name
+                ? [
+                    'key' => 'venue-name',
+                    'label' => __('messages.venue'),
+                    'value' => Str::limit($event->venue->name, 24),
+                ]
+                : null,
+        ]));
+
+        $secondaryFields = array_values(array_filter([
+            [
+                'key' => 'event-datetime',
+                'label' => __('messages.date_and_time'),
+                'value' => $this->formatDisplayDateTime($event, $startsAt),
+            ],
+            $sale->name
+                ? [
+                    'key' => 'attendee',
+                    'label' => __('messages.attendee'),
+                    'value' => $sale->name,
+                ]
+                : null,
+            $event->venue
+                ? [
+                    'key' => 'venue',
+                    'label' => __('messages.venue'),
+                    'value' => $event->venue->shortAddress() ?: $event->venue->name,
+                ]
+                : null,
+        ]));
+
+        $eventTicketFields = [
+            'primaryFields' => [
+                [
+                    'key' => 'event-name',
+                    'label' => $startsAt->format('D, M j'),
+                    'value' => $event->name,
+                ],
+            ],
+            'secondaryFields' => $secondaryFields,
+            'auxiliaryFields' => array_values(array_filter([
+                $entry
+                    ? [
+                        'key' => 'ticket-type',
+                        'label' => __('messages.ticket'),
+                        'value' => $ticketSummary,
+                    ]
+                    : [
+                        'key' => 'tickets',
+                        'label' => __('messages.tickets'),
+                        'value' => $ticketSummary ?: $sale->quantity(),
+                    ],
+                [
+                    'key' => 'order',
+                    'label' => __('messages.order_number'),
+                    'value' => (string) $sale->id,
+                ],
+                $entry
+                    ? [
+                        'key' => 'attendees',
+                        'label' => __('messages.number_of_attendees'),
+                        'value' => '1',
+                    ]
+                    : null,
+            ])),
+            'backFields' => [
+                [
+                    'key' => 'ticket-url',
+                    'label' => __('messages.ticket'),
+                    'value' => route('ticket.view', [
+                        'event_id' => $event->hashedId(),
+                        'secret' => $entry ? $entry->secret : $sale->secret,
+                    ]),
+                ],
+            ],
+        ];
+
+        if ($headerFields !== []) {
+            $eventTicketFields['headerFields'] = $headerFields;
+        }
+
         $fields = [
             'formatVersion' => 1,
             'passTypeIdentifier' => $this->passTypeIdentifier,
             'serialNumber' => $this->buildSerialNumber($sale, $entry),
             'teamIdentifier' => $this->teamIdentifier,
-            'organizationName' => $this->organizationName,
-            'description' => $event->name,
-            'logoText' => Str::limit($event->name, 24),
+            'organizationName' => $branding['organizationName'],
+            'description' => $branding['description'],
+            'logoText' => $branding['logoText'],
             'relevantDate' => $relevantDate,
-            'backgroundColor' => $this->backgroundColor,
-            'foregroundColor' => $this->foregroundColor,
-            'labelColor' => $this->labelColor,
+            'backgroundColor' => $branding['backgroundColor'],
+            'foregroundColor' => $branding['foregroundColor'],
+            'labelColor' => $branding['labelColor'],
             'barcode' => [
                 'format' => 'PKBarcodeFormatQR',
                 'message' => $entry ? $entry->secret : $sale->secret,
                 'messageEncoding' => 'utf-8',
             ],
-            'eventTicket' => [
-                'primaryFields' => [
-                    [
-                        'key' => 'event-name',
-                        'label' => __('messages.event'),
-                        'value' => $event->name,
-                    ],
-                ],
-                'secondaryFields' => array_values(array_filter([
-                    [
-                        'key' => 'event-date',
-                        'label' => __('messages.date'),
-                        'value' => $this->formatDisplayDate($event, $sale->event_date),
-                    ],
-                    $sale->name ? [
-                        'key' => 'attendee',
-                        'label' => __('messages.attendee'),
-                        'value' => $sale->name,
-                    ] : null,
-                    $event->venue ? [
-                        'key' => 'venue',
-                        'label' => __('messages.venue'),
-                        'value' => $event->venue->shortAddress() ?: $event->venue->name,
-                    ] : null,
-                ])),
-                'auxiliaryFields' => array_values(array_filter([
-                    $entry
-                        ? [
-                            'key' => 'ticket-type',
-                            'label' => __('messages.ticket'),
-                            'value' => $ticketSummary,
-                        ]
-                        : [
-                            'key' => 'tickets',
-                            'label' => __('messages.tickets'),
-                            'value' => $ticketSummary ?: $sale->quantity(),
-                        ],
-                    [
-                        'key' => 'order',
-                        'label' => __('messages.order_number'),
-                        'value' => (string) $sale->id,
-                    ],
-                    $entry ? [
-                        'key' => 'attendees',
-                        'label' => __('messages.number_of_attendees'),
-                        'value' => '1',
-                    ] : null,
-                ])),
-                'backFields' => [
-                    [
-                        'key' => 'ticket-url',
-                        'label' => __('messages.ticket'),
-                        'value' => route('ticket.view', [
-                            'event_id' => $event->hashedId(),
-                            'secret' => $entry ? $entry->secret : $sale->secret,
-                        ]),
-                    ],
-                ],
-            ],
+            'eventTicket' => $eventTicketFields,
         ];
 
         $locations = $this->resolveLocations($event);
@@ -572,6 +598,66 @@ class AppleWalletService
         }
 
         return __('messages.unscheduled');
+    }
+
+    protected function formatDisplayDateTime(Event $event, Carbon $startsAt): string
+    {
+        $formatted = $startsAt->format('D, M j • g:i A');
+        $timezoneAbbreviation = $startsAt->format('T');
+
+        if ($timezoneAbbreviation !== '') {
+            $formatted .= ' ' . $timezoneAbbreviation;
+        }
+
+        return $formatted;
+    }
+
+    protected function resolvePassBranding(Event $event, Carbon $startsAt): array
+    {
+        [$backgroundColor, $foregroundColor, $labelColor] = $this->resolvePassColors($event);
+
+        $organizationBase = $event->creatorRole?->name ?: $event->name ?: $this->organizationName;
+        $organizationName = Str::limit($organizationBase, 48) ?: $this->organizationName;
+
+        $descriptionParts = array_filter([
+            $event->name,
+            $this->formatDisplayDateTime($event, $startsAt),
+            $event->venue?->shortAddress() ?: $event->venue?->name,
+        ]);
+
+        $description = implode(' • ', $descriptionParts) ?: $organizationName;
+
+        return [
+            'organizationName' => $organizationName,
+            'description' => Str::limit($description, 120),
+            'logoText' => Str::limit($event->name ?: $organizationName, 24),
+            'backgroundColor' => $backgroundColor,
+            'foregroundColor' => $foregroundColor,
+            'labelColor' => $labelColor,
+        ];
+    }
+
+    protected function resolvePassColors(Event $event): array
+    {
+        $accent = $event->creatorRole?->accent_color;
+        $rgb = $this->normalizeHexColor($accent);
+
+        if (! $rgb) {
+            return [$this->backgroundColor, $this->foregroundColor, $this->labelColor];
+        }
+
+        $background = $this->rgbStringFromArray($rgb);
+        $luminance = $this->calculateRelativeLuminance($rgb);
+
+        if ($luminance > 0.55) {
+            $foreground = 'rgb(35,35,35)';
+            $label = 'rgb(70,70,70)';
+        } else {
+            $foreground = 'rgb(255,255,255)';
+            $label = 'rgb(235,235,235)';
+        }
+
+        return [$background, $foreground, $label];
     }
 
     /**
@@ -1808,10 +1894,19 @@ class AppleWalletService
         imagealphablending($image, true);
         imagesavealpha($image, true);
 
-        $background = $this->allocateColor($image, $event->creatorRole?->accent_color ?? '#4E81FA');
+        $accentColor = $event->creatorRole?->accent_color ?? '#4E81FA';
+        $accentRgb = $this->normalizeHexColor($accentColor);
+        $background = $this->allocateColor($image, $accentColor);
         imagefilledrectangle($image, 0, 0, $width, $height, $background);
 
         $textColor = imagecolorallocatealpha($image, 255, 255, 255, 40);
+
+        if ($accentRgb) {
+            $luminance = $this->calculateRelativeLuminance($accentRgb);
+            $textColor = $luminance > 0.55
+                ? imagecolorallocatealpha($image, 0, 0, 0, 70)
+                : imagecolorallocatealpha($image, 255, 255, 255, 40);
+        }
         $initials = $this->resolveInitials($event);
 
         $font = 5;
@@ -1852,20 +1947,56 @@ class AppleWalletService
 
     protected function allocateColor($image, ?string $hexColor)
     {
-        $hexColor = $hexColor ?: '#4E81FA';
-        $hexColor = ltrim($hexColor, '#');
-
-        if (strlen($hexColor) === 3) {
-            $hexColor = implode('', array_map(fn ($char) => $char . $char, str_split($hexColor)));
-        }
-
-        $rgb = [
-            hexdec(substr($hexColor, 0, 2)),
-            hexdec(substr($hexColor, 2, 2)),
-            hexdec(substr($hexColor, 4, 2)),
-        ];
+        $rgb = $this->normalizeHexColor($hexColor ?: '#4E81FA') ?? [78, 129, 250];
 
         return imagecolorallocate($image, $rgb[0], $rgb[1], $rgb[2]);
+    }
+
+    protected function normalizeHexColor(?string $color): ?array
+    {
+        if (! is_string($color)) {
+            return null;
+        }
+
+        $normalized = ltrim(trim($color), '#');
+
+        if ($normalized === '') {
+            return null;
+        }
+
+        if (strlen($normalized) === 3) {
+            $normalized = implode('', array_map(static fn ($char) => $char . $char, str_split($normalized)));
+        }
+
+        if (strlen($normalized) !== 6 || preg_match('/^[0-9a-fA-F]{6}$/', $normalized) !== 1) {
+            return null;
+        }
+
+        return [
+            hexdec(substr($normalized, 0, 2)),
+            hexdec(substr($normalized, 2, 2)),
+            hexdec(substr($normalized, 4, 2)),
+        ];
+    }
+
+    protected function rgbStringFromArray(array $rgb): string
+    {
+        return sprintf('rgb(%d,%d,%d)', $rgb[0], $rgb[1], $rgb[2]);
+    }
+
+    protected function calculateRelativeLuminance(array $rgb): float
+    {
+        [$r, $g, $b] = array_map(static function ($value) {
+            $component = $value / 255;
+
+            if ($component <= 0.03928) {
+                return $component / 12.92;
+            }
+
+            return (($component + 0.055) / 1.055) ** 2.4;
+        }, $rgb);
+
+        return 0.2126 * $r + 0.7152 * $g + 0.0722 * $b;
     }
 
     protected function resolveLocations(Event $event): array
