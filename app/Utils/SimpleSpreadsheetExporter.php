@@ -80,7 +80,7 @@ class SimpleSpreadsheetExporter
 
     protected static function sanitizeSheetTitle(string $title): string
     {
-        $title = str_replace(['[', ']', '*', '?', '\\', '/'], '', $title);
+        $title = str_replace(['[', ']', '*', '?', '\', '/'], '', $title);
 
         $title = Str::of($title)
             ->trim()
