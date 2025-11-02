@@ -284,6 +284,8 @@ class AppleWalletService
             'logo@2x.png' => $this->createPassImage($sale->event, 320, 100),
         ];
 
+        $baseFiles = array_merge($baseFiles, $this->createStripImages($sale->event));
+
         $this->logDebug('Apple Wallet pass base assets generated.', [
             'sale_id' => $sale->id,
             'asset_details' => $this->summarizeFiles($baseFiles),
@@ -362,13 +364,11 @@ class AppleWalletService
                 : null,
         ]));
 
-        $secondaryFields = array_values(array_filter([
+        $auxiliaryFields = array_values(array_filter([
             [
-                'key' => 'event-datetime',
-                'label' => __('messages.date_and_time'),
-                'value' => $hasScheduledStart
-                    ? $this->formatDisplayDateTime($event, $startsAt)
-                    : __('messages.unscheduled'),
+                'key' => 'ticket',
+                'label' => __('messages.ticket'),
+                'value' => $this->resolveTicketFieldValue($entry, $ticketSummary, $sale),
             ],
             $sale->name
                 ? [
@@ -377,49 +377,43 @@ class AppleWalletService
                     'value' => $sale->name,
                 ]
                 : null,
-            $event->venue
-                ? [
-                    'key' => 'venue',
-                    'label' => __('messages.venue'),
-                    'value' => $event->venue->shortAddress() ?: $event->venue->name,
-                ]
-                : null,
+            [
+                'key' => 'order',
+                'label' => __('messages.order_number'),
+                'value' => (string) $sale->id,
+            ],
+            [
+                'key' => 'attendees',
+                'label' => __('messages.number_of_attendees'),
+                'value' => (string) ($entry ? 1 : $sale->quantity()),
+            ],
         ]));
 
         $eventTicketFields = [
             'primaryFields' => [
                 [
                     'key' => 'event-name',
-                    'label' => $hasScheduledStart ? $startsAt->format('D, M j') : __('messages.event'),
+                    'label' => __('messages.event'),
                     'value' => $event->name,
                 ],
             ],
-            'secondaryFields' => $secondaryFields,
-            'auxiliaryFields' => array_values(array_filter([
-                $entry
-                    ? [
-                        'key' => 'ticket-type',
-                        'label' => __('messages.ticket'),
-                        'value' => $ticketSummary,
-                    ]
-                    : [
-                        'key' => 'tickets',
-                        'label' => __('messages.tickets'),
-                        'value' => $ticketSummary ?: $sale->quantity(),
-                    ],
+            'secondaryFields' => array_values(array_filter([
                 [
-                    'key' => 'order',
-                    'label' => __('messages.order_number'),
-                    'value' => (string) $sale->id,
+                    'key' => 'event-datetime',
+                    'label' => __('messages.date_and_time'),
+                    'value' => $hasScheduledStart
+                        ? $this->formatDisplayDateTime($event, $startsAt)
+                        : __('messages.unscheduled'),
                 ],
-                $entry
+                $event->venue
                     ? [
-                        'key' => 'attendees',
-                        'label' => __('messages.number_of_attendees'),
-                        'value' => '1',
+                        'key' => 'venue',
+                        'label' => __('messages.venue'),
+                        'value' => $event->venue->shortAddress() ?: $event->venue->name,
                     ]
                     : null,
             ])),
+            'auxiliaryFields' => $auxiliaryFields,
             'backFields' => [
                 [
                     'key' => 'ticket-url',
@@ -489,6 +483,38 @@ class AppleWalletService
         $name = $ticket?->type ?: $ticket?->name ?: __('messages.ticket');
 
         return trim($name) . ' #' . $entry->seat_number;
+    }
+
+    protected function resolveTicketFieldValue(?SaleTicketEntry $entry, string $ticketSummary, Sale $sale): string
+    {
+        if ($entry) {
+            $seatNumber = trim((string) $entry->seat_number);
+
+            if ($seatNumber !== '') {
+                return __('messages.ticket') . ' #' . $seatNumber;
+            }
+
+            $ticket = $entry->saleTicket->ticket;
+            $name = $ticket?->type ?: $ticket?->name;
+
+            if ($name) {
+                return trim($name);
+            }
+
+            return $ticketSummary !== '' ? $ticketSummary : __('messages.ticket');
+        }
+
+        if ($ticketSummary !== '') {
+            return $ticketSummary;
+        }
+
+        $quantity = $sale->quantity();
+
+        if ($quantity > 1) {
+            return __('messages.tickets') . ' x ' . $quantity;
+        }
+
+        return __('messages.ticket');
     }
 
     protected function summarizePayloadForLog(array $payload): array
@@ -1894,6 +1920,209 @@ class AppleWalletService
         }
 
         return $binary;
+    }
+
+    protected function createStripImages(Event $event): array
+    {
+        $sizes = [
+            'strip.png' => [320, 123],
+            'strip@2x.png' => [640, 246],
+        ];
+
+        $sourceImage = null;
+        $imageData = $this->resolveVenueBackgroundImage($event);
+
+        if ($imageData !== null) {
+            $sourceImage = @imagecreatefromstring($imageData);
+
+            if ($sourceImage === false) {
+                $sourceImage = null;
+            }
+        }
+
+        $files = [];
+
+        foreach ($sizes as $filename => [$width, $height]) {
+            $files[$filename] = $this->renderStripImage($event, $sourceImage, $width, $height);
+        }
+
+        if ($sourceImage !== null) {
+            imagedestroy($sourceImage);
+        }
+
+        return $files;
+    }
+
+    protected function renderStripImage(Event $event, $sourceImage, int $width, int $height): string
+    {
+        $image = imagecreatetruecolor($width, $height);
+
+        if (! $image) {
+            throw new RuntimeException('Unable to create wallet strip image.');
+        }
+
+        imagealphablending($image, true);
+        imagesavealpha($image, true);
+
+        $accent = $event->creatorRole?->accent_color ?? '#4E81FA';
+        $accentRgb = $this->normalizeHexColor($accent) ?? [78, 129, 250];
+        $background = imagecolorallocate($image, $accentRgb[0], $accentRgb[1], $accentRgb[2]);
+        imagefilledrectangle($image, 0, 0, $width, $height, $background);
+
+        if ($sourceImage) {
+            $sourceWidth = imagesx($sourceImage);
+            $sourceHeight = imagesy($sourceImage);
+
+            if ($sourceWidth > 0 && $sourceHeight > 0) {
+                $scale = max($width / $sourceWidth, $height / $sourceHeight);
+                $scaledWidth = (int) ceil($sourceWidth * $scale);
+                $scaledHeight = (int) ceil($sourceHeight * $scale);
+                $x = (int) floor(($width - $scaledWidth) / 2);
+                $y = (int) floor(($height - $scaledHeight) / 2);
+
+                imagecopyresampled($image, $sourceImage, $x, $y, 0, 0, $scaledWidth, $scaledHeight, $sourceWidth, $sourceHeight);
+
+                $overlay = imagecolorallocatealpha($image, $accentRgb[0], $accentRgb[1], $accentRgb[2], 90);
+                imagefilledrectangle($image, 0, 0, $width, $height, $overlay);
+            }
+        }
+
+        ob_start();
+        imagepng($image);
+        $contents = ob_get_clean();
+        imagedestroy($image);
+
+        if ($contents === false) {
+            throw new RuntimeException('Unable to generate wallet strip image.');
+        }
+
+        return $contents;
+    }
+
+    protected function resolveVenueBackgroundImage(Event $event): ?string
+    {
+        $candidates = [];
+
+        $venue = $event->venue;
+
+        if ($venue) {
+            $candidates[] = $venue->background_image_url ?? null;
+            $candidates[] = $venue->header_image_url ?? null;
+        }
+
+        if ($event->flyer_image_url) {
+            $candidates[] = $event->flyer_image_url;
+        }
+
+        if ($event->creatorRole) {
+            $candidates[] = $event->creatorRole->background_image_url ?? null;
+            $candidates[] = $event->creatorRole->header_image_url ?? null;
+        }
+
+        foreach ($candidates as $candidate) {
+            $candidate = trim((string) $candidate);
+
+            if ($candidate === '') {
+                continue;
+            }
+
+            $contents = $this->fetchImageContents($candidate);
+
+            if ($contents !== null) {
+                return $contents;
+            }
+        }
+
+        return null;
+    }
+
+    protected function fetchImageContents(string $pathOrUrl): ?string
+    {
+        if (str_starts_with($pathOrUrl, 'data:image/')) {
+            $commaPosition = strpos($pathOrUrl, ',');
+
+            if ($commaPosition !== false) {
+                $data = substr($pathOrUrl, $commaPosition + 1);
+                $decoded = base64_decode($data, true);
+
+                if ($decoded !== false) {
+                    return $decoded;
+                }
+            }
+
+            return null;
+        }
+
+        if (filter_var($pathOrUrl, FILTER_VALIDATE_URL)) {
+            $context = null;
+
+            if (app()->environment('local') || config('app.disable_ssl_verification', false)) {
+                $context = stream_context_create([
+                    'ssl' => [
+                        'verify_peer' => false,
+                        'verify_peer_name' => false,
+                    ],
+                    'http' => [
+                        'timeout' => 30,
+                    ],
+                ]);
+            }
+
+            $contents = @file_get_contents($pathOrUrl, false, $context);
+
+            if ($contents !== false) {
+                return $contents;
+            }
+
+            return $this->fetchImageWithCurl($pathOrUrl);
+        }
+
+        $normalized = str_replace('\\', '/', $pathOrUrl);
+        $candidates = [
+            $normalized,
+            public_path($normalized),
+            public_path('storage/' . ltrim($normalized, '/')),
+            storage_path('app/public/' . ltrim($normalized, '/')),
+        ];
+
+        foreach ($candidates as $candidate) {
+            if (is_string($candidate) && is_file($candidate)) {
+                $contents = @file_get_contents($candidate);
+
+                if ($contents !== false) {
+                    return $contents;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    protected function fetchImageWithCurl(string $url): ?string
+    {
+        if (! function_exists('curl_init')) {
+            return null;
+        }
+
+        $handle = curl_init($url);
+
+        if ($handle === false) {
+            return null;
+        }
+
+        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($handle, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($handle, CURLOPT_TIMEOUT, 30);
+
+        if (app()->environment('local') || config('app.disable_ssl_verification', false)) {
+            curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, false);
+        }
+
+        $contents = curl_exec($handle);
+        curl_close($handle);
+
+        return is_string($contents) ? $contents : null;
     }
 
     /**
