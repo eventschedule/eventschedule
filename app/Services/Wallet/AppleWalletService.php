@@ -364,6 +364,31 @@ class AppleWalletService
                 : null,
         ]));
 
+        $auxiliaryFields = array_values(array_filter([
+            [
+                'key' => 'ticket',
+                'label' => __('messages.ticket'),
+                'value' => $this->resolveTicketFieldValue($entry, $ticketSummary, $sale),
+            ],
+            $sale->name
+                ? [
+                    'key' => 'attendee',
+                    'label' => __('messages.attendee'),
+                    'value' => $sale->name,
+                ]
+                : null,
+            [
+                'key' => 'order',
+                'label' => __('messages.order_number'),
+                'value' => (string) $sale->id,
+            ],
+            [
+                'key' => 'attendees',
+                'label' => __('messages.number_of_attendees'),
+                'value' => (string) ($entry ? 1 : $sale->quantity()),
+            ],
+        ]));
+
         $eventTicketFields = [
             'primaryFields' => [
                 [
@@ -388,23 +413,7 @@ class AppleWalletService
                     ]
                     : null,
             ])),
-            'auxiliaryFields' => [
-                [
-                    'key' => 'ticket',
-                    'label' => __('messages.ticket'),
-                    'value' => $this->resolveTicketFieldValue($entry, $ticketSummary, $sale),
-                ],
-                [
-                    'key' => 'order',
-                    'label' => __('messages.order_number'),
-                    'value' => (string) $sale->id,
-                ],
-                [
-                    'key' => 'attendees',
-                    'label' => __('messages.number_of_attendees'),
-                    'value' => (string) ($entry ? 1 : $sale->quantity()),
-                ],
-            ],
+            'auxiliaryFields' => $auxiliaryFields,
             'backFields' => [
                 [
                     'key' => 'ticket-url',
