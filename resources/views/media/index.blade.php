@@ -171,6 +171,35 @@
             </div>
         </div>
 
+        <!-- Asset in use modal -->
+        <div x-show="showUsageWarning" x-cloak class="fixed inset-0 z-[70] flex items-center justify-center">
+            <div class="absolute inset-0 bg-gray-900/60" @click="cancelForceDelete"></div>
+            <div class="relative bg-white dark:bg-gray-900 rounded-lg shadow-lg w-full max-w-lg p-6 space-y-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Asset in use') }}</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300" x-text="pendingDeletionMessage || '{{ __('This asset is currently in use and cannot be deleted.') }}'"></p>
+                <div class="space-y-2">
+                    <template x-if="pendingDeletionUsages.length">
+                        <div class="space-y-2">
+                            <template x-for="usage in pendingDeletionUsages" :key="usage.id">
+                                <div class="border border-gray-200 dark:border-gray-700 rounded-md px-3 py-2">
+                                    <div class="text-sm font-medium text-gray-800 dark:text-gray-200" x-text="usage.display_name || usage.type || '{{ __('Record') }}'"></div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400" x-text="usage.context_label"></p>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <template x-if="!pendingDeletionUsages.length">
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('No usage details available.') }}</p>
+                    </template>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Removing the asset will clear it from every location where it is currently used.') }}</p>
+                <div class="flex justify-end gap-2">
+                    <button type="button" class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200" @click="cancelForceDelete">{{ __('Cancel') }}</button>
+                    <button type="button" class="px-4 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-500" @click="confirmForceDelete">{{ __('Remove usage & delete') }}</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Asset details drawer -->
         <div x-show="showDetails" x-cloak class="fixed inset-0 z-40 flex">
             <div class="flex-1 bg-gray-900/60" @click="closeDetails"></div>

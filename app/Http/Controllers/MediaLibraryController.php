@@ -59,26 +59,9 @@ class MediaLibraryController extends Controller
                     'height' => $asset->height,
                     'folder' => $asset->folder,
                     'usage_count' => $asset->usages_count ?? 0,
-                    'usages' => $asset->usages->map(function (MediaAssetUsage $usage) {
-                        $usable = $usage->usable;
-                        $name = null;
-
-                        if ($usable) {
-                            $name = $usable->name
-                                ?? $usable->title
-                                ?? ($usable->display_name ?? null);
-                        }
-
-                        return [
-                            'id' => $usage->id,
-                            'context' => $usage->context,
-                            'context_label' => Str::of($usage->context ?? 'general')->headline()->toString(),
-                            'type' => $usage->usable_type ? class_basename($usage->usable_type) : null,
-                            'display_name' => $name,
-                            'usable_id' => $usage->usable_id,
-                            'variant_id' => $usage->media_asset_variant_id,
-                        ];
-                    })->all(),
+                    'usages' => $asset->usages
+                        ->map(fn (MediaAssetUsage $usage) => $this->transformUsage($usage))
+                        ->all(),
                     'tags' => $asset->tags->map(fn (MediaTag $tag) => [
                         'id' => $tag->id,
                         'name' => $tag->name,
@@ -144,12 +127,30 @@ class MediaLibraryController extends Controller
         ], 201);
     }
 
-    public function destroy(MediaAsset $asset): JsonResponse
+    public function destroy(Request $request, MediaAsset $asset): JsonResponse
     {
-        if ($asset->usages()->exists()) {
+        $asset->loadMissing('usages.usable');
+
+        if ($asset->usages->isNotEmpty() && ! $request->boolean('force')) {
             return response()->json([
                 'message' => 'This asset is currently in use and cannot be deleted.',
+                'usages' => $asset->usages
+                    ->map(fn (MediaAssetUsage $usage) => $this->transformUsage($usage))
+                    ->all(),
             ], 422);
+        }
+
+        if ($asset->usages->isNotEmpty()) {
+            $remainingUsages = MediaAssetUsage::clearForAsset($asset);
+
+            if ($remainingUsages->isNotEmpty()) {
+                return response()->json([
+                    'message' => 'This asset is currently in use and cannot be deleted.',
+                    'usages' => $remainingUsages
+                        ->map(fn (MediaAssetUsage $usage) => $this->transformUsage($usage))
+                        ->all(),
+                ], 422);
+            }
         }
 
         $asset->delete();
@@ -252,5 +253,27 @@ class MediaLibraryController extends Controller
         $asset->tags()->sync($validated['tags'] ?? []);
 
         return response()->json(['success' => true]);
+    }
+
+    protected function transformUsage(MediaAssetUsage $usage): array
+    {
+        $usable = $usage->usable;
+        $name = null;
+
+        if ($usable) {
+            $name = $usable->name
+                ?? $usable->title
+                ?? ($usable->display_name ?? null);
+        }
+
+        return [
+            'id' => $usage->id,
+            'context' => $usage->context,
+            'context_label' => Str::of($usage->context ?? 'general')->headline()->toString(),
+            'type' => $usage->usable_type ? class_basename($usage->usable_type) : null,
+            'display_name' => $name,
+            'usable_id' => $usage->usable_id,
+            'variant_id' => $usage->media_asset_variant_id,
+        ];
     }
 }

@@ -56,7 +56,16 @@ const requestJson = async (url, options = {}) => {
     });
 
     if (!response.ok) {
-        throw new Error(await parseErrorMessage(response));
+        const error = new Error(await parseErrorMessage(response));
+        error.status = response.status;
+
+        try {
+            error.data = await response.clone().json();
+        } catch (_) {
+            // Ignore JSON parse errors for error payloads.
+        }
+
+        throw error;
     }
 
     return response.json();
@@ -101,8 +110,15 @@ const createMediaLibraryApi = (config) => ({
         });
     },
 
-    async deleteAsset(assetId) {
-        const endpoint = config.deleteAssetTemplate.replace('__ID__', assetId);
+    async deleteAsset(assetId, options = {}) {
+        const { force = false } = options;
+        let endpoint = config.deleteAssetTemplate.replace('__ID__', assetId);
+
+        if (force) {
+            const separator = endpoint.includes('?') ? '&' : '?';
+            endpoint = `${endpoint}${separator}force=1`;
+        }
+
         return requestJson(endpoint, {
             method: 'DELETE',
         });
@@ -166,6 +182,10 @@ export const registerMediaLibraryComponents = (alpineInstance) => {
             isCreatingTag: false,
             showDetails: false,
             detailAsset: null,
+            showUsageWarning: false,
+            pendingDeletionAsset: null,
+            pendingDeletionUsages: [],
+            pendingDeletionMessage: '',
 
             init() {
                 this.fetchTags();
@@ -376,26 +396,71 @@ export const registerMediaLibraryComponents = (alpineInstance) => {
                     return;
                 }
 
+                try {
+                    await api.deleteAsset(asset.id);
+                    await this.finalizeDeletion(asset.id);
+                } catch (error) {
+                    console.error('Unable to delete asset', error);
+
+                    const usages = error?.data?.usages;
+                    if (Array.isArray(usages) && usages.length) {
+                        this.pendingDeletionAsset = asset;
+                        this.pendingDeletionUsages = usages;
+                        this.pendingDeletionMessage = error.data?.message || error.message || 'This asset is currently in use.';
+                        this.showUsageWarning = true;
+                        return;
+                    }
+
+                    alert(error.message || 'Unable to delete asset');
+                }
+            },
+
+            resetDeletionWarning() {
+                this.showUsageWarning = false;
+                this.pendingDeletionAsset = null;
+                this.pendingDeletionUsages = [];
+                this.pendingDeletionMessage = '';
+            },
+
+            cancelForceDelete() {
+                this.resetDeletionWarning();
+            },
+
+            async confirmForceDelete() {
+                if (!this.pendingDeletionAsset) {
+                    return;
+                }
+
+                const asset = this.pendingDeletionAsset;
+
+                try {
+                    await api.deleteAsset(asset.id, { force: true });
+                    await this.finalizeDeletion(asset.id);
+                } catch (error) {
+                    console.error('Unable to force delete asset', error);
+                    alert(error.message || 'Unable to delete asset');
+                    return;
+                } finally {
+                    this.resetDeletionWarning();
+                }
+            },
+
+            async finalizeDeletion(assetId) {
                 const currentPage = Number(this.pagination.current_page) || 1;
                 const perPage = Number(this.pagination.per_page) || 24;
                 const updatedTotal = Math.max(0, (Number(this.pagination.total) || 0) - 1);
                 const lastPageAfterDeletion = Math.max(1, Math.ceil(updatedTotal / perPage));
                 const targetPage = Math.min(currentPage, lastPageAfterDeletion);
 
-                try {
-                    await api.deleteAsset(asset.id);
-                    this.assets = this.assets.filter((item) => item.id !== asset.id);
-                    this.pagination.total = updatedTotal;
+                this.assets = this.assets.filter((item) => item.id !== assetId);
+                this.pagination.total = updatedTotal;
+                this.pagination.current_page = targetPage;
 
-                    if (this.detailAsset && this.detailAsset.id === asset.id) {
-                        this.closeDetails();
-                    }
-
-                    await this.fetchAssets(targetPage);
-                } catch (error) {
-                    console.error('Unable to delete asset', error);
-                    alert(error.message || 'Unable to delete asset');
+                if (this.detailAsset && this.detailAsset.id === assetId) {
+                    this.closeDetails();
                 }
+
+                await this.fetchAssets(targetPage);
             },
 
             changePage(page) {
