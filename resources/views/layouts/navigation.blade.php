@@ -52,7 +52,7 @@
     $logoAlt = branding_logo_alt();
 @endphp
 
-<a href="https://www.eventschedule.com" class="block">
+<a href="{{ app_public_url() }}" class="block">
     <div class="flex h-16 shrink-0 items-center pt-2">
         @if ($navigationLogo)
             <img class="h-10 w-auto" src="{{ branding_logo_url() }}" alt="{{ $logoAlt }}">
