@@ -146,6 +146,54 @@ class AppleWalletServiceTest extends TestCase
         imagedestroy($logoImage);
     }
 
+    public function testItGeneratesStripImagesWithExpectedDimensions(): void
+    {
+        $event = new Event(['name' => 'Sample Event']);
+        $service = $this->makeService(null);
+
+        $images = $service->exposeCreateStripImages($event);
+
+        $this->assertArrayHasKey('strip.png', $images);
+        $this->assertArrayHasKey('strip@2x.png', $images);
+
+        $strip = imagecreatefromstring($images['strip.png']);
+        $this->assertNotFalse($strip, 'Standard strip PNG is invalid.');
+        $this->assertSame(320, imagesx($strip));
+        $this->assertSame(123, imagesy($strip));
+        imagedestroy($strip);
+
+        $strip2x = imagecreatefromstring($images['strip@2x.png']);
+        $this->assertNotFalse($strip2x, 'Retina strip PNG is invalid.');
+        $this->assertSame(640, imagesx($strip2x));
+        $this->assertSame(246, imagesy($strip2x));
+        imagedestroy($strip2x);
+    }
+
+    public function testStripImagesIncorporateVenueBackgroundWhenAvailable(): void
+    {
+        $event = new Event(['name' => 'Sample Event']);
+        $service = $this->makeService(null);
+
+        $fallback = $service->exposeCreateStripImages($event);
+
+        $source = imagecreatetruecolor(20, 10);
+        $color = imagecolorallocate($source, 255, 0, 0);
+        imagefilledrectangle($source, 0, 0, 20, 10, $color);
+        ob_start();
+        imagepng($source);
+        $backgroundBinary = ob_get_clean();
+        imagedestroy($source);
+
+        $this->assertIsString($backgroundBinary);
+
+        $service->overrideVenueBackgroundImage($backgroundBinary);
+
+        $custom = $service->exposeCreateStripImages($event);
+
+        $this->assertArrayHasKey('strip.png', $custom);
+        $this->assertNotSame($fallback['strip.png'], $custom['strip.png']);
+    }
+
     public function testItConvertsPemEncodedSignatureToBinary(): void
     {
         $binary = random_bytes(64);
@@ -568,6 +616,10 @@ class AppleWalletServiceForTests extends AppleWalletService
 
     private bool $cmsSignatureAppearsDerValue = true;
 
+    private bool $hasOverrideVenueBackground = false;
+
+    private ?string $overrideVenueBackground = null;
+
     public function __construct(?string $password)
     {
         $this->certificatePassword = $password;
@@ -585,6 +637,11 @@ class AppleWalletServiceForTests extends AppleWalletService
     public function exposeCreatePassImage(Event $event, int $width, int $height): string
     {
         return $this->createPassImage($event, $width, $height);
+    }
+
+    public function exposeCreateStripImages(Event $event): array
+    {
+        return $this->createStripImages($event);
     }
 
     public function exposeConvertSignatureToBinary(string $signature): string
@@ -652,6 +709,12 @@ class AppleWalletServiceForTests extends AppleWalletService
         return $this->resolveEventStart($event, $sale);
     }
 
+    public function overrideVenueBackgroundImage(?string $contents): void
+    {
+        $this->hasOverrideVenueBackground = true;
+        $this->overrideVenueBackground = $contents;
+    }
+
     protected function cmsSupportsDerEncoding(): bool
     {
         if (! $this->cmsDerEncodingAvailable) {
@@ -680,5 +743,14 @@ class AppleWalletServiceForTests extends AppleWalletService
         $this->pkcs7Used = true;
 
         return parent::signManifestWithPkcs7($manifestPath, $certificates, $chainPath);
+    }
+
+    protected function resolveVenueBackgroundImage(Event $event): ?string
+    {
+        if ($this->hasOverrideVenueBackground) {
+            return $this->overrideVenueBackground;
+        }
+
+        return parent::resolveVenueBackgroundImage($event);
     }
 }
