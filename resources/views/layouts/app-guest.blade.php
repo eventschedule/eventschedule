@@ -152,7 +152,7 @@
                 <div
                 class="container mx-auto flex flex-row justify-between items-center py-7 pr-5"
                 >
-                    <a href="https://www.eventschedule.com" target="_blank">
+                    <a href="{{ app_public_url() }}" target="_blank">
                         <x-application-logo />
                     </a> 
                     <div class="flex flex-row items-center gap-x-3 md:gap-x-12">
