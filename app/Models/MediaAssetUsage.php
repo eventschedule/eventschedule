@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Event;
+use App\Models\Role;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -67,5 +69,56 @@ class MediaAssetUsage extends Model
             ->where('usable_id', $model->getKey())
             ->where('context', $context)
             ->exists();
+    }
+
+    public static function clearForAsset(MediaAsset $asset): void
+    {
+        $asset->loadMissing('usages.usable');
+
+        $asset->usages->each(function (MediaAssetUsage $usage): void {
+            $usage->detachFromUsable();
+        });
+    }
+
+    public function detachFromUsable(): void
+    {
+        $usable = $this->usable;
+
+        if (! $usable) {
+            $this->delete();
+
+            return;
+        }
+
+        $changed = false;
+
+        if ($usable instanceof Role) {
+            if ($this->context === 'profile') {
+                $usable->profile_image = null;
+                $usable->profile_image_url = null;
+                $usable->profile_image_id = null;
+                $changed = true;
+            } elseif ($this->context === 'header') {
+                $usable->header_image = null;
+                $usable->header_image_url = null;
+                $usable->header_image_id = null;
+                $changed = true;
+            } elseif ($this->context === 'background') {
+                $usable->background_image = null;
+                $usable->background_image_url = null;
+                $usable->background_image_id = null;
+                $changed = true;
+            }
+        } elseif ($usable instanceof Event && $this->context === 'flyer') {
+            $usable->flyer_image_url = null;
+            $usable->flyer_image_id = null;
+            $changed = true;
+        }
+
+        if ($changed) {
+            $usable->save();
+        }
+
+        $this->delete();
     }
 }
