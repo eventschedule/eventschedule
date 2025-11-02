@@ -141,7 +141,16 @@ class MediaLibraryController extends Controller
         }
 
         if ($asset->usages->isNotEmpty()) {
-            MediaAssetUsage::clearForAsset($asset);
+            $remainingUsages = MediaAssetUsage::clearForAsset($asset);
+
+            if ($remainingUsages->isNotEmpty()) {
+                return response()->json([
+                    'message' => 'This asset is currently in use and cannot be deleted.',
+                    'usages' => $remainingUsages
+                        ->map(fn (MediaAssetUsage $usage) => $this->transformUsage($usage))
+                        ->all(),
+                ], 422);
+            }
         }
 
         $asset->delete();

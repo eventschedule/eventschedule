@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Collection;
 
 class MediaAssetUsage extends Model
 {
@@ -71,26 +72,27 @@ class MediaAssetUsage extends Model
             ->exists();
     }
 
-    public static function clearForAsset(MediaAsset $asset): void
+    public static function clearForAsset(MediaAsset $asset): Collection
     {
         $asset->loadMissing('usages.usable');
 
-        $asset->usages->each(function (MediaAssetUsage $usage): void {
-            $usage->detachFromUsable();
+        return $asset->usages->filter(function (MediaAssetUsage $usage): bool {
+            return ! $usage->detachFromUsable();
         });
     }
 
-    public function detachFromUsable(): void
+    public function detachFromUsable(): bool
     {
         $usable = $this->usable;
 
         if (! $usable) {
             $this->delete();
 
-            return;
+            return true;
         }
 
         $changed = false;
+        $handled = false;
 
         if ($usable instanceof Role) {
             if ($this->context === 'profile') {
@@ -98,21 +100,29 @@ class MediaAssetUsage extends Model
                 $usable->profile_image_url = null;
                 $usable->profile_image_id = null;
                 $changed = true;
+                $handled = true;
             } elseif ($this->context === 'header') {
                 $usable->header_image = null;
                 $usable->header_image_url = null;
                 $usable->header_image_id = null;
                 $changed = true;
+                $handled = true;
             } elseif ($this->context === 'background') {
                 $usable->background_image = null;
                 $usable->background_image_url = null;
                 $usable->background_image_id = null;
                 $changed = true;
+                $handled = true;
             }
         } elseif ($usable instanceof Event && $this->context === 'flyer') {
             $usable->flyer_image_url = null;
             $usable->flyer_image_id = null;
             $changed = true;
+            $handled = true;
+        }
+
+        if (! $handled) {
+            return false;
         }
 
         if ($changed) {
@@ -120,5 +130,7 @@ class MediaAssetUsage extends Model
         }
 
         $this->delete();
+
+        return true;
     }
 }

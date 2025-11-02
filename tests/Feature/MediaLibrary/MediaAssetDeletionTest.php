@@ -97,4 +97,58 @@ class MediaAssetDeletionTest extends TestCase
         $this->assertDatabaseHas('media_assets', ['id' => $asset->id]);
         Storage::disk('public')->assertExists($assetPath);
     }
+
+    public function test_force_deletion_is_rejected_when_usage_is_unsupported(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create([
+            'email_verified_at' => now(),
+        ]);
+
+        $assetPath = 'media/used-image-force.jpg';
+        Storage::disk('public')->put($assetPath, 'asset');
+
+        $asset = MediaAsset::create([
+            'disk' => 'public',
+            'path' => $assetPath,
+            'original_filename' => 'used-image-force.jpg',
+            'mime_type' => 'image/jpeg',
+            'size' => 2048,
+            'width' => 200,
+            'height' => 100,
+            'uploaded_by' => $user->id,
+        ]);
+
+        $usage = MediaAssetUsage::create([
+            'media_asset_id' => $asset->id,
+            'media_asset_variant_id' => null,
+            'usable_type' => User::class,
+            'usable_id' => $user->id,
+            'context' => 'general',
+        ]);
+
+        $response = $this->actingAs($user)->deleteJson(route('media.assets.destroy', [
+            'asset' => $asset->id,
+            'force' => 1,
+        ]));
+
+        $response
+            ->assertStatus(422)
+            ->assertJson([
+                'message' => 'This asset is currently in use and cannot be deleted.',
+            ])
+            ->assertJsonFragment([
+                'id' => $usage->id,
+                'usable_id' => $user->id,
+                'context' => 'general',
+            ]);
+
+        $this->assertDatabaseHas('media_assets', ['id' => $asset->id]);
+        $this->assertDatabaseHas('media_asset_usages', [
+            'media_asset_id' => $asset->id,
+            'usable_id' => $user->id,
+        ]);
+        Storage::disk('public')->assertExists($assetPath);
+    }
 }
