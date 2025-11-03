@@ -7,6 +7,9 @@
     $totalWeeks = ceil($totalDays / 7);
     $unavailable = [];
     $publicUrl = app_public_url();
+    $calendarQueryParams = isset($calendarQueryParams) ? array_filter($calendarQueryParams, function ($value) {
+        return $value !== null && $value !== '';
+    }) : [];
 
     // Always initialize as arrays
     $eventGroupIds = [];
@@ -173,23 +176,66 @@
                 </div>
             @endif
 
-            {{-- Month Navigation Controls --}}
-            <div class="flex items-center bg-white rounded-md shadow-sm hidden md:flex">
-                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}" class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50" rel="nofollow">
-                    <span class="sr-only">{{ __('messages.previous_month') }}</span>
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                        <path fill-rule="evenodd" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" clip-rule="evenodd" />
-                    </svg>
-                </a>
-                <a href="{{ $route == 'home' ? route('home') : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => now()->year, 'month' => now()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => now()->year, 'month' => now()->month]) }}" class="flex h-9 items-center justify-center border-y border-gray-300 px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative">
-                    <span class="h-5 flex items-center">{{ __('messages.this_month') }}</span>
-                </a>
-                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) }}" class="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50" rel="nofollow">
-                    <span class="sr-only">{{ __('messages.next_month') }}</span>
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                        <path fill-rule="evenodd" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" clip-rule="evenodd" />
-                    </svg>
-                </a>
+        {{-- Month Navigation Controls --}}
+        @php
+            $previousMonthDate = Carbon\Carbon::create($year, $month, 1)->subMonth();
+            $nextMonthDate = Carbon\Carbon::create($year, $month, 1)->addMonth();
+            $previousParams = array_merge($calendarQueryParams, [
+                'year' => $previousMonthDate->year,
+                'month' => $previousMonthDate->month,
+            ]);
+            $nextParams = array_merge($calendarQueryParams, [
+                'year' => $nextMonthDate->year,
+                'month' => $nextMonthDate->month,
+            ]);
+            $currentParams = array_merge($calendarQueryParams, [
+                'year' => now()->year,
+                'month' => now()->month,
+            ]);
+
+            if (in_array($route, ['guest', 'admin'])) {
+                $roleBaseParams = ['subdomain' => $role->subdomain];
+                if ($route === 'guest') {
+                    $roleBaseParams['embed'] = isset($embed) && $embed;
+                } else {
+                    $roleBaseParams['tab'] = $tab;
+                }
+            }
+        @endphp
+        <div class="flex items-center bg-white rounded-md shadow-sm hidden md:flex">
+            @if ($route === 'home')
+                <a href="{{ route('home', $previousParams) }}" class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50" rel="nofollow">
+            @elseif ($route === 'landing')
+                <a href="{{ route('landing', $previousParams) }}" class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50" rel="nofollow">
+            @else
+                <a href="{{ route('role.view_' . $route, array_merge($roleBaseParams, $previousParams)) }}" class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50" rel="nofollow">
+            @endif
+                <span class="sr-only">{{ __('messages.previous_month') }}</span>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" clip-rule="evenodd" />
+                </svg>
+            </a>
+            @if ($route === 'home')
+                <a href="{{ route('home', $currentParams) }}" class="flex h-9 items-center justify-center border-y border-gray-300 px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative">
+            @elseif ($route === 'landing')
+                <a href="{{ route('landing', $currentParams) }}" class="flex h-9 items-center justify-center border-y border-gray-300 px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative">
+            @else
+                <a href="{{ route('role.view_' . $route, array_merge($roleBaseParams, $currentParams)) }}" class="flex h-9 items-center justify-center border-y border-gray-300 px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative">
+            @endif
+                <span class="h-5 flex items-center">{{ __('messages.this_month') }}</span>
+            </a>
+            @if ($route === 'home')
+                <a href="{{ route('home', $nextParams) }}" class="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50" rel="nofollow">
+            @elseif ($route === 'landing')
+                <a href="{{ route('landing', $nextParams) }}" class="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50" rel="nofollow">
+            @else
+                <a href="{{ route('role.view_' . $route, array_merge($roleBaseParams, $nextParams)) }}" class="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50" rel="nofollow">
+            @endif
+                <span class="sr-only">{{ __('messages.next_month') }}</span>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" clip-rule="evenodd" />
+                </svg>
+            </a>
             </div>
 
             {{-- Add Event Button --}}
