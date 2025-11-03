@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\BlogPost;
+use App\Models\Setting;
+use App\Support\HomePageSettings;
 use App\Utils\UrlUtils;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -206,6 +208,8 @@ class HomeController extends Controller
             })
             ->all();
 
+        $homeContent = $this->buildHomePageContent((bool) $user);
+
         return view('landing', [
             'calendarEvents' => $calendarEvents,
             'month' => $month,
@@ -219,7 +223,87 @@ class HomeController extends Controller
             'selectedFilters' => $selectedFilters,
             'calendarQueryParams' => $calendarQueryParams,
             'isAuthenticated' => (bool) $user,
+            'homeContent' => $homeContent,
         ]);
+    }
+
+    protected function buildHomePageContent(bool $isAuthenticated): array
+    {
+        $stored = Setting::forGroup('home');
+
+        $layout = HomePageSettings::normalizeLayout($stored['layout'] ?? null);
+
+        $heroTitle = HomePageSettings::clean($stored['hero_title'] ?? null)
+            ?? ($isAuthenticated ? __('messages.your_events') : __('messages.upcoming_events'));
+
+        $heroHtml = HomePageSettings::compileHtml(
+            $stored['hero_html'] ?? null,
+            $stored['hero_markdown'] ?? null,
+        );
+
+        if (! $heroHtml) {
+            $defaultText = $isAuthenticated
+                ? __('messages.manage_calendar_intro')
+                : __('messages.discover_public_events');
+
+            $heroHtml = '<p>' . e($defaultText) . '</p>';
+        }
+
+        $heroCtaLabel = HomePageSettings::clean($stored['hero_cta_label'] ?? null);
+        $heroCtaUrl = HomePageSettings::clean($stored['hero_cta_url'] ?? null);
+
+        if ($heroCtaUrl && ! HomePageSettings::isSafeCtaUrl($heroCtaUrl)) {
+            $heroCtaUrl = null;
+        }
+
+        if (! $heroCtaLabel || ! $heroCtaUrl) {
+            $heroCtaLabel = null;
+            $heroCtaUrl = null;
+        }
+
+        if (! $heroCtaLabel && ! $heroCtaUrl && ! $isAuthenticated) {
+            $heroCtaLabel = __('messages.log_in');
+            $heroCtaUrl = route('login');
+        }
+
+        $asideTitle = HomePageSettings::clean($stored['aside_title'] ?? null);
+        $asideHtml = HomePageSettings::compileHtml(
+            $stored['aside_html'] ?? null,
+            $stored['aside_markdown'] ?? null,
+        );
+
+        $asideAlt = HomePageSettings::clean($stored['aside_image_alt'] ?? null);
+
+        $image = HomePageSettings::resolveImagePreview(
+            isset($stored['aside_image_media_asset_id']) ? (int) $stored['aside_image_media_asset_id'] : null,
+            isset($stored['aside_image_media_variant_id']) ? (int) $stored['aside_image_media_variant_id'] : null,
+        );
+
+        $hasAside = $asideTitle || $asideHtml || ($image['url'] ?? null);
+
+        if (! $hasAside) {
+            $layout = HomePageSettings::LAYOUT_FULL;
+        }
+
+        return [
+            'layout' => $layout,
+            'hero' => [
+                'title' => $heroTitle,
+                'html' => $heroHtml,
+                'cta' => [
+                    'label' => $heroCtaLabel,
+                    'url' => $heroCtaUrl,
+                ],
+            ],
+            'aside' => [
+                'title' => $asideTitle,
+                'html' => $asideHtml,
+                'image' => [
+                    'url' => $image['url'] ?? null,
+                    'alt' => $asideAlt,
+                ],
+            ],
+        ];
     }
 
     public function home(Request $request)

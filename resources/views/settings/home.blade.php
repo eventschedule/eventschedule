@@ -1,0 +1,154 @@
+<x-app-admin-layout>
+    @php
+        $homeSettings = $homeSettings ?? [];
+        if ($homeSettings instanceof \Illuminate\Support\Collection) {
+            $homeSettings = $homeSettings->toArray();
+        }
+
+        $layoutOptions = $layoutOptions ?? [];
+        $selectedLayout = old('home_layout', $homeSettings['layout'] ?? \App\Support\HomePageSettings::LAYOUT_FULL);
+
+        $initialAsideImage = $initialAsideImage ?? ['asset_id' => null, 'variant_id' => null, 'url' => null];
+        $initialAssetId = old('home_aside_media_asset_id', $initialAsideImage['asset_id'] ?? null);
+        $initialVariantId = old('home_aside_media_variant_id', $initialAsideImage['variant_id'] ?? null);
+        $initialImageUrl = $initialAsideImage['url'] ?? null;
+    @endphp
+
+    <div class="py-12">
+        <div class="max-w-4xl mx-auto space-y-6">
+            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                <div class="max-w-3xl">
+                    <div class="mb-6">
+                        <a href="{{ route('settings.index') }}" class="inline-flex items-center gap-2 text-sm font-medium text-[#4E81FA] hover:text-[#365fcc]">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                            </svg>
+                            {{ __('messages.back_to_settings') }}
+                        </a>
+                    </div>
+
+                    <section>
+                        <header>
+                            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                                {{ __('messages.home_settings_heading') }}
+                            </h2>
+
+                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                {{ __('messages.home_settings_description') }}
+                            </p>
+                        </header>
+
+                        @if (session('status') === 'home-settings-updated')
+                            <div class="mt-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-900/40 dark:text-green-200">
+                                {{ __('messages.home_settings_saved') }}
+                            </div>
+                        @endif
+
+                        <form method="post" action="{{ route('settings.home.update') }}" class="mt-6 space-y-8">
+                            @csrf
+                            @method('patch')
+
+                            <div>
+                                <x-input-label :value="__('messages.home_layout_label')" />
+                                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                    {{ __('messages.home_layout_help') }}
+                                </p>
+                                <div class="mt-4 grid gap-3 sm:grid-cols-3">
+                                    @foreach($layoutOptions as $value => $option)
+                                        <label class="relative block">
+                                            <input type="radio" name="home_layout" value="{{ $value }}" class="peer sr-only" @checked($selectedLayout === $value)>
+                                            <div class="h-full rounded-lg border border-gray-200 bg-white p-4 text-left shadow-sm transition peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[#4E81FA] peer-checked:border-[#4E81FA] peer-checked:ring-2 peer-checked:ring-[#4E81FA] dark:border-gray-700 dark:bg-gray-900/60 dark:peer-checked:border-[#4E81FA]">
+                                                <div class="flex items-start justify-between gap-3">
+                                                    <div>
+                                                        <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $option['label'] ?? $value }}</p>
+                                                        <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">{{ $option['description'] ?? '' }}</p>
+                                                    </div>
+                                                    <span class="text-gray-300 dark:text-gray-600">
+                                                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    @endforeach
+                                </div>
+                                <x-input-error class="mt-2" :messages="$errors->get('home_layout')" />
+                            </div>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <x-input-label for="home_hero_title" :value="__('messages.home_hero_title_label')" />
+                                    <x-text-input id="home_hero_title" name="home_hero_title" type="text" class="mt-1 block w-full" :value="old('home_hero_title', $homeSettings['hero_title'] ?? '')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('home_hero_title')" />
+                                </div>
+
+                                <div>
+                                    <x-input-label for="home_hero_markdown" :value="__('messages.home_hero_markdown_label')" />
+                                    <textarea id="home_hero_markdown" name="home_hero_markdown" rows="6"
+                                        class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:border-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">{{ old('home_hero_markdown', $homeSettings['hero_markdown'] ?? '') }}</textarea>
+                                    <x-input-error class="mt-2" :messages="$errors->get('home_hero_markdown')" />
+                                </div>
+
+                                <div class="grid gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <x-input-label for="home_hero_cta_label" :value="__('messages.home_hero_cta_label')" />
+                                        <x-text-input id="home_hero_cta_label" name="home_hero_cta_label" type="text" class="mt-1 block w-full" :value="old('home_hero_cta_label', $homeSettings['hero_cta_label'] ?? '')" />
+                                        <x-input-error class="mt-2" :messages="$errors->get('home_hero_cta_label')" />
+                                    </div>
+                                    <div>
+                                        <x-input-label for="home_hero_cta_url" :value="__('messages.home_hero_cta_url')" />
+                                        <x-text-input id="home_hero_cta_url" name="home_hero_cta_url" type="text" class="mt-1 block w-full" :value="old('home_hero_cta_url', $homeSettings['hero_cta_url'] ?? '')" />
+                                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.home_hero_cta_help') }}</p>
+                                        <x-input-error class="mt-2" :messages="$errors->get('home_hero_cta_url')" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <x-input-label for="home_aside_title" :value="__('messages.home_aside_title_label')" />
+                                    <x-text-input id="home_aside_title" name="home_aside_title" type="text" class="mt-1 block w-full" :value="old('home_aside_title', $homeSettings['aside_title'] ?? '')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('home_aside_title')" />
+                                </div>
+
+                                <div>
+                                    <x-input-label for="home_aside_markdown" :value="__('messages.home_aside_markdown_label')" />
+                                    <textarea id="home_aside_markdown" name="home_aside_markdown" rows="6"
+                                        class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:border-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">{{ old('home_aside_markdown', $homeSettings['aside_markdown'] ?? '') }}</textarea>
+                                    <x-input-error class="mt-2" :messages="$errors->get('home_aside_markdown')" />
+                                </div>
+
+                                <div class="space-y-4">
+                                    <x-input-label :value="__('messages.home_aside_image_label')" />
+                                    <x-media-picker
+                                        name="home_aside_media_variant_id"
+                                        asset-input-name="home_aside_media_asset_id"
+                                        context="home-aside"
+                                        :initial-url="$initialImageUrl"
+                                        :initial-asset-id="$initialAssetId"
+                                        :initial-variant-id="$initialVariantId"
+                                        label="{{ __('messages.home_aside_image_picker') }}"
+                                        help="{{ __('messages.home_aside_image_help') }}"
+                                    />
+                                    <x-input-error class="mt-2" :messages="$errors->get('home_aside_media_asset_id')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('home_aside_media_variant_id')" />
+                                </div>
+
+                                <div>
+                                    <x-input-label for="home_aside_image_alt" :value="__('messages.home_aside_image_alt_label')" />
+                                    <x-text-input id="home_aside_image_alt" name="home_aside_image_alt" type="text" class="mt-1 block w-full" :value="old('home_aside_image_alt', $homeSettings['aside_image_alt'] ?? '')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('home_aside_image_alt')" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <x-primary-button>{{ __('messages.save') }}</x-primary-button>
+                            </div>
+                        </form>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-admin-layout>
