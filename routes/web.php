@@ -92,9 +92,8 @@ Route::get('/ticket/view/{event_id}/{secret}', [TicketController::class, 'view']
 Route::get('/ticket/wallet/apple/{event_id}/{secret}', [TicketController::class, 'appleWallet'])->name('ticket.wallet.apple')->middleware('throttle:50,1');
 Route::get('/ticket/wallet/google/{event_id}/{secret}', [TicketController::class, 'googleWallet'])->name('ticket.wallet.google')->middleware('throttle:50,1');
 
-Route::middleware(['auth', 'verified'])->group(function () 
+Route::middleware(['auth', 'verified'])->group(function ()
 {
-    Route::get('/events', [HomeController::class, 'home'])->name('home');
     Route::get('/assets/images', [ImageController::class, 'index'])->name('images.index');
     Route::post('/assets/images', [ImageController::class, 'store'])->name('images.store');
     Route::delete('/assets/images/{image}', [ImageController::class, 'destroy'])->name('images.destroy');
@@ -322,4 +321,5 @@ if (config('app.env') == 'local') {
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 }
 
+Route::get('/events', [HomeController::class, 'landing'])->name('home');
 Route::get('/{slug?}', [HomeController::class, 'landing'])->name('landing');
