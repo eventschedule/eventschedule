@@ -589,7 +589,7 @@ class Role extends Model implements MustVerifyEmail
 
     public function isWhiteLabeled()
     {
-        return false;
+        return $this->plan_expires >= now()->format('Y-m-d') && $this->plan_type == 'pro';
     }
 
     public function showBranding()
