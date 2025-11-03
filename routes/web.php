@@ -156,6 +156,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
         Route::get('/updates', [SettingsController::class, 'updates'])->name('updates');
         Route::get('/logging', [SettingsController::class, 'logging'])->name('logging');
         Route::get('/branding', [SettingsController::class, 'branding'])->name('branding');
+        Route::get('/home', [SettingsController::class, 'home'])->name('home');
         Route::get('/terms', [SettingsController::class, 'terms'])->name('terms');
         Route::get('/integrations', [SettingsController::class, 'integrations'])->name('integrations');
         Route::get('/wallet', [SettingsController::class, 'wallet'])->name('wallet');
@@ -166,6 +167,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
         Route::patch('/updates', [SettingsController::class, 'updateUpdates'])->name('updates.update');
         Route::patch('/logging', [SettingsController::class, 'updateLogging'])->name('logging.update');
         Route::patch('/branding', [SettingsController::class, 'updateBranding'])->name('branding.update');
+        Route::patch('/home', [SettingsController::class, 'updateHome'])->name('home.update');
         Route::patch('/terms', [SettingsController::class, 'updateTerms'])->name('terms.update');
         Route::patch('/wallet/apple', [SettingsController::class, 'updateAppleWallet'])->name('wallet.apple.update');
         Route::patch('/wallet/google', [SettingsController::class, 'updateGoogleWallet'])->name('wallet.google.update');

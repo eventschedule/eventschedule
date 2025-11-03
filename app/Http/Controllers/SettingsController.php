@@ -10,6 +10,7 @@ use App\Services\ReleaseChannelService;
 use App\Rules\AccessibleColor;
 use App\Support\BrandingManager;
 use App\Support\ColorUtils;
+use App\Support\HomePageSettings;
 use App\Support\Logging\LogLevelNormalizer;
 use App\Support\Logging\LoggingConfigManager;
 use App\Support\MailConfigManager;
@@ -102,6 +103,24 @@ class SettingsController extends Controller
             'brandingSettings' => $this->getBrandingSettings(),
             'languageOptions' => $this->getSupportedLanguageOptions(),
             'colorPalettes' => $this->getBrandingPalettes(),
+        ]);
+    }
+
+    public function home(Request $request): View
+    {
+        $this->authorizeAdmin($request->user());
+
+        $homeSettings = Setting::forGroup('home');
+
+        $imagePreview = HomePageSettings::resolveImagePreview(
+            isset($homeSettings['aside_image_media_asset_id']) ? (int) $homeSettings['aside_image_media_asset_id'] : null,
+            isset($homeSettings['aside_image_media_variant_id']) ? (int) $homeSettings['aside_image_media_variant_id'] : null,
+        );
+
+        return view('settings.home', [
+            'homeSettings' => $homeSettings,
+            'layoutOptions' => $this->homeLayoutOptions(),
+            'initialAsideImage' => $imagePreview,
         ]);
     }
 
@@ -723,6 +742,101 @@ class SettingsController extends Controller
         return redirect()->route('settings.branding')->with('status', 'branding-settings-updated');
     }
 
+    public function updateHome(Request $request): RedirectResponse
+    {
+        $this->authorizeAdmin($request->user());
+
+        $validated = $request->validate([
+            'home_layout' => ['required', 'string', Rule::in(HomePageSettings::allowedLayouts())],
+            'home_hero_title' => ['nullable', 'string', 'max:150'],
+            'home_hero_markdown' => ['nullable', 'string', 'max:65000'],
+            'home_hero_cta_label' => ['nullable', 'string', 'max:100', 'required_with:home_hero_cta_url'],
+            'home_hero_cta_url' => ['nullable', 'string', 'max:500', 'required_with:home_hero_cta_label'],
+            'home_aside_title' => ['nullable', 'string', 'max:150'],
+            'home_aside_markdown' => ['nullable', 'string', 'max:65000'],
+            'home_aside_media_asset_id' => ['nullable', 'integer', 'exists:media_assets,id'],
+            'home_aside_media_variant_id' => ['nullable', 'integer', 'exists:media_asset_variants,id'],
+            'home_aside_image_alt' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $layout = HomePageSettings::normalizeLayout($validated['home_layout'] ?? null);
+
+        $heroTitle = HomePageSettings::clean($validated['home_hero_title'] ?? null);
+        $heroMarkdown = HomePageSettings::clean($validated['home_hero_markdown'] ?? null);
+        $heroHtml = $heroMarkdown ? MarkdownUtils::convertToHtml($heroMarkdown) : null;
+
+        $heroCtaLabel = HomePageSettings::clean($validated['home_hero_cta_label'] ?? null);
+        $heroCtaUrl = HomePageSettings::clean($validated['home_hero_cta_url'] ?? null);
+
+        if ($heroCtaUrl && ! HomePageSettings::isSafeCtaUrl($heroCtaUrl)) {
+            throw ValidationException::withMessages([
+                'home_hero_cta_url' => __('messages.home_cta_url_invalid'),
+            ]);
+        }
+
+        $asideTitle = HomePageSettings::clean($validated['home_aside_title'] ?? null);
+        $asideMarkdown = HomePageSettings::clean($validated['home_aside_markdown'] ?? null);
+        $asideHtml = $asideMarkdown ? MarkdownUtils::convertToHtml($asideMarkdown) : null;
+        $asideAlt = HomePageSettings::clean($validated['home_aside_image_alt'] ?? null);
+
+        $asideAssetId = $request->input('home_aside_media_asset_id');
+        $asideVariantId = $request->input('home_aside_media_variant_id');
+
+        if ($asideVariantId && ! $asideAssetId) {
+            throw ValidationException::withMessages([
+                'home_aside_media_variant_id' => __('messages.home_image_variant_mismatch'),
+            ]);
+        }
+
+        $imageAssetId = null;
+        $imageVariantId = null;
+
+        if ($asideAssetId) {
+            $asset = MediaAsset::find((int) $asideAssetId);
+
+            if (! $asset) {
+                throw ValidationException::withMessages([
+                    'home_aside_media_asset_id' => __('messages.home_image_missing'),
+                ]);
+            }
+
+            $imageAssetId = $asset->id;
+
+            if ($asideVariantId) {
+                $variant = MediaAssetVariant::where('media_asset_id', $asset->id)
+                    ->find((int) $asideVariantId);
+
+                if (! $variant) {
+                    throw ValidationException::withMessages([
+                        'home_aside_media_variant_id' => __('messages.home_image_variant_mismatch'),
+                    ]);
+                }
+
+                $imageVariantId = $variant->id;
+            }
+        } elseif ($request->exists('home_aside_media_asset_id')) {
+            $imageAssetId = null;
+            $imageVariantId = null;
+        }
+
+        Setting::setGroup('home', [
+            'layout' => $layout,
+            'hero_title' => $heroTitle,
+            'hero_markdown' => $heroMarkdown,
+            'hero_html' => $heroHtml,
+            'hero_cta_label' => $heroCtaLabel,
+            'hero_cta_url' => $heroCtaUrl,
+            'aside_title' => $asideTitle,
+            'aside_markdown' => $asideMarkdown,
+            'aside_html' => $asideHtml,
+            'aside_image_media_asset_id' => $imageAssetId,
+            'aside_image_media_variant_id' => $imageVariantId,
+            'aside_image_alt' => $asideAlt,
+        ]);
+
+        return redirect()->route('settings.home')->with('status', 'home-settings-updated');
+    }
+
     public function updateTerms(Request $request): RedirectResponse
     {
         $this->authorizeAdmin($request->user());
@@ -1214,6 +1328,24 @@ class SettingsController extends Controller
         unset($palette);
 
         return array_values($palettes);
+    }
+
+    protected function homeLayoutOptions(): array
+    {
+        return [
+            HomePageSettings::LAYOUT_FULL => [
+                'label' => __('messages.home_layout_full'),
+                'description' => __('messages.home_layout_full_description'),
+            ],
+            HomePageSettings::LAYOUT_LEFT => [
+                'label' => __('messages.home_layout_left'),
+                'description' => __('messages.home_layout_left_description'),
+            ],
+            HomePageSettings::LAYOUT_RIGHT => [
+                'label' => __('messages.home_layout_right'),
+                'description' => __('messages.home_layout_right_description'),
+            ],
+        ];
     }
 
     protected function getTermsSettings(): array
