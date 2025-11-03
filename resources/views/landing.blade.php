@@ -6,6 +6,20 @@
     $heroTitle = $hero['title'] ?? ($isAuthenticated ? __('messages.your_events') : __('messages.upcoming_events'));
     $heroHtml = $hero['html'] ?? null;
     $heroCta = $hero['cta'] ?? ['label' => null, 'url' => null];
+    $loginCta = null;
+    $showHeroCta = filled($heroCta['label'] ?? null) && filled($heroCta['url'] ?? null);
+
+    if ($showHeroCta) {
+        $defaultLoginUrl = \Illuminate\Support\Facades\Route::has('login') ? route('login') : null;
+        $isLoginCta = $defaultLoginUrl
+            && ($heroCta['label'] ?? null) === __('messages.log_in')
+            && ($heroCta['url'] ?? null) === $defaultLoginUrl;
+
+        if ($isLoginCta) {
+            $loginCta = $heroCta;
+            $showHeroCta = false;
+        }
+    }
     $asideImage = $aside['image'] ?? ['url' => null, 'alt' => null];
     $showAside = filled($aside['title'] ?? null) || filled($aside['html'] ?? null) || filled($asideImage['url'] ?? null);
 
@@ -32,7 +46,7 @@
 
 <x-app-layout :title="__('messages.events')">
     <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center text-white">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 text-center text-white">
             <h1 class="text-4xl sm:text-5xl font-bold tracking-tight">
                 {{ $heroTitle }}
             </h1>
@@ -41,7 +55,7 @@
                     {!! $heroHtml !!}
                 </div>
             @endif
-            @if(filled($heroCta['label'] ?? null) && filled($heroCta['url'] ?? null))
+            @if($showHeroCta)
                 <div class="mt-8 flex justify-center">
                     <a href="{{ $heroCta['url'] }}"
                         class="inline-flex items-center gap-2 rounded-full bg-white/10 px-6 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-white/20 transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
@@ -168,4 +182,29 @@
             </div>
         @endif
     </div>
+
+    <x-slot name="footer">
+        <footer class="bg-slate-950">
+            @if(request()->embed)
+                <div class="px-4 py-5 text-center text-sm text-slate-300">
+                    {!! str_replace(':link', '<a href="https://www.eventschedule.com" target="_blank" rel="noopener" class="hover:underline font-medium text-white">EventSchedule</a>', __('messages.powered_by_eventschedule')) !!}
+                </div>
+            @else
+                <div class="max-w-6xl mx-auto flex flex-col gap-4 px-4 py-8 text-center sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+                    <div class="text-sm text-slate-300">
+                        {!! str_replace(':link', '<a href="https://www.eventschedule.com" target="_blank" rel="noopener" class="hover:underline font-medium text-white">EventSchedule</a>', __('messages.powered_by_eventschedule')) !!}
+                    </div>
+
+                    @if($loginCta)
+                        <div>
+                            <a href="{{ $loginCta['url'] }}"
+                               class="inline-flex items-center gap-2 rounded-full bg-white px-6 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                                {{ $loginCta['label'] }}
+                            </a>
+                        </div>
+                    @endif
+                </div>
+            @endif
+        </footer>
+    </x-slot>
 </x-app-layout>
