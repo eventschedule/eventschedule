@@ -24,7 +24,7 @@ class HomeController extends Controller
             return $this->home($request);
         }
 
-        return redirect()->route('landing', $request->query());
+        return $this->landing($request);
     }
 
     public function landing(Request $request, $slug = null)
