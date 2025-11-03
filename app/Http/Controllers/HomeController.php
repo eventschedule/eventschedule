@@ -14,6 +14,19 @@ use Mail;
 
 class HomeController extends Controller
 {
+    public function root(Request $request, $slug = null)
+    {
+        if ($slug) {
+            return $this->landing($request, $slug);
+        }
+
+        if ($request->user()) {
+            return $this->home($request);
+        }
+
+        return redirect()->route('landing', $request->query());
+    }
+
     public function landing(Request $request, $slug = null)
     {
         if ($slug && $role = Role::whereSubdomain($slug)->first()) {
