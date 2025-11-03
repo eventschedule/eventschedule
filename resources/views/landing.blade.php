@@ -11,6 +11,18 @@
                     {{ __('messages.discover_public_events') }}
                 @endif
             </p>
+            @unless($isAuthenticated)
+                <div class="mt-8 flex justify-center">
+                    <a href="{{ route('login') }}"
+                        class="inline-flex items-center gap-2 rounded-full bg-white/10 px-6 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-white/20 transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6A2.25 2.25 0 0 0 5.25 5.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+                        </svg>
+                        {{ __('messages.log_in') }}
+                    </a>
+                </div>
+            @endunless
         </div>
     </div>
 

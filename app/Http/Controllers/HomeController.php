@@ -109,11 +109,16 @@ class HomeController extends Controller
 
         $venueOptions = $optionEvents
             ->map->venue
-            ->filter(function ($role) {
-                return $role
-                    && ! $role->is_deleted
-                    && ! $role->is_unlisted
-                    && optional($role->pivot)->is_accepted;
+            ->filter(function ($role) use ($user) {
+                if (! $role || $role->is_deleted) {
+                    return false;
+                }
+
+                if (! $user && $role->is_unlisted) {
+                    return false;
+                }
+
+                return true;
             })
             ->unique('id')
             ->sortBy(function ($role) {
@@ -122,21 +127,19 @@ class HomeController extends Controller
             ->values();
 
         $curatorOptions = $optionEvents
-            ->flatMap(function ($event) {
-                $curators = $event->roles->filter(function ($role) {
-                    return ! $role->is_deleted
-                        && ! $role->is_unlisted
-                        && $role->isCurator()
-                        && optional($role->pivot)->is_accepted;
+            ->flatMap(function ($event) use ($user) {
+                $curators = $event->roles->filter(function ($role) use ($user) {
+                    if ($role->is_deleted || ($role->is_unlisted && ! $user)) {
+                        return false;
+                    }
+
+                    return $role->isCurator();
                 });
 
-                if (
-                    $event->creatorRole
+                if ($event->creatorRole
                     && ! $event->creatorRole->is_deleted
-                    && ! $event->creatorRole->is_unlisted
-                    && $event->creatorRole->isCurator()
-                    && (! $event->creatorRole->pivot || $event->creatorRole->pivot->is_accepted)
-                ) {
+                    && ! (! $user && $event->creatorRole->is_unlisted)
+                    && $event->creatorRole->isCurator()) {
                     $curators->push($event->creatorRole);
                 }
 
@@ -149,12 +152,17 @@ class HomeController extends Controller
             ->values();
 
         $talentOptions = $optionEvents
-            ->flatMap(function ($event) {
-                return $event->roles->filter(function ($role) {
-                    return ! $role->is_deleted
-                        && ! $role->is_unlisted
-                        && $role->isTalent()
-                        && optional($role->pivot)->is_accepted;
+            ->flatMap(function ($event) use ($user) {
+                return $event->roles->filter(function ($role) use ($user) {
+                    if ($role->is_deleted || ! $role->isTalent()) {
+                        return false;
+                    }
+
+                    if (! $user && $role->is_unlisted) {
+                        return false;
+                    }
+
+                    return true;
                 });
             })
             ->unique('id')
