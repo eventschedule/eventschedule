@@ -110,7 +110,10 @@ class HomeController extends Controller
         $venueOptions = $optionEvents
             ->map->venue
             ->filter(function ($role) {
-                return $role && ! $role->is_deleted;
+                return $role
+                    && ! $role->is_deleted
+                    && ! $role->is_unlisted
+                    && optional($role->pivot)->is_accepted;
             })
             ->unique('id')
             ->sortBy(function ($role) {
@@ -121,10 +124,19 @@ class HomeController extends Controller
         $curatorOptions = $optionEvents
             ->flatMap(function ($event) {
                 $curators = $event->roles->filter(function ($role) {
-                    return ! $role->is_deleted && $role->isCurator();
+                    return ! $role->is_deleted
+                        && ! $role->is_unlisted
+                        && $role->isCurator()
+                        && optional($role->pivot)->is_accepted;
                 });
 
-                if ($event->creatorRole && ! $event->creatorRole->is_deleted && $event->creatorRole->isCurator()) {
+                if (
+                    $event->creatorRole
+                    && ! $event->creatorRole->is_deleted
+                    && ! $event->creatorRole->is_unlisted
+                    && $event->creatorRole->isCurator()
+                    && (! $event->creatorRole->pivot || $event->creatorRole->pivot->is_accepted)
+                ) {
                     $curators->push($event->creatorRole);
                 }
 
@@ -139,7 +151,10 @@ class HomeController extends Controller
         $talentOptions = $optionEvents
             ->flatMap(function ($event) {
                 return $event->roles->filter(function ($role) {
-                    return ! $role->is_deleted && $role->isTalent();
+                    return ! $role->is_deleted
+                        && ! $role->is_unlisted
+                        && $role->isTalent()
+                        && optional($role->pivot)->is_accepted;
                 });
             })
             ->unique('id')
