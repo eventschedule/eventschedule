@@ -7,20 +7,64 @@
         <style>
             @media (min-width: 1024px) {
                 #desktop-sidebar {
-                    will-change: transform;
+                    width: 18rem;
+                    transition: width 0.3s ease;
                 }
 
                 #desktop-sidebar[data-state="closed"] {
-                    transform: translateX(-100%);
-                    pointer-events: none;
+                    width: 5rem !important;
+                }
+
+                #desktop-sidebar[data-state="closed"] .sidebar-content {
+                    padding-left: 1rem;
+                    padding-right: 1rem;
+                }
+
+                #desktop-sidebar[data-state="closed"] .sidebar-toggle {
+                    justify-content: center;
+                }
+
+                #desktop-sidebar[data-state="closed"] .sidebar-logo {
+                    justify-content: center;
+                }
+
+                #desktop-sidebar[data-state="closed"] .sidebar-item-label,
+                #desktop-sidebar[data-state="closed"] .sidebar-section-label,
+                #desktop-sidebar[data-state="closed"] .sidebar-collapse-toggle {
+                    position: absolute !important;
+                    width: 1px !important;
+                    height: 1px !important;
+                    padding: 0 !important;
+                    margin: -1px !important;
+                    overflow: hidden !important;
+                    clip: rect(0, 0, 0, 0) !important;
+                    white-space: nowrap !important;
+                    border: 0 !important;
+                }
+
+                #desktop-sidebar[data-state="closed"] [data-collapse-content] {
+                    display: none !important;
+                }
+
+                #desktop-sidebar[data-state="closed"] .sidebar-item-icon {
+                    margin-right: 0;
+                }
+
+                #desktop-sidebar[data-state="closed"] .sidebar-item {
+                    justify-content: center;
                 }
 
                 #main-content {
                     transition: padding-left 0.3s ease;
+                    padding-left: 0;
+                }
+
+                #main-content[data-sidebar-state="open"] {
+                    padding-left: 18rem;
                 }
 
                 #main-content[data-sidebar-state="closed"] {
-                    padding-left: 0 !important;
+                    padding-left: 5rem;
                 }
             }
         </style>
@@ -60,7 +104,7 @@
 
                     const nextState = isOpen ? 'open' : 'closed';
                     desktopSidebar.setAttribute('data-state', nextState);
-                    desktopSidebar.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+                    desktopSidebar.setAttribute('aria-hidden', 'false');
                     mainContent.setAttribute('data-sidebar-state', nextState);
                     desktopToggleButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
 
@@ -188,16 +232,25 @@
         </div>
 
         <!-- Static sidebar for desktop -->
-        <div id="desktop-sidebar" data-state="open" class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col lg:transform lg:transition-transform lg:duration-300" aria-hidden="false">
+        <div id="desktop-sidebar" data-state="open" class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col lg:border-r lg:border-gray-200 lg:bg-white lg:transition-[width] lg:duration-300 dark:lg:border-gray-800 dark:lg:bg-gray-950" aria-hidden="false">
             <!-- Sidebar component, swap this element with another sidebar if you like -->
-            <div class="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4 dark:border-gray-800 dark:bg-gray-950">
+            <div class="sidebar-content flex grow flex-col gap-y-5 overflow-y-auto px-6 pb-4 text-gray-900 dark:text-gray-100">
+                <div class="sidebar-toggle flex h-16 items-center justify-end">
+                    <button id="toggle-desktop-sidebar" type="button" aria-expanded="true" data-open-text="{{ __('messages.open_sidebar') }}" data-close-text="{{ __('messages.close_sidebar') }}"
+                        class="hidden lg:inline-flex items-center justify-center rounded-md border border-gray-200 bg-white p-2 text-gray-600 transition-colors duration-150 hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-gray-600 dark:hover:text-gray-100">
+                        <span data-sidebar-toggle-label class="sr-only">{{ __('messages.close_sidebar') }}</span>
+                        <svg data-icon class="h-5 w-5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25 9 12l6.75 6.75" />
+                        </svg>
+                    </button>
+                </div>
 
                 @include('layouts.navigation')
 
             </div>
         </div>
 
-        <div id="main-content" data-sidebar-state="open" class="lg:pl-72 flex flex-col min-h-screen">
+        <div id="main-content" data-sidebar-state="open" class="flex flex-col min-h-screen">
             <div
                 class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900 dark:shadow-black/30 sm:gap-x-6 sm:px-6 lg:px-8">
                 <button id="open-sidebar" type="button" class="-m-2.5 p-2.5 text-gray-700 transition-colors duration-150 hover:text-gray-900 lg:hidden dark:text-gray-200 dark:hover:text-gray-50">
@@ -224,14 +277,6 @@
                     </form>
                     -->
                     <div class="flex items-center gap-x-4 lg:gap-x-6">
-                        <button id="toggle-desktop-sidebar" type="button" aria-expanded="true" data-open-text="{{ __('messages.open_sidebar') }}" data-close-text="{{ __('messages.close_sidebar') }}"
-                            class="hidden lg:inline-flex items-center justify-center rounded-md border border-gray-200 bg-white p-2 text-gray-600 transition-colors duration-150 hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-gray-600 dark:hover:text-gray-100">
-                            <span data-sidebar-toggle-label class="sr-only">{{ __('messages.close_sidebar') }}</span>
-                            <svg data-icon class="h-5 w-5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25 9 12l6.75 6.75" />
-                            </svg>
-                        </button>
-
                         <!--
                         <button type="button" class="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500">
                             <span class="sr-only">View notifications</span>
