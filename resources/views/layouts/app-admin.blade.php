@@ -235,7 +235,9 @@
         <div id="desktop-sidebar" data-state="open" class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col lg:border-r lg:border-gray-200 lg:bg-white lg:transition-[width] lg:duration-300 dark:lg:border-gray-800 dark:lg:bg-gray-950" aria-hidden="false">
             <!-- Sidebar component, swap this element with another sidebar if you like -->
             <div class="sidebar-content flex grow flex-col gap-y-5 overflow-y-auto px-6 pb-4 text-gray-900 dark:text-gray-100">
-                <div class="sidebar-toggle flex h-16 items-center justify-end">
+                @include('layouts.navigation')
+
+                <div class="sidebar-toggle mt-auto flex items-center justify-end pt-4">
                     <button id="toggle-desktop-sidebar" type="button" aria-expanded="true" data-open-text="{{ __('messages.open_sidebar') }}" data-close-text="{{ __('messages.close_sidebar') }}"
                         class="hidden lg:inline-flex items-center justify-center rounded-md border border-gray-200 bg-white p-2 text-gray-600 transition-colors duration-150 hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-gray-600 dark:hover:text-gray-100">
                         <span data-sidebar-toggle-label class="sr-only">{{ __('messages.close_sidebar') }}</span>
@@ -244,8 +246,6 @@
                         </svg>
                     </button>
                 </div>
-
-                @include('layouts.navigation')
 
             </div>
         </div>
