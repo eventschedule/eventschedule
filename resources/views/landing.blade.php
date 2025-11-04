@@ -275,10 +275,11 @@
                             </div>
 
                             <div class="mt-6 space-y-5">
-                                @forelse($calendarEvents as $event)
+                                @forelse($calendarEvents as $occurrence)
                                     @php
+                                        $event = $occurrence['event'];
                                         $eventUrl = $event->getGuestUrl(false, true);
-                                        $startsAt = $event->localStartsAt(true);
+                                        $startsAt = $occurrence['occurs_at_display'] ?? $event->localStartsAt(true);
                                         $venueName = $event->getVenueDisplayName();
                                         $talentList = $event->roles->filter(function ($role) {
                                             return $role->isTalent();
