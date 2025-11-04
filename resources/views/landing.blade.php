@@ -6,6 +6,9 @@
     $heroTitle = $hero['title'] ?? ($isAuthenticated ? __('messages.your_events') : __('messages.upcoming_events'));
     $heroHtml = $hero['html'] ?? null;
     $heroCta = $hero['cta'] ?? ['label' => null, 'url' => null];
+    $heroLogo = $hero['logo'] ?? ['url' => null, 'alt' => null];
+    $heroLogoUrl = $heroLogo['url'] ?? null;
+    $heroLogoAlt = $heroLogo['alt'] ?? $heroTitle;
     $loginCta = null;
     $showHeroCta = filled($heroCta['label'] ?? null) && filled($heroCta['url'] ?? null);
 
@@ -47,6 +50,11 @@
 <x-app-layout :title="__('messages.events')">
     <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 text-center text-white">
+            @if($heroLogoUrl)
+                <div class="flex justify-center mb-6">
+                    <img src="{{ $heroLogoUrl }}" alt="{{ $heroLogoAlt }}" class="h-20 w-auto sm:h-24 object-contain" loading="lazy">
+                </div>
+            @endif
             <h1 class="text-4xl sm:text-5xl font-bold tracking-tight">
                 {{ $heroTitle }}
             </h1>

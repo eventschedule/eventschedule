@@ -112,6 +112,11 @@ class SettingsController extends Controller
 
         $homeSettings = Setting::forGroup('home');
 
+        $heroPreview = HomePageSettings::resolveImagePreview(
+            isset($homeSettings['hero_image_media_asset_id']) ? (int) $homeSettings['hero_image_media_asset_id'] : null,
+            isset($homeSettings['hero_image_media_variant_id']) ? (int) $homeSettings['hero_image_media_variant_id'] : null,
+        );
+
         $imagePreview = HomePageSettings::resolveImagePreview(
             isset($homeSettings['aside_image_media_asset_id']) ? (int) $homeSettings['aside_image_media_asset_id'] : null,
             isset($homeSettings['aside_image_media_variant_id']) ? (int) $homeSettings['aside_image_media_variant_id'] : null,
@@ -120,6 +125,7 @@ class SettingsController extends Controller
         return view('settings.home', [
             'homeSettings' => $homeSettings,
             'layoutOptions' => $this->homeLayoutOptions(),
+            'initialHeroImage' => $heroPreview,
             'initialAsideImage' => $imagePreview,
         ]);
     }
@@ -752,6 +758,9 @@ class SettingsController extends Controller
             'home_hero_markdown' => ['nullable', 'string', 'max:65000'],
             'home_hero_cta_label' => ['nullable', 'string', 'max:100', 'required_with:home_hero_cta_url'],
             'home_hero_cta_url' => ['nullable', 'string', 'max:500', 'required_with:home_hero_cta_label'],
+            'home_hero_media_asset_id' => ['nullable', 'integer', 'exists:media_assets,id'],
+            'home_hero_media_variant_id' => ['nullable', 'integer', 'exists:media_asset_variants,id'],
+            'home_hero_image_alt' => ['nullable', 'string', 'max:255'],
             'home_aside_title' => ['nullable', 'string', 'max:150'],
             'home_aside_markdown' => ['nullable', 'string', 'max:65000'],
             'home_aside_media_asset_id' => ['nullable', 'integer', 'exists:media_assets,id'],
@@ -772,6 +781,52 @@ class SettingsController extends Controller
             throw ValidationException::withMessages([
                 'home_hero_cta_url' => __('messages.home_cta_url_invalid'),
             ]);
+        }
+
+        $heroAlt = HomePageSettings::clean($validated['home_hero_image_alt'] ?? null);
+
+        $heroAssetId = $request->input('home_hero_media_asset_id');
+        $heroVariantId = $request->input('home_hero_media_variant_id');
+
+        if ($heroVariantId && ! $heroAssetId) {
+            throw ValidationException::withMessages([
+                'home_hero_media_variant_id' => __('messages.home_image_variant_mismatch'),
+            ]);
+        }
+
+        $heroImageAssetId = null;
+        $heroImageVariantId = null;
+
+        if ($heroAssetId) {
+            $heroAsset = MediaAsset::find((int) $heroAssetId);
+
+            if (! $heroAsset) {
+                throw ValidationException::withMessages([
+                    'home_hero_media_asset_id' => __('messages.home_image_missing'),
+                ]);
+            }
+
+            $heroImageAssetId = $heroAsset->id;
+
+            if ($heroVariantId) {
+                $heroVariant = MediaAssetVariant::where('media_asset_id', $heroAsset->id)
+                    ->find((int) $heroVariantId);
+
+                if (! $heroVariant) {
+                    throw ValidationException::withMessages([
+                        'home_hero_media_variant_id' => __('messages.home_image_variant_mismatch'),
+                    ]);
+                }
+
+                $heroImageVariantId = $heroVariant->id;
+            }
+        } elseif ($request->exists('home_hero_media_asset_id')) {
+            $heroImageAssetId = null;
+            $heroImageVariantId = null;
+        }
+
+        if (! $heroImageAssetId) {
+            $heroAlt = null;
         }
 
         $asideTitle = HomePageSettings::clean($validated['home_aside_title'] ?? null);
@@ -826,6 +881,9 @@ class SettingsController extends Controller
             'hero_html' => $heroHtml,
             'hero_cta_label' => $heroCtaLabel,
             'hero_cta_url' => $heroCtaUrl,
+            'hero_image_media_asset_id' => $heroImageAssetId,
+            'hero_image_media_variant_id' => $heroImageVariantId,
+            'hero_image_alt' => $heroAlt,
             'aside_title' => $asideTitle,
             'aside_markdown' => $asideMarkdown,
             'aside_html' => $asideHtml,

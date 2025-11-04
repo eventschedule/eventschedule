@@ -266,6 +266,13 @@ class HomeController extends Controller
             $heroCtaUrl = route('login');
         }
 
+        $heroImage = HomePageSettings::resolveImagePreview(
+            isset($stored['hero_image_media_asset_id']) ? (int) $stored['hero_image_media_asset_id'] : null,
+            isset($stored['hero_image_media_variant_id']) ? (int) $stored['hero_image_media_variant_id'] : null,
+        );
+
+        $heroAlt = HomePageSettings::clean($stored['hero_image_alt'] ?? null);
+
         $asideTitle = HomePageSettings::clean($stored['aside_title'] ?? null);
         $asideHtml = HomePageSettings::compileHtml(
             $stored['aside_html'] ?? null,
@@ -293,6 +300,10 @@ class HomeController extends Controller
                 'cta' => [
                     'label' => $heroCtaLabel,
                     'url' => $heroCtaUrl,
+                ],
+                'logo' => [
+                    'url' => $heroImage['url'] ?? null,
+                    'alt' => ($heroImage['url'] ?? null) ? $heroAlt : null,
                 ],
             ],
             'aside' => [

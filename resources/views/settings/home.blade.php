@@ -8,6 +8,11 @@
         $layoutOptions = $layoutOptions ?? [];
         $selectedLayout = old('home_layout', $homeSettings['layout'] ?? \App\Support\HomePageSettings::LAYOUT_FULL);
 
+        $initialHeroImage = $initialHeroImage ?? ['asset_id' => null, 'variant_id' => null, 'url' => null];
+        $initialHeroAssetId = old('home_hero_media_asset_id', $initialHeroImage['asset_id'] ?? null);
+        $initialHeroVariantId = old('home_hero_media_variant_id', $initialHeroImage['variant_id'] ?? null);
+        $initialHeroImageUrl = $initialHeroImage['url'] ?? null;
+
         $initialAsideImage = $initialAsideImage ?? ['asset_id' => null, 'variant_id' => null, 'url' => null];
         $initialAssetId = old('home_aside_media_asset_id', $initialAsideImage['asset_id'] ?? null);
         $initialVariantId = old('home_aside_media_variant_id', $initialAsideImage['variant_id'] ?? null);
@@ -77,10 +82,34 @@
                             </div>
 
                             <div class="space-y-4">
-                                <div>
-                                    <x-input-label for="home_hero_title" :value="__('messages.home_hero_title_label')" />
-                                    <x-text-input id="home_hero_title" name="home_hero_title" type="text" class="mt-1 block w-full" :value="old('home_hero_title', $homeSettings['hero_title'] ?? '')" />
-                                    <x-input-error class="mt-2" :messages="$errors->get('home_hero_title')" />
+                                <div class="space-y-4">
+                                    <div>
+                                        <x-input-label for="home_hero_title" :value="__('messages.home_hero_title_label')" />
+                                        <x-text-input id="home_hero_title" name="home_hero_title" type="text" class="mt-1 block w-full" :value="old('home_hero_title', $homeSettings['hero_title'] ?? '')" />
+                                        <x-input-error class="mt-2" :messages="$errors->get('home_hero_title')" />
+                                    </div>
+
+                                    <div class="space-y-4">
+                                        <x-input-label :value="__('messages.home_hero_image_label')" />
+                                        <x-media-picker
+                                            name="home_hero_media_variant_id"
+                                            asset-input-name="home_hero_media_asset_id"
+                                            context="home-hero"
+                                            :initial-url="$initialHeroImageUrl"
+                                            :initial-asset-id="$initialHeroAssetId"
+                                            :initial-variant-id="$initialHeroVariantId"
+                                            label="{{ __('messages.home_hero_image_picker') }}"
+                                            help="{{ __('messages.home_hero_image_help') }}"
+                                        />
+                                        <x-input-error class="mt-2" :messages="$errors->get('home_hero_media_asset_id')" />
+                                        <x-input-error class="mt-2" :messages="$errors->get('home_hero_media_variant_id')" />
+                                    </div>
+
+                                    <div>
+                                        <x-input-label for="home_hero_image_alt" :value="__('messages.home_hero_image_alt_label')" />
+                                        <x-text-input id="home_hero_image_alt" name="home_hero_image_alt" type="text" class="mt-1 block w-full" :value="old('home_hero_image_alt', $homeSettings['hero_image_alt'] ?? '')" />
+                                        <x-input-error class="mt-2" :messages="$errors->get('home_hero_image_alt')" />
+                                    </div>
                                 </div>
 
                                 <div>
