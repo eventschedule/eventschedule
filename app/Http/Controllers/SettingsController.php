@@ -59,11 +59,15 @@ class SettingsController extends Controller
         $updateSettings = $this->getUpdateSettings();
         $selectedChannel = ReleaseChannel::fromString($updateSettings['update_release_channel'] ?? null);
 
-        $versionInstalled = null;
+        $versionInstalled = config('self-update.version_installed');
         $versionAvailable = null;
 
         if (! config('app.hosted') && ! config('app.testing')) {
-            $versionInstalled = $updater->source()->getVersionInstalled();
+            $installedFromSource = $updater->source()->getVersionInstalled();
+
+            if (is_string($installedFromSource) && $installedFromSource !== '') {
+                $versionInstalled = $installedFromSource;
+            }
 
             try {
                 if ($request->has('clear_cache')) {
