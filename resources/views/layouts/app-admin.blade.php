@@ -25,7 +25,7 @@
                 }
 
                 #desktop-sidebar[data-state="closed"] .sidebar-logo {
-                    justify-content: center;
+                    display: none;
                 }
 
                 #desktop-sidebar[data-state="closed"] .sidebar-item-label,
