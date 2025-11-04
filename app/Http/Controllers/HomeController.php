@@ -74,7 +74,7 @@ class HomeController extends Controller
                 $query->where('event_role.is_accepted', true)
                     ->where('roles.is_deleted', false)
                     ->where('roles.is_unlisted', false)
-                    ->whereIn('roles.type', ['talent', 'schedule']);
+                    ->whereIn('roles.type', ['talent', 'schedule', 'venue']);
             });
         }
 
