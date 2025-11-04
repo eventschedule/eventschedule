@@ -47,6 +47,25 @@
     };
 
     $calendarRouteName = request()->routeIs('landing') ? 'landing' : 'home';
+    $viewMode = $viewMode ?? 'calendar';
+    $isListView = $viewMode === 'list';
+    $viewToggleBaseParams = array_merge(
+        ['month' => $month, 'year' => $year],
+        collect($selectedFilters ?? [])->filter(function ($value) {
+            return $value !== null && $value !== '';
+        })->all()
+    );
+
+    if (request()->has('embed')) {
+        $viewToggleBaseParams['embed'] = request()->query('embed');
+    }
+
+    if ($calendarRouteName === 'home') {
+        $viewToggleBaseParams = array_merge(['slug' => null], $viewToggleBaseParams);
+    }
+
+    $calendarViewParams = $viewToggleBaseParams;
+    $listViewParams = array_merge($viewToggleBaseParams, ['view' => 'list']);
 @endphp
 
 <x-app-layout :title="__('messages.events')">
@@ -83,6 +102,9 @@
                     <form method="GET" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
                         <input type="hidden" name="month" value="{{ $month }}">
                         <input type="hidden" name="year" value="{{ $year }}">
+                        @if($isListView)
+                            <input type="hidden" name="view" value="list">
+                        @endif
 
                         <div>
                             <label for="filter-category" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
@@ -150,6 +172,14 @@
                                 if ($calendarRouteName === 'home') {
                                     $resetParams = array_merge(['slug' => null], $resetParams);
                                 }
+
+                                if ($isListView) {
+                                    $resetParams['view'] = 'list';
+                                }
+
+                                if (request()->has('embed')) {
+                                    $resetParams['embed'] = request()->query('embed');
+                                }
                             @endphp
                             <a href="{{ route($calendarRouteName, $resetParams) }}" class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
                                 {{ __('messages.clear_filters') }}
@@ -159,17 +189,199 @@
                 </div>
 
                 <div class="bg-white dark:bg-gray-900 shadow-sm rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6">
-                    @include('role/partials/calendar', [
-                        'route' => $calendarRouteName,
-                        'tab' => '',
-                        'events' => $calendarEvents,
-                        'month' => $month,
-                        'year' => $year,
-                        'startOfMonth' => $startOfMonth,
-                        'endOfMonth' => $endOfMonth,
-                        'category' => $selectedFilters['category'] ?? null,
-                        'calendarQueryParams' => $calendarQueryParams,
-                    ])
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 pb-4 dark:border-gray-800">
+                        <div class="inline-flex items-center rounded-full bg-slate-100 p-1 text-sm font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                            <a href="{{ route($calendarRouteName, $calendarViewParams) }}"
+                               class="@class([
+                                   'inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600',
+                                   'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white' => ! $isListView,
+                                   'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white' => $isListView,
+                               ])">
+                                {{ __('messages.calendar') }}
+                            </a>
+                            <a href="{{ route($calendarRouteName, $listViewParams) }}"
+                               class="@class([
+                                   'inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600',
+                                   'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white' => $isListView,
+                                   'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white' => ! $isListView,
+                               ])">
+                                {{ __('messages.list') }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 sm:pt-6">
+                        @if($isListView)
+                            @php
+                                $currentMonthDate = \Carbon\Carbon::create($year, $month, 1);
+                                $localizedMonth = $currentMonthDate->copy()->locale(app()->getLocale())->translatedFormat('F Y');
+                                $previousMonthDate = $currentMonthDate->copy()->subMonth();
+                                $nextMonthDate = $currentMonthDate->copy()->addMonth();
+                                $listNavBase = $calendarQueryParams;
+
+                                if (request()->has('embed')) {
+                                    $listNavBase['embed'] = request()->query('embed');
+                                }
+
+                                $previousParams = array_merge($listNavBase, [
+                                    'year' => $previousMonthDate->year,
+                                    'month' => $previousMonthDate->month,
+                                ]);
+                                $nextParams = array_merge($listNavBase, [
+                                    'year' => $nextMonthDate->year,
+                                    'month' => $nextMonthDate->month,
+                                ]);
+                                $currentParams = array_merge($listNavBase, [
+                                    'year' => now()->year,
+                                    'month' => now()->month,
+                                ]);
+
+                                if ($calendarRouteName === 'home') {
+                                    $previousParams = array_merge(['slug' => null], $previousParams);
+                                    $nextParams = array_merge(['slug' => null], $nextParams);
+                                    $currentParams = array_merge(['slug' => null], $currentParams);
+                                }
+                            @endphp
+
+                            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                    <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">{{ $localizedMonth }}</h2>
+                                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">{{ __('messages.upcoming_events') }}</p>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <a href="{{ route($calendarRouteName, $previousParams) }}"
+                                       class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                        </svg>
+                                        {{ __('messages.previous_month') }}
+                                    </a>
+                                    <a href="{{ route($calendarRouteName, $currentParams) }}"
+                                       class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3 3" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        {{ __('messages.today') }}
+                                    </a>
+                                    <a href="{{ route($calendarRouteName, $nextParams) }}"
+                                       class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
+                                        {{ __('messages.next_month') }}
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 space-y-5">
+                                @forelse($calendarEvents as $occurrence)
+                                    @php
+                                        $event = $occurrence['event'];
+                                        $eventUrl = $event->getGuestUrl(false, true);
+                                        $startsAt = $occurrence['occurs_at_display'] ?? $event->localStartsAt(true);
+                                        $venueName = $event->getVenueDisplayName();
+                                        $talentList = $event->roles->filter(function ($role) {
+                                            return $role->isTalent();
+                                        })->map->translatedName()->implode(', ');
+                                        $categoryLabel = ($event->category_id && isset($categories[$event->category_id]))
+                                            ? $categories[$event->category_id]
+                                            : null;
+                                        $isRecurringEvent = ! empty($event->days_of_week);
+                                    @endphp
+
+                                    <article class="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-indigo-200 hover:shadow-md dark:border-gray-700 dark:bg-gray-900">
+                                        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                            <div class="space-y-3">
+                                                <div class="flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                                    <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                                                        <svg class="h-4 w-4 text-slate-500 dark:text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3 3" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                        {{ $startsAt }}
+                                                    </span>
+                                                    @if($isRecurringEvent)
+                                                        <span class="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
+                                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.227V5.121" />
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-3.874-7.442" />
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.977 14.652H3.75v4.227" />
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12a9 9 0 013.874-7.442" />
+                                                            </svg>
+                                                            {{ __('messages.recurring') }}
+                                                        </span>
+                                                    @endif
+                                                    @if($categoryLabel)
+                                                        <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                                                            {{ $categoryLabel }}
+                                                        </span>
+                                                    @endif
+                                                </div>
+
+                                                <h3 class="text-2xl font-semibold text-gray-900 transition-colors group-hover:text-indigo-600 dark:text-gray-100">
+                                                    @if($eventUrl)
+                                                        <a href="{{ $eventUrl }}">{{ $event->translatedName() }}</a>
+                                                    @else
+                                                        {{ $event->translatedName() }}
+                                                    @endif
+                                                </h3>
+
+                                                @if($venueName)
+                                                    <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                                        <svg class="h-4 w-4 text-slate-500 dark:text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.5-7.5 11.25-7.5 11.25S4.5 18 4.5 10.5a7.5 7.5 0 1115 0z" />
+                                                        </svg>
+                                                        <span>{{ $venueName }}</span>
+                                                    </div>
+                                                @endif
+
+                                                @if($talentList)
+                                                    <div class="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                                        <svg class="h-4 w-4 text-slate-500 dark:text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M18 20v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 11a4 4 0 100-8 4 4 0 000 8z" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M20 11a4 4 0 10-3.5-6.32" />
+                                                        </svg>
+                                                        <span>{{ $talentList }}</span>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            @if($eventUrl)
+                                                <div class="flex items-start">
+                                                    <a href="{{ $eventUrl }}"
+                                                       class="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                                                        {{ __('messages.view_event') }}
+                                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                                        </svg>
+                                                    </a>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </article>
+                                @empty
+                                    <div class="rounded-xl border border-dashed border-gray-300 p-10 text-center text-gray-600 dark:border-gray-700 dark:text-gray-300">
+                                        {{ __('messages.no_events_found') }}
+                                    </div>
+                                @endforelse
+                            </div>
+                        @else
+                            @include('role/partials/calendar', [
+                                'route' => $calendarRouteName,
+                                'tab' => '',
+                                'events' => $calendarEvents,
+                                'month' => $month,
+                                'year' => $year,
+                                'startOfMonth' => $startOfMonth,
+                                'endOfMonth' => $endOfMonth,
+                                'category' => $selectedFilters['category'] ?? null,
+                                'calendarQueryParams' => $calendarQueryParams,
+                            ])
+                        @endif
+                    </div>
                 </div>
             </div>
 

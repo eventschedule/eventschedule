@@ -39,6 +39,11 @@ class HomeController extends Controller
 
         $month = (int) $request->input('month', now()->month);
         $year = (int) $request->input('year', now()->year);
+        $viewMode = $request->input('view');
+
+        if (! in_array($viewMode, ['calendar', 'list'], true)) {
+            $viewMode = 'calendar';
+        }
 
         if ($month < 1 || $month > 12) {
             $month = now()->month;
@@ -121,6 +126,51 @@ class HomeController extends Controller
 
         $optionEvents = $optionsQuery->orderBy('starts_at')->get();
         $calendarEvents = $filteredQuery->orderBy('starts_at')->get();
+
+        if ($viewMode === 'list') {
+            $calendarEvents = $calendarEvents
+                ->flatMap(function ($event) use ($startOfMonth, $endOfMonth) {
+                    if (! $event->days_of_week) {
+                        $occursAt = $event->getStartDateTime();
+
+                        if (! $occursAt) {
+                            return collect();
+                        }
+
+                        return collect([[
+                            'event' => $event,
+                            'occurs_at' => $occursAt,
+                            'occurs_at_display' => $event->localStartsAt(true),
+                        ]]);
+                    }
+
+                    $occurrences = collect();
+                    $currentDate = $startOfMonth->copy();
+
+                    while ($currentDate->lessThanOrEqualTo($endOfMonth)) {
+                        if ($event->matchesDate($currentDate)) {
+                            $dateString = $currentDate->format('Y-m-d');
+                            $occursAt = $event->getStartDateTime($dateString);
+
+                            if ($occursAt) {
+                                $occurrences->push([
+                                    'event' => $event,
+                                    'occurs_at' => $occursAt,
+                                    'occurs_at_display' => $event->localStartsAt(true, $dateString),
+                                ]);
+                            }
+                        }
+
+                        $currentDate->addDay();
+                    }
+
+                    return $occurrences;
+                })
+                ->sortBy(function ($occurrence) {
+                    return $occurrence['occurs_at'] ? $occurrence['occurs_at']->timestamp : PHP_INT_MAX;
+                })
+                ->values();
+        }
 
         $venueOptions = $optionEvents
             ->map->venue
@@ -208,6 +258,10 @@ class HomeController extends Controller
             })
             ->all();
 
+        if ($viewMode !== 'calendar') {
+            $calendarQueryParams['view'] = $viewMode;
+        }
+
         $homeContent = $this->buildHomePageContent((bool) $user);
 
         return view('landing', [
@@ -224,6 +278,7 @@ class HomeController extends Controller
             'calendarQueryParams' => $calendarQueryParams,
             'isAuthenticated' => (bool) $user,
             'homeContent' => $homeContent,
+            'viewMode' => $viewMode,
         ]);
     }
 
