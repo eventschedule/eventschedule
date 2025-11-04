@@ -30,7 +30,18 @@
 
                 #desktop-sidebar[data-state="closed"] .sidebar-item-label,
                 #desktop-sidebar[data-state="closed"] .sidebar-section-label,
-                #desktop-sidebar[data-state="closed"] .sidebar-collapse-toggle,
+                #desktop-sidebar[data-state="closed"] .sidebar-collapse-toggle {
+                    position: absolute !important;
+                    width: 1px !important;
+                    height: 1px !important;
+                    padding: 0 !important;
+                    margin: -1px !important;
+                    overflow: hidden !important;
+                    clip: rect(0, 0, 0, 0) !important;
+                    white-space: nowrap !important;
+                    border: 0 !important;
+                }
+
                 #desktop-sidebar[data-state="closed"] [data-collapse-content] {
                     display: none !important;
                 }
