@@ -4,11 +4,40 @@
         <link rel="preconnect" href="https://rsms.me/">
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
 
+        <style>
+            @media (min-width: 1024px) {
+                #desktop-sidebar {
+                    will-change: transform;
+                }
+
+                #desktop-sidebar[data-state="closed"] {
+                    transform: translateX(-100%);
+                    pointer-events: none;
+                }
+
+                #main-content {
+                    transition: padding-left 0.3s ease;
+                }
+
+                #main-content[data-sidebar-state="closed"] {
+                    padding-left: 0 !important;
+                }
+            }
+        </style>
+
         <script {!! nonce_attr() !!}>
             $(document).ready(function() {
                 const sidebar = document.getElementById('sidebar');
                 const openButton = document.getElementById('open-sidebar');
                 const closeButton = document.getElementById('close-sidebar');
+                const desktopSidebar = document.getElementById('desktop-sidebar');
+                const mainContent = document.getElementById('main-content');
+                const desktopToggleButton = document.getElementById('toggle-desktop-sidebar');
+                const desktopToggleIcon = desktopToggleButton ? desktopToggleButton.querySelector('[data-icon]') : null;
+                const desktopToggleLabel = desktopToggleButton ? desktopToggleButton.querySelector('[data-sidebar-toggle-label]') : null;
+                const openSidebarText = desktopToggleButton ? desktopToggleButton.getAttribute('data-open-text') : '';
+                const closeSidebarText = desktopToggleButton ? desktopToggleButton.getAttribute('data-close-text') : '';
+                const desktopSidebarStateKey = 'adminDesktopSidebarState';
 
                 function toggleMenu() {
                     const isOpen = sidebar.getAttribute('data-state') === 'open';
@@ -23,6 +52,63 @@
 
                 openButton.addEventListener('click', toggleMenu);
                 closeButton.addEventListener('click', toggleMenu);
+
+                const setDesktopSidebarState = function(isOpen) {
+                    if (!desktopSidebar || !mainContent || !desktopToggleButton) {
+                        return;
+                    }
+
+                    const nextState = isOpen ? 'open' : 'closed';
+                    desktopSidebar.setAttribute('data-state', nextState);
+                    desktopSidebar.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+                    mainContent.setAttribute('data-sidebar-state', nextState);
+                    desktopToggleButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+
+                    if (desktopToggleIcon) {
+                        if (isOpen) {
+                            desktopToggleIcon.classList.remove('rotate-180');
+                        } else {
+                            desktopToggleIcon.classList.add('rotate-180');
+                        }
+                    }
+
+                    if (desktopToggleLabel) {
+                        desktopToggleLabel.textContent = isOpen ? closeSidebarText : openSidebarText;
+                    }
+
+                    if (typeof window !== 'undefined' && window.localStorage) {
+                        try {
+                            window.localStorage.setItem(desktopSidebarStateKey, nextState);
+                        } catch (error) {
+                            // Ignored — localStorage may be unavailable (e.g. private browsing)
+                        }
+                    }
+                };
+
+                if (desktopToggleButton && desktopSidebar && mainContent) {
+                    let storedDesktopState = null;
+
+                    if (typeof window !== 'undefined' && window.localStorage) {
+                        try {
+                            storedDesktopState = window.localStorage.getItem(desktopSidebarStateKey);
+                        } catch (error) {
+                            storedDesktopState = null;
+                        }
+                    }
+
+                    setDesktopSidebarState(storedDesktopState !== 'closed');
+
+                    desktopToggleButton.addEventListener('click', function() {
+                        const isOpen = desktopSidebar.getAttribute('data-state') === 'open';
+                        setDesktopSidebarState(!isOpen);
+                    });
+
+                    $(window).on('resize', function() {
+                        if (window.innerWidth < 1024) {
+                            setDesktopSidebarState(true);
+                        }
+                    });
+                }
 
                 $('[data-collapse-trigger]').each(function() {
                     const $trigger = $(this);
@@ -102,7 +188,7 @@
         </div>
 
         <!-- Static sidebar for desktop -->
-        <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
+        <div id="desktop-sidebar" data-state="open" class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col lg:transform lg:transition-transform lg:duration-300" aria-hidden="false">
             <!-- Sidebar component, swap this element with another sidebar if you like -->
             <div class="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4 dark:border-gray-800 dark:bg-gray-950">
 
@@ -111,7 +197,7 @@
             </div>
         </div>
 
-        <div class="lg:pl-72 flex flex-col min-h-screen">
+        <div id="main-content" data-sidebar-state="open" class="lg:pl-72 flex flex-col min-h-screen">
             <div
                 class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900 dark:shadow-black/30 sm:gap-x-6 sm:px-6 lg:px-8">
                 <button id="open-sidebar" type="button" class="-m-2.5 p-2.5 text-gray-700 transition-colors duration-150 hover:text-gray-900 lg:hidden dark:text-gray-200 dark:hover:text-gray-50">
@@ -138,6 +224,13 @@
                     </form>
                     -->
                     <div class="flex items-center gap-x-4 lg:gap-x-6">
+                        <button id="toggle-desktop-sidebar" type="button" aria-expanded="true" data-open-text="{{ __('messages.open_sidebar') }}" data-close-text="{{ __('messages.close_sidebar') }}"
+                            class="hidden lg:inline-flex items-center justify-center rounded-md border border-gray-200 bg-white p-2 text-gray-600 transition-colors duration-150 hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-gray-600 dark:hover:text-gray-100">
+                            <span data-sidebar-toggle-label class="sr-only">{{ __('messages.close_sidebar') }}</span>
+                            <svg data-icon class="h-5 w-5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25 9 12l6.75 6.75" />
+                            </svg>
+                        </button>
 
                         <!--
                         <button type="button" class="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500">
