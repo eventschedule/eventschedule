@@ -45,6 +45,8 @@
         \App\Support\HomePageSettings::LAYOUT_RIGHT => 'lg:col-span-5 lg:order-1',
         default => '',
     };
+
+    $calendarRouteName = request()->routeIs('landing') ? 'landing' : 'home';
 @endphp
 
 <x-app-layout :title="__('messages.events')">
@@ -144,8 +146,12 @@
                             </button>
                             @php
                                 $resetParams = array_merge(['month' => $month, 'year' => $year], []);
+
+                                if ($calendarRouteName === 'home') {
+                                    $resetParams = array_merge(['slug' => null], $resetParams);
+                                }
                             @endphp
-                            <a href="{{ route('landing', $resetParams) }}" class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
+                            <a href="{{ route($calendarRouteName, $resetParams) }}" class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
                                 {{ __('messages.clear_filters') }}
                             </a>
                         </div>
@@ -154,7 +160,7 @@
 
                 <div class="bg-white dark:bg-gray-900 shadow-sm rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6">
                     @include('role/partials/calendar', [
-                        'route' => 'landing',
+                        'route' => $calendarRouteName,
                         'tab' => '',
                         'events' => $calendarEvents,
                         'month' => $month,
