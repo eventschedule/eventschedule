@@ -39,6 +39,11 @@ class HomeController extends Controller
 
         $month = (int) $request->input('month', now()->month);
         $year = (int) $request->input('year', now()->year);
+        $viewMode = $request->input('view');
+
+        if (! in_array($viewMode, ['calendar', 'list'], true)) {
+            $viewMode = 'calendar';
+        }
 
         if ($month < 1 || $month > 12) {
             $month = now()->month;
@@ -208,6 +213,10 @@ class HomeController extends Controller
             })
             ->all();
 
+        if ($viewMode !== 'calendar') {
+            $calendarQueryParams['view'] = $viewMode;
+        }
+
         $homeContent = $this->buildHomePageContent((bool) $user);
 
         return view('landing', [
@@ -224,6 +233,7 @@ class HomeController extends Controller
             'calendarQueryParams' => $calendarQueryParams,
             'isAuthenticated' => (bool) $user,
             'homeContent' => $homeContent,
+            'viewMode' => $viewMode,
         ]);
     }
 
