@@ -99,14 +99,14 @@
         <div class="{{ $gridWrapperClass }}">
             <div class="{{ $calendarColumnClass }}">
                 <div class="bg-white dark:bg-gray-900 shadow-sm rounded-2xl border border-gray-100 dark:border-gray-800 p-6 sm:p-8">
-                    <form method="GET" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+                    <form method="GET" class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                         <input type="hidden" name="month" value="{{ $month }}">
                         <input type="hidden" name="year" value="{{ $year }}">
                         @if($isListView)
                             <input type="hidden" name="view" value="list">
                         @endif
 
-                        <div>
+                        <div class="space-y-2">
                             <label for="filter-category" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                                 {{ __('messages.event_type') }}
                             </label>
@@ -120,7 +120,7 @@
                             </select>
                         </div>
 
-                        <div>
+                        <div class="space-y-2">
                             <label for="filter-venue" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                                 {{ __('messages.venue') }}
                             </label>
@@ -134,7 +134,7 @@
                             </select>
                         </div>
 
-                        <div>
+                        <div class="space-y-2">
                             <label for="filter-curator" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                                 {{ __('messages.curator') }}
                             </label>
@@ -148,7 +148,7 @@
                             </select>
                         </div>
 
-                        <div>
+                        <div class="space-y-2">
                             <label for="filter-talent" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                                 {{ __('messages.talent') }}
                             </label>
@@ -162,7 +162,7 @@
                             </select>
                         </div>
 
-                        <div class="md:col-span-2 xl:col-span-4 flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
+                        <div class="md:col-span-2 lg:col-span-3 xl:col-span-1 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
                             <button type="submit" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                 {{ __('messages.apply_filters') }}
                             </button>
