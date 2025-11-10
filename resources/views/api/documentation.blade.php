@@ -436,6 +436,118 @@
                         </div>
                     </div>
 
+                    <!-- Create Sale Endpoint -->
+                    <div class="mt-8">
+                        <div class="border dark:border-gray-700 rounded-lg overflow-hidden">
+                            <div class="bg-gray-100 dark:bg-gray-900 px-4 py-2 border-b dark:border-gray-700">
+                                <h3 class="text-xl font-medium">Create Sale</h3>
+                            </div>
+                            <div class="lg:grid lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x dark:divide-gray-700">
+                                <div class="p-4 prose dark:prose-invert">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="bg-green-600 text-white px-2 py-1 rounded text-sm">POST</span>
+                                        <code class="text-sm">/api/sales</code>
+                                    </div>
+                                    <p class="mt-4">Create a new sale manually for an event. This allows you to programmatically create sales records with associated tickets.</p>
+                                    
+                                    <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                        <h4 class="font-medium text-blue-900 dark:text-blue-100 mb-2">Request Body</h4>
+                                        <ul class="text-sm text-blue-800 dark:text-blue-200 mt-2 space-y-1">
+                                            <li><strong>event_id</strong> (required): Encoded event ID</li>
+                                            <li><strong>name</strong> (required): Customer name</li>
+                                            <li><strong>email</strong> (required): Customer email</li>
+                                            <li><strong>tickets</strong> (required): Object mapping ticket IDs to quantities, e.g., <code>{"ticket_id": 2}</code></li>
+                                            <li><strong>status</strong> (optional): Sale status - unpaid, paid, cancelled, refunded, or expired (defaults to unpaid)</li>
+                                            <li><strong>event_date</strong> (optional): Event date in Y-m-d format (defaults to event start date)</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <button onclick="toggleCurl(this)" 
+                                            class="mt-2 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
+                                        <svg class="w-4 h-4 mr-1 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                        Show cURL example
+                                    </button>
+                                    <div class="hidden mt-2">
+                                        <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
+                                            <div class="flex items-center justify-between">
+                                                <span>cURL</span>
+                                                <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                            </div>
+                                            <pre class="mt-2 overflow-x-auto"><code>curl -X POST "{{ config('app.url') }}/api/sales" \
+     -H "X-API-Key: your_api_key_here" \
+     -H "Content-Type: application/json" \
+     -d '{
+         "event_id": "456",
+         "name": "John Doe",
+         "email": "john@example.com",
+         "tickets": {
+             "ticket_id_1": 2,
+             "ticket_id_2": 1
+         },
+         "status": "paid",
+         "event_date": "{{ now()->format('Y-m-d') }}"
+     }'</code></pre>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                                        <h4 class="font-medium text-yellow-900 dark:text-yellow-100 mb-2">Requirements</h4>
+                                        <ul class="text-sm text-yellow-800 dark:text-yellow-200 mt-2 space-y-1">
+                                            <li>Event must belong to the authenticated user</li>
+                                            <li>Event must have tickets enabled and be a Pro account</li>
+                                            <li>All ticket IDs must exist and belong to the event</li>
+                                            <li>Ticket quantities must not exceed available tickets</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="p-4">
+                                    <div class="bg-gray-800 dark:bg-gray-950 rounded-lg p-4 text-white font-mono text-sm">
+                                        <div class="flex items-center justify-between">
+                                            <span>Response</span>
+                                            <button onclick="copyCode(this)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                        </div>
+                                        <pre class="mt-2 overflow-x-auto"><code>{
+    "data": {
+        "id": "789",
+        "event_id": "456",
+        "name": "John Doe",
+        "email": "john@example.com",
+        "event_date": "{{ now()->format('Y-m-d') }}",
+        "status": "paid",
+        "payment_method": "cash",
+        "payment_amount": 50.00,
+        "transaction_reference": null,
+        "secret": "abc123def456...",
+        "created_at": "{{ now()->toISOString() }}",
+        "updated_at": "{{ now()->toISOString() }}",
+        "tickets": [
+            {
+                "ticket_id": "ticket_id_1",
+                "quantity": 2,
+                "price": 20.00,
+                "type": "General Admission"
+            },
+            {
+                "ticket_id": "ticket_id_2",
+                "quantity": 1,
+                "price": 10.00,
+                "type": "Student"
+            }
+        ],
+        "total_quantity": 3
+    },
+    "meta": {
+        "message": "Sale created successfully"
+    }
+}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Error Handling -->
                     <div class="mt-12">
                         <h2 class="text-2xl font-semibold mb-4">Error Handling</h2>
