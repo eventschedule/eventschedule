@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use App\Services\Authorization\AuthorizationService;
 use Illuminate\Auth\Events\Logout;
+use Illuminate\Http\Request;
 
 class HandleLogout
 {
@@ -25,9 +26,9 @@ class HandleLogout
 
         $this->authorization->forgetUserPermissions($user);
 
-        $request = $event->request;
+        $request = request();
 
-        if ($request) {
+        if ($request instanceof Request) {
             $this->auditLogger->logFromRequest($request, $user, 'logout', 'auth', $user->getKey(), [
                 'guard' => $event->guard,
             ]);
