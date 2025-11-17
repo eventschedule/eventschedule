@@ -335,6 +335,11 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
+        return $this->hasLegacyAdminAccess();
+    }
+
+    public function hasLegacyAdminAccess(): bool
+    {
         if (! $this->shouldUseLegacyAdminFallback()) {
             return false;
         }
