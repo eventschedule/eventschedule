@@ -37,7 +37,7 @@
     >
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <x-input-label for="password" :value="$passwordLabel" />
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $passwordLabel }}</p>
                 @if (! $passwordRequired)
                     <p class="mt-1 text-sm text-gray-500" x-show="!showPasswordFields">
                         {{ __('messages.password_optional_for_existing_user') }}
@@ -73,6 +73,7 @@
 
         <div class="grid gap-6 md:grid-cols-2" x-show="showPasswordFields">
             <div>
+                <x-input-label for="password" :value="__('messages.password')" />
                 <x-text-input
                     id="password"
                     x-ref="password"
