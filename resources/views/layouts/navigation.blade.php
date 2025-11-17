@@ -51,7 +51,7 @@
     $navigationLogo = config('branding.logo_path');
     $logoAlt = branding_logo_alt();
     $accessRoles = auth()->check()
-        ? auth()->user()->systemRoles()->sortBy('name')
+        ? auth()->user()->systemRoles->sortBy('name')
         : collect();
 @endphp
 
