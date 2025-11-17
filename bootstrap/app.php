@@ -8,6 +8,8 @@ use App\Http\Middleware\SetUserLanguage;
 use App\Http\Middleware\EnsureEmailIsVerified;
 use App\Http\Middleware\HandleBotTraffic;
 use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\ApiAuthentication;
+use App\Http\Middleware\EnsureAbility;
 use Sentry\Laravel\Integration;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -21,6 +23,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias([
+            'api.auth' => ApiAuthentication::class,
+            'ability' => EnsureAbility::class,
+        ]);
+
         $middleware->validateCsrfTokens(except: [
             'stripe/webhook',
             'invoiceninja/webhook/*',
