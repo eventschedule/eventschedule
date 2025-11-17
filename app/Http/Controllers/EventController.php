@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use App\Utils\ColorUtils;
 use App\Utils\NotificationUtils;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\RoleUser;
@@ -744,6 +745,36 @@ class EventController extends Controller
 
         return redirect(route('role.view_admin', $data))
                 ->with('message', __('messages.event_updated'));
+    }
+
+    public function updateGuestList(Request $request, string $hash)
+    {
+        $user = $request->user();
+
+        if (! is_hosted_or_admin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $eventId = UrlUtils::decodeId($hash);
+        $event = Event::with(['roles'])->findOrFail($eventId);
+
+        if (! $user || ! $user->canEditEvent($event)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $validated = $request->validate([
+            'show_guest_list' => ['required', 'boolean'],
+            'guest_list_visibility' => ['required', Rule::in(['paid', 'all'])],
+        ]);
+
+        $event->show_guest_list = (bool) $validated['show_guest_list'];
+        $event->guest_list_visibility = $event->show_guest_list
+            ? $validated['guest_list_visibility']
+            : 'paid';
+
+        $event->save();
+
+        return redirect()->back()->with('message', __('messages.guest_list_settings_updated'));
     }
 
     public function accept(Request $request, $subdomain, $hash)

@@ -101,6 +101,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/events/{hash}/sales/export/{format}', [TicketController::class, 'exportEventSales'])
         ->whereIn('format', ['csv', 'xlsx'])
         ->name('events.sales.export');
+    Route::post('/events/{hash}/guest-list', [EventController::class, 'updateGuestList'])->name('events.guest_list.update');
     Route::get('/events/{hash}/clone', [EventController::class, 'cloneConfirm'])->name('events.clone.confirm');
     Route::post('/events/{hash}/clone', [EventController::class, 'clone'])->name('events.clone');
     Route::delete('/events/{hash}', [EventController::class, 'destroyFromHome'])->name('events.destroy');

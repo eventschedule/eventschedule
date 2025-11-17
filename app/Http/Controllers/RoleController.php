@@ -271,6 +271,7 @@ class RoleController extends Controller
         $otherRole = null;
         $event = null;
         $selectedGroup = null;
+        $publicGuestList = collect();
         $date = $request->date ? date('Y-m-d', strtotime($request->date)) : null;
 
         if ($date && $date != '1970-01-01') {
@@ -370,7 +371,19 @@ class RoleController extends Controller
                 $startAtDate = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
                 $month = $startAtDate->month;
                 $year = $startAtDate->year;
-            }            
+            }
+
+            if ($event->show_guest_list) {
+                $visibleStatuses = $event->guest_list_visibility === 'all'
+                    ? ['paid', 'unpaid']
+                    : ['paid'];
+
+                $publicGuestList = $event->sales()
+                    ->with(['saleTickets.ticket'])
+                    ->whereIn('status', $visibleStatuses)
+                    ->orderByDesc('created_at')
+                    ->get();
+            }
         }
 
         if (! $month) {
@@ -449,7 +462,7 @@ class RoleController extends Controller
             'events',
             'role',
             'otherRole',
-            'month', 
+            'month',
             'year',
             'startOfMonth',
             'endOfMonth',
@@ -461,6 +474,7 @@ class RoleController extends Controller
             'fonts',
             'translation',
             'selectedGroup',
+            'publicGuestList',
         ));
 
 
