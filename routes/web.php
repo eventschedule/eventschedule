@@ -151,8 +151,9 @@ Route::middleware(['auth', 'verified'])->group(function ()
         ->name('media.tags.destroy');
     Route::post('/media-library/assets/{asset}/tags', [MediaLibraryController::class, 'syncTags'])->name('media.assets.tags.sync');
 
-    Route::prefix('settings')->name('settings.')->group(function () {
-        Route::get('/', [SettingsController::class, 'index'])->name('index');
+    Route::middleware('ability:settings.manage')->group(function () {
+        Route::prefix('settings')->name('settings.')->group(function () {
+            Route::get('/', [SettingsController::class, 'index'])->name('index');
         Route::get('/general', [SettingsController::class, 'general'])->name('general');
         Route::get('/updates', [SettingsController::class, 'updates'])->name('updates');
         Route::get('/logging', [SettingsController::class, 'logging'])->name('logging');
@@ -185,6 +186,17 @@ Route::middleware(['auth', 'verified'])->group(function ()
         Route::delete('/event-types/{eventType}', [EventTypeController::class, 'destroy'])
             ->whereNumber('eventType')
             ->name('event_types.destroy');
+        });
+
+        Route::get('/admin/blog', [BlogController::class, 'adminIndex'])->name('blog.admin.index');
+        Route::get('/admin/blog/create', [BlogController::class, 'create'])->name('blog.create');
+        Route::post('/admin/blog', [BlogController::class, 'store'])->name('blog.store');
+        Route::get('/admin/blog/{blogPost}/edit', [BlogController::class, 'edit'])->name('blog.edit');
+        Route::put('/admin/blog/{blogPost}', [BlogController::class, 'update'])->name('blog.update');
+        Route::delete('/admin/blog/{blogPost}', [BlogController::class, 'destroy'])->name('blog.destroy');
+        require __DIR__ . '/admin.php';
+
+        Route::post('/admin/blog/generate-content', [BlogController::class, 'generateContent'])->name('blog.generate-content');
     });
 
     Route::get('/account', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -258,16 +270,6 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::patch('/api-settings', [ApiSettingsController::class, 'update'])->name('api-settings.update');
     Route::post('/api-settings/show-key', [ApiSettingsController::class, 'showApiKey'])->name('api-settings.show-key');
 
-    // Admin blog routes (only for admin users)
-    Route::get('/admin/blog', [BlogController::class, 'adminIndex'])->name('blog.admin.index');
-    Route::get('/admin/blog/create', [BlogController::class, 'create'])->name('blog.create');
-    Route::post('/admin/blog', [BlogController::class, 'store'])->name('blog.store');
-    Route::get('/admin/blog/{blogPost}/edit', [BlogController::class, 'edit'])->name('blog.edit');
-    Route::put('/admin/blog/{blogPost}', [BlogController::class, 'update'])->name('blog.update');
-    Route::delete('/admin/blog/{blogPost}', [BlogController::class, 'destroy'])->name('blog.destroy');
-    require __DIR__ . '/admin.php';
-
-    Route::post('/admin/blog/generate-content', [BlogController::class, 'generateContent'])->name('blog.generate-content');
 });
 
 Route::get('/tmp/event-image/{filename?}', function ($filename = null) {

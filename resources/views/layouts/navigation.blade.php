@@ -50,6 +50,9 @@
 @php
     $navigationLogo = config('branding.logo_path');
     $logoAlt = branding_logo_alt();
+    $accessRoles = auth()->check()
+        ? auth()->user()->systemRoles()->sortBy('name')
+        : collect();
 @endphp
 
 <a href="{{ app_public_url() }}" class="block">
@@ -63,6 +66,18 @@
     </div>
 </a>
 <nav class="flex flex-1 flex-col">
+    @if ($accessRoles->isNotEmpty())
+        <div class="mb-4 rounded-xl border border-gray-200 bg-white/80 p-3 text-xs font-medium text-gray-700 shadow-sm dark:bor-der-gray-700 dark:bg-gray-900/60 dark:text-gray-200">
+            <p class="text-[0.6rem] uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('messages.access_level') }}</p>
+            <div class="mt-2 flex flex-wrap gap-2">
+                @foreach ($accessRoles as $systemRole)
+                    <span class="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[0.7rem] font-semibold text-indigo-800 dark:border-indigo-500/40 dark:bg-indigo-500/10 dark:text-indigo-200">
+                        {{ $systemRole->name }}
+                    </span>
+                @endforeach
+            </div>
+        </div>
+    @endif
     <ul role="list" class="flex flex-1 flex-col gap-y-7">
         <li>
             <ul role="list" class="-mx-2 space-y-1">

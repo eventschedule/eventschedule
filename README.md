@@ -42,6 +42,7 @@
 - 🔍 **Search Feature:** Powerful search functionality to help users find specific events or content across your schedule.
 - 🎨 **Event Graphics Generator:** Create beautiful graphics of your upcoming events with flyers, QR codes, and event details for social media and marketing.
 - 🔌 **REST API:** Access and manage your events programmatically through a REST API.
+- 🛡️ **Role-Based Access Control:** Enforce least-privilege permissions for every route across the web UI and API; see [docs/authorization.md](docs/authorization.md) for the role matrix and permission keys.
 - 🚀 **Automatic App Updates:** Keep the platform up to date effortlessly with one-click automatic updates.
 - 🧭 **Streamlined Admin Navigation:** Reach Venues, Talent, and Curators from top-level menus while keeping their detailed sub-navigation intact.
 

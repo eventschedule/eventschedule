@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\SystemRole;
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -14,12 +16,15 @@ class DevSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(AuthorizationSeeder::class);
+
         \DB::table('users')->insert([
             [
                 'name' => 'Owner',
                 'email' => 'hillelcoren+owner@gmail.com',
                 'email_verified_at' => now(),
                 'password' => Hash::make('password'),
+                'password_hash' => Hash::make('password'),
                 'created_at' => now(),
                 'updated_at' => now(),
                 'timezone' => 'Asia/Jerusalem',
@@ -29,6 +34,7 @@ class DevSeeder extends Seeder
                 'email' => 'hillelcoren+admin@gmail.com',
                 'email_verified_at' => now(),
                 'password' => Hash::make('password'),
+                'password_hash' => Hash::make('password'),
                 'created_at' => now(),
                 'updated_at' => now(),
                 'timezone' => 'Asia/Jerusalem',
@@ -38,6 +44,7 @@ class DevSeeder extends Seeder
                 'email' => 'hillelcoren+follower@gmail.com',
                 'email_verified_at' => now(),
                 'password' => Hash::make('password'),
+                'password_hash' => Hash::make('password'),
                 'created_at' => now(),
                 'updated_at' => now(),
                 'timezone' => 'Asia/Jerusalem',
@@ -86,5 +93,23 @@ class DevSeeder extends Seeder
                 'updated_at' => now(),
             ],
         ]);
+
+        $systemRoles = SystemRole::query()->whereIn('slug', ['owner', 'admin', 'viewer'])->get()->keyBy('slug');
+
+        $owner = User::where('email', 'hillelcoren+owner@gmail.com')->first();
+        $admin = User::where('email', 'hillelcoren+admin@gmail.com')->first();
+        $viewer = User::where('email', 'hillelcoren+follower@gmail.com')->first();
+
+        if ($owner && isset($systemRoles['owner'])) {
+            $owner->systemRoles()->syncWithoutDetaching([$systemRoles['owner']->id]);
+        }
+
+        if ($admin && isset($systemRoles['admin'])) {
+            $admin->systemRoles()->syncWithoutDetaching([$systemRoles['admin']->id]);
+        }
+
+        if ($viewer && isset($systemRoles['viewer'])) {
+            $viewer->systemRoles()->syncWithoutDetaching([$systemRoles['viewer']->id]);
+        }
     }
 }
