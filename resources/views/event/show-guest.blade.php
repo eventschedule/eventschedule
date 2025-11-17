@@ -362,17 +362,11 @@
           @endforeach
 
           @if ($event->show_guest_list)
-            @php
-              $guestListDescriptionKey = $event->guest_list_visibility === 'all'
-                  ? 'guest_list_public_all'
-                  : 'guest_list_public_paid';
-            @endphp
             <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-5 py-8 sm:p-8 mb-6 flex flex-col gap-4">
               <div>
                 <h2 class="text-[28px] font-semibold leading-10 text-[#151B26] dark:text-gray-100">
                   {{ __('messages.guest_list_heading') }}
                 </h2>
-                <p class="text-sm text-[#33383C] dark:text-gray-300">{{ __('messages.' . $guestListDescriptionKey) }}</p>
               </div>
 
               @if ($publicGuestList->isEmpty())
@@ -380,24 +374,11 @@
               @else
                 <ul class="divide-y divide-gray-200 dark:divide-gray-700">
                   @foreach ($publicGuestList as $guest)
-                    <li class="flex items-center justify-between py-3">
-                      <div>
-                        <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $guest->name }}</div>
-                        <div class="text-sm text-gray-600 dark:text-gray-300">
-                          {{ $guest->quantity() }} {{ __('messages.tickets') }}
-                        </div>
+                    <li class="py-3">
+                      <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $guest->name }}</div>
+                      <div class="text-sm text-gray-600 dark:text-gray-300">
+                        {{ $guest->quantity() }} {{ __('messages.tickets') }}
                       </div>
-                      @php
-                        $statusLabel = $guest->status === 'paid'
-                            ? __('messages.guest_list_paid_label')
-                            : __('messages.guest_list_reserved_label');
-                        $statusClasses = $guest->status === 'paid'
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200'
-                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200';
-                      @endphp
-                      <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium {{ $statusClasses }}">
-                        {{ $statusLabel }}
-                      </span>
                     </li>
                   @endforeach
                 </ul>
