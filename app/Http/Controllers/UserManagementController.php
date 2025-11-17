@@ -1,0 +1,180 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\SystemRole;
+use App\Models\User;
+use App\Services\Authorization\AuthorizationService;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
+
+class UserManagementController extends Controller
+{
+    public function __construct(private AuthorizationService $authorization)
+    {
+    }
+
+    protected function ensureUserPermission(?User $user, string $permission): void
+    {
+        if (! $user || ! $user->hasPermission($permission)) {
+            abort(403, __('messages.access_denied'));
+        }
+    }
+
+    public function index(Request $request): View
+    {
+        $this->ensureUserPermission($request->user(), 'users.manage');
+
+        $users = $this->queryUsers($request);
+
+        return view('settings.users.index', [
+            'users' => $users,
+            'search' => (string) $request->string('search'),
+            'canManageRoles' => $request->user()->hasPermission('roles.manage'),
+        ]);
+    }
+
+    public function create(Request $request): View
+    {
+        $this->ensureUserPermission($request->user(), 'users.manage');
+
+        return view('settings.users.create', [
+            'timezones' => \Carbon\CarbonTimeZone::listIdentifiers(),
+            'languageOptions' => $this->languageOptions(),
+            'availableRoles' => $this->availableRoles(),
+            'canManageRoles' => $request->user()->hasPermission('roles.manage'),
+        ]);
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $this->ensureUserPermission($request->user(), 'users.manage');
+
+        $canManageRoles = $request->user()->hasPermission('roles.manage');
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class, 'email')],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'timezone' => ['required', 'timezone'],
+            'language_code' => ['required', 'string', Rule::in(array_keys($this->languageOptions()))],
+            'roles' => $canManageRoles ? ['array'] : ['prohibited'],
+            'roles.*' => $canManageRoles ? ['integer', Rule::exists('auth_roles', 'id')] : ['prohibited'],
+        ]);
+
+        $user = new User();
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->password = Hash::make($validated['password']);
+        $user->timezone = $validated['timezone'];
+        $user->language_code = $validated['language_code'];
+        $user->email_verified_at = now();
+        $user->save();
+
+        if ($canManageRoles) {
+            $this->syncRoles($user, $validated['roles'] ?? []);
+        }
+
+        return redirect()->route('settings.users.index')
+            ->with('status', __('messages.user_created'));
+    }
+
+    public function edit(Request $request, User $user): View
+    {
+        $this->ensureUserPermission($request->user(), 'users.manage');
+
+        return view('settings.users.edit', [
+            'managedUser' => $user->load('systemRoles'),
+            'timezones' => \Carbon\CarbonTimeZone::listIdentifiers(),
+            'languageOptions' => $this->languageOptions(),
+            'availableRoles' => $this->availableRoles(),
+            'canManageRoles' => $request->user()->hasPermission('roles.manage'),
+        ]);
+    }
+
+    public function update(Request $request, User $user): RedirectResponse
+    {
+        $this->ensureUserPermission($request->user(), 'users.manage');
+
+        $canManageRoles = $request->user()->hasPermission('roles.manage');
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class, 'email')->ignore($user->getKey())],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'timezone' => ['required', 'timezone'],
+            'language_code' => ['required', 'string', Rule::in(array_keys($this->languageOptions()))],
+            'roles' => $canManageRoles ? ['array'] : ['prohibited'],
+            'roles.*' => $canManageRoles ? ['integer', Rule::exists('auth_roles', 'id')] : ['prohibited'],
+        ]);
+
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->timezone = $validated['timezone'];
+        $user->language_code = $validated['language_code'];
+
+        if (! empty($validated['password'])) {
+            $user->password = Hash::make($validated['password']);
+        }
+
+        $user->save();
+
+        if ($canManageRoles) {
+            $this->syncRoles($user, $validated['roles'] ?? []);
+        }
+
+        return redirect()->route('settings.users.index')
+            ->with('status', __('messages.user_updated'));
+    }
+
+    protected function queryUsers(Request $request): LengthAwarePaginator
+    {
+        $search = trim((string) $request->string('search'));
+
+        return User::query()
+            ->with('systemRoles')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('name')
+            ->orderBy('id')
+            ->paginate(15)
+            ->withQueryString();
+    }
+
+    protected function availableRoles()
+    {
+        return SystemRole::query()->orderBy('name')->get();
+    }
+
+    protected function languageOptions(): array
+    {
+        return collect(config('app.supported_languages', ['en']))
+            ->mapWithKeys(function ($language) {
+                $label = function_exists('locale_get_display_language')
+                    ? locale_get_display_language($language, app()->getLocale())
+                    : null;
+
+                return [$language => $label ?: strtoupper($language)];
+            })
+            ->toArray();
+    }
+
+    protected function syncRoles(User $user, array $roleIds): void
+    {
+        $ids = SystemRole::query()
+            ->whereIn('id', $roleIds)
+            ->pluck('id')
+            ->all();
+
+        $user->systemRoles()->sync($ids);
+        $this->authorization->forgetUserPermissions($user);
+    }
+}

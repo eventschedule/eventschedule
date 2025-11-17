@@ -20,6 +20,7 @@ use App\Http\Controllers\TermsController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\GoogleCalendarWebhookController;
+use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
 
 if (config('app.hosted')) {
@@ -197,6 +198,19 @@ Route::middleware(['auth', 'verified'])->group(function ()
         require __DIR__ . '/admin.php';
 
         Route::post('/admin/blog/generate-content', [BlogController::class, 'generateContent'])->name('blog.generate-content');
+    });
+
+    Route::middleware('ability:users.manage')->prefix('settings/users')->name('settings.users.')->group(function () {
+        Route::get('/', [UserManagementController::class, 'index'])->name('index');
+
+        Route::get('/create', [UserManagementController::class, 'create'])->name('create');
+        Route::post('/', [UserManagementController::class, 'store'])->name('store');
+        Route::get('/{user}/edit', [UserManagementController::class, 'edit'])
+            ->whereNumber('user')
+            ->name('edit');
+        Route::patch('/{user}', [UserManagementController::class, 'update'])
+            ->whereNumber('user')
+            ->name('update');
     });
 
     Route::get('/account', [ProfileController::class, 'edit'])->name('profile.edit');
