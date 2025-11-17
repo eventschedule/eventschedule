@@ -176,6 +176,8 @@ return [
     'assign_roles_help' => 'Select the global roles this user should inherit. Changes take effect immediately.',
     'cannot_assign_roles_warning' => 'You do not have permission to assign roles.',
     'password_optional_for_existing_user' => 'Leave blank to keep the current password.',
+    'set_password' => 'Set password',
+    'keep_existing_password' => 'Keep existing password',
     'user_created' => 'User account created successfully.',
     'user_updated' => 'User account updated successfully.',
     'roles' => 'Roles',
