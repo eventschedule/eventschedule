@@ -3,7 +3,14 @@
         <div class="mx-auto max-w-6xl space-y-6">
             <div class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-100 dark:bg-gray-900 dark:ring-gray-800">
                 <div class="flex flex-col gap-4 border-b border-gray-100 pb-4 md:flex-row md:items-center md:justify-between dark:border-gray-800">
-                    <div>
+                    <div class="space-y-2">
+                        <x-breadcrumbs
+                            :items="[
+                                ['label' => __('messages.settings'), 'url' => route('settings.index')],
+                                ['label' => __('messages.user_management'), 'current' => true],
+                            ]"
+                            class="text-xs text-gray-500 dark:text-gray-400"
+                        />
                         <p class="text-sm font-medium text-indigo-600">{{ __('messages.settings') }}</p>
                         <h1 class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">{{ __('messages.user_management') }}</h1>
                         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.user_management_description') }}</p>

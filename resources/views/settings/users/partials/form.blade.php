@@ -1,5 +1,6 @@
 @php
     $assignedRoles = collect(old('roles', isset($managedUser) ? $managedUser->systemRoles->pluck('id')->all() : []))->map(fn ($id) => (int) $id)->all();
+    $showPasswordFields = $passwordRequired || ! is_null(old('password')) || ! is_null(old('password_confirmation'));
 @endphp
 
 <div class="space-y-6">
@@ -30,31 +31,72 @@
         <x-input-error class="mt-2" :messages="$errors->get('email')" />
     </div>
 
-    <div class="grid gap-6 md:grid-cols-2">
-        <div>
-            <x-input-label for="password" :value="$passwordLabel" />
-            <x-text-input
-                id="password"
-                name="password"
-                type="password"
-                class="mt-1 block w-full"
-                {{ $passwordRequired ? 'required' : '' }}
-            />
+    <div
+        x-data="{ showPasswordFields: {{ $showPasswordFields ? 'true' : 'false' }} }"
+        class="space-y-4"
+    >
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <x-input-label for="password" :value="$passwordLabel" />
+                @if (! $passwordRequired)
+                    <p class="mt-1 text-sm text-gray-500" x-show="!showPasswordFields">
+                        {{ __('messages.password_optional_for_existing_user') }}
+                    </p>
+                @endif
+            </div>
+
             @if (! $passwordRequired)
-                <p class="mt-2 text-sm text-gray-500">{{ __('messages.password_optional_for_existing_user') }}</p>
+                <div class="flex gap-3 text-sm font-medium">
+                    <button
+                        type="button"
+                        class="text-indigo-600 transition hover:text-indigo-500"
+                        x-show="!showPasswordFields"
+                        @click="showPasswordFields = true"
+                    >
+                        {{ __('messages.set_password') }}
+                    </button>
+                    <button
+                        type="button"
+                        class="text-gray-500 transition hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        x-show="showPasswordFields"
+                        @click="
+                            showPasswordFields = false;
+                            if ($refs.password) $refs.password.value = '';
+                            if ($refs.passwordConfirmation) $refs.passwordConfirmation.value = '';
+                        "
+                    >
+                        {{ __('messages.keep_existing_password') }}
+                    </button>
+                </div>
             @endif
-            <x-input-error class="mt-2" :messages="$errors->get('password')" />
         </div>
-        <div>
-            <x-input-label for="password_confirmation" :value="__('messages.confirm_password')" />
-            <x-text-input
-                id="password_confirmation"
-                name="password_confirmation"
-                type="password"
-                class="mt-1 block w-full"
-                {{ $passwordRequired ? 'required' : '' }}
-            />
-            <x-input-error class="mt-2" :messages="$errors->get('password_confirmation')" />
+
+        <div class="grid gap-6 md:grid-cols-2" x-show="showPasswordFields">
+            <div>
+                <x-text-input
+                    id="password"
+                    x-ref="password"
+                    name="password"
+                    type="password"
+                    class="mt-1 block w-full"
+                    autocomplete="new-password"
+                    {{ $passwordRequired ? 'required' : '' }}
+                />
+                <x-input-error class="mt-2" :messages="$errors->get('password')" />
+            </div>
+            <div>
+                <x-input-label for="password_confirmation" :value="__('messages.confirm_password')" />
+                <x-text-input
+                    id="password_confirmation"
+                    x-ref="passwordConfirmation"
+                    name="password_confirmation"
+                    type="password"
+                    class="mt-1 block w-full"
+                    autocomplete="new-password"
+                    {{ $passwordRequired ? 'required' : '' }}
+                />
+                <x-input-error class="mt-2" :messages="$errors->get('password_confirmation')" />
+            </div>
         </div>
     </div>
 
