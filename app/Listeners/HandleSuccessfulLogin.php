@@ -6,6 +6,8 @@ use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use App\Services\Authorization\AuthorizationService;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Http\Request;
 
 class HandleSuccessfulLogin
 {
@@ -27,9 +29,15 @@ class HandleSuccessfulLogin
 
         $user->forceFill(['last_login_at' => now()])->saveQuietly();
 
-        $request = $event->request;
+        $request = null;
 
-        if ($request) {
+        try {
+            $request = request();
+        } catch (BindingResolutionException) {
+            // Ignore missing request bindings and fall back to generic logging below.
+        }
+
+        if ($request instanceof Request) {
             $this->auditLogger->logFromRequest(
                 $request,
                 $user,
