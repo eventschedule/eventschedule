@@ -3,10 +3,14 @@
 namespace App\Providers;
 
 use App\Enums\ReleaseChannel;
+use App\Listeners\HandleLogout;
+use App\Listeners\HandleSuccessfulLogin;
 use App\Listeners\LogSentMessage;
 use App\Models\Image;
 use App\Models\Setting;
 use App\Policies\ImagePolicy;
+use App\Services\Audit\AuditLogger;
+use App\Services\Authorization\AuthorizationService;
 use App\Support\BrandingManager;
 use App\Support\Logging\LoggingConfigManager;
 use App\Support\MailConfigManager;
@@ -14,6 +18,8 @@ use App\Support\ReleaseChannelManager;
 use App\Support\UpdateConfigManager;
 use App\Support\UrlUtilsConfigManager;
 use App\Support\WalletConfigManager;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
 use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\Artisan;
@@ -31,7 +37,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(AuthorizationService::class, function ($app) {
+            return new AuthorizationService();
+        });
+
+        $this->app->singleton(AuditLogger::class, function ($app) {
+            return new AuditLogger();
+        });
     }
 
     /**
@@ -59,6 +71,8 @@ class AppServiceProvider extends ServiceProvider
 
         Event::listen(MessageSent::class, LogSentMessage::class);
         Event::listen(NotificationSent::class, LogSentMessage::class);
+        Event::listen(Login::class, HandleSuccessfulLogin::class);
+        Event::listen(Logout::class, HandleLogout::class);
 
         if (! config('app.hosted') && empty(config('app.key'))) {
             Artisan::call('key:generate', ['--force' => true]);

@@ -7,6 +7,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use App\Models\SystemRole;
+use App\Services\Authorization\AuthorizationService;
 use App\Notifications\VerifyEmail as CustomVerifyEmail;
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -44,6 +49,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'payment_secret',
         'is_subscribed',
         'profile_image_id',
+        'sso_subject',
+        'password_hash',
+        'totp_secret',
+        'totp_recovery_codes',
+        'totp_confirmed_at',
+        'last_login_at',
     ];
 
     /**
@@ -63,6 +74,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'google_token',
         'google_refresh_token',
         'facebook_token',
+        'totp_secret',
+        'totp_recovery_codes',
+        'password_hash',
     ];
 
     protected static function boot()
@@ -71,12 +85,38 @@ class User extends Authenticatable implements MustVerifyEmail
 
         static::saving(function ($model) {
             $model->email = strtolower($model->email);
+
+            if ($model->isDirty('password')) {
+                $model->password_hash = $model->password;
+            }
         });
 
         static::updating(function ($user) {
             if ($user->isDirty('email') && (config('app.hosted'))) {
                 $user->email_verified_at = null;
                 $user->sendEmailVerificationNotification();
+            }
+        });
+
+        static::created(function (User $user) {
+            if (! Schema::hasTable('user_roles')) {
+                return;
+            }
+
+            if (DB::table('user_roles')->exists()) {
+                return;
+            }
+
+            $ownerRole = SystemRole::where('slug', 'owner')->first();
+
+            if (! $ownerRole) {
+                return;
+            }
+
+            $user->systemRoles()->syncWithoutDetaching([$ownerRole->id]);
+
+            if (app()->bound(AuthorizationService::class)) {
+                app(AuthorizationService::class)->forgetUserPermissions($user);
             }
         });
     }
@@ -103,7 +143,16 @@ class User extends Authenticatable implements MustVerifyEmail
             'facebook_token_expires_at' => 'datetime',
             'stripe_completed_at' => 'datetime',
             'is_subscribed' => 'boolean',
+            'totp_confirmed_at' => 'datetime',
+            'totp_recovery_codes' => 'array',
+            'last_login_at' => 'datetime',
         ];
+    }
+
+    public function systemRoles(): BelongsToMany
+    {
+        return $this->belongsToMany(SystemRole::class, 'user_roles')
+            ->withTimestamps();
     }
 
     public function roles()
@@ -138,6 +187,28 @@ class User extends Authenticatable implements MustVerifyEmail
     public function profileImage(): BelongsTo
     {
         return $this->belongsTo(Image::class, 'profile_image_id');
+    }
+
+    public function hasPermission(string $permissionKey): bool
+    {
+        if (! app()->bound(AuthorizationService::class)) {
+            return false;
+        }
+
+        return app(AuthorizationService::class)->userHasPermission($this, $permissionKey);
+    }
+
+    public function hasAnyPermission(string ...$permissionKeys): bool
+    {
+        if (count($permissionKeys) === 1 && is_array($permissionKeys[0])) {
+            $permissionKeys = $permissionKeys[0];
+        }
+
+        if (! app()->bound(AuthorizationService::class)) {
+            return false;
+        }
+
+        return app(AuthorizationService::class)->userHasAnyPermission($this, $permissionKeys);
     }
 
     public function venues()
@@ -260,13 +331,38 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isAdmin(): bool
     {
+        if ($this->hasPermission('settings.manage')) {
+            return true;
+        }
+
+        if (! $this->shouldUseLegacyAdminFallback()) {
+            return false;
+        }
+
         if (config('app.debug')) {
             return true;
-        } elseif (config('app.hosted')) {
-            return in_array($this->id, [1, 26]);
-        } else {
-            return $this->id == 1;
         }
+
+        if (config('app.hosted')) {
+            return in_array($this->id, [1, 26]);
+        }
+
+        return $this->id == 1;
+    }
+
+    protected function shouldUseLegacyAdminFallback(): bool
+    {
+        static $shouldFallback;
+
+        if ($shouldFallback !== null) {
+            return $shouldFallback;
+        }
+
+        if (! Schema::hasTable('user_roles')) {
+            return $shouldFallback = true;
+        }
+
+        return $shouldFallback = DB::table('user_roles')->count() === 0;
     }
 
     /**

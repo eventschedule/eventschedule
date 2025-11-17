@@ -19,6 +19,7 @@ use App\Support\ReleaseChannelManager;
 use App\Support\UpdateConfigManager;
 use App\Support\UrlUtilsConfigManager;
 use App\Support\WalletConfigManager;
+use App\Services\Audit\AuditLogger;
 use App\Utils\MarkdownUtils;
 use Codedge\Updater\UpdaterManager;
 use Illuminate\Http\JsonResponse;
@@ -36,6 +37,9 @@ use App\Mail\TemplatePreview;
 
 class SettingsController extends Controller
 {
+    public function __construct(private AuditLogger $auditLogger)
+    {
+    }
     public function index(Request $request): View
     {
         $this->authorizeAdmin($request->user());
@@ -320,6 +324,12 @@ class SettingsController extends Controller
 
         WalletConfigManager::applyApple($appleSettings);
 
+        $this->auditSettingsChange($request, 'settings.wallet.apple.update', [
+            'enabled' => $appleSettings['enabled'],
+            'has_certificate' => (bool) $appleSettings['certificate_path'],
+            'has_wwdr_certificate' => (bool) $appleSettings['wwdr_certificate_path'],
+        ]);
+
         return redirect()->route('settings.wallet')->with('status', 'apple-wallet-settings-updated');
     }
 
@@ -400,6 +410,12 @@ class SettingsController extends Controller
 
         WalletConfigManager::applyGoogle($googleSettings);
 
+        $this->auditSettingsChange($request, 'settings.wallet.google.update', [
+            'enabled' => $googleSettings['enabled'],
+            'has_service_account_file' => (bool) $googleSettings['service_account_json_path'],
+            'has_inline_credentials' => ! empty($googleSettings['service_account_json']),
+        ]);
+
         return redirect()->route('settings.wallet')->with('status', 'google-wallet-settings-updated');
     }
 
@@ -414,6 +430,10 @@ class SettingsController extends Controller
         Setting::setGroup('mail', $mailSettings);
 
         $this->applyMailConfig($mailSettings);
+
+        $this->auditSettingsChange($request, 'settings.mail.update', [
+            'mailer' => $mailSettings['mailer'] ?? config('mail.default'),
+        ]);
 
         return redirect()->route('settings.email')->with('status', 'mail-settings-updated');
     }
@@ -531,6 +551,10 @@ class SettingsController extends Controller
 
         $this->applyGeneralConfig($publicUrl);
 
+        $this->auditSettingsChange($request, 'settings.general.update', [
+            'keys' => ['public_url'],
+        ]);
+
         return redirect()->route('settings.general')->with('status', 'general-settings-updated');
     }
 
@@ -573,6 +597,11 @@ class SettingsController extends Controller
         ReleaseChannelManager::apply($channel);
         UrlUtilsConfigManager::apply($request->boolean('url_utils_verify_ssl'));
 
+        $this->auditSettingsChange($request, 'settings.updates.update', [
+            'channel' => $channel->value,
+            'url_utils_verify_ssl' => $request->boolean('url_utils_verify_ssl'),
+        ]);
+
         return redirect()->route('settings.updates')->with('status', 'update-settings-updated');
     }
 
@@ -604,6 +633,13 @@ class SettingsController extends Controller
         ];
 
         Setting::setGroup('logging', $loggingSettings);
+
+        $this->auditSettingsChange($request, 'settings.logging.update', [
+            'level' => $logLevel,
+            'syslog_host' => $syslogHost,
+            'syslog_port' => $syslogPort,
+            'disabled' => $request->boolean('log_disabled'),
+        ]);
 
         LoggingConfigManager::apply($loggingSettings);
 
@@ -748,6 +784,10 @@ class SettingsController extends Controller
 
         Setting::setGroup('branding', $brandingSettings);
         BrandingManager::apply($brandingSettings);
+
+        $this->auditSettingsChange($request, 'settings.branding.update', [
+            'keys' => array_keys($brandingSettings),
+        ]);
 
         return redirect()->route('settings.branding')->with('status', 'branding-settings-updated');
     }
@@ -896,6 +936,12 @@ class SettingsController extends Controller
             'aside_image_alt' => $asideAlt,
         ]);
 
+        $this->auditSettingsChange($request, 'settings.home.update', [
+            'layout' => $layout,
+            'hero_has_image' => (bool) $heroImageAssetId,
+            'aside_has_image' => (bool) $imageAssetId,
+        ]);
+
         return redirect()->route('settings.home')->with('status', 'home-settings-updated');
     }
 
@@ -918,6 +964,10 @@ class SettingsController extends Controller
             'terms_updated_at' => (($storedGeneralSettings['terms_markdown'] ?? null) !== $termsMarkdown)
                 ? now()->toIso8601String()
                 : ($storedGeneralSettings['terms_updated_at'] ?? null),
+        ]);
+
+        $this->auditSettingsChange($request, 'settings.terms.update', [
+            'terms_length' => $termsMarkdown ? mb_strlen($termsMarkdown) : 0,
         ]);
 
         return redirect()->route('settings.terms')->with('status', 'terms-settings-updated');
@@ -956,6 +1006,11 @@ class SettingsController extends Controller
         $validated = $request->validate($rules);
 
         $mailTemplates->updateTemplate($template, $validated);
+
+        $this->auditSettingsChange($request, 'settings.mail_template.update', [
+            'template' => $template,
+            'enabled' => (bool) ($validated['enabled'] ?? false),
+        ]);
 
         return redirect()
             ->route('settings.email_templates.show', ['template' => $template])
@@ -1390,6 +1445,23 @@ class SettingsController extends Controller
         unset($palette);
 
         return array_values($palettes);
+    }
+
+    protected function auditSettingsChange(Request $request, string $action, array $metadata = []): void
+    {
+        $user = $request->user();
+
+        if (! $user) {
+            return;
+        }
+
+        $routeName = optional($request->route())->getName();
+
+        $context = array_filter([
+            'route' => $routeName,
+        ]);
+
+        $this->auditLogger->log($user, $action, 'settings', null, array_merge($context, $metadata));
     }
 
     protected function homeLayoutOptions(): array

@@ -20,6 +20,7 @@ use Endroid\QrCode\Writer\PngWriter;
 use App\Utils\InvoiceNinja;
 use App\Utils\NotificationUtils;
 use App\Rules\NoFakeEmail;
+use App\Services\Audit\AuditLogger;
 use App\Services\Wallet\AppleWalletService;
 use App\Services\Wallet\GoogleWalletService;
 use Illuminate\Validation\Rule;
@@ -32,6 +33,10 @@ use App\Notifications\TicketSaleNotification;
 class TicketController extends Controller
 {
     private const SALE_ACTIONS = ['mark_paid', 'refund', 'cancel', 'delete'];
+
+    public function __construct(private AuditLogger $auditLogger)
+    {
+    }
 
     public function tickets()
     {
@@ -108,7 +113,7 @@ class TicketController extends Controller
         $eventId = UrlUtils::decodeId($hash);
         $event = Event::with(['user'])->findOrFail($eventId);
 
-        if (! $request->user()->canEditEvent($event)) {
+        if (! $request->user()->canEditEvent($event) && ! $request->user()->hasPermission('orders.export')) {
             abort(403);
         }
 
@@ -158,11 +163,16 @@ class TicketController extends Controller
             'usage' => trim((string) $request->input('filter_usage', '')),
         ];
 
+        $canViewAllOrders = $user->hasPermission('orders.view');
+
         $query = Sale::with(['event', 'saleTickets.ticket'])
-            ->where('is_deleted', false)
-            ->whereHas('event', function ($query) use ($user) {
+            ->where('is_deleted', false);
+
+        if (! $canViewAllOrders) {
+            $query->whereHas('event', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             });
+        }
 
         if ($filter !== '') {
             $query->where(function ($q) use ($filter) {
@@ -883,10 +893,10 @@ class TicketController extends Controller
             'action' => ['required', Rule::in(self::SALE_ACTIONS)],
         ]);
 
-        $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
+        $sale = Sale::with('event')->findOrFail(UrlUtils::decodeId($sale_id));
         $user = auth()->user();
 
-        if ($user->id != $sale->event->user_id) {
+        if (! $user || ! $this->canManageSale($user, $sale)) {
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
@@ -906,7 +916,9 @@ class TicketController extends Controller
 
         $user = $request->user();
 
-        if (! $user || ! $user->canEditEvent($sale->event)) {
+        $canCheckIn = $user && ($user->canEditEvent($sale->event) || $user->hasPermission('tickets.checkin'));
+
+        if (! $canCheckIn) {
             return back()->with('error', __('messages.unauthorized'));
         }
 
@@ -949,6 +961,11 @@ class TicketController extends Controller
             $entry->forceFill(['scanned_at' => $timestamp])->save();
         });
 
+        $this->auditLogger->log($user, 'tickets.checkin', 'tickets', $sale->id, [
+            'mode' => $validated['mode'],
+            'entries_marked' => $entriesToMark->count(),
+        ]);
+
         return back()->with('success', __('messages.mark_used_success'));
     }
 
@@ -979,18 +996,19 @@ class TicketController extends Controller
 
         $sales = Sale::with('event')
             ->whereIn('id', $decodedIds)
-            ->whereHas('event', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })
             ->get();
 
         if ($sales->isEmpty()) {
             return response()->json(['error' => __('messages.no_sales_available_for_action')], 403);
         }
 
-        $sales->each(function (Sale $sale) use ($validated, $user) {
+        foreach ($sales as $sale) {
+            if (! $this->canManageSale($user, $sale)) {
+                return response()->json(['error' => __('messages.unauthorized')], 403);
+            }
+
             $this->processSaleAction($sale, $validated['action'], $user);
-        });
+        }
 
         return response()->json([
             'success' => true,
@@ -1014,6 +1032,11 @@ class TicketController extends Controller
                         'previous_status' => $previousStatus,
                         'actor_id' => $user->id,
                     ]);
+
+                    $this->auditLogger->log($user, 'order.mark_paid', 'orders', $sale->id, [
+                        'previous_status' => $previousStatus,
+                        'current_status' => $sale->status,
+                    ]);
                 } else {
                     Log::info('Sale mark_paid request ignored', [
                         'sale_id' => $sale->id,
@@ -1026,15 +1049,27 @@ class TicketController extends Controller
 
             case 'refund':
                 if ($sale->status === 'paid') {
+                    $previousStatus = $sale->status;
                     $sale->status = 'refunded';
                     $sale->save();
+
+                    $this->auditLogger->log($user, 'order.refund', 'orders', $sale->id, [
+                        'previous_status' => $previousStatus,
+                        'current_status' => $sale->status,
+                    ]);
                 }
                 break;
 
             case 'cancel':
                 if (in_array($sale->status, ['unpaid', 'paid'])) {
+                    $previousStatus = $sale->status;
                     $sale->status = 'cancelled';
                     $sale->save();
+
+                    $this->auditLogger->log($user, 'order.cancel', 'orders', $sale->id, [
+                        'previous_status' => $previousStatus,
+                        'current_status' => $sale->status,
+                    ]);
                 }
                 break;
 
@@ -1052,9 +1087,26 @@ class TicketController extends Controller
 
                     $sale->is_deleted = true;
                     $sale->save();
+
+                    $this->auditLogger->log($user, 'order.delete', 'orders', $sale->id, [
+                        'status' => $sale->status,
+                    ]);
                 }
                 break;
         }
+    }
+
+    private function canManageSale(User $user, Sale $sale): bool
+    {
+        if ($sale->relationLoaded('event') === false) {
+            $sale->loadMissing('event');
+        }
+
+        if ($sale->event && $user->canEditEvent($sale->event)) {
+            return true;
+        }
+
+        return $user->hasPermission('orders.refund');
     }
 
     private function resolveSaleAndEntry(Event $event, string $secret, bool $requireEntry = false): array
