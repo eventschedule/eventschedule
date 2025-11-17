@@ -36,6 +36,10 @@ class AuthorizationService
 
     public function userHasPermission(User $user, string $permissionKey): bool
     {
+        if ($this->legacyAdminAccessApplies($user)) {
+            return true;
+        }
+
         if (! $this->permissionsAvailable()) {
             return false;
         }
@@ -92,6 +96,11 @@ class AuthorizationService
                 ->values()
                 ->all();
         });
+    }
+
+    protected function legacyAdminAccessApplies(User $user): bool
+    {
+        return method_exists($user, 'hasLegacyAdminAccess') && $user->hasLegacyAdminAccess();
     }
 
     protected function userCacheKey(int $userId): string
