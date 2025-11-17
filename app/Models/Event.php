@@ -35,6 +35,8 @@ class Event extends Model
         'expire_unpaid_tickets',
         'remind_unpaid_tickets_every',
         'registration_url',
+        'show_guest_list',
+        'guest_list_visibility',
         'category_id',
         'creator_role_id',
         'flyer_image_id',
@@ -43,6 +45,7 @@ class Event extends Model
 
     protected $casts = [
         'duration' => 'float',
+        'show_guest_list' => 'boolean',
     ];
 
     protected static function boot()
