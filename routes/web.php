@@ -203,16 +203,14 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::middleware('ability:users.manage')->prefix('settings/users')->name('settings.users.')->group(function () {
         Route::get('/', [UserManagementController::class, 'index'])->name('index');
 
-        Route::middleware('ability:roles.manage')->group(function () {
-            Route::get('/create', [UserManagementController::class, 'create'])->name('create');
-            Route::post('/', [UserManagementController::class, 'store'])->name('store');
-            Route::get('/{user}/edit', [UserManagementController::class, 'edit'])
-                ->whereNumber('user')
-                ->name('edit');
-            Route::patch('/{user}', [UserManagementController::class, 'update'])
-                ->whereNumber('user')
-                ->name('update');
-        });
+        Route::get('/create', [UserManagementController::class, 'create'])->name('create');
+        Route::post('/', [UserManagementController::class, 'store'])->name('store');
+        Route::get('/{user}/edit', [UserManagementController::class, 'edit'])
+            ->whereNumber('user')
+            ->name('edit');
+        Route::patch('/{user}', [UserManagementController::class, 'update'])
+            ->whereNumber('user')
+            ->name('update');
     });
 
     Route::get('/account', [ProfileController::class, 'edit'])->name('profile.edit');
