@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use App\Services\Authorization\AuthorizationService;
 use Illuminate\Auth\Events\Logout;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
 
 class HandleLogout
@@ -26,7 +27,17 @@ class HandleLogout
 
         $this->authorization->forgetUserPermissions($user);
 
-        $request = request();
+        $request = null;
+
+        try {
+            $request = request();
+        } catch (BindingResolutionException) {
+            // Ignore missing request bindings and fall back to the event request below.
+        }
+
+        if (! $request instanceof Request) {
+            $request = $event->request;
+        }
 
         if ($request instanceof Request) {
             $this->auditLogger->logFromRequest($request, $user, 'logout', 'auth', $user->getKey(), [
