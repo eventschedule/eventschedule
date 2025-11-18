@@ -1,5 +1,7 @@
 @php
     $assignedRoles = collect(old('roles', isset($managedUser) ? $managedUser->systemRoles->pluck('id')->all() : []))->map(fn ($id) => (int) $id)->all();
+    $passwordMode = $passwordRequired ? 'set' : (in_array(old('password_mode'), ['keep', 'set'], true) ? old('password_mode') : 'keep');
+    $passwordInputsShouldBeRequired = $passwordRequired || old('password_mode') === 'set';
 @endphp
 
 <div class="space-y-6">
@@ -30,7 +32,12 @@
         <x-input-error class="mt-2" :messages="$errors->get('email')" />
     </div>
 
-    <div class="space-y-4">
+    <div
+        class="space-y-4"
+        data-user-password-section
+        data-user-password-optional="{{ $passwordRequired ? 'false' : 'true' }}"
+        data-user-password-default-mode="{{ $passwordMode }}"
+    >
         <div>
             <x-input-label for="password" :value="$passwordLabel" />
             @unless ($passwordRequired)
@@ -40,7 +47,36 @@
             @endunless
         </div>
 
-        <div class="grid gap-6 md:grid-cols-2">
+        @unless ($passwordRequired)
+            <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-300">
+                <div class="flex flex-col gap-3 md:flex-row" role="radiogroup">
+                    <label class="flex flex-1 cursor-pointer items-start gap-3 rounded-lg border border-gray-200 bg-white p-3 text-sm font-medium text-gray-900 shadow-sm transition hover:border-indigo-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100" data-user-password-toggle-option>
+                        <input
+                            type="radio"
+                            name="password_mode"
+                            value="keep"
+                            class="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500"
+                            data-user-password-toggle="keep"
+                            @checked($passwordMode === 'keep')
+                        />
+                        <span>{{ __('messages.keep_existing_password') }}</span>
+                    </label>
+                    <label class="flex flex-1 cursor-pointer items-start gap-3 rounded-lg border border-gray-200 bg-white p-3 text-sm font-medium text-gray-900 shadow-sm transition hover:border-indigo-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100" data-user-password-toggle-option>
+                        <input
+                            type="radio"
+                            name="password_mode"
+                            value="set"
+                            class="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500"
+                            data-user-password-toggle="set"
+                            @checked($passwordMode === 'set')
+                        />
+                        <span>{{ __('messages.set_password') }}</span>
+                    </label>
+                </div>
+            </div>
+        @endunless
+
+        <div class="grid gap-6 md:grid-cols-2" data-user-password-fields>
             <div>
                 <x-input-label for="password" :value="__('messages.password')" />
                 <x-text-input
@@ -49,7 +85,9 @@
                     type="password"
                     class="mt-1 block w-full"
                     autocomplete="new-password"
-                    @if ($passwordRequired) required @endif
+                    data-user-password-input
+                    data-password-required="true"
+                    @if ($passwordInputsShouldBeRequired) required @endif
                 />
                 <x-input-error class="mt-2" :messages="$errors->get('password')" />
             </div>
@@ -61,7 +99,9 @@
                     type="password"
                     class="mt-1 block w-full"
                     autocomplete="new-password"
-                    @if ($passwordRequired) required @endif
+                    data-user-password-input
+                    data-password-required="true"
+                    @if ($passwordInputsShouldBeRequired) required @endif
                 />
                 <x-input-error class="mt-2" :messages="$errors->get('password_confirmation')" />
             </div>
