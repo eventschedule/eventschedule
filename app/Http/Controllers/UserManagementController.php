@@ -105,7 +105,13 @@ class UserManagementController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class, 'email')->ignore($user->getKey())],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'password' => [
+                'nullable',
+                Rule::when(
+                    fn ($input) => filled($input->password),
+                    ['string', 'min:8', 'confirmed']
+                ),
+            ],
             'timezone' => ['required', 'timezone'],
             'language_code' => ['required', 'string', Rule::in(array_keys($this->languageOptions()))],
             'roles' => $canManageRoles ? ['array'] : ['prohibited'],
