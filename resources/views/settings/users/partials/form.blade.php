@@ -1,6 +1,5 @@
 @php
     $assignedRoles = collect(old('roles', isset($managedUser) ? $managedUser->systemRoles->pluck('id')->all() : []))->map(fn ($id) => (int) $id)->all();
-    $showPasswordFields = $passwordRequired || ! is_null(old('password')) || ! is_null(old('password_confirmation'));
 @endphp
 
 <div class="space-y-6">
@@ -31,15 +30,15 @@
         <x-input-error class="mt-2" :messages="$errors->get('email')" />
     </div>
 
-    <fieldset class="space-y-4">
-        <legend class="text-sm font-medium text-gray-700 dark:text-gray-300">
-            {{ $passwordLabel }}
-        </legend>
-        @if (! $passwordRequired)
-            <p class="mt-1 text-sm text-gray-500">
-                {{ __('messages.password_optional_for_existing_user') }}
-            </p>
-        @endif
+    <div class="space-y-4">
+        <div>
+            <x-input-label for="password" :value="$passwordLabel" />
+            @if (! $passwordRequired)
+                <p class="mt-1 text-sm text-gray-500">
+                    {{ __('messages.password_optional_for_existing_user') }}
+                </p>
+            @endif
+        </div>
 
         <div class="grid gap-6 md:grid-cols-2">
             <div>
@@ -67,7 +66,7 @@
                 <x-input-error class="mt-2" :messages="$errors->get('password_confirmation')" />
             </div>
         </div>
-    </fieldset>
+    </div>
 
     <div>
         <x-input-label for="timezone" :value="__('messages.timezone')" />
