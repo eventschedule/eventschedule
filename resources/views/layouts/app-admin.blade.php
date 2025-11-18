@@ -311,6 +311,7 @@
                                         $userName = trim((string) data_get($authenticatedUser, 'name', ''));
                                         $userEmail = trim((string) data_get($authenticatedUser, 'email', ''));
                                         $displayName = $userName !== '' ? $userName : $userEmail;
+                                        $accessRoles = $authenticatedUser?->systemRoles?->sortBy('name') ?? collect();
                                     @endphp
                                     <button
                                         class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150 dark:bg-gray-800 dark:text-gray-200 dark:hover:text-gray-100">
@@ -331,6 +332,19 @@
                                     <x-dropdown-link :href="route('profile.edit')">
                                         {{ __('messages.manage_account') }}
                                     </x-dropdown-link>
+
+                                    @if ($accessRoles->isNotEmpty())
+                                        <div class="border-t border-gray-100 px-4 pt-3 pb-2 text-xs text-gray-500 dark:border-gray-600 dark:text-gray-300">
+                                            <p class="text-[0.6rem] uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('messages.access_level') }}</p>
+                                            <div class="mt-2 flex flex-wrap gap-2">
+                                                @foreach ($accessRoles as $systemRole)
+                                                    <span class="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[0.7rem] font-semibold text-indigo-800 dark:border-indigo-500/40 dark:bg-indigo-500/10 dark:text-indigo-200">
+                                                        {{ $systemRole->name }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
 
                                     <!-- Authentication -->
                                     <form method="POST" action="{{ route('logout') }}">
