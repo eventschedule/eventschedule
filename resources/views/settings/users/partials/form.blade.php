@@ -30,26 +30,78 @@
         <x-input-error class="mt-2" :messages="$errors->get('email')" />
     </div>
 
-    <div class="space-y-4">
+    @php($passwordModeDefault = $passwordRequired ? 'set' : 'keep')
+
+    <div
+        class="space-y-4"
+        x-data="{
+            passwordMode: '{{ $passwordModeDefault }}',
+            clearPasswordFields() {
+                this.$refs.password?.value = '';
+                this.$refs.passwordConfirmation?.value = '';
+            }
+        }"
+        @unless ($passwordRequired)
+            x-effect="if (passwordMode === 'keep') clearPasswordFields()"
+        @endunless
+    >
         <div>
             <x-input-label for="password" :value="$passwordLabel" />
             @if (! $passwordRequired)
-                <p class="mt-1 text-sm text-gray-500">
+                <p class="mt-1 text-sm text-gray-500" x-show="passwordMode === 'keep'" x-cloak>
                     {{ __('messages.password_optional_for_existing_user') }}
                 </p>
             @endif
         </div>
 
-        <div class="grid gap-6 md:grid-cols-2">
+        @if (! $passwordRequired)
+            <fieldset class="grid gap-3 sm:grid-cols-2">
+                <legend class="sr-only">{{ __('messages.password') }}</legend>
+                <label class="flex items-start gap-3 rounded-lg border border-gray-200 bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+                    <input
+                        type="radio"
+                        name="password_mode"
+                        value="keep"
+                        x-model="passwordMode"
+                        class="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                    >
+                    <span>
+                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.keep_existing_password') }}</span>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            {{ __('messages.password_optional_for_existing_user') }}
+                        </p>
+                    </span>
+                </label>
+                <label class="flex items-start gap-3 rounded-lg border border-gray-200 bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+                    <input
+                        type="radio"
+                        name="password_mode"
+                        value="set"
+                        x-model="passwordMode"
+                        class="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                    >
+                    <span>
+                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.set_password') }}</span>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            {{ __('messages.set_new_password') }}
+                        </p>
+                    </span>
+                </label>
+            </fieldset>
+        @endif
+
+        <div class="grid gap-6 md:grid-cols-2" @unless ($passwordRequired) :class="{ 'opacity-60': passwordMode === 'keep' }" @endunless>
             <div>
                 <x-input-label for="password" :value="__('messages.password')" />
                 <x-text-input
                     id="password"
+                    x-ref="password"
                     name="password"
                     type="password"
                     class="mt-1 block w-full"
                     autocomplete="new-password"
                     @if ($passwordRequired) required @endif
+                    @unless ($passwordRequired) x-bind:disabled="passwordMode === 'keep'" @endunless
                 />
                 <x-input-error class="mt-2" :messages="$errors->get('password')" />
             </div>
@@ -57,11 +109,13 @@
                 <x-input-label for="password_confirmation" :value="__('messages.confirm_password')" />
                 <x-text-input
                     id="password_confirmation"
+                    x-ref="passwordConfirmation"
                     name="password_confirmation"
                     type="password"
                     class="mt-1 block w-full"
                     autocomplete="new-password"
                     @if ($passwordRequired) required @endif
+                    @unless ($passwordRequired) x-bind:disabled="passwordMode === 'keep'" @endunless
                 />
                 <x-input-error class="mt-2" :messages="$errors->get('password_confirmation')" />
             </div>
