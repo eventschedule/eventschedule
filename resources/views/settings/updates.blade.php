@@ -59,7 +59,6 @@
                             ]"
                             class="text-xs text-gray-500 dark:text-gray-400"
                         />
-                        <p class="text-sm font-medium text-indigo-600">{{ __('messages.settings') }}</p>
                         <h1 class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
                             {{ __('messages.update_settings') }}
                         </h1>
