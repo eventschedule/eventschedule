@@ -170,6 +170,96 @@ document.addEventListener('theme:change', (event) => {
 
 const bootstrapPickers = () => initMediaPickers();
 
+const initUserPasswordSections = () => {
+    const sections = document.querySelectorAll('[data-user-password-section]');
+
+    if (!sections.length) {
+        return;
+    }
+
+    sections.forEach((section) => {
+        if (!(section instanceof HTMLElement)) {
+            return;
+        }
+
+        if (section.dataset.userPasswordOptional !== 'true') {
+            return;
+        }
+
+        const fieldContainer = section.querySelector('[data-user-password-fields]');
+        const toggles = section.querySelectorAll('[data-user-password-toggle]');
+        const inputs = section.querySelectorAll('[data-user-password-input]');
+
+        if (!fieldContainer || !toggles.length || !inputs.length) {
+            return;
+        }
+
+        const applyMode = (mode) => {
+            const enableFields = mode === 'set';
+
+            section.dataset.userPasswordActiveMode = mode;
+
+            if (fieldContainer instanceof HTMLElement) {
+                fieldContainer.hidden = !enableFields;
+                fieldContainer.setAttribute('aria-hidden', String(!enableFields));
+            }
+
+            inputs.forEach((input) => {
+                if (!(input instanceof HTMLInputElement)) {
+                    return;
+                }
+
+                input.disabled = !enableFields;
+
+                if (!enableFields) {
+                    input.value = '';
+                }
+
+                const shouldRequire = input.dataset.passwordRequired === 'true';
+
+                if (enableFields && shouldRequire) {
+                    input.setAttribute('required', 'required');
+                } else if (!enableFields) {
+                    input.removeAttribute('required');
+                }
+            });
+        };
+
+        const handleToggle = (toggle) => {
+            const mode = toggle.dataset.userPasswordToggle || toggle.value;
+            applyMode(mode === 'set' ? 'set' : 'keep');
+        };
+
+        toggles.forEach((toggle) => {
+            if (!(toggle instanceof HTMLInputElement)) {
+                return;
+            }
+
+            toggle.addEventListener('change', () => {
+                if (toggle.checked) {
+                    handleToggle(toggle);
+                }
+            });
+        });
+
+        const defaultMode = section.dataset.userPasswordDefaultMode === 'set' ? 'set' : 'keep';
+        const defaultToggle = Array.from(toggles).find((toggle) => {
+            if (!(toggle instanceof HTMLInputElement)) {
+                return false;
+            }
+
+            const mode = toggle.dataset.userPasswordToggle || toggle.value;
+            return (mode === 'set' ? 'set' : 'keep') === defaultMode;
+        });
+
+        if (defaultToggle instanceof HTMLInputElement) {
+            defaultToggle.checked = true;
+        }
+
+        applyMode(defaultMode);
+    });
+};
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', bootstrapPickers);
 } else {
@@ -193,6 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
     syncThemeSelects();
     bindThemeSelects();
     removeDuplicateFloatingSelectors();
+    initUserPasswordSections();
 
     document.querySelectorAll('.html-editor').forEach(element => {
         const easyMDE = new EasyMDE({
