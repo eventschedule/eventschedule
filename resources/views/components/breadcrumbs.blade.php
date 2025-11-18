@@ -15,7 +15,7 @@
 @endphp
 
 @if ($items->isNotEmpty())
-    <nav aria-label="{{ $ariaLabel }}" {{ $attributes->merge(['class' => 'flex text-sm text-gray-500 dark:text-gray-400']) }}>
+    <nav aria-label="{{ $ariaLabel }}" {{ $attributes->merge(['class' => 'flex text-base text-gray-500 dark:text-gray-400']) }}>
         <ol role="list" class="flex flex-wrap items-center gap-x-2 gap-y-1">
             @foreach ($items as $index => $item)
                 <li class="flex items-center gap-2">
