@@ -30,20 +30,41 @@
         <x-input-error class="mt-2" :messages="$errors->get('email')" />
     </div>
 
-    @php($passwordModeDefault = $passwordRequired ? 'set' : 'keep')
+    @php(
+        $passwordModeDefault = in_array(old('password_mode'), ['keep', 'set'], true)
+            ? old('password_mode')
+            : ($passwordRequired ? 'set' : 'keep')
+    )
 
     <div
         class="space-y-4"
         x-data="{
             passwordMode: '{{ $passwordModeDefault }}',
+            init() {
+                if (this.passwordMode === 'keep') {
+                    this.clearPasswordFields();
+                }
+
+                this.$watch('passwordMode', (value, oldValue) => {
+                    if (value === 'keep') {
+                        this.clearPasswordFields();
+                        return;
+                    }
+
+                    if (value === 'set' && oldValue === 'keep') {
+                        this.focusPasswordField();
+                    }
+                });
+            },
             clearPasswordFields() {
                 this.$refs.password?.value = '';
                 this.$refs.passwordConfirmation?.value = '';
+            },
+            focusPasswordField() {
+                this.$nextTick(() => this.$refs.password?.focus());
             }
         }"
-        @unless ($passwordRequired)
-            x-effect="if (passwordMode === 'keep') clearPasswordFields()"
-        @endunless
+        x-init="init()"
     >
         <div>
             <x-input-label for="password" :value="$passwordLabel" />
