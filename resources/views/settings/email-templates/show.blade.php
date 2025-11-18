@@ -3,27 +3,28 @@
         <div class="max-w-4xl mx-auto space-y-6">
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                 <div class="max-w-3xl">
-                    <div class="mb-6">
-                        <a href="{{ route('settings.email_templates') }}" class="inline-flex items-center gap-2 text-sm font-medium text-[#4E81FA] hover:text-[#365fcc]">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                            </svg>
-                            {{ __('messages.back_to_email_templates') }}
-                        </a>
+                    <div class="mb-6 border-b border-gray-100 pb-4 dark:border-gray-800">
+                        <x-breadcrumbs
+                            :items="[
+                                ['label' => __('messages.settings'), 'url' => route('settings.index')],
+                                ['label' => __('messages.email_templates'), 'url' => route('settings.email_templates')],
+                                ['label' => $template['label'], 'current' => true],
+                            ]"
+                            class="text-xs text-gray-500 dark:text-gray-400"
+                        />
+                        <p class="text-sm font-medium text-indigo-600">{{ __('messages.email_templates') }}</p>
+                        <h1 class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
+                            {{ $template['label'] }}
+                        </h1>
+
+                        @if (!empty($template['description']))
+                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                {{ $template['description'] }}
+                            </p>
+                        @endif
                     </div>
 
                     <section>
-                        <header class="space-y-2">
-                            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                                {{ $template['label'] }}
-                            </h2>
-
-                            @if(!empty($template['description']))
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    {{ $template['description'] }}
-                                </p>
-                            @endif
-                        </header>
 
                         <form method="post" action="{{ route('settings.mail_templates.update', ['template' => $template['key']]) }}" class="mt-6 space-y-6"
                             x-data="{
