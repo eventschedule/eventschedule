@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SystemRole;
+use App\Models\Role as DomainRole;
 use App\Models\User;
 use App\Services\Authorization\AuthorizationService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -47,6 +48,30 @@ class UserManagementController extends Controller
             'languageOptions' => $this->languageOptions(),
             'availableRoles' => $this->availableRoles(),
             'canManageRoles' => $request->user()->hasPermission('roles.manage'),
+        ]);
+    }
+
+    public function createModern(Request $request): View
+    {
+        $this->ensureUserPermission($request->user(), 'users.manage');
+
+        $activeLabel = __('messages.active');
+        $inactiveLabel = __('messages.inactive');
+
+        return view('settings.users.create-modern', [
+            'timezones' => \Carbon\CarbonTimeZone::listIdentifiers(),
+            'languageOptions' => $this->languageOptions(),
+            'availableRoles' => $this->availableRoles(),
+            'canManageRoles' => $request->user()->hasPermission('roles.manage'),
+            'statusOptions' => [
+                'active' => $activeLabel !== 'messages.active' ? $activeLabel : 'Active',
+                'inactive' => $inactiveLabel !== 'messages.inactive' ? $inactiveLabel : 'Inactive',
+            ],
+            'resourceOptions' => [
+                'venues' => $this->resourceOptions('venue'),
+                'curators' => $this->resourceOptions('curator'),
+                'talent' => $this->resourceOptions('talent'),
+            ],
         ]);
     }
 
@@ -171,6 +196,14 @@ class UserManagementController extends Controller
                 return [$language => $label ?: strtoupper($language)];
             })
             ->toArray();
+    }
+
+    protected function resourceOptions(string $type)
+    {
+        return DomainRole::query()
+            ->where('type', $type)
+            ->orderBy('name')
+            ->get(['id', 'name', 'subdomain']);
     }
 
     protected function syncRoles(User $user, array $roleIds): void
