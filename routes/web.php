@@ -204,6 +204,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
         Route::get('/', [UserManagementController::class, 'index'])->name('index');
 
         Route::get('/create', [UserManagementController::class, 'create'])->name('create');
+        Route::get('/create/new', [UserManagementController::class, 'createModern'])->name('create.modern');
         Route::post('/', [UserManagementController::class, 'store'])->name('store');
         Route::get('/{user}/edit', [UserManagementController::class, 'edit'])
             ->whereNumber('user')
