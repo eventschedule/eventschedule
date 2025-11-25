@@ -2,28 +2,31 @@
     <div class="py-10">
         <div class="mx-auto max-w-6xl space-y-6">
             <div class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-100 dark:bg-gray-900 dark:ring-gray-800">
+                @php
+                    $isEdit = isset($managedUser);
+                    $managedUser = $managedUser ?? null;
+                @endphp
                 <div class="flex flex-col gap-4 border-b border-gray-100 pb-4 md:flex-row md:items-center md:justify-between dark:border-gray-800">
                     <div class="space-y-2">
                         <x-breadcrumbs
                             :items="[
                                 ['label' => __('messages.settings'), 'url' => route('settings.index')],
                                 ['label' => __('messages.user_management'), 'url' => route('settings.users.index')],
-                                ['label' => __('messages.add_user'), 'current' => true],
+                                ['label' => $isEdit ? __('messages.edit_user') : __('messages.add_user'), 'current' => true],
                             ]"
                             class="text-xs text-gray-500 dark:text-gray-400"
                         />
                         <div class="flex items-center gap-3">
-                            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">{{ __('messages.create_user') }}</h1>
-                            <span class="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-200 dark:ring-indigo-500/20">New layout</span>
+                            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">
+                                {{ $isEdit ? __('messages.edit_user') : __('messages.create_user') }}
+                            </h1>
                         </div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Rebuilt from the ground up to include role, scope, and creation privileges. The legacy create form is still available below while we validate this experience.</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            {{ $isEdit
+                                ? __('messages.edit_user_description', ['name' => $managedUser->name])
+                                : 'Create a platform account with roles, scopes, and access permissions.' }}
+                        </p>
                     </div>
-                    <a href="{{ route('settings.users.create') }}" class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-800">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 19 5 5m0 14L19 5" />
-                        </svg>
-                        <span>Open legacy form</span>
-                    </a>
                 </div>
 
                 @if ($errors->any())
@@ -38,16 +41,20 @@
                 @endif
 
                 @php
-                    $passwordMode = old('password_mode', 'set');
+                    $passwordMode = old('password_mode', $isEdit ? 'defer' : 'set');
                     $venueScope = old('venue_scope', 'all');
                     $curatorScope = old('curator_scope', 'all');
                     $talentScope = old('talent_scope', 'all');
-                    $timezoneDefault = old('timezone', config('app.timezone'));
-                    $languageDefault = old('language_code', app()->getLocale());
+                    $timezoneDefault = old('timezone', $isEdit ? ($managedUser->timezone ?? config('app.timezone')) : config('app.timezone'));
+                    $languageDefault = old('language_code', $isEdit ? ($managedUser->language_code ?? app()->getLocale()) : app()->getLocale());
+                    $assignedRoles = old('roles', $isEdit ? $managedUser->systemRoles->pluck('id')->all() : []);
                 @endphp
 
-                <form method="POST" action="{{ route('settings.users.store') }}" class="mt-6 grid gap-6 lg:grid-cols-[2fr,1fr]">
+                <form method="POST" action="{{ $isEdit ? route('settings.users.update', $managedUser) : route('settings.users.store') }}" class="mt-6 grid gap-6 lg:grid-cols-[2fr,1fr]">
                     @csrf
+                    @if ($isEdit)
+                        @method('PATCH')
+                    @endif
                     <div class="space-y-6">
                         <section class="rounded-xl border border-gray-100 bg-gray-50/60 p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900/50">
                             <div class="flex items-center justify-between">
@@ -60,12 +67,12 @@
                             <div class="mt-4 grid gap-4 md:grid-cols-2">
                                 <div class="space-y-2">
                                     <x-input-label for="name" :value="__('messages.name')" />
-                                    <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" value="{{ old('name') }}" required autocomplete="name" />
+                                    <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" value="{{ old('name', $managedUser->name ?? '') }}" required autocomplete="name" />
                                     <x-input-error class="mt-1" :messages="$errors->get('name')" />
                                 </div>
                                 <div class="space-y-2">
                                     <x-input-label for="email" :value="__('messages.email')" />
-                                    <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" value="{{ old('email') }}" required autocomplete="username" />
+                                    <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" value="{{ old('email', $managedUser->email ?? '') }}" required autocomplete="username" />
                                     <x-input-error class="mt-1" :messages="$errors->get('email')" />
                                 </div>
                                 <div class="space-y-2">
@@ -90,7 +97,7 @@
                                     <x-input-label for="status" value="Status" />
                                     <select id="status" name="status" class="mt-1 block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900/70">
                                         @foreach ($statusOptions as $value => $label)
-                                            <option value="{{ $value }}" @selected(old('status', 'active') === $value)>{{ $label }}</option>
+                                            <option value="{{ $value }}" @selected(old('status', $isEdit ? ($managedUser->status ?? 'active') : 'active') === $value)>{{ $label }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -160,7 +167,7 @@
                                         <div class="mt-3 grid gap-3 md:grid-cols-2">
                                             @foreach ($availableRoles as $role)
                                                 <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 bg-white p-3 shadow-sm transition hover:border-indigo-300 dark:border-gray-700 dark:bg-gray-900">
-                                                    <input type="checkbox" name="roles[]" value="{{ $role->id }}" class="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600" @checked(in_array($role->id, old('roles', [])))>
+                                                    <input type="checkbox" name="roles[]" value="{{ $role->id }}" class="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600" @checked(in_array($role->id, $assignedRoles, true))>
                                                     <div>
                                                         <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $role->name }}</div>
                                                         <div class="text-xs text-gray-600 dark:text-gray-400">{{ $role->description ?? 'Permissions defined in authorization config.' }}</div>
@@ -335,7 +342,7 @@
                                     <span>Adds per-user creation privileges alongside RBAC roles.</span>
                                 </li>
                             </ul>
-                            <p class="mt-4 text-xs text-indigo-800/80 dark:text-indigo-200/80">After we validate this experience, we can retire the legacy form.</p>
+                            <p class="mt-4 text-xs text-indigo-800/80 dark:text-indigo-200/80">Keep roles, permissions, and scopes aligned with how this person should use the platform.</p>
                         </div>
 
                         <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">

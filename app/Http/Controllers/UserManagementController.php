@@ -43,36 +43,7 @@ class UserManagementController extends Controller
     {
         $this->ensureUserPermission($request->user(), 'users.manage');
 
-        return view('settings.users.create', [
-            'timezones' => \Carbon\CarbonTimeZone::listIdentifiers(),
-            'languageOptions' => $this->languageOptions(),
-            'availableRoles' => $this->availableRoles(),
-            'canManageRoles' => $request->user()->hasPermission('roles.manage'),
-        ]);
-    }
-
-    public function createModern(Request $request): View
-    {
-        $this->ensureUserPermission($request->user(), 'users.manage');
-
-        $activeLabel = __('messages.active');
-        $inactiveLabel = __('messages.inactive');
-
-        return view('settings.users.create-modern', [
-            'timezones' => \Carbon\CarbonTimeZone::listIdentifiers(),
-            'languageOptions' => $this->languageOptions(),
-            'availableRoles' => $this->availableRoles(),
-            'canManageRoles' => $request->user()->hasPermission('roles.manage'),
-            'statusOptions' => [
-                'active' => $activeLabel !== 'messages.active' ? $activeLabel : 'Active',
-                'inactive' => $inactiveLabel !== 'messages.inactive' ? $inactiveLabel : 'Inactive',
-            ],
-            'resourceOptions' => [
-                'venues' => $this->resourceOptions('venue'),
-                'curators' => $this->resourceOptions('curator'),
-                'talent' => $this->resourceOptions('talent'),
-            ],
-        ]);
+        return view('settings.users.create-modern', $this->formOptions($request));
     }
 
     public function store(Request $request): RedirectResponse
@@ -112,13 +83,10 @@ class UserManagementController extends Controller
     {
         $this->ensureUserPermission($request->user(), 'users.manage');
 
-        return view('settings.users.edit', [
-            'managedUser' => $user->load('systemRoles'),
-            'timezones' => \Carbon\CarbonTimeZone::listIdentifiers(),
-            'languageOptions' => $this->languageOptions(),
-            'availableRoles' => $this->availableRoles(),
-            'canManageRoles' => $request->user()->hasPermission('roles.manage'),
-        ]);
+        return view('settings.users.create-modern', array_merge(
+            ['managedUser' => $user->load('systemRoles')],
+            $this->formOptions($request)
+        ));
     }
 
     public function update(Request $request, User $user): RedirectResponse
@@ -204,6 +172,28 @@ class UserManagementController extends Controller
             ->where('type', $type)
             ->orderBy('name')
             ->get(['id', 'name', 'subdomain']);
+    }
+
+    protected function formOptions(Request $request): array
+    {
+        $activeLabel = __('messages.active');
+        $inactiveLabel = __('messages.inactive');
+
+        return [
+            'timezones' => \Carbon\CarbonTimeZone::listIdentifiers(),
+            'languageOptions' => $this->languageOptions(),
+            'availableRoles' => $this->availableRoles(),
+            'canManageRoles' => $request->user()->hasPermission('roles.manage'),
+            'statusOptions' => [
+                'active' => $activeLabel !== 'messages.active' ? $activeLabel : 'Active',
+                'inactive' => $inactiveLabel !== 'messages.inactive' ? $inactiveLabel : 'Inactive',
+            ],
+            'resourceOptions' => [
+                'venues' => $this->resourceOptions('venue'),
+                'curators' => $this->resourceOptions('curator'),
+                'talent' => $this->resourceOptions('talent'),
+            ],
+        ];
     }
 
     protected function syncRoles(User $user, array $roleIds): void
