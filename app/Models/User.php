@@ -55,6 +55,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'totp_recovery_codes',
         'totp_confirmed_at',
         'last_login_at',
+        'venue_scope',
+        'curator_scope',
+        'talent_scope',
+        'venue_ids',
+        'curator_ids',
+        'talent_ids',
     ];
 
     /**
@@ -107,13 +113,13 @@ class User extends Authenticatable implements MustVerifyEmail
                 return;
             }
 
-            $ownerRole = SystemRole::where('slug', 'owner')->first();
+            $superRole = SystemRole::where('slug', 'superadmin')->first();
 
-            if (! $ownerRole) {
+            if (! $superRole) {
                 return;
             }
 
-            $user->systemRoles()->syncWithoutDetaching([$ownerRole->id]);
+            $user->systemRoles()->syncWithoutDetaching([$superRole->id]);
 
             if (app()->bound(AuthorizationService::class)) {
                 app(AuthorizationService::class)->forgetUserPermissions($user);
@@ -146,7 +152,19 @@ class User extends Authenticatable implements MustVerifyEmail
             'totp_confirmed_at' => 'datetime',
             'totp_recovery_codes' => 'array',
             'last_login_at' => 'datetime',
+            'venue_ids' => 'array',
+            'curator_ids' => 'array',
+            'talent_ids' => 'array',
         ];
+    }
+
+    public function hasSystemRoleSlug(string $slug): bool
+    {
+        if ($this->relationLoaded('systemRoles')) {
+            return $this->systemRoles->contains('slug', $slug);
+        }
+
+        return $this->systemRoles()->where('slug', $slug)->exists();
     }
 
     public function systemRoles(): BelongsToMany
@@ -331,7 +349,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isAdmin(): bool
     {
-        if ($this->hasPermission('settings.manage')) {
+        if ($this->hasPermission('settings.manage') || $this->hasPermission('resources.manage')) {
             return true;
         }
 
@@ -383,5 +401,111 @@ class User extends Authenticatable implements MustVerifyEmail
         
         $nameParts = explode(' ', trim($this->name));
         return $nameParts[0] ?: 'there';
+    }
+
+    public function getResourceScope(string $type): string
+    {
+        return match ($type) {
+            'venue' => $this->venue_scope ?? 'all',
+            'curator' => $this->curator_scope ?? 'all',
+            'talent' => $this->talent_scope ?? 'all',
+            default => 'all',
+        };
+    }
+
+    public function getResourceScopeIds(string $type): array
+    {
+        $ids = match ($type) {
+            'venue' => $this->venue_ids,
+            'curator' => $this->curator_ids,
+            'talent' => $this->talent_ids,
+            default => [],
+        };
+
+        return array_values(array_filter(is_array($ids) ? $ids : [], 'is_numeric'));
+    }
+
+    public function setResourceScopeIds(string $type, array $ids): void
+    {
+        $normalized = array_values(array_unique(array_map('intval', $ids)));
+
+        $column = match ($type) {
+            'venue' => 'venue_ids',
+            'curator' => 'curator_ids',
+            'talent' => 'talent_ids',
+            default => null,
+        };
+
+        if ($column) {
+            $this->setAttribute($column, $normalized);
+        }
+    }
+
+    public function canManageResource(Role $role): bool
+    {
+        if (! in_array($role->type, ['venue', 'talent', 'curator'], true)) {
+            return false;
+        }
+
+        if ($this->hasSystemRoleSlug('superadmin')) {
+            return true;
+        }
+
+        if (! $this->hasSystemRoleSlug('admin') || ! $this->hasPermission('resources.manage')) {
+            return false;
+        }
+
+        return $this->resourceWithinScope($role);
+    }
+
+    public function canViewResource(Role $role): bool
+    {
+        if (! in_array($role->type, ['venue', 'talent', 'curator'], true)) {
+            return false;
+        }
+
+        if ($this->hasSystemRoleSlug('superadmin')) {
+            return true;
+        }
+
+        if ($this->hasSystemRoleSlug('admin') && $this->hasPermission('resources.manage')) {
+            return $this->resourceWithinScope($role);
+        }
+
+        if (! $this->hasSystemRoleSlug('viewer') || ! $this->hasPermission('resources.view')) {
+            return false;
+        }
+
+        return $this->resourceWithinScope($role);
+    }
+
+    public function addResourceToScope(Role $role): void
+    {
+        if (! in_array($role->type, ['venue', 'talent', 'curator'], true)) {
+            return;
+        }
+
+        if ($this->getResourceScope($role->type) !== 'selected') {
+            return;
+        }
+
+        $ids = $this->getResourceScopeIds($role->type);
+
+        if (! in_array((int) $role->id, $ids, true)) {
+            $ids[] = (int) $role->id;
+            $this->setResourceScopeIds($role->type, $ids);
+            $this->save();
+        }
+    }
+
+    protected function resourceWithinScope(Role $role): bool
+    {
+        $scope = $this->getResourceScope($role->type);
+
+        if ($scope === 'all') {
+            return true;
+        }
+
+        return in_array((int) $role->id, $this->getResourceScopeIds($role->type), true);
     }
 }

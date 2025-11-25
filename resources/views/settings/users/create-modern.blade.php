@@ -42,12 +42,15 @@
 
                 @php
                     $passwordMode = old('password_mode', $isEdit ? 'defer' : 'set');
-                    $venueScope = old('venue_scope', 'all');
-                    $curatorScope = old('curator_scope', 'all');
-                    $talentScope = old('talent_scope', 'all');
+                    $venueScope = old('venue_scope', $isEdit ? ($managedUser->venue_scope ?? 'all') : 'all');
+                    $curatorScope = old('curator_scope', $isEdit ? ($managedUser->curator_scope ?? 'all') : 'all');
+                    $talentScope = old('talent_scope', $isEdit ? ($managedUser->talent_scope ?? 'all') : 'all');
                     $timezoneDefault = old('timezone', $isEdit ? ($managedUser->timezone ?? config('app.timezone')) : config('app.timezone'));
                     $languageDefault = old('language_code', $isEdit ? ($managedUser->language_code ?? app()->getLocale()) : app()->getLocale());
                     $assignedRoles = old('roles', $isEdit ? $managedUser->systemRoles->pluck('id')->all() : []);
+                    $selectedVenues = old('venue_ids', $isEdit ? (array) ($managedUser->venue_ids ?? []) : []);
+                    $selectedCurators = old('curator_ids', $isEdit ? (array) ($managedUser->curator_ids ?? []) : []);
+                    $selectedTalent = old('talent_ids', $isEdit ? (array) ($managedUser->talent_ids ?? []) : []);
                 @endphp
 
                 <form method="POST" action="{{ $isEdit ? route('settings.users.update', $managedUser) : route('settings.users.store') }}" class="mt-6 grid gap-6 lg:grid-cols-[2fr,1fr]">
@@ -162,7 +165,7 @@
                             <div class="mt-4 space-y-4">
                                 <div>
                                     <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200">System roles</h3>
-                                    <p class="text-xs text-gray-600 dark:text-gray-400">Roles map to the RBAC matrix in docs/authorization.</p>
+                                    <p class="text-xs text-gray-600 dark:text-gray-400">Choose Super Admin, Admin, or Viewer.</p>
                                     @if ($canManageRoles)
                                         <div class="mt-3 grid gap-3 md:grid-cols-2">
                                             @foreach ($availableRoles as $role)
@@ -182,21 +185,6 @@
                                             You don’t have permission to assign roles. An administrator can update them later.
                                         </div>
                                     @endif
-                                </div>
-
-                                <div class="grid gap-3 md:grid-cols-3">
-                                    <label class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-800 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-                                        <input type="checkbox" name="can_create_venues" value="1" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600" @checked(old('can_create_venues'))>
-                                        <span>Can create venues</span>
-                                    </label>
-                                    <label class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-800 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-                                        <input type="checkbox" name="can_create_curators" value="1" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600" @checked(old('can_create_curators'))>
-                                        <span>Can create curators</span>
-                                    </label>
-                                    <label class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-800 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-                                        <input type="checkbox" name="can_create_talent" value="1" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600" @checked(old('can_create_talent'))>
-                                        <span>Can create talent</span>
-                                    </label>
                                 </div>
                             </div>
                         </section>
@@ -230,7 +218,7 @@
                                     <div class="mt-3 grid gap-2 md:grid-cols-2" data-scope-target="venues">
                                         @forelse ($resourceOptions['venues'] as $venue)
                                             <label class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-800 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-                                                <input type="checkbox" name="venue_ids[]" value="{{ $venue->id }}" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600" @checked(in_array($venue->id, old('venue_ids', [])))>
+                                                <input type="checkbox" name="venue_ids[]" value="{{ $venue->id }}" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600" @checked(in_array($venue->id, $selectedVenues, true))>
                                                 <div>
                                                     <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $venue->name }}</div>
                                                     <div class="text-xs text-gray-500">{{ $venue->subdomain }}</div>
@@ -264,7 +252,7 @@
                                     <div class="mt-3 grid gap-2 md:grid-cols-2" data-scope-target="curators">
                                         @forelse ($resourceOptions['curators'] as $curator)
                                             <label class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-800 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-                                                <input type="checkbox" name="curator_ids[]" value="{{ $curator->id }}" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600" @checked(in_array($curator->id, old('curator_ids', [])))>
+                                                <input type="checkbox" name="curator_ids[]" value="{{ $curator->id }}" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600" @checked(in_array($curator->id, $selectedCurators, true))>
                                                 <div>
                                                     <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $curator->name }}</div>
                                                     <div class="text-xs text-gray-500">{{ $curator->subdomain }}</div>
@@ -298,7 +286,7 @@
                                     <div class="mt-3 grid gap-2 md:grid-cols-2" data-scope-target="talent">
                                         @forelse ($resourceOptions['talent'] as $talent)
                                             <label class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-800 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-                                                <input type="checkbox" name="talent_ids[]" value="{{ $talent->id }}" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600" @checked(in_array($talent->id, old('talent_ids', [])))>
+                                                <input type="checkbox" name="talent_ids[]" value="{{ $talent->id }}" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600" @checked(in_array($talent->id, $selectedTalent, true))>
                                                 <div>
                                                     <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $talent->name }}</div>
                                                     <div class="text-xs text-gray-500">{{ $talent->subdomain }}</div>
@@ -336,10 +324,6 @@
                                 <li class="flex items-start gap-2">
                                     <span class="mt-0.5 h-2 w-2 rounded-full bg-indigo-500"></span>
                                     <span>Captures resource scopes for venues, curators, and talent.</span>
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <span class="mt-0.5 h-2 w-2 rounded-full bg-indigo-500"></span>
-                                    <span>Adds per-user creation privileges alongside RBAC roles.</span>
                                 </li>
                             </ul>
                             <p class="mt-4 text-xs text-indigo-800/80 dark:text-indigo-200/80">Keep roles, permissions, and scopes aligned with how this person should use the platform.</p>

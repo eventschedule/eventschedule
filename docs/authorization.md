@@ -7,13 +7,13 @@ Event Schedule ships with a single-tenant role-based access control (RBAC) syste
 - **Least-privilege defaults.** Users only inherit the abilities assigned to their system role(s).
 - **Auditable changes.** Updates to global settings, login/logout activity, refunds, and check-ins are logged to `audit_logs` with IP and user-agent metadata.
 - **Unified enforcement.** Routes opt into the `ability:<permission-key>` middleware (see `routes/api.php` and `routes/web.php`) so the same permission keys protect both APIs and Blade controllers.
-- **Deterministic migrations.** The `AuthorizationSeeder` creates the roles, permissions, and initial mappings and assigns the first user to the `Owner` role when the `user_roles` table is empty.
+- **Deterministic migrations.** The `AuthorizationSeeder` creates the roles, permissions, and initial mappings and assigns the first user to the `SuperAdmin` role when the `user_roles` table is empty.
 
 ## Data model
 
 | Table | Purpose |
 | --- | --- |
-| `auth_roles` | System roles such as SuperAdmin, Owner, BoxOffice, etc. |
+| `auth_roles` | System roles such as SuperAdmin, Admin, Viewer. |
 | `permissions` | Canonical permission keys (e.g., `events.publish`, `tickets.refund`). |
 | `role_permissions` | Pivot table mapping system roles to permissions. |
 | `user_roles` | Pivot table mapping users to system roles. |
@@ -21,24 +21,22 @@ Event Schedule ships with a single-tenant role-based access control (RBAC) syste
 
 ### Permission keys
 
-`config/authorization.php` documents the cache and retention settings. `database/seeders/AuthorizationSeeder.php` seeds the following keys (abbreviated list):
+`config/authorization.php` documents the cache and retention settings. `database/seeders/AuthorizationSeeder.php` seeds a slimmed-down set of permission keys:
 
-- `settings.manage`, `users.manage`, `roles.manage`, `impersonate.use`
-- CRUD-style keys for `events`, `venues`, `talent`, `curators`, `tickets`, `media`, and `wallet`
-- Operational keys such as `tickets.refund`, `tickets.checkin`, `orders.view`, `orders.export`, `reports.export`
+- `settings.manage` – platform configuration
+- `users.manage` – user invitations and updates
+- `resources.manage` – create and edit venues, talent, and curators within scope
+- `resources.view` – read-only access to scoped venues, talent, and curators
 
 ### Role matrix
 
 | Role | Highlights |
 | --- | --- |
-| **SuperAdmin** | Full platform access plus impersonation. |
-| **Owner** | Full CRUD on every resource (no impersonation). |
-| **Admin** | Manage settings, users, and all records. |
-| **Curator** | Create/update/publish events, venues, talent, and curators. Export reports. |
-| **Editor** | Create/update content but cannot publish/delete. |
-| **BoxOffice** | View events, sell/refund tickets, export orders/reports, issue wallet passes. |
-| **Door** | View events/orders, scan/check in tickets, validate wallet passes. |
-| **Viewer** | Read-only access to public resources. |
+| **SuperAdmin** | Full platform access across every resource. |
+| **Admin** | Manage venues, talent, and curators inside their assigned scope. |
+| **Viewer** | View-only access to the venues, talent, and curators in their scope. |
+
+Admins and viewers are bound to a pick list of venues, talent, and curators configured on the user record. SuperAdmins ignore these scopes and can act on any resource.
 
 The `AuthorizationService` warms a role→permission cache and exposes helper methods that `User::hasPermission()` uses throughout the codebase. The custom `ability` middleware (see `app/Http/Middleware/EnsureAbility.php`) enforces these keys on routes like:
 

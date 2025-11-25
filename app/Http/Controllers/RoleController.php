@@ -860,12 +860,37 @@ class RoleController extends Controller
         }
     }
 
+    protected function authorizeManageResource(?User $user, string $type, ?Role $role = null): void
+    {
+        if (! $user) {
+            abort(403, __('messages.access_denied'));
+        }
+
+        if (! in_array($type, ['venue', 'talent', 'curator'], true)) {
+            abort(403, __('messages.access_denied'));
+        }
+
+        if ($user->hasSystemRoleSlug('superadmin')) {
+            return;
+        }
+
+        if (! $user->hasSystemRoleSlug('admin') || ! $user->hasPermission('resources.manage')) {
+            abort(403, __('messages.access_denied'));
+        }
+
+        if ($role && ! $user->canManageResource($role)) {
+            abort(403, __('messages.access_denied'));
+        }
+    }
+
 
     public function create($type)
     {
         if (! is_hosted_or_admin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
+
+        $this->authorizeManageResource(auth()->user(), $type);
 
         $rawGroupInput = session()->getOldInput('groups', []);
 
@@ -960,7 +985,8 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        $user = $request->user();        
+        $user = $request->user();
+        $this->authorizeManageResource($user, (string) $request->input('type'));
 
         $role = new Role;
         $role->fill($request->except('contacts'));
@@ -995,6 +1021,8 @@ class RoleController extends Controller
 
         $this->applyImageSelections($role, $request);
         $role->save();
+
+        $user->addResourceToScope($role);
 
         // Save groups
         $groupsData = $this->normalizeGroupInput($request->input('groups', []));
@@ -1179,6 +1207,8 @@ class RoleController extends Controller
 
         $role = Role::with('groups')->subdomain($subdomain)->firstOrFail();
 
+        $this->authorizeManageResource(auth()->user(), $role->type, $role);
+
         $user = auth()->user();
         $userData = $this->normalizeAuthenticatedUser($user);
         $this->ensureUserIdentityAttributes($user, $userData, $role);
@@ -1241,9 +1271,10 @@ class RoleController extends Controller
 
         if (! auth()->user()->isMember($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
-        }        
+        }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
+        $this->authorizeManageResource(auth()->user(), $role->type, $role);
         $role->fill($request->except('contacts'));
         $this->assignRoleContacts($role, $request);
 

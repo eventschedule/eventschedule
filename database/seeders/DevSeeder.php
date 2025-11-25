@@ -94,14 +94,14 @@ class DevSeeder extends Seeder
             ],
         ]);
 
-        $systemRoles = SystemRole::query()->whereIn('slug', ['owner', 'admin', 'viewer'])->get()->keyBy('slug');
+        $systemRoles = SystemRole::query()->whereIn('slug', ['superadmin', 'admin', 'viewer'])->get()->keyBy('slug');
 
-        $owner = User::where('email', 'hillelcoren+owner@gmail.com')->first();
+        $super = User::where('email', 'hillelcoren+owner@gmail.com')->first();
         $admin = User::where('email', 'hillelcoren+admin@gmail.com')->first();
         $viewer = User::where('email', 'hillelcoren+follower@gmail.com')->first();
 
-        if ($owner && isset($systemRoles['owner'])) {
-            $owner->systemRoles()->syncWithoutDetaching([$systemRoles['owner']->id]);
+        if ($super && isset($systemRoles['superadmin'])) {
+            $super->systemRoles()->syncWithoutDetaching([$systemRoles['superadmin']->id]);
         }
 
         if ($admin && isset($systemRoles['admin'])) {
