@@ -15,18 +15,9 @@
                         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.user_management_description') }}</p>
                     </div>
                     @if ($canManageRoles)
-                        <div class="flex flex-col items-start justify-end gap-2 text-sm md:flex-row md:items-center">
-                            <a href="{{ route('settings.users.create.modern') }}" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white shadow-sm transition hover:bg-indigo-500">
-                                {{ __('messages.add_user') }}
-                                <span class="ml-2 rounded bg-indigo-500/80 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide">New</span>
-                            </a>
-                            <a href="{{ route('settings.users.create') }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-800">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 7h14M5 12h14M5 17h14" />
-                                </svg>
-                                <span>Legacy form</span>
-                            </a>
-                        </div>
+                        <a href="{{ route('settings.users.create') }}" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500">
+                            {{ __('messages.add_user') }}
+                        </a>
                     @endif
                 </div>
 
