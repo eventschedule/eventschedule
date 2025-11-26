@@ -913,6 +913,15 @@ class RoleController extends Controller
             return;
         }
 
+        $hasRoleMembership = $user->roles()
+            ->where('roles.type', $type)
+            ->wherePivot('level', '!=', 'follower')
+            ->exists();
+
+        if ($hasRoleMembership) {
+            return;
+        }
+
         abort(403, __('messages.access_denied'));
     }
 
