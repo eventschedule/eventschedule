@@ -712,16 +712,27 @@ class RoleController extends Controller
 
     public function pages(Request $request)
     {
-        $roles = $request->user()
-            ->member()
-            ->withCount([
-                'events',
-                'followers',
-                'members as team_members_count',
-            ])
-            ->orderBy('type')
-            ->orderBy('name')
-            ->get();
+        $user = $request->user();
+
+        $roles = collect(['talent', 'venue', 'curator'])
+            ->flatMap(function (string $type) use ($user) {
+                return $user
+                    ->visibleRolesQuery($type)
+                    ->withCount([
+                        'events',
+                        'followers',
+                        'members as team_members_count',
+                    ])
+                    ->orderBy('name')
+                    ->get()
+                    ->filter(function (Role $role) use ($user) {
+                        return $user->isMember($role->subdomain)
+                            || $user->canManageResource($role)
+                            || $user->canViewResource($role);
+                    });
+            })
+            ->sortBy(fn (Role $role) => $role->type . '|' . $role->name)
+            ->values();
 
         return view('role.pages', [
             'roles' => $roles,
