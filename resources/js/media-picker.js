@@ -186,10 +186,21 @@ export const registerMediaLibraryComponents = (alpineInstance) => {
             pendingDeletionAsset: null,
             pendingDeletionUsages: [],
             pendingDeletionMessage: '',
+            canManage: Boolean(config?.canManage),
 
             init() {
                 this.fetchTags();
                 this.fetchAssets();
+            },
+
+            ensureCanManage() {
+                if (this.canManage) {
+                    return true;
+                }
+
+                console.warn('Media management is read-only for this user.');
+
+                return false;
             },
 
             async fetchAssets(page = 1) {
@@ -220,6 +231,10 @@ export const registerMediaLibraryComponents = (alpineInstance) => {
             },
 
             async handleUpload(event) {
+                if (!this.ensureCanManage()) {
+                    return;
+                }
+
                 const [file] = event.target.files || [];
                 event.target.value = '';
 
@@ -240,6 +255,10 @@ export const registerMediaLibraryComponents = (alpineInstance) => {
             },
 
             promptCreateTag() {
+                if (!this.ensureCanManage()) {
+                    return;
+                }
+
                 const name = window.prompt('Tag name');
                 if (!name) {
                     return;
@@ -249,6 +268,10 @@ export const registerMediaLibraryComponents = (alpineInstance) => {
             },
 
             async createTag(name, { select = false } = {}) {
+                if (!this.ensureCanManage()) {
+                    return null;
+                }
+
                 const value = (name || '').trim();
 
                 if (!value) {
@@ -280,6 +303,10 @@ export const registerMediaLibraryComponents = (alpineInstance) => {
             },
 
             async createTagFromModal() {
+                if (!this.ensureCanManage()) {
+                    return;
+                }
+
                 if (this.isCreatingTag) {
                     return;
                 }
@@ -297,6 +324,10 @@ export const registerMediaLibraryComponents = (alpineInstance) => {
             },
 
             async removeTag(tag) {
+                if (!this.ensureCanManage()) {
+                    return;
+                }
+
                 if (!tag) {
                     return;
                 }
@@ -337,6 +368,10 @@ export const registerMediaLibraryComponents = (alpineInstance) => {
             },
 
             openTagEditor(asset) {
+                if (!this.ensureCanManage()) {
+                    return;
+                }
+
                 this.editingAsset = asset;
                 const tags = Array.isArray(asset.tags) ? asset.tags : [];
                 this.selectedTagIds = tags.map((tag) => tag.id);
@@ -362,6 +397,10 @@ export const registerMediaLibraryComponents = (alpineInstance) => {
             },
 
             async saveTags() {
+                if (!this.ensureCanManage()) {
+                    return;
+                }
+
                 if (!this.editingAsset) {
                     return;
                 }
@@ -387,6 +426,10 @@ export const registerMediaLibraryComponents = (alpineInstance) => {
             },
 
             async deleteAsset(asset) {
+                if (!this.ensureCanManage()) {
+                    return;
+                }
+
                 if (!asset) {
                     return;
                 }
@@ -427,6 +470,10 @@ export const registerMediaLibraryComponents = (alpineInstance) => {
             },
 
             async confirmForceDelete() {
+                if (!this.ensureCanManage()) {
+                    return;
+                }
+
                 if (!this.pendingDeletionAsset) {
                     return;
                 }

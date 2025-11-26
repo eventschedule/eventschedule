@@ -1145,7 +1145,7 @@
 
         </div>
 
-        @if ($role->exists && in_array($role->type, ['talent', 'curator', 'venue']))
+        @if ($role->exists && in_array($role->type, ['talent', 'curator', 'venue']) && auth()->user()->hasSystemRoleSlug('superadmin'))
         @php $typeLabel = __('messages.' . $role->type); @endphp
         <div class="max-w-7xl mx-auto mt-6">
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">

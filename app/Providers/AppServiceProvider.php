@@ -87,17 +87,30 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::composer(['layouts.navigation', 'home'], function ($view) {
-            $allRoles = app('userRoles');
+            $user = auth()->user();
+
+            if (! $user) {
+                $view->with([
+                    'schedules' => collect(),
+                    'venues' => collect(),
+                    'curators' => collect(),
+                ]);
+
+                return;
+            }
+
+            $memberRolesByType = function (string $type) use ($user) {
+                return $user
+                    ->member()
+                    ->where('type', $type)
+                    ->orderBy('name')
+                    ->get();
+            };
+
             $view->with([
-                'schedules' => $allRoles
-                    ->where('type', 'talent')
-                    ->whereIn('pivot.level', ['owner', 'admin']),
-                'venues' => $allRoles
-                    ->where('type', 'venue')
-                    ->whereIn('pivot.level', ['owner', 'admin']),
-                'curators' => $allRoles
-                    ->where('type', 'curator')
-                    ->whereIn('pivot.level', ['owner', 'admin']),
+                'schedules' => $memberRolesByType('talent'),
+                'venues' => $memberRolesByType('venue'),
+                'curators' => $memberRolesByType('curator'),
             ]);
         });
 

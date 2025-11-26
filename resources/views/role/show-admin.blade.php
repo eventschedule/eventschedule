@@ -231,7 +231,7 @@
                                 </div>
                             </a>
                             @endif
-                            @if ($role->exists && $role->user_id == auth()->user()->id)
+                            @if ($role->exists && auth()->user()->hasSystemRoleSlug('superadmin'))
                             <div class="py-1" role="none">
                                 <div class="border-t border-gray-100"></div>
                             </div>
