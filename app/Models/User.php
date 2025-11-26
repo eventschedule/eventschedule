@@ -444,7 +444,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function visibleRolesQuery(string $type): Builder
     {
-        $query = Role::query()->type($type);
+        $query = Role::query()
+            ->type($type)
+            ->where('is_deleted', false);
 
         if ($this->hasSystemRoleSlug('superadmin')) {
             return $query;
