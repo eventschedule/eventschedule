@@ -492,11 +492,15 @@ class RoleController extends Controller
 
     public function viewAdmin(Request $request, $subdomain, $tab = 'schedule')
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        $user = auth()->user();
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! $user->isMember($subdomain)
+            && ! $user->canManageResource($role)
+            && ! $user->canViewResource($role)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        $role = Role::subdomain($subdomain)->firstOrFail();
         $followers = $role->followers()->get();
         $members = $role->members()->get();
 
@@ -1317,12 +1321,14 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        if (! auth()->user()->isMember($subdomain)) {
+        $user = auth()->user();
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! $user->isMember($subdomain) && ! $user->canManageResource($role)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        $role = Role::subdomain($subdomain)->firstOrFail();
-        $this->authorizeManageResource(auth()->user(), $role->type, $role);
+        $this->authorizeManageResource($user, $role->type, $role);
         $role->fill($request->except('contacts'));
         $this->assignRoleContacts($role, $request);
 

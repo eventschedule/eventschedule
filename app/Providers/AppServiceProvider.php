@@ -7,6 +7,7 @@ use App\Listeners\HandleLogout;
 use App\Listeners\HandleSuccessfulLogin;
 use App\Listeners\LogSentMessage;
 use App\Models\Image;
+use App\Models\Role;
 use App\Models\Setting;
 use App\Policies\ImagePolicy;
 use App\Services\Audit\AuditLogger;
@@ -99,18 +100,23 @@ class AppServiceProvider extends ServiceProvider
                 return;
             }
 
-            $memberRolesByType = function (string $type) use ($user) {
+            $visibleRolesByType = function (string $type) use ($user) {
                 return $user
-                    ->member()
-                    ->where('type', $type)
+                    ->visibleRolesQuery($type)
                     ->orderBy('name')
-                    ->get();
+                    ->get()
+                    ->filter(function (Role $role) use ($user) {
+                        return $user->isMember($role->subdomain)
+                            || $user->canManageResource($role)
+                            || $user->canViewResource($role);
+                    })
+                    ->values();
             };
 
             $view->with([
-                'schedules' => $memberRolesByType('talent'),
-                'venues' => $memberRolesByType('venue'),
-                'curators' => $memberRolesByType('curator'),
+                'schedules' => $visibleRolesByType('talent'),
+                'venues' => $visibleRolesByType('venue'),
+                'curators' => $visibleRolesByType('curator'),
             ]);
         });
 
