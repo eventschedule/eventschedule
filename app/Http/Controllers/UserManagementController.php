@@ -35,7 +35,7 @@ class UserManagementController extends Controller
         return view('settings.users.index', [
             'users' => $users,
             'search' => (string) $request->string('search'),
-            'canManageRoles' => $request->user()->hasPermission('roles.manage'),
+            'canManageRoles' => $request->user()->hasPermission('users.manage'),
         ]);
     }
 
@@ -50,7 +50,7 @@ class UserManagementController extends Controller
     {
         $this->ensureUserPermission($request->user(), 'users.manage');
 
-        $canManageRoles = $request->user()->hasPermission('roles.manage');
+        $canManageRoles = $request->user()->hasPermission('users.manage');
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -60,6 +60,15 @@ class UserManagementController extends Controller
             'language_code' => ['required', 'string', Rule::in(array_keys($this->languageOptions()))],
             'roles' => $canManageRoles ? ['array'] : ['prohibited'],
             'roles.*' => $canManageRoles ? ['integer', Rule::exists('auth_roles', 'id')] : ['prohibited'],
+            'venue_scope' => ['required', Rule::in(['all', 'selected'])],
+            'curator_scope' => ['required', Rule::in(['all', 'selected'])],
+            'talent_scope' => ['required', Rule::in(['all', 'selected'])],
+            'venue_ids' => ['array'],
+            'venue_ids.*' => ['integer', Rule::exists('roles', 'id')->where('type', 'venue')],
+            'curator_ids' => ['array'],
+            'curator_ids.*' => ['integer', Rule::exists('roles', 'id')->where('type', 'curator')],
+            'talent_ids' => ['array'],
+            'talent_ids.*' => ['integer', Rule::exists('roles', 'id')->where('type', 'talent')],
         ]);
 
         $user = new User();
@@ -74,6 +83,8 @@ class UserManagementController extends Controller
         if ($canManageRoles) {
             $this->syncRoles($user, $validated['roles'] ?? []);
         }
+
+        $this->syncScopes($user, $validated);
 
         return redirect()->route('settings.users.index')
             ->with('status', __('messages.user_created'));
@@ -93,7 +104,7 @@ class UserManagementController extends Controller
     {
         $this->ensureUserPermission($request->user(), 'users.manage');
 
-        $canManageRoles = $request->user()->hasPermission('roles.manage');
+        $canManageRoles = $request->user()->hasPermission('users.manage');
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -109,6 +120,15 @@ class UserManagementController extends Controller
             'language_code' => ['required', 'string', Rule::in(array_keys($this->languageOptions()))],
             'roles' => $canManageRoles ? ['array'] : ['prohibited'],
             'roles.*' => $canManageRoles ? ['integer', Rule::exists('auth_roles', 'id')] : ['prohibited'],
+            'venue_scope' => ['required', Rule::in(['all', 'selected'])],
+            'curator_scope' => ['required', Rule::in(['all', 'selected'])],
+            'talent_scope' => ['required', Rule::in(['all', 'selected'])],
+            'venue_ids' => ['array'],
+            'venue_ids.*' => ['integer', Rule::exists('roles', 'id')->where('type', 'venue')],
+            'curator_ids' => ['array'],
+            'curator_ids.*' => ['integer', Rule::exists('roles', 'id')->where('type', 'curator')],
+            'talent_ids' => ['array'],
+            'talent_ids.*' => ['integer', Rule::exists('roles', 'id')->where('type', 'talent')],
         ]);
 
         $user->name = $validated['name'];
@@ -125,6 +145,8 @@ class UserManagementController extends Controller
         if ($canManageRoles) {
             $this->syncRoles($user, $validated['roles'] ?? []);
         }
+
+        $this->syncScopes($user, $validated);
 
         return redirect()->route('settings.users.index')
             ->with('status', __('messages.user_updated'));
@@ -150,7 +172,10 @@ class UserManagementController extends Controller
 
     protected function availableRoles()
     {
-        return SystemRole::query()->orderBy('name')->get();
+        return SystemRole::query()
+            ->whereIn('slug', ['superadmin', 'admin', 'viewer'])
+            ->orderBy('name')
+            ->get();
     }
 
     protected function languageOptions(): array
@@ -183,7 +208,7 @@ class UserManagementController extends Controller
             'timezones' => \Carbon\CarbonTimeZone::listIdentifiers(),
             'languageOptions' => $this->languageOptions(),
             'availableRoles' => $this->availableRoles(),
-            'canManageRoles' => $request->user()->hasPermission('roles.manage'),
+            'canManageRoles' => $request->user()->hasPermission('users.manage'),
             'statusOptions' => [
                 'active' => $activeLabel !== 'messages.active' ? $activeLabel : 'Active',
                 'inactive' => $inactiveLabel !== 'messages.inactive' ? $inactiveLabel : 'Inactive',
@@ -205,5 +230,18 @@ class UserManagementController extends Controller
 
         $user->systemRoles()->sync($ids);
         $this->authorization->forgetUserPermissions($user);
+    }
+
+    protected function syncScopes(User $user, array $validated): void
+    {
+        $user->venue_scope = $validated['venue_scope'] ?? 'all';
+        $user->curator_scope = $validated['curator_scope'] ?? 'all';
+        $user->talent_scope = $validated['talent_scope'] ?? 'all';
+
+        $user->venue_ids = $user->venue_scope === 'selected' ? ($validated['venue_ids'] ?? []) : [];
+        $user->curator_ids = $user->curator_scope === 'selected' ? ($validated['curator_ids'] ?? []) : [];
+        $user->talent_ids = $user->talent_scope === 'selected' ? ($validated['talent_ids'] ?? []) : [];
+
+        $user->save();
     }
 }
