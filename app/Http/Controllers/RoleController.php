@@ -492,11 +492,15 @@ class RoleController extends Controller
 
     public function viewAdmin(Request $request, $subdomain, $tab = 'schedule')
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        $user = auth()->user();
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! $user->isMember($subdomain)
+            && ! $user->canManageResource($role)
+            && ! $user->canViewResource($role)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        $role = Role::subdomain($subdomain)->firstOrFail();
         $followers = $role->followers()->get();
         $members = $role->members()->get();
 
@@ -708,16 +712,27 @@ class RoleController extends Controller
 
     public function pages(Request $request)
     {
-        $roles = $request->user()
-            ->member()
-            ->withCount([
-                'events',
-                'followers',
-                'members as team_members_count',
-            ])
-            ->orderBy('type')
-            ->orderBy('name')
-            ->get();
+        $user = $request->user();
+
+        $roles = collect(['talent', 'venue', 'curator'])
+            ->flatMap(function (string $type) use ($user) {
+                return $user
+                    ->visibleRolesQuery($type)
+                    ->withCount([
+                        'events',
+                        'followers',
+                        'members as team_members_count',
+                    ])
+                    ->orderBy('name')
+                    ->get()
+                    ->filter(function (Role $role) use ($user) {
+                        return $user->isMember($role->subdomain)
+                            || $user->canManageResource($role)
+                            || $user->canViewResource($role);
+                    });
+            })
+            ->sortBy(fn (Role $role) => $role->type . '|' . $role->name)
+            ->values();
 
         return view('role.pages', [
             'roles' => $roles,
@@ -1317,12 +1332,14 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        if (! auth()->user()->isMember($subdomain)) {
+        $user = auth()->user();
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! $user->isMember($subdomain) && ! $user->canManageResource($role)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        $role = Role::subdomain($subdomain)->firstOrFail();
-        $this->authorizeManageResource(auth()->user(), $role->type, $role);
+        $this->authorizeManageResource($user, $role->type, $role);
         $role->fill($request->except('contacts'));
         $this->assignRoleContacts($role, $request);
 
