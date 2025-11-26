@@ -67,6 +67,13 @@ class AuthorizationSeeder extends Seeder
             $authorization->forgetRolePermissions($role->getKey());
         }
 
+        User::query()
+            ->select('id')
+            ->cursor()
+            ->each(function (User $user) use ($authorization) {
+                $authorization->forgetUserPermissions($user);
+            });
+
         if (! DB::table('user_roles')->exists()) {
             $superRole = $roleModels['superadmin'] ?? null;
 
