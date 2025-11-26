@@ -99,10 +99,18 @@ class AppServiceProvider extends ServiceProvider
                 return;
             }
 
+            $memberRolesByType = function (string $type) use ($user) {
+                return $user
+                    ->member()
+                    ->where('type', $type)
+                    ->orderBy('name')
+                    ->get();
+            };
+
             $view->with([
-                'schedules' => $user->visibleRolesQuery('talent')->orderBy('name')->get(),
-                'venues' => $user->visibleRolesQuery('venue')->orderBy('name')->get(),
-                'curators' => $user->visibleRolesQuery('curator')->orderBy('name')->get(),
+                'schedules' => $memberRolesByType('talent'),
+                'venues' => $memberRolesByType('venue'),
+                'curators' => $memberRolesByType('curator'),
             ]);
         });
 
