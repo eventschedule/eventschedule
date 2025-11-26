@@ -140,17 +140,27 @@ Route::middleware(['auth', 'verified'])->group(function ()
 
     Route::get('/media-library', [MediaLibraryController::class, 'index'])->name('media.index');
     Route::get('/media-library/assets', [MediaLibraryController::class, 'list'])->name('media.assets.index');
-    Route::post('/media-library/assets', [MediaLibraryController::class, 'store'])->name('media.assets.store');
+    Route::post('/media-library/assets', [MediaLibraryController::class, 'store'])
+        ->middleware('ability:resources.manage')
+        ->name('media.assets.store');
     Route::delete('/media-library/assets/{asset}', [MediaLibraryController::class, 'destroy'])
         ->whereNumber('asset')
+        ->middleware('ability:resources.manage')
         ->name('media.assets.destroy');
-    Route::post('/media-library/assets/{asset}/variants', [MediaLibraryController::class, 'storeVariant'])->name('media.assets.variants.store');
+    Route::post('/media-library/assets/{asset}/variants', [MediaLibraryController::class, 'storeVariant'])
+        ->middleware('ability:resources.manage')
+        ->name('media.assets.variants.store');
     Route::get('/media-library/tags', [MediaLibraryController::class, 'tags'])->name('media.tags.index');
-    Route::post('/media-library/tags', [MediaLibraryController::class, 'storeTag'])->name('media.tags.store');
+    Route::post('/media-library/tags', [MediaLibraryController::class, 'storeTag'])
+        ->middleware('ability:resources.manage')
+        ->name('media.tags.store');
     Route::delete('/media-library/tags/{tag}', [MediaLibraryController::class, 'destroyTag'])
         ->whereNumber('tag')
+        ->middleware('ability:resources.manage')
         ->name('media.tags.destroy');
-    Route::post('/media-library/assets/{asset}/tags', [MediaLibraryController::class, 'syncTags'])->name('media.assets.tags.sync');
+    Route::post('/media-library/assets/{asset}/tags', [MediaLibraryController::class, 'syncTags'])
+        ->middleware('ability:resources.manage')
+        ->name('media.assets.tags.sync');
 
     Route::middleware('ability:settings.manage')->group(function () {
         Route::prefix('settings')->name('settings.')->group(function () {

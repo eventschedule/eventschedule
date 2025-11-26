@@ -111,7 +111,11 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         $type = $role->type;
 
-        if ($user->id != $role->user_id) {
+        if ($user->hasSystemRoleSlug('admin') && ! $user->hasSystemRoleSlug('superadmin')) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        if ($user->id != $role->user_id && ! $user->hasSystemRoleSlug('superadmin')) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 

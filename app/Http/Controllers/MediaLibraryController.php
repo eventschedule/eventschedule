@@ -20,6 +20,15 @@ class MediaLibraryController extends Controller
         return view('media.index');
     }
 
+    protected function ensureCanManage(): void
+    {
+        $user = Auth::user();
+
+        if (! $user || ! $user->hasPermission('resources.manage')) {
+            abort(403, __('messages.access_denied'));
+        }
+    }
+
     public function list(Request $request): JsonResponse
     {
         $query = MediaAsset::with([
@@ -87,6 +96,8 @@ class MediaLibraryController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        $this->ensureCanManage();
+
         $validated = $request->validate([
             'file' => ['required', 'image', 'max:5120'],
             'tags' => ['nullable', 'array'],
@@ -129,6 +140,8 @@ class MediaLibraryController extends Controller
 
     public function destroy(Request $request, MediaAsset $asset): JsonResponse
     {
+        $this->ensureCanManage();
+
         $asset->loadMissing('usages.usable');
 
         if ($asset->usages->isNotEmpty() && ! $request->boolean('force')) {
@@ -162,6 +175,8 @@ class MediaLibraryController extends Controller
 
     public function storeVariant(Request $request, MediaAsset $asset): JsonResponse
     {
+        $this->ensureCanManage();
+
         $validated = $request->validate([
             'file' => ['required', 'image', 'max:5120'],
             'label' => ['nullable', 'string', 'max:120'],
@@ -215,6 +230,8 @@ class MediaLibraryController extends Controller
 
     public function storeTag(Request $request): JsonResponse
     {
+        $this->ensureCanManage();
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:120'],
         ]);
@@ -236,6 +253,8 @@ class MediaLibraryController extends Controller
 
     public function destroyTag(MediaTag $tag): JsonResponse
     {
+        $this->ensureCanManage();
+
         $tag->delete();
 
         return response()->json([
@@ -245,6 +264,8 @@ class MediaLibraryController extends Controller
 
     public function syncTags(Request $request, MediaAsset $asset): JsonResponse
     {
+        $this->ensureCanManage();
+
         $validated = $request->validate([
             'tags' => ['array'],
             'tags.*' => ['integer', 'exists:media_tags,id'],

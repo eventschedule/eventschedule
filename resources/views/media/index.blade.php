@@ -1,4 +1,7 @@
 <x-app-admin-layout>
+    @php
+        $canManageMedia = auth()->user()?->hasPermission('resources.manage');
+    @endphp
     <x-slot name="header">
         <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ __('Media library') }}</h1>
     </x-slot>
@@ -12,6 +15,7 @@
             deleteTagTemplate: '{{ route('media.tags.destroy', ['tag' => '__ID__'], false) }}',
             syncTagsTemplate: '{{ route('media.assets.tags.sync', ['asset' => '__ID__'], false) }}',
             deleteAssetTemplate: '{{ route('media.assets.destroy', ['asset' => '__ID__'], false) }}',
+            canManage: @json($canManageMedia),
         })"
         x-init="init()"
         class="space-y-6"
@@ -22,15 +26,17 @@
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Manage assets') }}</h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Upload new media, add tags and review usage across your workspace.') }}</p>
                 </div>
-                <div class="flex items-center gap-2">
-                    <label class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 focus:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100 cursor-pointer">
-                        <input type="file" class="hidden" @change="handleUpload($event)" accept="image/*">
-                        <span>{{ __('Upload') }}</span>
-                    </label>
-                    <button type="button" @click="promptCreateTag" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                        {{ __('New tag') }}
-                    </button>
-                </div>
+                @if ($canManageMedia)
+                    <div class="flex items-center gap-2">
+                        <label class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 focus:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100 cursor-pointer">
+                            <input type="file" class="hidden" @change="handleUpload($event)" accept="image/*">
+                            <span>{{ __('Upload') }}</span>
+                        </label>
+                        <button type="button" @click="promptCreateTag" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            {{ __('New tag') }}
+                        </button>
+                    </div>
+                @endif
             </div>
 
             <div class="mt-4 max-w-md">
@@ -65,15 +71,17 @@
                             @click="activeTag = tag.slug; fetchAssets()"
                             x-text="tag.name"
                         ></button>
-                        <button
-                            type="button"
-                            class="px-2 py-1 text-xs"
-                            :class="activeTag === tag.slug ? 'text-white/80 hover:text-white' : 'text-gray-500 hover:text-red-600 dark:hover:text-red-400'"
-                            @click.stop="removeTag(tag)"
-                        >
-                            <span aria-hidden="true">&times;</span>
-                            <span class="sr-only">{{ __('Remove tag') }}</span>
-                        </button>
+                        @if ($canManageMedia)
+                            <button
+                                type="button"
+                                class="px-2 py-1 text-xs"
+                                :class="activeTag === tag.slug ? 'text-white/80 hover:text-white' : 'text-gray-500 hover:text-red-600 dark:hover:text-red-400'"
+                                @click.stop="removeTag(tag)"
+                            >
+                                <span aria-hidden="true">&times;</span>
+                                <span class="sr-only">{{ __('Remove tag') }}</span>
+                            </button>
+                        @endif
                     </div>
                 </template>
             </div>
@@ -103,9 +111,13 @@
                                 </template>
                             </div>
                             <div class="mt-auto flex items-center gap-2 pt-2">
-                                <button type="button" class="text-sm text-indigo-600 hover:text-indigo-500" @click="openTagEditor(asset)">{{ __('Edit tags') }}</button>
+                                @if ($canManageMedia)
+                                    <button type="button" class="text-sm text-indigo-600 hover:text-indigo-500" @click="openTagEditor(asset)">{{ __('Edit tags') }}</button>
+                                @endif
                                 <button type="button" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-500" @click="openDetails(asset)">{{ __('Details') }}</button>
-                                <button type="button" class="ml-auto text-sm text-red-600 hover:text-red-500" @click="deleteAsset(asset)">{{ __('Delete') }}</button>
+                                @if ($canManageMedia)
+                                    <button type="button" class="ml-auto text-sm text-red-600 hover:text-red-500" @click="deleteAsset(asset)">{{ __('Delete') }}</button>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -247,9 +259,11 @@
                             </div>
                         </div>
                         <div>
-                            <button type="button" class="inline-flex items-center justify-center rounded-md border border-red-200 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50" @click="deleteAsset(detailAsset)">
-                                {{ __('Delete asset') }}
-                            </button>
+                            @if ($canManageMedia)
+                                <button type="button" class="inline-flex items-center justify-center rounded-md border border-red-200 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50" @click="deleteAsset(detailAsset)">
+                                    {{ __('Delete asset') }}
+                                </button>
+                            @endif
                         </div>
                     </div>
                 </template>

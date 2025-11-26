@@ -313,7 +313,7 @@
         </li>
 
 
-        @if (auth()->user()->isAdmin())
+        @if (auth()->user()->hasSystemRoleSlug('superadmin'))
         <li class="mt-auto">
             <a href="{{ route('settings.index') }}"
                 class="{{ $navLinkBase }} -mx-2 font-semibold {{ request()->is('settings*') ? $navLinkActive : $navLinkDefault }}">
