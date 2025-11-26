@@ -810,10 +810,10 @@ class RoleController extends Controller
 
         $user = $request->user();
 
-        $this->authorizeViewResource($user, $typeConfig['type']);
+        $limitToManagedResources = $this->authorizeViewResource($user, $typeConfig['type']);
 
         $roles = $user
-            ->visibleRolesQuery($typeConfig['type'])
+            ->visibleRolesQuery($typeConfig['type'], $limitToManagedResources)
             ->with('members')
             ->orderBy('name')
             ->get();
@@ -891,7 +891,7 @@ class RoleController extends Controller
         }
     }
 
-    protected function authorizeViewResource(?User $user, string $type): void
+    protected function authorizeViewResource(?User $user, string $type): bool
     {
         if (! $user) {
             abort(403, __('messages.access_denied'));
@@ -902,18 +902,29 @@ class RoleController extends Controller
         }
 
         if ($user->hasSystemRoleSlug('superadmin')) {
-            return;
+            return false;
         }
 
         if ($user->hasPermission('resources.manage') && $user->hasSystemRoleSlug('admin')) {
-            return;
+            return false;
         }
 
         if ($user->hasPermission('resources.view') && $user->hasSystemRoleSlug('viewer')) {
-            return;
+            return false;
+        }
+
+        $hasRoleMembership = $user->roles()
+            ->where('roles.type', $type)
+            ->wherePivot('level', '!=', 'follower')
+            ->exists();
+
+        if ($hasRoleMembership) {
+            return true;
         }
 
         abort(403, __('messages.access_denied'));
+
+        return false;
     }
 
 
