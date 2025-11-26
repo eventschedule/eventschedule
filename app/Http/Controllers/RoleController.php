@@ -808,12 +808,18 @@ class RoleController extends Controller
 
         $typeConfig = $config[$typeKey];
 
-        $roles = $request->user()
-            ->member()
-            ->type($typeConfig['type'])
+        $user = $request->user();
+
+        $this->authorizeViewResource($user, $typeConfig['type']);
+
+        $roles = $user
+            ->visibleRolesQuery($typeConfig['type'])
             ->with('members')
             ->orderBy('name')
             ->get();
+
+        $canCreate = $user && $user->hasPermission('resources.manage')
+            && ($user->hasSystemRoleSlug('admin') || $user->hasSystemRoleSlug('superadmin'));
 
         $availableViews = ['grid', 'list'];
         $sessionKey = 'role_listing_view_' . $typeConfig['type'];
@@ -842,6 +848,8 @@ class RoleController extends Controller
             'emptyTitle' => $typeConfig['empty_title'],
             'emptyDescription' => $typeConfig['empty_description'],
             'selectedView' => $selectedView,
+            'canCreate' => $canCreate,
+            'authUser' => $user,
         ]);
     }
 
@@ -881,6 +889,31 @@ class RoleController extends Controller
         if ($role && ! $user->canManageResource($role)) {
             abort(403, __('messages.access_denied'));
         }
+    }
+
+    protected function authorizeViewResource(?User $user, string $type): void
+    {
+        if (! $user) {
+            abort(403, __('messages.access_denied'));
+        }
+
+        if (! in_array($type, ['venue', 'talent', 'curator'], true)) {
+            abort(403, __('messages.access_denied'));
+        }
+
+        if ($user->hasSystemRoleSlug('superadmin')) {
+            return;
+        }
+
+        if ($user->hasPermission('resources.manage') && $user->hasSystemRoleSlug('admin')) {
+            return;
+        }
+
+        if ($user->hasPermission('resources.view') && $user->hasSystemRoleSlug('viewer')) {
+            return;
+        }
+
+        abort(403, __('messages.access_denied'));
     }
 
 

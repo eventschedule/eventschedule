@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -439,6 +440,34 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($column) {
             $this->setAttribute($column, $normalized);
         }
+    }
+
+    public function visibleRolesQuery(string $type): Builder
+    {
+        $query = Role::query()
+            ->type($type)
+            ->where('is_deleted', false);
+
+        if ($this->hasSystemRoleSlug('superadmin')) {
+            return $query;
+        }
+
+        $scope = $this->getResourceScope($type);
+        $scopeIds = $this->getResourceScopeIds($type);
+
+        return $query->where(function (Builder $builder) use ($scope, $scopeIds) {
+            if ($scope === 'all') {
+                $builder->whereRaw('1 = 1');
+            } elseif ($scope === 'selected' && ! empty($scopeIds)) {
+                $builder->whereIn('roles.id', $scopeIds);
+            } else {
+                $builder->whereRaw('0 = 1');
+            }
+
+            $builder->orWhereHas('users', function (Builder $memberQuery) {
+                $memberQuery->where('users.id', $this->id);
+            });
+        });
     }
 
     public function canManageResource(Role $role): bool
