@@ -3,6 +3,8 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             @php
                 $currentView = $selectedView ?? 'grid';
+                $canCreate = $canCreate ?? false;
+                $authUser = $authUser ?? null;
             @endphp
             <div class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between lg:items-center">
                 <div>
@@ -40,15 +42,17 @@
                             @endforeach
                         </div>
                     </div>
-                    <a
-                        href="{{ route('new', ['type' => $roleType]) }}"
-                        class="inline-flex items-center justify-center gap-2 rounded-full bg-[#4E81FA] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#3b6ae0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]"
-                    >
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                        </svg>
-                        {{ $createLabel }}
-                    </a>
+                    @if ($canCreate)
+                        <a
+                            href="{{ route('new', ['type' => $roleType]) }}"
+                            class="inline-flex items-center justify-center gap-2 rounded-full bg-[#4E81FA] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#3b6ae0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]"
+                        >
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            {{ $createLabel }}
+                        </a>
+                    @endif
                 </div>
             </div>
 
@@ -86,11 +90,11 @@
                                             if ($websiteUrl && ! \Illuminate\Support\Str::startsWith($websiteUrl, ['http://', 'https://'])) {
                                                 $websiteUrl = 'https://' . $websiteUrl;
                                             }
-                                        @endphp
-                                        <tr class="align-top">
-                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                                <div class="flex items-start gap-3">
-                                                    @if ($role->profile_image_url)
+                                            @endphp
+                                            <tr class="align-top">
+                                                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                                                    <div class="flex items-start gap-3">
+                                                        @if ($role->profile_image_url)
                                                         <img src="{{ $role->profile_image_url }}" alt="" class="h-10 w-10 flex-none rounded-full object-cover" />
                                                     @else
                                                         <span class="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-gray-100 text-base font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-200">
@@ -143,19 +147,22 @@
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4">
+                                                @php $canManage = $authUser && $authUser->canManageResource($role); @endphp
                                                 <div class="flex flex-wrap items-center gap-2">
-                                                    <a
-                                                        href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']) }}"
-                                                        class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-[#4E81FA] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-[#4E81FA]"
-                                                    >
-                                                        {{ __('messages.manage') }}
-                                                    </a>
-                                                    <a
-                                                        href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}"
-                                                        class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-[#4E81FA] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-[#4E81FA]"
-                                                    >
-                                                        {{ __('messages.edit_' . strtolower($role->type)) }}
-                                                    </a>
+                                                    @if ($canManage)
+                                                        <a
+                                                            href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']) }}"
+                                                            class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-[#4E81FA] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-[#4E81FA]"
+                                                        >
+                                                            {{ __('messages.manage') }}
+                                                        </a>
+                                                        <a
+                                                            href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}"
+                                                            class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-[#4E81FA] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-[#4E81FA]"
+                                                        >
+                                                            {{ __('messages.edit_' . strtolower($role->type)) }}
+                                                        </a>
+                                                    @endif
                                                     @if ($role->isClaimed() && $role->getGuestUrl())
                                                         <a
                                                             href="{{ $role->getGuestUrl() }}"
@@ -193,18 +200,21 @@
                                     @endif
                                 </div>
                                 <div class="flex flex-wrap items-center gap-2">
-                                    <a
-                                        href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']) }}"
-                                        class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-[#4E81FA] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-[#4E81FA]"
-                                    >
-                                        {{ __('messages.manage') }}
-                                    </a>
-                                    <a
-                                        href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}"
-                                        class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-[#4E81FA] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-[#4E81FA]"
-                                    >
-                                        {{ __('messages.edit_' . strtolower($role->type)) }}
-                                    </a>
+                                    @php $canManage = $authUser && $authUser->canManageResource($role); @endphp
+                                    @if ($canManage)
+                                        <a
+                                            href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']) }}"
+                                            class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-[#4E81FA] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-[#4E81FA]"
+                                        >
+                                            {{ __('messages.manage') }}
+                                        </a>
+                                        <a
+                                            href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}"
+                                            class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-[#4E81FA] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-[#4E81FA]"
+                                        >
+                                            {{ __('messages.edit_' . strtolower($role->type)) }}
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
 
@@ -331,15 +341,17 @@
                     </div>
                     <h3 class="mt-6 text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $emptyTitle }}</h3>
                     <p class="mt-2 max-w-md text-sm text-gray-600 dark:text-gray-400">{{ $emptyDescription }}</p>
-                    <a
-                        href="{{ route('new', ['type' => $roleType]) }}"
-                        class="mt-6 inline-flex items-center gap-2 rounded-full bg-[#4E81FA] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#3b6ae0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]"
-                    >
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                        </svg>
-                        {{ $createLabel }}
-                    </a>
+                    @if ($canCreate)
+                        <a
+                            href="{{ route('new', ['type' => $roleType]) }}"
+                            class="mt-6 inline-flex items-center gap-2 rounded-full bg-[#4E81FA] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#3b6ae0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]"
+                        >
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            {{ $createLabel }}
+                        </a>
+                    @endif
                 </div>
             @endif
         </div>
