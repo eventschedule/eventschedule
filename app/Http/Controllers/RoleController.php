@@ -21,6 +21,7 @@ use Illuminate\Support\Str;
 use DateTimeInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
 use App\Models\Role;
 use App\Models\Event;
 use App\Models\User;
@@ -601,6 +602,8 @@ class RoleController extends Controller
             }
         }
 
+        $accessUsers = $this->accessUsersForRole($role);
+
         return view('role/show-admin', compact(
             'subdomain',
             'role',
@@ -615,7 +618,37 @@ class RoleController extends Controller
             'endOfMonth',
             'unscheduled',
             'datesUnavailable',
+            'accessUsers',
         ));
+    }
+
+    protected function accessUsersForRole(Role $role)
+    {
+        $scopeColumn = $role->type . '_scope';
+        $idsColumn = $role->type . '_ids';
+
+        return User::query()
+            ->with('systemRoles')
+            ->whereHas('systemRoles', function ($query) {
+                $query->whereIn('slug', ['superadmin', 'admin', 'viewer']);
+            })
+            ->where(function (Builder $query) use ($scopeColumn, $idsColumn, $role) {
+                $query->whereHas('systemRoles', fn ($roles) => $roles->where('slug', 'superadmin'))
+                    ->orWhere($scopeColumn, 'all')
+                    ->orWhereJsonContains($idsColumn, $role->id);
+            })
+            ->orderBy('name')
+            ->get([
+                'id',
+                'name',
+                'email',
+                'venue_scope',
+                'curator_scope',
+                'talent_scope',
+                'venue_ids',
+                'curator_ids',
+                'talent_ids',
+            ]);
     }
 
     public function createMember(Request $request, $subdomain)

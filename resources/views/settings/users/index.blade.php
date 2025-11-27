@@ -50,6 +50,9 @@
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                     {{ __('messages.roles') }}
                                 </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                    Access
+                                </th>
                                 <th scope="col" class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                     {{ __('messages.actions') }}
                                 </th>
@@ -71,6 +74,41 @@
                                             @endforelse
                                         </div>
                                     </td>
+                                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                                        @php
+                                            $resourceScopes = [
+                                                ['label' => 'Venues', 'type' => 'venue'],
+                                                ['label' => 'Curators', 'type' => 'curator'],
+                                                ['label' => 'Talent', 'type' => 'talent'],
+                                            ];
+                                        @endphp
+                                        <div class="space-y-2">
+                                            @foreach ($resourceScopes as $resource)
+                                                @php
+                                                    $scope = $user->getResourceScope($resource['type']);
+                                                    $ids = $user->getResourceScopeIds($resource['type']);
+                                                    $names = collect($ids)
+                                                        ->map(fn ($id) => optional($resourceLookups[$resource['type']][$id] ?? null)->name)
+                                                        ->filter()
+                                                        ->values();
+                                                @endphp
+                                                <div>
+                                                    <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $resource['label'] }}:</span>
+                                                    @if ($scope === 'all')
+                                                        <span class="ml-1 inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-200">All</span>
+                                                    @elseif ($names->isNotEmpty())
+                                                        <span class="ml-1 inline-flex flex-wrap gap-1 align-middle">
+                                                            @foreach ($names as $name)
+                                                                <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200">{{ $name }}</span>
+                                                            @endforeach
+                                                        </span>
+                                                    @else
+                                                        <span class="ml-1 text-xs text-gray-500 dark:text-gray-400">No selection</span>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </td>
                                     <td class="px-6 py-4 text-right text-sm">
                                         @if ($canManageRoles)
                                             <a href="{{ route('settings.users.edit', $user) }}" class="font-medium text-indigo-600 hover:text-indigo-500">
@@ -83,7 +121,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="px-6 py-12 text-center text-sm text-gray-500">
+                                    <td colspan="4" class="px-6 py-12 text-center text-sm text-gray-500">
                                         {{ __('messages.no_users_found') }}
                                     </td>
                                 </tr>
