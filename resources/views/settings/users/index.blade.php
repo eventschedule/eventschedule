@@ -88,7 +88,7 @@
                                                     $scope = $user->getResourceScope($resource['type']);
                                                     $ids = $user->getResourceScopeIds($resource['type']);
                                                     $names = collect($ids)
-                                                        ->map(fn ($id) => $resourceLookups[$resource['type']][$id]->name ?? null)
+                                                        ->map(fn ($id) => optional($resourceLookups[$resource['type']][$id] ?? null)->name)
                                                         ->filter()
                                                         ->values();
                                                 @endphp
