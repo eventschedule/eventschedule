@@ -31,11 +31,13 @@ class UserManagementController extends Controller
         $this->ensureUserPermission($request->user(), 'users.manage');
 
         $users = $this->queryUsers($request);
+        $resourceLookups = $this->resourceLookups($users);
 
         return view('settings.users.index', [
             'users' => $users,
             'search' => (string) $request->string('search'),
             'canManageRoles' => $request->user()->hasPermission('users.manage'),
+            'resourceLookups' => $resourceLookups,
         ]);
     }
 
@@ -221,6 +223,34 @@ class UserManagementController extends Controller
         ];
     }
 
+    protected function resourceLookups($users): array
+    {
+        $idsByType = [
+            'venue' => [],
+            'curator' => [],
+            'talent' => [],
+        ];
+
+        foreach ($users as $user) {
+            $idsByType['venue'] = array_merge($idsByType['venue'], $user->getResourceScopeIds('venue'));
+            $idsByType['curator'] = array_merge($idsByType['curator'], $user->getResourceScopeIds('curator'));
+            $idsByType['talent'] = array_merge($idsByType['talent'], $user->getResourceScopeIds('talent'));
+        }
+
+        return collect($idsByType)->map(function (array $ids, string $type) {
+            if (empty($ids)) {
+                return collect();
+            }
+
+            return DomainRole::query()
+                ->where('type', $type)
+                ->whereIn('id', array_unique($ids))
+                ->orderBy('name')
+                ->get(['id', 'name', 'subdomain'])
+                ->keyBy('id');
+        });
+    }
+
     protected function syncRoles(User $user, array $roleIds): void
     {
         $ids = SystemRole::query()
@@ -238,9 +268,9 @@ class UserManagementController extends Controller
         $user->curator_scope = $validated['curator_scope'] ?? 'all';
         $user->talent_scope = $validated['talent_scope'] ?? 'all';
 
-        $user->venue_ids = $user->venue_scope === 'selected' ? ($validated['venue_ids'] ?? []) : [];
-        $user->curator_ids = $user->curator_scope === 'selected' ? ($validated['curator_ids'] ?? []) : [];
-        $user->talent_ids = $user->talent_scope === 'selected' ? ($validated['talent_ids'] ?? []) : [];
+        $user->setResourceScopeIds('venue', $user->venue_scope === 'selected' ? ($validated['venue_ids'] ?? []) : []);
+        $user->setResourceScopeIds('curator', $user->curator_scope === 'selected' ? ($validated['curator_ids'] ?? []) : []);
+        $user->setResourceScopeIds('talent', $user->talent_scope === 'selected' ? ($validated['talent_ids'] ?? []) : []);
 
         $user->save();
     }

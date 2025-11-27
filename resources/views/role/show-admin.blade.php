@@ -251,6 +251,47 @@
         </div>
     </div>
 
+    @if (isset($accessUsers))
+        <div class="mt-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Access</div>
+                    <div class="text-base font-semibold text-gray-900 dark:text-white">Users who can manage this {{ strtolower($role->type) }}</div>
+                </div>
+                <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-200">
+                    {{ $accessUsers->count() }}
+                </span>
+            </div>
+            <div class="mt-3 grid gap-3 md:grid-cols-2">
+                @forelse ($accessUsers as $accessUser)
+                    @php
+                        $scopeLabel = $accessUser->getResourceScope($role->type) === 'all' ? 'All ' . ucfirst($role->type) . 's' : 'Selected list';
+                    @endphp
+                    <div class="rounded-lg border border-gray-100 bg-gray-50 p-3 text-sm text-gray-800 shadow-sm dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-100">
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <div class="font-semibold">{{ $accessUser->name }}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ $accessUser->email }}</div>
+                            </div>
+                            <span class="rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-200">{{ $scopeLabel }}</span>
+                        </div>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            @forelse ($accessUser->systemRoles as $systemRole)
+                                <span class="inline-flex items-center rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-gray-700 ring-1 ring-gray-200 dark:bg-gray-900 dark:text-gray-200 dark:ring-gray-700">{{ $systemRole->name }}</span>
+                            @empty
+                                <span class="text-xs text-gray-500 dark:text-gray-400">No system roles</span>
+                            @endforelse
+                        </div>
+                    </div>
+                @empty
+                    <div class="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-300 md:col-span-2">
+                        No users currently have access to this {{ strtolower($role->type) }}.
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    @endif
+
     @if (! $role->email_verified_at)
     <div class="pt-5 pb-2">
         <div class="bg-white rounded-lg shadow-sm p-6">
