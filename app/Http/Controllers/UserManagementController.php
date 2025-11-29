@@ -248,7 +248,7 @@ class UserManagementController extends Controller
                 ->orderBy('name')
                 ->get(['id', 'name', 'subdomain'])
                 ->keyBy('id');
-        });
+        })->all();
     }
 
     protected function syncRoles(User $user, array $roleIds): void
