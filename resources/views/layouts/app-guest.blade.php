@@ -140,6 +140,143 @@
 
         </style>
 
+        @if ($event && $event->exists && $event->starts_at)
+            @php
+                // Use translation if available, otherwise fall back to event methods
+                $eventName = (isset($translation) && $translation && $translation->name_translated) ? $translation->name_translated : $event->translatedName();
+                $eventDescription = (isset($translation) && $translation && $translation->description_translated) ? $translation->description_translated : $event->translatedDescription();
+                $eventDescription = trim(strip_tags($eventDescription));
+                $eventUrl = $event->getGuestUrl();
+                $eventImage = $event->getImageUrl();
+                $startDate = $event->getSchemaStartDate($date ?? null);
+                $endDate = $event->getSchemaEndDate($date ?? null);
+                $location = $event->getSchemaLocation();
+                $offers = $event->getSchemaOffers();
+                
+                // Get organizer
+                $organizer = null;
+                if ($event->venue && $event->venue->isClaimed()) {
+                    $organizer = [
+                        '@type' => 'Organization',
+                        'name' => $event->venue->translatedName(),
+                        'url' => $event->venue->getGuestUrl(),
+                    ];
+                } elseif ($event->role() && $event->role()->isClaimed()) {
+                    $organizer = [
+                        '@type' => 'Person',
+                        'name' => $event->role()->translatedName(),
+                        'url' => $event->role()->getGuestUrl(),
+                    ];
+                }
+            @endphp
+
+            <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "Event",
+                "name": {!! json_encode($eventName, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                @if ($eventDescription)
+                ,
+                "description": {!! json_encode($eventDescription, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                @endif
+                ,
+                "startDate": {!! json_encode($startDate, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
+                "endDate": {!! json_encode($endDate, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                @if ($eventImage)
+                ,
+                "image": {!! json_encode($eventImage, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                @endif
+                ,
+                "url": {!! json_encode($eventUrl, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                @if ($location)
+                ,
+                "location": {!! json_encode($location, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                @endif
+                @if ($organizer)
+                ,
+                "organizer": {!! json_encode($organizer, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                @endif
+                @if ($offers && !empty($offers))
+                ,
+                "offers": {!! json_encode(count($offers) === 1 ? $offers[0] : $offers, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                @endif
+            }
+            </script>
+        @elseif ($role->exists)
+            @php
+                $roleName = $role->translatedName();
+                $roleDescription = trim(strip_tags($role->translatedDescription()));
+                $roleUrl = $role->getGuestUrl();
+                $roleImage = $role->profile_image_url;
+                
+                // Determine schema type based on role type
+                $schemaType = $role->isVenue() ? 'Organization' : ($role->isCurator() ? 'Organization' : 'Person');
+                
+                // Build address if venue
+                $address = null;
+                if ($role->isVenue() && ($role->formatted_address || $role->translatedAddress1() || $role->translatedCity())) {
+                    $address = ['@type' => 'PostalAddress'];
+                    if ($role->translatedAddress1()) {
+                        $address['streetAddress'] = $role->translatedAddress1();
+                        if ($role->translatedAddress2()) {
+                            $address['streetAddress'] .= ', ' . $role->translatedAddress2();
+                        }
+                    }
+                    if ($role->translatedCity()) {
+                        $address['addressLocality'] = $role->translatedCity();
+                    }
+                    if ($role->translatedState()) {
+                        $address['addressRegion'] = $role->translatedState();
+                    }
+                    if ($role->postal_code) {
+                        $address['postalCode'] = $role->postal_code;
+                    }
+                    if ($role->country_code) {
+                        $address['addressCountry'] = $role->country_code;
+                    }
+                }
+                
+                // Get social links
+                $sameAs = [];
+                if ($role->social_links) {
+                    $socialLinks = json_decode($role->social_links, true);
+                    if (is_array($socialLinks)) {
+                        foreach ($socialLinks as $link) {
+                            if (isset($link['url']) && $link['url']) {
+                                $sameAs[] = $link['url'];
+                            }
+                        }
+                    }
+                }
+            @endphp
+
+            <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": {!! json_encode($schemaType, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
+                "name": {!! json_encode($roleName, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                @if ($roleDescription)
+                ,
+                "description": {!! json_encode($roleDescription, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                @endif
+                ,
+                "url": {!! json_encode($roleUrl, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                @if ($roleImage)
+                ,
+                "image": {!! json_encode($roleImage, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                @endif
+                @if ($address)
+                ,
+                "address": {!! json_encode($address, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                @endif
+                @if (!empty($sameAs))
+                ,
+                "sameAs": {!! json_encode($sameAs, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                @endif
+            }
+            </script>
+        @endif
+
         {{ isset($head) ? $head : '' }}
     </x-slot>
     
