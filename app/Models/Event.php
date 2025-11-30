@@ -807,4 +807,121 @@ class Event extends Model
 
         return 'not_synced';
     }
+
+    /**
+     * Get end date/time for the event
+     */
+    public function getEndDateTime($date = null, $locale = false)
+    {
+        $startAt = $this->getStartDateTime($date, $locale);
+        $duration = $this->duration > 0 ? $this->duration : 2; // Default to 2 hours if no duration
+        
+        return $startAt->copy()->addHours($duration);
+    }
+
+    /**
+     * Get location schema data for JSON-LD
+     */
+    public function getSchemaLocation()
+    {
+        if (!$this->venue) {
+            return null;
+        }
+
+        $location = [
+            '@type' => 'Place',
+            'name' => $this->venue->translatedName(),
+        ];
+
+        // Add address if available
+        $address = [];
+        if ($this->venue->translatedAddress1()) {
+            $address['streetAddress'] = $this->venue->translatedAddress1();
+            if ($this->venue->translatedAddress2()) {
+                $address['streetAddress'] .= ', ' . $this->venue->translatedAddress2();
+            }
+        }
+        if ($this->venue->translatedCity()) {
+            $address['addressLocality'] = $this->venue->translatedCity();
+        }
+        if ($this->venue->translatedState()) {
+            $address['addressRegion'] = $this->venue->translatedState();
+        }
+        if ($this->venue->postal_code) {
+            $address['postalCode'] = $this->venue->postal_code;
+        }
+        if ($this->venue->country_code) {
+            $address['addressCountry'] = $this->venue->country_code;
+        }
+
+        if (!empty($address)) {
+            $address['@type'] = 'PostalAddress';
+            $location['address'] = $address;
+        }
+
+        // Add geo coordinates if available
+        if ($this->venue->geo_lat && $this->venue->geo_lon) {
+            $location['geo'] = [
+                '@type' => 'GeoCoordinates',
+                'latitude' => (float) $this->venue->geo_lat,
+                'longitude' => (float) $this->venue->geo_lon,
+            ];
+        }
+
+        return $location;
+    }
+
+    /**
+     * Get offers schema data for JSON-LD (tickets)
+     */
+    public function getSchemaOffers()
+    {
+        if (!$this->tickets_enabled || !$this->isPro() || $this->tickets->isEmpty()) {
+            return null;
+        }
+
+        $offers = [];
+        $currency = $this->ticket_currency_code ?: 'USD';
+        $url = $this->getGuestUrl();
+
+        foreach ($this->tickets as $ticket) {
+            $offer = [
+                '@type' => 'Offer',
+                'price' => (float) $ticket->price,
+                'priceCurrency' => $currency,
+                'url' => $url . (strpos($url, '?') !== false ? '&' : '?') . 'tickets=true',
+                'availability' => 'https://schema.org/InStock',
+            ];
+
+            if ($ticket->name) {
+                $offer['name'] = $ticket->name;
+            }
+
+            if ($ticket->quantity > 0) {
+                $offer['inventoryLevel'] = $ticket->quantity;
+            }
+
+            $offers[] = $offer;
+        }
+
+        return $offers;
+    }
+
+    /**
+     * Get ISO 8601 formatted date string for schema
+     */
+    public function getSchemaStartDate($date = null)
+    {
+        $startAt = $this->getStartDateTime($date, true);
+        return $startAt->toIso8601String();
+    }
+
+    /**
+     * Get ISO 8601 formatted end date string for schema
+     */
+    public function getSchemaEndDate($date = null)
+    {
+        $endAt = $this->getEndDateTime($date, true);
+        return $endAt->toIso8601String();
+    }
 }
