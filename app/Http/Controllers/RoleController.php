@@ -870,8 +870,7 @@ class RoleController extends Controller
             ->orderBy('name')
             ->get();
 
-        $canCreate = $user && $user->hasPermission('resources.manage')
-            && ($user->hasSystemRoleSlug('admin') || $user->hasSystemRoleSlug('superadmin'));
+        $canCreate = $user ? $this->canManageResourceType($user, $typeConfig['type']) : false;
 
         $availableViews = ['grid', 'list'];
         $sessionKey = 'role_listing_view_' . $typeConfig['type'];
@@ -941,6 +940,19 @@ class RoleController extends Controller
         if ($role && ! $user->canManageResource($role)) {
             abort(403, __('messages.access_denied'));
         }
+    }
+
+    protected function canManageResourceType(?User $user, string $type): bool
+    {
+        if (! $user || ! in_array($type, ['venue', 'talent', 'curator'], true)) {
+            return false;
+        }
+
+        if ($user->hasSystemRoleSlug('superadmin')) {
+            return true;
+        }
+
+        return $user->hasSystemRoleSlug('admin') && $user->hasPermission('resources.manage');
     }
 
     protected function authorizeViewResource(?User $user, string $type): bool
