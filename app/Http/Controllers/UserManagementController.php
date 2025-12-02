@@ -10,6 +10,8 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -57,7 +59,14 @@ class UserManagementController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class, 'email')],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password_mode' => ['required', Rule::in(['set', 'invite', 'defer'])],
+            'password' => [
+                Rule::requiredIf(fn ($input) => $input->password_mode === 'set'),
+                'nullable',
+                'string',
+                'min:8',
+                'confirmed',
+            ],
             'timezone' => ['required', 'timezone'],
             'language_code' => ['required', 'string', Rule::in(array_keys($this->languageOptions()))],
             'roles' => $canManageRoles ? ['array'] : ['prohibited'],
@@ -73,10 +82,14 @@ class UserManagementController extends Controller
             'talent_ids.*' => ['integer', Rule::exists('roles', 'id')->where('type', 'talent')],
         ]);
 
+        $passwordMode = $validated['password_mode'];
+
         $user = new User();
         $user->name = $validated['name'];
         $user->email = $validated['email'];
-        $user->password = Hash::make($validated['password']);
+        $user->password = Hash::make(
+            $passwordMode === 'set' ? $validated['password'] : Str::random(40)
+        );
         $user->timezone = $validated['timezone'];
         $user->language_code = $validated['language_code'];
         $user->email_verified_at = now();
@@ -88,8 +101,19 @@ class UserManagementController extends Controller
 
         $this->syncScopes($user, $validated);
 
+        $statusKey = 'messages.user_created';
+
+        if ($passwordMode === 'invite') {
+            $inviteStatus = Password::sendResetLink(['email' => $user->email]);
+            $statusKey = $inviteStatus === Password::RESET_LINK_SENT
+                ? 'messages.user_invite_sent'
+                : 'messages.user_invite_failed';
+        } elseif ($passwordMode === 'defer') {
+            $statusKey = 'messages.user_created_password_deferred';
+        }
+
         return redirect()->route('settings.users.index')
-            ->with('status', __('messages.user_created'));
+            ->with('status', __($statusKey));
     }
 
     public function edit(Request $request, User $user): View
@@ -111,12 +135,13 @@ class UserManagementController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class, 'email')->ignore($user->getKey())],
+            'password_mode' => ['required', Rule::in(['set', 'invite', 'defer'])],
             'password' => [
+                Rule::requiredIf(fn ($input) => $input->password_mode === 'set'),
                 'nullable',
-                Rule::when(
-                    fn ($input) => filled($input->password),
-                    ['string', 'min:8', 'confirmed']
-                ),
+                'string',
+                'min:8',
+                'confirmed'
             ],
             'timezone' => ['required', 'timezone'],
             'language_code' => ['required', 'string', Rule::in(array_keys($this->languageOptions()))],
@@ -132,6 +157,8 @@ class UserManagementController extends Controller
             'talent_ids' => ['array'],
             'talent_ids.*' => ['integer', Rule::exists('roles', 'id')->where('type', 'talent')],
         ]);
+
+        $passwordMode = $validated['password_mode'];
 
         $user->name = $validated['name'];
         $user->email = $validated['email'];
@@ -150,8 +177,19 @@ class UserManagementController extends Controller
 
         $this->syncScopes($user, $validated);
 
+        $statusKey = 'messages.user_updated';
+
+        if ($passwordMode === 'invite') {
+            $inviteStatus = Password::sendResetLink(['email' => $user->email]);
+            $statusKey = $inviteStatus === Password::RESET_LINK_SENT
+                ? 'messages.user_invite_sent'
+                : 'messages.user_invite_failed';
+        } elseif ($passwordMode === 'set' && ! empty($validated['password'])) {
+            $statusKey = 'messages.user_password_updated';
+        }
+
         return redirect()->route('settings.users.index')
-            ->with('status', __('messages.user_updated'));
+            ->with('status', __($statusKey));
     }
 
     public function destroy(Request $request, User $user): RedirectResponse
