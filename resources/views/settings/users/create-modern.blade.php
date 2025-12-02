@@ -339,6 +339,50 @@
                         </div>
                     </aside>
                 </form>
+
+                @if ($isEdit)
+                    <div class="mt-6 rounded-xl border border-red-200 bg-red-50 p-6 shadow-sm dark:border-red-900 dark:bg-red-950/40">
+                        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h3 class="text-base font-semibold text-red-800 dark:text-red-100">{{ __('messages.delete_user') }}</h3>
+                                <p class="mt-1 text-sm text-red-700 dark:text-red-200/80">
+                                    {{ __('messages.delete_user_description') }}
+                                </p>
+                            </div>
+                            <x-danger-button
+                                x-data="{}"
+                                x-on:click.prevent="$dispatch('open-modal', 'confirm-managed-user-deletion')"
+                            >
+                                {{ __('messages.delete_user') }}
+                            </x-danger-button>
+                        </div>
+                    </div>
+
+                    <x-modal name="confirm-managed-user-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable>
+                        <form method="POST" action="{{ route('settings.users.destroy', $managedUser) }}" class="p-6">
+                            @csrf
+                            @method('DELETE')
+
+                            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                                {{ __('messages.delete_user') }}
+                            </h2>
+
+                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                {{ __('messages.delete_user_confirmation', ['name' => $managedUser->name]) }}
+                            </p>
+
+                            <div class="mt-6 flex justify-end gap-3">
+                                <x-secondary-button x-on:click="$dispatch('close')">
+                                    {{ __('messages.cancel') }}
+                                </x-secondary-button>
+
+                                <x-danger-button class="ml-3">
+                                    {{ __('messages.delete') }}
+                                </x-danger-button>
+                            </div>
+                        </form>
+                    </x-modal>
+                @endif
             </div>
         </div>
     </div>

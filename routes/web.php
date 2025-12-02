@@ -221,6 +221,9 @@ Route::middleware(['auth', 'verified'])->group(function ()
         Route::patch('/{user}', [UserManagementController::class, 'update'])
             ->whereNumber('user')
             ->name('update');
+        Route::delete('/{user}', [UserManagementController::class, 'destroy'])
+            ->whereNumber('user')
+            ->name('destroy');
     });
 
     Route::get('/account', [ProfileController::class, 'edit'])->name('profile.edit');
