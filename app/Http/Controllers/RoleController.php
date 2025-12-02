@@ -769,6 +769,7 @@ class RoleController extends Controller
 
         return view('role.pages', [
             'roles' => $roles,
+            'canManageResources' => $user->hasPermission('resources.manage'),
         ]);
     }
 

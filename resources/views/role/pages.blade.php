@@ -1,5 +1,6 @@
 <x-app-admin-layout>
     @php
+        $canManageResources = $canManageResources ?? false;
         $typeStyles = [
             'talent' => 'bg-purple-50 text-purple-700 ring-purple-600/20 dark:bg-purple-500/20 dark:text-purple-200 dark:ring-purple-400/40',
             'venue' => 'bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-500/20 dark:text-emerald-200 dark:ring-emerald-400/40',
@@ -14,35 +15,37 @@
                     <h1 class="text-3xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">{{ __('messages.pages') }}</h1>
                     <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.manage_pages_description') }}</p>
                 </div>
-                <div class="flex flex-wrap items-center gap-3">
-                    <a
-                        href="{{ route('new', ['type' => 'talent']) }}"
-                        class="inline-flex items-center gap-2 rounded-full bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600"
-                    >
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
-                        </svg>
-                        {{ __('messages.new_talent') }}
-                    </a>
-                    <a
-                        href="{{ route('new', ['type' => 'venue']) }}"
-                        class="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
-                    >
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
-                        </svg>
-                        {{ __('messages.new_venue') }}
-                    </a>
-                    <a
-                        href="{{ route('new', ['type' => 'curator']) }}"
-                        class="inline-flex items-center gap-2 rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
-                    >
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
-                        </svg>
-                        {{ __('messages.new_curator') }}
-                    </a>
-                </div>
+                @if ($canManageResources)
+                    <div class="flex flex-wrap items-center gap-3">
+                        <a
+                            href="{{ route('new', ['type' => 'talent']) }}"
+                            class="inline-flex items-center gap-2 rounded-full bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600"
+                        >
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+                            </svg>
+                            {{ __('messages.new_talent') }}
+                        </a>
+                        <a
+                            href="{{ route('new', ['type' => 'venue']) }}"
+                            class="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+                        >
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+                            </svg>
+                            {{ __('messages.new_venue') }}
+                        </a>
+                        <a
+                            href="{{ route('new', ['type' => 'curator']) }}"
+                            class="inline-flex items-center gap-2 rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
+                        >
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+                            </svg>
+                            {{ __('messages.new_curator') }}
+                        </a>
+                    </div>
+                @endif
             </div>
 
             @if ($roles->isNotEmpty())
@@ -110,18 +113,20 @@
                                             </td>
                                             <td class="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                                 <div class="flex items-center justify-end gap-2">
-                                                    <a
-                                                        href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']) }}"
-                                                        class="inline-flex items-center rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 transition hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-                                                    >
-                                                        {{ __('messages.manage') }}
-                                                    </a>
-                                                    <a
-                                                        href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}"
-                                                        class="inline-flex items-center rounded-md bg-[#4E81FA] px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#3b6ae0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]"
-                                                    >
-                                                        {{ __('messages.edit') }}
-                                                    </a>
+                                                    @if ($canManageResources)
+                                                        <a
+                                                            href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']) }}"
+                                                            class="inline-flex items-center rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 transition hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                                                        >
+                                                            {{ __('messages.manage') }}
+                                                        </a>
+                                                        <a
+                                                            href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}"
+                                                            class="inline-flex items-center rounded-md bg-[#4E81FA] px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#3b6ae0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]"
+                                                        >
+                                                            {{ __('messages.edit') }}
+                                                        </a>
+                                                    @endif
                                                     @if ($publicUrl)
                                                         <a
                                                             href="{{ $publicUrl }}"
@@ -152,35 +157,37 @@
                     </div>
                     <h3 class="mt-6 text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.no_pages_listed') }}</h3>
                     <p class="mt-2 max-w-md text-sm text-gray-600 dark:text-gray-400">{{ __('messages.create_first_page_prompt') }}</p>
-                    <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
-                        <a
-                            href="{{ route('new', ['type' => 'talent']) }}"
-                            class="inline-flex items-center gap-2 rounded-full bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600"
-                        >
-                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
-                            </svg>
-                            {{ __('messages.new_talent') }}
-                        </a>
-                        <a
-                            href="{{ route('new', ['type' => 'venue']) }}"
-                            class="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
-                        >
-                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
-                            </svg>
-                            {{ __('messages.new_venue') }}
-                        </a>
-                        <a
-                            href="{{ route('new', ['type' => 'curator']) }}"
-                            class="inline-flex items-center gap-2 rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
-                        >
-                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
-                            </svg>
-                            {{ __('messages.new_curator') }}
-                        </a>
-                    </div>
+                    @if ($canManageResources)
+                        <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+                            <a
+                                href="{{ route('new', ['type' => 'talent']) }}"
+                                class="inline-flex items-center gap-2 rounded-full bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600"
+                            >
+                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+                                </svg>
+                                {{ __('messages.new_talent') }}
+                            </a>
+                            <a
+                                href="{{ route('new', ['type' => 'venue']) }}"
+                                class="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+                            >
+                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+                                </svg>
+                                {{ __('messages.new_venue') }}
+                            </a>
+                            <a
+                                href="{{ route('new', ['type' => 'curator']) }}"
+                                class="inline-flex items-center gap-2 rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
+                            >
+                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+                                </svg>
+                                {{ __('messages.new_curator') }}
+                            </a>
+                        </div>
+                    @endif
                 </div>
             @endif
         </div>
