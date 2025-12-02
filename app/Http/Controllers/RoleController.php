@@ -631,11 +631,10 @@ class RoleController extends Controller
         return User::query()
             ->with('systemRoles')
             ->whereHas('systemRoles', function ($query) {
-                $query->whereIn('slug', ['superadmin', 'admin', 'viewer']);
+                $query->whereIn('slug', ['admin', 'viewer']);
             })
             ->where(function (Builder $query) use ($scopeColumn, $idsColumn, $role) {
-                $query->whereHas('systemRoles', fn ($roles) => $roles->where('slug', 'superadmin'))
-                    ->orWhere($scopeColumn, 'all')
+                $query->where($scopeColumn, 'all')
                     ->orWhereJsonContains($idsColumn, $role->id);
             })
             ->orderBy('name')
@@ -652,6 +651,25 @@ class RoleController extends Controller
             ]);
     }
 
+    protected function eligibleTeamMembers(Role $role)
+    {
+        $scopeColumn = $role->type . '_scope';
+        $idsColumn = $role->type . '_ids';
+
+        return User::query()
+            ->with('systemRoles')
+            ->whereHas('systemRoles', function ($query) {
+                $query->whereIn('slug', ['admin', 'viewer']);
+            })
+            ->where(function (Builder $query) use ($scopeColumn, $idsColumn, $role) {
+                $query->where($scopeColumn, 'all')
+                    ->orWhereJsonContains($idsColumn, $role->id);
+            })
+            ->orderBy('name')
+            ->orderBy('email')
+            ->get(['id', 'name', 'email']);
+    }
+
     public function createMember(Request $request, $subdomain)
     {
         $user = auth()->user();
@@ -664,6 +682,7 @@ class RoleController extends Controller
         $data = [
             'role' => $role,
             'title' => __('messages.add_member'),
+            'availableUsers' => $this->eligibleTeamMembers($role),
         ];
 
         return view('role/add-member', $data);
@@ -685,25 +704,14 @@ class RoleController extends Controller
         }
 
         $data = $request->validated();
-        $user = User::whereEmail($data['email'])->first();
-
-        if ($user && $user->isMember($subdomain)) {
-            return redirect()->back()->with('error', __('messages.member_already_exists'));
-        }
+        $user = $this->eligibleTeamMembers($role)->firstWhere('id', (int) $data['user_id']);
 
         if (! $user) {
-            $user = new User;
-            $user->email = $data['email'];
-            $user->name = $data['name'];
-            $user->password = bcrypt(Str::random(32));
-            $user->timezone = $request->user()->timezone;
-            $user->language_code = $request->user()->language_code;
+            return redirect()->back()->with('error', __('messages.invalid_member_selection'));
+        }
 
-            if (! config('app.hosted')) {
-                $user->email_verified_at = now();
-            }
-
-            $user->save();
+        if ($user->isMember($subdomain)) {
+            return redirect()->back()->with('error', __('messages.member_already_exists'));
         }
 
         $level = $data['level'] ?? 'admin';
@@ -718,16 +726,6 @@ class RoleController extends Controller
 
         } else {
             $user->roles()->attach($role->id, ['level' => $level, 'created_at' => now()]);
-        }
-
-        if ($level === 'owner') {
-            RoleUser::where('role_id', $role->id)
-                ->where('user_id', '!=', $user->id)
-                ->where('level', 'owner')
-                ->update(['level' => 'admin']);
-
-            $role->user_id = $user->id;
-            $role->save();
         }
 
         Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
@@ -770,7 +768,7 @@ class RoleController extends Controller
         }
 
         $data = $request->validate([
-            'level' => ['required', 'string', Rule::in(['admin', 'owner'])],
+            'level' => ['required', 'string', Rule::in(['admin', 'viewer', 'owner'])],
         ]);
 
         $userId = UrlUtils::decodeId($hash);
