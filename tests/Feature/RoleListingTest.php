@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\Role;
+use App\Models\SystemRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Services\Authorization\AuthorizationService;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -75,6 +77,28 @@ class RoleListingTest extends TestCase
             'curators' => ['role.curators', 'curator', 'curators', 'new_curator'],
             'talent' => ['role.talent', 'talent', null, 'new_talent'],
         ];
+    }
+
+    public function test_viewer_cannot_create_roles_or_access_create_page(): void
+    {
+        $this->seed(\Database\Seeders\AuthorizationSeeder::class);
+
+        $viewer = User::factory()->create();
+
+        $viewerRole = SystemRole::query()->where('slug', 'viewer')->firstOrFail();
+        $viewer->systemRoles()->sync([$viewerRole->getKey()]);
+
+        app(AuthorizationService::class)->forgetUserPermissions($viewer);
+
+        $this->actingAs($viewer);
+
+        $response = $this->get(route('role.venues'));
+
+        $response->assertOk();
+        $response->assertDontSeeText(__('messages.new_venue'));
+
+        $createResponse = $this->get(route('new', ['type' => 'venue']));
+        $createResponse->assertForbidden();
     }
 
     private function createRoleForUser(?User $user, string $type, string $name): Role
