@@ -61,7 +61,7 @@ class UserManagementController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class, 'email')],
             'password_mode' => ['required', Rule::in(['set', 'invite', 'defer'])],
             'password' => [
-                Rule::requiredIf(fn ($input) => $input->password_mode === 'set'),
+                Rule::requiredIf(fn () => $request->input('password_mode') === 'set'),
                 'nullable',
                 'string',
                 'min:8',
@@ -137,7 +137,7 @@ class UserManagementController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class, 'email')->ignore($user->getKey())],
             'password_mode' => ['required', Rule::in(['set', 'invite', 'defer'])],
             'password' => [
-                Rule::requiredIf(fn ($input) => $input->password_mode === 'set'),
+                Rule::requiredIf(fn () => $request->input('password_mode') === 'set'),
                 'nullable',
                 'string',
                 'min:8',
