@@ -352,6 +352,10 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPasswordC
 
     public function isAdmin(): bool
     {
+        if ($this->hasSystemRoleSlug('superadmin')) {
+            return true;
+        }
+
         if ($this->hasPermission('settings.manage') || $this->hasPermission('resources.manage')) {
             return true;
         }
