@@ -82,6 +82,14 @@
 
     </form>
 
+    @php
+        $authUser = auth()->user();
+        $canManageResource = $authUser && $authUser->canManageResource($role);
+        $isRoleMember = $authUser && $authUser->isMember($role->subdomain);
+        $canManageRole = $isRoleMember || $canManageResource;
+        $isSuperAdmin = $authUser && $authUser->hasSystemRoleSlug('superadmin');
+    @endphp
+
     <div class="pt-2 space-y-4">
         <x-role-breadcrumbs :role="$role" class="text-sm" />
         <div class="flex items-start justify-between">
@@ -145,19 +153,21 @@
 
             {{-- Desktop buttons (hidden on mobile) --}}
             <div class="mt-2 hidden md:flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3 flex-shrink-0 md:ml-4">
-                <span class="block">
-                    <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}">
-                        <button type="button"
-                            class="w-full sm:w-auto inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                            <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor"
-                                aria-hidden="true">
-                                <path
-                                    d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
-                            </svg>
-                            {{ __('messages.edit_' . strtolower($role->type)) }}
-                        </button>
-                    </a>
-                </span>
+                @if ($canManageRole)
+                    <span class="block">
+                        <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}">
+                            <button type="button"
+                                class="w-full sm:w-auto inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                                <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor"
+                                    aria-hidden="true">
+                                    <path
+                                        d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
+                                </svg>
+                                {{ __('messages.edit_' . strtolower($role->type)) }}
+                            </button>
+                        </a>
+                    </span>
+                @endif
                 <span class="block">
                     <a href="{{ route('role.view_guest', (now()->year == $year && now()->month == $month) ? ['subdomain' => $role->subdomain] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'month' => $month] : ['subdomain' => $role->subdomain, 'year' => $year, 'month' => $month])) }}"
                         target="_blank">
@@ -175,83 +185,87 @@
                 </span>
             </div>
 
-            {{-- Actions dropdown (always visible) --}}
-            <div class="mt-2 md:ml-3">
-                <div class="relative inline-block text-left w-full">
-                    <button type="button" onclick="onPopUpClick('role-actions-pop-up-menu', event)" class="inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="role-actions-menu-button" aria-expanded="true" aria-haspopup="true">
-                        {{ __('messages.actions') }}
-                        <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                    <div id="role-actions-pop-up-menu" class="pop-up-menu hidden absolute right-0 z-10 mt-2 w-64 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="role-actions-menu-button" tabindex="-1">
-                        <div class="py-1" role="none" onclick="onPopUpClick('role-actions-pop-up-menu', event)">
-                            {{-- Show edit/view options only when desktop buttons are hidden (mobile) --}}
-                            <div class="md:hidden">
-                                <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
-                                    <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                        <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
-                                    </svg>
-                                    <div>
-                                        {{ __('messages.edit_' . strtolower($role->type)) }}
+            {{-- Actions dropdown (visible for managers) --}}
+            @if ($canManageRole)
+                <div class="mt-2 md:ml-3">
+                    <div class="relative inline-block text-left w-full">
+                        <button type="button" onclick="onPopUpClick('role-actions-pop-up-menu', event)" class="inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="role-actions-menu-button" aria-expanded="true" aria-haspopup="true">
+                            {{ __('messages.actions') }}
+                            <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <div id="role-actions-pop-up-menu" class="pop-up-menu hidden absolute right-0 z-10 mt-2 w-64 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="role-actions-menu-button" tabindex="-1">
+                            <div class="py-1" role="none" onclick="onPopUpClick('role-actions-pop-up-menu', event)">
+                                {{-- Show edit/view options only when desktop buttons are hidden (mobile) --}}
+                                <div class="md:hidden">
+                                    @if ($canManageRole)
+                                        <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
+                                            <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                                <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
+                                            </svg>
+                                            <div>
+                                                {{ __('messages.edit_' . strtolower($role->type)) }}
+                                            </div>
+                                        </a>
+                                    @endif
+                                    <a href="{{ route('role.view_guest', (now()->year == $year && now()->month == $month) ? ['subdomain' => $role->subdomain] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'month' => $month] : ['subdomain' => $role->subdomain, 'year' => $year, 'month' => $month])) }}" target="_blank" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
+                                        <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
+                                        </svg>
+                                        <div>
+                                            {{ __('messages.view_' . strtolower($role->type)) }}
+                                        </div>
+                                    </a>
+                                </div>
+                                @if ($tab == 'schedule')
+                                    <a href="{{ route('event.show_import', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
+                                        <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <path d="M14,12L10,8V11H2V13H10V16M20,18V6C20,4.89 19.1,4 18,4H6A2,2 0 0,0 4,6V9H6V6H18V18H6V15H4V18A2,2 0 0,0 6,20H18A2,2 0 0,0 20,18Z" />
+                                        </svg>
+                                        <div>
+                                            {{ __('messages.import_events') }}
+                                        </div>
+                                    </a>
+                                    <a href="#" onclick="handleEventsGraphicClick()" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
+                                        <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <path d="M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19M8.5,13.5L11,16.5L14.5,12L19,18H5L8.5,13.5Z" />
+                                        </svg>
+                                        <div>
+                                            {{ __('messages.events_graphic') }}
+                                        </div>
+                                    </a>
+                                    <a href="#" onclick="openEmbedModal()" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
+                                        <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <path d="M12.89,3L14.85,3.4L11.11,21L9.15,20.6L12.89,3M19.59,12L16,8.41V5.58L22.42,12L16,18.41V15.58L19.59,12M1.58,12L8,5.58V8.41L4.41,12L8,15.58V18.41L1.58,12Z" />
+                                        </svg>
+                                        <div>
+                                            {{ __('messages.embed_schedule') }}
+                                        </div>
+                                    </a>
+                                @endif
+                                @if ($role->exists && $isSuperAdmin)
+                                    <div class="py-1" role="none">
+                                        <div class="border-t border-gray-100"></div>
                                     </div>
-                                </a>
-                                <a href="{{ route('role.view_guest', (now()->year == $year && now()->month == $month) ? ['subdomain' => $role->subdomain] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'month' => $month] : ['subdomain' => $role->subdomain, 'year' => $year, 'month' => $month])) }}" target="_blank" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
-                                    <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                        <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
-                                    </svg>
-                                    <div>
-                                        {{ __('messages.view_' . strtolower($role->type)) }}
-                                    </div>
-                                </a>
+                                    <a href="#" onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete', ['subdomain' => $role->subdomain]) }}'; } return false;" class="group flex items-center px-4 py-2 text-sm text-red-600 hover:text-red-700" role="menuitem" tabindex="-1">
+                                        <svg class="mr-3 h-5 w-5 text-red-400 group-hover:text-red-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+                                        </svg>
+                                        <div>
+                                            {{ __('messages.delete_schedule') }}
+                                        </div>
+                                    </a>
+                                @endif
                             </div>
-                            @if ($tab == 'schedule')
-                            <a href="{{ route('event.show_import', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
-                                <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                    <path d="M14,12L10,8V11H2V13H10V16M20,18V6C20,4.89 19.1,4 18,4H6A2,2 0 0,0 4,6V9H6V6H18V18H6V15H4V18A2,2 0 0,0 6,20H18A2,2 0 0,0 20,18Z" />
-                                </svg>
-                                <div>
-                                    {{ __('messages.import_events') }}
-                                </div>
-                            </a>
-                            <a href="#" onclick="handleEventsGraphicClick()" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
-                                <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                    <path d="M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19M8.5,13.5L11,16.5L14.5,12L19,18H5L8.5,13.5Z" />
-                                </svg>
-                                <div>
-                                    {{ __('messages.events_graphic') }}
-                                </div>
-                            </a>
-                            <a href="#" onclick="openEmbedModal()" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
-                                <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                    <path d="M12.89,3L14.85,3.4L11.11,21L9.15,20.6L12.89,3M19.59,12L16,8.41V5.58L22.42,12L16,18.41V15.58L19.59,12M1.58,12L8,5.58V8.41L4.41,12L8,15.58V18.41L1.58,12Z" />
-                                </svg>
-                                <div>
-                                    {{ __('messages.embed_schedule') }}
-                                </div>
-                            </a>
-                            @endif
-                            @if ($role->exists && auth()->user()->hasSystemRoleSlug('superadmin'))
-                            <div class="py-1" role="none">
-                                <div class="border-t border-gray-100"></div>
-                            </div>
-                            <a href="#" onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete', ['subdomain' => $role->subdomain]) }}'; } return false;" class="group flex items-center px-4 py-2 text-sm text-red-600 hover:text-red-700" role="menuitem" tabindex="-1">
-                                <svg class="mr-3 h-5 w-5 text-red-400 group-hover:text-red-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                    <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
-                                </svg>
-                                <div>
-                                    {{ __('messages.delete_schedule') }}
-                                </div>
-                            </a>
-                            @endif
                         </div>
                     </div>
                 </div>
-            </div>
+            @endif
         </div>
     </div>
 
-    @if (isset($accessUsers))
+    @if ($canManageResource && isset($accessUsers))
         <div class="mt-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
             <div class="flex items-center justify-between">
                 <div>
@@ -312,14 +326,14 @@
             <select id="current-tab" name="current-tab" onchange="onTabChange()"
                 class="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:ring-2 focus:ring-inset focus:ring-[#4E81FA]">
                 <option value="schedule" {{ $tab == 'schedule' ? 'selected' : '' }}>{{ __('messages.schedule') }}</option>
-                @if ($role->isCurator())
+                @if ($canManageRole && $role->isCurator())
                 <option value="videos" {{ $tab == 'videos' ? 'selected' : '' }}>
                     {{ __('messages.videos') }}</option>
                 @endif
-                @if ($role->isTalent())
+                @if ($canManageRole && $role->isTalent())
                 <option value="availability" {{ $tab == 'availability' ? 'selected' : '' }}>{{ __('messages.availability') }}</option>
                 @endif
-                @if (count($requests))
+                @if ($canManageRole && count($requests))
                 <option value="requests" {{ $tab == 'requests' ? 'selected' : '' }}>
                     {{ __('messages.requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</option>
                 @endif
@@ -328,11 +342,13 @@
                 <option value="followers" {{ $tab == 'followers' ? 'selected' : '' }}>
                     {{ __('messages.followers') }}{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</option>
                 @endif
-                <option value="team" {{ $tab == 'team' ? 'selected' : '' }}>
-                    {{ __('messages.team') }}{{ count($members) ? ' (' . count($members) . ')' : '' }}</option>
-                @if (config('app.hosted'))
-                <option value="plan" {{ $tab == 'plan' ? 'selected' : '' }}>
-                    {{ __('messages.plan') }}</option>
+                @if ($canManageRole)
+                    <option value="team" {{ $tab == 'team' ? 'selected' : '' }}>
+                        {{ __('messages.team') }}{{ count($members) ? ' (' . count($members) . ')' : '' }}</option>
+                    @if (config('app.hosted'))
+                    <option value="plan" {{ $tab == 'plan' ? 'selected' : '' }}>
+                        {{ __('messages.plan') }}</option>
+                    @endif
                 @endif
             </select>
         </div>
@@ -342,15 +358,15 @@
             <nav class="-mb-px flex space-x-8">
                 <a href="{{ route('role.view_admin', ((now()->year == $year && now()->month == $month) || $tab == 'schedule') ? ['subdomain' => $role->subdomain, 'tab' => 'schedule'] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'month' => $month] : ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'year' => $year, 'month' => $month])) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'schedule' ? 'border-[#4E81FA] px-1 pb-4 text-sm font-medium text-[#4E81FA]' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.schedule') }}</a>
-                @if ($role->isCurator())
+                @if ($canManageRole && $role->isCurator())
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'videos']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'videos' ? 'border-[#4E81FA] px-1 pb-4 text-sm font-medium text-[#4E81FA]' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.videos') }}</a>
                 @endif
-                @if ($role->isTalent())
+                @if ($canManageRole && $role->isTalent())
                 <a href=" {{ route('role.view_admin', ((now()->year == $year && now()->month == $month) || $tab == 'availability') ? ['subdomain' => $role->subdomain, 'tab' => 'availability'] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'tab' => 'availability', 'month' => $month] : ['subdomain' => $role->subdomain, 'tab' => 'availability', 'year' => $year, 'month' => $month])) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'availability' ? 'border-[#4E81FA] px-1 pb-4 text-sm font-medium text-[#4E81FA]' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.availability') }}</a>
                 @endif
-                @if (count($requests))
+                @if ($canManageRole && count($requests))
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'requests']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'requests' ? 'border-[#4E81FA] px-1 pb-4 text-sm font-medium text-[#4E81FA]' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</a>
                 @endif
@@ -360,11 +376,13 @@
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'followers']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'followers' ? 'border-[#4E81FA] px-1 pb-4 text-sm font-medium text-[#4E81FA]' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.followers') }}{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</a>
                 @endif
-                <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'team' ? 'border-[#4E81FA] px-1 pb-4 text-sm font-medium text-[#4E81FA]' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.team') }}{{ count($members) ? ' (' . count($members) . ')' : '' }}</a>
-                @if (config('app.hosted'))
-                <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'plan' ? 'border-[#4E81FA] px-1 pb-4 text-sm font-medium text-[#4E81FA]' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.plan') }}</a>
+                @if ($canManageRole)
+                    <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']) }}"
+                        class="whitespace-nowrap border-b-2 {{ $tab == 'team' ? 'border-[#4E81FA] px-1 pb-4 text-sm font-medium text-[#4E81FA]' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.team') }}{{ count($members) ? ' (' . count($members) . ')' : '' }}</a>
+                    @if (config('app.hosted'))
+                    <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']) }}"
+                        class="whitespace-nowrap border-b-2 {{ $tab == 'plan' ? 'border-[#4E81FA] px-1 pb-4 text-sm font-medium text-[#4E81FA]' : 'border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">{{ __('messages.plan') }}</a>
+                    @endif
                 @endif
             </nav>
         </div>
@@ -373,20 +391,22 @@
 
     @if ($tab == 'schedule')
     @include('role.show-admin-schedule')
-    @elseif ($tab == 'availability')
+    @elseif ($tab == 'availability' && $canManageRole)
     @include('role.show-admin-availability')
-    @elseif ($tab == 'requests')
+    @elseif ($tab == 'requests' && $canManageRole)
     @include('role.show-admin-requests')
     @elseif ($tab == 'profile')
     @include('role.show-admin-profile')
     @elseif ($tab == 'followers')
     @include('role.show-admin-followers')
-    @elseif ($tab == 'team')
+    @elseif ($tab == 'team' && $canManageRole)
     @include('role.show-admin-team')
-    @elseif ($tab == 'videos')
+    @elseif ($tab == 'videos' && $canManageRole)
     @include('role.show-admin-videos')
-    @elseif ($tab == 'plan')
+    @elseif ($tab == 'plan' && $canManageRole)
     @include('role.show-admin-plan')
+    @else
+    @include('role.show-admin-schedule')
     @endif
 
 <script>
