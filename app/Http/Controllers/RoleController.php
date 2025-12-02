@@ -38,6 +38,7 @@ use App\Support\GroupPayloadNormalizer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
+use Throwable;
 
 class RoleController extends Controller
 {
@@ -724,7 +725,16 @@ class RoleController extends Controller
             $user->roles()->attach($role->id, ['level' => $level, 'created_at' => now()]);
         }
 
-        Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
+        try {
+            Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
+        } catch (Throwable $exception) {
+            Log::warning('Failed to send added member notification.', [
+                'role_id' => $role->id,
+                'member_id' => $user->id,
+                'acting_user_id' => $request->user()->id,
+                'exception' => $exception->getMessage(),
+            ]);
+        }
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))
                     ->with('message', __('messages.member_added'));
