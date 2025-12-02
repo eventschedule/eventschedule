@@ -33,6 +33,16 @@
 
                         </div>
 
+                        <div class="mb-6">
+                            <x-input-label for="level" :value="__('messages.access_level') . ' *'" />
+                            <select id="level" name="level" required
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                                <option value="admin" @selected(old('level', 'admin') === 'admin')>{{ __('messages.admin') }}</option>
+                                <option value="owner" @selected(old('level') === 'owner')>{{ __('messages.owner') }}</option>
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('level')" />
+                        </div>
+
                     </div>
                 </div>
             </div>
