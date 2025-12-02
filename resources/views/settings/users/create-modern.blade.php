@@ -116,21 +116,41 @@
                                 <span class="rounded-full bg-gray-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-700 dark:bg-gray-800 dark:text-gray-200">Step 2</span>
                             </div>
                             <div class="mt-4 grid gap-4 md:grid-cols-3" data-auth-mode>
-                                <label class="relative flex cursor-pointer flex-col gap-2 rounded-lg border border-indigo-200 bg-indigo-50 p-4 text-sm font-medium text-indigo-900 shadow-sm ring-2 ring-indigo-200 transition dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-100" data-auth-option>
+                                <label
+                                    @class([
+                                        'relative flex cursor-pointer flex-col gap-2 rounded-lg border p-4 text-sm font-medium shadow-sm transition hover:border-indigo-300',
+                                        'border-indigo-200 bg-indigo-50 text-indigo-900 ring-2 ring-indigo-200 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-100' => $passwordMode === 'set',
+                                        'border-dashed border-gray-300 bg-gray-50 text-gray-800 ring-1 ring-transparent dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200' => $passwordMode !== 'set',
+                                    ])
+                                    data-auth-option
+                                >
                                     <input type="radio" name="password_mode" value="set" class="peer sr-only" @checked($passwordMode === 'set') />
                                     <span class="flex items-center justify-between">
                                         <span>Set password now</span>
                                         <span class="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-indigo-700 shadow-sm ring-1 ring-indigo-200 dark:bg-indigo-900 dark:text-indigo-100">Default</span>
                                     </span>
                                     <span class="text-xs font-normal text-indigo-800/80 dark:text-indigo-200/80">Create a password immediately. This matches today’s flow.</span>
-                                    <span class="pointer-events-none absolute inset-0 rounded-lg ring-1 ring-inset ring-indigo-400/40 peer-checked:ring-indigo-600/70"></span>
                                 </label>
-                                <label class="flex cursor-pointer flex-col gap-2 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm font-medium text-gray-800 shadow-sm transition hover:border-indigo-300 dark:border-gray-700 dark:bg-gray-900" data-auth-option>
+                                <label
+                                    @class([
+                                        'relative flex cursor-pointer flex-col gap-2 rounded-lg border p-4 text-sm font-medium shadow-sm transition hover:border-indigo-300',
+                                        'border-indigo-200 bg-indigo-50 text-indigo-900 ring-2 ring-indigo-200 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-100' => $passwordMode === 'invite',
+                                        'border-dashed border-gray-300 bg-gray-50 text-gray-800 ring-1 ring-transparent dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200' => $passwordMode !== 'invite',
+                                    ])
+                                    data-auth-option
+                                >
                                     <input type="radio" name="password_mode" value="invite" class="peer sr-only" @checked($passwordMode === 'invite') />
                                     <span>Send invite email</span>
                                     <span class="text-xs font-normal text-gray-600 dark:text-gray-400">User sets their own password from a secure email link we send immediately.</span>
                                 </label>
-                                <label class="flex cursor-pointer flex-col gap-2 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm font-medium text-gray-800 shadow-sm transition hover:border-indigo-300 dark:border-gray-700 dark:bg-gray-900" data-auth-option>
+                                <label
+                                    @class([
+                                        'relative flex cursor-pointer flex-col gap-2 rounded-lg border p-4 text-sm font-medium shadow-sm transition hover:border-indigo-300',
+                                        'border-indigo-200 bg-indigo-50 text-indigo-900 ring-2 ring-indigo-200 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-100' => $passwordMode === 'defer',
+                                        'border-dashed border-gray-300 bg-gray-50 text-gray-800 ring-1 ring-transparent dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200' => $passwordMode !== 'defer',
+                                    ])
+                                    data-auth-option
+                                >
                                     <input type="radio" name="password_mode" value="defer" class="peer sr-only" @checked($passwordMode === 'defer') />
                                     <span>Defer password</span>
                                     <span class="text-xs font-normal text-gray-600 dark:text-gray-400">Create the account now and send the password invite when you’re ready.</span>
@@ -392,6 +412,30 @@
             const passwordRadios = document.querySelectorAll('input[name="password_mode"]');
             const passwordFields = document.querySelectorAll('[data-password-required]');
             const passwordFieldContainer = document.querySelector('[data-password-fields]');
+            const authOptions = document.querySelectorAll('[data-auth-option]');
+
+            const selectedAuthClasses = [
+                'border-indigo-200',
+                'bg-indigo-50',
+                'text-indigo-900',
+                'ring-2',
+                'ring-indigo-200',
+                'dark:border-indigo-900/60',
+                'dark:bg-indigo-950/40',
+                'dark:text-indigo-100',
+            ];
+
+            const defaultAuthClasses = [
+                'border-dashed',
+                'border-gray-300',
+                'bg-gray-50',
+                'text-gray-800',
+                'ring-1',
+                'ring-transparent',
+                'dark:border-gray-700',
+                'dark:bg-gray-900',
+                'dark:text-gray-200',
+            ];
 
             function syncPasswordRequirements() {
                 const mode = document.querySelector('input[name="password_mode"]:checked')?.value || 'set';
@@ -409,6 +453,22 @@
                 radio.addEventListener('change', syncPasswordRequirements);
             });
             syncPasswordRequirements();
+
+            function syncAuthSelection() {
+                authOptions.forEach((option) => {
+                    const radio = option.querySelector('input[name="password_mode"]');
+                    if (!radio) return;
+
+                    const isSelected = radio.checked;
+                    selectedAuthClasses.forEach((cls) => option.classList.toggle(cls, isSelected));
+                    defaultAuthClasses.forEach((cls) => option.classList.toggle(cls, !isSelected));
+                });
+            }
+
+            passwordRadios.forEach((radio) => {
+                radio.addEventListener('change', syncAuthSelection);
+            });
+            syncAuthSelection();
 
             document.querySelectorAll('[data-scope-toggle]').forEach((radio) => {
                 radio.addEventListener('change', (event) => {
