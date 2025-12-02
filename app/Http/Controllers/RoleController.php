@@ -653,12 +653,13 @@ class RoleController extends Controller
     }
 
     public function createMember(Request $request, $subdomain)
-    {        
-        if (! auth()->user()->isMember($subdomain)) {
+    {
+        $user = auth()->user();
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! $user->isMember($subdomain) && ! $user->canManageResource($role)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
-
-        $role = Role::subdomain($subdomain)->firstOrFail();
 
         $data = [
             'role' => $role,
@@ -670,11 +671,12 @@ class RoleController extends Controller
 
     public function storeMember(MemberAddRequest $request, $subdomain)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        $user = $request->user();
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! $user->isMember($subdomain) && ! $user->canManageResource($role)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
-
-        $role = Role::subdomain($subdomain)->firstOrFail();
 
         if (! $role->isPro()) {
             return redirect()->back()->with('error', __('messages.upgrade_to_pro'));
@@ -736,12 +738,14 @@ class RoleController extends Controller
 
     public function removeMember(Request $request, $subdomain, $hash)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        $user = $request->user();
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! $user->isMember($subdomain) && ! $user->canManageResource($role)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         $userId = UrlUtils::decodeId($hash);
-        $role = Role::subdomain($subdomain)->firstOrFail();
 
         if ($userId == $role->user_id) {
             return redirect()->back()->with('error', __('messages.cannot_remove_owner'));
@@ -758,7 +762,10 @@ class RoleController extends Controller
 
     public function updateMember(Request $request, $subdomain, $hash)
     {
-        if (! auth()->user()->isMember($subdomain)) {
+        $user = $request->user();
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! $user->isMember($subdomain) && ! $user->canManageResource($role)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
@@ -767,7 +774,6 @@ class RoleController extends Controller
         ]);
 
         $userId = UrlUtils::decodeId($hash);
-        $role = Role::subdomain($subdomain)->firstOrFail();
 
         $roleUser = RoleUser::where('user_id', $userId)
             ->where('role_id', $role->id)
