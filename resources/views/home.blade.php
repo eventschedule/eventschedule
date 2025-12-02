@@ -7,6 +7,10 @@
     @endphp
     @php
         $creationRoles = collect([$schedules, $venues, $curators])->flatten()->unique('id')->sortBy('name');
+        $canCreateEvent = auth()->user() && (
+            auth()->user()->hasSystemRoleSlug('superadmin') ||
+            (auth()->user()->hasSystemRoleSlug('admin') && auth()->user()->hasPermission('resources.manage'))
+        ) && $creationRoles->isNotEmpty();
         $creationRoleOptions = $creationRoles->map(function ($role) {
             return [
                 'id' => $role->encodeId(),
@@ -127,7 +131,7 @@
                     <div>
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.events') }}</h2>
                     </div>
-                    @if ($creationRoles->isNotEmpty())
+                    @if ($canCreateEvent)
                         <x-primary-button type="button" x-data="" x-on:click="$dispatch('open-modal', 'create-event')">
                             {{ __('messages.add_event') }}
                         </x-primary-button>
@@ -269,10 +273,10 @@
             'route' => 'home',
             'tab' => '',
             'events' => $calendarEvents,
-            'canCreateEvent' => $creationRoles->isNotEmpty(),
+            'canCreateEvent' => $canCreateEvent,
         ])
 
-        @if ($creationRoles->isNotEmpty())
+        @if ($canCreateEvent)
             <x-modal name="create-event">
                 <div class="px-6 py-5">
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('messages.add_event') }}</h2>
