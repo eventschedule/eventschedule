@@ -280,6 +280,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/followers/qr-code', [RoleController::class, 'qrCode'])->name('role.qr_code');
     Route::get('/{subdomain}/team/add-member', [RoleController::class, 'createMember'])->name('role.create_member');
     Route::post('/{subdomain}/team/add-member', [RoleController::class, 'storeMember'])->name('role.store_member');
+    Route::patch('/{subdomain}/team/update-member/{hash}', [RoleController::class, 'updateMember'])->name('role.update_member');
     Route::get('/{subdomain}/team/remove-member/{hash}', [RoleController::class, 'removeMember'])->name('role.remove_member');
     Route::delete('/{subdomain}/uncurate-event/{hash}', [EventController::class, 'uncurate'])->name('event.uncurate');
     Route::get('/{subdomain}/import', [EventController::class, 'showImport'])->name('event.show_import');

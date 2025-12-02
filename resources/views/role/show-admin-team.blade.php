@@ -52,16 +52,24 @@
                                     <a href="mailto:{{ $member->email }}">{{ $member->email }}</a>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    @if ($member->email_verified_at)
-                                        {{ __('messages.' . strtolower($member->pivot->level)) }}
-                                    @else      
-                                        <a href="{{ route('role.resend_invite', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($member->id)]) }}">    
-                                            <button type="button"
-                                                class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                                                {{ __('messages.resend_invite') }}
-                                            </button>
-                                        </a>
-                                    @endif
+                                    <form method="post" action="{{ route('role.update_member', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($member->id)]) }}" class="flex items-center gap-3">
+                                        @csrf
+                                        @method('patch')
+                                        <select name="level" class="block rounded-md border-gray-300 text-sm shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" onchange="this.form.submit()">
+                                            <option value="admin" @selected($member->pivot->level === 'admin')>{{ __('messages.admin') }}</option>
+                                            <option value="owner" @selected($member->pivot->level === 'owner')>{{ __('messages.owner') }}</option>
+                                        </select>
+                                    </form>
+                                    @unless ($member->email_verified_at)
+                                        <div class="mt-2">
+                                            <a href="{{ route('role.resend_invite', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($member->id)]) }}">
+                                                <button type="button"
+                                                    class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                                                    {{ __('messages.resend_invite') }}
+                                                </button>
+                                            </a>
+                                        </div>
+                                    @endunless
                                 </td>
                                 <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                     @if ($member->pivot->level != 'owner')

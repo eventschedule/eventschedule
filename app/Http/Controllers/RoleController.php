@@ -36,6 +36,7 @@ use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
 use App\Support\GroupPayloadNormalizer;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 
 class RoleController extends Controller
@@ -703,16 +704,28 @@ class RoleController extends Controller
             $user->save();
         }
 
+        $level = $data['level'] ?? 'admin';
+
         if ($user->isFollowing($subdomain)) {
             $roleUser = RoleUser::where('user_id', $user->id)
                 ->where('role_id', $role->id)
                 ->first();
-            
-            $roleUser->level = 'admin';
+
+            $roleUser->level = $level;
             $roleUser->save();
 
         } else {
-            $user->roles()->attach($role->id, ['level' => 'admin', 'created_at' => now()]);
+            $user->roles()->attach($role->id, ['level' => $level, 'created_at' => now()]);
+        }
+
+        if ($level === 'owner') {
+            RoleUser::where('role_id', $role->id)
+                ->where('user_id', '!=', $user->id)
+                ->where('level', 'owner')
+                ->update(['level' => 'admin']);
+
+            $role->user_id = $user->id;
+            $role->save();
         }
 
         Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
@@ -736,11 +749,54 @@ class RoleController extends Controller
 
         $roleUser = RoleUser::where('user_id', $userId)
             ->where('role_id', $role->id)
-            ->first();        
+            ->first();
         $roleUser->delete();
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))
                     ->with('message', __('messages.removed_member'));
+    }
+
+    public function updateMember(Request $request, $subdomain, $hash)
+    {
+        if (! auth()->user()->isMember($subdomain)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $data = $request->validate([
+            'level' => ['required', 'string', Rule::in(['admin', 'owner'])],
+        ]);
+
+        $userId = UrlUtils::decodeId($hash);
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $roleUser = RoleUser::where('user_id', $userId)
+            ->where('role_id', $role->id)
+            ->firstOrFail();
+
+        $roleUser->level = $data['level'];
+        $roleUser->save();
+
+        if ($data['level'] === 'owner') {
+            RoleUser::where('role_id', $role->id)
+                ->where('user_id', '!=', $userId)
+                ->where('level', 'owner')
+                ->update(['level' => 'admin']);
+
+            $role->user_id = $userId;
+            $role->save();
+        } elseif ($role->user_id === $userId) {
+            $newOwnerId = RoleUser::where('role_id', $role->id)
+                ->where('level', 'owner')
+                ->value('user_id');
+
+            if ($newOwnerId) {
+                $role->user_id = $newOwnerId;
+                $role->save();
+            }
+        }
+
+        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))
+                    ->with('message', __('messages.updated_member'));
     }
 
     public function pages(Request $request)
