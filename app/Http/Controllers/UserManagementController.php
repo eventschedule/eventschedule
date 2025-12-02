@@ -154,6 +154,22 @@ class UserManagementController extends Controller
             ->with('status', __('messages.user_updated'));
     }
 
+    public function destroy(Request $request, User $user): RedirectResponse
+    {
+        $this->ensureUserPermission($request->user(), 'users.manage');
+
+        if ($request->user()->is($user)) {
+            return redirect()->route('settings.users.edit', $user)
+                ->with('status', __('messages.cannot_delete_self'));
+        }
+
+        $user->delete();
+        $this->authorization->forgetUserPermissions($user);
+
+        return redirect()->route('settings.users.index')
+            ->with('status', __('messages.user_deleted'));
+    }
+
     protected function queryUsers(Request $request): LengthAwarePaginator
     {
         $search = trim((string) $request->string('search'));
