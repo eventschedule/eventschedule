@@ -4,7 +4,7 @@
             alt="Event Schedule">
     </div>
 </a>
-<nav class="flex flex-1 flex-col">
+<nav class="flex flex-1 flex-col mt-4">
     <ul role="list" class="flex flex-1 flex-col gap-y-7">
         <li>
             <ul role="list" class="-mx-2 space-y-2">
@@ -74,9 +74,9 @@
     
         @if ($schedules->isNotEmpty())
         <li>
-            <div class="text-xs font-semibold leading-6 text-gray-400">{{ __('messages.talent_schedules') }}</div>
+            <div class="text-sm font-semibold leading-6 text-gray-400">{{ __('messages.talent_schedules') }}</div>
 
-            <ul role="list" class="-mx-2 mt-2 space-y-1">
+            <ul role="list" class="-mx-2 mt-2 space-y-2">
 
                 @foreach ($schedules as $each)
                 <li>
@@ -96,9 +96,9 @@
 
         @if ($venues->isNotEmpty())
         <li>
-            <div class="text-xs font-semibold leading-6 text-gray-400">{{ __('messages.venue_schedules') }}</div>
+            <div class="text-sm font-semibold leading-6 text-gray-400">{{ __('messages.venue_schedules') }}</div>
 
-            <ul role="list" class="-mx-2 mt-2 space-y-1">
+            <ul role="list" class="-mx-2 mt-2 space-y-2">
 
                 @foreach ($venues as $venue)
                 <li>
@@ -117,9 +117,9 @@
 
         @if ($curators->isNotEmpty())
         <li>
-            <div class="text-xs font-semibold leading-6 text-gray-400">{{ __('messages.curator_schedules') }}</div>
+            <div class="text-sm font-semibold leading-6 text-gray-400">{{ __('messages.curator_schedules') }}</div>
 
-            <ul role="list" class="-mx-2 mt-2 space-y-1">
+            <ul role="list" class="-mx-2 mt-2 space-y-2">
 
                 @foreach ($curators as $curator)
                 <li>
