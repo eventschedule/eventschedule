@@ -7,6 +7,7 @@
     @endphp
     @php
         $creationRoles = collect([$schedules, $venues, $curators])->flatten()->unique('id')->sortBy('name');
+        $canManageResources = auth()->user()?->hasPermission('resources.manage');
         $canCreateEvent = auth()->user() && (
             auth()->user()->hasSystemRoleSlug('superadmin') ||
             (auth()->user()->hasSystemRoleSlug('admin') && auth()->user()->hasPermission('resources.manage'))
@@ -43,7 +44,7 @@
     <div class="py-5">
 
         <!-- Get Started Panel -->
-        @if($schedules->isEmpty() && $venues->isEmpty() && $curators->isEmpty() && auth()->user()->tickets()->count() === 0)
+        @if($canManageResources && $schedules->isEmpty() && $venues->isEmpty() && $curators->isEmpty() && auth()->user()->tickets()->count() === 0)
         <div class="mb-8">
             <!-- Header Panel -->
             <div class="relative bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 border border-blue-100/50 rounded-3xl p-10 mb-8 overflow-hidden">
