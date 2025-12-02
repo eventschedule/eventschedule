@@ -128,16 +128,16 @@
                                 <label class="flex cursor-pointer flex-col gap-2 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm font-medium text-gray-800 shadow-sm transition hover:border-indigo-300 dark:border-gray-700 dark:bg-gray-900" data-auth-option>
                                     <input type="radio" name="password_mode" value="invite" class="peer sr-only" @checked($passwordMode === 'invite') />
                                     <span>Send invite email</span>
-                                    <span class="text-xs font-normal text-gray-600 dark:text-gray-400">User sets their own password from a secure email link. (Coming soon)</span>
+                                    <span class="text-xs font-normal text-gray-600 dark:text-gray-400">User sets their own password from a secure email link we send immediately.</span>
                                 </label>
                                 <label class="flex cursor-pointer flex-col gap-2 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm font-medium text-gray-800 shadow-sm transition hover:border-indigo-300 dark:border-gray-700 dark:bg-gray-900" data-auth-option>
                                     <input type="radio" name="password_mode" value="defer" class="peer sr-only" @checked($passwordMode === 'defer') />
                                     <span>Defer password</span>
-                                    <span class="text-xs font-normal text-gray-600 dark:text-gray-400">Create the account now and return to set credentials later.</span>
+                                    <span class="text-xs font-normal text-gray-600 dark:text-gray-400">Create the account now and send the password invite when you’re ready.</span>
                                 </label>
                             </div>
                             <div class="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
-                                Invitation and deferred password flows are being designed. Until they ship, new users still need a password on creation.
+                                Choose how to share credentials. “Send invite email” delivers a password setup link right away. “Defer password” skips password creation until you send that invite later.
                             </div>
                             <div class="mt-5 grid gap-4 md:grid-cols-2" data-password-fields>
                                 <div class="space-y-2">
@@ -391,6 +391,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const passwordRadios = document.querySelectorAll('input[name="password_mode"]');
             const passwordFields = document.querySelectorAll('[data-password-required]');
+            const passwordFieldContainer = document.querySelector('[data-password-fields]');
 
             function syncPasswordRequirements() {
                 const mode = document.querySelector('input[name="password_mode"]:checked')?.value || 'set';
@@ -398,8 +399,10 @@
 
                 passwordFields.forEach((field) => {
                     field.required = shouldRequire;
-                    field.closest('[data-password-fields]')?.classList.toggle('opacity-50', !shouldRequire);
                 });
+
+                passwordFieldContainer?.classList.toggle('hidden', !shouldRequire);
+                passwordFieldContainer?.setAttribute('aria-hidden', (!shouldRequire).toString());
             }
 
             passwordRadios.forEach((radio) => {
