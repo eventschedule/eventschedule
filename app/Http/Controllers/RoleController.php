@@ -653,17 +653,13 @@ class RoleController extends Controller
 
     protected function eligibleTeamMembers(Role $role)
     {
-        $scopeColumn = $role->type . '_scope';
-        $idsColumn = $role->type . '_ids';
-
         return User::query()
             ->with('systemRoles')
             ->whereHas('systemRoles', function ($query) {
                 $query->whereIn('slug', ['admin', 'viewer']);
             })
-            ->where(function (Builder $query) use ($scopeColumn, $idsColumn, $role) {
-                $query->where($scopeColumn, 'all')
-                    ->orWhereJsonContains($idsColumn, $role->id);
+            ->whereDoesntHave('roles', function (Builder $query) use ($role) {
+                $query->where('roles.id', $role->id);
             })
             ->orderBy('name')
             ->orderBy('email')
