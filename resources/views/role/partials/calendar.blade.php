@@ -134,7 +134,7 @@
                         {{ __('messages.save') }}
                     </button>
                 @endif
-            @elseif ($route == 'home' && auth()->check())
+            @elseif ($route == 'home' && ($canCreateEvent ?? false))
                 <div style="font-family: sans-serif" class="relative inline-block text-left w-full md:w-auto">
                     <button type="button" onclick="onPopUpClick('calendar-pop-up-menu', event)" class="inline-flex w-full justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
                         {{ __('messages.new_schedule') }}
