@@ -19,26 +19,38 @@
                         </h2>
 
                         <div class="mb-6">
-                            <x-input-label for="name" :value="__('messages.name') . ' *'" />
-                            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
-                                :value="old('name')" required autofocus autocomplete="name" />
-                            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+                            <x-input-label for="user_id" :value="__('messages.select_user') . ' *'" />
+                            <select id="user_id" name="user_id" required
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                                <option value="" disabled {{ old('user_id') ? '' : 'selected' }}>{{ __('messages.select_user') }}</option>
+                                @foreach ($availableUsers as $availableUser)
+                                    <option value="{{ $availableUser->id }}" @selected(old('user_id') == $availableUser->id)>
+                                        {{ $availableUser->name }} ({{ $availableUser->email }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('user_id')" />
                         </div>
 
-                        <div class="mb-6">
-                            <x-input-label for="email" :value="__('messages.email') . ' *'" />
-                            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
-                                :value="old('email')" required autocomplete="username" />
-                            <x-input-error class="mt-2" :messages="$errors->get('email')" />
-
-                        </div>
+                        @if ($availableUsers->isEmpty())
+                            <div class="mb-6 rounded-md bg-blue-50 p-4 text-sm text-blue-900 ring-1 ring-blue-200 dark:bg-blue-900/20 dark:text-blue-100 dark:ring-blue-800/40">
+                                {{ __('messages.no_team_members_available') }}
+                                <a href="{{ route('settings.users.create') }}" class="font-semibold underline">{{ __('messages.create_user') }}</a>
+                                {{ __('messages.to_add_new_team_member') }}
+                            </div>
+                        @else
+                            <p class="mb-6 text-sm text-gray-600 dark:text-gray-300">
+                                {{ __('messages.cant_find_user_prompt') }}
+                                <a href="{{ route('settings.users.create') }}" class="font-semibold text-[#4E81FA] hover:text-[#3A6BE0]">{{ __('messages.create_user') }}</a>.
+                            </p>
+                        @endif
 
                         <div class="mb-6">
                             <x-input-label for="level" :value="__('messages.access_level') . ' *'" />
                             <select id="level" name="level" required
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                                 <option value="admin" @selected(old('level', 'admin') === 'admin')>{{ __('messages.admin') }}</option>
-                                <option value="owner" @selected(old('level') === 'owner')>{{ __('messages.owner') }}</option>
+                                <option value="viewer" @selected(old('level') === 'viewer')>{{ __('messages.viewer') }}</option>
                             </select>
                             <x-input-error class="mt-2" :messages="$errors->get('level')" />
                         </div>

@@ -57,6 +57,7 @@
                                         @method('patch')
                                         <select name="level" class="block rounded-md border-gray-300 text-sm shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" onchange="this.form.submit()">
                                             <option value="admin" @selected($member->pivot->level === 'admin')>{{ __('messages.admin') }}</option>
+                                            <option value="viewer" @selected($member->pivot->level === 'viewer')>{{ __('messages.viewer') }}</option>
                                             <option value="owner" @selected($member->pivot->level === 'owner')>{{ __('messages.owner') }}</option>
                                         </select>
                                     </form>
