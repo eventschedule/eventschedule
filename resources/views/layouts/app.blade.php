@@ -1,35 +1,36 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head class="h-full bg-white">
     <title>{{ $title ?? 'Event Schedule' }}</title>
     <!-- Version: {{ config('self-update.version_installed') }} -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    
+
     <link rel="icon" href="{{ asset('images/favicon.png') }}">
-    <link rel="sitemap" type="application/xml" href="{{ config('app.url') . route('sitemap', [], false) }}">    
-    
+    <link rel="sitemap" type="application/xml" href="{{ config('app.url') . route('sitemap', [], false) }}">
+
     @if (config('app.hosted') || config('app.report_errors'))
-        <script src="{{ config('app.sentry_js_dsn') }}" crossorigin="anonymous"></script>
+    <script src="{{ config('app.sentry_js_dsn') }}" crossorigin="anonymous"></script>
     @endif
 
     @if (isset($meta))
-        {{ $meta }}
+    {{ $meta }}
     @else
-        <link rel="canonical" href="{{ url()->current() }}">
-        <meta name="description" content="The simple and free way to share your event schedule">
-        <meta property="og:title" content="Event Schedule">
-        <meta property="og:description" content="The simple and free way to share your event schedule">
-        <meta property="og:image" content="{{ config('app.url') }}/images/background.jpg">
-        <meta property="og:url" content="{{ str_replace('http://', 'https://', request()->url()) }}">
-        <meta property="og:site_name" content="Event Schedule">
-        <meta name="twitter:title" content="Event Schedule">
-        <meta name="twitter:description" content="The simple and free way to share your event schedule">
-        <meta name="twitter:image" content="{{ config('app.url') }}/images/background.jpg">
-        <meta name="twitter:image:alt" content="Event Schedule">
-        <meta name="twitter:card" content="summary_large_image">
-    @endif    
+    <link rel="canonical" href="{{ url()->current() }}">
+    <meta name="description" content="The simple and free way to share your event schedule">
+    <meta property="og:title" content="Event Schedule">
+    <meta property="og:description" content="The simple and free way to share your event schedule">
+    <meta property="og:image" content="{{ config('app.url') }}/images/background.jpg">
+    <meta property="og:url" content="{{ str_replace('http://', 'https://', request()->url()) }}">
+    <meta property="og:site_name" content="Event Schedule">
+    <meta name="twitter:title" content="Event Schedule">
+    <meta name="twitter:description" content="The simple and free way to share your event schedule">
+    <meta name="twitter:image" content="{{ config('app.url') }}/images/background.jpg">
+    <meta name="twitter:image:alt" content="Event Schedule">
+    <meta name="twitter:card" content="summary_large_image">
+    @endif
 
     <script src="{{ asset('js/jquery.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/toastify-js.js') }}"></script>
@@ -39,41 +40,40 @@
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics') }}"></script>
     <script {!! nonce_attr() !!}>
-    window.dataLayer = window.dataLayer || [];
+        window.dataLayer = window.dataLayer || [];
 
-    function gtag() {
-        try {
-            dataLayer.push(arguments);
-        } catch (e) {
-            // Handle DataCloneError silently
-            console.warn('Analytics data could not be cloned:', e);
+        function gtag() {
+            try {
+                dataLayer.push(arguments);
+            } catch (e) {
+                console.warn('Analytics data could not be cloned:', e);
+            }
         }
-    }
-    gtag('js', new Date());
-    gtag('config', '{{ config('services.google.analytics') }}');
-    @else
-    <script {!! nonce_attr() !!}>
+        gtag('js', new Date());
+        gtag('config', '{{ config("services.google.analytics") }}');
+    </script>
     @endif
 
-    function onPopUpClick(id, event) {
-        event.stopPropagation();
-        var menu = $('#' + id);
-        if (menu.is(':hidden')) {
-            menu.show();
-            $(document).on('click', hidePopUp);
-        } else {
-            hidePopUp();
+    <script {!! nonce_attr() !!}>
+        function onPopUpClick(id, event) {
+            event.stopPropagation();
+            var menu = $('#' + id);
+            if (menu.is(':hidden')) {
+                menu.show();
+                $(document).on('click', hidePopUp);
+            } else {
+                hidePopUp();
+            }
         }
-    }
 
-    function hidePopUp() {
-        $('.pop-up-menu').hide();
-        $(document).off('click', hidePopUp);
-    }
+        function hidePopUp() {
+            $('.pop-up-menu').hide();
+            $(document).off('click', hidePopUp);
+        }
 
-    $(document).on('click', '.pop-up-menu', function(event) {
-        event.stopPropagation();
-    });
+        $(document).on('click', '.pop-up-menu', function(event) {
+            event.stopPropagation();
+        });
     </script>
 
     @vite([
@@ -86,54 +86,128 @@
             direction: rtl;
             text-align: right;
         }
-        
+
         .rtl select {
             text-align: right;
             direction: rtl;
         }
-        
+
         .rtl select option {
             text-align: right;
             direction: rtl;
         }
-        
+
         /* RTL-specific spacing adjustments */
-        .rtl .ml-2 { margin-left: 0; margin-right: 0.5rem; }
-        .rtl .ml-4 { margin-left: 0; margin-right: 1rem; }
-        .rtl .mr-1\.5 { margin-right: 0; margin-left: 0.375rem; }
-        .rtl .mr-3 { margin-right: 0; margin-left: 0.75rem; }
-        .rtl .-ml-0\.5 { margin-left: 0; margin-right: -0.125rem; }
-        .rtl .-mr-1 { margin-right: 0; margin-left: -0.25rem; }
-        .rtl .sm\\:ml-2 { margin-left: 0; margin-right: 0.5rem; }
-        .rtl .lg\\:ml-2 { margin-left: 0; margin-right: 0.5rem; }
-        .rtl .lg\\:ml-4 { margin-left: 0; margin-right: 1rem; }
-        .rtl .xl\\:ml-3\.5 { margin-left: 0; margin-right: 0.875rem; }
-        .rtl .xl\\:pl-3\.5 { padding-left: 0; padding-right: 0.875rem; }
-        .rtl .xl\\:border-l { border-left: none; border-right: 1px solid; }
-        
+        .rtl .ml-2 {
+            margin-left: 0;
+            margin-right: 0.5rem;
+        }
+
+        .rtl .ml-4 {
+            margin-left: 0;
+            margin-right: 1rem;
+        }
+
+        .rtl .mr-1\.5 {
+            margin-right: 0;
+            margin-left: 0.375rem;
+        }
+
+        .rtl .mr-3 {
+            margin-right: 0;
+            margin-left: 0.75rem;
+        }
+
+        .rtl .-ml-0\.5 {
+            margin-left: 0;
+            margin-right: -0.125rem;
+        }
+
+        .rtl .-mr-1 {
+            margin-right: 0;
+            margin-left: -0.25rem;
+        }
+
+        .rtl .sm\\:ml-2 {
+            margin-left: 0;
+            margin-right: 0.5rem;
+        }
+
+        .rtl .lg\\:ml-2 {
+            margin-left: 0;
+            margin-right: 0.5rem;
+        }
+
+        .rtl .lg\\:ml-4 {
+            margin-left: 0;
+            margin-right: 1rem;
+        }
+
+        .rtl .xl\\:ml-3\.5 {
+            margin-left: 0;
+            margin-right: 0.875rem;
+        }
+
+        .rtl .xl\\:pl-3\.5 {
+            padding-left: 0;
+            padding-right: 0.875rem;
+        }
+
+        .rtl .xl\\:border-l {
+            border-left: none;
+            border-right: 1px solid;
+        }
+
         /* RTL flex direction adjustments */
-        .rtl .space-x-3 > :not([hidden]) ~ :not([hidden]) {
+        .rtl .space-x-3> :not([hidden])~ :not([hidden]) {
             --tw-space-x-reverse: 1;
         }
-        .rtl .space-x-10 > :not([hidden]) ~ :not([hidden]) {
+
+        .rtl .space-x-10> :not([hidden])~ :not([hidden]) {
             --tw-space-x-reverse: 1;
         }
-        
+
         /* RTL text alignment fixes */
-        .rtl .text-left { text-align: right; }
-        .rtl .lg\\:text-left { text-align: right; }
-        
+        .rtl .text-left {
+            text-align: right;
+        }
+
+        .rtl .lg\\:text-left {
+            text-align: right;
+        }
+
         /* RTL positioning adjustments */
-        .rtl .right-4 { right: auto; left: 1rem; }
-        .rtl .absolute.right-0 { right: auto; left: 0; }
-        
+        .rtl .right-4 {
+            right: auto;
+            left: 1rem;
+        }
+
+        .rtl .absolute.right-0 {
+            right: auto;
+            left: 0;
+        }
+
         /* RTL flex justification adjustments */
-        .rtl .justify-start { justify-content: flex-end; }
-        .rtl .justify-end { justify-content: flex-start; }
-        .rtl .lg\\:justify-start { justify-content: flex-end; }
-        .rtl .lg\\:justify-end { justify-content: flex-start; }
-        .rtl .sm\\:justify-end { justify-content: flex-start; }
-        
+        .rtl .justify-start {
+            justify-content: flex-end;
+        }
+
+        .rtl .justify-end {
+            justify-content: flex-start;
+        }
+
+        .rtl .lg\\:justify-start {
+            justify-content: flex-end;
+        }
+
+        .rtl .lg\\:justify-end {
+            justify-content: flex-start;
+        }
+
+        .rtl .sm\\:justify-end {
+            justify-content: flex-start;
+        }
+
         .tooltip {
             font-family: sans-serif !important;
             position: absolute;
@@ -148,7 +222,8 @@
 
         /* EasyMDE Toolbar Fixes */
         .editor-toolbar {
-            background-color: #f8f9fa !important; /* Temporarily change to light gray for debugging */
+            background-color: #f8f9fa !important;
+            /* Temporarily change to light gray for debugging */
             border-bottom: 1px solid #d1d5db !important;
         }
 
@@ -159,7 +234,8 @@
             color: #374151 !important;
             background-color: transparent !important;
             border: none !important;
-            text-shadow: 0 0 1px rgba(0,0,0,0.5) !important; /* Add text shadow for visibility */
+            text-shadow: 0 0 1px rgba(0, 0, 0, 0.5) !important;
+            /* Add text shadow for visibility */
         }
 
         .editor-toolbar button:hover,
@@ -190,7 +266,7 @@
         .editor-toolbar button:before,
         .editor-toolbar a:before {
             color: #374151 !important;
-            text-shadow: 0 0 1px rgba(0,0,0,0.5) !important;
+            text-shadow: 0 0 1px rgba(0, 0, 0, 0.5) !important;
         }
 
         .editor-toolbar button:hover:before,
@@ -199,21 +275,21 @@
         }
 
         /* More specific EasyMDE fixes for different icon types */
-        .CodeMirror .editor-toolbar > * {
+        .CodeMirror .editor-toolbar>* {
             color: #374151 !important;
         }
 
-        .editor-toolbar > * {
+        .editor-toolbar>* {
             color: #374151 !important;
         }
 
-        .editor-toolbar > button > i,
-        .editor-toolbar > a > i {
+        .editor-toolbar>button>i,
+        .editor-toolbar>a>i {
             color: #374151 !important;
         }
 
         /* Force visibility of all toolbar elements */
-        .editor-toolbar > * {
+        .editor-toolbar>* {
             opacity: 1 !important;
             visibility: visible !important;
         }
@@ -236,7 +312,6 @@
         .custom-content code {
             white-space: pre-wrap;
         }
-
     </style>
 
     <script {!! nonce_attr() !!}>
@@ -283,7 +358,7 @@
             });
 
 
-            @if (session('message'))
+            @if(session('message'))
             Toastify({
                 text: "{{ session('message') }}",
                 duration: 3000,
@@ -293,7 +368,7 @@
                     background: '#4BB543',
                 }
             }).showToast();
-            @elseif (session('error'))
+            @elseif(session('error'))
             Toastify({
                 text: "{{ session('error') }}",
                 close: true,
@@ -306,15 +381,16 @@
             }).showToast();
             @endif
         });
-
     </script>
 
     {{ isset($head) ? $head : '' }}
 
-</head> 
+</head>
+
 <body class="font-sans antialiased h-full bg-gray-50">
 
     {{ $slot }}
 
 </body>
+
 </html>
