@@ -178,8 +178,9 @@
 
         {{-- Month Navigation Controls --}}
         @php
-            $previousMonthDate = Carbon\Carbon::create($year, $month, 1)->subMonth();
-            $nextMonthDate = Carbon\Carbon::create($year, $month, 1)->addMonth();
+            $currentMonthDate = Carbon\Carbon::create($year, $month, 1);
+            $previousMonthDate = $currentMonthDate->copy()->subMonth();
+            $nextMonthDate = $currentMonthDate->copy()->addMonth();
             $previousParams = array_merge($calendarQueryParams, [
                 'year' => $previousMonthDate->year,
                 'month' => $previousMonthDate->month,
