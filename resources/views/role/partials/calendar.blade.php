@@ -201,42 +201,90 @@
                     $roleBaseParams['tab'] = $tab;
                 }
             }
+
+            $resolveRoute = function (array $params) use ($route, $roleBaseParams) {
+                $routeName = match ($route) {
+                    'home' => 'home',
+                    'landing' => 'landing',
+                    default => 'role.view_' . $route,
+                };
+
+                $finalParams = in_array($route, ['home', 'landing'], true)
+                    ? $params
+                    : array_merge($roleBaseParams ?? [], $params);
+
+                return route($routeName, $finalParams);
+            };
+
+            $previousUrl = $resolveRoute($previousParams);
+            $nextUrl = $resolveRoute($nextParams);
+            $currentUrl = $resolveRoute($currentParams);
+
+            $monthOptions = collect(range(-5, 6))->map(function ($offset) use ($currentMonthDate, $calendarQueryParams, $resolveRoute) {
+                $optionDate = Carbon\Carbon::create($currentMonthDate->year, $currentMonthDate->month, 1)->addMonths($offset);
+                $params = array_merge($calendarQueryParams, [
+                    'year' => $optionDate->year,
+                    'month' => $optionDate->month,
+                ]);
+
+                return [
+                    'label' => $optionDate->copy()->locale(app()->getLocale())->translatedFormat('F Y'),
+                    'url' => $resolveRoute($params),
+                    'is_current' => $optionDate->isSameMonth($currentMonthDate) && $optionDate->isSameYear($currentMonthDate),
+                ];
+            });
         @endphp
-        <div class="flex items-center bg-white rounded-md shadow-sm hidden md:flex">
-            @if ($route === 'home')
-                <a href="{{ route('home', $previousParams) }}" class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50" rel="nofollow">
-            @elseif ($route === 'landing')
-                <a href="{{ route('landing', $previousParams) }}" class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50" rel="nofollow">
-            @else
-                <a href="{{ route('role.view_' . $route, array_merge($roleBaseParams, $previousParams)) }}" class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50" rel="nofollow">
-            @endif
-                <span class="sr-only">{{ __('messages.previous_month') }}</span>
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path fill-rule="evenodd" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" clip-rule="evenodd" />
+        <div class="hidden md:flex flex-wrap items-center gap-2 bg-white rounded-md shadow-sm p-1">
+            <a href="{{ $previousUrl }}" class="flex h-9 items-center rounded-md border border-gray-200 px-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800" rel="nofollow">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                 </svg>
+                <span class="ml-1 hidden sm:inline">{{ __('messages.previous_month') }}</span>
             </a>
-            @if ($route === 'home')
-                <a href="{{ route('home', $currentParams) }}" class="flex h-9 items-center justify-center border-y border-gray-300 px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative">
-            @elseif ($route === 'landing')
-                <a href="{{ route('landing', $currentParams) }}" class="flex h-9 items-center justify-center border-y border-gray-300 px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative">
-            @else
-                <a href="{{ route('role.view_' . $route, array_merge($roleBaseParams, $currentParams)) }}" class="flex h-9 items-center justify-center border-y border-gray-300 px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative">
-            @endif
-                <span class="h-5 flex items-center">{{ __('messages.this_month') }}</span>
-            </a>
-            @if ($route === 'home')
-                <a href="{{ route('home', $nextParams) }}" class="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50" rel="nofollow">
-            @elseif ($route === 'landing')
-                <a href="{{ route('landing', $nextParams) }}" class="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50" rel="nofollow">
-            @else
-                <a href="{{ route('role.view_' . $route, array_merge($roleBaseParams, $nextParams)) }}" class="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50" rel="nofollow">
-            @endif
-                <span class="sr-only">{{ __('messages.next_month') }}</span>
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path fill-rule="evenodd" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" clip-rule="evenodd" />
-                </svg>
-            </a>
+
+            <div class="relative" x-data="{ open: false }">
+                <button type="button" @click="open = !open" :aria-expanded="open.toString()" class="flex h-9 items-center gap-2 rounded-md border border-gray-200 px-3 text-sm font-semibold text-gray-900 transition hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-800">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3 3" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>{{ __('messages.this_month') }}</span>
+                    <svg class="h-4 w-4 transition" :class="{ 'rotate-180': open }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+                    </svg>
+                </button>
+
+                <div x-show="open" x-cloak @click.outside="open = false" class="absolute left-0 z-20 mt-2 w-56 overflow-hidden rounded-lg border border-gray-100 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
+                    <div class="max-h-64 overflow-y-auto py-2">
+                        @foreach($monthOptions as $option)
+                            <a href="{{ $option['url'] }}" class="flex items-center justify-between px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800">
+                                <span>{{ $option['label'] }}</span>
+                                @if($option['is_current'])
+                                    <svg class="h-4 w-4 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                    </svg>
+                                @endif
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
             </div>
+
+            <a href="{{ $nextUrl }}" class="flex h-9 items-center rounded-md border border-gray-200 px-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800" rel="nofollow">
+                <span class="mr-1 hidden sm:inline">{{ __('messages.next_month') }}</span>
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+            </a>
+
+            @if(!empty($layoutToggleParams ?? []))
+                <div class="ml-auto">
+                    @include('landing.partials.layout-toggle', array_merge($layoutToggleParams, [
+                        'wrapperClass' => trim(($layoutToggleParams['wrapperClass'] ?? '') . ' shadow-sm'),
+                    ]))
+                </div>
+            @endif
+        </div>
 
             {{-- Add Event Button --}}
             @if ($route == 'admin' && $role->email_verified_at && $tab == 'schedule')

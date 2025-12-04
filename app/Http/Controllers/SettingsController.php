@@ -798,6 +798,7 @@ class SettingsController extends Controller
 
         $validated = $request->validate([
             'home_layout' => ['required', 'string', Rule::in(HomePageSettings::allowedLayouts())],
+            'home_hero_alignment' => ['nullable', 'string', Rule::in(HomePageSettings::allowedHeroAlignments())],
             'home_hero_title' => ['nullable', 'string', 'max:150'],
             'home_hero_markdown' => ['nullable', 'string', 'max:65000'],
             'home_hero_cta_label' => ['nullable', 'string', 'max:100', 'required_with:home_hero_cta_url'],
@@ -805,6 +806,7 @@ class SettingsController extends Controller
             'home_hero_media_asset_id' => ['nullable', 'integer', 'exists:media_assets,id'],
             'home_hero_media_variant_id' => ['nullable', 'integer', 'exists:media_asset_variants,id'],
             'home_hero_image_alt' => ['nullable', 'string', 'max:255'],
+            'home_hero_show_default_text' => ['nullable', 'boolean'],
             'home_aside_title' => ['nullable', 'string', 'max:150'],
             'home_aside_markdown' => ['nullable', 'string', 'max:65000'],
             'home_aside_media_asset_id' => ['nullable', 'integer', 'exists:media_assets,id'],
@@ -813,10 +815,12 @@ class SettingsController extends Controller
         ]);
 
         $layout = HomePageSettings::normalizeLayout($validated['home_layout'] ?? null);
+        $heroAlignment = HomePageSettings::normalizeHeroAlignment($validated['home_hero_alignment'] ?? null);
 
         $heroTitle = HomePageSettings::clean($validated['home_hero_title'] ?? null);
         $heroMarkdown = HomePageSettings::clean($validated['home_hero_markdown'] ?? null);
         $heroHtml = $heroMarkdown ? MarkdownUtils::convertToHtml($heroMarkdown) : null;
+        $showDefaultHeroText = HomePageSettings::normalizeBoolean($validated['home_hero_show_default_text'] ?? null, true);
 
         $heroCtaLabel = HomePageSettings::clean($validated['home_hero_cta_label'] ?? null);
         $heroCtaUrl = HomePageSettings::clean($validated['home_hero_cta_url'] ?? null);
@@ -923,6 +927,8 @@ class SettingsController extends Controller
             'hero_title' => $heroTitle,
             'hero_markdown' => $heroMarkdown,
             'hero_html' => $heroHtml,
+            'hero_alignment' => $heroAlignment,
+            'hero_show_default_text' => $showDefaultHeroText,
             'hero_cta_label' => $heroCtaLabel,
             'hero_cta_url' => $heroCtaUrl,
             'hero_image_media_asset_id' => $heroImageAssetId,
