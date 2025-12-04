@@ -9,6 +9,7 @@
     $heroLogo = $hero['logo'] ?? ['url' => null, 'alt' => null];
     $heroLogoUrl = $heroLogo['url'] ?? null;
     $heroLogoAlt = $heroLogo['alt'] ?? $heroTitle;
+    $heroAlignment = \App\Support\HomePageSettings::normalizeHeroAlignment($hero['alignment'] ?? null);
     $loginCta = null;
     $showHeroCta = filled($heroCta['label'] ?? null) && filled($heroCta['url'] ?? null);
 
@@ -52,6 +53,12 @@
     $viewToggleBaseParams = array_merge(
         ['month' => $month, 'year' => $year],
         collect($selectedFilters ?? [])->filter(function ($value) {
+            if (is_array($value)) {
+                return count(array_filter($value, function ($item) {
+                    return $item !== null && $item !== '';
+                })) > 0;
+            }
+
             return $value !== null && $value !== '';
         })->all()
     );
@@ -66,166 +73,190 @@
 
     $calendarViewParams = $viewToggleBaseParams;
     $listViewParams = array_merge($viewToggleBaseParams, ['view' => 'list']);
+
+    $heroContainerClass = match ($heroAlignment) {
+        \App\Support\HomePageSettings::HERO_ALIGN_LEFT => 'flex flex-col items-center gap-6 text-center md:flex-row md:items-center md:justify-between md:text-left',
+        \App\Support\HomePageSettings::HERO_ALIGN_RIGHT => 'flex flex-col items-center gap-6 text-center md:flex-row-reverse md:items-center md:justify-between md:text-left',
+        default => 'flex flex-col items-center gap-6 text-center',
+    };
+
+    $heroTextContainerClass = $heroAlignment === \App\Support\HomePageSettings::HERO_ALIGN_CENTER
+        ? 'flex flex-col items-center gap-4 max-w-3xl'
+        : 'flex flex-col gap-4 md:max-w-2xl';
+
+    $heroLogoWrapperClass = match ($heroAlignment) {
+        \App\Support\HomePageSettings::HERO_ALIGN_LEFT => 'flex justify-center md:justify-start',
+        \App\Support\HomePageSettings::HERO_ALIGN_RIGHT => 'flex justify-center md:justify-end',
+        default => 'flex justify-center',
+    };
+
+    $heroBodyClass = $heroAlignment === \App\Support\HomePageSettings::HERO_ALIGN_CENTER
+        ? 'mt-2 text-lg sm:text-xl text-slate-200 leading-relaxed space-y-4 text-center [&_p]:m-0 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-white [&_a]:underline'
+        : 'mt-2 text-lg sm:text-xl text-slate-200 leading-relaxed space-y-4 text-left [&_p]:m-0 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-white [&_a]:underline';
+
+    $heroCtaAlignmentClass = $heroAlignment === \App\Support\HomePageSettings::HERO_ALIGN_CENTER
+        ? 'justify-center'
+        : 'justify-start md:justify-start';
 @endphp
 
 <x-app-layout :title="__('messages.events')">
     <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 text-center text-white">
-            @if($heroLogoUrl)
-                <div class="flex justify-center mb-6">
-                    <img src="{{ $heroLogoUrl }}" alt="{{ $heroLogoAlt }}" class="h-20 w-auto sm:h-24 object-contain" loading="lazy">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 text-white">
+            <div class="{{ $heroContainerClass }}">
+                @if($heroLogoUrl)
+                    <div class="{{ $heroLogoWrapperClass }} w-full md:w-auto">
+                        <img src="{{ $heroLogoUrl }}" alt="{{ $heroLogoAlt }}" class="h-20 w-auto sm:h-24 object-contain" loading="lazy">
+                    </div>
+                @endif
+
+                <div class="{{ $heroTextContainerClass }}">
+                    <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-white {{ $heroAlignment === \App\Support\HomePageSettings::HERO_ALIGN_CENTER ? 'text-center' : 'text-left md:text-left' }}">
+                        {{ $heroTitle }}
+                    </h1>
+
+                    @if($heroHtml)
+                        <div class="{{ $heroBodyClass }}">
+                            {!! $heroHtml !!}
+                        </div>
+                    @endif
+
+                    @if($showHeroCta)
+                        <div class="mt-4 flex {{ $heroCtaAlignmentClass }}">
+                            <a href="{{ $heroCta['url'] }}"
+                                class="inline-flex items-center gap-2 rounded-full bg-white/10 px-6 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-white/20 transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                                {{ $heroCta['label'] }}
+                            </a>
+                        </div>
+                    @endif
                 </div>
-            @endif
-            <h1 class="text-4xl sm:text-5xl font-bold tracking-tight">
-                {{ $heroTitle }}
-            </h1>
-            @if($heroHtml)
-                <div class="mt-4 text-lg sm:text-xl text-slate-200 leading-relaxed space-y-4 [&_p]:m-0 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-white [&_a]:underline">
-                    {!! $heroHtml !!}
-                </div>
-            @endif
-            @if($showHeroCta)
-                <div class="mt-8 flex justify-center">
-                    <a href="{{ $heroCta['url'] }}"
-                        class="inline-flex items-center gap-2 rounded-full bg-white/10 px-6 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-white/20 transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
-                        {{ $heroCta['label'] }}
-                    </a>
-                </div>
-            @endif
+            </div>
         </div>
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
         <div class="{{ $gridWrapperClass }}">
             <div class="{{ $calendarColumnClass }}">
-                <div class="bg-white dark:bg-gray-900 shadow-sm rounded-2xl border border-gray-100 dark:border-gray-800 p-6 sm:p-8">
-                    <form method="GET" class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-                        <input type="hidden" name="month" value="{{ $month }}">
-                        <input type="hidden" name="year" value="{{ $year }}">
-                        @if($isListView)
-                            <input type="hidden" name="view" value="list">
-                        @endif
+                @php
+                    $selectedCategories = array_map('strval', $selectedFilters['category'] ?? []);
+                    $selectedVenues = $selectedFilters['venue'] ?? [];
+                    $selectedCurators = $selectedFilters['curator'] ?? [];
+                    $selectedTalent = $selectedFilters['talent'] ?? [];
+                    $filtersOpenDefault = $hasActiveFilters ?? false;
+                @endphp
 
-                        <div class="space-y-2">
-                            <label for="filter-category" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                                {{ __('messages.event_type') }}
-                            </label>
-                            <select id="filter-category" name="category" class="block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="">{{ __('messages.all_categories') }}</option>
-                                @foreach($categories as $id => $label)
-                                    <option value="{{ $id }}" @selected(($selectedFilters['category'] ?? '') == (string) $id)>
-                                        {{ $label }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="space-y-2">
-                            <label for="filter-venue" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                                {{ __('messages.venue') }}
-                            </label>
-                            <select id="filter-venue" name="venue" class="block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="">{{ __('messages.all_venues') }}</option>
-                                @foreach($venueOptions as $venue)
-                                    <option value="{{ $venue['id'] }}" @selected(($selectedFilters['venue'] ?? '') === $venue['id'])>
-                                        {{ $venue['name'] }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="space-y-2">
-                            <label for="filter-curator" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                                {{ __('messages.curator') }}
-                            </label>
-                            <select id="filter-curator" name="curator" class="block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="">{{ __('messages.all_curators') }}</option>
-                                @foreach($curatorOptions as $curator)
-                                    <option value="{{ $curator['id'] }}" @selected(($selectedFilters['curator'] ?? '') === $curator['id'])>
-                                        {{ $curator['name'] }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="space-y-2">
-                            <label for="filter-talent" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                                {{ __('messages.talent') }}
-                            </label>
-                            <select id="filter-talent" name="talent" class="block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="">{{ __('messages.all_talent') }}</option>
-                                @foreach($talentOptions as $talent)
-                                    <option value="{{ $talent['id'] }}" @selected(($selectedFilters['talent'] ?? '') === $talent['id'])>
-                                        {{ $talent['name'] }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="md:col-span-2 lg:col-span-3 xl:col-span-1 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-                            <button type="submit" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                {{ __('messages.apply_filters') }}
-                            </button>
-                            @php
-                                $resetParams = array_merge(['month' => $month, 'year' => $year], []);
-
-                                if ($calendarRouteName === 'home') {
-                                    $resetParams = array_merge(['slug' => null], $resetParams);
-                                }
-
-                                if ($isListView) {
-                                    $resetParams['view'] = 'list';
-                                }
-
-                                if (request()->has('embed')) {
-                                    $resetParams['embed'] = request()->query('embed');
-                                }
-                            @endphp
-                            <a href="{{ route($calendarRouteName, $resetParams) }}" class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
-                                {{ __('messages.clear_filters') }}
-                            </a>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="bg-white dark:bg-gray-900 shadow-sm rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6">
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 pb-4 dark:border-gray-800">
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm font-medium text-gray-600 dark:text-gray-300">{{ __('messages.layout') }}</span>
-                            <div class="inline-flex rounded-full border border-gray-200 bg-gray-100 p-0.5 text-sm font-medium dark:border-gray-700 dark:bg-gray-800">
-                                <a href="{{ route($calendarRouteName, $listViewParams) }}"
-                                   class="@class([
-                                       'inline-flex items-center gap-1 rounded-full px-3 py-1.5 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600',
-                                       'bg-white text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-700' => $isListView,
-                                       'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' => ! $isListView,
-                                   ])"
-                                   @if($isListView) aria-current="page" @endif
-                                >
-                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 6h13M4 6h.01M7 12h13M4 12h.01M7 18h13M4 18h.01" />
-                                    </svg>
-                                    {{ __('messages.list') }}
-                                </a>
-                                <a href="{{ route($calendarRouteName, $calendarViewParams) }}"
-                                   class="@class([
-                                       'inline-flex items-center gap-1 rounded-full px-3 py-1.5 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600',
-                                       'bg-white text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-700' => ! $isListView,
-                                       'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' => $isListView,
-                                   ])"
-                                   @unless($isListView) aria-current="page" @endunless
-                                >
-                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 8.25C3 7.007 3.993 6 5.25 6h13.5C19.507 6 20.5 7.007 20.5 8.25v9.5A1.25 1.25 0 0119.25 19H4.75A1.75 1.75 0 013 17.25v-9z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 6V4.75A1.75 1.75 0 019.75 3h4.5A1.75 1.75 0 0116 4.75V6" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5h17.5" />
-                                    </svg>
-                                    {{ __('messages.calendar') }}
-                                </a>
+                <div x-data="{ filtersOpen: {{ $filtersOpenDefault ? 'true' : 'false' }} }" class="bg-white dark:bg-gray-900 shadow-sm rounded-2xl border border-gray-100 dark:border-gray-800 p-6 sm:p-8">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ __('messages.filter') }}</span>
+                                @if(($activeFilterCount ?? 0) > 0)
+                                    <span class="inline-flex items-center justify-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
+                                        {{ $activeFilterCount }}
+                                    </span>
+                                @endif
                             </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.home_filters_hint') }}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800" @click="filtersOpen = !filtersOpen" :aria-expanded="filtersOpen.toString()">
+                                <svg class="h-4 w-4 transition" :class="{ 'rotate-180': filtersOpen }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                </svg>
+                                <span x-show="!filtersOpen" x-cloak>{{ __('messages.show_filters') }}</span>
+                                <span x-show="filtersOpen" x-cloak>{{ __('messages.hide_filters') }}</span>
+                            </button>
                         </div>
                     </div>
 
-                    <div class="pt-4 sm:pt-6">
+                    <div x-show="filtersOpen" x-cloak class="mt-5 border-t border-gray-100 pt-5 dark:border-gray-800">
+                        <form method="GET" class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                            <input type="hidden" name="month" value="{{ $month }}">
+                            <input type="hidden" name="year" value="{{ $year }}">
+                            @if($isListView)
+                                <input type="hidden" name="view" value="list">
+                            @endif
+
+                            <div class="space-y-2">
+                                <label for="filter-category" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                                    {{ __('messages.event_type') }}
+                                </label>
+                                <select id="filter-category" name="category[]" multiple size="4" class="block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
+                                    @foreach($categories as $id => $label)
+                                        <option value="{{ $id }}" @selected(in_array((string) $id, $selectedCategories, true))>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label for="filter-venue" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                                    {{ __('messages.venue') }}
+                                </label>
+                                <select id="filter-venue" name="venue[]" multiple size="4" class="block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
+                                    @foreach($venueOptions as $venue)
+                                        <option value="{{ $venue['id'] }}" @selected(in_array($venue['id'], $selectedVenues, true))>
+                                            {{ $venue['name'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label for="filter-curator" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                                    {{ __('messages.curator') }}
+                                </label>
+                                <select id="filter-curator" name="curator[]" multiple size="4" class="block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
+                                    @foreach($curatorOptions as $curator)
+                                        <option value="{{ $curator['id'] }}" @selected(in_array($curator['id'], $selectedCurators, true))>
+                                            {{ $curator['name'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label for="filter-talent" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                                    {{ __('messages.talent') }}
+                                </label>
+                                <select id="filter-talent" name="talent[]" multiple size="4" class="block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
+                                    @foreach($talentOptions as $talent)
+                                        <option value="{{ $talent['id'] }}" @selected(in_array($talent['id'], $selectedTalent, true))>
+                                            {{ $talent['name'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="md:col-span-2 lg:col-span-3 xl:col-span-1 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+                                <button type="submit" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                    {{ __('messages.apply_filters') }}
+                                </button>
+                                @php
+                                    $resetParams = array_merge(['month' => $month, 'year' => $year], []);
+
+                                    if ($calendarRouteName === 'home') {
+                                        $resetParams = array_merge(['slug' => null], $resetParams);
+                                    }
+
+                                    if ($isListView) {
+                                        $resetParams['view'] = 'list';
+                                    }
+
+                                    if (request()->has('embed')) {
+                                        $resetParams['embed'] = request()->query('embed');
+                                    }
+                                @endphp
+                                <a href="{{ route($calendarRouteName, $resetParams) }}" class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
+                                    {{ __('messages.clear_filters') }}
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-900 shadow-sm rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6">
+                    <div class="pt-2 sm:pt-4">
                         @if($isListView)
                             @php
                                 $currentMonthDate = \Carbon\Carbon::create($year, $month, 1);
@@ -256,36 +287,86 @@
                                     $nextParams = array_merge(['slug' => null], $nextParams);
                                     $currentParams = array_merge(['slug' => null], $currentParams);
                                 }
+
+                                $monthOptions = collect(range(-5, 6))->map(function ($offset) use ($currentMonthDate, $listNavBase, $calendarRouteName) {
+                                    $optionDate = $currentMonthDate->copy()->addMonths($offset);
+                                    $params = array_merge($listNavBase, [
+                                        'year' => $optionDate->year,
+                                        'month' => $optionDate->month,
+                                    ]);
+
+                                    if ($calendarRouteName === 'home') {
+                                        $params = array_merge(['slug' => null], $params);
+                                    }
+
+                                    return [
+                                        'label' => $optionDate->copy()->locale(app()->getLocale())->translatedFormat('F Y'),
+                                        'params' => $params,
+                                        'is_current' => $optionDate->isSameMonth($currentMonthDate) && $optionDate->isSameYear($currentMonthDate),
+                                    ];
+                                });
                             @endphp
 
-                            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                <div>
-                                    <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">{{ $localizedMonth }}</h2>
-                                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">{{ __('messages.upcoming_events') }}</p>
-                                </div>
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <a href="{{ route($calendarRouteName, $previousParams) }}"
-                                       class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
-                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                                        </svg>
-                                        {{ __('messages.previous_month') }}
-                                    </a>
-                                    <a href="{{ route($calendarRouteName, $currentParams) }}"
-                                       class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
-                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3 3" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        {{ __('messages.today') }}
-                                    </a>
-                                    <a href="{{ route($calendarRouteName, $nextParams) }}"
-                                       class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
-                                        {{ __('messages.next_month') }}
-                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                                        </svg>
-                                    </a>
+                            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                                    <div>
+                                        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">{{ $localizedMonth }}</h2>
+                                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">{{ __('messages.upcoming_events') }}</p>
+                                    </div>
+
+                                    <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                                        <a href="{{ route($calendarRouteName, $previousParams) }}"
+                                           class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
+                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                            </svg>
+                                            {{ __('messages.previous_month') }}
+                                        </a>
+
+                                        <div class="relative" x-data="{ open: false }">
+                                            <button type="button" @click="open = !open" :aria-expanded="open.toString()" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
+                                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3 3" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <span>{{ __('messages.this_month') }}</span>
+                                                <svg class="h-4 w-4 transition" :class="{ 'rotate-180': open }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+                                                </svg>
+                                            </button>
+
+                                            <div x-show="open" x-cloak @click.outside="open = false" class="absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-lg border border-gray-100 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
+                                                <div class="max-h-64 overflow-y-auto py-2">
+                                                    @foreach($monthOptions as $option)
+                                                        <a href="{{ route($calendarRouteName, $option['params']) }}" class="flex items-center justify-between px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800">
+                                                            <span>{{ $option['label'] }}</span>
+                                                            @if($option['is_current'])
+                                                                <svg class="h-4 w-4 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                                                </svg>
+                                                            @endif
+                                                        </a>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <a href="{{ route($calendarRouteName, $nextParams) }}"
+                                           class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
+                                            {{ __('messages.next_month') }}
+                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                            </svg>
+                                        </a>
+
+                                        @include('landing.partials.layout-toggle', [
+                                            'calendarRouteName' => $calendarRouteName,
+                                            'listViewParams' => $listViewParams,
+                                            'calendarViewParams' => $calendarViewParams,
+                                            'isListView' => $isListView,
+                                            'wrapperClass' => 'shadow-sm'
+                                        ])
+                                    </div>
                                 </div>
                             </div>
 
@@ -384,6 +465,15 @@
                                 @endforelse
                             </div>
                         @else
+                            <div class="mb-4 flex items-center justify-end md:hidden">
+                                @include('landing.partials.layout-toggle', [
+                                    'calendarRouteName' => $calendarRouteName,
+                                    'listViewParams' => $listViewParams,
+                                    'calendarViewParams' => $calendarViewParams,
+                                    'isListView' => $isListView,
+                                    'wrapperClass' => 'shadow-sm'
+                                ])
+                            </div>
                             @include('role/partials/calendar', [
                                 'route' => $calendarRouteName,
                                 'tab' => '',
@@ -392,8 +482,15 @@
                                 'year' => $year,
                                 'startOfMonth' => $startOfMonth,
                                 'endOfMonth' => $endOfMonth,
-                                'category' => $selectedFilters['category'] ?? null,
+                                'category' => $selectedFilters['category'][0] ?? null,
                                 'calendarQueryParams' => $calendarQueryParams,
+                                'layoutToggleParams' => [
+                                    'calendarRouteName' => $calendarRouteName,
+                                    'listViewParams' => $listViewParams,
+                                    'calendarViewParams' => $calendarViewParams,
+                                    'isListView' => $isListView,
+                                    'wrapperClass' => 'shadow-sm',
+                                ],
                             ])
                         @endif
                     </div>

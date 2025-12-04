@@ -13,6 +13,10 @@ class HomePageSettings
     public const LAYOUT_LEFT = 'calendar_left';
     public const LAYOUT_RIGHT = 'calendar_right';
 
+    public const HERO_ALIGN_LEFT = 'left';
+    public const HERO_ALIGN_CENTER = 'center';
+    public const HERO_ALIGN_RIGHT = 'right';
+
     /**
      * @return array<int, string>
      */
@@ -30,6 +34,42 @@ class HomePageSettings
         return in_array($layout, self::allowedLayouts(), true)
             ? $layout
             : self::LAYOUT_FULL;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function allowedHeroAlignments(): array
+    {
+        return [
+            self::HERO_ALIGN_CENTER,
+            self::HERO_ALIGN_LEFT,
+            self::HERO_ALIGN_RIGHT,
+        ];
+    }
+
+    public static function normalizeHeroAlignment(?string $alignment): string
+    {
+        return in_array($alignment, self::allowedHeroAlignments(), true)
+            ? $alignment
+            : self::HERO_ALIGN_CENTER;
+    }
+
+    public static function normalizeBoolean(null|bool|string|int $value, bool $default = false): bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_int($value)) {
+            return $value === 1;
+        }
+
+        if (is_string($value)) {
+            return in_array(strtolower($value), ['1', 'true', 'yes', 'on'], true);
+        }
+
+        return $default;
     }
 
     public static function clean(?string $value): ?string

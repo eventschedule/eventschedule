@@ -7,6 +7,8 @@
 
         $layoutOptions = $layoutOptions ?? [];
         $selectedLayout = old('home_layout', $homeSettings['layout'] ?? \App\Support\HomePageSettings::LAYOUT_FULL);
+        $selectedHeroAlignment = old('home_hero_alignment', $homeSettings['hero_alignment'] ?? \App\Support\HomePageSettings::HERO_ALIGN_CENTER);
+        $showDefaultHeroText = filter_var(old('home_hero_show_default_text', $homeSettings['hero_show_default_text'] ?? true), FILTER_VALIDATE_BOOLEAN);
 
         $initialHeroImage = $initialHeroImage ?? ['asset_id' => null, 'variant_id' => null, 'url' => null];
         $initialHeroAssetId = old('home_hero_media_asset_id', $initialHeroImage['asset_id'] ?? null);
@@ -85,6 +87,32 @@
                                         <x-input-label for="home_hero_title" :value="__('messages.home_hero_title_label')" />
                                         <x-text-input id="home_hero_title" name="home_hero_title" type="text" class="mt-1 block w-full" :value="old('home_hero_title', $homeSettings['hero_title'] ?? '')" />
                                         <x-input-error class="mt-2" :messages="$errors->get('home_hero_title')" />
+                                    </div>
+
+                                    <div class="grid gap-4 sm:grid-cols-2">
+                                        <div>
+                                            <x-input-label for="home_hero_alignment" :value="__('messages.home_hero_alignment_label')" />
+                                            <select id="home_hero_alignment" name="home_hero_alignment" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:border-[#4E81FA] focus:ring-[#4E81FA]">
+                                                @foreach(\App\Support\HomePageSettings::allowedHeroAlignments() as $alignment)
+                                                    <option value="{{ $alignment }}" @selected($selectedHeroAlignment === $alignment)>
+                                                        {{ __('messages.home_hero_alignment_option_' . $alignment) }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <p class="mt-2 text-xs text-gray-600 dark:text-gray-400">{{ __('messages.home_hero_alignment_help') }}</p>
+                                            <x-input-error class="mt-2" :messages="$errors->get('home_hero_alignment')" />
+                                        </div>
+
+                                        <div>
+                                            <x-input-label for="home_hero_show_default_text" :value="__('messages.home_hero_show_default_text_label')" />
+                                            <label class="mt-2 flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-900 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                                                <input type="hidden" name="home_hero_show_default_text" value="0">
+                                                <input id="home_hero_show_default_text" type="checkbox" name="home_hero_show_default_text" value="1" class="mt-1 h-4 w-4 rounded border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]" @checked($showDefaultHeroText)>
+                                                <span>
+                                                    {{ __('messages.home_hero_show_default_text_help') }}
+                                                </span>
+                                            </label>
+                                        </div>
                                     </div>
 
                                     <div class="space-y-4">

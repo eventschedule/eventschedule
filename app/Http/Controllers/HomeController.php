@@ -87,19 +87,39 @@ class HomeController extends Controller
         $filteredQuery = clone $baseQuery;
 
         $filters = [
-            'category' => $request->filled('category') ? (int) $request->input('category') : null,
-            'venue' => UrlUtils::decodeId($request->input('venue')),
-            'curator' => UrlUtils::decodeId($request->input('curator')),
-            'talent' => UrlUtils::decodeId($request->input('talent')),
+            'category' => collect((array) $request->input('category'))
+                ->map(fn ($value) => (int) $value)
+                ->filter()
+                ->unique()
+                ->values()
+                ->all(),
+            'venue' => collect((array) $request->input('venue'))
+                ->map(fn ($value) => UrlUtils::decodeId($value))
+                ->filter()
+                ->unique()
+                ->values()
+                ->all(),
+            'curator' => collect((array) $request->input('curator'))
+                ->map(fn ($value) => UrlUtils::decodeId($value))
+                ->filter()
+                ->unique()
+                ->values()
+                ->all(),
+            'talent' => collect((array) $request->input('talent'))
+                ->map(fn ($value) => UrlUtils::decodeId($value))
+                ->filter()
+                ->unique()
+                ->values()
+                ->all(),
         ];
 
         if ($filters['category']) {
-            $filteredQuery->where('category_id', $filters['category']);
+            $filteredQuery->whereIn('category_id', $filters['category']);
         }
 
         if ($filters['venue']) {
             $filteredQuery->whereHas('roles', function ($query) use ($filters) {
-                $query->where('roles.id', $filters['venue'])
+                $query->whereIn('roles.id', $filters['venue'])
                     ->where('roles.type', 'venue')
                     ->where('event_role.is_accepted', true);
             });
@@ -107,9 +127,9 @@ class HomeController extends Controller
 
         if ($filters['curator']) {
             $filteredQuery->where(function ($query) use ($filters) {
-                $query->where('creator_role_id', $filters['curator'])
+                $query->whereIn('creator_role_id', $filters['curator'])
                     ->orWhereHas('roles', function ($subQuery) use ($filters) {
-                        $subQuery->where('roles.id', $filters['curator'])
+                        $subQuery->whereIn('roles.id', $filters['curator'])
                             ->where('roles.type', 'curator')
                             ->where('event_role.is_accepted', true);
                     });
@@ -118,7 +138,7 @@ class HomeController extends Controller
 
         if ($filters['talent']) {
             $filteredQuery->whereHas('roles', function ($query) use ($filters) {
-                $query->where('roles.id', $filters['talent'])
+                $query->whereIn('roles.id', $filters['talent'])
                     ->whereIn('roles.type', ['talent', 'schedule'])
                     ->where('event_role.is_accepted', true);
             });
@@ -246,17 +266,61 @@ class HomeController extends Controller
         };
 
         $selectedFilters = [
-            'category' => $request->input('category'),
-            'venue' => $request->input('venue'),
-            'curator' => $request->input('curator'),
-            'talent' => $request->input('talent'),
+            'category' => collect((array) $request->input('category'))
+                ->filter(function ($value) {
+                    return $value !== null && $value !== '';
+                })
+                ->map('strval')
+                ->unique()
+                ->values()
+                ->all(),
+            'venue' => collect((array) $request->input('venue'))
+                ->filter(function ($value) {
+                    return $value !== null && $value !== '';
+                })
+                ->map('strval')
+                ->unique()
+                ->values()
+                ->all(),
+            'curator' => collect((array) $request->input('curator'))
+                ->filter(function ($value) {
+                    return $value !== null && $value !== '';
+                })
+                ->map('strval')
+                ->unique()
+                ->values()
+                ->all(),
+            'talent' => collect((array) $request->input('talent'))
+                ->filter(function ($value) {
+                    return $value !== null && $value !== '';
+                })
+                ->map('strval')
+                ->unique()
+                ->values()
+                ->all(),
         ];
 
         $calendarQueryParams = collect($selectedFilters)
             ->filter(function ($value) {
+                if (is_array($value)) {
+                    return count(array_filter($value, function ($item) {
+                        return $item !== null && $item !== '';
+                    })) > 0;
+                }
+
                 return $value !== null && $value !== '';
             })
             ->all();
+
+        $activeFilterCount = collect($selectedFilters)->reduce(function ($count, $value) {
+            if (is_array($value)) {
+                return $count + count(array_filter($value, function ($item) {
+                    return $item !== null && $item !== '';
+                }));
+            }
+
+            return $count + (($value !== null && $value !== '') ? 1 : 0);
+        }, 0);
 
         if ($viewMode !== 'calendar') {
             $calendarQueryParams['view'] = $viewMode;
@@ -279,6 +343,8 @@ class HomeController extends Controller
             'isAuthenticated' => (bool) $user,
             'homeContent' => $homeContent,
             'viewMode' => $viewMode,
+            'activeFilterCount' => $activeFilterCount,
+            'hasActiveFilters' => $activeFilterCount > 0,
         ]);
     }
 
@@ -287,6 +353,8 @@ class HomeController extends Controller
         $stored = Setting::forGroup('home');
 
         $layout = HomePageSettings::normalizeLayout($stored['layout'] ?? null);
+        $heroAlignment = HomePageSettings::normalizeHeroAlignment($stored['hero_alignment'] ?? null);
+        $showDefaultHeroText = HomePageSettings::normalizeBoolean($stored['hero_show_default_text'] ?? true, true);
 
         $heroTitle = HomePageSettings::clean($stored['hero_title'] ?? null)
             ?? ($isAuthenticated ? __('messages.your_events') : __('messages.upcoming_events'));
@@ -296,7 +364,7 @@ class HomeController extends Controller
             $stored['hero_markdown'] ?? null,
         );
 
-        if (! $heroHtml) {
+        if (! $heroHtml && $showDefaultHeroText) {
             $defaultText = $isAuthenticated
                 ? __('messages.manage_calendar_intro')
                 : __('messages.discover_public_events');
@@ -352,6 +420,8 @@ class HomeController extends Controller
             'hero' => [
                 'title' => $heroTitle,
                 'html' => $heroHtml,
+                'alignment' => $heroAlignment,
+                'show_default_text' => $showDefaultHeroText,
                 'cta' => [
                     'label' => $heroCtaLabel,
                     'url' => $heroCtaUrl,
