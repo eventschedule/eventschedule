@@ -482,7 +482,7 @@
 
 <div id="tooltip" class="tooltip"></div>
 
-<script src="{{ asset('js/vue.global.prod.js') }}"></script>
+<script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
 <script {!! nonce_attr() !!}>
 const { createApp } = Vue;
 
