@@ -6,6 +6,7 @@ use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
@@ -19,7 +20,7 @@ use App\Notifications\VerifyEmail as CustomVerifyEmail;
 
 class User extends Authenticatable implements MustVerifyEmail, CanResetPasswordContract
 {
-    use HasFactory, Notifiable, CanResetPasswordTrait;
+    use HasFactory, Notifiable, CanResetPasswordTrait, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -32,6 +33,7 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPasswordC
         'password',
         'timezone',
         'language_code',
+        'status',
         'profile_image_url',
         'api_key',
         'google_id',
@@ -159,6 +161,11 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPasswordC
             'curator_ids' => 'array',
             'talent_ids' => 'array',
         ];
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === 'active' && ! $this->trashed();
     }
 
     public function hasSystemRoleSlug(string $slug): bool

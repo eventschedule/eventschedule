@@ -93,7 +93,7 @@ Route::get('/ticket/view/{event_id}/{secret}', [TicketController::class, 'view']
 Route::get('/ticket/wallet/apple/{event_id}/{secret}', [TicketController::class, 'appleWallet'])->name('ticket.wallet.apple')->middleware('throttle:50,1');
 Route::get('/ticket/wallet/google/{event_id}/{secret}', [TicketController::class, 'googleWallet'])->name('ticket.wallet.google')->middleware('throttle:50,1');
 
-Route::middleware(['auth', 'verified'])->group(function ()
+Route::middleware(['auth', 'verified', 'active'])->group(function ()
 {
     Route::get('/assets/images', [ImageController::class, 'index'])->name('images.index');
     Route::post('/assets/images', [ImageController::class, 'store'])->name('images.store');

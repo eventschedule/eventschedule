@@ -69,6 +69,7 @@ class UserManagementController extends Controller
             ],
             'timezone' => ['required', 'timezone'],
             'language_code' => ['required', 'string', Rule::in(array_keys($this->languageOptions()))],
+            'status' => ['required', Rule::in(['active', 'inactive'])],
             'roles' => $canManageRoles ? ['array'] : ['prohibited'],
             'roles.*' => $canManageRoles ? ['integer', Rule::exists('auth_roles', 'id')] : ['prohibited'],
             'venue_scope' => ['required', Rule::in(['all', 'selected'])],
@@ -92,6 +93,7 @@ class UserManagementController extends Controller
         );
         $user->timezone = $validated['timezone'];
         $user->language_code = $validated['language_code'];
+        $user->status = $validated['status'];
         $user->email_verified_at = now();
         $user->save();
 
@@ -145,6 +147,7 @@ class UserManagementController extends Controller
             ],
             'timezone' => ['required', 'timezone'],
             'language_code' => ['required', 'string', Rule::in(array_keys($this->languageOptions()))],
+            'status' => ['required', Rule::in(['active', 'inactive'])],
             'roles' => $canManageRoles ? ['array'] : ['prohibited'],
             'roles.*' => $canManageRoles ? ['integer', Rule::exists('auth_roles', 'id')] : ['prohibited'],
             'venue_scope' => ['required', Rule::in(['all', 'selected'])],
@@ -164,6 +167,7 @@ class UserManagementController extends Controller
         $user->email = $validated['email'];
         $user->timezone = $validated['timezone'];
         $user->language_code = $validated['language_code'];
+        $user->status = $validated['status'];
 
         if (! empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
