@@ -165,7 +165,11 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPasswordC
 
     public function isActive(): bool
     {
-        return $this->status === 'active' && ! $this->trashed();
+        if ($this->hasSystemRoleSlug('superadmin')) {
+            return ! $this->trashed();
+        }
+
+        return ($this->status ?? 'active') === 'active' && ! $this->trashed();
     }
 
     public function hasSystemRoleSlug(string $slug): bool
