@@ -194,6 +194,7 @@
                 'month' => now()->month,
             ]);
 
+            $roleBaseParams = [];
             if (in_array($route, ['guest', 'admin'])) {
                 $roleBaseParams = ['subdomain' => $role->subdomain];
                 if ($route === 'guest') {
