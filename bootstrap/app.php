@@ -6,6 +6,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use App\Console\Commands\InspectStoragePermissions;
 use App\Http\Middleware\SetUserLanguage;
 use App\Http\Middleware\EnsureEmailIsVerified;
+use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\HandleBotTraffic;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\ApiAuthentication;
@@ -26,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'api.auth' => ApiAuthentication::class,
             'ability' => EnsureAbility::class,
+            'active' => EnsureUserIsActive::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [
