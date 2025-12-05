@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Str;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
@@ -18,10 +19,12 @@ use App\Notifications\VerifyEmail as CustomVerifyEmail;
 
 class Role extends Model implements MustVerifyEmail
 {
-    use Notifiable, MustVerifyEmailTrait;
+    use HasFactory, Notifiable, MustVerifyEmailTrait;
 
     protected $fillable = [
         'type',
+        'subdomain',
+        'user_id',
         'is_unlisted',
         'design',
         'background',
