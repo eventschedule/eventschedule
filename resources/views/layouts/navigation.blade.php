@@ -314,7 +314,7 @@
         </li>
 
 
-        @if (auth()->user()->hasSystemRoleSlug('superadmin'))
+        @if (auth()->user()->hasPermission('settings.manage'))
         <li class="mt-auto">
             <a href="{{ route('settings.index') }}"
                 class="{{ $navLinkBase }} -mx-2 font-semibold {{ request()->is('settings*') ? $navLinkActive : $navLinkDefault }}">
