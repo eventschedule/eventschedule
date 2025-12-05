@@ -9,6 +9,7 @@ use App\Models\MediaAssetUsage;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,11 @@ use Illuminate\Support\Str;
 
 class Event extends Model
 {
+    use HasFactory;
     protected $fillable = [
+        'user_id',
+        'role_id',
+        'venue_id',
         'starts_at',
         'duration',
         'description',
