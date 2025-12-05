@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('language_code')->default('en');
             $table->string('profile_image_url')->nullable();
             $table->rememberToken();
+            $table->softDeletes();
             $table->timestamps();
         });
 

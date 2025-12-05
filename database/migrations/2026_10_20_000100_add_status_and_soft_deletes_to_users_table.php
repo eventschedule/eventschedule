@@ -12,8 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('status')->default('active')->after('language_code');
-            $table->softDeletes();
+            if (! Schema::hasColumn('users', 'status')) {
+                $table->string('status')->default('active')->after('language_code');
+            }
+
+            if (! Schema::hasColumn('users', 'deleted_at')) {
+                $table->softDeletes();
+            }
         });
     }
 
@@ -22,9 +27,21 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('status');
-            $table->dropSoftDeletes();
+        $columns = Schema::getColumnListing('users');
+        $deletedAtIndex = array_search('deleted_at', $columns, true);
+        $createdAtIndex = array_search('created_at', $columns, true);
+        $shouldDropSoftDeletes = $deletedAtIndex !== false
+            && $createdAtIndex !== false
+            && $deletedAtIndex > $createdAtIndex;
+
+        Schema::table('users', function (Blueprint $table) use ($shouldDropSoftDeletes) {
+            if (Schema::hasColumn('users', 'status')) {
+                $table->dropColumn('status');
+            }
+
+            if ($shouldDropSoftDeletes) {
+                $table->dropSoftDeletes();
+            }
         });
     }
 };
