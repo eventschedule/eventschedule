@@ -17,7 +17,7 @@ class RoleFactory extends Factory
     public function definition(): array
     {
         $name = trim(fake()->unique()->company());
-        $type = fake()->randomElement(['venue', 'talent', 'vendor', 'curator']);
+        $type = fake()->randomElement(['venue', 'talent', 'vendor']);
 
         return [
             'user_id' => User::factory(),
