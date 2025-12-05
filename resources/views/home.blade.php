@@ -45,7 +45,10 @@
         $viewMode = $viewMode ?? 'calendar';
         $isListView = $viewMode === 'list';
         $calendarRouteName = 'home';
-        $calendarViewParams = array_merge($calendarQueryParams ?? [], ['month' => $month, 'year' => $year]);
+        $calendarViewParams = array_merge(\Illuminate\Support\Arr::except($calendarQueryParams ?? [], ['view']), [
+            'month' => $month,
+            'year' => $year,
+        ]);
         $listViewParams = array_merge($calendarQueryParams ?? [], ['month' => $month, 'year' => $year, 'view' => 'list']);
     @endphp
 
