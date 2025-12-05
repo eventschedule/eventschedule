@@ -461,17 +461,25 @@ class HomeController extends Controller
         }
 
         $events = [];
-        $month = $request->month;
-        $year = $request->year;
-        $startOfMonth = '';
-        $endOfMonth = '';
+        $viewMode = $request->input('view');
 
-        if (! $month) {
+        if (! in_array($viewMode, ['calendar', 'list'], true)) {
+            $viewMode = 'calendar';
+        }
+
+        $month = (int) $request->input('month', now()->month);
+        $year = (int) $request->input('year', now()->year);
+
+        if ($month < 1 || $month > 12) {
             $month = now()->month;
         }
-        if (! $year) {
+
+        if ($year < 1900 || $year > 2100) {
             $year = now()->year;
         }
+
+        $startOfMonth = null;
+        $endOfMonth = null;
 
         $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
         $endOfMonth = $startOfMonth->copy()->endOfMonth();
@@ -501,10 +509,63 @@ class HomeController extends Controller
             ->orderBy('starts_at')
             ->get();
 
+        if ($viewMode === 'list') {
+            $calendarEvents = $calendarEvents
+                ->flatMap(function ($event) use ($startOfMonth, $endOfMonth) {
+                    if (! $event->days_of_week) {
+                        $occursAt = $event->getStartDateTime();
+
+                        if (! $occursAt) {
+                            return collect();
+                        }
+
+                        return collect([
+                            [
+                                'event' => $event,
+                                'occurs_at' => $occursAt,
+                                'occurs_at_display' => $event->localStartsAt(true),
+                            ],
+                        ]);
+                    }
+
+                    $occurrences = collect();
+                    $currentDate = $startOfMonth->copy();
+
+                    while ($currentDate->lessThanOrEqualTo($endOfMonth)) {
+                        if ($event->matchesDate($currentDate)) {
+                            $dateString = $currentDate->format('Y-m-d');
+                            $occursAt = $event->getStartDateTime($dateString);
+
+                            if ($occursAt) {
+                                $occurrences->push([
+                                    'event' => $event,
+                                    'occurs_at' => $occursAt,
+                                    'occurs_at_display' => $event->localStartsAt(true, $dateString),
+                                ]);
+                            }
+                        }
+
+                        $currentDate->addDay();
+                    }
+
+                    return $occurrences;
+                })
+                ->sortBy(function ($occurrence) {
+                    return $occurrence['occurs_at'] ? $occurrence['occurs_at']->timestamp : PHP_INT_MAX;
+                })
+                ->values();
+        }
+
         $events = $baseQuery
             ->orderBy('starts_at')
             ->paginate(10)
             ->withQueryString();
+
+        $calendarQueryParams = [];
+
+        if ($viewMode !== 'calendar') {
+            $calendarQueryParams['view'] = $viewMode;
+        }
 
         return view('home', compact(
             'events',
@@ -513,6 +574,8 @@ class HomeController extends Controller
             'year',
             'startOfMonth',
             'endOfMonth',
+            'calendarQueryParams',
+            'viewMode',
         ));
     }
 

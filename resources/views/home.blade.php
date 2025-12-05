@@ -41,6 +41,14 @@
 
     @endphp
 
+    @php
+        $viewMode = $viewMode ?? 'calendar';
+        $isListView = $viewMode === 'list';
+        $calendarRouteName = 'home';
+        $calendarViewParams = array_merge($calendarQueryParams ?? [], ['month' => $month, 'year' => $year]);
+        $listViewParams = array_merge($calendarQueryParams ?? [], ['month' => $month, 'year' => $year, 'view' => 'list']);
+    @endphp
+
     <div class="py-5">
 
         <!-- Get Started Panel -->
@@ -270,12 +278,167 @@
             </div>
         </div>
 
-        @include('role/partials/calendar', [
-            'route' => 'home',
-            'tab' => '',
-            'events' => $calendarEvents,
-            'canCreateEvent' => $canCreateEvent,
-        ])
+        <div class="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.calendar') }}</h2>
+                <div class="flex justify-start md:justify-end">
+                    @include('landing.partials.layout-toggle', [
+                        'calendarRouteName' => $calendarRouteName,
+                        'listViewParams' => $listViewParams,
+                        'calendarViewParams' => $calendarViewParams,
+                        'isListView' => $isListView,
+                    ])
+                </div>
+            </div>
+
+            @if($isListView)
+                @php
+                    $currentMonthDate = Carbon\Carbon::create($year, $month, 1);
+                    $localizedMonth = $currentMonthDate->copy()->locale(app()->getLocale())->translatedFormat('F Y');
+                    $previousMonthDate = $currentMonthDate->copy()->subMonth();
+                    $nextMonthDate = $currentMonthDate->copy()->addMonth();
+                    $listNavBase = $calendarQueryParams ?? [];
+
+                    $previousParams = array_merge($listNavBase, [
+                        'year' => $previousMonthDate->year,
+                        'month' => $previousMonthDate->month,
+                        'view' => 'list',
+                    ]);
+                    $nextParams = array_merge($listNavBase, [
+                        'year' => $nextMonthDate->year,
+                        'month' => $nextMonthDate->month,
+                        'view' => 'list',
+                    ]);
+                    $currentParams = array_merge($listNavBase, [
+                        'year' => now()->year,
+                        'month' => now()->month,
+                        'view' => 'list',
+                    ]);
+
+                    $monthOptions = collect(range(-5, 6))->map(function ($offset) use ($currentMonthDate, $listNavBase) {
+                        $optionDate = $currentMonthDate->copy()->addMonths($offset);
+                        $params = array_merge($listNavBase, [
+                            'year' => $optionDate->year,
+                            'month' => $optionDate->month,
+                            'view' => 'list',
+                        ]);
+
+                        return [
+                            'label' => $optionDate->copy()->locale(app()->getLocale())->translatedFormat('F Y'),
+                            'params' => $params,
+                            'is_current' => $optionDate->isSameMonth($currentMonthDate) && $optionDate->isSameYear($currentMonthDate),
+                        ];
+                    });
+                @endphp
+
+                <div class="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/40">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-200">
+                            <a href="{{ route($calendarRouteName, $previousParams) }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 font-medium text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                                </svg>
+                                {{ __('messages.previous_month') }}
+                            </a>
+
+                            <div class="relative" x-data="{ open: false }">
+                                <button type="button" @click="open = !open" :aria-expanded="open.toString()" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 font-medium text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700">
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3 3" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>{{ $localizedMonth }}</span>
+                                    <svg class="h-4 w-4 transition" :class="{ 'rotate-180': open }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+                                    </svg>
+                                </button>
+
+                                <div x-show="open" x-cloak @click.outside="open = false" class="absolute z-20 mt-2 max-h-64 w-56 overflow-hidden rounded-lg border border-gray-100 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
+                                    <div class="max-h-64 overflow-y-auto py-2">
+                                        @foreach($monthOptions as $option)
+                                            <a href="{{ route($calendarRouteName, $option['params']) }}" class="flex items-center justify-between px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800">
+                                                <span>{{ $option['label'] }}</span>
+                                                @if($option['is_current'])
+                                                    <svg class="h-4 w-4 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                                    </svg>
+                                                @endif
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+
+                            <a href="{{ route($calendarRouteName, $nextParams) }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 font-medium text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700">
+                                {{ __('messages.next_month') }}
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                </svg>
+                            </a>
+                        </div>
+
+                        <a href="{{ route($calendarRouteName, $currentParams) }}" class="inline-flex items-center gap-2 self-start rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700">
+                            {{ __('messages.this_month') }}
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-4 space-y-4">
+                    @forelse($calendarEvents as $occurrence)
+                        @php
+                            $event = $occurrence['event'];
+                            $eventUrl = $event->getGuestUrl(false, true);
+                        @endphp
+
+                        <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-indigo-200 hover:shadow-md dark:border-gray-700 dark:bg-gray-900">
+                            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                    <svg class="h-4 w-4 text-slate-500 dark:text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3 3" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>{{ $occurrence['occurs_at_display'] ?? $event->localStartsAt(true) }}</span>
+                                </div>
+
+                                <div class="flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-300">
+                                    @if($event->days_of_week)
+                                        <span class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
+                                            {{ __('messages.recurring') }}
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <div class="mt-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                @if($eventUrl)
+                                    <a href="{{ $eventUrl }}" class="hover:text-indigo-600">{{ $event->translatedName() }}</a>
+                                @else
+                                    {{ $event->translatedName() }}
+                                @endif
+                            </div>
+                        </div>
+                    @empty
+                        <div class="rounded-xl border border-dashed border-gray-300 p-8 text-center text-gray-600 dark:border-gray-700 dark:text-gray-300">
+                            {{ __('messages.no_events_found') }}
+                        </div>
+                    @endforelse
+                </div>
+            @else
+                @include('role/partials/calendar', [
+                    'route' => 'home',
+                    'tab' => '',
+                    'events' => $calendarEvents,
+                    'canCreateEvent' => $canCreateEvent,
+                    'calendarQueryParams' => $calendarQueryParams ?? [],
+                    'layoutToggleParams' => [
+                        'calendarRouteName' => $calendarRouteName,
+                        'listViewParams' => $listViewParams,
+                        'calendarViewParams' => $calendarViewParams,
+                        'isListView' => $isListView,
+                    ],
+                ])
+            @endif
+        </div>
 
         @if ($canCreateEvent)
             <x-modal name="create-event">
