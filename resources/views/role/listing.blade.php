@@ -22,12 +22,12 @@
                                 @endphp
                                 <a
                                     href="{{ $url }}"
-                                    class="@class([
+                                    @class([
                                         'inline-flex items-center gap-1 rounded-full px-3 py-1.5 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]',
                                         $isActive
                                             ? 'bg-white text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-700'
                                             : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white',
-                                    ])"
+                                    ])
                                     @if ($isActive) aria-current="page" @endif
                                 >
                                     @if ($layout === 'grid')
