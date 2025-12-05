@@ -45,6 +45,7 @@
     $pillBase = 'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium transition-colors duration-150';
     $pillDefault = 'border-gray-300 bg-gray-100 text-gray-600 group-hover:text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:group-hover:text-white';
     $pillActive = 'border-indigo-500 bg-indigo-500 text-white';
+    $collapseToggleClasses = 'sidebar-collapse-toggle ml-1 inline-flex items-center rounded-md p-1 text-gray-500 transition-colors duration-150 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-gray-300 dark:hover:text-white';
 @endphp
 
 @php
@@ -103,7 +104,7 @@
 
                         @if ($venues->isNotEmpty())
                             <button type="button"
-                                class="sidebar-collapse-toggle ml-1 inline-flex items-center rounded-md p-1 text-gray-500 transition-colors duration-150 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-gray-300 dark:hover:text-white"
+                                class="{{ $collapseToggleClasses }}"
                                 data-collapse-trigger aria-controls="collapse-venues"
                                 aria-expanded="{{ $venuesSectionOpen ? 'true' : 'false' }}">
                                 <span class="sr-only">{{ __('Toggle :menu menu', ['menu' => __('messages.venues')]) }}</span>
@@ -155,7 +156,7 @@
 
                         @if ($curators->isNotEmpty())
                             <button type="button"
-                                class="sidebar-collapse-toggle ml-1 inline-flex items-center rounded-md p-1 text-gray-500 transition-colors duration-150 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-gray-300 dark:hover:text-white"
+                                class="{{ $collapseToggleClasses }}"
                                 data-collapse-trigger aria-controls="collapse-curators"
                                 aria-expanded="{{ $curatorsSectionOpen ? 'true' : 'false' }}">
                                 <span class="sr-only">{{ __('Toggle :menu menu', ['menu' => __('messages.curators')]) }}</span>
@@ -207,7 +208,7 @@
 
                         @if ($schedules->isNotEmpty())
                             <button type="button"
-                                class="sidebar-collapse-toggle ml-1 inline-flex items-center rounded-md p-1 text-gray-500 transition-colors duration-150 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-gray-300 dark:hover:text-white"
+                                class="{{ $collapseToggleClasses }}"
                                 data-collapse-trigger aria-controls="collapse-talent"
                                 aria-expanded="{{ $talentSectionOpen ? 'true' : 'false' }}">
                                 <span class="sr-only">{{ __('Toggle :menu menu', ['menu' => \Illuminate\Support\Str::plural(__('messages.talent'))]) }}</span>
