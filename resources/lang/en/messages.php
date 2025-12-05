@@ -191,6 +191,8 @@ return [
     'user_password_updated' => 'Password updated successfully.',
     'user_updated' => 'User account updated successfully.',
     'user_deleted' => 'User account deleted successfully.',
+    'active' => 'Active',
+    'inactive' => 'Inactive',
     'delete_user' => 'Delete user',
     'delete_user_description' => 'Remove this account and revoke all access. This action cannot be undone.',
     'delete_user_confirmation' => 'Are you sure you want to permanently delete :name? This will remove their access immediately.',

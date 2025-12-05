@@ -32,6 +32,7 @@ class UserFactory extends Factory
             'timezone' => 'America/New_York',
             'language_code' => 'en',
             'is_subscribed' => true,
+            'status' => 'active',
         ];
     }
 

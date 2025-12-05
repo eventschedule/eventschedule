@@ -17,7 +17,7 @@ class MemberAddRequest extends FormRequest
     {
         return [
             'user_id' => ['required', 'integer', 'exists:users,id'],
-            'level' => ['required', 'string', Rule::in(['admin', 'viewer'])],
+            'level' => ['required', 'string', Rule::in(['owner', 'admin', 'viewer'])],
         ];
     }
 }
