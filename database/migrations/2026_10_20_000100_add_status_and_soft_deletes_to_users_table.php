@@ -27,12 +27,19 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        $columns = Schema::getColumnListing('users');
+        $deletedAtIndex = array_search('deleted_at', $columns, true);
+        $createdAtIndex = array_search('created_at', $columns, true);
+        $shouldDropSoftDeletes = $deletedAtIndex !== false
+            && $createdAtIndex !== false
+            && $deletedAtIndex > $createdAtIndex;
+
+        Schema::table('users', function (Blueprint $table) use ($shouldDropSoftDeletes) {
             if (Schema::hasColumn('users', 'status')) {
                 $table->dropColumn('status');
             }
 
-            if (Schema::hasColumn('users', 'deleted_at')) {
+            if ($shouldDropSoftDeletes) {
                 $table->dropSoftDeletes();
             }
         });
