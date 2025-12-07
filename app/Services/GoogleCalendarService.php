@@ -364,9 +364,10 @@ class GoogleCalendarService
                 $googleEventId = $event->getGoogleEventIdForRole($role->id);
                 
                 if ($googleEventId) {
-                    // Update existing event
-                    $this->updateEvent($event, $googleEventId, $role);
-                    $results['updated']++;
+                    // Skip events that already exist in Google Calendar
+                    // Updates should only happen when the specific event is changed in the app
+                    // (handled by SyncEventToGoogleCalendar job with 'update' action)
+                    continue;
                 } else {
                     // Create new event
                     $googleEvent = $this->createEvent($event, $role);
@@ -562,9 +563,8 @@ class GoogleCalendarService
                     }
 
                     if ($existingEvent) {
-                        // Update existing event
-                        $this->updateEventFromGoogle($existingEvent, $googleEvent, $role);
-                        $results['updated']++;
+                        // Skip updating existing events
+                        continue;
                     } else {
                         // Create new event
                         $this->createEventFromGoogle($googleEvent, $role, $calendarId);
