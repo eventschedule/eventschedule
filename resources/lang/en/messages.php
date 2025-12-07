@@ -629,4 +629,5 @@ return [
     'sync_events_between_schedules' => 'Sync events between this schedule and your Google Calendar.',
     'events_synced' => 'Events synced successfully!',
     'untitled_event' => 'Untitled Event',
+    'no_videos_selected' => 'No videos selected',
 ];
