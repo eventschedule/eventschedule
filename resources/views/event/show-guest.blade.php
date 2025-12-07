@@ -8,18 +8,18 @@
   
 
   @if ($eventIsAccepted === null)
-  <div class="w-full bg-amber-50 border-b border-amber-200 py-4">
+  <div class="w-full bg-amber-50 border-b border-amber-200 py-6">
     <div class="container mx-auto px-5">
       <div class="flex items-center justify-center text-amber-800">
-        <span class="text-sm font-medium">{{ __('messages.event_pending_review') }}</span>
+        <span class="text-xl font-medium">{{ __('messages.event_pending_review') }}</span>
       </div>
     </div>
   </div>
   @elseif (! $eventIsAccepted)
-  <div class="w-full bg-red-50 border-b border-red-200 py-4">
+  <div class="w-full bg-red-50 border-b border-red-200 py-6">
     <div class="container mx-auto px-5">
       <div class="flex items-center justify-center text-red-800">
-        <span class="text-sm font-medium">{{ __('messages.event_rejected') }}</span>
+        <span class="text-xl font-medium">{{ __('messages.event_rejected') }}</span>
       </div>
     </div>
   </div>
