@@ -17,6 +17,7 @@ use App\Http\Controllers\InvoiceNinjaController;
 use App\Http\Controllers\AppController;
 use App\Http\Controllers\Api\ApiSettingsController;
 use App\Http\Controllers\TermsController;
+use App\Http\Controllers\DiscoveryController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\GoogleCalendarWebhookController;
@@ -74,6 +75,10 @@ Route::post('/unsubscribe', [RoleController::class, 'unsubscribe'])
 Route::get('/user/unsubscribe', [RoleController::class, 'unsubscribeUser'])
     ->name('user.unsubscribe')
     ->middleware('throttle:2,2');
+Route::get('/.well-known/eventschedule.json', [DiscoveryController::class, 'manifest'])
+    ->name('well_known.eventschedule');
+Route::get('/branding.json', [DiscoveryController::class, 'branding'])
+    ->name('branding.json');
 Route::post('/clear-pending-request', [EventController::class, 'clearPendingRequest'])->name('event.clear_pending_request');
 
 Route::get('/terms', [TermsController::class, 'show'])->name('terms.show');
