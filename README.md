@@ -37,6 +37,7 @@
 - 🔢 **Ticket Quantity Limits:** Set a maximum number of tickets available for each event to manage capacity.  
 - ⏳ **Ticket Reservation System:** Allow attendees to reserve tickets with a configurable release time before purchase.  
 - 📅 **Calendar Integration:** Enable attendees to add events directly to Google, Apple, or Microsoft calendars. 
+- 🔄 **Google Calendar Sync:** Automatically sync events between Event Schedule and Google Calendar, with real-time updates via webhooks.
 - 📋 **Sub-schedules:** Organize events into multiple sub-schedules for better categorization and management.
 - 🔍 **Search Feature:** Powerful search functionality to help users find specific events or content across your schedule.
 - 🎨 **Event Graphics Generator:** Create beautiful graphics of your upcoming events with flyers, QR codes, and event details for social media and marketing.
