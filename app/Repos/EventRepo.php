@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\ClaimRole;
 use App\Mail\ClaimVenue;
 use App\Models\Ticket;
-
+use App\Utils\GeminiUtils;
 
 class EventRepo
 {
@@ -178,6 +178,14 @@ class EventRepo
                 $event->slug = \Str::slug($request->name_en);
             } else {
                 $event->slug = \Str::slug($request->name);
+            }
+
+            if (! $event->slug) {
+                $translated = GeminiUtils::translate($request->name, 'auto', 'en');
+
+                if ($translated) {
+                    $event->slug = Str::slug($translated);
+                }
             }
 
             if (! $event->slug) {

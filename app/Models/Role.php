@@ -10,6 +10,7 @@ use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use App\Notifications\VerifyEmail as CustomVerifyEmail;
+use App\Utils\GeminiUtils;
 
 class Role extends Model implements MustVerifyEmail
 {
@@ -363,6 +364,14 @@ class Role extends Model implements MustVerifyEmail
     {
         $subdomain = Str::slug($name);
 
+        if (strlen($subdomain) <= 2 && $role->language_code != 'en') {            
+            $translated = GeminiUtils::translate($name, 'auto', 'en');
+
+            if ($translated) {
+                $subdomain = Str::slug($translated);
+            }
+        }
+
         $reserved = [
             'eventschedule',
             'event',
@@ -401,7 +410,7 @@ class Role extends Model implements MustVerifyEmail
             $subdomain = '';
         }
 
-        if (strlen($subdomain) <= 2) {
+        if (strlen($subdomain) <= 2) {            
             return strtolower(\Str::random(8));
         }
     
