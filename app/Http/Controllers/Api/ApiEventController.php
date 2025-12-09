@@ -398,6 +398,23 @@ class ApiEventController extends Controller
         ], 200, [], JSON_PRETTY_PRINT);
     }
 
+    public function destroy(Request $request, $event_id)
+    {
+        $event = Event::findOrFail(UrlUtils::decodeId($event_id));
+
+        if ($event->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $event->delete();
+
+        return response()->json([
+            'meta' => [
+                'message' => 'Event deleted successfully'
+            ]
+        ], 200, [], JSON_PRETTY_PRINT);
+    }
+
     public function flyer(Request $request, $event_id)
     {
         $event = Event::findOrFail(UrlUtils::decodeId($event_id));

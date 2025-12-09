@@ -52,6 +52,12 @@ Optional fields and behaviors:
 
 Successful creation returns **201** with the new role plus any created groups in `data` and a `meta.message` success string. 【F:app/Http/Controllers/Api/ApiRoleController.php†L126-L131】
 
+#### DELETE `/api/roles/{role_id}`
+Removes a venue, curator, or talent the user owns. The backend rejects unsupported role types, and deleting a talent cascades removal of any events where that talent is the only member. Ownership is enforced; otherwise the response is 403. 【F:routes/api.php†L15-L18】【F:app/Http/Controllers/Api/ApiRoleController.php†L136-L165】
+
+#### DELETE `/api/roles/{role_id}/contacts/{contact}`
+Removes a single contact by its zero-based index and returns the updated role payload. 404 is returned when the index is missing, and ownership is required. 【F:routes/api.php†L15-L18】【F:app/Http/Controllers/Api/ApiRoleController.php†L167-L192】
+
 ### GET `/api/schedules`
 Returns paginated schedules (venues, talents, curators, etc.) owned by the authenticated user.
 
@@ -147,6 +153,9 @@ curl -X PATCH https://eventschedule.test/api/events/RVZFTlQtMg== \
     "starts_at": "2024-05-01 20:00:00"
   }'
 ```
+
+### DELETE `/api/events/{event_id}`
+Deletes an event owned by the authenticated user. Returns a 200 response with a success message when the deletion succeeds, 403 when the requester does not own the event, and 404 for unknown IDs. 【F:routes/api.php†L20-L25】【F:app/Http/Controllers/Api/ApiEventController.php†L401-L415】
 
 ### POST `/api/events/flyer/{event_id}`
 Uploads, replaces, or removes an event flyer. Requires ownership of the event. 【F:app/Http/Controllers/Api/ApiEventController.php†L223-L289】
