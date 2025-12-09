@@ -222,6 +222,10 @@ class EventRepo
 
             $input = $request->all();
 
+            // Prevent attempting to persist legacy venue_id column; venue linkage is
+            // handled via the pivot table instead.
+            $input = Arr::except($input, ['venue_id']);
+
             if (array_key_exists('slug', $input)) {
                 $slugValue = $input['slug'];
 
