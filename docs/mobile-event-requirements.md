@@ -37,41 +37,34 @@ The mobile client must only surface the same fields and actions that appear on t
 - Google Calendar sync controls for existing events linked to a Google account: show sync status, and buttons to sync or remove from Google Calendar. 【F:resources/views/event/edit.blade.php†L1062-L1095】
 
 ## Open questions for the web API
-Subject: Clarifications needed for Event Update API (to align mobile with web)
-
-The mobile client needs clarification on how to mirror web update behavior while avoiding hidden logic. Please confirm the following, keeping responses aligned to the web UI’s visible fields only:
+The mobile client needs clarification on how to mirror web update behavior while avoiding hidden logic. Please confirm the following:
 
 1. **Update endpoint contract**
-   - What is the exact HTTP method and path for updating an event (e.g., `PATCH /api/events/{id}`, `POST /api/events/{id}`)?
-   - What is the minimal valid payload for updating only basic fields (name, description, dates)? Please include a working example JSON body.
-   - Do you support partial updates? If so, which fields are optional/omittable on update?
+   - Expected HTTP method and path for updates (e.g., `PATCH /api/events/{id}`).
+   - Minimal valid payload for basic edits (name, description, dates) with a working example JSON body.
+   - Whether partial updates are supported and which fields are optional/omittable.
 
 2. **Role fields on update (venue, members, curator)**
-   - Should `venue_id` be included on update? If the event was created under a venue subdomain (venue-scoped schedule), should `venue_id` always be omitted when updating?
+   - Whether `venue_id` should be included when updating; if the event was created under a venue subdomain, should it be omitted?
    - If `venue_id` is included but unchanged, is that allowed?
-   - How should participants be updated? Does the update endpoint accept a `members` array of role IDs? If not, is there a separate endpoint for adding/removing participants? If accepted, should the client send the full replacement list or only diffs (add/remove)?
-   - Are there any other role-based fields (e.g., `curator_role_id`) that must be included or must be omitted on update?
+   - How to update participants: does the endpoint accept a `members` array of role IDs, or is there a separate add/remove API? If accepted, should the client send full replacements or diffs?
+   - Any other role-based fields (e.g., `curator_role_id`) that must be included or omitted on update.
 
 3. **Validation rules for role IDs**
-   - What are the valid sources of `venue_id` for edits? Must the venue belong to the same schedule/subdomain as the event, and can an event be reassigned to another venue during update?
-   - For `members`, which role types are accepted? Do member IDs have to belong to a specific schedule or subdomain?
-   - Under what constraints could `"No query results for model [App\Models\Role]"` occur even when the ID exists elsewhere (e.g., different schedule or tenant)?
+   - Valid sources of `venue_id` during edits (must it belong to the same schedule/subdomain? can events be reassigned?).
+   - Accepted role types for `members`, and whether member IDs must belong to the same schedule/subdomain.
+   - Constraints that could trigger `"No query results for model [App\Models\Role]"` when IDs exist in another context.
 
 4. **Error semantics**
-   - When `"No query results for model [App\Models\Role]"` occurs during update, which field is being resolved (`venue_id`, `members`, `curator_role_id`)?
-   - Can the server return field-specific errors (e.g., `errors: { venue_id: ["not found"] }`) to help the client diagnose issues?
-   - Are logs or middleware available that can reveal which specific ID failed lookup so we can pinpoint the problematic field/value?
+   - When `"No query results for model [App\Models\Role]"` occurs, which field is being resolved (venue, members, curator)?
+   - Whether the server can return field-specific errors (e.g., `errors: { venue_id: ["not found"] }`).
+   - Whether logs or middleware can reveal which specific ID failed lookup.
 
 5. **Create vs update differences**
-   - Are there intentional differences between create and update payloads (e.g., create accepts `members` while update does not; create infers venue from subdomain while update expects no `venue_id`)?
+   - Intentional differences between create and update payloads (e.g., create accepts `members` but update does not; create infers venue from subdomain while update expects no `venue_id`).
 
 6. **Include/expand parameters**
-   - Is `include=venue,talent,tickets` (or similar) supported on update responses? Which include values are allowed or recommended for edit responses?
+   - Whether `include=venue,talent,tickets` (or similar) is supported on update responses and which include values are allowed.
 
 7. **Versioning and rollout**
-   - Were there recent changes to the update route (e.g., method switched from PUT to POST)?
-   - Do clients need to gate behavior based on API version or capabilities? If so, what capability flags or version markers should the client use?
-
-If possible, please also share:
-- A curl example that successfully updates only name/description (no role fields).
-- A curl example that successfully updates `venue_id` (if supported), and one that updates `members` (if supported), noting whether they are full replacements or diffs.
+   - Recent changes to the update route (e.g., method switched from PUT to POST) and whether clients need gating based on API version or capabilities.
