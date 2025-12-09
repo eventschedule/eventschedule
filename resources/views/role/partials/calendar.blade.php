@@ -274,7 +274,7 @@
                                 class="relative group" 
                                 :class="event.can_edit ? '{{ (isset($role) && $role->isRtl()) ? 'hover:pl-8' : 'hover:pr-8' }}' : ''"
                                 v-show="isEventVisible(event)">
-                                <a :href="getEventUrl(event)"
+                                <a :href="getEventUrl(event, '{{ $currentDate->format('Y-m-d') }}')"
                                     class="flex has-tooltip" 
                                     :data-tooltip="getEventTooltip(event)"
                                     @click.stop {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
@@ -598,12 +598,17 @@ const calendarApp = createApp({
             }
             return true;
         },
-        getEventUrl(event) {
+        getEventUrl(event, occurrenceDate = null) {
             let url = event.guest_url;
             let queryParams = [];
             
-            if (event.utc_date) {
-                queryParams.push('date=' + event.utc_date);
+            // For recurring events, use the occurrence date (the date being viewed)
+            // For mobile view, use occurrenceDate if available (already set for recurring events)
+            // For desktop view, use the passed occurrenceDate parameter
+            const dateToUse = occurrenceDate || event.occurrenceDate || event.utc_date;
+            
+            if (dateToUse) {
+                queryParams.push('date=' + dateToUse);
             }
             
             // Preserve current filter values
