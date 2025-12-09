@@ -66,6 +66,9 @@
             'edit_url' => auth()->user() && auth()->user()->canEditEvent($event) 
                 ? (isset($role) ? config('app.url') . route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)], false) : config('app.url') . route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($event->id)], false))
                 : null,
+            'recurring_end_type' => $event->recurring_end_type ?? 'never',
+            'recurring_end_value' => $event->recurring_end_value,
+            'start_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
         ];
     }
 
@@ -455,6 +458,51 @@ const calendarApp = createApp({
             const endDate = new Date(today);
             endDate.setMonth(endDate.getMonth() + 4);
             
+            // Helper function to check if a date should be included based on recurring end settings
+            const shouldIncludeDate = (event, dateStr) => {
+                if (!event.days_of_week || event.days_of_week.length === 0) {
+                    return true; // Not a recurring event
+                }
+                
+                const recurringEndType = event.recurring_end_type || 'never';
+                
+                if (recurringEndType === 'never') {
+                    return true;
+                }
+                
+                if (recurringEndType === 'on_date' && event.recurring_end_value) {
+                    const endDate = new Date(event.recurring_end_value + 'T00:00:00');
+                    const checkDate = new Date(dateStr + 'T00:00:00');
+                    return checkDate <= endDate;
+                }
+                
+                if (recurringEndType === 'after_events' && event.recurring_end_value && event.start_date) {
+                    const maxOccurrences = parseInt(event.recurring_end_value);
+                    const startDate = new Date(event.start_date + 'T00:00:00');
+                    const checkDate = new Date(dateStr + 'T00:00:00');
+                    
+                    // Count occurrences from start date up to and including the check date
+                    let occurrenceCount = 0;
+                    const currentDate = new Date(startDate);
+                    
+                    while (currentDate <= checkDate) {
+                        const dayOfWeek = currentDate.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+                        const daysOfWeekStr = event.days_of_week;
+                        
+                        // Check if this day matches (days_of_week is a string like "0100000" where index 0=Sunday, 1=Monday, etc.)
+                        if (daysOfWeekStr && daysOfWeekStr[dayOfWeek] === '1') {
+                            occurrenceCount++;
+                        }
+                        
+                        currentDate.setDate(currentDate.getDate() + 1);
+                    }
+                    
+                    return occurrenceCount <= maxOccurrences;
+                }
+                
+                return true;
+            };
+            
             // Process all filtered events
             this.filteredEvents.forEach(event => {
                 if (event.days_of_week && event.days_of_week.length > 0) {
@@ -463,17 +511,22 @@ const calendarApp = createApp({
                     
                     while (currentDate <= endDate) {
                         const dayOfWeek = currentDate.getDay(); // 0 = Sunday, 6 = Saturday
+                        const daysOfWeekStr = event.days_of_week;
                         
-                        if (event.days_of_week.includes(dayOfWeek)) {
+                        // Check if this day matches (days_of_week is a string like "0100000" where 1 means the day is selected)
+                        if (daysOfWeekStr && daysOfWeekStr[dayOfWeek] === '1') {
                             const dateStr = currentDate.getFullYear() + '-' + 
                                           String(currentDate.getMonth() + 1).padStart(2, '0') + '-' + 
                                           String(currentDate.getDate()).padStart(2, '0');
                             
-                            mobileEvents.push({
-                                ...event,
-                                occurrenceDate: dateStr,
-                                uniqueKey: `${event.id}-${dateStr}`
-                            });
+                            // Check if this date should be included based on recurring end settings
+                            if (shouldIncludeDate(event, dateStr)) {
+                                mobileEvents.push({
+                                    ...event,
+                                    occurrenceDate: dateStr,
+                                    uniqueKey: `${event.id}-${dateStr}`
+                                });
+                            }
                         }
                         
                         currentDate.setDate(currentDate.getDate() + 1);

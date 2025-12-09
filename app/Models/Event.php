@@ -32,6 +32,8 @@ class Event extends Model
         'registration_url',
         'category_id',
         'creator_role_id',
+        'recurring_end_type',
+        'recurring_end_value',
     ];
 
     protected $casts = [
@@ -312,7 +314,43 @@ class Event extends Model
         if ($this->days_of_week) {            
             $afterStartDate = Carbon::parse($this->localStartsAt())->isSameDay($date) || Carbon::parse($this->localStartsAt())->lessThanOrEqualTo($date);
             $dayOfWeek = $date->dayOfWeek;
-            return $afterStartDate && $this->days_of_week[$dayOfWeek] === '1';
+            
+            if (!$afterStartDate || $this->days_of_week[$dayOfWeek] !== '1') {
+                return false;
+            }
+            
+            // Check recurring end conditions
+            $recurringEndType = $this->recurring_end_type ?? 'never';
+            
+            if ($recurringEndType === 'on_date' && $this->recurring_end_value) {
+                $endDate = Carbon::createFromFormat('Y-m-d', $this->recurring_end_value)->startOfDay();
+                $checkDate = Carbon::parse($date)->startOfDay();
+                if ($checkDate->greaterThan($endDate)) {
+                    return false;
+                }
+            } elseif ($recurringEndType === 'after_events' && $this->recurring_end_value) {
+                $maxOccurrences = (int) $this->recurring_end_value;
+                $startDate = Carbon::parse($this->localStartsAt())->startOfDay();
+                $checkDate = Carbon::parse($date)->startOfDay();
+                
+                // Count occurrences from start date up to and including the check date
+                $occurrenceCount = 0;
+                $currentDate = $startDate->copy();
+                
+                while ($currentDate->lte($checkDate)) {
+                    $dayOfWeek = $currentDate->dayOfWeek;
+                    if ($this->days_of_week[$dayOfWeek] === '1') {
+                        $occurrenceCount++;
+                    }
+                    $currentDate->addDay();
+                }
+                
+                if ($occurrenceCount > $maxOccurrences) {
+                    return false;
+                }
+            }
+            
+            return true;
         } else {
             return Carbon::parse($this->localStartsAt())->isSameDay($date);
         }

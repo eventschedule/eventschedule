@@ -33,6 +33,21 @@
         // https://github.com/flatpickr/flatpickr/issues/892#issuecomment-604387030
         f._input.onkeydown = () => false;
 
+        // Initialize recurring end date picker if it exists on page load
+        var endDateInput = document.querySelector('.datepicker-end-date');
+        if (endDateInput && endDateInput.value) {
+            var endDatePicker = flatpickr(endDateInput, {
+                allowInput: true,
+                enableTime: false,
+                altInput: true,
+                altFormat: "M j, Y",
+                dateFormat: "Y-m-d",
+            });
+            if (endDatePicker._input) {
+                endDatePicker._input.onkeydown = () => false;
+            }
+        }
+
         $("#venue_country").countrySelect({
             defaultCountry: "{{ $selectedVenue && $selectedVenue->country ? $selectedVenue->country : ($role && $role->country_code ? $role->country_code : '') }}",
         });
@@ -667,6 +682,43 @@
                             </label>
                             @endforeach
                         </div>
+
+                        <div v-if="isRecurring" id="recurring_end_div" class="mb-6">
+                            <x-input-label :value="__('messages.recurring_end')" />
+                            <div class="mt-2 space-y-4">
+                                <div class="flex items-center">
+                                    <input id="recurring_end_never" name="recurring_end_type" type="radio" value="never" v-model="event.recurring_end_type"
+                                        class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                    <label for="recurring_end_never"
+                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.never') }}</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="recurring_end_on_date" name="recurring_end_type" type="radio" value="on_date" v-model="event.recurring_end_type"
+                                        class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                    <label for="recurring_end_on_date"
+                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.on_date') }}</label>
+                                </div>
+                                <div v-if="event.recurring_end_type === 'on_date'" class="ml-7">
+                                    <x-text-input type="text" id="recurring_end_date" name="recurring_end_value" class="datepicker-end-date mt-1 block w-full"
+                                        value="{{ old('recurring_end_value', $event->recurring_end_value) }}"
+                                        autocomplete="off" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('recurring_end_value')" />
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="recurring_end_after_events" name="recurring_end_type" type="radio" value="after_events" v-model="event.recurring_end_type"
+                                        class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                    <label for="recurring_end_after_events"
+                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.after_events') }}</label>
+                                </div>
+                                <div v-if="event.recurring_end_type === 'after_events'" class="ml-7">
+                                    <x-text-input type="number" id="recurring_end_count" name="recurring_end_value" class="mt-1 block w-full"
+                                        :value="old('recurring_end_value', $event->recurring_end_value)"
+                                        v-model="event.recurring_end_value"
+                                        min="1" autocomplete="off" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('recurring_end_value')" />
+                                </div>
+                            </div>
+                        </div>
                         @endif
 
                         <div class="mb-6">
@@ -1076,6 +1128,8 @@
           ...@json($event),
           tickets_enabled: {{ $event->tickets_enabled ? 'true' : 'false' }},
           total_tickets_mode: @json($event->total_tickets_mode ?? 'individual'),
+          recurring_end_type: @json($event->recurring_end_type ?? 'never'),
+          recurring_end_value: @json($event->recurring_end_value ?? null),
         },
         venues: @json($venues),
         members: @json($members ?? []),
@@ -1443,6 +1497,42 @@
           }
         });
       },
+      initializeRecurringEndDatePicker() {
+        // Use multiple nextTick calls to ensure Vue has fully rendered the v-if element
+        this.$nextTick(() => {
+          this.$nextTick(() => {
+            const endDateInput = document.querySelector('.datepicker-end-date');
+            // Make sure element exists and is not already initialized
+            if (endDateInput && !endDateInput._flatpickr) {
+              // Get the value from Vue model or input's value attribute
+              const inputValue = this.event.recurring_end_value || endDateInput.value || null;
+              
+              // Clear the value attribute - flatpickr will set it via defaultDate
+              if (inputValue) {
+                endDateInput.removeAttribute('value');
+              }
+              
+              var f = flatpickr(endDateInput, {
+                allowInput: true,
+                enableTime: false,
+                altInput: true,
+                altFormat: "M j, Y",
+                dateFormat: "Y-m-d",
+                defaultDate: inputValue,
+                onChange: (selectedDates, dateStr, instance) => {
+                  // Update Vue model with the actual value (YYYY-MM-DD format)
+                  this.event.recurring_end_value = dateStr;
+                }
+              });
+              
+              // https://github.com/flatpickr/flatpickr/issues/892#issuecomment-604387030
+              if (f._input) {
+                f._input.onkeydown = () => false;
+              }
+            }
+          });
+        });
+      },
     },
     computed: {
       filteredMembers() {
@@ -1539,6 +1629,16 @@
       'event.tickets_enabled'(newValue) {
         this.savePreferences();
       },
+      'event.recurring_end_type'(newValue, oldValue) {
+        // Clear the value when switching between types
+        if (oldValue && newValue !== oldValue) {
+          this.event.recurring_end_value = null;
+        }
+        
+        if (newValue === 'on_date') {
+          this.initializeRecurringEndDatePicker();
+        }
+      },
     },
     mounted() {
       this.showMemberTypeRadio = this.selectedMembers.length === 0;
@@ -1562,6 +1662,11 @@
 
       // Initialize curator group selections
       this.initializeCuratorGroupSelections();
+      
+      // Initialize recurring end date picker if needed
+      if (this.event.recurring_end_type === 'on_date') {
+        this.initializeRecurringEndDatePicker();
+      }
     }
   }).mount('#app')
 
