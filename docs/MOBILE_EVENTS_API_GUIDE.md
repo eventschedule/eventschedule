@@ -86,7 +86,7 @@ Payload format:
 - `meta.total_roles` — count of roles returned; `meta.path` echoes the requested URL. 【F:app/Http/Controllers/Api/ApiEventController.php†L26-L45】
 
 ### POST `/api/events/{subdomain}`
-Creates a new event attached to the schedule identified by `{subdomain}`. The subdomain can be a venue, talent, or curator; the API automatically populates related fields based on the schedule type. 【F:app/Http/Controllers/Api/ApiEventController.php†L70-L213】
+Creates a new event attached to the schedule identified by `{subdomain}`. The subdomain can be a venue, talent, or curator; the API automatically populates related fields based on the schedule type. **Do not** POST to `/api/events` without a subdomain, as that route is read-only and will return HTTP 405. 【F:app/Http/Controllers/Api/ApiEventController.php†L70-L213】【F:routes/api.php†L14-L20】
 
 Required inputs:
 - `name` (string, ≤255) and `starts_at` (`Y-m-d H:i:s`). 【F:app/Http/Controllers/Api/ApiEventController.php†L85-L95】
@@ -103,6 +103,28 @@ Responses:
 - **201** with `data` containing the full event payload plus `meta.message` when creation succeeds. 【F:app/Http/Controllers/Api/ApiEventController.php†L215-L220】
 - **403** if the authenticated user is not a member of the targeted subdomain. 【F:app/Http/Controllers/Api/ApiEventController.php†L81-L83】
 - **422** for validation errors (missing venue info, invalid schedule/group, unknown category, etc.). 【F:app/Http/Controllers/Api/ApiEventController.php†L97-L155】
+- **405** if you POST to `/api/events` without a subdomain. Ensure your client resolves the correct schedule subdomain (e.g., the currently selected venue or curator) before issuing the request.
+
+How to choose `{subdomain}` and build the request:
+- Call `GET /api/schedules` and read the `subdomain` field from the schedule you want to own the event (e.g., `sample-venue`). 【F:app/Http/Controllers/Api/ApiScheduleController.php†L10-L37】
+- Append that value to the path when posting (e.g., `/api/events/sample-venue`). The backend uses it to infer defaults (venue assignment, curator membership, or talent membership). 【F:routes/api.php†L14-L20】【F:app/Http/Controllers/Api/ApiEventController.php†L72-L213】
+- Provide the schedule's encoded `id` in `venue_id` if you want to be explicit about the venue, even when posting to a venue subdomain.
+
+Minimal example request:
+
+```bash
+curl -X POST https://eventschedule.test/api/events/sample-venue \
+  -H "X-API-Key: <your-api-key>" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Mobile-created show",
+    "starts_at": "2024-04-15 19:30:00",
+    "venue_id": "Uk9MRS0z",
+    "category_name": "Concert",
+    "members": [{"name": "Guest Performer"}]
+  }'
+```
 
 ### POST `/api/events/flyer/{event_id}`
 Uploads, replaces, or removes an event flyer. Requires ownership of the event. 【F:app/Http/Controllers/Api/ApiEventController.php†L223-L289】
