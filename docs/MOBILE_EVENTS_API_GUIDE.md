@@ -22,6 +22,36 @@ Content-Type: application/json
 
 All API routes are namespaced under `/api` and require authentication via the middleware above. 【F:routes/api.php†L9-L17】
 
+### Roles: venues, curators, and talent
+
+#### GET `/api/roles`
+Lists the authenticated user's roles filtered to `venue`, `curator`, and `talent` types.
+
+Query parameters:
+- `per_page` — max 1000, default 100. 【F:app/Http/Controllers/Api/ApiRoleController.php†L13-L24】
+- `type` — optional filter; accepts a comma-separated list or array of `venue`, `curator`, `talent`. 【F:app/Http/Controllers/Api/ApiRoleController.php†L22-L34】
+- `name` — optional substring match on the role name. 【F:app/Http/Controllers/Api/ApiRoleController.php†L36-L38】
+
+Response payload mirrors other paginated resources and returns each role's encoded ID, contact info, address (for venues), background colors, and group metadata via `toApiData()`. 【F:app/Http/Controllers/Api/ApiRoleController.php†L40-L53】【F:app/Models/Role.php†L667-L714】
+
+#### POST `/api/roles`
+Creates a new role for use as a venue, curator, or talent. The authenticated user is made the owner of the role and the record is added to their resource scope. 【F:app/Http/Controllers/Api/ApiRoleController.php†L71-L131】
+
+Required fields:
+- `type` — one of `venue`, `curator`, or `talent`.
+- `name` — up to 255 characters.
+- `email` — valid email up to 255 characters. 【F:app/Http/Controllers/Api/ApiRoleController.php†L72-L95】
+- `address1` — required only when `type` is `venue`. 【F:app/Http/Controllers/Api/ApiRoleController.php†L88-L95】
+
+Optional fields and behaviors:
+- `contacts` — array of contact objects (`name`, `email`, `phone`), stored verbatim if provided. 【F:app/Http/Controllers/Api/ApiRoleController.php†L82-L112】
+- `groups` — array of group names; the API creates slugged groups under the role. 【F:app/Http/Controllers/Api/ApiRoleController.php†L96-L114】
+- `website`, `timezone`, `language_code`, `country_code`, `address2`, `city`, `state`, `postal_code` — stored on the role when present. 【F:app/Http/Controllers/Api/ApiRoleController.php†L72-L95】
+- Styling defaults are applied when no colors are supplied: a random gradient background, random rotation, and white font color. 【F:app/Http/Controllers/Api/ApiRoleController.php†L119-L124】
+- Hosted deployments set a one-year `plan_expires` and pro plan defaults; self-hosted instances mark the email as verified immediately. 【F:app/Http/Controllers/Api/ApiRoleController.php†L102-L118】
+
+Successful creation returns **201** with the new role plus any created groups in `data` and a `meta.message` success string. 【F:app/Http/Controllers/Api/ApiRoleController.php†L126-L131】
+
 ### GET `/api/schedules`
 Returns paginated schedules (venues, talents, curators, etc.) owned by the authenticated user.
 
@@ -45,6 +75,15 @@ Each event object contains:
 - Tickets: `tickets_enabled`, currency/mode, ticket notes (plain and HTML), and ticket objects including price, quantity, and sold breakdowns. 【F:app/Models/Event.php†L826-L860】
 - Links and media: guest `url`, `registration_url`, `event_url`, `payment_method`, `payment_instructions` (plain and HTML), `flyer_image_url`, and `category` summary. 【F:app/Models/Event.php†L815-L839】【F:app/Models/Event.php†L832-L836】
 - Curator metadata: `curator_role` populated when the creator is a curator. 【F:app/Models/Event.php†L875-L876】
+
+### GET `/api/events/resources`
+Returns the user's venues, curators, and talent pre-grouped for building event creation screens. Each item is serialized through `toApiData()`, matching the `/api/roles` responses. 【F:app/Http/Controllers/Api/ApiEventController.php†L26-L45】
+
+Payload format:
+- `data.venues` — array of venue roles.
+- `data.curators` — array of curator roles.
+- `data.talent` — array of talent roles.
+- `meta.total_roles` — count of roles returned; `meta.path` echoes the requested URL. 【F:app/Http/Controllers/Api/ApiEventController.php†L26-L45】
 
 ### POST `/api/events/{subdomain}`
 Creates a new event attached to the schedule identified by `{subdomain}`. The subdomain can be a venue, talent, or curator; the API automatically populates related fields based on the schedule type. 【F:app/Http/Controllers/Api/ApiEventController.php†L70-L213】

@@ -26,6 +26,26 @@ class ApiEventController extends Controller
         $this->eventRepo = $eventRepo;
     }
 
+    public function resources(Request $request)
+    {
+        $roles = Role::where('user_id', auth()->id())
+            ->whereIn('type', ['venue', 'curator', 'talent'])
+            ->orderBy('name')
+            ->get();
+
+        return response()->json([
+            'data' => [
+                'venues' => $roles->where('type', 'venue')->map->toApiData()->values(),
+                'curators' => $roles->where('type', 'curator')->map->toApiData()->values(),
+                'talent' => $roles->where('type', 'talent')->map->toApiData()->values(),
+            ],
+            'meta' => [
+                'total_roles' => $roles->count(),
+                'path' => $request->url(),
+            ],
+        ], 200, [], JSON_PRETTY_PRINT);
+    }
+
     public function index(Request $request)
     {
         /*
