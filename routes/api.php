@@ -18,5 +18,6 @@ Route::middleware([ApiAuthentication::class])->group(function () {
     Route::get('/events', [ApiEventController::class, 'index'])->middleware('ability:resources.view');
     Route::get('/events/resources', [ApiEventController::class, 'resources'])->middleware('ability:resources.view');
     Route::post('/events/{subdomain}', [ApiEventController::class, 'store'])->middleware('ability:resources.manage');
+    Route::patch('/events/{event_id}', [ApiEventController::class, 'update'])->middleware('ability:resources.manage');
     Route::post('/events/flyer/{event_id}', [ApiEventController::class, 'flyer'])->middleware('ability:resources.view');
 });

@@ -126,6 +126,28 @@ curl -X POST https://eventschedule.test/api/events/sample-venue \
   }'
 ```
 
+### PATCH `/api/events/{event_id}`
+Updates an event the authenticated user owns. The route uses the same validation rules as creation but treats most fields as optional so clients can send partial payloads. Existing venue/members/curators are preserved when those arrays are omitted, and when you do send `members` or `curators` the backend merges them with the current set so you can add or edit talent/curators without resending the entire list. Providing a different `venue_id` or venue address will move the event to the new venue or update the existing unclaimed venue record. 【F:routes/api.php†L16-L22】【F:app/Http/Controllers/Api/ApiEventController.php†L231-L316】
+
+Key points:
+- Ownership is required; otherwise the endpoint returns 403. 【F:app/Http/Controllers/Api/ApiEventController.php†L231-L242】
+- `name` and `starts_at` become required only when provided; date format stays `Y-m-d H:i:s`. Venue/address/url fields still share the required-without-all rule when any are supplied. 【F:app/Http/Controllers/Api/ApiEventController.php†L244-L254】
+- Sending `schedule` slugs maps them to `current_role_group_id`; invalid slugs return 422. Categories can be updated via `category_id` or `category_name` with the same slug-matching behavior as creation. 【F:app/Http/Controllers/Api/ApiEventController.php†L256-L299】
+- When `members`, `venue_id`, or `curators` are omitted, the backend seeds the request with existing associations before saving to avoid unintended detachments. When supplied, the arrays are merged with the current lists so you can append or adjust participants and curators alongside venue edits. 【F:app/Http/Controllers/Api/ApiEventController.php†L281-L316】
+
+Example minimal patch:
+
+```bash
+curl -X PATCH https://eventschedule.test/api/events/RVZFTlQtMg== \
+  -H "X-API-Key: <your-api-key>" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated title",
+    "starts_at": "2024-05-01 20:00:00"
+  }'
+```
+
 ### POST `/api/events/flyer/{event_id}`
 Uploads, replaces, or removes an event flyer. Requires ownership of the event. 【F:app/Http/Controllers/Api/ApiEventController.php†L223-L289】
 

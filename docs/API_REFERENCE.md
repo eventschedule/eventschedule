@@ -177,6 +177,50 @@ Optional fields include `members`, `schedule` (sub-schedule slug), `category`, t
 * **404** – Schedule subdomain not found.
 * **422** – Validation errors (invalid dates, missing venue details, unknown categories, etc.).
 
+### `PATCH /api/events/{event_id}`
+Updates an event owned by the authenticated user. The route enforces the `resources.manage` ability. Omit fields to keep existing values; venue, member, and curator relationships are preserved when their arrays are not provided. Supplying `members` or `curators` merges your payload with the existing lists so you can add, edit, or remove talent/curators without re-sending the full roster, and providing `venue_id` or venue fields will re-link the event to the chosen venue (or update the existing unclaimed venue details). 【F:routes/api.php†L16-L22】【F:app/Http/Controllers/Api/ApiEventController.php†L231-L316】
+
+#### Minimal example
+```http
+PATCH /api/events/RVZFTlQtMg== HTTP/1.1
+X-API-Key: <your-api-key>
+Accept: application/json
+Content-Type: application/json
+
+{
+  "name": "Updated title",
+  "starts_at": "2024-05-01 20:00:00"
+}
+```
+
+#### Validation rules
+* `name` and `starts_at` are required **when present**; date format remains `Y-m-d H:i:s`.
+* If you supply any of `venue_id`, `venue_address1`, or `event_url`, at least one must be present (same as creation).
+* `members` and `curators` accept arrays of encoded role IDs; unknown schedule slugs or category names return 422. `members` entries may include optional `name`, `email`, or `youtube_url` fields to update unclaimed talent in place. 【F:app/Http/Controllers/Api/ApiEventController.php†L244-L316】
+
+#### Successful response (200)
+```json
+{
+  "data": {
+    "id": "RVZFTlQtMg==",
+    "name": "Updated title",
+    "starts_at": "2024-05-01 20:00:00",
+    "members": {
+      "Uk9MRS0y": {"name": "Performer", "email": null, "youtube_url": null}
+    },
+    "venue": {"id": "Uk9MRS0z", "name": "The Club", "type": "venue"}
+  },
+  "meta": {
+    "message": "Event updated successfully"
+  }
+}
+```
+
+#### Failure scenarios
+* **403** – Authenticated user does not own the event.
+* **404** – Unknown event ID.
+* **422** – Validation errors for venue, schedule slug, or category lookups.
+
 ### `POST /api/events/flyer/{event_id}`
 Uploads or swaps the flyer for an event you own. Supply either a multipart `flyer_image` file or a JSON payload containing `flyer_image_id` to reuse an existing upload.
 
