@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Utils\ColorUtils;
+use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -130,5 +131,63 @@ class ApiRoleController extends Controller
                 'message' => 'Role created successfully',
             ],
         ], 201, [], JSON_PRETTY_PRINT);
+    }
+
+    public function destroy(Request $request, string $role_id)
+    {
+        $role = Role::findOrFail(UrlUtils::decodeId($role_id));
+
+        if ($role->user_id !== $request->user()->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        if (! in_array($role->type, ['venue', 'curator', 'talent'])) {
+            return response()->json(['error' => 'Role type not supported'], 422);
+        }
+
+        if ($role->isTalent()) {
+            $role->loadMissing('events');
+
+            foreach ($role->events as $event) {
+                if ($event->members()->count() === 1) {
+                    $event->delete();
+                }
+            }
+        }
+
+        $role->delete();
+
+        return response()->json([
+            'meta' => [
+                'message' => 'Role deleted successfully',
+            ],
+        ], 200, [], JSON_PRETTY_PRINT);
+    }
+
+    public function destroyContact(Request $request, string $role_id, int $contact)
+    {
+        $role = Role::findOrFail(UrlUtils::decodeId($role_id));
+
+        if ($role->user_id !== $request->user()->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $contacts = collect($role->contacts);
+
+        if (! $contacts->has($contact)) {
+            return response()->json(['error' => 'Contact not found'], 404);
+        }
+
+        $contacts->forget($contact);
+
+        $role->contacts = $contacts->values()->all();
+        $role->save();
+
+        return response()->json([
+            'data' => $role->fresh()->toApiData(),
+            'meta' => [
+                'message' => 'Contact deleted successfully',
+            ],
+        ], 200, [], JSON_PRETTY_PRINT);
     }
 }
