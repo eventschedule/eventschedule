@@ -127,7 +127,24 @@ Lists all events owned by the authenticated user, including ticketing, schedulin
 * **401 / 423 / 429** – Same authentication and throttling responses as `/api/schedules`.
 
 ### `POST /api/events/{subdomain}`
-Creates a new event attached to the provided schedule (talent, venue, or curator subdomain).
+Creates a new event attached to the provided schedule (talent, venue, or curator subdomain). Posting to `/api/events` without the trailing subdomain is not supported and will return HTTP 405 because the bare route is reserved for GET requests. 【F:routes/api.php†L14-L20】
+
+To determine `{subdomain}`, use the `subdomain` field returned by `/api/schedules` (e.g., `sample-venue`). The subdomain is the schedule identifier used in public URLs and is required for event creation. Example request targeting a venue schedule:
+
+```http
+POST /api/events/sample-venue HTTP/1.1
+X-API-Key: <your-api-key>
+Accept: application/json
+Content-Type: application/json
+
+{
+  "name": "API Showcase",
+  "starts_at": "2024-04-01 20:00:00",
+  "venue_id": "Uk9MRS0z",
+  "category_name": "Concert",
+  "members": [{"name": "Performer"}]
+}
+```
 
 #### Required fields
 * `name` – string
