@@ -634,4 +634,6 @@ return [
     'events_synced' => 'Events synced successfully!',
     'untitled_event' => 'Untitled Event',
     'no_videos_selected' => 'No videos selected',
+    'new_requests_notification_subject' => ':count pending request(s) for :name',
+    'new_requests_notification_line' => 'You have :count pending request(s) for :name. Click below to view and manage them.',
 ];

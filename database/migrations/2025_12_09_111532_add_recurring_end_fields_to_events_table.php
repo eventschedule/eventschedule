@@ -15,6 +15,10 @@ return new class extends Migration
             $table->enum('recurring_end_type', ['never', 'on_date', 'after_events'])->default('never')->after('days_of_week');
             $table->string('recurring_end_value', 255)->nullable()->after('recurring_end_type');
         });
+
+        Schema::table('roles', function (Blueprint $table) {
+            $table->integer('last_notified_request_count')->default(0)->nullable()->after('request_terms_en');
+        });
     }
 
     /**
@@ -24,6 +28,10 @@ return new class extends Migration
     {
         Schema::table('events', function (Blueprint $table) {
             $table->dropColumn(['recurring_end_type', 'recurring_end_value']);
+        });
+
+        Schema::table('roles', function (Blueprint $table) {
+            $table->dropColumn('last_notified_request_count');
         });
     }
 };

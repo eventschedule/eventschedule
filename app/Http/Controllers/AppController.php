@@ -70,6 +70,7 @@ class AppController extends Controller
         \Artisan::call('app:import-curator-events');
         \Artisan::call('app:translate');
         \Artisan::call('google:refresh-webhooks');
+        \Artisan::call('app:notify-request-changes');
 
         return response()->json(['success' => true]);
     }

@@ -67,6 +67,7 @@ class Role extends Model implements MustVerifyEmail
         'sync_direction',
         'request_terms',
         'request_terms_en',
+        'last_notified_request_count',
     ];
 
     /**
