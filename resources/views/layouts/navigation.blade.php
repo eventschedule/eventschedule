@@ -7,7 +7,7 @@
 <nav class="flex flex-1 flex-col mt-4">
     <ul role="list" class="flex flex-1 flex-col gap-y-7">
         <li>
-            <ul role="list" class="-mx-2 space-y-2">
+            <ul role="list" class="-mx-2 space-y-1">
 
             <li>
                     <a href="{{ route('home') }}"
