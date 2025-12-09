@@ -240,6 +240,164 @@ class ApiEventController extends Controller
         ], 201, [], JSON_PRETTY_PRINT);
     }
 
+    public function update(Request $request, $event_id)
+    {
+        $event = Event::with(['roles', 'creatorRole'])->findOrFail(UrlUtils::decodeId($event_id));
+
+        if ($event->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $currentRole = $event->creatorRole ?: $event->roles->first();
+
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'starts_at' => 'sometimes|required|date_format:Y-m-d H:i:s',
+            'venue_id' => 'sometimes|required_without_all:venue_address1,event_url',
+            'venue_address1' => 'sometimes|required_without_all:venue_id,event_url',
+            'event_url' => 'sometimes|required_without_all:venue_id,venue_address1',
+            'members' => 'sometimes|array',
+            'curators' => 'sometimes|array',
+            'schedule' => 'nullable|string|max:255',
+            'category' => 'nullable|string|max:255',
+            'category_id' => 'nullable|integer',
+        ]);
+
+        if ($request->has('schedule')) {
+            $groupSlug = $request->schedule;
+            if ($currentRole && $group = $currentRole->groups()->where('slug', $groupSlug)->first()) {
+                $request->merge(['current_role_group_id' => UrlUtils::encodeId($group->id)]);
+            } else {
+                return response()->json(['error' => 'Schedule not found: ' . $request->schedule], 422);
+            }
+        }
+
+        if ($request->has('category_name') && ! $request->has('category_id')) {
+            $categoryName = trim((string) $request->category_name);
+            $categorySlug = Str::slug($categoryName);
+            $categoryId = null;
+
+            try {
+                $eventTypes = EventType::ordered();
+            } catch (\Throwable $exception) {
+                $eventTypes = collect();
+            }
+
+            if ($eventTypes->isNotEmpty()) {
+                foreach ($eventTypes as $eventType) {
+                    if (Str::slug($eventType->name) === $categorySlug || Str::slug($eventType->translatedName('en')) === $categorySlug) {
+                        $categoryId = $eventType->id;
+                        break;
+                    }
+
+                    foreach (($eventType->translations ?? []) as $translation) {
+                        if (! is_string($translation)) {
+                            continue;
+                        }
+
+                        if (Str::slug($translation) === $categorySlug) {
+                            $categoryId = $eventType->id;
+                            break 2;
+                        }
+                    }
+                }
+            }
+
+            if (! $categoryId) {
+                $fallbackCategories = config('app.event_categories', []);
+
+                foreach ($fallbackCategories as $id => $name) {
+                    if (Str::slug($name) === $categorySlug) {
+                        $categoryId = $id;
+                        break;
+                    }
+                }
+            }
+
+            if ($categoryId) {
+                $request->merge(['category_id' => $categoryId]);
+            } else {
+                return response()->json(['error' => 'Category not found: ' . $request->category_name], 422);
+            }
+        }
+
+        $event->loadMissing('roles');
+
+        if (! $request->has('members')) {
+            $members = $event->members()->mapWithKeys(function ($member) {
+                return [UrlUtils::encodeId($member->id) => [
+                    'name' => $member->name,
+                    'email' => $member->email,
+                    'youtube_url' => $member->getFirstVideoUrl(),
+                ]];
+            })->toArray();
+
+            if ($currentRole && $currentRole->isTalent()) {
+                $members[UrlUtils::encodeId($currentRole->id)] = [
+                    'name' => $currentRole->name,
+                    'email' => $currentRole->email,
+                    'youtube_url' => $currentRole->getFirstVideoUrl(),
+                ];
+            }
+
+            $request->merge(['members' => $members]);
+        } else {
+            $existingMembers = $event->members()->mapWithKeys(function ($member) {
+                return [UrlUtils::encodeId($member->id) => [
+                    'name' => $member->name,
+                    'email' => $member->email,
+                    'youtube_url' => $member->getFirstVideoUrl(),
+                ]];
+            })->toArray();
+
+            $requestMembers = collect($request->members)->mapWithKeys(function ($memberData, $memberId) {
+                return [$memberId => $memberData];
+            });
+
+            $mergedMembers = collect($existingMembers)
+                ->mergeRecursive($requestMembers)
+                ->filter(function ($memberData) {
+                    return $memberData !== null;
+                })
+                ->toArray();
+
+            $request->merge(['members' => $mergedMembers]);
+        }
+
+        if (! $request->has('venue_id') && $event->venue) {
+            $request->merge(['venue_id' => UrlUtils::encodeId($event->venue->id)]);
+        }
+
+        if (! $request->has('curators')) {
+            $curators = $event->roles->filter->isCurator()->map(function ($curator) {
+                return UrlUtils::encodeId($curator->id);
+            })->values()->all();
+
+            $request->merge(['curators' => $curators]);
+        } else {
+            $existingCurators = $event->roles->filter->isCurator()->map(function ($curator) {
+                return UrlUtils::encodeId($curator->id);
+            });
+
+            $mergedCurators = $existingCurators
+                ->merge($request->curators)
+                ->unique()
+                ->values()
+                ->all();
+
+            $request->merge(['curators' => $mergedCurators]);
+        }
+
+        $event = $this->eventRepo->saveEvent($currentRole, $request, $event);
+
+        return response()->json([
+            'data' => $event->toApiData(),
+            'meta' => [
+                'message' => 'Event updated successfully'
+            ]
+        ], 200, [], JSON_PRETTY_PRINT);
+    }
+
     public function flyer(Request $request, $event_id)
     {
         $event = Event::findOrFail(UrlUtils::decodeId($event_id));
