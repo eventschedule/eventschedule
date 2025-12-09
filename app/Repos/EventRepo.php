@@ -206,6 +206,31 @@ class EventRepo
         }
         $event->days_of_week = request()->schedule_type == 'recurring' ? $days_of_week : null;
 
+        // Handle recurring end configuration (only for recurring events)
+        if (request()->schedule_type == 'recurring') {
+            $event->recurring_end_type = $request->input('recurring_end_type', 'never');
+            $event->recurring_end_value = $request->input('recurring_end_value');
+            
+            // Validate and clean up recurring_end_value based on type
+            if ($event->recurring_end_type === 'never') {
+                $event->recurring_end_value = null;
+            } elseif ($event->recurring_end_type === 'on_date') {
+                // Ensure it's a valid date format (YYYY-MM-DD)
+                if ($event->recurring_end_value && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $event->recurring_end_value)) {
+                    $event->recurring_end_value = null;
+                }
+            } elseif ($event->recurring_end_type === 'after_events') {
+                // Ensure it's a positive integer
+                $event->recurring_end_value = $event->recurring_end_value && is_numeric($event->recurring_end_value) && (int)$event->recurring_end_value > 0 
+                    ? (string)(int)$event->recurring_end_value 
+                    : null;
+            }
+        } else {
+            // Clear recurring end fields for non-recurring events
+            $event->recurring_end_type = 'never';
+            $event->recurring_end_value = null;
+        }
+
         if ($event->starts_at) {
             $timezone = $user->timezone;
             $event->starts_at = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, $timezone)
