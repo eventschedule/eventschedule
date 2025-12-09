@@ -32,6 +32,20 @@ Example error payloads:
 }
 ```
 
+## Roles
+
+### `GET /api/roles`
+Lists the authenticated user's venues, curators, and talent schedules. Supports filtering by `type` (comma-separated list) and `name` substring. Results are paginated up to 1000 per page and include the role's encoded ID, contact info, styling, and groups. 【F:routes/api.php†L15-L18】【F:app/Http/Controllers/Api/ApiRoleController.php†L17-L57】
+
+### `POST /api/roles`
+Creates a new venue, curator, or talent owned by the requesting user. Requires the `resources.manage` ability and validates standard role fields (name, email, type, venue address when applicable). Contacts and groups can be provided and are persisted when present. 【F:routes/api.php†L15-L18】【F:app/Http/Controllers/Api/ApiRoleController.php†L59-L134】
+
+### `DELETE /api/roles/{role_id}`
+Deletes a venue, curator, or talent owned by the authenticated user. Talent deletion also removes any events where that talent is the only member. Non-schedule role types return 422. 【F:routes/api.php†L15-L18】【F:app/Http/Controllers/Api/ApiRoleController.php†L136-L165】
+
+### `DELETE /api/roles/{role_id}/contacts/{contact}`
+Removes a single contact entry by its zero-based index. Returns the updated role payload and a success message, or 404 if the contact index does not exist. 【F:routes/api.php†L15-L18】【F:app/Http/Controllers/Api/ApiRoleController.php†L167-L192】
+
 ## Schedules
 
 ### `GET /api/schedules`
@@ -242,6 +256,23 @@ Uploads or swaps the flyer for an event you own. Supply either a multipart `flye
 * **403** – Event does not belong to the authenticated user.
 * **404** – Event ID not found.
 * **422** – Validation error (e.g., invalid `flyer_image_id`).
+
+### `DELETE /api/events/{event_id}`
+Deletes an event owned by the authenticated user. The route enforces the `resources.manage` ability (same as creation and update).
+
+#### Successful response (200)
+```json
+{
+  "meta": {
+    "message": "Event deleted successfully"
+  }
+}
+```
+
+#### Failure scenarios
+* **403** – Authenticated user does not own the event.
+* **404** – Unknown event ID.
+* **405** – Method not allowed when targeting `/api/events` without an ID.
 
 ## Error handling summary
 
