@@ -28,6 +28,7 @@ class EventCreateRequest extends FormRequest
             'flyer_media_asset_id' => ['nullable', 'integer', 'exists:media_assets,id'],
             'flyer_media_variant_id' => ['nullable', 'integer', 'exists:media_asset_variants,id'],
             'slug' => ['nullable', 'string', 'max:255'],
+            'timezone' => ['required', 'timezone'],
         ];
     }
 }

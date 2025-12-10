@@ -29,6 +29,7 @@ class EventFactory extends Factory
             'name' => $name,
             'slug' => Str::slug($name) . '-' . fake()->unique()->numberBetween(100, 999),
             'starts_at' => now()->addWeek(),
+            'timezone' => config('app.timezone', 'UTC'),
             'duration' => 2.5,
             'description' => fake()->sentence(),
             'description_html' => '<p>' . fake()->sentence() . '</p>',

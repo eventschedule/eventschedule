@@ -1,6 +1,6 @@
 <x-app-admin-layout>
     @php
-        $timezone = auth()->user()->timezone ?? config('app.timezone');
+    $timezone = $event->timezone ?? auth()->user()->timezone ?? config('app.timezone');
         $startDisplay = $startAt ? $startAt->copy()->locale(app()->getLocale())->translatedFormat('M j, Y • g:i A') : null;
         $endDisplay = $endAt ? $endAt->copy()->locale(app()->getLocale())->translatedFormat('M j, Y • g:i A') : null;
         $talentNames = $talents->map->translatedName()->implode(', ');

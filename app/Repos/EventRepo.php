@@ -253,9 +253,10 @@ class EventRepo
             }
             $event->days_of_week = request()->schedule_type == 'recurring' ? $days_of_week : null;
 
+            $event->timezone = $event->timezone ?: ($user->timezone ?? config('app.timezone', 'UTC'));
+
             if ($event->starts_at) {
-                $timezone = $user->timezone;
-                $event->starts_at = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, $timezone)
+                $event->starts_at = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, $event->timezone)
                     ->setTimezone('UTC')
                     ->format('Y-m-d H:i:s');
             }

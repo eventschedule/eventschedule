@@ -612,7 +612,8 @@ class AppleWalletService
 
     protected function resolveTimezone(Event $event): string
     {
-        return $event->venue?->timezone
+        return $event->timezone
+            ?? $event->venue?->timezone
             ?? $event->creatorRole?->timezone
             ?? config('app.timezone', 'UTC');
     }
