@@ -95,7 +95,7 @@ Payload format:
 Creates a new event attached to the schedule identified by `{subdomain}`. The subdomain can be a venue, talent, or curator; the API automatically populates related fields based on the schedule type. **Do not** POST to `/api/events` without a subdomain, as that route is read-only and will return HTTP 405. 【F:app/Http/Controllers/Api/ApiEventController.php†L70-L213】【F:routes/api.php†L14-L20】
 
 Required inputs:
-- `name` (string, ≤255) and `starts_at` (`Y-m-d H:i:s`). 【F:app/Http/Controllers/Api/ApiEventController.php†L85-L95】
+- `name` (string, ≤255) and `starts_at` (`Y-m-d H:i:s`). Backend parsing treats this as the creator's local wall time, not an ISO8601 instant, so mobile clients should format the field in the current timezone rather than forcing UTC. 【F:app/Http/Controllers/Api/ApiEventController.php†L85-L95】【F:app/Repos/EventRepo.php†L237-L243】
 - One of `venue_id`, `venue_address1`, or `event_url`. 【F:app/Http/Controllers/Api/ApiEventController.php†L85-L95】
 
 Key behaviors and optional fields:
