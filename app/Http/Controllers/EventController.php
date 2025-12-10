@@ -136,13 +136,8 @@ class EventController extends Controller
 
         $this->handleEventDeletion($event, $user);
 
-        $data = [
-            'subdomain' => $subdomain,
-            'tab' => 'schedule',
-        ];
-
-        return redirect(route('role.view_admin', $data))
-                ->with('message', __('messages.event_deleted'));
+        return redirect()->route('home', ['view' => 'list'])
+            ->with('message', __('messages.event_deleted'));
     }
 
     public function destroyFromHome(Request $request, $hash)
@@ -157,7 +152,7 @@ class EventController extends Controller
 
         $this->handleEventDeletion($event, $user);
 
-        return redirect()->route('home')->with('message', __('messages.event_deleted'));
+        return redirect()->route('home', ['view' => 'list'])->with('message', __('messages.event_deleted'));
     }
 
     public function view(Request $request, $hash)
