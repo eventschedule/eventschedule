@@ -10,7 +10,6 @@ use App\Models\Role;
 use App\Models\RoleUser;
 use App\Repos\EventRepo;
 use App\Utils\UrlUtils;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -92,14 +91,12 @@ class ApiEventController extends Controller
     {
         $role = Role::with('groups')->subdomain($subdomain)->firstOrFail();
         $encodedRoleId = UrlUtils::encodeId($role->id);
-
-        $this->normalizeStartsAt($request);
-
+        
         if ($role->isVenue()) {
             $request->merge(['venue_id' => $encodedRoleId]);
         } else if ($role->isTalent()) {
             $request->merge(['members' => [$encodedRoleId => ['name' => $role->name]]]);
-        }
+        }   
 
         if (! auth()->user()->isMember($subdomain)) {
             return response()->json(['error' => 'Unauthorized'], 403);
@@ -252,8 +249,6 @@ class ApiEventController extends Controller
         }
 
         $currentRole = $event->creatorRole ?: $event->roles->first();
-
-        $this->normalizeStartsAt($request);
 
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
@@ -487,22 +482,5 @@ class ApiEventController extends Controller
                 'message' => 'Flyer uploaded successfully'
             ]
         ], 200, [], JSON_PRETTY_PRINT);
-    }
-
-    protected function normalizeStartsAt(Request $request): void
-    {
-        $startsAt = $request->input('starts_at');
-
-        if (! $startsAt || ! is_string($startsAt)) {
-            return;
-        }
-
-        try {
-            $parsedStartsAt = Carbon::parse($startsAt);
-        } catch (\Throwable $exception) {
-            return;
-        }
-
-        $request->merge(['starts_at' => $parsedStartsAt->format('Y-m-d H:i:s')]);
     }
 }
