@@ -190,13 +190,13 @@ class GoogleCalendarService
 
             $startDateTime = new EventDateTime();
             $startDateTime->setDateTime($startAt->toRfc3339String());
-            $startDateTime->setTimeZone($event->creatorRole->timezone ?? 'UTC');
+            $startDateTime->setTimeZone($event->timezone ?? $event->creatorRole->timezone ?? 'UTC');
             $googleEvent->setStart($startDateTime);
 
             $endDateTime = new EventDateTime();
             $endTime = $startAt->copy()->addHours($event->duration ?: 2);
             $endDateTime->setDateTime($endTime->toRfc3339String());
-            $endDateTime->setTimeZone($event->creatorRole->timezone ?? 'UTC');
+            $endDateTime->setTimeZone($event->timezone ?? $event->creatorRole->timezone ?? 'UTC');
             $googleEvent->setEnd($endDateTime);
 
             // Set location
@@ -267,13 +267,13 @@ class GoogleCalendarService
 
             $startDateTime = new EventDateTime();
             $startDateTime->setDateTime($startAt->toRfc3339String());
-            $startDateTime->setTimeZone($event->creatorRole->timezone ?? 'UTC');
+            $startDateTime->setTimeZone($event->timezone ?? $event->creatorRole->timezone ?? 'UTC');
             $googleEvent->setStart($startDateTime);
 
             $endDateTime = new EventDateTime();
             $endTime = $startAt->copy()->addHours($event->duration ?: 2);
             $endDateTime->setDateTime($endTime->toRfc3339String());
-            $endDateTime->setTimeZone($event->creatorRole->timezone ?? 'UTC');
+            $endDateTime->setTimeZone($event->timezone ?? $event->creatorRole->timezone ?? 'UTC');
             $googleEvent->setEnd($endDateTime);
 
             // Set location

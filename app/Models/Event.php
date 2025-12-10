@@ -46,6 +46,7 @@ class Event extends Model
         'creator_role_id',
         'flyer_image_id',
         'google_event_id',
+        'timezone',
     ];
 
     protected $casts = [
@@ -429,6 +430,14 @@ class Event extends Model
         return '';
     }
 
+    public function getEventTimezone(): string
+    {
+        return $this->timezone
+            ?? $this->creatorRole?->timezone
+            ?? (auth()->user()->timezone ?? null)
+            ?? config('app.timezone', 'UTC');
+    }
+
     public function getGuestUrl($subdomain = false, $date = null, $useCustomDomain = null, bool $forceEventSlug = false)
     {
         $data = $this->getGuestUrlData($subdomain, $date, $forceEventSlug);
@@ -486,7 +495,9 @@ class Event extends Model
 
         if ($date === true) {
             $date = $this->starts_at
-                ? Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d')
+                ? Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')
+                    ->setTimezone($this->getEventTimezone())
+                    ->format('Y-m-d')
                 : null;
         }
 
@@ -647,13 +658,7 @@ class Event extends Model
 
     public function getStartDateTime($date = null, $locale = false)
     {
-        $timezone = 'UTC';
-        
-        if ($user = auth()->user()) {
-            $timezone = $user->timezone;
-        } else if ($this->creatorRole) {
-            $timezone = $this->creatorRole->timezone;
-        }
+        $timezone = $this->getEventTimezone();
 
         $startsAt = $this->starts_at;
 
@@ -773,7 +778,7 @@ class Event extends Model
         return storage_asset_url($value);
     }
 
-    public function getOtherRole($subdomain) {        
+    public function getOtherRole($subdomain) {
         if ($this->role() && $subdomain == $this->role()->subdomain) {
             return $this->venue;
         } else {
@@ -820,7 +825,7 @@ class Event extends Model
             'description_html' => $this->description_html,
             'starts_at' => $this->starts_at ? Carbon::parse($this->starts_at)->format('Y-m-d H:i:s') : null,
             'duration' => $this->duration,
-            'timezone' => $primaryRole ? $primaryRole->timezone : null,
+            'timezone' => $this->timezone ?? ($primaryRole ? $primaryRole->timezone : null),
             'venue_id' => $this->venue ? UrlUtils::encodeId($this->venue->id) : null,
             'venue' => $this->venue ? $this->venue->toApiData() : null,
             'tickets_enabled' => (bool) $this->tickets_enabled,

@@ -433,9 +433,11 @@ class EventController extends Controller
         }
 
         if ($request->date) {
-            $defaultTime = Carbon::now($user->timezone)->setTime(20, 0, 0);
+            $defaultTimezone = $role->timezone ?? $user->timezone ?? config('app.timezone');
+            $defaultTime = Carbon::now($defaultTimezone)->setTime(20, 0, 0);
             $utcTime = $defaultTime->setTimezone('UTC');
             $event->starts_at = $request->date . $utcTime->format('H:i:s');
+            $event->timezone = $defaultTimezone;
         }
 
         $roles = $user->roles()->get();

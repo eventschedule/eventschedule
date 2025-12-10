@@ -70,6 +70,7 @@ class EventClaimMailTest extends TestCase
             'venue_state' => 'TS',
             'venue_postal_code' => '12345',
             'venue_country_code' => 'US',
+            'timezone' => 'UTC',
         ];
 
         $response = $this->post(route('event.store', ['subdomain' => $organizerRole->subdomain]), $payload);

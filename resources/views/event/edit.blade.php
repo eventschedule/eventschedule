@@ -697,6 +697,23 @@
                             <x-input-error class="mt-2" :messages="$errors->get('starts_at')" />
                         </div>
 
+                        @php
+                            $eventTimezone = old(
+                                'timezone',
+                                $event->timezone ?? ($role->timezone ?? $user->timezone ?? config('app.timezone'))
+                            );
+                        @endphp
+
+                        <div class="mb-6">
+                            <x-input-label for="timezone" :value="__('messages.timezone')" />
+                            <select id="timezone" name="timezone" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:border-[#4E81FA] dark:focus:ring-[#4E81FA]">
+                                @foreach(\Carbon\CarbonTimeZone::listIdentifiers() as $timezone)
+                                    <option value="{{ $timezone }}" @selected($eventTimezone === $timezone)>{{ $timezone }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('timezone')" />
+                        </div>
+
                         <div class="mb-6">
                             <x-input-label for="duration" :value="__('messages.duration_in_hours')" />
                             <x-text-input type="number" id="duration" name="duration" step="0.01"
