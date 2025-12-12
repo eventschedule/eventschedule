@@ -405,10 +405,18 @@
 
                         <div class="mt-4" v-show="isPrivate">
                           <x-input-label for="event_password" :value="__('messages.password') . ' *'" />
-                          <x-text-input id="event_password" name="event_password" type="password" class="mt-1 block w-full"
-                            v-model="event.event_password" v-bind:required="shouldRequirePassword() || (!initiallyPrivate && isPrivate)" autocomplete="off" />
-                          <x-input-error class="mt-2" :messages="$errors->get('event_password')" />
-                          <p class="text-sm text-gray-500 mt-2">{{ __('messages.password_help') }}</p>
+
+                          <div v-if="initiallyPrivate && isPrivate && !editingPassword" class="flex items-center space-x-3 mt-2">
+                            <span class="text-sm text-green-600">{{ __('messages.password_set') }}</span>
+                            <x-secondary-button type="button" class="ml-2" x-on:click.prevent="editingPassword = true">{{ __('messages.change_password') }}</x-secondary-button>
+                          </div>
+
+                          <div v-show="!initiallyPrivate || editingPassword" class="mt-2">
+                            <x-text-input id="event_password" name="event_password" type="password" class="mt-1 block w-full"
+                              v-model="event.event_password" v-bind:required="shouldRequirePassword() || (!initiallyPrivate && isPrivate) || (editingPassword && isPrivate)" autocomplete="off" />
+                            <x-input-error class="mt-2" :messages="$errors->get('event_password')" />
+                            <p class="text-sm text-gray-500 mt-2">{{ __('messages.password_help') }}</p>
+                          </div>
                         </div>
                     </div>
                 </div>
@@ -1303,6 +1311,8 @@
         memberYoutubeUrl: "",
         showMemberTypeRadio: true,
         showVenueAddressFields: false,
+        // When true, display the password input so the owner can change the password
+        editingPassword: false,
         isInPerson: @json($event->exists ? (bool) ($selectedVenue ?? false) : true),
         isOnline: @json($event->exists ? (bool) $event->event_url : false),
         eventName: @json($event->name ?? ''),
@@ -1733,8 +1743,8 @@
           return;
         }
 
-        // Require password if it's a required policy for online tickets OR the event is being marked private
-        if ((this.shouldRequirePassword() || (!this.initiallyPrivate && this.isPrivate)) && (!this.event.event_password || this.event.event_password.trim() === '')) {
+        // Require password if it's a required policy for online tickets, the event is being newly marked private, or the user chose to edit the password
+        if ((this.shouldRequirePassword() || (!this.initiallyPrivate && this.isPrivate) || (this.editingPassword && this.isPrivate)) && (!this.event.event_password || this.event.event_password.trim() === '')) {
           if (event && typeof event.preventDefault === 'function') {
               event.preventDefault();
           }

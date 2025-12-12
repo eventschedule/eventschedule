@@ -55,11 +55,30 @@ class Event extends Model
      */
     public function verifyPassword(?string $password): bool
     {
-        if (! $this->event_password_hash) {
+        if (! $password) {
             return false;
         }
 
-        return \Illuminate\Support\Facades\Hash::check($password, $this->event_password_hash);
+        // If hash exists, check against it
+        if ($this->event_password_hash) {
+            return \Illuminate\Support\Facades\Hash::check($password, $this->event_password_hash);
+        }
+
+        // Legacy plaintext fallback: if the legacy column has a value, allow matching.
+        if ($this->getAttribute('event_password') && $password === $this->getAttribute('event_password')) {
+            // Migrate to hashed storage for future safety
+            try {
+                $this->event_password_hash = \Illuminate\Support\Facades\Hash::make($password);
+                $this->attributes['event_password'] = null;
+                $this->saveQuietly();
+            } catch (\Throwable $ex) {
+                // If migration fails, ignore and still allow authentication
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -67,7 +86,7 @@ class Event extends Model
      */
     public function hasPassword(): bool
     {
-        return (bool) $this->event_password_hash;
+        return (bool) ($this->event_password_hash || $this->getAttribute('event_password'));
     }
 
     protected $casts = [

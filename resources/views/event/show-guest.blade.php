@@ -213,6 +213,17 @@
             </div>
           @endif
 
+          @if ($event->event_url)
+            <div class="mt-3">
+              <a href="{{ $event->event_url }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                </svg>
+                {{ __('messages.watch_online') }}
+              </a>
+            </div>
+          @endif
+
           @if ($translation ? $translation->description_translated : $event->translatedDescription())
           <div class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-5 py-8 sm:p-8 mb-6 flex flex-col gap-4 {{ $role->isRtl() || ($translation && $translation->role->isRtl()) ? 'rtl' : '' }}">
             <h2
