@@ -389,6 +389,27 @@
                                 v-model="event.event_url" required autofocus autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('event_url')" />
                         </div>
+
+                        <div class="mt-4">
+                          <x-input-label for="event_private" :value="__('messages.event_private_label')" />
+                          <div class="flex items-center space-x-4 mt-2">
+                            <input id="event_private" name="event_private" type="checkbox" v-model="isPrivate"
+                              :disabled="shouldRequirePassword()"
+                              class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                            <label for="event_private" class="text-sm text-gray-900 dark:text-gray-100">
+                              {{ __('messages.private_event_label') }}
+                              <span v-if="shouldRequirePassword()" class="ml-2 text-xs text-gray-500">({{ __('messages.required') }})</span>
+                            </label>
+                          </div>
+                        </div>
+
+                        <div class="mt-4" v-show="isPrivate">
+                          <x-input-label for="event_password" :value="__('messages.password') . ' *'" />
+                          <x-text-input id="event_password" name="event_password" type="password" class="mt-1 block w-full"
+                            v-model="event.event_password" :required="shouldRequirePassword() || (!initiallyPrivate && isPrivate)" autocomplete="off" />
+                          <x-input-error class="mt-2" :messages="$errors->get('event_password')" />
+                          <p class="text-sm text-gray-500 mt-2">{{ __('messages.password_help') }}</p>
+                        </div>
                     </div>
                 </div>
 
@@ -1256,6 +1277,8 @@
           tickets_enabled: {{ $event->tickets_enabled ? 'true' : 'false' }},
           total_tickets_mode: @json($event->total_tickets_mode ?? 'individual'),
         },
+        isPrivate: @json($event->hasPassword()),
+        initiallyPrivate: @json($event->hasPassword()),
         venues: sanitizeCollection(@json($venues ?? [])),
         members: sanitizeCollection(@json($members ?? [])),
         shouldBypassPreferences: hasBrowserTestingCookie() || @json(is_browser_testing()),
@@ -1689,6 +1712,7 @@
           this.isProgrammaticSubmitPending = false;
           return;
         }
+        
 
         this.tickets = this.tickets.map(ticket => ({
           ...ticket,
@@ -1707,6 +1731,20 @@
           alert("{{ __('messages.please_select_venue_or_participant') }}");
 
           return;
+        }
+
+        // Require password if it's a required policy for online tickets OR the event is being marked private
+        if ((this.shouldRequirePassword() || (!this.initiallyPrivate && this.isPrivate)) && (!this.event.event_password || this.event.event_password.trim() === '')) {
+          if (event && typeof event.preventDefault === 'function') {
+              event.preventDefault();
+          }
+          alert("{{ __('messages.password_required_for_online_tickets') }}");
+          return;
+        }
+
+        if (!this.isPrivate) {
+          // Clear event password if privacy not enabled
+          this.event.event_password = null;
         }
 
         if (event && typeof event.preventDefault === 'function') {
@@ -1739,6 +1777,9 @@
             }
           });
         }
+      },
+      shouldRequirePassword() {
+        return this.isOnline && this.event.tickets_enabled && Array.isArray(this.tickets) && this.tickets.length > 0;
       },
       addTicket() {
         this.tickets.push({
@@ -1964,6 +2005,9 @@
           this.clearEventUrl();
         }
         this.savePreferences();
+        if (this.shouldRequirePassword()) {
+          this.isPrivate = true;
+        }
       },
       selectedMembers: {
         handler(newValue) {
@@ -1979,6 +2023,17 @@
       },
       'event.tickets_enabled'(newValue) {
         this.savePreferences();
+        if (this.shouldRequirePassword()) {
+          this.isPrivate = true;
+        }
+      },
+      tickets: {
+        handler(newValue) {
+          if (this.shouldRequirePassword()) {
+            this.isPrivate = true;
+          }
+        },
+        deep: true
       },
     },
     mounted() {

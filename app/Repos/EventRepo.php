@@ -240,6 +240,34 @@ class EventRepo
                 $input['slug'] = $slugValue;
             }
 
+            // Handle password input: convert plaintext password to a secure hash
+            $privateFlag = array_key_exists('event_private', $input) ? (bool) $input['event_private'] : null;
+
+            if ($privateFlag === false) {
+                // User explicitly opted out of privacy: clear existing password
+                $event->event_password_hash = null;
+            } elseif ($privateFlag === true) {
+                if (array_key_exists('event_password', $input)) {
+                    if ($input['event_password'] && trim($input['event_password']) !== '') {
+                        $event->event_password_hash = \Illuminate\Support\Facades\Hash::make($input['event_password']);
+                    } else {
+                        // No new password provided, and privacy flag is true: keep existing hash
+                    }
+                    unset($input['event_password']);
+                }
+            } else {
+                // No explicit privacy flag present in input (e.g., API callers or scripts)
+                if (array_key_exists('event_password', $input)) {
+                    if ($input['event_password'] && trim($input['event_password']) !== '') {
+                        $event->event_password_hash = \Illuminate\Support\Facades\Hash::make($input['event_password']);
+                    } else {
+                        // Explicit empty password provided: clear existing
+                        $event->event_password_hash = null;
+                    }
+                    unset($input['event_password']);
+                }
+            }
+
             $event->fill($input);
 
             if (! $request->event_url) {
