@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\HandlesEventDeletion;
 use App\Models\Role;
 use App\Utils\ColorUtils;
 use App\Utils\UrlUtils;
@@ -17,6 +18,7 @@ use App\Utils\UrlUtils;
 
 class ApiRoleController extends Controller
 {
+    use HandlesEventDeletion;
     protected const MAX_PER_PAGE = 1000;
     protected const DEFAULT_PER_PAGE = 100;
 
@@ -156,7 +158,7 @@ class ApiRoleController extends Controller
 
             foreach ($role->events as $event) {
                 if ($event->members()->count() === 1) {
-                    $event->delete();
+                    $this->handleEventDeletion($event, $request->user());
                 }
             }
         }

@@ -387,6 +387,7 @@
                             <x-input-label for="event_url" :value="__('messages.event_url') . ' *'" />
                             <x-text-input id="event_url" name="event_url" type="url" class="mt-1 block w-full"
                                 v-model="event.event_url" required autofocus autocomplete="off" />
+                            <p class="mt-1 text-sm text-gray-500">{{ __('messages.password_required_for_online_tickets') }}</p>
                             <x-input-error class="mt-2" :messages="$errors->get('event_url')" />
                         </div>
 

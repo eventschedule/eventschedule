@@ -84,6 +84,12 @@
             if ($locationHeadline === $locationDetails) {
               $locationDetails = null;
             }
+            // Add room/suite information if available
+            if ($event->venue->translatedAddress2()) {
+              $locationDetails = $locationDetails 
+                ? $locationDetails . ' • ' . $event->venue->translatedAddress2()
+                : $event->venue->translatedAddress2();
+            }
           } elseif ($event->event_url) {
             $locationHeadline = \App\Utils\UrlUtils::clean($event->event_url);
           } else {
@@ -469,10 +475,12 @@
           $locationLink = null;
           $locationCta = null;
           $locationDescription = null;
+          $locationRoom = null;
           if ($event->venue) {
             $locationLink = 'https://www.google.com/maps/search/?api=1&query=' . urlencode($event->venue->bestAddress());
             $locationCta = $event->venue->shortAddress();
             $locationDescription = $event->venue->translatedName() ?: $event->venue->shortAddress();
+            $locationRoom = $event->venue->translatedAddress2();
           } elseif ($event->event_url) {
             $locationLink = $event->event_url;
             $locationCta = \App\Utils\UrlUtils::clean($event->event_url);
@@ -485,6 +493,9 @@
           </h4>
           @if ($locationDescription)
             <p class="text-sm text-gray-600 dark:text-gray-300">{{ $locationDescription }}</p>
+          @endif
+          @if ($locationRoom)
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $locationRoom }}</p>
           @endif
           @if ($locationLink && $locationCta)
             <a href="{{ $locationLink }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">

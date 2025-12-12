@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\HandlesEventDeletion;
 use App\Models\Event;
 use App\Models\EventType;
 use App\Models\Image;
@@ -17,6 +18,7 @@ use Illuminate\Support\Str;
 
 class ApiEventController extends Controller
 {
+    use HandlesEventDeletion;
     protected const MAX_PER_PAGE = 1000;
     protected const DEFAULT_PER_PAGE = 100;
 
@@ -418,7 +420,7 @@ class ApiEventController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $event->delete();
+        $this->handleEventDeletion($event, auth()->user());
 
         return response()->json([
             'meta' => [

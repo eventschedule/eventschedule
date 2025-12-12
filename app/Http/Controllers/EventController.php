@@ -33,9 +33,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Rules\NoFakeEmail;
 use App\Models\Image;
+use App\Http\Controllers\Concerns\HandlesEventDeletion;
 
 class EventController extends Controller
 {
+    use HandlesEventDeletion;
     protected $eventRepo;
 
     public function __construct(EventRepo $eventRepo)
@@ -98,31 +100,7 @@ class EventController extends Controller
         return redirect()->back()->with('message', __('messages.videos_cleared'));
     }
 
-    protected function handleEventDeletion(Event $event, User $user): void
-    {
-        $event->loadMissing(['roles.members', 'venue.members', 'creatorRole.members', 'sales']);
-
-        $talentRoles = $event->roles->filter(fn ($roleModel) => $roleModel->isTalent());
-
-        NotificationUtils::uniqueRoleMembersWithContext($talentRoles)->each(function (array $recipient) use ($event, $user) {
-            $recipient['user']->notify(new DeletedEventNotification($event, $user, 'talent', $recipient['role']));
-        });
-
-        $organizerRoles = collect([$event->creatorRole, $event->venue])->filter();
-
-        NotificationUtils::uniqueRoleMembersWithContext($organizerRoles)->each(function (array $recipient) use ($event, $user) {
-            $recipient['user']->notify(new DeletedEventNotification($event, $user, 'organizer', $recipient['role']));
-        });
-
-        $purchaserEmails = NotificationUtils::purchaserEmails($event);
-
-        if ($purchaserEmails->isNotEmpty()) {
-            Notification::route('mail', $purchaserEmails->all())
-                ->notify(new DeletedEventNotification($event, $user, 'purchaser', $event->venue));
-        }
-
-        $event->delete();
-    }
+    // handleEventDeletion method moved to HandlesEventDeletion trait
 
     public function delete(Request $request, $subdomain, $hash)
     {

@@ -33,6 +33,7 @@ use App\Models\MediaAssetUsage;
 use App\Support\ScheduleBackgroundManager;
 use App\Utils\UrlUtils;
 use App\Utils\ColorUtils;
+use App\Http\Controllers\Concerns\HandlesEventDeletion;
 use App\Utils\GeminiUtils;
 use App\Support\GroupPayloadNormalizer;
 use Illuminate\Database\Eloquent\Model;
@@ -42,6 +43,7 @@ use Throwable;
 
 class RoleController extends Controller
 {
+    use HandlesEventDeletion;
     protected $eventRepo;
 
     /**
@@ -166,7 +168,7 @@ class RoleController extends Controller
             $events = $role->events()->get();
             foreach ($events as $event) {
                 if ($event->members()->count() == 1) {
-                    $event->delete();
+                    $this->handleEventDeletion($event, $user);
                 }
             }
         }
