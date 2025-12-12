@@ -503,7 +503,7 @@
           <h4 class="text-[24px] leading-snug font-semibold text-gray-900 dark:text-gray-100">
             {{ __('messages.event_online_label') }}
           </h4>
-          <p class="text-sm text-gray-600 dark:text-gray-300">{{ \\App\\Utils\\UrlUtils::clean($event->event_url) }}</p>
+          <p class="text-sm text-gray-600 dark:text-gray-300">{{ \App\Utils\UrlUtils::clean($event->event_url) }}</p>
           <a href="{{ $event->event_url }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">
             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />

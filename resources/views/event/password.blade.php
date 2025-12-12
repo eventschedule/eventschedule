@@ -9,7 +9,7 @@
         <div class="mb-4 text-red-600">{{ session('error') }}</div>
       @endif
 
-      <form method="POST" action="{{ route('event.access', ['subdomain' => $role->subdomain, 'hash' => \\App\\Utils\\UrlUtils::encodeId($event->id)]) }}">
+      <form method="POST" action="{{ route('event.access', ['subdomain' => $role->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}">
         @csrf
         <input type="hidden" name="date" value="{{ request('date') }}" />
         <div class="mb-4">
