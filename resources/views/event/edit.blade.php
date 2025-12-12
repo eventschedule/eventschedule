@@ -394,7 +394,7 @@
                           <x-input-label for="event_private" :value="__('messages.event_private_label')" />
                           <div class="flex items-center space-x-4 mt-2">
                             <input id="event_private" name="event_private" type="checkbox" v-model="isPrivate"
-                              :disabled="shouldRequirePassword()"
+                              v-bind:disabled="shouldRequirePassword()"
                               class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
                             <label for="event_private" class="text-sm text-gray-900 dark:text-gray-100">
                               {{ __('messages.private_event_label') }}
@@ -406,7 +406,7 @@
                         <div class="mt-4" v-show="isPrivate">
                           <x-input-label for="event_password" :value="__('messages.password') . ' *'" />
                           <x-text-input id="event_password" name="event_password" type="password" class="mt-1 block w-full"
-                            v-model="event.event_password" :required="shouldRequirePassword() || (!initiallyPrivate && isPrivate)" autocomplete="off" />
+                            v-model="event.event_password" v-bind:required="shouldRequirePassword() || (!initiallyPrivate && isPrivate)" autocomplete="off" />
                           <x-input-error class="mt-2" :messages="$errors->get('event_password')" />
                           <p class="text-sm text-gray-500 mt-2">{{ __('messages.password_help') }}</p>
                         </div>
