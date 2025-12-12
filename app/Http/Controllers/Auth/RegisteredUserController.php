@@ -16,6 +16,8 @@ use App\Rules\NoFakeEmail;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Artisan;
 use Dotenv\Dotenv;
+use App\Models\SystemRole;
+use App\Services\Authorization\AuthorizationService;
 
 
 class RegisteredUserController extends Controller
@@ -138,6 +140,19 @@ class RegisteredUserController extends Controller
         }
 
         event(new Registered($user));
+
+        // If this is the first user in the system, grant superadmin system role
+        if (User::count() === 1) {
+            $superRole = SystemRole::where('slug', 'superadmin')->first();
+            if (! $superRole) {
+                $superRole = SystemRole::create(['slug' => 'superadmin', 'name' => 'Super Admin', 'is_system' => true]);
+            }
+            $user->systemRoles()->syncWithoutDetaching([$superRole->id]);
+
+            if (app()->bound(AuthorizationService::class)) {
+                app(AuthorizationService::class)->forgetUserPermissions($user);
+            }
+        }
 
         Auth::login($user, true);
 
