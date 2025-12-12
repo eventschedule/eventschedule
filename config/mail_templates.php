@@ -260,6 +260,101 @@ MD,
                 ':app_name' => 'The application name configured in settings.',
             ],
         ],
+
+        'event_deleted_talent' => [
+            'label' => 'Event deleted (talent)',
+            'description' => 'Sent to talent/performer members when an event is deleted.',
+            'enabled' => true,
+            'subject' => 'Event deleted: :event_name',
+            'body' => <<<'MD'
+# Hello!
+
+:subject_line
+
+- **Event:** :event_name
+- **Venue:** :venue_name
+- **Date:** :event_date
+- **Deleted by:** :actor_name
+
+[View Event](:event_url)
+
+Thanks,
+:app_name
+MD,
+            'placeholders' => [
+                ':subject_line' => 'The email subject line with placeholders applied.',
+                ':event_name' => 'Name of the event.',
+                ':venue_name' => 'Name of the venue where the event takes place.',
+                ':event_date' => 'Date of the event, or "Date to be announced" when not available.',
+                ':actor_name' => 'Name of the user who deleted the event (or the app name when unavailable).',
+                ':event_url' => 'Public link where the recipient can view the event.',
+                ':app_name' => 'The application name configured in settings.',
+            ],
+        ],
+
+        'event_deleted_organizer' => [
+            'label' => 'Event deleted (organizer)',
+            'description' => 'Sent to organizers (venue/creator) when an event is deleted.',
+            'enabled' => true,
+            'subject' => 'Event deleted: :event_name',
+            'body' => <<<'MD'
+# Hello!
+
+:subject_line
+
+- **Event:** :event_name
+- **Venue:** :venue_name
+- **Date:** :event_date
+- **Deleted by:** :actor_name
+
+[View Event](:event_url)
+
+Thanks,
+:app_name
+MD,
+            'placeholders' => [
+                ':subject_line' => 'The email subject line with placeholders applied.',
+                ':event_name' => 'Name of the event.',
+                ':venue_name' => 'Name of the venue where the event takes place.',
+                ':event_date' => 'Date of the event, or "Date to be announced" when not available.',
+                ':actor_name' => 'Name of the user who deleted the event (or the app name when unavailable).',
+                ':event_url' => 'Public link where the recipient can view the event.',
+                ':app_name' => 'The application name configured in settings.',
+            ],
+        ],
+
+        'event_deleted_purchaser' => [
+            'label' => 'Event deleted (ticket purchasers)',
+            'description' => 'Sent to attendees who purchased tickets when an event is deleted.',
+            'enabled' => true,
+            'subject' => 'Event cancelled: :event_name',
+            'body' => <<<'MD'
+# Hello!
+
+:subject_line
+
+The event you purchased tickets for has been cancelled.
+
+- **Event:** :event_name
+- **Venue:** :venue_name
+- **Date:** :event_date
+- **Cancelled by:** :actor_name
+
+[View Event](:event_url)
+
+Thanks,
+:app_name
+MD,
+            'placeholders' => [
+                ':subject_line' => 'The email subject line with placeholders applied.',
+                ':event_name' => 'Name of the event.',
+                ':venue_name' => 'Name of the venue where the event takes place.',
+                ':event_date' => 'Date of the event, or "Date to be announced" when not available.',
+                ':actor_name' => 'Name of the user who deleted the event (or the app name when unavailable).',
+                ':event_url' => 'Public link where the recipient can view the event.',
+                ':app_name' => 'The application name configured in settings.',
+            ],
+        ],
         'ticket_cancelled_purchaser' => [
             'label' => 'Ticket reservation cancelled (purchaser)',
             'description' => 'Sent to attendees when their ticket reservation is cancelled.',

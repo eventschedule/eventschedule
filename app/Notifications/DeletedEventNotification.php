@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Models\User;
 use App\Support\MailConfigManager;
+use App\Support\MailTemplateManager;
 use App\Utils\NotificationUtils;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -36,7 +37,9 @@ class DeletedEventNotification extends Notification
             return [];
         }
 
-        return ['mail'];
+        $templates = app(MailTemplateManager::class);
+
+        return $templates->enabled($this->templateKey()) ? ['mail'] : [];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -46,29 +49,41 @@ class DeletedEventNotification extends Notification
         $venueName = $this->event->getVenueDisplayName();
         $date = $this->event->localStartsAt(true);
 
-        $subject = __('messages.event_deleted_subject', ['event' => $eventName]);
+        $templates = app(MailTemplateManager::class);
+        $templateKey = $this->templateKey();
 
-        $lineKey = $this->recipientType === 'purchaser'
-            ? 'messages.event_deleted_line_purchaser'
-            : 'messages.event_deleted_line';
+        $data = [
+            'event_name' => $eventName,
+            'venue_name' => $venueName ?: __('messages.event'),
+            'event_date' => $date ?: __('messages.date_to_be_announced'),
+            'actor_name' => $this->actor?->name ?? config('app.name'),
+            'event_url' => $this->event->getGuestUrl($this->contextRole?->subdomain ?? $this->event->venue?->subdomain),
+            'app_name' => config('app.name'),
+        ];
 
-        $line = __($lineKey, [
-            'talent' => $talentName ?: $eventName,
-            'venue' => $venueName ?: __('messages.event'),
-            'date' => $date ?: __('messages.date_to_be_announced'),
-            'user' => $this->actor?->name ?? config('app.name'),
-        ]);
+        $subject = $templates->renderSubject($templateKey, $data);
+        $body = $templates->renderBody($templateKey, $data);
 
-        $mail = (new MailMessage)
+        $mail = (new MailMessage())
             ->subject($subject)
-            ->line($line)
-            ->action(__('messages.view_event'), $this->event->getGuestUrl($this->contextRole?->subdomain ?? $this->event->venue?->subdomain));
+            ->markdown('mail.templates.generic', [
+                'body' => $body,
+            ]);
 
         if ($this->actor && $this->actor->email) {
             $mail->replyTo($this->actor->email, $this->actor->name);
         }
 
         return $mail;
+    }
+
+    protected function templateKey(): string
+    {
+        return match ($this->recipientType) {
+            'purchaser' => 'event_deleted_purchaser',
+            'organizer' => 'event_deleted_organizer',
+            default => 'event_deleted_talent',
+        };
     }
 
     public function toArray(object $notifiable): array
