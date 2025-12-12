@@ -229,23 +229,109 @@ components:
           type: string
     EventCreateRequest:
       type: object
+      description: Fields accepted when creating an event. `timezone` is required by the backend.
+      required: [timezone]
       properties:
+        role_id:
+          type: string
+          description: Encoded role id to attach the event to (optional). If omitted the server may infer role from the request context.
         name:
           type: string
         starts_at:
           type: string
+          format: date-time
         description:
+          type: string
+        timezone:
+          type: string
+          description: IANA timezone (required).
+        venue_id:
+          type: string
+          description: Encoded role id representing a venue (optional).
+        tickets_enabled:
+          type: boolean
+        ticket_currency_code:
+          type: string
+        ticket_notes:
+          type: string
+        total_tickets_mode:
+          type: string
+          enum: [individual, combined]
+        payment_method:
+          type: string
+        payment_instructions:
+          type: string
+        expire_unpaid_tickets:
+          type: boolean
+        remind_unpaid_tickets_every:
+          type: integer
+        registration_url:
+          type: string
+        show_guest_list:
+          type: boolean
+        guest_list_visibility:
+          type: string
+        category_id:
+          type: integer
+        creator_role_id:
+          type: string
+        flyer_image_id:
+          type: integer
+        google_event_id:
           type: string
     EventUpdateRequest:
       type: object
+      description: Fields accepted when updating an event. `timezone` is required by the backend.
+      required: [timezone]
       properties:
+        role_id:
+          type: string
+          description: Encoded role id to attach the event to (optional).
         name:
           type: string
         starts_at:
           type: string
+          format: date-time
         ends_at:
           type: string
+          format: date-time
         description:
+          type: string
+        timezone:
+          type: string
+          description: IANA timezone (required).
+        venue_id:
+          type: string
+        tickets_enabled:
+          type: boolean
+        ticket_currency_code:
+          type: string
+        ticket_notes:
+          type: string
+        total_tickets_mode:
+          type: string
+          enum: [individual, combined]
+        payment_method:
+          type: string
+        payment_instructions:
+          type: string
+        expire_unpaid_tickets:
+          type: boolean
+        remind_unpaid_tickets_every:
+          type: integer
+        registration_url:
+          type: string
+        show_guest_list:
+          type: boolean
+        guest_list_visibility:
+          type: string
+        category_id:
+          type: integer
+        creator_role_id:
+          type: string
+        flyer_image_id:
+          type: integer
+        google_event_id:
           type: string
     CreateSaleRequest:
       type: object
