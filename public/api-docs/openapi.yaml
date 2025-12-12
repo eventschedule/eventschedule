@@ -1,0 +1,836 @@
+openapi: 3.0.3
+info:
+	title: EventSchedule API (mutable endpoints)
+	version: 1.0.0
+	description: >-
+		Core mutable API endpoints (create/update/delete) useful to mobile clients.
+
+servers:
+	- url: https://api.example.com
+
+components:
+	securitySchemes:
+		ApiKeyAuth:
+			type: apiKey
+			in: header
+			name: X-API-Key
+	schemas:
+		Error:
+			type: object
+			properties:
+				error:
+					type: string
+		Role:
+			type: object
+			properties:
+				id:
+					type: integer
+				name:
+					type: string
+		Event:
+			type: object
+			properties:
+				id:
+					type: integer
+				name:
+					type: string
+		Sale:
+			type: object
+			properties:
+				id:
+					type: integer
+				status:
+					type: string
+				name:
+					type: string
+				openapi: 3.0.3
+				info:
+					title: EventSchedule API (mutable endpoints)
+					version: 1.0.0
+					description: >-
+						Core mutable API endpoints (create/update/delete) useful to mobile clients.
+
+				servers:
+					- url: https://api.example.com
+
+				components:
+					securitySchemes:
+						ApiKeyAuth:
+							type: apiKey
+							in: header
+							name: X-API-Key
+					schemas:
+						Error:
+							type: object
+							properties:
+								error:
+									type: string
+						UserProfile:
+							type: object
+							properties:
+								id:
+									type: integer
+								name:
+									type: string
+								email:
+									type: string
+								avatar_url:
+									type: string
+								bio:
+									type: string
+						Role:
+							type: object
+							properties:
+								id:
+									type: integer
+								name:
+									type: string
+								type:
+									type: string
+						RoleMember:
+							type: object
+							properties:
+								id:
+									type: integer
+								user_id:
+									type: integer
+								email:
+									type: string
+								role_label:
+									type: string
+								status:
+									type: string
+						Event:
+							type: object
+							properties:
+								id:
+									type: integer
+								subdomain:
+									type: string
+								name:
+									type: string
+								description:
+									type: string
+								starts_at:
+									type: string
+								ends_at:
+									type: string
+						Ticket:
+							type: object
+							properties:
+								id:
+									type: integer
+								ticket_type:
+									type: string
+								seat_number:
+									type: string
+								status:
+									type: string
+						Sale:
+							type: object
+							properties:
+								id:
+									type: integer
+								status:
+									type: string
+								name:
+									type: string
+								email:
+									type: string
+								total_cents:
+									type: integer
+								currency:
+									type: string
+								created_at:
+									type: string
+								tickets:
+									type: array
+									items:
+										$ref: '#/components/schemas/Ticket'
+						MediaAsset:
+							type: object
+							properties:
+								responses:
+									'200':
+										description: OK
+												content:
+													application/json:
+														schema:
+														type: array
+														items:
+															$ref: '#/components/schemas/MediaTag'
+														examples:
+															tagsList:
+																summary: Media tags list
+																value:
+																- id: 1
+																  name: photos
+																- id: 2
+																  name: logos
+										content:
+											application/json:
+												schema:
+													type: array
+													items:
+														$ref: '#/components/schemas/MediaTag'
+									type: string
+								url:
+									type: string
+								mime_type:
+									type: string
+								size:
+									type: integer
+								variants:
+									type: array
+									items:
+										type: object
+								responses:
+									'201':
+										description: Created
+										content:
+											application/json:
+												schema:
+													$ref: '#/components/schemas/Sale'
+											examples:
+												mediaUploaded:
+													summary: Uploaded media asset
+													value:
+														id: 555
+														filename: "image.jpg"
+														url: "https://cdn.example.com/media/image.jpg"
+														mime_type: "image/jpeg"
+														size: 123456
+														variants:
+														- label: thumb
+														  url: "https://cdn.example.com/media/image_thumb.jpg"
+												examples:
+													saleCreated:
+														summary: Sale created (pending payment)
+														value:
+															id: 9876
+															status: pending
+															name: Jane Doe
+															email: jane@example.com
+															total_cents: 4000
+															currency: USD
+															tickets:
+															- id: 1
+															  ticket_type: general
+															  status: reserved
+										content:
+											application/json:
+												schema:
+													$ref: '#/components/schemas/MediaTag'
+											url:
+												type: string
+						MediaTag:
+							type: object
+							properties:
+								id:
+									type: integer
+								name:
+									type: string
+						SuccessResponse:
+							type: object
+							properties:
+								success:
+									type: boolean
+						RoleCreateRequest:
+							type: object
+							required: [name]
+							properties:
+								name:
+									type: string
+								type:
+									type: string
+						RoleUpdateRequest:
+							type: object
+							properties:
+								name:
+									type: string
+								type:
+									type: string
+						RoleMemberCreateRequest:
+							type: object
+							required: [email]
+							properties:
+								user_id:
+									type: integer
+								email:
+									type: string
+								role_label:
+									type: string
+						UserProfileUpdate:
+							type: object
+							properties:
+								name:
+									type: string
+								email:
+									type: string
+								bio:
+									type: string
+						EventCreateRequest:
+							type: object
+							properties:
+								name:
+									type: string
+								starts_at:
+									type: string
+								description:
+									type: string
+						EventUpdateRequest:
+							type: object
+							properties:
+								name:
+									type: string
+								starts_at:
+									type: string
+								ends_at:
+									type: string
+								description:
+									type: string
+						CreateSaleRequest:
+							type: object
+							required: [name,email]
+							properties:
+								name:
+									type: string
+								email:
+									type: string
+								event_date:
+									type: string
+								tickets:
+									type: array
+									items:
+										type: object
+										properties:
+											ticket_type:
+												type: string
+											quantity:
+												type: integer
+						CheckoutSessionResponse:
+							type: object
+							properties:
+								data:
+									type: object
+									properties:
+										url:
+											type: string
+										id:
+											type: string
+						TicketActionRequest:
+							type: object
+							properties:
+								action:
+									type: string
+									enum: [mark_paid, refund, cancel, delete]
+						ScanRecordRequest:
+							type: object
+							properties:
+								sale_ticket_id:
+									type: integer
+								seat_number:
+									type: string
+
+				security:
+					- ApiKeyAuth: []
+
+				paths:
+					/schedules:
+						get:
+							summary: List schedules
+							responses:
+								'200':
+									description: OK
+
+					/roles:
+						get:
+							summary: List roles
+							responses:
+								'200':
+									description: OK
+									content:
+										application/json:
+											schema:
+												type: array
+												items:
+													$ref: '#/components/schemas/Role'
+						post:
+							summary: Create role
+							requestBody:
+								required: true
+								content:
+									application/json:
+										schema:
+											$ref: '#/components/schemas/RoleCreateRequest'
+								responses:
+									'201':
+										description: Created
+										content:
+											application/json:
+												schema:
+													$ref: '#/components/schemas/Role'
+												examples:
+													roleCreated:
+														summary: Example role
+														value:
+															id: 12
+															name: Volunteers
+															type: team
+					/roles/{role_id}:
+						delete:
+							summary: Delete a role
+							parameters:
+								- in: path
+									name: role_id
+									required: true
+									schema:
+										type: string
+							responses:
+								'200':
+									description: Deleted
+									content:
+										application/json:
+											schema:
+												$ref: '#/components/schemas/SuccessResponse'
+									content:
+										application/json:
+											schema:
+												$ref: '#/components/schemas/SuccessResponse'
+						patch:
+							summary: Update a role
+							parameters:
+								- in: path
+									name: role_id
+									required: true
+									schema:
+										type: string
+							requestBody:
+								required: true
+								content:
+									application/json:
+										schema:
+											type: object
+											properties:
+												name:
+													type: string
+												type:
+													type: string
+							responses:
+								'200':
+									description: Updated
+										content:
+											application/json:
+												schema:
+												$ref: '#/components/schemas/SuccessResponse'
+												examples:
+													ticketAction:
+														summary: Action applied
+														value:
+															success: true
+															action: mark_paid
+									content:
+										application/json:
+											schema:
+												$ref: '#/components/schemas/Role'
+
+					/events:
+						get:
+							summary: List events for authenticated user
+							responses:
+								'200':
+									description: OK
+
+					/events/{subdomain}:
+						post:
+							summary: Create event under subdomain
+							parameters:
+								- in: path
+									name: subdomain
+									required: true
+									schema:
+										type: string
+							requestBody:
+								required: true
+								content:
+									application/json:
+										schema:
+											$ref: '#/components/schemas/EventCreateRequest'
+							responses:
+								'201':
+									description: Created
+											content:
+												application/json:
+													schema:
+													type: object
+													properties:
+														sale_ticket_id:
+															type: integer
+														seat_number:
+															type: string
+														scanned_at:
+															type: string
+													examples:
+														scanCreated:
+															summary: Scan recorded
+															value:
+																sale_ticket_id: 987
+																seat_number: "A12"
+																scanned_at: "2026-01-15T20:12:34Z"
+
+					/events/{event_id}:
+						patch:
+							summary: Update event
+							parameters:
+								- in: path
+									name: event_id
+									required: true
+							requestBody:
+								required: true
+								content:
+									application/json:
+										schema:
+											$ref: '#/components/schemas/EventUpdateRequest'
+							responses:
+								'200':
+									description: Updated
+						delete:
+							summary: Delete event
+							parameters:
+								- in: path
+									name: event_id
+									required: true
+							responses:
+								'200':
+									description: Deleted
+
+					/events/flyer/{event_id}:
+						post:
+							summary: Upload flyer or set flyer image id
+							parameters:
+								- in: path
+									name: event_id
+									required: true
+							requestBody:
+								content:
+									multipart/form-data:
+										schema:
+											type: object
+											properties:
+												flyer_image:
+													type: string
+													format: binary
+												flyer_image_id:
+													type: integer
+							responses:
+								'200':
+									description: Flyer updated
+									content:
+										application/json:
+											schema:
+												$ref: '#/components/schemas/Event'
+
+						/events/{subdomain}/checkout:
+							post:
+								summary: Create a sale (checkout) for an event
+								parameters:
+									- in: path
+										name: subdomain
+										required: true
+								requestBody:
+									required: true
+									content:
+										application/json:
+											schema:
+												$ref: '#/components/schemas/CreateSaleRequest'
+								responses:
+									'201':
+										description: Created
+
+					/profile:
+						patch:
+							summary: Update authenticated user's profile
+							requestBody:
+								required: true
+								content:
+									application/json:
+										schema:
+											$ref: '#/components/schemas/UserProfileUpdate'
+							responses:
+								'200':
+									description: Updated
+						delete:
+							summary: Delete authenticated account
+							requestBody:
+								required: true
+								content:
+									application/json:
+										schema:
+											type: object
+											properties:
+												password:
+													type: string
+							responses:
+								'200':
+									description: Deleted
+
+					/tickets:
+						get:
+							summary: List ticket sales
+							responses:
+								'200':
+									description: OK
+
+					/tickets/{sale_id}:
+						patch:
+							summary: Update a sale (actions: mark_paid, refund, cancel, delete)
+							parameters:
+								- in: path
+									name: sale_id
+									required: true
+							requestBody:
+								required: true
+								content:
+									application/json:
+										schema:
+											$ref: '#/components/schemas/TicketActionRequest'
+							responses:
+								'200':
+									description: Updated
+
+					/tickets/{sale_id}/checkout:
+						post:
+							summary: Create Stripe Checkout session for a sale
+							parameters:
+								- in: path
+									name: sale_id
+									required: true
+								responses:
+									'201':
+										description: Created
+										content:
+											application/json:
+												schema:
+													$ref: '#/components/schemas/CheckoutSessionResponse'
+												examples:
+													checkoutSession:
+														summary: Stripe checkout session
+														value:
+															data:
+																url: "https://checkout.stripe.com/pay/cs_test_ABC123"
+																id: "cs_test_ABC123"
+
+					/tickets/{sale_id}/scan:
+						post:
+							summary: Record a ticket scan
+							parameters:
+								- in: path
+									name: sale_id
+									required: true
+							requestBody:
+								required: true
+								content:
+									application/json:
+										schema:
+											type: object
+											properties:
+												sale_ticket_id:
+													type: integer
+												seat_number:
+													type: string
+							responses:
+								'201':
+									description: Created
+
+					/media:
+						get:
+							summary: List media assets
+							responses:
+								'200':
+									description: OK
+						post:
+							summary: Upload media asset
+							requestBody:
+								content:
+									multipart/form-data:
+										schema:
+											type: object
+											properties:
+												file:
+													type: string
+													format: binary
+												tags:
+													type: array
+													items:
+														type: integer
+							responses:
+								'201':
+									description: Created
+
+					/media/{asset}:
+						delete:
+							summary: Delete media asset
+							parameters:
+								- in: path
+									name: asset
+									required: true
+							responses:
+								'200':
+									description: Deleted
+									content:
+										application/json:
+											schema:
+												$ref: '#/components/schemas/SuccessResponse'
+
+					/media/{asset}/variant:
+						post:
+							summary: Upload a media variant
+							requestBody:
+								content:
+									multipart/form-data:
+										schema:
+											type: object
+											properties:
+												file:
+													type: string
+													format: binary
+												label:
+													type: string
+							responses:
+								'201':
+									description: Created
+
+					/media/tags:
+						get:
+							summary: List media tags
+							responses:
+								'200':
+									description: OK
+						post:
+							summary: Create media tag
+							requestBody:
+								required: true
+								content:
+									application/json:
+										schema:
+											type: object
+											properties:
+												name:
+													type: string
+							responses:
+								'201':
+									description: Created
+
+					/media/tags/{tag}:
+						delete:
+							summary: Delete media tag
+							parameters:
+								- in: path
+									name: tag
+									required: true
+							responses:
+								'200':
+									description: Deleted
+
+					/media/{asset}/sync-tags:
+						post:
+							summary: Sync tags for an asset
+							requestBody:
+								required: true
+								content:
+									application/json:
+										schema:
+											type: object
+											properties:
+												tags:
+													type: array
+													items:
+														type: integer
+							responses:
+								'200':
+									description: Synced
+
+					/roles/{role_id}/members:
+						post:
+							summary: Add a member to a role
+							parameters:
+								- in: path
+									name: role_id
+									required: true
+									schema:
+										type: string
+							requestBody:
+								required: true
+								content:
+									application/json:
+										schema:
+											$ref: '#/components/schemas/RoleMemberCreateRequest'
+							responses:
+								'201':
+									description: Member added
+									content:
+										application/json:
+											schema:
+												$ref: '#/components/schemas/RoleMember'
+														examples:
+															memberAdded:
+																summary: Role member created
+																value:
+																	id: 345
+																	user_id: 123
+																	email: new@user.com
+																role_label: volunteer
+																status: invited
+
+					/roles/{role_id}/members/{member_id}:
+						patch:
+							summary: Update a role member
+							parameters:
+								- in: path
+									name: role_id
+									required: true
+									schema:
+										type: string
+								- in: path
+									name: member_id
+									required: true
+									schema:
+										type: string
+							requestBody:
+								required: true
+								content:
+									application/json:
+										schema:
+											type: object
+											properties:
+												role_label:
+													type: string
+												status:
+													type: string
+							responses:
+								'200':
+									description: Member updated
+									content:
+										application/json:
+											schema:
+												$ref: '#/components/schemas/RoleMember'
+						delete:
+							summary: Remove a member from a role
+							parameters:
+								- in: path
+									name: role_id
+									required: true
+									schema:
+										type: string
+								- in: path
+									name: member_id
+									required: true
+									schema:
+										type: string
+							responses:
+								'200':
+									description: Member removed
+									content:
+										application/json:
+											schema:
+												$ref: '#/components/schemas/SuccessResponse'
