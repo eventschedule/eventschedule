@@ -83,6 +83,7 @@ return [
     'event_password_required' => 'This event is password protected',
     'password_set' => 'Password set',
     'change_password' => 'Change password',
+    'event_online_label' => 'Event Online',
     'event_password_prompt' => 'Enter the event password to continue',
     'invalid_event_password' => 'Invalid event password',
     'watch_online' => 'Watch online',

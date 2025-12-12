@@ -1,6 +1,28 @@
 <x-app-guest-layout :role="$role" :event="$event" :date="$date" :fonts="$fonts">
 
   <main>
+    @if ($event->hasPassword() && !session('event_access_' . $event->id) && !(auth()->check() && auth()->user()->canEditEvent($event)))
+      <div class="container mx-auto px-5 py-[80px]">
+        <div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">{{ __('messages.event_password_required') }}</h2>
+          <p class="mb-4 text-sm text-gray-700">{{ __('messages.event_password_prompt') }}</p>
+          @if (session('error'))
+            <div class="mb-4 text-red-600">{{ session('error') }}</div>
+          @endif
+          <form method="POST" action="{{ route('event.access', ['subdomain' => $role->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}">
+            @csrf
+            <input type="hidden" name="date" value="{{ request('date') }}" />
+            <div class="mb-4">
+              <label for="password" class="block text-sm font-medium text-gray-700">{{ __('messages.password') }}</label>
+              <input id="password" name="password" type="password" class="mt-1 block w-full border-gray-300 rounded-md" required>
+            </div>
+            <div class="flex items-center justify-end">
+              <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md">{{ __('messages.submit') }}</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    @else
     @php
       $eventRole = $event->roles->where('id', $role->id)->first();
       $eventIsAccepted = $eventRole->pivot->is_accepted;
@@ -475,6 +497,21 @@
             <p class="text-sm text-gray-600 dark:text-gray-300">{{ __('messages.unscheduled') }}</p>
           @endif
         </div>
+
+        @if ($event->event_url)
+        <div class="p-6 rounded-xl flex flex-col gap-3 bg-[#F5F9FE] dark:bg-gray-800">
+          <h4 class="text-[24px] leading-snug font-semibold text-gray-900 dark:text-gray-100">
+            {{ __('messages.event_online_label') }}
+          </h4>
+          <p class="text-sm text-gray-600 dark:text-gray-300">{{ \\App\\Utils\\UrlUtils::clean($event->event_url) }}</p>
+          <a href="{{ $event->event_url }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+            </svg>
+            {{ __('messages.watch_online') }}
+          </a>
+        </div>
+        @endif
 
         <div class="p-6 rounded-xl flex flex-col gap-3 bg-[#F5F9FE] dark:bg-gray-800">
           <h4 class="text-[24px] leading-snug font-semibold text-gray-900 dark:text-gray-100">

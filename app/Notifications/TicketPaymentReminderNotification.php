@@ -89,6 +89,7 @@ class TicketPaymentReminderNotification extends Notification
             'buyer_name' => $buyerName,
             'buyer_email' => $buyerEmail,
             'event_url' => $eventGuestUrl,
+            'event_stream_url' => $event->event_url,
             'ticket_view_url' => $ticketViewUrl,
             'order_reference' => (string) $this->sale->id,
             'app_name' => config('app.name'),

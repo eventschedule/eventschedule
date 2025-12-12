@@ -72,6 +72,7 @@ class TicketCancelledNotification extends Notification
             'buyer_name' => $buyerName,
             'buyer_email' => $buyerEmail,
             'event_url' => $eventGuestUrl,
+            'event_stream_url' => $event->event_url,
             'ticket_view_url' => $this->recipientType === 'purchaser'
                 ? $ticketViewUrl
                 : $eventTicketUrl,
