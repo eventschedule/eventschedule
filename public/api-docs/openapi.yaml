@@ -20,6 +20,216 @@ components:
 			properties:
 				error:
 					type: string
+		UserProfile:
+			type: object
+			properties:
+				id:
+					type: integer
+				name:
+					type: string
+				email:
+					type: string
+				avatar_url:
+					type: string
+				bio:
+					type: string
+		Role:
+			type: object
+			properties:
+				id:
+					type: integer
+				name:
+					type: string
+				type:
+					type: string
+		RoleMember:
+			type: object
+			properties:
+				id:
+					type: integer
+				user_id:
+					type: integer
+				email:
+					type: string
+				role_label:
+					type: string
+				status:
+					type: string
+		Event:
+			type: object
+			properties:
+				id:
+					type: integer
+				subdomain:
+					type: string
+				name:
+					type: string
+				description:
+					type: string
+				starts_at:
+					type: string
+				ends_at:
+					type: string
+		Ticket:
+			type: object
+			properties:
+				id:
+					type: integer
+				ticket_type:
+					type: string
+				seat_number:
+					type: string
+				status:
+					type: string
+		Sale:
+			type: object
+			properties:
+				id:
+					type: integer
+				status:
+					type: string
+				name:
+					type: string
+				email:
+					type: string
+				total_cents:
+					type: integer
+				currency:
+					type: string
+				created_at:
+					type: string
+				tickets:
+					type: array
+					items:
+						$ref: '#/components/schemas/Ticket'
+		MediaAsset:
+			type: object
+			properties:
+				filename:
+					type: string
+				url:
+					type: string
+				mime_type:
+					type: string
+				size:
+					type: integer
+				variants:
+					type: array
+					items:
+						type: object
+						properties:
+							label:
+								type: string
+							url:
+								type: string
+		MediaTag:
+			type: object
+			properties:
+				id:
+					type: integer
+				name:
+					type: string
+		SuccessResponse:
+			type: object
+			properties:
+				success:
+					type: boolean
+		RoleCreateRequest:
+			type: object
+			required: [name]
+			properties:
+				name:
+					type: string
+				type:
+					type: string
+		RoleUpdateRequest:
+			type: object
+			properties:
+				name:
+					type: string
+				type:
+					type: string
+		RoleMemberCreateRequest:
+			type: object
+			required: [email]
+			properties:
+				user_id:
+					type: integer
+				email:
+					type: string
+				role_label:
+					type: string
+		UserProfileUpdate:
+			type: object
+			properties:
+				name:
+					type: string
+				email:
+					type: string
+				bio:
+					type: string
+		EventCreateRequest:
+			type: object
+			properties:
+				name:
+					type: string
+				starts_at:
+					type: string
+				description:
+					type: string
+		EventUpdateRequest:
+			type: object
+			properties:
+				name:
+					type: string
+				starts_at:
+					type: string
+				ends_at:
+					type: string
+				description:
+					type: string
+		CreateSaleRequest:
+			type: object
+			required: [name,email]
+			properties:
+				name:
+					type: string
+				email:
+					type: string
+				event_date:
+					type: string
+				tickets:
+					type: array
+					items:
+						type: object
+						properties:
+							ticket_type:
+								type: string
+							quantity:
+								type: integer
+		CheckoutSessionResponse:
+			type: object
+			properties:
+				data:
+					type: object
+					properties:
+						url:
+							type: string
+						id:
+							type: string
+		TicketActionRequest:
+			type: object
+			properties:
+				action:
+					type: string
+					enum: [mark_paid, refund, cancel, delete]
+		ScanRecordRequest:
+			type: object
+			properties:
+				sale_ticket_id:
+					type: integer
+				seat_number:
+					type: string
 		Role:
 			type: object
 			properties:
