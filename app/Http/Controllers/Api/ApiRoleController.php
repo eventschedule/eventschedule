@@ -8,6 +8,12 @@ use App\Utils\ColorUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Models\RoleUser;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\AddedMemberNotification;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
+use App\Utils\UrlUtils;
 
 class ApiRoleController extends Controller
 {
@@ -189,5 +195,149 @@ class ApiRoleController extends Controller
                 'message' => 'Contact deleted successfully',
             ],
         ], 200, [], JSON_PRETTY_PRINT);
+    }
+
+    public function update(Request $request, string $role_id)
+    {
+        $role = Role::findOrFail(UrlUtils::decodeId($role_id));
+
+        if ($role->user_id !== $request->user()->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'email' => ['sometimes', 'required', 'string', 'email', 'max:255'],
+            'website' => ['nullable', 'string', 'max:255'],
+            'timezone' => ['nullable', 'string', 'max:255'],
+            'language_code' => ['nullable', 'string', 'max:10'],
+            'contacts' => ['nullable', 'array'],
+            'groups' => ['nullable', 'array'],
+        ]);
+
+        $role->fill($validated);
+        $role->save();
+
+        if (! empty($validated['groups']) && is_array($validated['groups'])) {
+            // simple replace: delete existing groups and create new ones
+            $role->groups()->delete();
+            foreach ($validated['groups'] as $groupName) {
+                $name = trim((string) $groupName);
+                if ($name === '') continue;
+                $role->groups()->create(['name' => $name, 'slug' => Str::slug($name)]);
+            }
+        }
+
+        return response()->json(['data' => $role->fresh()->toApiData(), 'meta' => ['message' => 'Role updated']], 200, [], JSON_PRETTY_PRINT);
+    }
+
+    public function storeMember(Request $request, string $role_id)
+    {
+        $role = Role::findOrFail(UrlUtils::decodeId($role_id));
+        $user = $request->user();
+
+        if (! $user->isMember($role->subdomain) && ! $user->canManageResource($role)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        if (! $role->isPro()) {
+            return response()->json(['error' => 'Upgrade to pro required'], 422);
+        }
+
+        if (! $role->email_verified_at) {
+            return response()->json(['error' => 'Role email not verified'], 422);
+        }
+
+        $validated = $request->validate([
+            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'level' => ['required', 'string', Rule::in(['owner','admin','viewer'])],
+        ]);
+
+        $candidate = \App\Models\User::find($validated['user_id']);
+
+        if (! $candidate) {
+            return response()->json(['error' => 'Invalid member selection'], 422);
+        }
+
+        if ($candidate->isMember($role->subdomain)) {
+            return response()->json(['error' => 'Member already exists'], 422);
+        }
+
+        $level = $validated['level'] ?? 'admin';
+
+        if ($candidate->isFollowing($role->subdomain)) {
+            $roleUser = RoleUser::where('user_id', $candidate->id)->where('role_id', $role->id)->first();
+            $roleUser->level = $level;
+            $roleUser->save();
+        } else {
+            $candidate->roles()->attach($role->id, ['level' => $level, 'created_at' => now()]);
+        }
+
+        try {
+            Notification::send($candidate, new AddedMemberNotification($role, $candidate, $request->user()));
+        } catch (\Throwable $e) {
+            Log::warning('Failed to send added member notification', ['role_id' => $role->id, 'member_id' => $candidate->id, 'error' => $e->getMessage()]);
+        }
+
+        return response()->json(['meta' => ['message' => 'Member added']], 201, [], JSON_PRETTY_PRINT);
+    }
+
+    public function destroyMember(Request $request, string $role_id, string $member_id)
+    {
+        $role = Role::findOrFail(UrlUtils::decodeId($role_id));
+        $user = $request->user();
+
+        if (! $user->isMember($role->subdomain) && ! $user->canManageResource($role)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $userId = UrlUtils::decodeId($member_id);
+
+        if ($userId == $role->user_id) {
+            return response()->json(['error' => 'Cannot remove owner'], 422);
+        }
+
+        $roleUser = RoleUser::where('user_id', $userId)->where('role_id', $role->id)->first();
+
+        if ($roleUser) {
+            $roleUser->delete();
+        }
+
+        return response()->json(['meta' => ['message' => 'Member removed']], 200, [], JSON_PRETTY_PRINT);
+    }
+
+    public function updateMember(Request $request, string $role_id, string $member_id)
+    {
+        $role = Role::findOrFail(UrlUtils::decodeId($role_id));
+        $user = $request->user();
+
+        if (! $user->isMember($role->subdomain) && ! $user->canManageResource($role)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $data = $request->validate([
+            'level' => ['required', 'string', Rule::in(['admin','viewer','owner'])],
+        ]);
+
+        $userId = UrlUtils::decodeId($member_id);
+
+        $roleUser = RoleUser::where('user_id', $userId)->where('role_id', $role->id)->firstOrFail();
+
+        $roleUser->level = $data['level'];
+        $roleUser->save();
+
+        if ($data['level'] === 'owner') {
+            RoleUser::where('role_id', $role->id)->where('user_id', '!=', $userId)->where('level', 'owner')->update(['level' => 'admin']);
+            $role->user_id = $userId;
+            $role->save();
+        } elseif ($role->user_id === $userId) {
+            $newOwnerId = RoleUser::where('role_id', $role->id)->where('level', 'owner')->value('user_id');
+            if ($newOwnerId) {
+                $role->user_id = $newOwnerId;
+                $role->save();
+            }
+        }
+
+        return response()->json(['meta' => ['message' => 'Member updated']], 200, [], JSON_PRETTY_PRINT);
     }
 }
