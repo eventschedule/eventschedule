@@ -198,6 +198,14 @@ class ApiTicketController extends Controller
 
         $event = Event::where('subdomain', $subdomain)->firstOrFail();
 
+        // If the event is password protected, require password match
+        if ($event->hasPassword()) {
+            $password = $request->input('password');
+            if (! $password || ! $event->verifyPassword($password)) {
+                return response()->json(['error' => 'Invalid event password'], 403);
+            }
+        }
+
         // Basic ticket availability check (mirrors web logic minimally)
         foreach ($validated['tickets'] as $ticketHash => $quantity) {
             if ($quantity <= 0) continue;

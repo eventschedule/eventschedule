@@ -27,7 +27,8 @@ class Event extends Model
         'description',
         'description_en',
         'event_url',
-        'event_password',
+        // event_password is provided via forms as plaintext; do not persist directly
+        'event_password_hash',
         'name',
         'name_en',
         'slug',
@@ -49,9 +50,36 @@ class Event extends Model
         'timezone',
     ];
 
+    /**
+     * Verify a plaintext password against the stored hash
+     */
+    public function verifyPassword(?string $password): bool
+    {
+        if (! $this->event_password_hash) {
+            return false;
+        }
+
+        return \Illuminate\Support\Facades\Hash::check($password, $this->event_password_hash);
+    }
+
+    /**
+     * Return whether an event has a password set
+     */
+    public function hasPassword(): bool
+    {
+        return (bool) $this->event_password_hash;
+    }
+
     protected $casts = [
         'duration' => 'float',
         'show_guest_list' => 'boolean',
+    ];
+
+    /**
+     * Hide sensitive attributes from JSON output
+     */
+    protected $hidden = [
+        'event_password_hash',
     ];
 
     protected static function boot()
@@ -844,6 +872,8 @@ class Event extends Model
                 'name' => $this->eventType->name,
             ] : null,
         ];
+
+        $data['has_password'] = $this->hasPassword();
 
         $data['members'] = $this->members()->mapWithKeys(function ($member) {
             return [UrlUtils::encodeId($member->id) => [

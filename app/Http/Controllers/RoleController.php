@@ -360,6 +360,15 @@ class RoleController extends Controller
         }
 
         if ($event) {
+            // If the event is password protected, ensure the visitor has access
+            if ($event->hasPassword()) {
+                $sessionKey = 'event_access_' . $event->id;
+                if (! session()->get($sessionKey) && ! (auth()->user() && auth()->user()->canEditEvent($event))) {
+                    return response()->view('event.password', compact(
+                        'subdomain', 'role', 'event', 'date'
+                    ));
+                }
+            }
             if ($event->venue) {
                 if ($event->venue->subdomain == $subdomain) {
                     if ($event->roles->count() > 0) {
@@ -491,6 +500,26 @@ class RoleController extends Controller
         }
         
         return $response;
+    }
+
+    public function eventAccess(Request $request, $subdomain, $hash)
+    {
+        $eventId = UrlUtils::decodeId($hash);
+        $event = Event::findOrFail($eventId);
+
+        if (! $event->hasPassword()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $password = $request->input('password');
+
+        if (! $password || ! $event->verifyPassword($password)) {
+            return redirect()->back()->with('error', __('messages.invalid_event_password'));
+        }
+
+        session()->put('event_access_' . $event->id, true);
+
+        return redirect($event->getGuestUrl($subdomain, $request->date));
     }
 
     public function viewAdmin(Request $request, $subdomain, $tab = 'schedule')

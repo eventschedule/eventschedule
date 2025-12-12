@@ -29,6 +29,17 @@ class EventCreateRequest extends FormRequest
             'flyer_media_variant_id' => ['nullable', 'integer', 'exists:media_asset_variants,id'],
             'slug' => ['nullable', 'string', 'max:255'],
             'timezone' => ['required', 'timezone'],
+            'event_password' => [
+                Rule::requiredIf(function () {
+                    return (bool) $this->input('tickets_enabled')
+                        && (!empty($this->input('event_url')))
+                        && is_array($this->input('tickets'))
+                        && count($this->input('tickets')) > 0;
+                }),
+                'nullable',
+                'string',
+                'max:255',
+            ],
         ];
     }
 }

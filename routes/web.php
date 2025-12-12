@@ -55,6 +55,7 @@ if (config('app.hosted')) {
         Route::get('/payment/success/{sale_id}', [TicketController::class, 'paymentUrlSuccess'])->name('payment_url.success');
         Route::get('/payment/cancel/{sale_id}', [TicketController::class, 'paymentUrlCancel'])->name('payment_url.cancel');
         Route::get('/{slug}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
+        Route::post('/event/access/{hash}', [RoleController::class, 'eventAccess'])->name('event.access');
     });
 } else {
     Route::match(['get', 'post'], '/update', [AppController::class, 'update'])->name('app.update');
@@ -352,6 +353,7 @@ if (config('app.hosted')) {
     Route::get('/{subdomain}/payment/cancel/{sale_id}', [TicketController::class, 'paymentUrlCancel'])->name('payment_url.cancel');
     Route::get('/{subdomain}', [RoleController::class, 'viewGuest'])->name('role.view_guest');
     Route::get('/{subdomain}/{slug}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
+    Route::post('/{subdomain}/event/access/{hash}', [RoleController::class, 'eventAccess'])->name('event.access');
 }
 
 if (config('app.env') == 'local') {

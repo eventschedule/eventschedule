@@ -11,6 +11,7 @@ use App\Models\RoleUser;
 use App\Repos\EventRepo;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -112,6 +113,17 @@ class ApiEventController extends Controller
             'schedule' => 'nullable|string|max:255',
             'category' => 'nullable|string|max:255',
             'category_id' => 'nullable|integer',
+            'event_password' => [
+                Rule::requiredIf(function () use ($request) {
+                    return (bool) $request->input('tickets_enabled')
+                        && !empty($request->input('event_url'))
+                        && is_array($request->input('tickets'))
+                        && count($request->input('tickets')) > 0;
+                }),
+                'nullable',
+                'string',
+                'max:255',
+            ],
         ]);
 
         // Handle group name to group_id conversion

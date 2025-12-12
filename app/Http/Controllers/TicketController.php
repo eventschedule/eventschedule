@@ -332,6 +332,10 @@ class TicketController extends Controller
     public function checkout(Request $request, $subdomain)
     {
         $event = Event::findOrFail(UrlUtils::decodeId($request->event_id));
+        $sessionKey = 'event_access_' . $event->id;
+        if ($event->hasPassword() && ! session()->get($sessionKey) && ! ($request->user() && $request->user()->canEditEvent($event))) {
+            return back()->with('error', __('messages.invalid_event_password'));
+        }
         $user = auth()->user();
 
         // Validate basic required fields for all checkout requests
