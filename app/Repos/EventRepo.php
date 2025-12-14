@@ -51,6 +51,7 @@ class EventRepo
         try {
             $user = $request->user();
             $venue = null;
+            $roomId = null;
 
             // Set creator_role_id to the current role
             $creatorRoleId = $currentRole ? $currentRole->id : null;
@@ -117,6 +118,25 @@ class EventRepo
 
                     Log::debug('EventRepo.saveEvent.updatedVenue', $context + ['venue_id' => $venue->id]);
                 }
+            }
+
+            if ($request->filled('venue_room_id')) {
+                $roomId = UrlUtils::decodeId($request->venue_room_id);
+            }
+
+            if ($roomId && $venue) {
+                $roomBelongsToVenue = $venue->rooms()->where('id', $roomId)->exists();
+
+                if (! $roomBelongsToVenue) {
+                    Log::warning('EventRepo.saveEvent.invalidRoomForVenue', $context + [
+                        'venue_id' => $venue->id,
+                        'room_id' => $roomId,
+                    ]);
+
+                    $roomId = null;
+                }
+            } else {
+                $roomId = null;
             }
 
             $roles = [];
@@ -224,7 +244,7 @@ class EventRepo
 
             // Prevent attempting to persist legacy venue_id column; venue linkage is
             // handled via the pivot table instead.
-            $input = Arr::except($input, ['venue_id']);
+            $input = Arr::except($input, ['venue_id', 'venue_room_id']);
 
             if (array_key_exists('slug', $input)) {
                 $slugValue = $input['slug'];
@@ -354,7 +374,18 @@ class EventRepo
                 }
             }
 
-            $event->roles()->sync($roleIds);
+            $roleIds = array_values(array_unique($roleIds));
+
+            $pivotData = [];
+            foreach ($roleIds as $roleId) {
+                $pivotData[$roleId] = [];
+            }
+
+            if ($venueId && $roomId) {
+                $pivotData[$venueId]['room_id'] = $roomId;
+            }
+
+            $event->roles()->sync($pivotData);
 
             $curatorGroups = $request->input('curator_groups', []);
 

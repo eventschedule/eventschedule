@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use DateTimeInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -249,6 +250,10 @@ class RoleController extends Controller
 
         $role = Role::subdomain($subdomain)->first();
 
+        if ($role) {
+            $role->loadMissing('rooms');
+        }
+
         if (! $role || ! $role->isClaimed()) {
             return redirect(app_public_url());
         }
@@ -362,6 +367,7 @@ class RoleController extends Controller
         }
 
         if ($event) {
+            $event->loadMissing('roles.rooms');
             // If the event is password protected, ensure the visitor has access
             if ($event->hasPassword()) {
                 $sessionKey = 'event_access_' . $event->id;
@@ -416,7 +422,7 @@ class RoleController extends Controller
         $endOfMonth = $startOfMonth->copy()->addMonth()->endOfMonth();
 
         if ($role->isCurator()) {
-            $events = Event::with('roles')
+            $events = Event::with('roles.rooms')
                 ->where(function ($query) use ($startOfMonth, $endOfMonth) {
                     $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
                         ->orWhereNotNull('days_of_week');
@@ -430,7 +436,7 @@ class RoleController extends Controller
                 ->orderBy('starts_at')
                 ->get();
         } else {
-            $events = Event::with('roles')
+            $events = Event::with('roles.rooms')
                 ->where(function ($query) use ($startOfMonth, $endOfMonth) {
                     $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
                         ->orWhereNotNull('days_of_week');
@@ -1411,7 +1417,7 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        $role = Role::with('groups')->subdomain($subdomain)->firstOrFail();
+        $role = Role::with(['groups', 'rooms'])->subdomain($subdomain)->firstOrFail();
 
         $this->authorizeManageResource(auth()->user(), $role->type, $role);
 
@@ -1485,6 +1491,54 @@ class RoleController extends Controller
         $this->authorizeManageResource($user, $role->type, $role);
         $role->fill($request->except('contacts'));
         $this->assignRoleContacts($role, $request);
+
+        if ($role->isVenue()) {
+            $roomsInput = collect($request->input('rooms', []))
+                ->map(function ($room) {
+                    return [
+                        'id' => data_get($room, 'id'),
+                        'name' => trim((string) data_get($room, 'name', '')),
+                        'details' => trim((string) data_get($room, 'details', '')),
+                    ];
+                })
+                ->filter(function ($room) {
+                    return ($room['name'] !== '') || $room['id'];
+                });
+
+            $existingRoomIds = $role->rooms()->pluck('id')->toArray();
+            $submittedRoomIds = [];
+
+            foreach ($roomsInput as $room) {
+                $roomId = $room['id'];
+
+                if ($roomId && in_array((int) $roomId, $existingRoomIds, true)) {
+                    if ($room['name'] === '') {
+                        continue;
+                    }
+
+                    $role->rooms()->where('id', $roomId)->update([
+                        'name' => $room['name'],
+                        'details' => $room['details'] ?: null,
+                    ]);
+
+                    $submittedRoomIds[] = (int) $roomId;
+                } elseif ($room['name'] !== '') {
+                    $newRoom = $role->rooms()->create([
+                        'name' => $room['name'],
+                        'details' => $room['details'] ?: null,
+                    ]);
+
+                    $submittedRoomIds[] = $newRoom->id;
+                }
+            }
+
+            $roomsToDelete = array_diff($existingRoomIds, $submittedRoomIds);
+
+            if (! empty($roomsToDelete)) {
+                DB::table('event_role')->whereIn('room_id', $roomsToDelete)->update(['room_id' => null]);
+                $role->rooms()->whereIn('id', $roomsToDelete)->delete();
+            }
+        }
 
         $newSubdomain = Role::cleanSubdomain($request->new_subdomain);
         if ($newSubdomain != $subdomain) {

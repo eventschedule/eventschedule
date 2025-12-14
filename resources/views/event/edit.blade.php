@@ -381,6 +381,20 @@
                                 </div>
                             </div>
 
+                                  <div v-if="selectedVenue && availableRooms.length" class="mb-6">
+                                    <x-input-label for="venue_room_id" :value="__('messages.room_optional')" />
+                                    <select id="venue_room_id"
+                                        name="venue_room_id"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}"
+                                        v-model="selectedRoomId">
+                                      <option value="">{{ __('messages.select_room') }}</option>
+                                      <option v-for="room in availableRooms" :key="room.id" :value="room.id">
+                                        @{{ room.name }}
+                                      </option>
+                                    </select>
+                                    <x-input-error class="mt-2" :messages="$errors->get('venue_room_id')" />
+                                  </div>
+
                         </div>
 
                         <div v-if="isOnline">
@@ -1303,6 +1317,7 @@
         venueSearchEmail: "",
         venueSearchResults: [],
         selectedVenue: @json($selectedVenue ? $selectedVenue->toData() : null),
+        selectedRoomId: @json(old('venue_room_id', $selectedRoom ? $selectedRoom->encodeId() : '')),
         selectedMembers: sanitizeCollection(@json($selectedMembers ?? [])),
         memberSearchResults: [],
         selectedMember: "",
@@ -1389,6 +1404,7 @@
         this.venueState = "";
         this.venuePostalCode = "";
         this.venueCountryCode = "";
+        this.selectedRoomId = "";
         this.venueSearchEmail = "";
         this.venueSearchResults = [];
         this.showVenueAddressFields = preserveVenueType ? this.showVenueAddressFields : !this.hasAnyVenues;
@@ -1844,6 +1860,13 @@
       availableVenues() {
         return sanitizeCollection(this.venues);
       },
+      availableRooms() {
+        if (!this.selectedVenue || !Array.isArray(this.selectedVenue.rooms)) {
+          return [];
+        }
+
+        return sanitizeCollection(this.selectedVenue.rooms);
+      },
       sanitizedVenueSearchResults() {
         return sanitizeCollection(this.venueSearchResults);
       },
@@ -2005,6 +2028,7 @@
         this.venueState = this.selectedVenue ? this.selectedVenue.state : "";
         this.venuePostalCode = this.selectedVenue ? this.selectedVenue.postal_code : "";
         this.venueCountryCode = this.selectedVenue ? this.selectedVenue.country_code : "";
+        this.selectedRoomId = "";
         this.venueSearchEmail = "";
         this.venueSearchResults = [];
       },

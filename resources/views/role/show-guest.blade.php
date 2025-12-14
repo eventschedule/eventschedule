@@ -246,6 +246,26 @@
             </div>
             @endif
 
+            @if ($role->isVenue() && $role->rooms && $role->rooms->count())
+            <div class="mt-6 w-full">
+              <div class="rounded-3xl border border-white/70 bg-white/70 p-4 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-gray-800/60">
+                <h3 class="text-sm font-semibold text-[#33383C] dark:text-gray-200">
+                  {{ __('messages.rooms') }}
+                </h3>
+                <div class="mt-3 space-y-3">
+                  @foreach ($role->rooms as $room)
+                    <div class="rounded-2xl bg-white/80 p-3 text-sm text-[#33383C] shadow-sm dark:bg-gray-800/80 dark:text-gray-200">
+                      <p class="font-semibold">{{ $room->name }}</p>
+                      @if ($room->details)
+                        <p class="text-sm text-gray-600 dark:text-gray-300">{{ $room->details }}</p>
+                      @endif
+                    </div>
+                  @endforeach
+                </div>
+              </div>
+            </div>
+            @endif
+
             @if($role->show_email && !empty($role->contacts))
             <div class="mt-6 w-full">
               <div class="rounded-3xl border border-white/70 bg-white/70 p-4 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-gray-800/60">

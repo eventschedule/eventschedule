@@ -136,7 +136,7 @@ class EventController extends Controller
     public function view(Request $request, $hash)
     {
         $event_id = UrlUtils::decodeId($hash);
-        $event = Event::with(['roles', 'creatorRole', 'tickets', 'user'])->findOrFail($event_id);
+        $event = Event::with(['roles.rooms', 'creatorRole', 'tickets', 'user'])->findOrFail($event_id);
 
         if (! $request->user()->canEditEvent($event)) {
             return redirect()->route('home')->with('error', __('messages.not_authorized'));
@@ -178,6 +178,7 @@ class EventController extends Controller
         return view('event.view', [
             'event' => $event,
             'venue' => $event->venue,
+            'venueRoom' => $event->venueRoom(),
             'talents' => $event->roles->filter(function ($role) {
                 return $role->isTalent();
             }),
@@ -195,7 +196,7 @@ class EventController extends Controller
     public function cloneConfirm(Request $request, $hash)
     {
         $eventId = UrlUtils::decodeId($hash);
-        $event = Event::with(['roles', 'creatorRole', 'tickets', 'user'])->findOrFail($eventId);
+        $event = Event::with(['roles.rooms', 'creatorRole', 'tickets', 'user'])->findOrFail($eventId);
         $user = $request->user();
 
         if (! $user || (! $user->canEditEvent($event) && ! $user->isAdmin())) {
@@ -233,6 +234,7 @@ class EventController extends Controller
         return view('event.clone-confirm', [
             'event' => $event,
             'venue' => $event->venue,
+            'venueRoom' => $event->venueRoom(),
             'talents' => $event->roles->filter(function ($role) {
                 return $role->isTalent();
             }),
@@ -296,6 +298,8 @@ class EventController extends Controller
 
         $user = $request->user();
         $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $role->loadMissing('rooms');
         
         $venue = $role->isVenue() ? $role : null;
         $schedule = $role->isTalent() ? $role : null;
@@ -418,7 +422,7 @@ class EventController extends Controller
             $event->timezone = $defaultTimezone;
         }
 
-        $roles = $user->roles()->get();
+        $roles = $user->roles()->with('rooms')->get();
     
         $venues = $roles->filter(function($item) {
             if ($item->pivot->level == 'follower' && ! $item->acceptEventRequests()) {
@@ -451,6 +455,7 @@ class EventController extends Controller
             'subdomain' => $subdomain,
             'title' => __('messages.add_event'),
             'selectedVenue' => $venue,
+            'selectedRoom' => null,
             'venues' => $venues,
             'selectedMembers' => $selectedMembers,
             'members' => $members,
@@ -492,7 +497,7 @@ class EventController extends Controller
         }
 
         $event_id = UrlUtils::decodeId($hash);
-        $event = Event::with(['creatorRole', 'curators'])->findOrFail($event_id);
+        $event = Event::with(['creatorRole', 'curators', 'roles.rooms'])->findOrFail($event_id);
 
         Log::info('EventController.edit.attempt', [
             'event_id' => $event->id,
@@ -527,6 +532,10 @@ class EventController extends Controller
         
         $role = Role::subdomain($subdomain)->firstOrFail();
         $venue = $event->venue;
+        if ($venue) {
+            $venue->loadMissing('rooms');
+        }
+        $selectedRoom = $event->venueRoom();
         $selectedMembers = [];
         foreach ($event->roles as $each) {
             if ($each->isTalent()) {
@@ -540,7 +549,7 @@ class EventController extends Controller
 
         $title = __('messages.edit_event');
         
-        $roles = $user->roles()->get();
+        $roles = $user->roles()->with('rooms')->get();
     
         $venues = $roles->filter(function($item) {            
             if ($item->pivot->level == 'follower' && ! $item->acceptEventRequests()) {
@@ -586,6 +595,7 @@ class EventController extends Controller
             'subdomain' => $subdomain,
             'title' => $title,
             'selectedVenue' => $venue,
+            'selectedRoom' => $selectedRoom,
             'venues' => $venues,
             'selectedMembers' => $selectedMembers,
             'members' => $members,

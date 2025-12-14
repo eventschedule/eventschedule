@@ -529,6 +529,60 @@
 
                     </div>
                 </div>
+
+                @php
+                    $roomValues = old('rooms', $role->rooms ?? []);
+                    if (! is_array($roomValues)) {
+                        $roomValues = [];
+                    }
+                @endphp
+
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg mt-6">
+                    <div class="max-w-xl">
+                        <div class="flex items-start justify-between gap-4 mb-4">
+                            <div>
+                                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                                    {{ __('messages.rooms') }}
+                                </h2>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.room_optional') }}</p>
+                            </div>
+                            <x-secondary-button type="button" onclick="addRoomField()" class="shrink-0">
+                                {{ __('messages.add_room') }}
+                            </x-secondary-button>
+                        </div>
+
+                        <div id="room-items" class="space-y-4">
+                            @forelse ($roomValues as $key => $room)
+                                @php
+                                    $room = is_array($room) ? $room : (array) $room;
+                                @endphp
+                                <div class="room-item rounded-lg border border-gray-200 dark:border-gray-700 p-4" data-room-key="{{ $key }}">
+                                    <input type="hidden" name="rooms[{{ $key }}][id]" value="{{ old('rooms.' . $key . '.id', data_get($room, 'id')) }}">
+                                    <div class="flex items-start justify-between gap-4">
+                                        <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.room_name') }}</span>
+                                        <button type="button" class="inline-flex items-center rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800" onclick="removeRoomField(this)">
+                                            {{ __('messages.remove') }}
+                                        </button>
+                                    </div>
+                                    <div class="mt-4 space-y-3">
+                                        <div>
+                                            <x-input-label for="rooms_{{ $key }}_name" :value="__('messages.room_name')" />
+                                            <x-text-input id="rooms_{{ $key }}_name" name="rooms[{{ $key }}][name]" type="text" class="mt-1 block w-full" :value="old('rooms.' . $key . '.name', data_get($room, 'name', ''))" autocomplete="off" />
+                                            <x-input-error class="mt-2" :messages="$errors->get('rooms.' . $key . '.name')" />
+                                        </div>
+                                        <div>
+                                            <x-input-label for="rooms_{{ $key }}_details" :value="__('messages.room_details')" />
+                                            <textarea id="rooms_{{ $key }}_details" name="rooms[{{ $key }}][details]" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]" rows="2">{{ old('rooms.' . $key . '.details', data_get($room, 'details', '')) }}</textarea>
+                                            <x-input-error class="mt-2" :messages="$errors->get('rooms.' . $key . '.details')" />
+                                        </div>
+                                    </div>
+                                </div>
+                            @empty
+                                <p id="no-rooms-placeholder" class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.none') }}</p>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
                 @endif
 
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
@@ -1484,6 +1538,7 @@ function closeImportOutput() {
 }
 
 let contactIndex = {{ count((array) old('contacts', $role->contacts ?? [])) }};
+let roomIndex = {{ count((array) old('rooms', $role->rooms ?? [])) }};
 
 function addContactField(values = {}) {
     const container = document.getElementById('contact-items');
@@ -1568,6 +1623,81 @@ function removeContactField(button) {
         placeholder.id = 'no-contacts-placeholder';
         placeholder.className = 'text-sm text-gray-500 dark:text-gray-400';
         placeholder.textContent = '{{ __('messages.no_contacts_added') }}';
+        container.appendChild(placeholder);
+    }
+}
+
+function addRoomField(values = {}) {
+    const container = document.getElementById('room-items');
+
+    if (!container) {
+        return;
+    }
+
+    const placeholder = document.getElementById('no-rooms-placeholder');
+    if (placeholder) {
+        placeholder.remove();
+    }
+
+    const key = `new_${roomIndex++}`;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'room-item rounded-lg border border-gray-200 dark:border-gray-700 p-4';
+    wrapper.dataset.roomKey = key;
+    wrapper.innerHTML = `
+        <input type="hidden" name="rooms[${key}][id]" />
+        <div class="flex items-start justify-between gap-4">
+            <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.room_name') }}</span>
+            <button type="button" class="inline-flex items-center rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800" onclick="removeRoomField(this)">
+                {{ __('messages.remove') }}
+            </button>
+        </div>
+        <div class="mt-4 space-y-3">
+            <div>
+                <label for="rooms_${key}_name" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.room_name') }}</label>
+                <input id="rooms_${key}_name" name="rooms[${key}][name]" type="text" autocomplete="off" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
+            </div>
+            <div>
+                <label for="rooms_${key}_details" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.room_details') }}</label>
+                <textarea id="rooms_${key}_details" name="rooms[${key}][details]" rows="2" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA]"></textarea>
+            </div>
+        </div>
+    `;
+
+    container.appendChild(wrapper);
+
+    const nameInput = wrapper.querySelector(`#rooms_${key}_name`);
+    const detailsInput = wrapper.querySelector(`#rooms_${key}_details`);
+
+    if (values.name) {
+        nameInput.value = values.name;
+    }
+
+    if (values.details) {
+        detailsInput.value = values.details;
+    }
+
+    if (nameInput) {
+        nameInput.focus();
+    }
+}
+
+function removeRoomField(button) {
+    const container = document.getElementById('room-items');
+
+    if (!container) {
+        return;
+    }
+
+    const item = button.closest('.room-item');
+    if (item) {
+        item.remove();
+    }
+
+    if (container.querySelectorAll('.room-item').length === 0) {
+        const placeholder = document.createElement('p');
+        placeholder.id = 'no-rooms-placeholder';
+        placeholder.className = 'text-sm text-gray-500 dark:text-gray-400';
+        placeholder.textContent = '{{ __('messages.none') }}';
         container.appendChild(placeholder);
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Models\Role;
+use App\Models\VenueRoom;
+use App\Utils\UrlUtils;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -29,6 +31,25 @@ class EventCreateRequest extends FormRequest
             'flyer_media_variant_id' => ['nullable', 'integer', 'exists:media_asset_variants,id'],
             'slug' => ['nullable', 'string', 'max:255'],
             'timezone' => ['required', 'timezone'],
+            'venue_room_id' => ['nullable', 'string', function ($attribute, $value, $fail) {
+                $roomId = UrlUtils::decodeId($value);
+
+                if (! $roomId) {
+                    return;
+                }
+
+                $venueId = $this->input('venue_id') ? UrlUtils::decodeId($this->input('venue_id')) : null;
+                $room = VenueRoom::find($roomId);
+
+                if (! $room) {
+                    $fail(__('messages.invalid_room_selection'));
+                    return;
+                }
+
+                if ($venueId && $room->venue_id !== $venueId) {
+                    $fail(__('messages.room_not_in_venue'));
+                }
+            }],
             'event_password' => [
                 Rule::requiredIf(function () {
                     return (bool) $this->input('tickets_enabled')

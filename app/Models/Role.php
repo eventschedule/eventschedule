@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\MediaAsset;
 use App\Models\MediaAssetUsage;
+use App\Models\VenueRoom;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use App\Notifications\VerifyEmail as CustomVerifyEmail;
@@ -215,6 +216,11 @@ class Role extends Model implements MustVerifyEmail
     public function headerImageAsset(): BelongsTo
     {
         return $this->belongsTo(Image::class, 'header_image_id');
+    }
+
+    public function rooms()
+    {
+        return $this->hasMany(VenueRoom::class, 'venue_id');
     }
 
     public function backgroundImageAsset(): BelongsTo
@@ -704,6 +710,15 @@ class Role extends Model implements MustVerifyEmail
             $data['state'] = $this->state;
             $data['postal_code'] = $this->postal_code;
             $data['country_code'] = $this->country_code;
+
+            $rooms = $this->relationLoaded('rooms') ? $this->rooms : $this->rooms()->get();
+            $data['rooms'] = $rooms->map(function (VenueRoom $room) {
+                return [
+                    'id' => $room->encodeId(),
+                    'name' => $room->name,
+                    'details' => $room->details,
+                ];
+            })->values()->all();
         }
 
         if ($this->isTalent()) {

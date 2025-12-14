@@ -78,17 +78,25 @@
 
           $locationHeadline = null;
           $locationDetails = null;
+          $venueRoom = $event->venueRoom();
           if ($event->venue) {
             $locationHeadline = $event->venue->translatedName() ?: $event->venue->shortAddress();
             $locationDetails = $event->venue->shortAddress();
             if ($locationHeadline === $locationDetails) {
               $locationDetails = null;
             }
-            // Add room/suite information if available
-            if ($event->venue->translatedAddress2()) {
+
+            $roomLabel = $venueRoom?->name;
+            $suiteLabel = $event->venue->translatedAddress2();
+
+            if ($roomLabel) {
+              $locationDetails = $locationDetails
+                ? $locationDetails . ' • ' . $roomLabel
+                : $roomLabel;
+            } elseif ($suiteLabel) {
               $locationDetails = $locationDetails 
-                ? $locationDetails . ' • ' . $event->venue->translatedAddress2()
-                : $event->venue->translatedAddress2();
+                ? $locationDetails . ' • ' . $suiteLabel
+                : $suiteLabel;
             }
           } elseif ($event->event_url) {
             $locationHeadline = \App\Utils\UrlUtils::clean($event->event_url);
@@ -480,7 +488,7 @@
             $locationLink = 'https://www.google.com/maps/search/?api=1&query=' . urlencode($event->venue->bestAddress());
             $locationCta = $event->venue->shortAddress();
             $locationDescription = $event->venue->translatedName() ?: $event->venue->shortAddress();
-            $locationRoom = $event->venue->translatedAddress2();
+            $locationRoom = $venueRoom?->name ?: $event->venue->translatedAddress2();
           } elseif ($event->event_url) {
             $locationLink = $event->event_url;
             $locationCta = \App\Utils\UrlUtils::clean($event->event_url);

@@ -44,6 +44,10 @@ class RoleUpdateRequest extends FormRequest
                 config('app.hosted') ? [new NoFakeEmail] : []
             ),
             'contacts.*.phone' => ['nullable', 'string', 'max:255'],
+            'rooms' => ['nullable', 'array'],
+            'rooms.*.id' => ['nullable', 'integer', 'exists:venue_rooms,id'],
+            'rooms.*.name' => ['nullable', 'string', 'max:255'],
+            'rooms.*.details' => ['nullable', 'string'],
         ];
     }
 }

@@ -195,7 +195,9 @@
                                     @else
                                         <div>
                                             {{ $venue->address1 }}<br>
-                                            @if ($venue->translatedAddress2())
+                                            @if (!empty($venueRoom?->name))
+                                                {{ $venueRoom->name }}<br>
+                                            @elseif ($venue->translatedAddress2())
                                                 {{ $venue->translatedAddress2() }}<br>
                                             @endif
                                             {{ trim($venue->city . ', ' . $venue->state . ' ' . $venue->postal_code) }}

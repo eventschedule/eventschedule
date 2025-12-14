@@ -6,6 +6,7 @@ use App\Jobs\SyncEventToGoogleCalendar;
 use App\Models\EventRole;
 use App\Models\EventType;
 use App\Models\MediaAssetUsage;
+use App\Models\VenueRoom;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -205,7 +206,7 @@ class Event extends Model
         // Load venue from event_role table where the role is a venue
         return $this->belongsToMany(Role::class, 'event_role', 'event_id', 'role_id')
                     ->where('roles.type', 'venue')
-                    ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id')
+                    ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id', 'room_id')
                     ->using(EventRole::class);
     }
 
@@ -222,6 +223,27 @@ class Event extends Model
         }
 
         return null;
+    }
+
+    public function venueRoom(): ?VenueRoom
+    {
+        $venue = $this->venue;
+
+        if (! $venue) {
+            return null;
+        }
+
+        $roomId = $venue->pivot->room_id ?? null;
+
+        if (! $roomId) {
+            return null;
+        }
+
+        if ($venue->relationLoaded('rooms')) {
+            return $venue->rooms->firstWhere('id', $roomId);
+        }
+
+        return VenueRoom::find($roomId);
     }
 
     public function getGroupIdForSubdomain($subdomain)
@@ -260,7 +282,7 @@ class Event extends Model
     public function roles()
     {
         return $this->belongsToMany(Role::class)
-                    ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id')
+                    ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id', 'room_id')
                     ->using(EventRole::class);
     }
 
