@@ -428,7 +428,7 @@
 
                           <div v-show="!initiallyPrivate || editingPassword" class="mt-2">
                             <x-text-input id="event_password" name="event_password" type="password" class="mt-1 block w-full"
-                              v-model="event.event_password" v-bind:required="shouldRequirePassword() || (!initiallyPrivate && isPrivate) || (editingPassword && isPrivate)" autocomplete="off" />
+                              v-model="event.event_password" autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('event_password')" />
                             <p class="text-sm text-gray-500 mt-2">{{ __('messages.password_help') }}</p>
                           </div>
