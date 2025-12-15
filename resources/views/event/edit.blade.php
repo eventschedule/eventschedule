@@ -263,7 +263,7 @@
                                     </fieldset>
 
                                     <div v-if="venueType === 'use_existing'">
-                                        <select required id="selected_venue"
+                                        <select id="selected_venue"
                                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}"
                                                 v-model="selectedVenue">
                                                 <option value="" disabled selected>{{ __('messages.please_select') }}</option>                                
@@ -313,9 +313,9 @@
                                     </div>
 
                                     <div class="mb-6">
-                                        <x-input-label for="venue_address1" :value="__('messages.street_address') . ' *'" />
+                                        <x-input-label for="venue_address1" :value="__('messages.street_address')" />
                                         <x-text-input id="venue_address1" name="venue_address1" type="text"
-                                            class="mt-1 block w-full" required v-model="venueAddress1" autocomplete="off" />
+                                            class="mt-1 block w-full" v-model="venueAddress1" autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_address1')" />
                                     </div>
 
@@ -395,9 +395,9 @@
                         </div>
 
                         <div v-if="isOnline">
-                            <x-input-label for="event_url" :value="__('messages.event_url') . ' *'" />
+                            <x-input-label for="event_url" :value="__('messages.event_url')" />
                             <x-text-input id="event_url" name="event_url" type="url" class="mt-1 block w-full"
-                                v-model="event.event_url" required autofocus autocomplete="off" />
+                                v-model="event.event_url" autofocus autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('event_url')" />
                         </div>
                     </div>
@@ -1540,9 +1540,8 @@
       },
       isFormValid() {        
         var hasSubdomain = this.venueName || this.selectedMembers.length > 0;
-        var hasVenue = this.venueAddress1 || this.event.event_url;
 
-        return hasSubdomain && hasVenue;
+        return hasSubdomain;
       },
       hasLimitedPaidTickets() {
         return this.tickets.some(ticket => ticket.price > 0 && ticket.quantity > 0);
