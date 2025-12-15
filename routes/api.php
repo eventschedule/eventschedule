@@ -34,6 +34,26 @@ Route::middleware([ApiAuthentication::class])->group(function () {
     Route::post('/tickets/{sale_id}/scan', [\App\Http\Controllers\Api\ApiTicketController::class, 'scan'])->middleware('ability:resources.manage');
     Route::post('/tickets/{sale_id}/checkout', [\App\Http\Controllers\Api\ApiTicketController::class, 'checkout'])->middleware('ability:resources.manage');
     Route::post('/events/{subdomain}/checkout', [\App\Http\Controllers\Api\ApiTicketController::class, 'createSale'])->middleware('ability:resources.manage');
+    Route::post('/tickets/{sale_id}/reassign', [\App\Http\Controllers\Api\ApiTicketController::class, 'reassign'])->middleware('ability:resources.manage');
+    Route::post('/tickets/{sale_id}/notes', [\App\Http\Controllers\Api\ApiTicketController::class, 'addNote'])->middleware('ability:resources.manage');
+
+    // Talent/Performers
+    Route::get('/talent', [\App\Http\Controllers\Api\ApiTalentController::class, 'index'])->middleware('ability:resources.view');
+    Route::get('/talent/{id}', [\App\Http\Controllers\Api\ApiTalentController::class, 'show'])->middleware('ability:resources.view');
+    Route::post('/talent', [\App\Http\Controllers\Api\ApiTalentController::class, 'store'])->middleware('ability:resources.manage');
+    Route::put('/talent/{id}', [\App\Http\Controllers\Api\ApiTalentController::class, 'update'])->middleware('ability:resources.manage');
+    Route::delete('/talent/{id}', [\App\Http\Controllers\Api\ApiTalentController::class, 'destroy'])->middleware('ability:resources.manage');
+
+    // Venues
+    Route::get('/venues', [\App\Http\Controllers\Api\ApiVenueController::class, 'index'])->middleware('ability:resources.view');
+    Route::get('/venues/{id}', [\App\Http\Controllers\Api\ApiVenueController::class, 'show'])->middleware('ability:resources.view');
+    Route::post('/venues', [\App\Http\Controllers\Api\ApiVenueController::class, 'store'])->middleware('ability:resources.manage');
+    Route::put('/venues/{id}', [\App\Http\Controllers\Api\ApiVenueController::class, 'update'])->middleware('ability:resources.manage');
+    Route::delete('/venues/{id}', [\App\Http\Controllers\Api\ApiVenueController::class, 'destroy'])->middleware('ability:resources.manage');
+
+    // Check-ins
+    Route::post('/checkins', [\App\Http\Controllers\Api\ApiCheckInController::class, 'store'])->middleware('ability:resources.manage');
+    Route::get('/checkins', [\App\Http\Controllers\Api\ApiCheckInController::class, 'index'])->middleware('ability:resources.view');
 
     // Media library
     Route::get('/media', [\App\Http\Controllers\Api\ApiMediaLibraryController::class, 'list'])->middleware('ability:resources.view');

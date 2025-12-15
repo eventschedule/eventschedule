@@ -275,4 +275,78 @@ class ApiTicketController extends Controller
 
         return response()->json(['data' => ['id' => UrlUtils::encodeId($sale->id), 'status' => $sale->status, 'payment_method' => $sale->payment_method]], 201, [], JSON_PRETTY_PRINT);
     }
+
+    /**
+     * Reassign ticket to a new holder.
+     */
+    public function reassign(Request $request, $sale_id)
+    {
+        $decoded = UrlUtils::decodeId($sale_id);
+        $id = $decoded ?? $sale_id;
+
+        $sale = Sale::findOrFail($id);
+
+        if ($sale->user_id !== $request->user()->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'new_holder_name' => 'required|string|max:255',
+            'new_holder_email' => 'required|email|max:255',
+        ]);
+
+        $sale->update([
+            'name' => $validated['new_holder_name'],
+            'email' => $validated['new_holder_email'],
+        ]);
+
+        return response()->json([
+            'message' => 'Ticket reassigned successfully',
+            'data' => [
+                'id' => $sale->id,
+                'new_holder_name' => $sale->name,
+                'new_holder_email' => $sale->email,
+            ],
+        ]);
+    }
+
+    /**
+     * Add internal note to ticket.
+     */
+    public function addNote(Request $request, $sale_id)
+    {
+        $decoded = UrlUtils::decodeId($sale_id);
+        $id = $decoded ?? $sale_id;
+
+        $sale = Sale::findOrFail($id);
+
+        if ($sale->user_id !== $request->user()->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'note' => 'required|string|max:1000',
+        ]);
+
+        // Get existing notes (assuming a 'notes' column or we'll use 'metadata' style field)
+        // For simplicity, we'll store as JSON array
+        $notes = $sale->notes ? json_decode($sale->notes, true) : [];
+        
+        $notes[] = [
+            'note' => $validated['note'],
+            'created_at' => now()->toIso8601String(),
+            'created_by' => $request->user()->id,
+        ];
+
+        $sale->notes = json_encode($notes);
+        $sale->save();
+
+        return response()->json([
+            'message' => 'Note added successfully',
+            'data' => [
+                'note' => $validated['note'],
+                'created_at' => now()->toIso8601String(),
+            ],
+        ], 201);
+    }
 }
