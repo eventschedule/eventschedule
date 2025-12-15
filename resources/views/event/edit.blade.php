@@ -400,6 +400,9 @@
                                 v-model="event.event_url" autofocus autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('event_url')" />
                         </div>
+                        <div v-if="!isOnline">
+                            <input type="hidden" name="event_url" value="" />
+                        </div>
                     </div>
                 </div>
 
