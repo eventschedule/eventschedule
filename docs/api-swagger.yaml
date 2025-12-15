@@ -1,12 +1,16 @@
 openapi: 3.0.3
 info:
-  title: EventSchedule API (mutable endpoints)
-  version: 1.0.0
+  title: EventSchedule API
+  version: 2.0.0
   description: >-
-    Core mutable API endpoints (create/update/delete) useful to mobile clients.
+    Complete REST API for EventSchedule event management system.
+    Includes schedules, roles, events, ticketing, talent, venues, check-ins, and media management.
 
 servers:
-  - url: https://api.example.com
+  - url: https://your-domain.com/api
+    description: Production server
+  - url: http://localhost/api
+    description: Local development
 
 components:
   securitySchemes:
@@ -14,6 +18,7 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
+      description: API key from Settings → Integrations & API
   schemas:
     Error:
       type: object
@@ -374,6 +379,270 @@ components:
         sale_ticket_id:
           type: integer
         seat_number:
+    Talent:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+      tags: [Schedules]
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+          description: Filter by type (venue,curator,talent)
+      tags: [Roles]
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+          description: Filter by type (venue,curator,talent)
+        - name: name
+          in: query
+          schema:
+            type: string
+      tags: [Roles]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+              examples:
+                roleCreated:
+                  summary: Example role
+                  value:
+                    id: 12
+                    name: Volunteers
+                    type: venuerized
+          content:
+            application/json:
+              schema:
+      tags: [Roles]
+                $ref: '#/components/schemas/Error'
+          example: "booking@jazzquartet.com"
+        phone:
+          type: string
+          example: "+1234567890"
+        website:
+          type: string
+          example: "https://jazzquartet.com"
+        description:
+          type: string
+        address1:
+          type: string
+        address2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+      tags: [Roles]
+        postal_code:
+          type: string
+        country_code:
+          type: string
+        timezone:
+          type: string
+          example: "America/New_York"
+        subdomain:
+          type: string
+          example: "jazz-quartet"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    TalentCreateRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+      tags: [Events]
+      parameters:
+        - name: per_page
+          in: query
+          resources:
+    get:
+      summary: Get venues, curators, and talent for event form pickers
+      tags: [Events]
+      responses:
+        '200':
+          description: OK
+
+  /events/{subdomain}:
+    post:
+      summary: Create event under subdomain
+      tags: [Events]fault 100)
+        website:
+          type: string
+          format: uri
+        description:
+          type: string
+        address1:
+          type: string
+        address2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        postal_code:
+          type: string
+        country_code:
+          type: string
+        timezone:
+          type: string
+    Venue:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        website:
+          type: string
+        description:
+          type: string
+        address1:
+          type: string
+        address2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        postal_code:
+          type: string
+        country_code:
+          type: string
+        formatted_address:
+          type: string
+        geo_lat:
+          type: number
+          format: float
+          minimum: -90
+          maximum: 90
+        geo_lon:
+          type: number
+          format: float
+          minimum: -180
+          maximum: 180
+        timezone:
+          type: string
+        subdomain:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    VenueCreateRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        website:
+          type: string
+          format: uri
+        description:
+          type: string
+        address1:
+          type: string
+        address2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        postal_code:
+          type: string
+        country_code:
+          type: string
+        formatted_address:
+          type: string
+        geo_lat:
+          type: number
+          format: float
+        geo_lon:
+          type: number
+          format: float
+        timezone:
+          type: string
+    CheckIn:
+      type: object
+      properties:
+        id:
+          type: integer
+        event_id:
+          type: integer
+        attendee_name:
+          type: string
+        attendee_email:
+          type: string
+        checked_in_at:
+          type: string
+          format: date-time
+        notes:
+          type: string
+    CheckInRequest:
+      type: object
+      required: [event_id, attendee_name]
+      properties:
+        event_id:
+          type: integer
+        attendee_name:
+          type: string
+        attendee_email:
+          type: string
+          format: email
+        notes:
+          type: string
+    TicketReassignRequest:
+      type: object
+      required: [new_holder_name, new_holder_email]
+      properties:
+        new_holder_name:
+          type: string
+        new_holder_email:
+          type: string
+          format: email
+    TicketNoteRequest:
+      type: object
+      required: [note]
+      properties:
+        note:
+          type: string
+          maxLength: 1000
           type: string
 
 security:
@@ -439,6 +708,7 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           content:
             application/json:
+      tags: [Events]
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
     patch:
@@ -453,6 +723,7 @@ paths:
         required: true
         content:
           application/json:
+      tags: [Events]
             schema:
               type: object
               properties:
@@ -463,6 +734,7 @@ paths:
       responses:
         '200':
           description: Updated
+      tags: [Events]
           content:
             application/json:
               schema:
@@ -485,10 +757,11 @@ paths:
           schema:
             type: string
       requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
+  /events/{subdomain}/checkout:
+    post:
+      summary: Create a sale (checkout) for an event
+      tags: [Tickets]
+          schema:
               $ref: '#/components/schemas/EventCreateRequest'
       responses:
         '201':
@@ -546,7 +819,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Event'
 
-    /events/{subdomain}/checkout:
+    /etags: [Profile]
+      vents/{subdomain}/checkout:
       post:
         summary: Create a sale (checkout) for an event
         parameters:
@@ -556,6 +830,7 @@ paths:
         requestBody:
           required: true
           content:
+      tags: [Profile]
             application/json:
               schema:
                 $ref: '#/components/schemas/CreateSaleRequest'
@@ -586,6 +861,19 @@ paths:
       summary: Update authenticated user's profile
       requestBody:
         required: true
+      tags: [Tickets]
+      parameters:
+        - name: event_id
+          in: query
+          schema:
+            type: integer
+          description: Filter by event ID
+      tags: [Tickets]
+        - name: query
+          in: query
+          schema:
+            type: string
+          description: Search by name or email
         content:
           application/json:
             schema:
@@ -604,11 +892,326 @@ paths:
               properties:
                 password:
                   type: string
+      responses:reassign:
+    post:
+      summary: Reassign ticket to new holder
+      tags: [Tickets]
+      parameters:
+        - in: path
+          name: sale_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TicketReassignRequest'
+      responses:
+        '200':
+          description: Ticket reassigned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+      tags: [Tickets]
+                    type: string
+                  data:
+                    type: object
+
+  /tickets/{sale_id}/notes:
+    post:
+      summary: Add internal note to ticket
+      tags: [Tickets]
+      parameters:
+        - in: path
+          name: sale_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TicketNoteRequest'
+      responses:
+        '201':
+          description: Note added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+   talent:
+    get:
+      summary: List all talent
+      tags: [Talent]
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Talent'
+    post:
+      summary: Create talent
+      tags: [Talent]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TalentCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Talent'
+
+  /talent/{id}:
+    get:
+      summary: Get single talent
+      tags: [Talent]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+      tags: [Media]
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Talent'
+    put:
+      summary: Update talent
+      tags: [Talent]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      tags: [Media]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TalentCreateRequest'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Talent'
+    delete:
+      summary: Delete talent
+      tags: [Talent]
+      parameters:
+        - name: id
+      tags: [Media]
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
 
-  /tickets:
+  /venues:
+    get:
+      summary: List all venues
+      tags: [Venues]
+      tags: [Media]
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Venue'
+    post:
+      summary: Create venue
+      tags: [Venues]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VenueCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+      tags: [Media]
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Venue'
+
+  /venues/{id}:
+    get:
+      summary: Get single venue
+      tags: [Venues]
+      parameters:
+        - name: id
+      tags: [Media]
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Venue'
+    put:
+      summary: Update venue
+      tags: [Venues]
+      parameters:
+        - name: id
+          in: path
+      tags: [Roles]
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VenueCreateRequest'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Venue'
+    delete:
+      summary: Delete venue
+      tags: [Venues]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+      tags: [Roles]
+                  message:
+                    type: string
+
+  /checkins:
+    get:
+      summary: List check-ins for an event
+      tags: [Check-ins]
+      parameters:
+        - name: event_id
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Event ID to get check-ins for
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CheckIn'
+    post:
+      summary: Record a check-in
+      tags: [Check-ins]
+      requestBody:
+      tags: [Roles]
+      parameters:
+        - in: path
+          name: role_id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: member_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Member removed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /roles/{role_id}/contacts/{index}:
+    delete:
+      summary: Remove a contact from a role
+      tags: [Roles]
+      parameters:
+        - in: path
+          name: role_id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: index
+          required: true
+          schema:
+            type: integer
+          description: Zero-based index of the contact to remove
+      responses:
+        '200':
+          description: Contact removedets
+      tags: [Media]
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Upload media asset
+      tags: [Media]
     get:
       summary: List ticket sales
       responses:
