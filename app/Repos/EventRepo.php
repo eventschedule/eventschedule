@@ -195,10 +195,6 @@ class EventRepo
 
         $event->fill($request->all());
         
-        if (! $request->event_url) {
-            $event->event_url = null;
-        }
-
         $days_of_week = '';
         $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
         foreach ($days as $index => $day) {

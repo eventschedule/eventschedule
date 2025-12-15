@@ -62,10 +62,6 @@ class CheckData extends Command
         $events = Event::with(['venue', 'roles', 'user'])->get();
 
         foreach ($events as $event) {
-            if (! $event->venue && ! $event->event_url) {
-                $errors[] = 'No venue or event_url for event ' . $event->id . ': ' . $event->name . ' (' . $event->user->id . ': ' . $event->user->name . ')';
-            }
-
             if (! $event->slug) {
                 $errors[] = 'No slug for event ' . $event->id . ': ' . $event->name . ' (' . $event->user->id . ': ' . $event->user->name . ')';
             }
