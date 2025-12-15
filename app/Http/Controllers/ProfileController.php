@@ -6,10 +6,12 @@ use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use App\Notifications\DeletedUserNotification;
 use App\Utils\InvoiceNinja;
 use Codedge\Updater\UpdaterManager;
 
@@ -149,6 +151,9 @@ class ProfileController extends Controller
                 Storage::delete($path);
             }    
         }
+
+        // Send notification to the deleted user
+        Notification::route('mail', $user->email)->notify(new DeletedUserNotification($user));
 
         $user->delete();
 
