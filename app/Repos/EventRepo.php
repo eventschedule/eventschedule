@@ -276,15 +276,17 @@ class EventRepo
                     unset($input['event_password']);
                 }
             } else {
-                // No explicit privacy flag present in input (e.g., API callers or scripts)
+                // No explicit privacy flag present in input (e.g., unchecked checkbox does not submit)
                 if (array_key_exists('event_password', $input)) {
                     if ($input['event_password'] && trim($input['event_password']) !== '') {
                         $event->event_password_hash = \Illuminate\Support\Facades\Hash::make($input['event_password']);
                     } else {
-                        // Explicit empty password provided: clear existing
+                        // Empty password provided: clear existing
                         $event->event_password_hash = null;
                     }
                     unset($input['event_password']);
+                } else {
+                    // No password field present: preserve existing hash (common when event_private unchecked)
                 }
             }
 
@@ -391,7 +393,12 @@ class EventRepo
 
             foreach ($roles as $role) {
                 if ((auth()->user() && $user->isMember($role->subdomain)) || ($role->accept_requests && ! $role->require_approval)) {
-                    $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
+                    $updateData = ['is_accepted' => true];
+                    // Preserve room_id if this is the venue role
+                    if ($role->id === $venueId && $roomId) {
+                        $updateData['room_id'] = $roomId;
+                    }
+                    $event->roles()->updateExistingPivot($role->id, $updateData);
                 }
 
                 // If this is a curator and curator_groups is provided, add it to the pivot
@@ -399,14 +406,24 @@ class EventRepo
                     $curatorEncodedId = UrlUtils::encodeId($role->id);
                     if (isset($curatorGroups[$curatorEncodedId]) && $curatorGroups[$curatorEncodedId]) {
                         $groupId = UrlUtils::decodeId($curatorGroups[$curatorEncodedId]);
-                        $event->roles()->updateExistingPivot($role->id, ['group_id' => $groupId]);
+                        $updateData = ['group_id' => $groupId];
+                        // Preserve room_id if this is the venue role
+                        if ($role->id === $venueId && $roomId) {
+                            $updateData['room_id'] = $roomId;
+                        }
+                        $event->roles()->updateExistingPivot($role->id, $updateData);
                     }
                 }
 
                 // If this is the current role and current_role_group_id is provided, add it to the pivot
                 if ($role && $role->id === $currentRole->id && $request->has('current_role_group_id') && $request->current_role_group_id) {
                     $groupId = UrlUtils::decodeId($request->current_role_group_id);
-                    $event->roles()->updateExistingPivot($role->id, ['group_id' => $groupId]);
+                    $updateData = ['group_id' => $groupId];
+                    // Preserve room_id if this is the venue role
+                    if ($role->id === $venueId && $roomId) {
+                        $updateData['room_id'] = $roomId;
+                    }
+                    $event->roles()->updateExistingPivot($role->id, $updateData);
                 }
             }
 
