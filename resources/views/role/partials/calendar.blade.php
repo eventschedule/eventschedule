@@ -338,7 +338,7 @@
                                                 </time>
                                             </dd>
                                         </div>
-                                        <div
+                                        <div v-if="event.venue_name"
                                             class="mt-2 flex items-start {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'space-x-reverse' : '' }} space-x-3 {{ (isset($force_mobile) && $force_mobile) ? '' : (isset($role) && $role->isRtl() && ! session()->has('translate') ? 'xl:mr-3.5 xl:mt-0 xl:border-r xl:border-gray-400 xl:border-opacity-50 xl:pr-3.5' : 'xl:ml-3.5 xl:mt-0 xl:border-l xl:border-gray-400 xl:border-opacity-50 xl:pl-3.5') }}">
                                             <dt class="mt-0.5">
                                                 <span class="sr-only">Location</span>
@@ -628,11 +628,17 @@ const calendarApp = createApp({
         },
         getEventTooltip(event) {
             const time = this.getEventTime(event);
-            return `<b>${event.name}</b><br/>${event.venue_name} • ${time}`;
+            let tooltip = `<b>${event.name}</b><br/>`;
+            if (event.venue_name) {
+                tooltip += `${event.venue_name} • ${time}`;
+            } else {
+                tooltip += time;
+            }
+            return tooltip;
         },
         getEventDisplayName(event) {
             if (this.subdomain && this.isRoleAMember(event)) {
-                return event.venue_name;
+                return event.venue_name || event.name;
             }
             return event.name;
         },
