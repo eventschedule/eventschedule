@@ -1119,6 +1119,7 @@
                     </div>
                 </div>
 
+                @if (! config('app.hosted'))
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="import-settings">
                     <div class="max-w-xl">
 
@@ -1192,6 +1193,7 @@
                         
                     </div>
                 </div>
+                @endif
 
                 @if (! $role->exists || $role->user_id == auth()->user()->id)
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">

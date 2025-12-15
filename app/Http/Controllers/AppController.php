@@ -67,10 +67,13 @@ class AppController extends Controller
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
-        \Artisan::call('app:import-curator-events');
         \Artisan::call('app:translate');
         \Artisan::call('google:refresh-webhooks');
         \Artisan::call('app:notify-request-changes');
+
+        if (! config('app.hosted')) {
+            \Artisan::call('app:import-curator-events');
+        }
 
         return response()->json(['success' => true]);
     }
