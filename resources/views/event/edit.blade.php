@@ -223,7 +223,7 @@
                                     <div class="flex items-center">
                                         <input id="in_person" name="event_type" type="checkbox" v-model="isInPerson"
                                             class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
-                                            @change="ensureOneChecked('in_person')">
+                                            @change="onChangeVenueType('in_person')">
                                         <label for="in_person" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                             {{ __('messages.in_person') }}
                                         </label>
@@ -231,7 +231,7 @@
                                     <div class="flex items-center pl-3">
                                         <input id="online" name="event_type" type="checkbox" v-model="isOnline"
                                             class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
-                                            @change="ensureOneChecked('online')">
+                                            @change="onChangeVenueType('online')">
                                         <label for="online" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                             {{ __('messages.online') }}
                                         </label>
@@ -1400,16 +1400,7 @@
       clearEventUrl() {
         this.event.event_url = "";
       },
-      ensureOneChecked(type) {
-        if (!this.isInPerson && !this.isOnline) {
-            if (type === 'in_person') {
-                this.isOnline = true;
-            } else {
-                this.isInPerson = true;
-            }
-        }
-        
-        // Clear venue if in-person is unchecked
+      onChangeVenueType(type) {
         if (type === 'in_person' && !this.isInPerson) {
             this.venueType = '{{ (count($venues) > 0 ? 'use_existing' : 'create_new'); }}';
             this.selectedVenue = '';
