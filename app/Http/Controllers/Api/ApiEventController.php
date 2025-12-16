@@ -478,6 +478,8 @@ class ApiEventController extends Controller
             $path = storage_put_file_as_public($disk, $file, $filename, 'media');
             $dimensions = @getimagesize($file->getRealPath());
 
+            \Log::info('Flyer upload - path after storage_put_file_as_public: ' . $path);
+
             $image = Image::create([
                 'disk' => $disk,
                 'path' => $path,
@@ -489,12 +491,18 @@ class ApiEventController extends Controller
                 'user_id' => $event->user_id,
             ]);
 
+            \Log::info('Flyer upload - image created with ID: ' . $image->id . ', path: ' . $image->path);
+
             $event->flyer_image_id = $image->id;
             $event->flyer_image_url = $image->path;
             $event->save();
+
+            \Log::info('Flyer upload - event saved with flyer_image_id: ' . $event->flyer_image_id . ', flyer_image_url: ' . $event->flyer_image_url);
         }
         
         $event->refresh();
+        
+        \Log::info('Flyer upload - after refresh: flyer_image_id: ' . $event->flyer_image_id . ', flyer_image_url: ' . $event->flyer_image_url);
         
         return response()->json([
             'data' => $event->toApiData(),
