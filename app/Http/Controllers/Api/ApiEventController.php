@@ -267,7 +267,7 @@ class ApiEventController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'starts_at' => 'sometimes|required|date_format:Y-m-d H:i:s',
-            'venue_id' => 'sometimes|required_without_all:venue_address1,event_url',
+            'venue_id' => 'sometimes|nullable|required_without_all:venue_address1,event_url',
             'venue_address1' => 'sometimes|required_without_all:venue_id,event_url',
             'event_url' => 'sometimes|required_without_all:venue_id,venue_address1',
             'members' => 'sometimes|array',
@@ -378,7 +378,9 @@ class ApiEventController extends Controller
             $request->merge(['members' => $mergedMembers]);
         }
 
-        if (! $request->has('venue_id') && $event->venue) {
+        // Only merge existing venue_id if venue_id key is not present in request
+        // If venue_id is explicitly null, we want to clear it (online-only event)
+        if (! array_key_exists('venue_id', $request->all()) && $event->venue) {
             $request->merge(['venue_id' => UrlUtils::encodeId($event->venue->id)]);
         }
 
