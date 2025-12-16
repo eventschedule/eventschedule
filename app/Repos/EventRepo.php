@@ -58,7 +58,9 @@ class EventRepo
 
             // Check if venue_id is explicitly provided and not null/empty
             // This allows clearing venue_id for online-only events
-            if ($request->has('venue_id') && $request->venue_id !== null && $request->venue_id !== '') {
+            $hasVenueId = $request->has('venue_id') && $request->venue_id !== null && $request->venue_id !== '';
+            
+            if ($hasVenueId) {
                 $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
             }
 
@@ -66,7 +68,12 @@ class EventRepo
                 $user = $currentRole->user;
             }
 
-            if ($request->venue_address1) {
+            // Only process venue address if we have a venue_id (updating existing venue)
+            // OR if venue_id was not sent at all (creating new venue)
+            // Do NOT process venue address if venue_id was explicitly sent as null/empty (clearing venue for online-only)
+            $shouldProcessVenueAddress = $request->filled('venue_address1') && ($hasVenueId || !$request->has('venue_id'));
+            
+            if ($shouldProcessVenueAddress) {
                 if (! $venue) {
                     Log::debug('EventRepo.saveEvent.creatingVenue', $context + ['venue_email' => $request->venue_email]);
 

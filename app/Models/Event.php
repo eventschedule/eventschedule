@@ -233,7 +233,16 @@ class Event extends Model
             return null;
         }
 
+        // First try to get room_id from the pivot data if available
         $roomId = $venue->pivot->room_id ?? null;
+
+        // If not available in pivot, query the event_role table directly
+        if (! $roomId) {
+            $roomId = DB::table('event_role')
+                ->where('event_id', $this->id)
+                ->where('role_id', $venue->id)
+                ->value('room_id');
+        }
 
         if (! $roomId) {
             return null;
