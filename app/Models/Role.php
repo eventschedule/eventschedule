@@ -78,6 +78,9 @@ class Role extends Model implements MustVerifyEmail
         'request_terms',
         'contacts',
         'profile_image_id',
+        'profile_image_url',
+        'header_image_url',
+        'background_image_url',
     ];
 
     /**

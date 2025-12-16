@@ -95,6 +95,9 @@ class ApiTalentController extends Controller
             'country_code' => $validated['country_code'] ?? null,
             'timezone' => $validated['timezone'] ?? $user->timezone ?? 'UTC',
             'language_code' => $user->language_code ?? 'en',
+            'profile_image_url' => $validated['profile_image_url'] ?? null,
+            'header_image_url' => $validated['header_image_url'] ?? null,
+            'background_image_url' => $validated['background_image_url'] ?? null,
         ]);
 
         return response()->json($this->formatTalent($talent), 201);
@@ -126,6 +129,9 @@ class ApiTalentController extends Controller
             'postal_code' => 'nullable|string|max:20',
             'country_code' => 'nullable|string|max:2',
             'timezone' => 'nullable|string|max:100',
+            'profile_image_url' => 'nullable|url|max:500',
+            'header_image_url' => 'nullable|url|max:500',
+            'background_image_url' => 'nullable|url|max:500',
         ]);
 
         $talent->update($validated);
@@ -169,6 +175,9 @@ class ApiTalentController extends Controller
             'country_code' => $talent->country_code,
             'timezone' => $talent->timezone,
             'subdomain' => $talent->subdomain,
+            'profile_image_url' => $talent->profile_image_url,
+            'header_image_url' => $talent->header_image_url,
+            'background_image_url' => $talent->background_image_url,
             'created_at' => $talent->created_at?->toIso8601String(),
             'updated_at' => $talent->updated_at?->toIso8601String(),
         ];

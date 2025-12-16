@@ -69,6 +69,9 @@ class ApiVenueController extends Controller
             'formatted_address' => 'nullable|string|max:500',
             'geo_lat' => 'nullable|numeric|between:-90,90',
             'geo_lon' => 'nullable|numeric|between:-180,180',
+            'profile_image_url' => 'nullable|url|max:500',
+            'header_image_url' => 'nullable|url|max:500',
+            'background_image_url' => 'nullable|url|max:500',
         ]);
 
         // Generate unique subdomain
@@ -101,6 +104,9 @@ class ApiVenueController extends Controller
             'formatted_address' => $validated['formatted_address'] ?? null,
             'geo_lat' => $validated['geo_lat'] ?? null,
             'geo_lon' => $validated['geo_lon'] ?? null,
+            'profile_image_url' => $validated['profile_image_url'] ?? null,
+            'header_image_url' => $validated['header_image_url'] ?? null,
+            'background_image_url' => $validated['background_image_url'] ?? null,
         ]);
 
         return response()->json($this->formatVenue($venue), 201);
@@ -135,6 +141,9 @@ class ApiVenueController extends Controller
             'formatted_address' => 'nullable|string|max:500',
             'geo_lat' => 'nullable|numeric|between:-90,90',
             'geo_lon' => 'nullable|numeric|between:-180,180',
+            'profile_image_url' => 'nullable|url|max:500',
+            'header_image_url' => 'nullable|url|max:500',
+            'background_image_url' => 'nullable|url|max:500',
         ]);
 
         $venue->update($validated);
@@ -181,6 +190,9 @@ class ApiVenueController extends Controller
             'geo_lon' => $venue->geo_lon ? (float) $venue->geo_lon : null,
             'timezone' => $venue->timezone,
             'subdomain' => $venue->subdomain,
+            'profile_image_url' => $venue->profile_image_url,
+            'header_image_url' => $venue->header_image_url,
+            'background_image_url' => $venue->background_image_url,
             'created_at' => $venue->created_at?->toIso8601String(),
             'updated_at' => $venue->updated_at?->toIso8601String(),
         ];

@@ -47,6 +47,7 @@ class Event extends Model
         'category_id',
         'creator_role_id',
         'flyer_image_id',
+        'flyer_image_url',
         'google_event_id',
         'timezone',
     ];
