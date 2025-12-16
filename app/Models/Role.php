@@ -667,6 +667,17 @@ class Role extends Model implements MustVerifyEmail
         $data['url'] = $url;
         $data['youtube_url'] = $youtubeUrl;
 
+        // If rooms are loaded, properly encode their IDs for frontend use
+        if ($this->relationLoaded('rooms')) {
+            $data['rooms'] = $this->rooms->map(function ($room) {
+                return [
+                    'id' => UrlUtils::encodeId($room->id),
+                    'name' => $room->name,
+                    'details' => $room->details,
+                ];
+            })->toArray();
+        }
+
         return $data;
     }
 

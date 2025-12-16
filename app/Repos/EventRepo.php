@@ -56,11 +56,10 @@ class EventRepo
             // Set creator_role_id to the current role
             $creatorRoleId = $currentRole ? $currentRole->id : null;
 
-            // Check if venue_id is explicitly provided and not null/empty
-            // This allows clearing venue_id for online-only events
-            $hasVenueId = $request->has('venue_id') && $request->venue_id !== null && $request->venue_id !== '';
-            
-            if ($hasVenueId) {
+            // Check if venue_id is provided
+            // If not provided at all (online-only), skip venue processing
+            // If provided, decode and use it
+            if ($request->filled('venue_id')) {
                 $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
             }
 
@@ -68,12 +67,11 @@ class EventRepo
                 $user = $currentRole->user;
             }
 
-            // Only process venue address if we have a venue_id (updating existing venue)
-            // OR if venue_id was not sent at all (creating new venue)
-            // Do NOT process venue address if venue_id was explicitly sent as null/empty (clearing venue for online-only)
-            $shouldProcessVenueAddress = $request->filled('venue_address1') && ($hasVenueId || !$request->has('venue_id'));
-            
-            if ($shouldProcessVenueAddress) {
+            // Only process venue address data if:
+            // 1. We have address data AND
+            // 2. (We have a venue_id to update OR venue_id wasn't sent at all to create new venue)
+            // Do NOT process if venue_id is absent (meaning online-only event)
+            if ($request->filled('venue_address1') && ($venue || !$request->has('venue_id'))) {
                 if (! $venue) {
                     Log::debug('EventRepo.saveEvent.creatingVenue', $context + ['venue_email' => $request->venue_email]);
 
@@ -393,7 +391,8 @@ class EventRepo
                 $pivotData[$roleId] = [];
             }
 
-            if ($venueId && $roomId) {
+            // Always set room_id for venue (even if null) to properly update/clear it
+            if ($venueId) {
                 $pivotData[$venueId]['room_id'] = $roomId;
             }
 
@@ -404,8 +403,8 @@ class EventRepo
             foreach ($roles as $role) {
                 if ((auth()->user() && $user->isMember($role->subdomain)) || ($role->accept_requests && ! $role->require_approval)) {
                     $updateData = ['is_accepted' => true];
-                    // Preserve room_id if this is the venue role
-                    if ($role->id === $venueId && $roomId) {
+                    // Always include room_id for venue role to preserve what we set in sync()
+                    if ($role->id === $venueId) {
                         $updateData['room_id'] = $roomId;
                     }
                     $event->roles()->updateExistingPivot($role->id, $updateData);
@@ -417,8 +416,8 @@ class EventRepo
                     if (isset($curatorGroups[$curatorEncodedId]) && $curatorGroups[$curatorEncodedId]) {
                         $groupId = UrlUtils::decodeId($curatorGroups[$curatorEncodedId]);
                         $updateData = ['group_id' => $groupId];
-                        // Preserve room_id if this is the venue role
-                        if ($role->id === $venueId && $roomId) {
+                        // Always include room_id for venue role to preserve what we set in sync()
+                        if ($role->id === $venueId) {
                             $updateData['room_id'] = $roomId;
                         }
                         $event->roles()->updateExistingPivot($role->id, $updateData);
