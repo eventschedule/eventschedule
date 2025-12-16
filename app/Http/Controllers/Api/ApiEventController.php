@@ -275,7 +275,25 @@ class ApiEventController extends Controller
             'schedule' => 'nullable|string|max:255',
             'category' => 'nullable|string|max:255',
             'category_id' => 'nullable|integer',
+            'flyer_image_url' => 'nullable|string',
+            'flyer_image_id' => 'nullable|integer',
         ]);
+
+        // Handle flyer image removal
+        if ($request->has('flyer_image_url') && $request->input('flyer_image_url') === null) {
+            // Delete the physical file if it exists
+            if ($event->flyer_image_url) {
+                $disk = storage_public_disk();
+                $path = storage_normalize_path($event->getAttributes()['flyer_image_url']);
+                if ($path !== '') {
+                    Storage::disk($disk)->delete($path);
+                }
+            }
+            
+            $event->flyer_image_id = null;
+            $event->flyer_image_url = null;
+            $event->save();
+        }
 
         if ($request->has('schedule')) {
             $groupSlug = $request->schedule;
