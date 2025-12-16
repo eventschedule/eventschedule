@@ -799,47 +799,17 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label :value="__('messages.public_guest_list')" />
-                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.public_guest_list_description') }}</p>
-                            
-                            <div class="mt-4">
-                                <label class="flex items-start gap-3">
-                                    <input type="hidden" name="show_guest_list" value="0">
-                                    <input id="show_guest_list" name="show_guest_list" type="checkbox" value="1" 
-                                        {{ old('show_guest_list', $event->show_guest_list) ? 'checked' : '' }}
-                                        class="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                                    <span class="text-sm text-gray-700 dark:text-gray-300">
-                                        <span class="font-medium">{{ __('messages.enable_public_guest_list') }}</span>
-                                        <span class="mt-1 block text-gray-500 dark:text-gray-400">{{ __('messages.enable_public_guest_list_help') }}</span>
-                                    </span>
-                                </label>
-                            </div>
-
-                            <div class="mt-4">
-                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.guest_list_visibility_label') }}</p>
-                                <div class="space-y-3">
-                                    <label class="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-300">
-                                        <input type="radio" name="guest_list_visibility" value="paid" 
-                                            class="mt-1 h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500" 
-                                            {{ old('guest_list_visibility', $event->guest_list_visibility ?? 'paid') === 'paid' ? 'checked' : '' }}>
-                                        <span>
-                                            <span class="font-medium block">{{ __('messages.guest_list_visibility_paid') }}</span>
-                                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.guest_list_visibility_paid_help') }}</span>
-                                        </span>
-                                    </label>
-                                    <label class="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-300">
-                                        <input type="radio" name="guest_list_visibility" value="all" 
-                                            class="mt-1 h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500" 
-                                            {{ old('guest_list_visibility', $event->guest_list_visibility ?? 'paid') === 'all' ? 'checked' : '' }}>
-                                        <span>
-                                            <span class="font-medium block">{{ __('messages.guest_list_visibility_all') }}</span>
-                                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.guest_list_visibility_all_help') }}</span>
-                                        </span>
-                                    </label>
-                                </div>
-                            </div>
+                            <label class="flex items-start gap-3">
+                                <input type="hidden" name="show_guest_list" value="0">
+                                <input id="show_guest_list" name="show_guest_list" type="checkbox" value="1" 
+                                    {{ old('show_guest_list', $event->show_guest_list) ? 'checked' : '' }}
+                                    class="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                <span class="text-sm text-gray-700 dark:text-gray-300">
+                                    <span class="font-medium">{{ __('messages.public_guest_list') }}</span>
+                                    <span class="mt-1 block text-gray-500 dark:text-gray-400">{{ __('messages.public_guest_list_description') }}</span>
+                                </span>
+                            </label>
                             <x-input-error class="mt-2" :messages="$errors->get('show_guest_list')" />
-                            <x-input-error class="mt-2" :messages="$errors->get('guest_list_visibility')" />
                         </div>
 
                         @php

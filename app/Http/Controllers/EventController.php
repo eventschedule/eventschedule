@@ -725,10 +725,9 @@ class EventController extends Controller
             'hash' => $hash,
             'subdomain' => $subdomain,
             'user_id' => optional($user)->id,
-            'redirect' => $data,
         ]);
 
-        return redirect(route('role.view_admin', $data))
+        return redirect(route('events.view', ['hash' => $hash]))
                 ->with('message', __('messages.event_updated'));
     }
 

@@ -492,7 +492,12 @@
             <p class="text-sm text-gray-600 dark:text-gray-300">{{ $locationDescription }}</p>
           @endif
           @if ($locationRoom)
-            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $locationRoom }}</p>
+            <div class="inline-flex items-center rounded-lg bg-blue-50 px-4 py-2 text-base font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-200">
+              <svg class="mr-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+              </svg>
+              {{ $locationRoom }}
+            </div>
           @endif
           @if ($locationLink && $locationCta)
             <a href="{{ $locationLink }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">

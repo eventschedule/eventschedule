@@ -548,28 +548,12 @@
                 <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
                     <div class="px-6 py-5">
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('messages.public_guest_list') }}</h2>
-                        <div class="mt-4 space-y-3 text-sm">
-                            <div>
-                                <span class="font-medium text-gray-700 dark:text-gray-200">{{ __('messages.enabled') }}:</span>
-                                <span class="ml-2 text-gray-600 dark:text-gray-300">
-                                    @if ($event->show_guest_list)
-                                        <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-200">{{ __('messages.yes') }}</span>
-                                    @else
-                                        <span class="inline-flex items-center rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 dark:bg-gray-900/30 dark:text-gray-200">{{ __('messages.no') }}</span>
-                                    @endif
-                                </span>
-                            </div>
+                        <div class="mt-3 text-sm text-gray-600 dark:text-gray-300">
                             @if ($event->show_guest_list)
-                                <div>
-                                    <span class="font-medium text-gray-700 dark:text-gray-200">{{ __('messages.guest_list_visibility_label') }}:</span>
-                                    <span class="ml-2 text-gray-600 dark:text-gray-300">
-                                        @if (($event->guest_list_visibility ?? 'paid') === 'all')
-                                            {{ __('messages.guest_list_visibility_all') }}
-                                        @else
-                                            {{ __('messages.guest_list_visibility_paid') }}
-                                        @endif
-                                    </span>
-                                </div>
+                                <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-200">{{ __('messages.enabled') }}</span>
+                                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.guest_list_visibility_paid_help') }}</p>
+                            @else
+                                <span class="inline-flex items-center rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 dark:bg-gray-900/30 dark:text-gray-200">{{ __('messages.disabled') }}</span>
                             @endif
                         </div>
                     </div>
@@ -582,14 +566,20 @@
                             <div class="mt-3 text-sm text-gray-700 dark:text-gray-200 space-y-2">
                                 @if ($venue)
                                     <div class="font-medium">{{ $venue->translatedName() }}</div>
+                                    @if (!empty($venueRoom?->name))
+                                        <div class="inline-flex items-center rounded-md bg-blue-50 px-3 py-1.5 text-sm font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-200">
+                                            <svg class="mr-1.5 h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                                            </svg>
+                                            {{ $venueRoom->name }}
+                                        </div>
+                                    @endif
                                     @if ($venue->formatted_address)
                                         <div>{{ $venue->formatted_address }}</div>
                                     @else
                                         <div>
                                             {{ $venue->address1 }}<br>
-                                            @if (!empty($venueRoom?->name))
-                                                {{ $venueRoom->name }}<br>
-                                            @elseif ($venue->translatedAddress2())
+                                            @if ($venue->translatedAddress2())
                                                 {{ $venue->translatedAddress2() }}<br>
                                             @endif
                                             {{ trim($venue->city . ', ' . $venue->state . ' ' . $venue->postal_code) }}
