@@ -439,14 +439,6 @@ class ApiEventController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        \Log::info('Flyer upload request received', [
-            'has_flyer_image_id' => $request->has('flyer_image_id'),
-            'has_file_flyer_image' => $request->hasFile('flyer_image'),
-            'has_file_image' => $request->hasFile('image'),
-            'all_keys' => array_keys($request->all()),
-            'all_files' => array_keys($request->allFiles()),
-        ]);
-
         if ($request->has('flyer_image_id')) {
             $request->validate([
                 'flyer_image_id' => ['nullable', 'integer', 'exists:images,id'],
@@ -487,8 +479,6 @@ class ApiEventController extends Controller
             $path = storage_put_file_as_public($disk, $file, $filename, 'media');
             $dimensions = @getimagesize($file->getRealPath());
 
-            \Log::info('Flyer upload - path after storage_put_file_as_public: ' . $path);
-
             $image = Image::create([
                 'disk' => $disk,
                 'path' => $path,
@@ -500,18 +490,12 @@ class ApiEventController extends Controller
                 'user_id' => $event->user_id,
             ]);
 
-            \Log::info('Flyer upload - image created with ID: ' . $image->id . ', path: ' . $image->path);
-
             $event->flyer_image_id = $image->id;
             $event->flyer_image_url = $image->path;
             $event->save();
-
-            \Log::info('Flyer upload - event saved with flyer_image_id: ' . $event->flyer_image_id . ', flyer_image_url: ' . $event->flyer_image_url);
         }
         
         $event->refresh();
-        
-        \Log::info('Flyer upload - after refresh: flyer_image_id: ' . $event->flyer_image_id . ', flyer_image_url: ' . $event->flyer_image_url);
         
         return response()->json([
             'data' => $event->toApiData(),
