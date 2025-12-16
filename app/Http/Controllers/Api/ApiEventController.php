@@ -442,6 +442,7 @@ class ApiEventController extends Controller
         \Log::info('Flyer upload request received', [
             'has_flyer_image_id' => $request->has('flyer_image_id'),
             'has_file_flyer_image' => $request->hasFile('flyer_image'),
+            'has_file_image' => $request->hasFile('image'),
             'all_keys' => array_keys($request->all()),
             'all_files' => array_keys($request->allFiles()),
         ]);
@@ -470,7 +471,8 @@ class ApiEventController extends Controller
             }
         }
 
-        if ($request->hasFile('flyer_image')) {
+        // Support both 'flyer_image' and 'image' field names
+        if ($request->hasFile('flyer_image') || $request->hasFile('image')) {
             $disk = storage_public_disk();
 
             if (! $event->flyer_image_id && $event->flyer_image_url) {
@@ -480,7 +482,7 @@ class ApiEventController extends Controller
                 }
             }
 
-            $file = $request->file('flyer_image');
+            $file = $request->file('flyer_image') ?? $request->file('image');
             $filename = strtolower('flyer_' . Str::random(32) . '.' . $file->getClientOriginalExtension());
             $path = storage_put_file_as_public($disk, $file, $filename, 'media');
             $dimensions = @getimagesize($file->getRealPath());
