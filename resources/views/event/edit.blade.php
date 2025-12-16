@@ -222,7 +222,7 @@
                             </fieldset>
                         </div>
 
-                        <x-text-input name="venue_id" v-bind:value="selectedVenue ? selectedVenue.id : ''" type="hidden" />
+                        <x-text-input name="venue_id" v-bind:value="selectedVenue ? selectedVenue.id : null" type="hidden" />
 
                         <div :class="{ 'hidden': !(isInPerson || shouldBypassPreferences) }">
                             <div class="mb-6" :class="{ 'hidden': !shouldShowVenueForm }">

@@ -56,9 +56,9 @@ class EventRepo
             // Set creator_role_id to the current role
             $creatorRoleId = $currentRole ? $currentRole->id : null;
 
-            // Check if venue_id is explicitly provided and not null
+            // Check if venue_id is explicitly provided and not null/empty
             // This allows clearing venue_id for online-only events
-            if ($request->has('venue_id') && $request->venue_id !== null) {
+            if ($request->has('venue_id') && $request->venue_id !== null && $request->venue_id !== '') {
                 $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
             }
 
