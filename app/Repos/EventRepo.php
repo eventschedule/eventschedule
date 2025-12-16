@@ -294,8 +294,9 @@ class EventRepo
 
             $event->fill($input);
 
-            if (! $request->event_url) {
-                $event->event_url = null;
+            // Explicitly handle event_url to allow clearing it for in-person only events
+            if ($request->has('event_url')) {
+                $event->event_url = $request->event_url; // Will be null if sent as null
             }
 
             $days_of_week = '';
