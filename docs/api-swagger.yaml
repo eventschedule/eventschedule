@@ -372,7 +372,23 @@ components:
       properties:
         action:
           type: string
-          enum: [mark_paid, refund, cancel, delete]
+          enum: [mark_paid, mark_unpaid, refund, cancel, delete, mark_used, mark_unused]
+          description: |
+            Available actions:
+            - mark_paid: Mark unpaid sale as paid
+            - mark_unpaid: Mark paid/cancelled sale as unpaid
+            - refund: Refund a paid sale
+            - cancel: Cancel an unpaid/paid sale
+            - delete: Soft delete the sale
+            - mark_used: Mark all ticket entries as used
+            - mark_unused: Mark all ticket entries as unused
+        name:
+          type: string
+          description: Update ticket holder name
+        email:
+          type: string
+          format: email
+          description: Update ticket holder email
     ScanRecordRequest:
       type: object
       properties:
@@ -1220,7 +1236,7 @@ paths:
 
   /tickets/{sale_id}:
     patch:
-      summary: Update a sale (actions: mark_paid, refund, cancel, delete)
+      summary: Update a sale (actions: mark_paid, mark_unpaid, refund, cancel, delete, mark_used, mark_unused)
       parameters:
         - in: path
           name: sale_id

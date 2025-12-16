@@ -32,7 +32,7 @@ use App\Notifications\TicketSaleNotification;
 
 class TicketController extends Controller
 {
-    private const SALE_ACTIONS = ['mark_paid', 'refund', 'cancel', 'delete'];
+    private const SALE_ACTIONS = ['mark_paid', 'mark_unpaid', 'refund', 'cancel', 'delete', 'mark_used', 'mark_unused'];
 
     public function __construct(private AuditLogger $auditLogger)
     {
@@ -1094,6 +1094,62 @@ class TicketController extends Controller
 
                     $this->auditLogger->log($user, 'order.delete', 'orders', $sale->id, [
                         'status' => $sale->status,
+                    ]);
+                }
+                break;
+
+            case 'mark_unpaid':
+                if (in_array($sale->status, ['paid', 'cancelled'])) {
+                    $previousStatus = $sale->status;
+                    $sale->status = 'unpaid';
+                    $sale->save();
+
+                    $this->auditLogger->log($user, 'order.mark_unpaid', 'orders', $sale->id, [
+                        'previous_status' => $previousStatus,
+                        'current_status' => $sale->status,
+                    ]);
+                }
+                break;
+
+            case 'mark_used':
+                $sale->loadMissing('saleTickets.entries');
+                $timestamp = now();
+                $markedCount = 0;
+
+                foreach ($sale->saleTickets as $saleTicket) {
+                    foreach ($saleTicket->entries as $entry) {
+                        if ($entry->scanned_at === null) {
+                            $entry->scanned_at = $timestamp;
+                            $entry->save();
+                            $markedCount++;
+                        }
+                    }
+                }
+
+                if ($markedCount > 0) {
+                    $this->auditLogger->log($user, 'order.mark_used', 'orders', $sale->id, [
+                        'entries_marked' => $markedCount,
+                    ]);
+                }
+                break;
+
+            case 'mark_unused':
+                $sale->loadMissing('saleTickets.entries');
+                $unmarkedCount = 0;
+
+                foreach ($sale->saleTickets as $saleTicket) {
+                    foreach ($saleTicket->entries as $entry) {
+                        if ($entry->scanned_at !== null) {
+                            $entry->scanned_at = null;
+                            $entry->save();
+                            $unmarkedCount++;
+                        }
+                    }
+                }
+
+                if ($unmarkedCount > 0) {
+                    $this->auditLogger->log($user, 'order.mark_unused', 'orders', $sale->id, [
+                        'entries_unmarked' => $unmarkedCount,
                     ]);
                 }
                 break;

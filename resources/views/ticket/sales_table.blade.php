@@ -24,7 +24,11 @@
                 <select id="bulk-action-select" class="w-full sm:w-56 rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">{{ __('messages.select_action') }}</option>
                     <option value="mark_paid">{{ __('messages.mark_paid') }}</option>
+                    <option value="mark_unpaid">{{ __('messages.mark_unpaid') }}</option>
+                    <option value="mark_used">{{ __('messages.mark_tickets_as_used') }}</option>
+                    <option value="mark_unused">{{ __('messages.mark_tickets_as_unused') }}</option>
                     <option value="cancel">{{ __('messages.cancel') }}</option>
+                    <option value="refund">{{ __('messages.refund') }}</option>
                     <option value="delete">{{ __('messages.delete') }}</option>
                 </select>
 

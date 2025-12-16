@@ -690,11 +690,23 @@ Update a ticket sale (mark as paid, refund, cancel, delete, or update holder inf
 }
 ```
 
-**Actions:**
-- `mark_paid` - Mark sale as paid
-- `refund` - Refund the sale
-- `cancel` - Cancel the sale
-- `delete` - Soft delete the sale
+**Available Actions:**
+- `mark_paid` - Mark unpaid sale as paid (sets status to "paid")
+- `mark_unpaid` - Mark paid or cancelled sale as unpaid (sets status to "unpaid")
+- `refund` - Refund a paid sale (sets status to "refunded")
+- `cancel` - Cancel an unpaid or paid sale (sets status to "cancelled")
+- `delete` - Soft delete the sale (sets is_deleted flag, does not remove from database)
+- `mark_used` - Mark all ticket entries in this sale as used (sets scanned_at timestamp)
+- `mark_unused` - Mark all ticket entries in this sale as unused (clears scanned_at timestamp)
+
+**Action Constraints:**
+- `mark_paid`: Only works if status is "unpaid"
+- `mark_unpaid`: Only works if status is "paid" or "cancelled"
+- `refund`: Only works if status is "paid"
+- `cancel`: Only works if status is "unpaid" or "paid"
+- `delete`: Works on any sale
+- `mark_used`: Marks only entries where scanned_at is null
+- `mark_unused`: Clears scanned_at only for entries that have been scanned
 
 **Success Response (200):**
 ```json

@@ -68,7 +68,7 @@ class ApiTicketController extends Controller
         }
 
         $validated = $request->validate([
-            'action' => ['nullable', 'string'],
+            'action' => ['nullable', 'string', 'in:mark_paid,mark_unpaid,refund,cancel,delete,mark_used,mark_unused'],
             'name' => ['sometimes', 'string', 'max:255'],
             'email' => ['sometimes', 'string', 'email', 'max:255'],
         ]);
@@ -83,16 +83,50 @@ class ApiTicketController extends Controller
 
             switch ($action) {
                 case 'mark_paid':
-                    $sale->update(['status' => 'paid']);
+                    if ($sale->status === 'unpaid') {
+                        $sale->update(['status' => 'paid', 'transaction_reference' => 'Manual payment via API']);
+                    }
+                    break;
+                case 'mark_unpaid':
+                    if (in_array($sale->status, ['paid', 'cancelled'])) {
+                        $sale->update(['status' => 'unpaid']);
+                    }
                     break;
                 case 'refund':
-                    $sale->update(['status' => 'refunded']);
+                    if ($sale->status === 'paid') {
+                        $sale->update(['status' => 'refunded']);
+                    }
                     break;
                 case 'cancel':
-                    $sale->update(['status' => 'cancelled']);
+                    if (in_array($sale->status, ['unpaid', 'paid'])) {
+                        $sale->update(['status' => 'cancelled']);
+                    }
                     break;
                 case 'delete':
                     $sale->update(['is_deleted' => true]);
+                    break;
+                case 'mark_used':
+                    $sale->load('saleTickets.entries');
+                    $timestamp = now();
+                    foreach ($sale->saleTickets as $saleTicket) {
+                        foreach ($saleTicket->entries as $entry) {
+                            if ($entry->scanned_at === null) {
+                                $entry->scanned_at = $timestamp;
+                                $entry->save();
+                            }
+                        }
+                    }
+                    break;
+                case 'mark_unused':
+                    $sale->load('saleTickets.entries');
+                    foreach ($sale->saleTickets as $saleTicket) {
+                        foreach ($saleTicket->entries as $entry) {
+                            if ($entry->scanned_at !== null) {
+                                $entry->scanned_at = null;
+                                $entry->save();
+                            }
+                        }
+                    }
                     break;
                 default:
                     return response()->json(['error' => 'Unknown action'], 422);

@@ -395,9 +395,12 @@ function executeAction(action, saleIds) {
 
             const messages = {
                 mark_paid: '{{ __('messages.mark_paid_success') }}',
+                mark_unpaid: '{{ __('messages.mark_unpaid_success') }}',
                 refund: '{{ __('messages.refund_success') }}',
                 cancel: '{{ __('messages.cancel_success') }}',
                 delete: '{{ __('messages.delete_success') }}',
+                mark_used: '{{ __('messages.mark_used_success') }}',
+                mark_unused: '{{ __('messages.mark_unused_success') }}',
             };
 
             let message = messages[action] || '';
