@@ -48,9 +48,9 @@ class EventUpdateRequest extends FormRequest
             'flyer_media_variant_id' => ['nullable', 'integer', 'exists:media_asset_variants,id'],
             'slug' => ['nullable', 'string', 'max:255'],
             'timezone' => ['required', 'timezone'],
-            'venue_id' => ['nullable', 'string', 'required_without_all:venue_address1,event_url'],
-            'venue_address1' => ['nullable', 'string', 'required_without_all:venue_id,event_url'],
-            'event_url' => ['nullable', 'url', 'required_without_all:venue_id,venue_address1'],
+            'venue_id' => ['nullable', 'string'],
+            'venue_address1' => ['nullable', 'string'],
+            'event_url' => ['nullable', 'url'],
             'venue_room_id' => ['nullable', 'string', function ($attribute, $value, $fail) {
                 $roomId = UrlUtils::decodeId($value);
 
@@ -82,5 +82,20 @@ class EventUpdateRequest extends FormRequest
                 'max:255',
             ],
         ];
+    }
+
+    /**
+     * Configure the validator instance.
+     */
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $hasVenue = $this->filled('venue_id') || $this->filled('venue_address1');
+            $hasEventUrl = $this->filled('event_url');
+
+            if (!$hasVenue && !$hasEventUrl) {
+                $validator->errors()->add('event_url', __('messages.please_select_venue_or_participant'));
+            }
+        });
     }
 }
