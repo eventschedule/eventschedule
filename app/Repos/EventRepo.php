@@ -315,6 +315,9 @@ class EventRepo
             // Explicitly handle event_url to allow clearing it for in-person only events
             if ($request->has('event_url')) {
                 $event->event_url = $request->event_url; // Will be null if sent as null
+            } elseif ($request->filled('venue_id') || $request->filled('venue_address1')) {
+                // If venue is provided but event_url is not in request, clear it (in-person only)
+                $event->event_url = null;
             }
 
             $days_of_week = '';

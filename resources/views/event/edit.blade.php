@@ -2055,6 +2055,10 @@
       },
       isInPerson(newValue) {
         this.savePreferences();
+        // When unchecking in-person, check if password is now required
+        if (!newValue && this.shouldRequirePassword()) {
+          this.isPrivate = true;
+        }
       },
       isOnline(newValue) {
         if (!newValue) {
