@@ -183,7 +183,7 @@
         @method('put')
         @endif
 
-        <template v-if="isInPerson">
+        <div v-if="isInPerson">
             <x-text-input name="venue_name" type="hidden" v-model="venueName" />
             <x-text-input name="venue_email" type="hidden" v-model="venueEmail" />                                                                
             <x-text-input name="venue_address1" type="hidden" v-model="venueAddress1" />                                                                
@@ -191,7 +191,7 @@
             <x-text-input name="venue_state" type="hidden" v-model="venueState" />                                                                
             <x-text-input name="venue_postal_code" type="hidden" v-model="venuePostalCode" />                                                                
             <x-text-input name="venue_country_code" type="hidden" v-model="venueCountryCode" />
-        </template>
+        </div>
 
         <div class="py-5">
             <div class="max-w-7xl mx-auto space-y-6">
