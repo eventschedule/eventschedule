@@ -439,6 +439,13 @@ class ApiEventController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
+        \Log::info('Flyer upload request received', [
+            'has_flyer_image_id' => $request->has('flyer_image_id'),
+            'has_file_flyer_image' => $request->hasFile('flyer_image'),
+            'all_keys' => array_keys($request->all()),
+            'all_files' => array_keys($request->allFiles()),
+        ]);
+
         if ($request->has('flyer_image_id')) {
             $request->validate([
                 'flyer_image_id' => ['nullable', 'integer', 'exists:images,id'],
