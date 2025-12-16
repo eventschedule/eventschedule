@@ -56,11 +56,24 @@ class EventRepo
             // Set creator_role_id to the current role
             $creatorRoleId = $currentRole ? $currentRole->id : null;
 
+            // Debug logging for venue processing
+            Log::debug('EventRepo.saveEvent.venue_debug', [
+                'has_venue_id' => $request->has('venue_id'),
+                'filled_venue_id' => $request->filled('venue_id'),
+                'venue_id_value' => $request->input('venue_id'),
+                'has_venue_address1' => $request->has('venue_address1'),
+                'filled_venue_address1' => $request->filled('venue_address1'),
+                'venue_address1_value' => $request->input('venue_address1'),
+            ]);
+
             // Check if venue_id is provided
             // If not provided at all (online-only), skip venue processing
             // If provided, decode and use it
             if ($request->filled('venue_id')) {
                 $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
+                Log::debug('EventRepo.saveEvent.venue_loaded', ['venue_id' => $venue->id, 'venue_name' => $venue->name]);
+            } else {
+                Log::debug('EventRepo.saveEvent.no_venue', ['reason' => 'venue_id not filled']);
             }
 
             if (! $user) {
@@ -396,7 +409,19 @@ class EventRepo
                 $pivotData[$venueId]['room_id'] = $roomId;
             }
 
+            Log::debug('EventRepo.saveEvent.before_sync', [
+                'event_id' => $event->id,
+                'roleIds' => $roleIds,
+                'venueId' => $venueId,
+                'pivotData_keys' => array_keys($pivotData),
+            ]);
+
             $event->roles()->sync($pivotData);
+
+            Log::debug('EventRepo.saveEvent.after_sync', [
+                'event_id' => $event->id,
+                'synced_roles' => $event->roles()->pluck('roles.id')->toArray(),
+            ]);
 
             $curatorGroups = $request->input('curator_groups', []);
 
