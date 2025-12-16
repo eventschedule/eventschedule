@@ -267,9 +267,9 @@ class ApiEventController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'starts_at' => 'sometimes|required|date_format:Y-m-d H:i:s',
-            'venue_id' => 'sometimes|nullable|required_without_all:venue_address1,event_url',
-            'venue_address1' => 'sometimes|required_without_all:venue_id,event_url',
-            'event_url' => 'sometimes|required_without_all:venue_id,venue_address1',
+            'venue_id' => 'sometimes|nullable|string',
+            'venue_address1' => 'sometimes|nullable|string',
+            'event_url' => 'sometimes|nullable|url',
             'members' => 'sometimes|array',
             'curators' => 'sometimes|array',
             'schedule' => 'nullable|string|max:255',
@@ -278,6 +278,17 @@ class ApiEventController extends Controller
             'flyer_image_url' => 'nullable|string',
             'flyer_image_id' => 'nullable|integer',
         ]);
+        
+        // Validate that at least one location type is present (venue or online)
+        $hasVenue = $request->filled('venue_id') || $request->filled('venue_address1') || $event->venue_id;
+        $hasEventUrl = $request->filled('event_url') || ($event->event_url && !$request->has('event_url'));
+        
+        if (!$hasVenue && !$hasEventUrl) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'message' => 'Event must have either a venue (venue_id or venue_address1) or an event_url'
+            ], 422);
+        }
 
         // Handle flyer image removal
         if ($request->has('flyer_image_url') && $request->input('flyer_image_url') === null) {
