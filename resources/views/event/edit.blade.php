@@ -1663,6 +1663,8 @@
         this.event.event_url = "";
       },
       ensureOneChecked(type) {
+        console.log('ensureOneChecked called', { type, isInPerson: this.isInPerson, isOnline: this.isOnline, selectedVenue: this.selectedVenue });
+        
         if (!this.isInPerson && !this.isOnline) {
             if (type === 'in_person') {
                 this.isOnline = true;
@@ -1673,7 +1675,9 @@
 
         // Clear venue if in-person is unchecked
         if (type === 'in_person' && !this.isInPerson) {
+            console.log('Clearing venue because in-person unchecked');
             this.clearSelectedVenue();
+            console.log('After clearSelectedVenue', { selectedVenue: this.selectedVenue, venueAddress1: this.venueAddress1 });
         }
 
         this.savePreferences();
