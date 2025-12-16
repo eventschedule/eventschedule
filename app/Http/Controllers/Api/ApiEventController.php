@@ -453,11 +453,13 @@ class ApiEventController extends Controller
                     $event->flyer_image_id = $image->id;
                     $event->flyer_image_url = $image->path;
                     $event->save();
+                    $event->refresh();
                 }
             } else {
                 $event->flyer_image_id = null;
                 $event->flyer_image_url = null;
                 $event->save();
+                $event->refresh();
             }
         }
 
@@ -491,6 +493,8 @@ class ApiEventController extends Controller
             $event->flyer_image_url = $image->path;
             $event->save();
         }
+        
+        $event->refresh();
         
         return response()->json([
             'data' => $event->toApiData(),

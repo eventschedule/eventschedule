@@ -917,6 +917,7 @@ class Event extends Model
             'payment_method' => $this->payment_method,
             'payment_instructions' => $this->payment_instructions,
             'payment_instructions_html' => $this->payment_instructions_html,
+            'flyer_image_id' => $this->flyer_image_id ? UrlUtils::encodeId($this->flyer_image_id) : null,
             'flyer_image_url' => $this->flyer_image_url,
             'category' => $this->eventType ? [
                 'id' => $this->eventType->id,
