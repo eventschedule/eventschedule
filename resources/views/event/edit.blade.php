@@ -305,8 +305,9 @@
 
                                     <div class="mb-6">
                                         <x-input-label for="venue_address1" :value="__('messages.street_address') . ' *'" />
-                                        <x-text-input id="venue_address1" name="venue_address1" type="text"
-                                            class="mt-1 block w-full" :required="isInPerson" v-model="venueAddress1" autocomplete="off" />
+                                        <input id="venue_address1" name="venue_address1" type="text"
+                                            class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm mt-1 block w-full"
+                                            :required="isInPerson" v-model="venueAddress1" autocomplete="off" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_address1')" />
                                     </div>
 
