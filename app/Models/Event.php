@@ -217,6 +217,11 @@ class Event extends Model
 
     public function getVenueAttribute()
     {
+        // For online-only events, do not expose a venue
+        if (! $this->is_in_person) {
+            return null;
+        }
+
         if (! $this->relationLoaded('roles')) {
             $this->load('roles');
         }
@@ -553,7 +558,10 @@ class Event extends Model
 
     public function getGuestUrlData($subdomain = false, $date = null, bool $forceEventSlug = false)
     {
-        $venueSubdomain = $this->venue && $this->venue->isClaimed() ? $this->venue->subdomain : null;
+        // Do not prefer venue subdomain for online-only events
+        $venueSubdomain = ($this->is_in_person && $this->venue && $this->venue->isClaimed())
+            ? $this->venue->subdomain
+            : null;
         $roleSubdomain = $this->role() && $this->role()->isClaimed() ? $this->role()->subdomain : null;
 
         if (! $subdomain) {
