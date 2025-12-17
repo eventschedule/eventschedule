@@ -564,6 +564,11 @@ class Event extends Model
             $subdomain = $this->creatorRole ? $this->creatorRole->subdomain : null;
         }
 
+        // Final fallback: use configured default subdomain or 'www' to avoid missing parameter
+        if (! $subdomain) {
+            $subdomain = config('app.subdomain', 'www');
+        }
+
         $slug = $this->slug;
 
         if (! $forceEventSlug && $venueSubdomain && $roleSubdomain) {
