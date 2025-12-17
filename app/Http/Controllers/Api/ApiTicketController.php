@@ -52,7 +52,7 @@ class ApiTicketController extends Controller
         }
 
         // Build query for sales from managed events
-        $query = Sale::with(['event', 'saleTickets.ticket'])
+        $query = Sale::with(['event', 'saleTickets.ticket', 'saleTickets.entries'])
             ->whereIn('event_id', $managedEventIds)
             ->where('is_deleted', false);
         
