@@ -24,6 +24,7 @@ use App\Models\MediaAssetUsage;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
 
 
 class EventRepo
@@ -266,6 +267,18 @@ class EventRepo
             // handled via the pivot table instead.
             $input = Arr::except($input, ['venue_id', 'venue_room_id']);
 
+            // If venue address columns are absent in schema, drop them from mass assignment
+            if (! Schema::hasColumn('events', 'venue_address1')) {
+                $input = Arr::except($input, [
+                    'venue_address1',
+                    'venue_address2',
+                    'venue_city',
+                    'venue_state',
+                    'venue_postal_code',
+                    'venue_country_code',
+                ]);
+            }
+
             if (array_key_exists('slug', $input)) {
                 $slugValue = $input['slug'];
 
@@ -324,16 +337,22 @@ class EventRepo
             $event->is_in_person = $isInPerson;
             $event->is_online = $isOnline;
 
-            // Normalize conflicting fields based on flags
+            // Normalize conflicting fields based on flags (only if columns exist)
+            $hasVenueId = Schema::hasColumn('events', 'venue_id');
+            $hasVenueAddr = Schema::hasColumn('events', 'venue_address1');
+
             if (! $isInPerson) {
-                // Clear venue-related fields when not in-person
-                $event->venue_id = null;
-                $event->setAttribute('venue_address1', null);
-                $event->setAttribute('venue_address2', null);
-                $event->setAttribute('venue_city', null);
-                $event->setAttribute('venue_state', null);
-                $event->setAttribute('venue_postal_code', null);
-                $event->setAttribute('venue_country_code', null);
+                if ($hasVenueId) {
+                    $event->venue_id = null;
+                }
+                if ($hasVenueAddr) {
+                    $event->setAttribute('venue_address1', null);
+                    $event->setAttribute('venue_address2', null);
+                    $event->setAttribute('venue_city', null);
+                    $event->setAttribute('venue_state', null);
+                    $event->setAttribute('venue_postal_code', null);
+                    $event->setAttribute('venue_country_code', null);
+                }
             }
 
             if (! $isOnline) {
