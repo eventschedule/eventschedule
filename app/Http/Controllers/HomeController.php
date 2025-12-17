@@ -111,14 +111,25 @@ class HomeController extends Controller
             ->orderBy('published_at', 'desc')
             ->get();
 
-        $content = view('sitemap', [
+        $sitemapView = view('sitemap', [
             'roles' => ! request()->has('events') ? $roles : [],
             'events' => ! request()->has('roles') ? $events : [],
             'blogPosts' => request()->has('events') || request()->has('roles') ? [] : $blogPosts,
             'lastmod' => now()->toIso8601String()
         ]);
         
-        return response($content)
+        // Check if the request is for the gzipped version
+        $isGzipped = str_ends_with(request()->path(), '.gz');
+        
+        if ($isGzipped) {
+            $content = $sitemapView->render();
+            $gzipped = gzencode($content, 9);
+            return response($gzipped)
+                ->header('Content-Type', 'application/xml')
+                ->header('Content-Encoding', 'gzip');
+        }
+        
+        return response($sitemapView)
             ->header('Content-Type', 'application/xml');
     }
 }
