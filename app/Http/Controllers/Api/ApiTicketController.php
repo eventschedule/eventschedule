@@ -6,10 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Sale;
 use App\Models\SaleTicketEntry;
+use App\Models\Event;
+use App\Models\EventRole;
 use App\Utils\UrlUtils;
 use Illuminate\Support\Str;
 use Stripe\StripeClient;
-use App\Models\Event;
 use App\Models\Ticket;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
@@ -21,12 +22,60 @@ class ApiTicketController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+        
+        // Get all events the user manages (owns or is a member of)
+        $managedEventIds = Event::where('user_id', $user->id)
+            ->pluck('id')
+            ->toArray();
+        
+        // Also get events where user is a member of event roles
+        $roleIds = $user->roles()->pluck('id')->toArray();
+        if (!empty($roleIds)) {
+            $eventRoleIds = \App\Models\EventRole::whereIn('role_id', $roleIds)
+                ->distinct()
+                ->pluck('event_id')
+                ->toArray();
+            $managedEventIds = array_unique(array_merge($managedEventIds, $eventRoleIds));
+        }
+        
+        // If user has no managed events, return empty result
+        if (empty($managedEventIds)) {
+            return response()->json([
+                'data' => [],
+                'meta' => [
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'per_page' => 50,
+                    'total' => 0,
+                ],
+            ], 200, [], JSON_PRETTY_PRINT);
+        }
 
-        $sales = Sale::with(['event', 'saleTickets.ticket'])
-            ->where('user_id', $user->id)
-            ->where('is_deleted', false)
-            ->orderByDesc('created_at')
-            ->paginate(50);
+        // Build query for sales from managed events
+        $query = Sale::with(['event', 'saleTickets.ticket'])
+            ->whereIn('event_id', $managedEventIds)
+            ->where('is_deleted', false);
+        
+        // Optional: filter by event_id
+        if ($request->filled('event_id')) {
+            $eventId = $request->integer('event_id');
+            if (in_array($eventId, $managedEventIds)) {
+                $query->where('event_id', $eventId);
+            } else {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+        }
+        
+        // Optional: filter by query (name or email)
+        if ($request->filled('query')) {
+            $searchTerm = $request->string('query')->trim()->value();
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%")
+                  ->orWhere('email', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        $sales = $query->orderByDesc('created_at')->paginate(50);
 
         return response()->json([
             'data' => $sales->map(function ($sale) {
@@ -62,8 +111,13 @@ class ApiTicketController extends Controller
         $id = $decoded ?? $sale_id;
 
         $sale = Sale::findOrFail($id);
-
-        if ($sale->user_id !== $request->user()->id) {
+        $user = $request->user();
+        
+        // Check if user is authorized: either owns the sale or manages the event
+        $isOwner = $sale->user_id === $user->id;
+        $isEventManager = $user->canEditEvent($sale->event);
+        
+        if (!$isOwner && !$isEventManager) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
