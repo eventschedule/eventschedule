@@ -31,6 +31,7 @@ Route::middleware([ApiAuthentication::class])->group(function () {
     // Tickets
     Route::get('/tickets', [\App\Http\Controllers\Api\ApiTicketController::class, 'index'])->middleware('ability:resources.view');
     Route::patch('/tickets/{sale_id}', [\App\Http\Controllers\Api\ApiTicketController::class, 'update'])->middleware('ability:resources.manage');
+    Route::post('/tickets/scan', [\App\Http\Controllers\Api\ApiTicketController::class, 'scanByCode'])->middleware('ability:resources.manage');
     Route::post('/tickets/{sale_id}/scan', [\App\Http\Controllers\Api\ApiTicketController::class, 'scan'])->middleware('ability:resources.manage');
     Route::post('/tickets/{sale_id}/checkout', [\App\Http\Controllers\Api\ApiTicketController::class, 'checkout'])->middleware('ability:resources.manage');
     Route::post('/events/{subdomain}/checkout', [\App\Http\Controllers\Api\ApiTicketController::class, 'createSale'])->middleware('ability:resources.manage');

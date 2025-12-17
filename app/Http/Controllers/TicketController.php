@@ -165,7 +165,7 @@ class TicketController extends Controller
 
         $canViewAllOrders = $user->hasPermission('orders.view');
 
-        $query = Sale::with(['event', 'saleTickets.ticket'])
+        $query = Sale::with(['event', 'saleTickets.ticket', 'saleTickets.entries'])
             ->where('is_deleted', false);
 
         if (! $canViewAllOrders) {

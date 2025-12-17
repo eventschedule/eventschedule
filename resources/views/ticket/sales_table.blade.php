@@ -110,6 +110,9 @@
                                     {{ __('messages.event') }}
                                 </th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                    {{ __('messages.tickets') }}
+                                </th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                     {{ __('messages.total') }}
                                 </th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
@@ -133,6 +136,7 @@
                                 <th class="py-2 pl-4 pr-3 sm:pl-6">
                                     <input type="text" name="filter_event" value="{{ $filterEvent }}" placeholder="{{ __('messages.event') }}" class="mt-1 block w-full rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" data-column-filter data-filter-key="event">
                                 </th>
+                                <th class="px-3 py-2"></th>
                                 <th class="px-3 py-2">
                                     <div class="flex items-center gap-2">
                                         <input type="number" step="0.01" name="filter_total_min" value="{{ $filterTotalMin }}" placeholder="{{ __('messages.min') ?? 'Min' }}" class="w-full rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" data-column-filter data-filter-key="total_min">
@@ -180,6 +184,24 @@
                                     <a href="{{ $sale->getEventUrl() }}"
                                         target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">{{ $sale->event->name }}
                                     </a>
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                    <div class="flex flex-col gap-1">
+                                        @foreach ($sale->saleTickets as $saleTicket)
+                                            @php
+                                                $ticketUsageStatus = $saleTicket->usage_status;
+                                                $ticketUsageClasses = $ticketUsageStatus === 'used'
+                                                    ? 'bg-orange-100 text-orange-800'
+                                                    : 'bg-green-100 text-green-800';
+                                            @endphp
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-gray-900">{{ $saleTicket->ticket->type ?: __('messages.ticket') }} x {{ $saleTicket->quantity }}</span>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $ticketUsageClasses }}">
+                                                    {{ __('messages.ticket_status_' . $ticketUsageStatus) }}
+                                                </span>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     <span class="font-semibold text-gray-900">{{ number_format($sale->payment_amount, 2, '.', ',') }}</span>
@@ -289,20 +311,38 @@
                                                 </a>
 
                                                 @if($sale->status === 'unpaid')
-                                                      <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_paid')"
+                                                    <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_paid')"
                                                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150" 
                                                             role="menuitem">
                                                         {{ __('messages.mark_paid') }}
                                                     </button>
+                                                @elseif($sale->status === 'paid')
+                                                    <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_unpaid')"
+                                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150" 
+                                                            role="menuitem">
+                                                        {{ __('messages.mark_unpaid') }}
+                                                    </button>
                                                 @endif
 
-                                                @if(false && $sale->status === 'paid' && $sale->payment_method != 'cash')
-                                                      <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'refund')"
+                                                @if($sale->status === 'paid' && $sale->payment_method != 'cash')
+                                                    <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'refund')"
                                                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150" 
                                                             role="menuitem">
                                                         {{ __('messages.refund') }}
                                                     </button>
                                                 @endif
+
+                                                <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_used')"
+                                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150" 
+                                                        role="menuitem">
+                                                    {{ __('messages.mark_tickets_as_used') }}
+                                                </button>
+
+                                                <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_unused')"
+                                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150" 
+                                                        role="menuitem">
+                                                    {{ __('messages.mark_tickets_as_unused') }}
+                                                </button>
 
                                                 @if(in_array($sale->status, ['unpaid', 'paid']))
                                                       <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'cancel')"
@@ -433,6 +473,27 @@
                     </span>
                 </div>
 
+                <!-- Tickets -->
+                <div class="bg-gray-50 rounded-lg p-3">
+                    <div class="text-sm font-medium text-gray-700 mb-2">{{ __('messages.tickets') }}</div>
+                    <div class="space-y-2">
+                        @foreach ($sale->saleTickets as $saleTicket)
+                            @php
+                                $ticketUsageStatus = $saleTicket->usage_status;
+                                $ticketUsageClasses = $ticketUsageStatus === 'used'
+                                    ? 'bg-orange-100 text-orange-800'
+                                    : 'bg-green-100 text-green-800';
+                            @endphp
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-900">{{ $saleTicket->ticket->type ?: __('messages.ticket') }} x {{ $saleTicket->quantity }}</span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $ticketUsageClasses }}">
+                                    {{ __('messages.ticket_status_' . $ticketUsageStatus) }}
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
                 <!-- Actions -->
                 <div class="pt-2">
                     <div class="relative" x-data="{ 
@@ -481,15 +542,33 @@
                                         role="menuitem">
                                     {{ __('messages.mark_paid') }}
                                 </button>
+                            @elseif($sale->status === 'paid')
+                                <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_unpaid')"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150" 
+                                        role="menuitem">
+                                    {{ __('messages.mark_unpaid') }}
+                                </button>
                             @endif
 
-                            @if(false && $sale->status === 'paid' && $sale->payment_method != 'cash')
+                            @if($sale->status === 'paid' && $sale->payment_method != 'cash')
                                 <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'refund')"
                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150" 
                                         role="menuitem">
                                     {{ __('messages.refund') }}
                                 </button>
                             @endif
+
+                            <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_used')"
+                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150" 
+                                    role="menuitem">
+                                {{ __('messages.mark_tickets_as_used') }}
+                            </button>
+
+                            <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_unused')"
+                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150" 
+                                    role="menuitem">
+                                {{ __('messages.mark_tickets_as_unused') }}
+                            </button>
 
                             @if(in_array($sale->status, ['unpaid', 'paid']))
                                 <button x-on:click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'cancel')"

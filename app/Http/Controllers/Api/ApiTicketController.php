@@ -226,6 +226,90 @@ class ApiTicketController extends Controller
         ], 200, [], JSON_PRETTY_PRINT);
     }
 
+    public function scanByCode(Request $request)
+    {
+        $validated = $request->validate([
+            'ticket_code' => ['required', 'string'],
+            'sale_ticket_id' => ['nullable', 'integer'],
+            'seat_number' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        // Lookup sale by secret (ticket code)
+        $sale = Sale::with(['event', 'saleTickets.ticket', 'saleTickets.entries'])
+            ->where('secret', $validated['ticket_code'])
+            ->where('is_deleted', false)
+            ->first();
+
+        if (!$sale) {
+            return response()->json(['error' => 'Ticket not found'], 404);
+        }
+
+        // Check if user manages this event
+        $user = $request->user();
+        $managedEventIds = Event::where('user_id', $user->id)->pluck('id')->toArray();
+        $roleIds = $user->roles()->pluck('roles.id')->toArray();
+        if (!empty($roleIds)) {
+            $eventRoleIds = \App\Models\EventRole::whereIn('role_id', $roleIds)
+                ->distinct()
+                ->pluck('event_id')
+                ->toArray();
+            $managedEventIds = array_unique(array_merge($managedEventIds, $eventRoleIds));
+        }
+
+        if (!in_array($sale->event_id, $managedEventIds)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Determine which sale_ticket to scan
+        if (isset($validated['sale_ticket_id'])) {
+            $saleTicket = $sale->saleTickets->firstWhere('id', $validated['sale_ticket_id']);
+            if (!$saleTicket) {
+                return response()->json(['error' => 'Sale ticket not found'], 404);
+            }
+        } else {
+            // Default to first sale ticket
+            $saleTicket = $sale->saleTickets->first();
+            if (!$saleTicket) {
+                return response()->json(['error' => 'No tickets found in this sale'], 404);
+            }
+        }
+
+        // Create entry and mark as scanned
+        $entry = SaleTicketEntry::create([
+            'sale_ticket_id' => $saleTicket->id,
+            'secret' => Str::random(24),
+            'seat_number' => $validated['seat_number'] ?? null,
+            'scanned_at' => now(),
+        ]);
+
+        // Reload to get fresh usage status
+        $sale->load(['saleTickets.entries']);
+
+        return response()->json([
+            'data' => [
+                'sale_id' => $sale->id,
+                'entry_id' => $entry->id,
+                'scanned_at' => $entry->scanned_at->toIsoString(),
+                'sale' => [
+                    'id' => $sale->id,
+                    'status' => $sale->status,
+                    'name' => $sale->name,
+                    'email' => $sale->email,
+                    'event_id' => $sale->event_id,
+                    'event' => $sale->event ? $sale->event->toApiData() : null,
+                    'tickets' => $sale->saleTickets->map(function ($st) {
+                        return [
+                            'id' => $st->id,
+                            'ticket_id' => $st->ticket_id,
+                            'quantity' => $st->quantity,
+                            'usage_status' => $st->usage_status,
+                        ];
+                    })->values()->all(),
+                ],
+            ],
+        ], 201, [], JSON_PRETTY_PRINT);
+    }
+
     public function scan(Request $request, $sale_id)
     {
         $decoded = UrlUtils::decodeId($sale_id);
