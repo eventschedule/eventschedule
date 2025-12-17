@@ -84,26 +84,31 @@ class ApiTicketController extends Controller
             switch ($action) {
                 case 'mark_paid':
                     if ($sale->status === 'unpaid') {
-                        $sale->update(['status' => 'paid', 'transaction_reference' => 'Manual payment via API']);
+                        Sale::where('id', $sale->id)->update(['status' => 'paid', 'transaction_reference' => 'Manual payment via API']);
+                        $sale = Sale::findOrFail($id);
                     }
                     break;
                 case 'mark_unpaid':
                     if (in_array($sale->status, ['paid', 'cancelled'])) {
-                        $sale->update(['status' => 'unpaid']);
+                        Sale::where('id', $sale->id)->update(['status' => 'unpaid']);
+                        $sale = Sale::findOrFail($id);
                     }
                     break;
                 case 'refund':
                     if ($sale->status === 'paid') {
-                        $sale->update(['status' => 'refunded']);
+                        Sale::where('id', $sale->id)->update(['status' => 'refunded']);
+                        $sale = Sale::findOrFail($id);
                     }
                     break;
                 case 'cancel':
                     if (in_array($sale->status, ['unpaid', 'paid'])) {
-                        $sale->update(['status' => 'cancelled']);
+                        Sale::where('id', $sale->id)->update(['status' => 'cancelled']);
+                        $sale = Sale::findOrFail($id);
                     }
                     break;
                 case 'delete':
-                    $sale->update(['is_deleted' => true]);
+                    Sale::where('id', $sale->id)->update(['is_deleted' => true]);
+                    $sale = Sale::findOrFail($id);
                     break;
                 case 'mark_used':
                     $sale->load('saleTickets.entries');
