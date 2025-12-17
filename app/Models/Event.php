@@ -50,6 +50,8 @@ class Event extends Model
         'flyer_image_url',
         'google_event_id',
         'timezone',
+        'is_in_person',
+        'is_online',
     ];
 
     /**
