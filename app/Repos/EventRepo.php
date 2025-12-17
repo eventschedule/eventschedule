@@ -163,6 +163,11 @@ class EventRepo
             $roles = [];
             $roleIds = [];
 
+            $existingVenueIds = [];
+            if ($event) {
+                $existingVenueIds = $event->roles()->where('roles.type', 'venue')->pluck('roles.id')->toArray();
+            }
+
             if ($request->members) {
                 foreach ($request->members as $memberId => $member) {
                     if (! $memberId || strpos($memberId, 'new_') === 0) {
@@ -363,6 +368,17 @@ class EventRepo
                 if ($request->has('event_url')) {
                     $event->event_url = $request->input('event_url');
                 }
+            }
+
+            // If not in-person, drop any existing venue roles before sync
+            if (! $isInPerson && ! empty($existingVenueIds)) {
+                $roles = array_values(array_filter($roles, function ($role) use ($existingVenueIds) {
+                    return ! in_array($role->id, $existingVenueIds);
+                }));
+                $roleIds = array_values(array_filter($roleIds, function ($id) use ($existingVenueIds) {
+                    return ! in_array($id, $existingVenueIds);
+                }));
+                $event->roles()->detach($existingVenueIds);
             }
 
             $days_of_week = '';
