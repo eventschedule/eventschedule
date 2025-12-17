@@ -197,7 +197,28 @@ class ApiTicketController extends Controller
             }
         }
 
-        return response()->json(['data' => ['id' => $sale->id, 'status' => $sale->status]], 200, [], JSON_PRETTY_PRINT);
+        // Reload fresh data with all relationships to return accurate state
+        $sale = Sale::with(['event', 'saleTickets.ticket', 'saleTickets.entries'])
+            ->findOrFail($id);
+
+        return response()->json([
+            'data' => [
+                'id' => $sale->id,
+                'status' => $sale->status,
+                'name' => $sale->name,
+                'email' => $sale->email,
+                'event_id' => $sale->event_id,
+                'event' => $sale->event ? $sale->event->toApiData() : null,
+                'tickets' => $sale->saleTickets->map(function ($st) {
+                    return [
+                        'id' => $st->id,
+                        'ticket_id' => $st->ticket_id,
+                        'quantity' => $st->quantity,
+                        'usage_status' => $st->usage_status ?? $st->getUsageStatusAttribute(),
+                    ];
+                })->all(),
+            ],
+        ], 200, [], JSON_PRETTY_PRINT);
     }
 
     public function scan(Request $request, $sale_id)
