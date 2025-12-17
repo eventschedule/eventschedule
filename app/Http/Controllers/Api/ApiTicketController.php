@@ -134,31 +134,25 @@ class ApiTicketController extends Controller
 
         if (! empty($validated['action'])) {
             $action = $validated['action'];
+            $previousStatus = $sale->status;
+            $restockStatuses = ['refunded', 'cancelled', 'expired', 'deleted'];
 
             switch ($action) {
                 case 'mark_paid':
-                    if ($sale->status === 'unpaid') {
-                        Sale::where('id', $sale->id)->update(['status' => 'paid', 'transaction_reference' => 'Manual payment via API']);
-                        $sale = Sale::findOrFail($id);
-                    }
+                    Sale::where('id', $sale->id)->update(['status' => 'paid', 'transaction_reference' => 'Manual payment via API']);
+                    $sale = Sale::findOrFail($id);
                     break;
                 case 'mark_unpaid':
-                    if (in_array($sale->status, ['paid', 'cancelled'])) {
-                        Sale::where('id', $sale->id)->update(['status' => 'unpaid']);
-                        $sale = Sale::findOrFail($id);
-                    }
+                    Sale::where('id', $sale->id)->update(['status' => 'unpaid']);
+                    $sale = Sale::findOrFail($id);
                     break;
                 case 'refund':
-                    if ($sale->status === 'paid') {
-                        Sale::where('id', $sale->id)->update(['status' => 'refunded']);
-                        $sale = Sale::findOrFail($id);
-                    }
+                    Sale::where('id', $sale->id)->update(['status' => 'refunded']);
+                    $sale = Sale::findOrFail($id);
                     break;
                 case 'cancel':
-                    if (in_array($sale->status, ['unpaid', 'paid'])) {
-                        Sale::where('id', $sale->id)->update(['status' => 'cancelled']);
-                        $sale = Sale::findOrFail($id);
-                    }
+                    Sale::where('id', $sale->id)->update(['status' => 'cancelled']);
+                    $sale = Sale::findOrFail($id);
                     break;
                 case 'delete':
                     Sale::where('id', $sale->id)->update(['is_deleted' => true]);
@@ -189,6 +183,17 @@ class ApiTicketController extends Controller
                     break;
                 default:
                     return response()->json(['error' => 'Unknown action'], 422);
+            }
+
+            // Return inventory to pool when moving into a restock status from a non-restock status.
+            if (! in_array($previousStatus, $restockStatuses, true)
+                && in_array($sale->status, $restockStatuses, true)) {
+                $sale->loadMissing('saleTickets.ticket');
+                foreach ($sale->saleTickets as $saleTicket) {
+                    if ($saleTicket->ticket) {
+                        $saleTicket->ticket->updateSold($sale->event_date, -$saleTicket->quantity);
+                    }
+                }
             }
         }
 
