@@ -29,7 +29,7 @@ class ApiTicketController extends Controller
             ->toArray();
         
         // Also get events where user is a member of event roles
-        $roleIds = $user->roles()->pluck('id')->toArray();
+        $roleIds = $user->roles()->pluck('roles.id')->toArray();
         if (!empty($roleIds)) {
             $eventRoleIds = \App\Models\EventRole::whereIn('role_id', $roleIds)
                 ->distinct()
