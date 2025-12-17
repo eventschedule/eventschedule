@@ -472,11 +472,35 @@ class EventController extends Controller
         $user = $request->user();
         $subdomain = null;
 
+        // Prefer a role subdomain the user is a member of
         foreach ($event->roles as $each) {
-            if ($user->isMember($each->subdomain)) {
-                $subdomain = $each->subdomain;
-                break;
+            if ($each->subdomain) {
+                if ($user && $user->isMember($each->subdomain)) {
+                    $subdomain = $each->subdomain;
+                    break;
+                }
+                // Fallback candidate if none matched membership
+                if (! $subdomain) {
+                    $subdomain = $each->subdomain;
+                }
             }
+        }
+
+        // Fallback to creator role if none found
+        if (! $subdomain && $event->creatorRole && $event->creatorRole->subdomain) {
+            $subdomain = $event->creatorRole->subdomain;
+        }
+
+        // Fallback to user's first role if still missing
+        if (! $subdomain && $user) {
+            $firstRole = $user->roles()->first();
+            if ($firstRole && $firstRole->subdomain) {
+                $subdomain = $firstRole->subdomain;
+            }
+        }
+
+        if (! $subdomain) {
+            abort(404, 'Unable to determine subdomain for event edit.');
         }
 
         return redirect(route('event.edit', ['subdomain' => $subdomain, 'hash' => $hash]));
