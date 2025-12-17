@@ -207,7 +207,7 @@
                                     <div class="flex items-center">
                                         <input id="in_person" name="event_type" type="checkbox" v-model="isInPerson"
                                             class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
-                                            @change="ensureOneChecked('in_person')">
+                                          @change="ensureOneChecked('in_person', $event)">
                                         <label for="in_person" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                             {{ __('messages.in_person') }}
                                         </label>
@@ -215,7 +215,7 @@
                                     <div class="flex items-center pl-3">
                                         <input id="online" name="event_type" type="checkbox" v-model="isOnline"
                                             class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
-                                            @change="ensureOneChecked('online')">
+                                          @change="ensureOneChecked('online', $event)">
                                         <label for="online" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                             {{ __('messages.online') }}
                                         </label>
@@ -1351,8 +1351,9 @@
         showVenueAddressFields: false,
         // When true, display the password input so the owner can change the password
         editingPassword: false,
-        isInPerson: @json($event->exists ? (bool) ($selectedVenue ?? false) : true),
-        isOnline: @json($event->exists ? (bool) $event->event_url : false),
+        // Initialize from persisted flags when editing; otherwise default to false
+        isInPerson: @json($event->exists ? (bool) ($event->is_in_person ?? false) : false),
+        isOnline: @json($event->exists ? (bool) ($event->is_online ?? false) : false),
         eventName: @json($event->name ?? ''),
         eventSlug: @json($initialSlug),
         slugManuallyEdited: @json($slugWasManuallyEdited),
@@ -1684,7 +1685,12 @@
       clearEventUrl() {
         this.event.event_url = "";
       },
-      ensureOneChecked(type) {
+      ensureOneChecked(type, event) {
+        // Only enforce on genuine user interactions
+        if (event && event.isTrusted === false) {
+          return;
+        }
+
         console.log('ensureOneChecked called', { type, isInPerson: this.isInPerson, isOnline: this.isOnline, selectedVenue: this.selectedVenue });
         
         if (!this.isInPerson && !this.isOnline) {
@@ -2113,19 +2119,15 @@
       this.showMemberTypeRadio = this.sanitizedSelectedMembers.length === 0;
 
       if (this.event.id) {
-        this.isInPerson = !!this.event.venue || !!this.selectedVenue;
-        this.isOnline = !!this.event.event_url;
+        // Respect persisted flags from the server
+        this.isInPerson = !!this.event.is_in_person;
+        this.isOnline = !!this.event.is_online;
       } else {
+        // For new events, do not auto-select types; let the user choose.
         const preferences = this.loadPreferences();
-
-        if (this.shouldBypassPreferences) {
-          this.isInPerson = true;
-          this.isOnline = false;
-          if (this.hasAnyVenues) {
-            this.venueType = 'use_existing';
-          }
-        } else if (!this.isInPerson && !this.isOnline) {
-          this.isInPerson = true;
+        if (this.shouldBypassPreferences && this.hasAnyVenues) {
+          // Pre-select venue type only; do not force in-person flag.
+          this.venueType = 'use_existing';
         }
       }
 

@@ -312,12 +312,38 @@ class EventRepo
 
             $event->fill($input);
 
-            // Explicitly handle event_url to allow clearing it for in-person only events
-            if ($request->has('event_url')) {
-                $event->event_url = $request->event_url; // Will be null if sent as null
-            } elseif ($request->filled('venue_id') || $request->filled('venue_address1')) {
-                // If venue is provided but event_url is not in request, clear it (in-person only)
+            // Derive and enforce event type flags
+            $isInPerson = $request->has('is_in_person')
+                ? (bool) $request->boolean('is_in_person')
+                : ($request->filled('venue_id') || $request->filled('venue_address1'));
+
+            $isOnline = $request->has('is_online')
+                ? (bool) $request->boolean('is_online')
+                : $request->filled('event_url');
+
+            $event->is_in_person = $isInPerson;
+            $event->is_online = $isOnline;
+
+            // Normalize conflicting fields based on flags
+            if (! $isInPerson) {
+                // Clear venue-related fields when not in-person
+                $event->venue_id = null;
+                $event->setAttribute('venue_address1', null);
+                $event->setAttribute('venue_address2', null);
+                $event->setAttribute('venue_city', null);
+                $event->setAttribute('venue_state', null);
+                $event->setAttribute('venue_postal_code', null);
+                $event->setAttribute('venue_country_code', null);
+            }
+
+            if (! $isOnline) {
+                // Clear event URL when not online
                 $event->event_url = null;
+            } else {
+                // Explicitly set the event URL if provided
+                if ($request->has('event_url')) {
+                    $event->event_url = $request->input('event_url');
+                }
             }
 
             $days_of_week = '';
