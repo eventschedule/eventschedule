@@ -579,11 +579,12 @@ class Event extends Model
 
         $slug = $this->slug;
 
-        if (! $forceEventSlug && $venueSubdomain && $roleSubdomain) {
+        // For online-only events, never use venue subdomain in slug
+        if (! $this->is_in_person) {
+            // Keep the event's own slug
+        } elseif (! $forceEventSlug && $venueSubdomain && $roleSubdomain) {
             $slug = $venueSubdomain == $subdomain ? $roleSubdomain : $venueSubdomain;
-        }
-
-        if ($forceEventSlug && (! $slug) && $venueSubdomain && $roleSubdomain) {
+        } elseif ($forceEventSlug && (! $slug) && $venueSubdomain && $roleSubdomain) {
             $slug = $venueSubdomain == $subdomain ? $roleSubdomain : $venueSubdomain;
         }
         

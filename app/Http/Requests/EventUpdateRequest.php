@@ -71,12 +71,6 @@ class EventUpdateRequest extends FormRequest
                 }
             }],
             'event_password' => [
-                Rule::requiredIf(function () {
-                    return (bool) $this->input('tickets_enabled')
-                        && (!empty($this->input('event_url')))
-                        && is_array($this->input('tickets'))
-                        && count($this->input('tickets')) > 0;
-                }),
                 'nullable',
                 'string',
                 'max:255',
