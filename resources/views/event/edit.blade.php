@@ -222,6 +222,10 @@
                                     </div>
                                 </div>
                             </fieldset>
+
+                            <!-- Hidden inputs to explicitly send event type flags -->
+                            <input type="hidden" name="is_in_person" :value="isInPerson ? 1 : 0">
+                            <input type="hidden" name="is_online" :value="isOnline ? 1 : 0">
                         </div>
 
                         <x-text-input v-if="selectedVenue" name="venue_id" v-bind:value="selectedVenue.id" type="hidden" />
