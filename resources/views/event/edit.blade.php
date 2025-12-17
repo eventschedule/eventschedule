@@ -246,10 +246,11 @@
                                         </div>
                                     </fieldset>
 
-                                    <div :class="{ 'hidden': !shouldShowExistingVenueDropdown }">
+                                    <div v-if="shouldShowExistingVenueDropdown">
                                         <select id="selected_venue"
-                                                :required="hasAnyVenues && shouldShowExistingVenueDropdown"
-                                                :disabled="!hasAnyVenues || !shouldShowExistingVenueDropdown"
+                                                name="selected_venue"
+                                                :required="isInPerson && hasAnyVenues"
+                                                :disabled="!hasAnyVenues"
                                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}"
                                                 v-model="selectedVenue">
                                                 <template v-if="!hasAnyVenues">
