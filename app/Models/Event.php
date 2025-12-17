@@ -96,6 +96,8 @@ class Event extends Model
     protected $casts = [
         'duration' => 'float',
         'show_guest_list' => 'boolean',
+        'is_in_person' => 'boolean',
+        'is_online' => 'boolean',
     ];
 
     /**
