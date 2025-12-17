@@ -79,6 +79,11 @@ class ApiTicketController extends Controller
 
         return response()->json([
             'data' => $sales->map(function ($sale) {
+                // Ensure saleTickets are loaded
+                if (!$sale->relationLoaded('saleTickets')) {
+                    $sale->load(['saleTickets.entries']);
+                }
+                
                 return [
                     'id' => $sale->id,
                     'status' => $sale->status,
@@ -86,14 +91,14 @@ class ApiTicketController extends Controller
                     'email' => $sale->email,
                     'event_id' => $sale->event_id,
                     'event' => $sale->event ? $sale->event->toApiData() : null,
-                    'tickets' => $sale->saleTickets->map(function ($st) {
+                    'tickets' => $sale->saleTickets ? $sale->saleTickets->map(function ($st) {
                         return [
                             'id' => $st->id,
                             'ticket_id' => $st->ticket_id,
                             'quantity' => $st->quantity,
-                            'usage_status' => $st->usage_status ?? $st->getUsageStatusAttribute(),
+                            'usage_status' => $st->getUsageStatusAttribute(),
                         ];
-                    })->all(),
+                    })->toArray() : [],
                 ];
             })->values(),
             'meta' => [
