@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\TicketSaleNotification;
 use App\Utils\NotificationUtils;
+use Carbon\Carbon;
 
 class ApiTicketController extends Controller
 {
@@ -246,18 +247,22 @@ class ApiTicketController extends Controller
 
         // Check if user manages this event
         $user = $request->user();
-        $managedEventIds = Event::where('user_id', $user->id)->pluck('id')->toArray();
-        $roleIds = $user->roles()->pluck('roles.id')->toArray();
-        if (!empty($roleIds)) {
-            $eventRoleIds = \App\Models\EventRole::whereIn('role_id', $roleIds)
-                ->distinct()
-                ->pluck('event_id')
-                ->toArray();
-            $managedEventIds = array_unique(array_merge($managedEventIds, $eventRoleIds));
+        if (!$user->canEditEvent($sale->event)) {
+            return response()->json(['error' => 'You are not authorized to scan this ticket'], 403);
         }
 
-        if (!in_array($sale->event_id, $managedEventIds)) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        // Validation: Ticket must be for today
+        if (Carbon::parse($sale->event_date)->format('Y-m-d') !== now()->format('Y-m-d')) {
+            return response()->json(['error' => 'This ticket is not valid for today'], 400);
+        }
+
+        // Validation: Ticket must be paid
+        if ($sale->status === 'unpaid') {
+            return response()->json(['error' => 'This ticket is not paid'], 400);
+        } elseif ($sale->status === 'cancelled') {
+            return response()->json(['error' => 'This ticket is cancelled'], 400);
+        } elseif ($sale->status === 'refunded') {
+            return response()->json(['error' => 'This ticket is refunded'], 400);
         }
 
         // Determine which sale_ticket to scan
