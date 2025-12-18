@@ -72,7 +72,14 @@ class ApiTicketController extends Controller
             $searchTerm = $request->string('query')->trim()->value();
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'like', "%{$searchTerm}%")
-                  ->orWhere('email', 'like', "%{$searchTerm}%");
+                  ->orWhere('email', 'like', "%{$searchTerm}%")
+                  ->orWhere('secret', 'like', "%{$searchTerm}%")
+                  ->orWhereHas('saleTickets.entries', function ($e) use ($searchTerm) {
+                      $e->where('secret', 'like', "%{$searchTerm}%");
+                  })
+                  ->orWhereHas('event', function ($qe) use ($searchTerm) {
+                      $qe->where('name', 'like', "%{$searchTerm}%");
+                  });
             });
         }
 
@@ -235,28 +242,99 @@ class ApiTicketController extends Controller
             'seat_number' => ['nullable', 'string', 'max:255'],
         ]);
 
-        // Lookup sale by secret (ticket code)
+        $code = $validated['ticket_code'];
+
+        // 1) Try lookup by entry secret (web QR)
+        $entry = SaleTicketEntry::with(['saleTicket.sale', 'saleTicket.ticket'])
+            ->where('secret', $code)
+            ->first();
+
+        if ($entry && $entry->saleTicket && $entry->saleTicket->sale) {
+            $sale = $entry->saleTicket->sale;
+            $sale->loadMissing(['event', 'saleTickets.ticket', 'saleTickets.entries']);
+
+            // Auth: must be able to manage event
+            $user = $request->user();
+            if (! $user->canEditEvent($sale->event)) {
+                return response()->json(['error' => 'You are not authorized to scan this ticket'], 403);
+            }
+
+            // Date check: use event timezone
+            $tz = $sale->event->timezone ?: config('app.timezone', 'UTC');
+            $eventDateLocal = Carbon::parse($sale->event_date, 'UTC')->setTimezone($tz)->toDateString();
+            $todayLocal = now($tz)->toDateString();
+            if ($eventDateLocal !== $todayLocal) {
+                return response()->json(['error' => 'This ticket is not valid for today'], 400);
+            }
+
+            // Status checks
+            if ($sale->status === 'unpaid') {
+                return response()->json(['error' => 'This ticket is not paid'], 400);
+            } elseif ($sale->status === 'cancelled') {
+                return response()->json(['error' => 'This ticket is cancelled'], 400);
+            } elseif ($sale->status === 'refunded') {
+                return response()->json(['error' => 'This ticket is refunded'], 400);
+            }
+
+            // Mark entry scanned if not already
+            if ($entry->scanned_at === null) {
+                $entry->scanned_at = now();
+                $entry->save();
+            }
+
+            // Reload entries to reflect updated usage status
+            $sale->load(['saleTickets.entries']);
+
+            return response()->json([
+                'data' => [
+                    'sale_id' => $sale->id,
+                    'entry_id' => $entry->id,
+                    'scanned_at' => $entry->scanned_at->toIsoString(),
+                    'sale' => [
+                        'id' => $sale->id,
+                        'status' => $sale->status,
+                        'name' => $sale->name,
+                        'email' => $sale->email,
+                        'event_id' => $sale->event_id,
+                        'event' => $sale->event ? $sale->event->toApiData() : null,
+                        'tickets' => $sale->saleTickets->map(function ($st) {
+                            return [
+                                'id' => $st->id,
+                                'ticket_id' => $st->ticket_id,
+                                'quantity' => $st->quantity,
+                                'usage_status' => $st->usage_status,
+                            ];
+                        })->values()->all(),
+                    ],
+                ],
+            ], 201, [], JSON_PRETTY_PRINT);
+        }
+
+        // 2) Fallback: lookup sale by sale secret
         $sale = Sale::with(['event', 'saleTickets.ticket', 'saleTickets.entries'])
-            ->where('secret', $validated['ticket_code'])
+            ->where('secret', $code)
             ->where('is_deleted', false)
             ->first();
 
-        if (!$sale) {
+        if (! $sale) {
             return response()->json(['error' => 'Ticket not found'], 404);
         }
 
-        // Check if user manages this event
+        // Auth
         $user = $request->user();
-        if (!$user->canEditEvent($sale->event)) {
+        if (! $user->canEditEvent($sale->event)) {
             return response()->json(['error' => 'You are not authorized to scan this ticket'], 403);
         }
 
-        // Validation: Ticket must be for today
-        if (Carbon::parse($sale->event_date)->format('Y-m-d') !== now()->format('Y-m-d')) {
+        // Date check: use event timezone
+        $tz = $sale->event->timezone ?: config('app.timezone', 'UTC');
+        $eventDateLocal = Carbon::parse($sale->event_date, 'UTC')->setTimezone($tz)->toDateString();
+        $todayLocal = now($tz)->toDateString();
+        if ($eventDateLocal !== $todayLocal) {
             return response()->json(['error' => 'This ticket is not valid for today'], 400);
         }
 
-        // Validation: Ticket must be paid
+        // Status checks
         if ($sale->status === 'unpaid') {
             return response()->json(['error' => 'This ticket is not paid'], 400);
         } elseif ($sale->status === 'cancelled') {
@@ -268,33 +346,32 @@ class ApiTicketController extends Controller
         // Determine which sale_ticket to scan
         if (isset($validated['sale_ticket_id'])) {
             $saleTicket = $sale->saleTickets->firstWhere('id', $validated['sale_ticket_id']);
-            if (!$saleTicket) {
+            if (! $saleTicket) {
                 return response()->json(['error' => 'Sale ticket not found'], 404);
             }
         } else {
-            // Default to first sale ticket
             $saleTicket = $sale->saleTickets->first();
-            if (!$saleTicket) {
+            if (! $saleTicket) {
                 return response()->json(['error' => 'No tickets found in this sale'], 404);
             }
         }
 
-        // Create entry and mark as scanned
-        $entry = SaleTicketEntry::create([
+        // Create new entry and mark as scanned
+        $newEntry = SaleTicketEntry::create([
             'sale_ticket_id' => $saleTicket->id,
             'secret' => Str::random(24),
             'seat_number' => $validated['seat_number'] ?? null,
             'scanned_at' => now(),
         ]);
 
-        // Reload to get fresh usage status
+        // Reload entries to reflect updated usage status
         $sale->load(['saleTickets.entries']);
 
         return response()->json([
             'data' => [
                 'sale_id' => $sale->id,
-                'entry_id' => $entry->id,
-                'scanned_at' => $entry->scanned_at->toIsoString(),
+                'entry_id' => $newEntry->id,
+                'scanned_at' => $newEntry->scanned_at->toIsoString(),
                 'sale' => [
                     'id' => $sale->id,
                     'status' => $sale->status,
