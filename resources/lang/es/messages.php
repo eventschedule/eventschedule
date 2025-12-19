@@ -624,4 +624,9 @@ return [
     'sync_events_between_schedules' => 'Sincroniza eventos entre este horario y tu Google Calendar.',
     'events_synced' => '¡Eventos sincronizados con éxito!',
     'untitled_event' => 'Evento Sin Título',
+    'no_videos_selected' => 'No se seleccionaron videos',
+    'new_requests_notification_subject' => ':count solicitud(es) pendiente(s) para :name',
+    'new_requests_notification_line' => 'Tienes :count solicitud(es) pendiente(s) para :name. Haz clic a continuación para verlas y gestionarlas.',
+    'user_has_been_deleted' => 'Tu cuenta ha sido eliminada',
+    'user_has_been_deleted_details' => 'La cuenta de :user ha sido eliminada.',
 ];
