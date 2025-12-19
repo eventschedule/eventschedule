@@ -625,4 +625,9 @@ return [
     'sync_events_between_schedules' => 'مزامنة الأحداث بين هذا الجدول وتقويم جوجل الخاص بك.',
     'events_synced' => 'تمت مزامنة الأحداث بنجاح!',
     'untitled_event' => 'حدث بدون عنوان',
+    'no_videos_selected' => 'لم يتم اختيار أي فيديوهات',
+    'new_requests_notification_subject' => ':count طلب(ات) معلق(ة) لـ :name',
+    'new_requests_notification_line' => 'لديك :count طلب(ات) معلق(ة) لـ :name. انقر أدناه لعرضها وإدارتها.',
+    'user_has_been_deleted' => 'تم حذف حسابك',
+    'user_has_been_deleted_details' => 'تم حذف الحساب الخاص بـ :user.',
 ];

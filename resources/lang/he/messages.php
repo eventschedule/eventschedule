@@ -617,4 +617,9 @@ return [
     'sync_events_between_schedules' => 'סנכרן אירועים בין לוח הזמנים הזה ל-Google Calendar שלך.',
     'events_synced' => 'האירועים סונכרנו בהצלחה!',
     'untitled_event' => 'אירוע ללא כותרת',
+    'no_videos_selected' => 'לא נבחרו סרטונים',
+    'new_requests_notification_subject' => ':count בקשה(ות) ממתינה(ות) עבור :name',
+    'new_requests_notification_line' => 'יש לך :count בקשה(ות) ממתינה(ות) עבור :name. לחץ למטה כדי לצפות ולנהל אותן.',
+    'user_has_been_deleted' => 'החשבון שלך נמחק',
+    'user_has_been_deleted_details' => 'החשבון עבור :user נמחק.',
 ];

@@ -625,4 +625,9 @@ return [
     'sync_events_between_schedules' => 'Sincronizza eventi tra questo programma e il tuo Google Calendar.',
     'events_synced' => 'Eventi sincronizzati con successo!',
     'untitled_event' => 'Evento Senza Titolo',
+    'no_videos_selected' => 'Nessun video selezionato',
+    'new_requests_notification_subject' => ':count richiesta(e) in sospeso per :name',
+    'new_requests_notification_line' => 'Hai :count richiesta(e) in sospeso per :name. Clicca qui sotto per visualizzarle e gestirle.',
+    'user_has_been_deleted' => 'Il tuo account è stato eliminato',
+    'user_has_been_deleted_details' => 'L\'account per :user è stato eliminato.',
 ];

@@ -622,4 +622,9 @@ return [
     'sync_events_between_schedules' => 'Synchroniseer evenementen tussen dit rooster en je Google Calendar.',
     'events_synced' => 'Evenementen succesvol gesynchroniseerd!',
     'untitled_event' => 'Naamloos Evenement',
+    'no_videos_selected' => 'Geen video\'s geselecteerd',
+    'new_requests_notification_subject' => ':count in afwachting zijnde verzoek(en) voor :name',
+    'new_requests_notification_line' => 'Je hebt :count in afwachting zijnde verzoek(en) voor :name. Klik hieronder om ze te bekijken en te beheren.',
+    'user_has_been_deleted' => 'Je account is verwijderd',
+    'user_has_been_deleted_details' => 'Het account voor :user is verwijderd.',
 ];

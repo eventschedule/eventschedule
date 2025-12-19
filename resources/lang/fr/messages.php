@@ -624,4 +624,9 @@ return [
     'sync_events_between_schedules' => 'Synchronisez les événements entre ce planning et votre Google Calendar.',
     'events_synced' => 'Événements synchronisés avec succès !',
     'untitled_event' => 'Événement Sans Titre',
+    'no_videos_selected' => 'Aucune vidéo sélectionnée',
+    'new_requests_notification_subject' => ':count demande(s) en attente pour :name',
+    'new_requests_notification_line' => 'Vous avez :count demande(s) en attente pour :name. Cliquez ci-dessous pour les voir et les gérer.',
+    'user_has_been_deleted' => 'Votre compte a été supprimé',
+    'user_has_been_deleted_details' => 'Le compte de :user a été supprimé.',
 ];

@@ -628,4 +628,9 @@ return [
     'sync_events_between_schedules' => 'Synchronisieren Sie Veranstaltungen zwischen diesem Zeitplan und Ihrem Google Kalender.',
     'events_synced' => 'Veranstaltungen erfolgreich synchronisiert!',
     'untitled_event' => 'Unbenannte Veranstaltung',
+    'no_videos_selected' => 'Keine Videos ausgewählt',
+    'new_requests_notification_subject' => ':count ausstehende Anfrage(n) für :name',
+    'new_requests_notification_line' => 'Sie haben :count ausstehende Anfrage(n) für :name. Klicken Sie unten, um sie anzuzeigen und zu verwalten.',
+    'user_has_been_deleted' => 'Ihr Konto wurde gelöscht',
+    'user_has_been_deleted_details' => 'Das Konto für :user wurde gelöscht.',
 ];
