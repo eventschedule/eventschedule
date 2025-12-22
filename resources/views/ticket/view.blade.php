@@ -77,7 +77,7 @@
               </defs>
             </svg>
 
-            <p class="text-[10px]">{{ $event->getStartDateTime($sale->date, true)->format('F j, Y') }}</p>
+            <p class="text-[10px]">{{ $event->getStartDateTime($sale->event_date, true)->format('F j, Y') }}</p>
           </div>
           <div class="flex gap-[8px] flex-row items-center">
             <svg
@@ -154,7 +154,7 @@
                 </clipPath>
               </defs>
             </svg>
-            <p class="text-[10px]">{{ $event->getStartEndTime($sale->date) }}</p>
+            <p class="text-[10px]">{{ $event->getStartEndTime($sale->event_date) }}</p>
           </div>
           <div class="flex gap-[8px] flex-row items-center">
             <svg
