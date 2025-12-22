@@ -630,4 +630,7 @@ return [
     'new_requests_notification_line' => 'Hai :count richiesta(e) in sospeso per :name. Clicca qui sotto per visualizzarle e gestirle.',
     'user_has_been_deleted' => 'Il tuo account è stato eliminato',
     'user_has_been_deleted_details' => 'L\'account per :user è stato eliminato.',
+    'feedback_placeholder' => 'Hai bisogno di modifiche? Raccontaci le funzionalità di cui hai bisogno e saremo felici di aggiungerle per te.',
+    'feedback_submitted' => 'Il tuo feedback è stato inviato.',
+    'feedback_failed' => 'Invio del feedback non riuscito. Riprova.',
 ];

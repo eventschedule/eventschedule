@@ -627,4 +627,7 @@ return [
     'new_requests_notification_line' => 'Je hebt :count in afwachting zijnde verzoek(en) voor :name. Klik hieronder om ze te bekijken en te beheren.',
     'user_has_been_deleted' => 'Je account is verwijderd',
     'user_has_been_deleted_details' => 'Het account voor :user is verwijderd.',
+    'feedback_placeholder' => 'Wijzigingen nodig? Vertel ons welke functies je nodig hebt en we voegen ze graag voor je toe.',
+    'feedback_submitted' => 'Je feedback is verzonden.',
+    'feedback_failed' => 'Verzenden van feedback mislukt. Probeer het opnieuw.',
 ];

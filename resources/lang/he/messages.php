@@ -622,4 +622,7 @@ return [
     'new_requests_notification_line' => 'יש לך :count בקשה(ות) ממתינה(ות) עבור :name. לחץ למטה כדי לצפות ולנהל אותן.',
     'user_has_been_deleted' => 'החשבון שלך נמחק',
     'user_has_been_deleted_details' => 'החשבון עבור :user נמחק.',
+    'feedback_placeholder' => 'צריך שינויים? ספר לנו את התכונות שאתה צריך ואנחנו נהיה שמחים להוסיף אותן עבורך.',
+    'feedback_submitted' => 'המשוב שלך נשלח.',
+    'feedback_failed' => 'שליחת המשוב נכשלה. אנא נסה שוב.',
 ];

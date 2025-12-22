@@ -630,4 +630,7 @@ return [
     'new_requests_notification_line' => 'لديك :count طلب(ات) معلق(ة) لـ :name. انقر أدناه لعرضها وإدارتها.',
     'user_has_been_deleted' => 'تم حذف حسابك',
     'user_has_been_deleted_details' => 'تم حذف الحساب الخاص بـ :user.',
+    'feedback_placeholder' => 'هل تحتاج إلى أي تغييرات؟ أخبرنا بالميزات التي تحتاجها وسنكون سعداء لإضافتها لك.',
+    'feedback_submitted' => 'تم إرسال ملاحظاتك.',
+    'feedback_failed' => 'فشل إرسال الملاحظات. يرجى المحاولة مرة أخرى.',
 ];

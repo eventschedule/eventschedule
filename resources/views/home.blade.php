@@ -145,7 +145,7 @@
                         
                         if (data.success) {
                             Toastify({
-                                text: data.message || 'Your feedback has been submitted.',
+                                text: data.message || '{{ __("messages.feedback_submitted") }}',
                                 duration: 3000,
                                 position: 'center',
                                 stopOnFocus: true,
@@ -157,7 +157,7 @@
                             feedbackTextarea.value = '';
                         } else {
                             Toastify({
-                                text: data.message || 'Failed to submit feedback. Please try again.',
+                                text: data.message || '{{ __("messages.feedback_failed") }}',
                                 duration: 5000,
                                 position: 'center',
                                 stopOnFocus: true,
@@ -168,7 +168,7 @@
                         }
                     } catch (error) {
                         Toastify({
-                            text: 'Failed to submit feedback. Please try again.',
+                            text: '{{ __("messages.feedback_failed") }}',
                             duration: 5000,
                             position: 'center',
                             stopOnFocus: true,

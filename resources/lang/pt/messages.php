@@ -628,4 +628,7 @@ return [
     'new_requests_notification_line' => 'Você tem :count solicitação(ões) pendente(s) para :name. Clique abaixo para visualizá-las e gerenciá-las.',
     'user_has_been_deleted' => 'Sua conta foi excluída',
     'user_has_been_deleted_details' => 'A conta de :user foi excluída.',
+    'feedback_placeholder' => 'Precisa de alterações? Conte-nos os recursos de que você precisa e teremos prazer em adicioná-los para você.',
+    'feedback_submitted' => 'Seu feedback foi enviado.',
+    'feedback_failed' => 'Falha ao enviar o feedback. Por favor, tente novamente.',
 ];

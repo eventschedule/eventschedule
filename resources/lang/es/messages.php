@@ -629,4 +629,7 @@ return [
     'new_requests_notification_line' => 'Tienes :count solicitud(es) pendiente(s) para :name. Haz clic a continuación para verlas y gestionarlas.',
     'user_has_been_deleted' => 'Tu cuenta ha sido eliminada',
     'user_has_been_deleted_details' => 'La cuenta de :user ha sido eliminada.',
+    'feedback_placeholder' => '¿Necesitas algún cambio? Cuéntanos las funciones que necesitas y estaremos encantados de agregarlas para ti.',
+    'feedback_submitted' => 'Tu comentario ha sido enviado.',
+    'feedback_failed' => 'No se pudo enviar el comentario. Por favor, inténtalo de nuevo.',
 ];
