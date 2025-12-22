@@ -103,7 +103,7 @@ class HomeController extends Controller
                 ->orderBy(request()->has('roles') ? 'id' : 'subdomain', request()->has('roles') ? 'desc' : 'asc')
                 ->get();
 
-        $events = Event::with(['venue', 'roles'])
+        $events = Event::with(['roles'])
             ->orderBy(request()->has('events') ? 'id' : 'starts_at', 'desc')
             ->get();
 
