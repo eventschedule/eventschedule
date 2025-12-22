@@ -633,4 +633,7 @@ return [
     'new_requests_notification_line' => 'Sie haben :count ausstehende Anfrage(n) für :name. Klicken Sie unten, um sie anzuzeigen und zu verwalten.',
     'user_has_been_deleted' => 'Ihr Konto wurde gelöscht',
     'user_has_been_deleted_details' => 'Das Konto für :user wurde gelöscht.',
+    'feedback_placeholder' => 'Benötigen Sie Änderungen? Teilen Sie uns die Funktionen mit, die Sie benötigen, und wir fügen sie gerne für Sie hinzu.',
+    'feedback_submitted' => 'Ihr Feedback wurde übermittelt.',
+    'feedback_failed' => 'Feedback konnte nicht übermittelt werden. Bitte versuchen Sie es erneut.',
 ];

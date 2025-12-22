@@ -629,4 +629,7 @@ return [
     'new_requests_notification_line' => 'Vous avez :count demande(s) en attente pour :name. Cliquez ci-dessous pour les voir et les gérer.',
     'user_has_been_deleted' => 'Votre compte a été supprimé',
     'user_has_been_deleted_details' => 'Le compte de :user a été supprimé.',
+    'feedback_placeholder' => 'Besoin de modifications ? Dites-nous les fonctionnalités dont vous avez besoin et nous serons heureux de les ajouter pour vous.',
+    'feedback_submitted' => 'Votre commentaire a été envoyé.',
+    'feedback_failed' => 'Échec de l\'envoi du commentaire. Veuillez réessayer.',
 ];
