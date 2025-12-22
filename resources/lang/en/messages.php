@@ -638,4 +638,7 @@ return [
     'new_requests_notification_line' => 'You have :count pending request(s) for :name. Click below to view and manage them.',
     'user_has_been_deleted' => 'Your account has been deleted',
     'user_has_been_deleted_details' => 'The account for :user has been deleted.',
+    'feedback_placeholder' => 'Need any changes? Tell us the features you need and we\'ll be happy to add them for you.',
+    'feedback_submitted' => 'Your feedback has been submitted.',
+    'feedback_failed' => 'Failed to submit feedback. Please try again.',
 ];

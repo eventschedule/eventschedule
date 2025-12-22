@@ -1,6 +1,26 @@
 <x-app-admin-layout>
     <div class="py-5">
         
+        <!-- Feedback Form -->
+        <div class="mb-6 mt-2 w-full">
+            <form id="feedback-form" class="flex gap-3 items-start w-full">
+                @csrf
+                <textarea 
+                    id="feedback-textarea"
+                    name="feedback" 
+                    placeholder="{{ __('messages.feedback_placeholder') }}"
+                    class="flex-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                    rows="2"
+                ></textarea>
+                <button 
+                    type="submit"
+                    class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors whitespace-nowrap"
+                >
+                    {{ __('messages.submit') }}
+                </button>
+            </form>
+        </div>
+        
         <!-- Get Started Panel -->
         @if($schedules->isEmpty() && $venues->isEmpty() && $curators->isEmpty() && auth()->user()->tickets()->count() === 0)
         <div class="mb-8">
@@ -87,4 +107,81 @@
         @include('role/partials/calendar', ['route' => 'home', 'tab' => ''])
 
     </div>
+
+    <script {!! nonce_attr() !!}>
+        document.addEventListener('DOMContentLoaded', function() {
+            const feedbackForm = document.getElementById('feedback-form');
+            const feedbackTextarea = document.getElementById('feedback-textarea');
+            
+            if (feedbackForm) {
+                feedbackForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const feedback = feedbackTextarea.value.trim();
+                    if (!feedback) {
+                        return;
+                    }
+                    
+                    const submitButton = feedbackForm.querySelector('button[type="submit"]');
+                    const originalText = submitButton.textContent;
+                    submitButton.disabled = true;
+                    submitButton.textContent = 'Submitting...';
+                    
+                    try {
+                        const formData = new FormData();
+                        formData.append('feedback', feedback);
+                        formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}');
+                        
+                        const response = await fetch('{{ route("home.feedback") }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            },
+                            body: formData
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            Toastify({
+                                text: data.message || 'Your feedback has been submitted.',
+                                duration: 3000,
+                                position: 'center',
+                                stopOnFocus: true,
+                                style: {
+                                    background: '#4BB543',
+                                }
+                            }).showToast();
+                            
+                            feedbackTextarea.value = '';
+                        } else {
+                            Toastify({
+                                text: data.message || 'Failed to submit feedback. Please try again.',
+                                duration: 5000,
+                                position: 'center',
+                                stopOnFocus: true,
+                                style: {
+                                    background: '#FF0000',
+                                }
+                            }).showToast();
+                        }
+                    } catch (error) {
+                        Toastify({
+                            text: 'Failed to submit feedback. Please try again.',
+                            duration: 5000,
+                            position: 'center',
+                            stopOnFocus: true,
+                            style: {
+                                background: '#FF0000',
+                            }
+                        }).showToast();
+                    } finally {
+                        submitButton.disabled = false;
+                        submitButton.textContent = originalText;
+                    }
+                });
+            }
+        });
+    </script>
 </x-app-admin-layout>

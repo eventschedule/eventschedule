@@ -8,7 +8,7 @@ use App\Models\Role;
 use App\Models\BlogPost;
 use Carbon\Carbon;
 use App\Mail\SupportEmail;
-use Mail;
+use Illuminate\Support\Facades\Mail;
 
 class HomeController extends Controller
 {
@@ -131,5 +131,33 @@ class HomeController extends Controller
         
         return response($sitemapView)
             ->header('Content-Type', 'application/xml');
+    }
+
+    public function submitFeedback(Request $request)
+    {
+        $request->validate([
+            'feedback' => 'required|string|max:5000',
+        ]);
+
+        $user = $request->user();
+        $feedback = $request->input('feedback');
+
+        try {
+            Mail::to('contact@eventschedule.com')->send(new SupportEmail(
+                $user->name ?? $user->email,
+                $user->email,
+                $feedback
+            ));
+
+            return response()->json([
+                'success' => true,
+                'message' => __('messages.feedback_submitted')
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.feedback_failed')
+            ], 500);
+        }
     }
 }
