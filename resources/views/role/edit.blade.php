@@ -1305,14 +1305,10 @@
                     </div>
                 </div>
                 @endif
-                    
-            </div>            
-        </div>
 
-
-        @if (config('app.hosted'))
-        <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="email-settings">
-            <div class="max-w-xl">
+                @if (config('app.hosted'))
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="email-settings">
+                    <div class="max-w-xl">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                     {{ __('messages.email_settings') }}
                 </h2>
@@ -1374,21 +1370,18 @@
                 </div>
 
                 <div class="mb-6">
-                    <x-input-label for="test_email_address" :value="__('messages.test_email')" />
-                    <div class="flex gap-2 mt-1">
-                        <x-text-input id="test_email_address" type="email" class="block w-full"
-                            placeholder="{{ __('messages.enter_email_to_test') }}" />
-                        <x-primary-button type="button" id="send-test-email-btn">
-                            {{ __('messages.send_test_email') }}
-                        </x-primary-button>
-                    </div>
+                    <x-primary-button type="button" id="send-test-email-btn">
+                        {{ __('messages.send_test_email') }}
+                    </x-primary-button>
                     <div id="test-email-result" class="mt-2 hidden"></div>
+                    </div>
                 </div>
-            </div>
+                @endif
+                    
+            </div>            
         </div>
-        @endif
 
-        <div class="max-w-7xl mx-auto space-y-6 mt-3">
+        <div class="max-w-7xl mx-auto space-y-6 mt-8">
             @if (! $role->exists)
             <p class="text-base dark:text-gray-400 text-gray-600 pb-2">
                 {{ __('messages.note_all_schedules_are_publicly_listed') }}
@@ -1822,16 +1815,16 @@ document.addEventListener('DOMContentLoaded', function() {
 // Test email functionality
 document.addEventListener('DOMContentLoaded', function() {
     const sendTestEmailBtn = document.getElementById('send-test-email-btn');
-    const testEmailInput = document.getElementById('test_email_address');
     const testEmailResult = document.getElementById('test-email-result');
     
-    if (sendTestEmailBtn && testEmailInput && testEmailResult) {
+    if (sendTestEmailBtn && testEmailResult) {
         sendTestEmailBtn.addEventListener('click', function() {
-            const email = testEmailInput.value.trim();
+            const fromAddressInput = document.getElementById('email_settings_from_address');
+            const email = fromAddressInput ? fromAddressInput.value.trim() : '';
             
             if (!email) {
                 testEmailResult.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
-                testEmailResult.textContent = '{{ __("messages.please_enter_email_address") }}';
+                testEmailResult.textContent = '{{ __("messages.please_enter_from_address") }}';
                 testEmailResult.classList.remove('hidden');
                 return;
             }

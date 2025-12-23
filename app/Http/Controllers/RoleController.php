@@ -2139,15 +2139,28 @@ class RoleController extends Controller
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
-        $request->validate([
-            'email' => ['required', 'email'],
-        ]);
-
         $role = Role::subdomain($subdomain)->firstOrFail();
+        
+        // Get email from request or from role's email settings
+        $email = $request->input('email');
+        if (!$email) {
+            $emailSettings = $role->getEmailSettings();
+            $email = $emailSettings['from_address'] ?? null;
+        }
+        
+        if (!$email) {
+            return response()->json(['error' => __('messages.please_enter_from_address')], 400);
+        }
+
+        // Validate email format
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return response()->json(['error' => __('messages.invalid_email_address')], 400);
+        }
+
         $emailService = new EmailService();
 
         try {
-            $emailService->sendTestEmail($role, $request->email);
+            $emailService->sendTestEmail($role, $email);
             return response()->json(['success' => true, 'message' => __('messages.test_email_sent')]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
