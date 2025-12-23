@@ -88,6 +88,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/tickets', [TicketController::class, 'tickets'])->name('tickets');
     Route::get('/sales', [TicketController::class, 'sales'])->name('sales');
     Route::post('/sales/action/{sale_id}', [TicketController::class, 'handleAction'])->name('sales.action');
+    Route::post('/sales/resend-email/{sale_id}', [TicketController::class, 'resendEmail'])->name('sales.resend_email');
     
     Route::get('/account', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/account', [ProfileController::class, 'update'])->name('profile.update');
@@ -119,6 +120,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/subscribe', [RoleController::class, 'subscribe'])->name('role.subscribe');
     Route::get('/{subdomain}/unfollow', [RoleController::class, 'unfollow'])->name('role.unfollow');
     Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
+    Route::post('/{subdomain}/test-email', [RoleController::class, 'testEmail'])->name('role.test_email');
     Route::get('/{subdomain}/delete', [RoleController::class, 'delete'])->name('role.delete');
     Route::get('/{subdomain}/delete-image', [RoleController::class, 'deleteImage'])->name('role.delete_image');
     Route::get('/{subdomain}/add-event', [EventController::class, 'create'])->name('event.create');

@@ -1310,6 +1310,84 @@
         </div>
 
 
+        @if (config('app.hosted'))
+        <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="email-settings">
+            <div class="max-w-xl">
+                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                    {{ __('messages.email_settings') }}
+                </h2>
+
+                @php
+                    $emailSettings = $role->getEmailSettings();
+                @endphp
+
+                <div class="mb-6">
+                    <x-input-label for="email_settings_host" :value="__('messages.smtp_host')" />
+                    <x-text-input id="email_settings_host" name="email_settings[host]" type="text" class="mt-1 block w-full"
+                        :value="old('email_settings.host', $emailSettings['host'] ?? '')" />
+                    <x-input-error class="mt-2" :messages="$errors->get('email_settings.host')" />
+                </div>
+
+                <div class="mb-6">
+                    <x-input-label for="email_settings_port" :value="__('messages.smtp_port')" />
+                    <x-text-input id="email_settings_port" name="email_settings[port]" type="number" class="mt-1 block w-full"
+                        :value="old('email_settings.port', $emailSettings['port'] ?? '')" />
+                    <x-input-error class="mt-2" :messages="$errors->get('email_settings.port')" />
+                </div>
+
+                <div class="mb-6">
+                    <x-input-label for="email_settings_encryption" :value="__('messages.encryption')" />
+                    <select id="email_settings_encryption" name="email_settings[encryption]" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                        <option value="">{{ __('messages.none') }}</option>
+                        <option value="tls" {{ old('email_settings.encryption', $emailSettings['encryption'] ?? '') == 'tls' ? 'selected' : '' }}>TLS</option>
+                        <option value="ssl" {{ old('email_settings.encryption', $emailSettings['encryption'] ?? '') == 'ssl' ? 'selected' : '' }}>SSL</option>
+                    </select>
+                    <x-input-error class="mt-2" :messages="$errors->get('email_settings.encryption')" />
+                </div>
+
+                <div class="mb-6">
+                    <x-input-label for="email_settings_username" :value="__('messages.smtp_username')" />
+                    <x-text-input id="email_settings_username" name="email_settings[username]" type="text" class="mt-1 block w-full"
+                        :value="old('email_settings.username', $emailSettings['username'] ?? '')" />
+                    <x-input-error class="mt-2" :messages="$errors->get('email_settings.username')" />
+                </div>
+
+                <div class="mb-6">
+                    <x-input-label for="email_settings_password" :value="__('messages.smtp_password')" />
+                    <x-text-input id="email_settings_password" name="email_settings[password]" type="password" class="mt-1 block w-full"
+                        :value="old('email_settings.password', '')" placeholder="{{ __('messages.leave_blank_to_keep_current') }}" />
+                    <x-input-error class="mt-2" :messages="$errors->get('email_settings.password')" />
+                </div>
+
+                <div class="mb-6">
+                    <x-input-label for="email_settings_from_address" :value="__('messages.from_address')" />
+                    <x-text-input id="email_settings_from_address" name="email_settings[from_address]" type="email" class="mt-1 block w-full"
+                        :value="old('email_settings.from_address', $emailSettings['from_address'] ?? '')" />
+                    <x-input-error class="mt-2" :messages="$errors->get('email_settings.from_address')" />
+                </div>
+
+                <div class="mb-6">
+                    <x-input-label for="email_settings_from_name" :value="__('messages.from_name')" />
+                    <x-text-input id="email_settings_from_name" name="email_settings[from_name]" type="text" class="mt-1 block w-full"
+                        :value="old('email_settings.from_name', $emailSettings['from_name'] ?? '')" />
+                    <x-input-error class="mt-2" :messages="$errors->get('email_settings.from_name')" />
+                </div>
+
+                <div class="mb-6">
+                    <x-input-label for="test_email_address" :value="__('messages.test_email')" />
+                    <div class="flex gap-2 mt-1">
+                        <x-text-input id="test_email_address" type="email" class="block w-full"
+                            placeholder="{{ __('messages.enter_email_to_test') }}" />
+                        <x-primary-button type="button" id="send-test-email-btn">
+                            {{ __('messages.send_test_email') }}
+                        </x-primary-button>
+                    </div>
+                    <div id="test-email-result" class="mt-2 hidden"></div>
+                </div>
+            </div>
+        </div>
+        @endif
+
         <div class="max-w-7xl mx-auto space-y-6 mt-3">
             @if (! $role->exists)
             <p class="text-base dark:text-gray-400 text-gray-600 pb-2">
@@ -1738,6 +1816,75 @@ document.addEventListener('DOMContentLoaded', function() {
     const selectedDirection = document.querySelector('input[name="sync_direction"]:checked');
     if (syncEventsButton && selectedDirection) {
         syncEventsButton.disabled = !selectedDirection.value || selectedDirection.value === '';
+    }
+});
+
+// Test email functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const sendTestEmailBtn = document.getElementById('send-test-email-btn');
+    const testEmailInput = document.getElementById('test_email_address');
+    const testEmailResult = document.getElementById('test-email-result');
+    
+    if (sendTestEmailBtn && testEmailInput && testEmailResult) {
+        sendTestEmailBtn.addEventListener('click', function() {
+            const email = testEmailInput.value.trim();
+            
+            if (!email) {
+                testEmailResult.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
+                testEmailResult.textContent = '{{ __("messages.please_enter_email_address") }}';
+                testEmailResult.classList.remove('hidden');
+                return;
+            }
+            
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                testEmailResult.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
+                testEmailResult.textContent = '{{ __("messages.invalid_email_address") }}';
+                testEmailResult.classList.remove('hidden');
+                return;
+            }
+            
+            // Disable button and show loading
+            sendTestEmailBtn.disabled = true;
+            sendTestEmailBtn.textContent = '{{ __("messages.sending") }}...';
+            testEmailResult.classList.add('hidden');
+            
+            // Send AJAX request
+            fetch('{{ route("role.test_email", ["subdomain" => $role->subdomain]) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    email: email
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                sendTestEmailBtn.disabled = false;
+                sendTestEmailBtn.textContent = '{{ __("messages.send_test_email") }}';
+                
+                if (data.success) {
+                    testEmailResult.className = 'mt-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-800 dark:text-green-200';
+                    testEmailResult.textContent = data.message || '{{ __("messages.test_email_sent") }}';
+                } else {
+                    testEmailResult.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
+                    testEmailResult.textContent = data.error || '{{ __("messages.failed_to_send_test_email") }}';
+                }
+                testEmailResult.classList.remove('hidden');
+            })
+            .catch(error => {
+                sendTestEmailBtn.disabled = false;
+                sendTestEmailBtn.textContent = '{{ __("messages.send_test_email") }}';
+                testEmailResult.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
+                testEmailResult.textContent = '{{ __("messages.failed_to_send_test_email") }}';
+                testEmailResult.classList.remove('hidden');
+                console.error('Error:', error);
+            });
+        });
     }
 });
 </script>

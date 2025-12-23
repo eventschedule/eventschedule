@@ -140,6 +140,12 @@
                                                     {{ __('messages.view_ticket') }}
                                                 </a>
 
+                                                <button @click="open = false; resendEmail('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}')" 
+                                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150" 
+                                                        role="menuitem">
+                                                    {{ __('messages.send_email') }}
+                                                </button>
+
                                                 @if($sale->status === 'unpaid')
                                                     <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_paid')" 
                                                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150" 
@@ -306,6 +312,12 @@
                                role="menuitem">
                                 {{ __('messages.view_ticket') }}
                             </a>
+
+                            <button @click="open = false; resendEmail('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}')" 
+                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left transition-colors duration-150" 
+                                    role="menuitem">
+                                {{ __('messages.send_email') }}
+                            </button>
 
                             @if($sale->status === 'unpaid')
                                 <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_paid')" 
