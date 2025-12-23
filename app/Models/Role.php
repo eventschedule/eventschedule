@@ -68,6 +68,7 @@ class Role extends Model implements MustVerifyEmail
         'request_terms',
         'request_terms_en',
         'last_notified_request_count',
+        'email_settings',
     ];
 
     /**
@@ -817,5 +818,89 @@ class Role extends Model implements MustVerifyEmail
         return $this->google_webhook_id && 
                $this->google_webhook_expires_at && 
                $this->google_webhook_expires_at->isFuture();
+    }
+
+    /**
+     * Get the email settings attribute (decrypted and decoded)
+     */
+    public function getEmailSettingsAttribute($value)
+    {
+        if (!$value) {
+            return null;
+        }
+
+        try {
+            $decrypted = \Illuminate\Support\Facades\Crypt::decryptString($value);
+            $decoded = json_decode($decrypted, true);
+            return is_array($decoded) ? $decoded : null;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Set the email settings attribute (encrypted and encoded)
+     */
+    public function setEmailSettingsAttribute($value)
+    {
+        if (is_null($value) || (is_array($value) && empty(array_filter($value)))) {
+            $this->attributes['email_settings'] = null;
+            return;
+        }
+
+        if (is_array($value)) {
+            // Remove empty values
+            $value = array_filter($value, function($v) {
+                return $v !== null && $v !== '';
+            });
+
+            if (empty($value)) {
+                $this->attributes['email_settings'] = null;
+                return;
+            }
+
+            $json = json_encode($value);
+            $this->attributes['email_settings'] = \Illuminate\Support\Facades\Crypt::encryptString($json);
+        } else {
+            // If it's already a string, assume it's already encrypted JSON
+            $this->attributes['email_settings'] = $value;
+        }
+    }
+
+    /**
+     * Check if role has email settings configured
+     */
+    public function hasEmailSettings(): bool
+    {
+        $settings = $this->getEmailSettings();
+        return !empty($settings) && !empty($settings['host']) && !empty($settings['username']);
+    }
+
+    /**
+     * Get decrypted email settings as array
+     * Uses raw attribute to avoid infinite recursion
+     */
+    public function getEmailSettings(): array
+    {
+        $rawValue = $this->attributes['email_settings'] ?? null;
+        if (!$rawValue) {
+            return [];
+        }
+
+        try {
+            $decrypted = \Illuminate\Support\Facades\Crypt::decryptString($rawValue);
+            $decoded = json_decode($decrypted, true);
+            return is_array($decoded) ? $decoded : [];
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Set encrypted email settings from array
+     */
+    public function setEmailSettings(array $settings): void
+    {
+        $this->email_settings = $settings;
     }
 }

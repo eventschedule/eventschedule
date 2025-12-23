@@ -16,8 +16,10 @@ use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use App\Utils\InvoiceNinja;
 use App\Rules\NoFakeEmail;
+use App\Services\EmailService;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\JsonResponse;
 
 class TicketController extends Controller
 {
@@ -170,6 +172,9 @@ class TicketController extends Controller
 
         $sale->payment_amount = $total;
         $sale->save();
+        
+        // Send email when sale is created
+        $this->sendTicketPurchaseEmail($sale, $event);
         
         if ($total == 0) {
             $sale->status = 'paid';
@@ -522,5 +527,65 @@ class TicketController extends Controller
         \Artisan::call('app:release-tickets');
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Send ticket purchase email
+     */
+    private function sendTicketPurchaseEmail(Sale $sale, Event $event): void
+    {
+        try {
+            // Load roles if not already loaded
+            if (!$event->relationLoaded('roles')) {
+                $event->load('roles');
+            }
+            
+            // Get the venue role if available, otherwise get the first role
+            $role = $event->venue ?: $event->roles->first();
+            $emailService = new EmailService();
+            $emailService->sendTicketEmail($sale, $role);
+        } catch (\Exception $e) {
+            // Log error but don't fail the sale creation
+            \Log::error('Failed to send ticket purchase email: ' . $e->getMessage(), [
+                'sale_id' => $sale->id,
+                'event_id' => $event->id,
+            ]);
+        }
+    }
+
+    /**
+     * Resend ticket email
+     */
+    public function resendEmail($sale_id): JsonResponse
+    {
+        $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
+        $user = auth()->user();
+        
+        if ($user->id != $sale->event->user_id) {
+            return response()->json(['error' => __('messages.unauthorized')], 403);
+        }
+
+        try {
+            $event = $sale->event;
+            
+            // Load roles if not already loaded
+            if (!$event->relationLoaded('roles')) {
+                $event->load('roles');
+            }
+            
+            // Get the venue role if available, otherwise get the first role
+            $role = $event->venue ?: $event->roles->first();
+            $emailService = new EmailService();
+            
+            $success = $emailService->sendTicketEmail($sale, $role);
+            
+            if ($success) {
+                return response()->json(['success' => true, 'message' => __('messages.email_sent_successfully')]);
+            } else {
+                return response()->json(['error' => __('messages.failed_to_send_email')], 500);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

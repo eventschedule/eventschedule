@@ -25,7 +25,9 @@ use App\Models\EventRole;
 use App\Utils\UrlUtils;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
+use App\Services\EmailService;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 
 class RoleController extends Controller
 {
@@ -1033,6 +1035,22 @@ class RoleController extends Controller
                 'cities' => array_map('strtolower', array_filter(array_map('trim', $request->input('import_cities', []))))
             ];
             $role->import_config = $importConfig;
+        }
+
+        // Handle email settings
+        if ($request->has('email_settings')) {
+            $submittedSettings = $request->input('email_settings', []);
+            $existingSettings = $role->getEmailSettings();
+            
+            // Merge with existing settings to preserve values not being updated
+            $emailSettings = array_merge($existingSettings, $submittedSettings);
+            
+            // If password is empty in submitted data, preserve existing password
+            if (empty($submittedSettings['password']) && !empty($existingSettings['password'])) {
+                $emailSettings['password'] = $existingSettings['password'];
+            }
+            
+            $role->setEmailSettings($emailSettings);
         }
 
         $role->save();
@@ -2106,5 +2124,33 @@ class RoleController extends Controller
         }
         
         return $expiresAt->diffInSeconds(now());
+    }
+
+    /**
+     * Send test email to verify SMTP credentials
+     */
+    public function testEmail(Request $request, $subdomain): JsonResponse
+    {
+        if (!is_hosted_or_admin()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        if (!auth()->user()->isMember($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $emailService = new EmailService();
+
+        try {
+            $emailService->sendTestEmail($role, $request->email);
+            return response()->json(['success' => true, 'message' => __('messages.test_email_sent')]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

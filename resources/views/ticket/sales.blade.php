@@ -122,4 +122,51 @@ function handleAction(saleId, action) {
     });
 }
 
+function resendEmail(saleId) {
+    fetch(`/sales/resend-email/${saleId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            Toastify({
+                text: data.error,
+                duration: 3000,
+                position: 'center',
+                stopOnFocus: true,
+                style: {
+                    background: '#FF0000',
+                }
+            }).showToast();
+        } else {
+            Toastify({
+                text: data.message || '{{ __("messages.email_sent_successfully") }}',
+                duration: 3000,
+                position: 'center',
+                stopOnFocus: true,
+                style: {
+                    background: '#4BB543',
+                }
+            }).showToast();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Toastify({
+            text: '{{ __("messages.failed_to_send_email") }}',
+            duration: 3000,
+            position: 'center',
+            stopOnFocus: true,
+            style: {
+                background: '#FF0000',
+            }
+        }).showToast();
+    });
+}
+
 </script>
