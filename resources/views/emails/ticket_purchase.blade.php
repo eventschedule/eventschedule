@@ -29,9 +29,6 @@
                 <p style="margin: 10px 0;">
                     <strong>{{ $saleTicket->ticket->type ?: __('messages.ticket') }}</strong> 
                     x {{ $saleTicket->quantity }}
-                    @if ($saleTicket->ticket->price > 0)
-                        - {{ number_format($saleTicket->ticket->price * $saleTicket->quantity, 2) }} {{ $event->ticket_currency_code }}
-                    @endif
                 </p>
             @endforeach
         </div>
