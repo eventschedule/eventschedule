@@ -40,10 +40,6 @@
             </a>
         </div>
         
-        <p style="font-size: 14px; color: #666; margin-top: 30px;">
-            {{ __('messages.ticket_email_footer') }}
-        </p>
-        
         @if ($event->ticket_notes_html)
         <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
             <h4 style="margin-top: 0; color: #856404;">{{ __('messages.notes') }}:</h4>
