@@ -650,4 +650,8 @@ return [
     'enter_email_to_test' => 'Voer e-mail in om te testen',
     'test_email_subject' => 'Test E-mail',
     'test_email_body' => 'Dit is een test e-mail om te verifiëren dat je SMTP-instellingen correct zijn geconfigureerd.',
+    'ticket_purchase_confirmation' => 'Ticket Aankoopbevestiging',
+    'ticket_reservation_confirmation' => 'Ticket Reservatiebevestiging',
+    'thank_you_for_purchasing_tickets' => 'Bedankt voor het kopen van tickets!',
+    'thank_you_for_reserving_tickets' => 'Bedankt voor het reserveren van tickets!',
 ];

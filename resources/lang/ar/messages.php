@@ -653,4 +653,8 @@ return [
     'enter_email_to_test' => 'أدخل البريد الإلكتروني للاختبار',
     'test_email_subject' => 'بريد اختباري',
     'test_email_body' => 'هذا بريد اختباري للتحقق من أن إعدادات SMTP الخاصة بك تم تكوينها بشكل صحيح.',
+    'ticket_purchase_confirmation' => 'تأكيد شراء التذاكر',
+    'ticket_reservation_confirmation' => 'تأكيد حجز التذاكر',
+    'thank_you_for_purchasing_tickets' => 'شكرًا لشراء التذاكر!',
+    'thank_you_for_reserving_tickets' => 'شكرًا لحجز التذاكر!',
 ];

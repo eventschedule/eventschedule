@@ -652,4 +652,8 @@ return [
     'enter_email_to_test' => 'Entrez l\'e-mail à tester',
     'test_email_subject' => 'E-mail de Test',
     'test_email_body' => 'Ceci est un e-mail de test pour vérifier que vos paramètres SMTP sont correctement configurés.',
+    'ticket_purchase_confirmation' => 'Confirmation d\'Achat de Billets',
+    'ticket_reservation_confirmation' => 'Confirmation de Réservation de Billets',
+    'thank_you_for_purchasing_tickets' => 'Merci d\'avoir acheté les billets !',
+    'thank_you_for_reserving_tickets' => 'Merci d\'avoir réservé les billets !',
 ];

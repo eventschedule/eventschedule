@@ -645,4 +645,8 @@ return [
     'enter_email_to_test' => 'הזן דוא"ל לבדיקה',
     'test_email_subject' => 'דוא"ל בדיקה',
     'test_email_body' => 'זהו דוא"ל בדיקה כדי לוודא שהגדרות SMTP שלך מוגדרות כראוי.',
+    'ticket_purchase_confirmation' => 'אישור רכישת כרטיסים',
+    'ticket_reservation_confirmation' => 'אישור הזמנת כרטיסים',
+    'thank_you_for_purchasing_tickets' => 'תודה על רכישת הכרטיסים!',
+    'thank_you_for_reserving_tickets' => 'תודה על הזמנת הכרטיסים!',
 ];
