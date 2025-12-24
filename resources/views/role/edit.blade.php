@@ -1344,14 +1344,14 @@
                 <div class="mb-6">
                     <x-input-label for="email_settings_username" :value="__('messages.smtp_username')" />
                     <x-text-input id="email_settings_username" name="email_settings[username]" type="text" class="mt-1 block w-full"
-                        :value="old('email_settings.username', $emailSettings['username'] ?? '')" />
+                        :value="old('email_settings.username', $emailSettings['username'] ?? '')" autocomplete="off" />
                     <x-input-error class="mt-2" :messages="$errors->get('email_settings.username')" />
                 </div>
 
                 <div class="mb-6">
                     <x-input-label for="email_settings_password" :value="__('messages.smtp_password')" />
                     <x-text-input id="email_settings_password" name="email_settings[password]" type="password" class="mt-1 block w-full"
-                        :value="old('email_settings.password', '')" placeholder="{{ __('messages.leave_blank_to_keep_current') }}" />
+                        :value="old('email_settings.password', '')" placeholder="{{ __('messages.leave_blank_to_keep_current') }}" autocomplete="new-password" />
                     <x-input-error class="mt-2" :messages="$errors->get('email_settings.password')" />
                 </div>
 
@@ -1845,6 +1845,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
+            // Collect email settings from form fields
+            const emailSettings = {
+                host: document.getElementById('email_settings_host')?.value.trim() || '',
+                port: document.getElementById('email_settings_port')?.value.trim() || '',
+                encryption: document.getElementById('email_settings_encryption')?.value.trim() || '',
+                username: document.getElementById('email_settings_username')?.value.trim() || '',
+                password: document.getElementById('email_settings_password')?.value.trim() || '',
+                from_address: email,
+                from_name: document.getElementById('email_settings_from_name')?.value.trim() || ''
+            };
+            
+            // Remove empty values
+            Object.keys(emailSettings).forEach(key => {
+                if (emailSettings[key] === '') {
+                    delete emailSettings[key];
+                }
+            });
+            
             // Disable button and show loading
             sendTestEmailBtn.disabled = true;
             sendTestEmailBtn.textContent = '{{ __("messages.sending") }}...';
@@ -1859,7 +1877,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
-                    email: email
+                    email: email,
+                    email_settings: emailSettings
                 })
             })
             .then(response => response.json())
