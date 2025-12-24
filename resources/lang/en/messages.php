@@ -661,4 +661,9 @@ return [
     'enter_email_to_test' => 'Enter email to test',
     'test_email_subject' => 'Test Email',
     'test_email_body' => 'This is a test email to verify your SMTP settings are configured correctly.',
+    'ticket_purchase_confirmation' => 'Ticket Purchase Confirmation',
+    'thank_you_for_purchasing_tickets' => 'Thank you for purchasing tickets!',
+    'time' => 'Time',
+    'view_your_tickets' => 'View Your Tickets',
+    'ticket_details' => 'Ticket Details',
 ];
