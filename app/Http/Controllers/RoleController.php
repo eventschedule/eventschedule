@@ -2157,6 +2157,29 @@ class RoleController extends Controller
             return response()->json(['error' => __('messages.invalid_email_address')], 400);
         }
 
+        // If email_settings are provided in the request (from form), temporarily apply them to the role
+        // This allows testing before saving the form
+        if ($request->has('email_settings')) {
+            $submittedSettings = $request->input('email_settings', []);
+            $existingSettings = $role->getEmailSettings();
+            
+            // Convert port to integer if provided
+            if (isset($submittedSettings['port']) && $submittedSettings['port'] !== '') {
+                $submittedSettings['port'] = (int) $submittedSettings['port'];
+            }
+            
+            // Merge with existing settings to preserve values not being updated
+            $emailSettings = array_merge($existingSettings, $submittedSettings);
+            
+            // If password is empty in submitted data, preserve existing password
+            if (empty($submittedSettings['password']) && !empty($existingSettings['password'])) {
+                $emailSettings['password'] = $existingSettings['password'];
+            }
+            
+            // Temporarily set email settings on the role for testing
+            $role->setEmailSettings($emailSettings);
+        }
+
         $emailService = new EmailService();
 
         try {
