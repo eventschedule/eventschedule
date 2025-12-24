@@ -653,4 +653,7 @@ return [
     'ticket_reservation_confirmation' => 'Ticket Reservatiebevestiging',
     'thank_you_for_purchasing_tickets' => 'Bedankt voor het kopen van tickets!',
     'thank_you_for_reserving_tickets' => 'Bedankt voor het reserveren van tickets!',
+    'time' => 'Tijd',
+    'view_your_tickets' => 'Bekijk Je Tickets',
+    'ticket_details' => 'Ticket Details',
 ];

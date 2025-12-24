@@ -659,4 +659,7 @@ return [
     'ticket_reservation_confirmation' => 'Ticket-Reservierungsbestätigung',
     'thank_you_for_purchasing_tickets' => 'Vielen Dank für den Kauf der Tickets!',
     'thank_you_for_reserving_tickets' => 'Vielen Dank für die Reservierung der Tickets!',
+    'time' => 'Zeit',
+    'view_your_tickets' => 'Ihre Tickets ansehen',
+    'ticket_details' => 'Ticket-Details',
 ];

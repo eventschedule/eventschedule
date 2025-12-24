@@ -656,4 +656,7 @@ return [
     'ticket_reservation_confirmation' => 'تأكيد حجز التذاكر',
     'thank_you_for_purchasing_tickets' => 'شكرًا لشراء التذاكر!',
     'thank_you_for_reserving_tickets' => 'شكرًا لحجز التذاكر!',
+    'time' => 'الوقت',
+    'view_your_tickets' => 'عرض تذاكرك',
+    'ticket_details' => 'تفاصيل التذكرة',
 ];

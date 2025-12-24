@@ -648,4 +648,7 @@ return [
     'ticket_reservation_confirmation' => 'אישור הזמנת כרטיסים',
     'thank_you_for_purchasing_tickets' => 'תודה על רכישת הכרטיסים!',
     'thank_you_for_reserving_tickets' => 'תודה על הזמנת הכרטיסים!',
+    'time' => 'שעה',
+    'view_your_tickets' => 'צפה בכרטיסים שלך',
+    'ticket_details' => 'פרטי הכרטיס',
 ];
