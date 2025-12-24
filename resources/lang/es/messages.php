@@ -655,4 +655,7 @@ return [
     'ticket_reservation_confirmation' => 'Confirmación de Reserva de Entradas',
     'thank_you_for_purchasing_tickets' => '¡Gracias por comprar las entradas!',
     'thank_you_for_reserving_tickets' => '¡Gracias por reservar las entradas!',
+    'time' => 'Hora',
+    'view_your_tickets' => 'Ver Tus Entradas',
+    'ticket_details' => 'Detalles de la Entrada',
 ];
