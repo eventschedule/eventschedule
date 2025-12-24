@@ -33,6 +33,14 @@
             @endforeach
         </div>
         
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+            <h3 style="margin-top: 0; color: #4E81FA; margin-bottom: 15px;">{{ __('messages.ticket_qr_code') ?: 'Your Ticket QR Code' }}</h3>
+            <div style="display: inline-block; padding: 15px; background-color: #f9f9f9; border-radius: 8px;">
+                <img src="{{ $message->embedData($qrCodeData, 'ticket-qr-code.png', 'image/png') }}" alt="Ticket QR Code" style="max-width: 200px; height: auto;" />
+            </div>
+            <p style="margin-top: 15px; font-size: 14px; color: #666;">{{ __('messages.scan_qr_code_to_view_ticket') ?: 'Scan this QR code to view your ticket' }}</p>
+        </div>
+        
         <div style="text-align: center; margin: 30px 0;">
             <a href="{{ $ticketUrl }}" 
                style="display: inline-block; background-color: #4E81FA; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">

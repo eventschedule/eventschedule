@@ -1351,7 +1351,9 @@
                 <div class="mb-6">
                     <x-input-label for="email_settings_password" :value="__('messages.smtp_password')" />
                     <x-text-input id="email_settings_password" name="email_settings[password]" type="password" class="mt-1 block w-full"
-                        :value="old('email_settings.password', '')" placeholder="{{ __('messages.leave_blank_to_keep_current') }}" autocomplete="new-password" />
+                        :value="old('email_settings.password', !empty($emailSettings['password']) ? '••••••••••' : '')" 
+                        placeholder="{{ __('messages.leave_blank_to_keep_current') }}" 
+                        autocomplete="new-password" />
                     <x-input-error class="mt-2" :messages="$errors->get('email_settings.password')" />
                 </div>
 
@@ -1846,12 +1848,18 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Collect email settings from form fields
+            let passwordValue = document.getElementById('email_settings_password')?.value.trim() || '';
+            // If password is all bullets, don't include it (backend will preserve existing)
+            if (passwordValue === '••••••••••') {
+                passwordValue = '';
+            }
+            
             const emailSettings = {
                 host: document.getElementById('email_settings_host')?.value.trim() || '',
                 port: document.getElementById('email_settings_port')?.value.trim() || '',
                 encryption: document.getElementById('email_settings_encryption')?.value.trim() || '',
                 username: document.getElementById('email_settings_username')?.value.trim() || '',
-                password: document.getElementById('email_settings_password')?.value.trim() || '',
+                password: passwordValue,
                 from_address: email,
                 from_name: document.getElementById('email_settings_from_name')?.value.trim() || ''
             };
