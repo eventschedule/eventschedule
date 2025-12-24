@@ -1847,19 +1847,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Collect email settings from form fields
-            let passwordValue = document.getElementById('email_settings_password')?.value.trim() || '';
-            // If password is all bullets, don't include it (backend will preserve existing)
-            if (passwordValue === '••••••••••') {
-                passwordValue = '';
-            }
-            
             const emailSettings = {
                 host: document.getElementById('email_settings_host')?.value.trim() || '',
                 port: document.getElementById('email_settings_port')?.value.trim() || '',
                 encryption: document.getElementById('email_settings_encryption')?.value.trim() || '',
                 username: document.getElementById('email_settings_username')?.value.trim() || '',
-                password: passwordValue,
+                password: document.getElementById('email_settings_password')?.value.trim() || '',
                 from_address: email,
                 from_name: document.getElementById('email_settings_from_name')?.value.trim() || ''
             };
