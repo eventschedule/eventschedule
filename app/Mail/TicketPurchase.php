@@ -13,6 +13,8 @@ use App\Models\Sale;
 use App\Models\Event;
 use App\Models\Role;
 use App\Utils\UrlUtils;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 
 class TicketPurchase extends Mailable
 {
@@ -71,6 +73,15 @@ class TicketPurchase extends Mailable
             'secret' => $this->sale->secret
         ]);
 
+        // Generate QR code
+        $qrCode = QrCode::create($ticketUrl)
+            ->setSize(200)
+            ->setMargin(10);
+
+        $writer = new PngWriter();
+        $result = $writer->write($qrCode);
+        $qrCodeData = $result->getString();
+
         return new Content(
             view: 'emails.ticket_purchase',
             with: [
@@ -78,6 +89,7 @@ class TicketPurchase extends Mailable
                 'event' => $this->event,
                 'role' => $this->role,
                 'ticketUrl' => $ticketUrl,
+                'qrCodeData' => $qrCodeData,
             ]
         );
     }
