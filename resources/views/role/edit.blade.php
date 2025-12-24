@@ -1369,13 +1369,14 @@
                     <x-input-error class="mt-2" :messages="$errors->get('email_settings.from_name')" />
                 </div>
 
+                @if ($role->exists && $role->subdomain)
                 <div class="mb-6">
                     <x-primary-button type="button" id="send-test-email-btn">
                         {{ __('messages.send_test_email') }}
                     </x-primary-button>
                     <div id="test-email-result" class="mt-2 hidden"></div>
-                    </div>
                 </div>
+                @endif
                 @endif
                     
             </div>            
@@ -1817,7 +1818,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const sendTestEmailBtn = document.getElementById('send-test-email-btn');
     const testEmailResult = document.getElementById('test-email-result');
     
-    if (sendTestEmailBtn && testEmailResult) {
+    @if ($role->exists && $role->subdomain)
+    const testEmailUrl = '{{ route("role.test_email", ["subdomain" => $role->subdomain]) }}';
+    @else
+    const testEmailUrl = null;
+    @endif
+    
+    if (sendTestEmailBtn && testEmailResult && testEmailUrl) {
         sendTestEmailBtn.addEventListener('click', function() {
             const fromAddressInput = document.getElementById('email_settings_from_address');
             const email = fromAddressInput ? fromAddressInput.value.trim() : '';
@@ -1844,7 +1851,7 @@ document.addEventListener('DOMContentLoaded', function() {
             testEmailResult.classList.add('hidden');
             
             // Send AJAX request
-            fetch('{{ route("role.test_email", ["subdomain" => $role->subdomain]) }}', {
+            fetch(testEmailUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
