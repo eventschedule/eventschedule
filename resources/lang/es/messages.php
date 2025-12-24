@@ -640,7 +640,6 @@ return [
     'from_address' => 'Dirección del Remitente',
     'from_name' => 'Nombre del Remitente',
     'encryption' => 'Cifrado',
-    'leave_blank_to_keep_current' => 'Dejar en blanco para mantener el valor actual',
     'test_email' => 'Correo de Prueba',
     'send_test_email' => 'Enviar Correo de Prueba',
     'test_email_sent' => 'Correo de prueba enviado con éxito',

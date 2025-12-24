@@ -1352,7 +1352,6 @@
                     <x-input-label for="email_settings_password" :value="__('messages.smtp_password')" />
                     <x-text-input id="email_settings_password" name="email_settings[password]" type="password" class="mt-1 block w-full"
                         :value="old('email_settings.password', !empty($emailSettings['password']) ? '••••••••••' : '')" 
-                        placeholder="{{ __('messages.leave_blank_to_keep_current') }}" 
                         autocomplete="new-password" />
                     <x-input-error class="mt-2" :messages="$errors->get('email_settings.password')" />
                 </div>

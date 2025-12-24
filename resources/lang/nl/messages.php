@@ -638,7 +638,6 @@ return [
     'from_address' => 'Afzenderadres',
     'from_name' => 'Afzendernaam',
     'encryption' => 'Versleuteling',
-    'leave_blank_to_keep_current' => 'Laat leeg om de huidige waarde te behouden',
     'test_email' => 'Test E-mail',
     'send_test_email' => 'Verstuur Test E-mail',
     'test_email_sent' => 'Test e-mail succesvol verzonden',
