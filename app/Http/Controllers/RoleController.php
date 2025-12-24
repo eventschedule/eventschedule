@@ -1002,7 +1002,8 @@ class RoleController extends Controller
         }        
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-        
+        $existingSettings = $role->getEmailSettings();
+
         // Handle sync_direction and calendar changes and webhook management
         $oldSyncDirection = $role->sync_direction;
         $newSyncDirection = $request->input('sync_direction');
@@ -1040,7 +1041,6 @@ class RoleController extends Controller
         // Handle email settings
         if ($request->has('email_settings')) {
             $submittedSettings = $request->input('email_settings', []);
-            $existingSettings = $role->getEmailSettings();
             
             // If password is all bullets, use the old value
             if (isset($submittedSettings['password'])) {
@@ -1055,10 +1055,9 @@ class RoleController extends Controller
                     }
                 }
             }
-            
+
             // Merge with existing settings to preserve values not being updated
             $emailSettings = array_merge($existingSettings, $submittedSettings);
-            
             $role->setEmailSettings($emailSettings);
         }
 
