@@ -51,8 +51,12 @@ class TicketPurchase extends Mailable
             }
         }
 
+        $subjectKey = $this->sale->calculateTotal() == 0 
+            ? 'messages.ticket_reservation_confirmation' 
+            : 'messages.ticket_purchase_confirmation';
+
         return new Envelope(
-            subject: __('messages.ticket_purchase_confirmation') . ' - ' . $this->event->name,
+            subject: __($subjectKey) . ' - ' . $this->event->name,
             from: new Address($fromAddress, $fromName),
         );
     }

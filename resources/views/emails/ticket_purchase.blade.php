@@ -3,17 +3,17 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('messages.ticket_purchase_confirmation') }}</title>
+    <title>{{ $sale->calculateTotal() == 0 ? __('messages.ticket_reservation_confirmation') : __('messages.ticket_purchase_confirmation') }}</title>
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background-color: #4E81FA; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0; font-size: 24px;">{{ __('messages.ticket_purchase_confirmation') }}</h1>
+        <h1 style="margin: 0; font-size: 24px;">{{ $sale->calculateTotal() == 0 ? __('messages.ticket_reservation_confirmation') : __('messages.ticket_purchase_confirmation') }}</h1>
     </div>
     
     <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
         <p style="font-size: 16px; margin-top: 0;">{{ __('messages.hello') }} {{ $sale->name }},</p>
         
-        <p>{{ __('messages.thank_you_for_purchasing_tickets') }}</p>
+        <p>{{ $sale->calculateTotal() == 0 ? __('messages.thank_you_for_reserving_tickets') : __('messages.thank_you_for_purchasing_tickets') }}</p>
         
         <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
             <h2 style="margin-top: 0; color: #4E81FA;">{{ $event->name }}</h2>
