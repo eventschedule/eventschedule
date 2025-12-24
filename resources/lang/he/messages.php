@@ -633,7 +633,6 @@ return [
     'from_address' => 'כתובת השולח',
     'from_name' => 'שם השולח',
     'encryption' => 'הצפנה',
-    'leave_blank_to_keep_current' => 'השאר ריק כדי לשמור על הערך הנוכחי',
     'test_email' => 'דוא"ל בדיקה',
     'send_test_email' => 'שלח דוא"ל בדיקה',
     'test_email_sent' => 'דוא"ל בדיקה נשלח בהצלחה',

@@ -644,7 +644,6 @@ return [
     'from_address' => 'Absenderadresse',
     'from_name' => 'Absendername',
     'encryption' => 'Verschlüsselung',
-    'leave_blank_to_keep_current' => 'Leer lassen, um den aktuellen Wert beizubehalten',
     'test_email' => 'Test-E-Mail',
     'send_test_email' => 'Test-E-Mail senden',
     'test_email_sent' => 'Test-E-Mail erfolgreich gesendet',

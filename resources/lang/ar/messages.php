@@ -641,7 +641,6 @@ return [
     'from_address' => 'عنوان المرسل',
     'from_name' => 'اسم المرسل',
     'encryption' => 'التشفير',
-    'leave_blank_to_keep_current' => 'اتركه فارغاً للاحتفاظ بالقيمة الحالية',
     'test_email' => 'بريد اختباري',
     'send_test_email' => 'إرسال بريد اختباري',
     'test_email_sent' => 'تم إرسال البريد الاختباري بنجاح',

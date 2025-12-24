@@ -640,7 +640,6 @@ return [
     'from_address' => 'Adresse de l\'expéditeur',
     'from_name' => 'Nom de l\'expéditeur',
     'encryption' => 'Chiffrement',
-    'leave_blank_to_keep_current' => 'Laisser vide pour conserver la valeur actuelle',
     'test_email' => 'E-mail de Test',
     'send_test_email' => 'Envoyer un E-mail de Test',
     'test_email_sent' => 'E-mail de test envoyé avec succès',

@@ -649,7 +649,6 @@ return [
     'from_address' => 'From Address',
     'from_name' => 'From Name',
     'encryption' => 'Encryption',
-    'leave_blank_to_keep_current' => 'Leave blank to keep current',
     'test_email' => 'Test Email',
     'send_test_email' => 'Send Test Email',
     'test_email_sent' => 'Test email sent successfully',

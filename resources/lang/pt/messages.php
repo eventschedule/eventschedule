@@ -639,7 +639,6 @@ return [
     'from_address' => 'Endereço do Remetente',
     'from_name' => 'Nome do Remetente',
     'encryption' => 'Criptografia',
-    'leave_blank_to_keep_current' => 'Deixe em branco para manter o valor atual',
     'test_email' => 'E-mail de Teste',
     'send_test_email' => 'Enviar E-mail de Teste',
     'test_email_sent' => 'E-mail de teste enviado com sucesso',

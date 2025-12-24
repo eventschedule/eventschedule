@@ -641,7 +641,6 @@ return [
     'from_address' => 'Indirizzo Mittente',
     'from_name' => 'Nome Mittente',
     'encryption' => 'Crittografia',
-    'leave_blank_to_keep_current' => 'Lascia vuoto per mantenere il valore corrente',
     'test_email' => 'Email di Test',
     'send_test_email' => 'Invia Email di Test',
     'test_email_sent' => 'Email di test inviata con successo',
