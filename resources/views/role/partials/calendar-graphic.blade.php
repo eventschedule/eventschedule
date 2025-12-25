@@ -20,7 +20,7 @@
             @endphp
 
             @foreach($displayEvents as $index => $event)
-                <div class="bg-white rounded-lg shadow-xl overflow-hidden transform hover:scale-[1.02] transition-all duration-300 hover:shadow-2xl">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl dark:shadow-gray-900/50 overflow-hidden transform hover:scale-[1.02] transition-all duration-300 hover:shadow-2xl dark:hover:shadow-gray-900/70">
                     <div class="flex {{ is_rtl() ? 'flex-row' : 'flex-row-reverse' }} min-h-0">
 
                         <!-- Event Image Section -->
@@ -38,7 +38,7 @@
                             <div class="space-y-4">
                                 <!-- Event Name -->
                                 <div class="pt-1">
-                                    <h3 class="text-3xl font-bold text-gray-900 leading-tight truncate" 
+                                    <h3 class="text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate" 
                                         title="{{ $event->translatedName() }}">
                                         {{ $event->translatedName() }}
                                     </h3>
@@ -46,25 +46,25 @@
 
                                 <!-- Venue -->
                                 <div class="pt-1 flex items-center space-x-3 {{ is_rtl() ? 'space-x-reverse' : '' }}">
-                                    <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div class="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                         </svg>
                                     </div>
-                                    <p class="text-lg text-gray-700 font-medium">
+                                    <p class="text-lg text-gray-700 dark:text-gray-300 font-medium">
                                         {{ $event->getVenueDisplayName() }}
                                     </p>
                                 </div>
                                 
                                 <!-- Date & Time -->
                                 <div class="flex items-center space-x-3 {{ is_rtl() ? 'space-x-reverse' : '' }}">
-                                    <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div class="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                         </svg>
                                     </div>
-                                    <p class="text-lg text-gray-700 font-medium">
+                                    <p class="text-lg text-gray-700 dark:text-gray-300 font-medium">
                                         {{ $event->localStartsAt(true) }}
                                     </p>
                                 </div>
@@ -72,7 +72,7 @@
                         </div>
 
                         <!-- QR Code Section -->
-                        <div class="w-42 h-52 flex-shrink-0 p-6 bg-gray-50 flex items-center justify-center">
+                        <div class="w-42 h-52 flex-shrink-0 p-6 bg-gray-50 dark:bg-gray-700 flex items-center justify-center">
                             @php
                                 $qrCode = Endroid\QrCode\QrCode::create($event->getGuestUrl($role->subdomain))
                                     ->setSize(200)
@@ -101,7 +101,7 @@
         @if($role->website || $role->custom_domain)
             <div class="text-center pt-10">
                 <div class="flex items-center justify-center gap-4">
-                    <p class="text-white text-2xl font-bold">
+                    <p class="text-white dark:text-gray-100 text-2xl font-bold">
                         @if ($role->custom_domain)
                             {{ \App\Utils\UrlUtils::clean($role->custom_domain) }}
                         @else
