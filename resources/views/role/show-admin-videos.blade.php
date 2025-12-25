@@ -1,7 +1,7 @@
 <div class="pt-5">
-    <div class="bg-white rounded-lg shadow-sm p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ __('messages.videos') }}</h2>
-        <p class="text-gray-600 mb-6">{{ __('messages.videos_description') }}</p>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.videos') }}</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">{{ __('messages.videos_description') }}</p>
         
         <div id="videos-app">
             <div v-if="loading" class="text-center py-8">
@@ -15,19 +15,19 @@
             </div>
             
             <div v-else-if="talentRoles.length === 0" class="text-center py-8">
-                <div class="text-gray-500">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="text-gray-500 dark:text-gray-400">
+                    <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
-                    <p class="mt-1 text-sm text-gray-500">{{ __('messages.all_talent_roles_have_videos') }}</p>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.all_talent_roles_have_videos') }}</p>
                 </div>
             </div>
             
             <div v-else class="space-y-6">
-                <div v-for="role in talentRoles" :key="role.id" class="bg-gray-50 rounded-lg p-6">
+                <div v-for="role in talentRoles" :key="role.id" class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
                     <div class="mb-4">
-                        <h3 class="text-lg font-medium text-gray-900">@{{ role.name }}</h3>
-                        <p v-if="role.description" class="text-sm text-gray-500 mt-1">@{{ role.description }}</p>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">@{{ role.name }}</h3>
+                        <p v-if="role.description" class="text-sm text-gray-500 dark:text-gray-400 mt-1">@{{ role.description }}</p>
                     </div>
                     
                     <div class="mt-4">
@@ -37,25 +37,25 @@
                         </div>
                         
                         <div v-else-if="role.videos && role.videos.length > 0" class="space-y-3">
-                            <h4 class="text-sm font-medium text-gray-700">{{ __('messages.select_video') }}</h4>
+                            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.select_video') }}</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                 <div v-for="video in role.videos" :key="video.id" 
-                                        class="border rounded-lg p-3 cursor-pointer hover:border-blue-300 transition-colors relative"
-                                        :class="isVideoSelected(role, video) ? 'border-blue-500 bg-blue-50' : 'border-gray-200'"
+                                        class="border rounded-lg p-3 cursor-pointer hover:border-blue-300 dark:hover:border-blue-600 transition-colors relative"
+                                        :class="isVideoSelected(role, video) ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-200 dark:border-gray-600'"
                                         @click="selectVideo(role, video)">
-                                    <div class="aspect-video bg-gray-100 rounded mb-2 flex items-center justify-center relative">
+                                    <div class="aspect-video bg-gray-100 dark:bg-gray-600 rounded mb-2 flex items-center justify-center relative">
                                         <img v-if="video.thumbnail" :src="video.thumbnail" :alt="video.title" class="w-full h-full object-cover rounded">
                                         <svg v-else class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                         </svg>
                                     </div>
                                     
-                                    <h5 class="text-sm font-medium text-gray-900 truncate">@{{ video.title }}</h5>
-                                    <p class="text-xs text-gray-500 mt-1">@{{ video.channelTitle }}</p>
+                                    <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">@{{ video.title }}</h5>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">@{{ video.channelTitle }}</p>
                                     
                                     <!-- Video stats and watch button -->
                                     <div class="flex items-center justify-between mt-2">
-                                        <div class="flex items-center space-x-4 text-xs text-gray-500">
+                                        <div class="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
                                             <div class="flex items-center space-x-2">
                                                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                     <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
@@ -97,11 +97,11 @@
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center space-x-3">
                                         <button @click="skipRole(role)" 
-                                                class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800">
                                             {{ __('messages.skip') }}
                                         </button>
                                         <button @click="saveVideos(role)" 
-                                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800">
                                             {{ __('messages.save_videos') }}
                                         </button>
                                     </div>
@@ -110,25 +110,25 @@
                             
                             <div v-else-if="role.videos && role.videos.length > 0" class="mt-4">
                                 <div class="flex items-center justify-between">
-                                    <div class="text-sm text-gray-600">
+                                    <div class="text-sm text-gray-600 dark:text-gray-400">
                                         {{ __('messages.no_videos_selected') }}
                                     </div>
                                     <button @click="skipRole(role)" 
-                                            class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                            class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800">
                                         {{ __('messages.skip') }}
                                     </button>
                                 </div>
                             </div>
                         </div>
                         
-                        <div v-else-if="role.error" class="text-sm text-red-600">
+                        <div v-else-if="role.error" class="text-sm text-red-600 dark:text-red-400">
                             @{{ role.error }}
                         </div>
                         
-                        <div v-else class="text-sm text-gray-500">
+                        <div v-else class="text-sm text-gray-500 dark:text-gray-400">
                             {{ __('messages.no_videos_found') }}
                             <button @click="skipRole(role)" 
-                                    class="ml-3 inline-flex items-center px-3 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    class="ml-3 inline-flex items-center px-3 py-1 border border-gray-300 dark:border-gray-600 text-xs font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800">
                                 {{ __('messages.skip') }}
                             </button>
                         </div>
