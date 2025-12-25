@@ -3,21 +3,27 @@
         
         <!-- Feedback Form -->
         <div class="mb-6 mt-2 w-full">
-            <form id="feedback-form" class="flex gap-3 items-start w-full">
+            <form id="feedback-form" class="w-full">
                 @csrf
-                <textarea 
-                    id="feedback-textarea"
-                    name="feedback" 
-                    placeholder="{{ __('messages.feedback_placeholder') }}"
-                    class="flex-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                    rows="2"
-                ></textarea>
-                <button 
-                    type="submit"
-                    class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors whitespace-nowrap"
-                >
-                    {{ __('messages.submit') }}
-                </button>
+                <div class="relative w-full">
+                    <textarea 
+                        id="feedback-textarea"
+                        name="feedback" 
+                        placeholder="{{ __('messages.feedback_placeholder') }}"
+                        class="w-full px-4 py-2 pr-12 pb-10 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                        rows="2"
+                    ></textarea>
+                    <button 
+                        type="button"
+                        id="feedback-submit-btn"
+                        class="absolute bottom-2 right-2 p-2 mb-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all opacity-0 pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed"
+                        style="transition: opacity 0.2s ease-in-out;"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                        </svg>
+                    </button>
+                </div>
             </form>
         </div>
         
@@ -112,20 +118,33 @@
         document.addEventListener('DOMContentLoaded', function() {
             const feedbackForm = document.getElementById('feedback-form');
             const feedbackTextarea = document.getElementById('feedback-textarea');
+            const submitButton = document.getElementById('feedback-submit-btn');
             
-            if (feedbackForm) {
-                feedbackForm.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    
+            if (feedbackForm && feedbackTextarea && submitButton) {
+                // Show/hide submit button based on textarea content
+                function toggleSubmitButton() {
+                    const hasText = feedbackTextarea.value.trim().length > 0;
+                    if (hasText) {
+                        submitButton.classList.remove('opacity-0', 'pointer-events-none');
+                        submitButton.classList.add('opacity-100');
+                    } else {
+                        submitButton.classList.add('opacity-0', 'pointer-events-none');
+                        submitButton.classList.remove('opacity-100');
+                    }
+                }
+                
+                // Listen for input changes
+                feedbackTextarea.addEventListener('input', toggleSubmitButton);
+                feedbackTextarea.addEventListener('keyup', toggleSubmitButton);
+                
+                // Handle form submission
+                async function submitFeedback() {
                     const feedback = feedbackTextarea.value.trim();
                     if (!feedback) {
                         return;
                     }
                     
-                    const submitButton = feedbackForm.querySelector('button[type="submit"]');
-                    const originalText = submitButton.textContent;
                     submitButton.disabled = true;
-                    submitButton.textContent = 'Submitting...';
                     
                     try {
                         const formData = new FormData();
@@ -155,6 +174,7 @@
                             }).showToast();
                             
                             feedbackTextarea.value = '';
+                            toggleSubmitButton();
                         } else {
                             Toastify({
                                 text: data.message || '{{ __("messages.feedback_failed") }}',
@@ -178,7 +198,17 @@
                         }).showToast();
                     } finally {
                         submitButton.disabled = false;
-                        submitButton.textContent = originalText;
+                    }
+                }
+                
+                // Handle button click
+                submitButton.addEventListener('click', submitFeedback);
+                
+                // Handle Enter key (Ctrl+Enter or Cmd+Enter to submit)
+                feedbackTextarea.addEventListener('keydown', function(e) {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                        e.preventDefault();
+                        submitFeedback();
                     }
                 });
             }
