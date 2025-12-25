@@ -214,7 +214,7 @@
 </header>
 @endif
 
-    <div class="{{ ($tab == 'availability' || (isset($embed) && $embed) || (isset($force_mobile) && $force_mobile)) ? '' : 'hidden' }} shadow-sm ring-1 ring-black ring-opacity-5 md:flex md:flex-auto md:flex-col {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
+    <div class="{{ ($tab == 'availability' || (isset($embed) && $embed) || (isset($force_mobile) && $force_mobile)) ? '' : 'hidden' }} shadow-sm ring-1 ring-black ring-opacity-5 dark:border dark:border-gray-700 md:flex md:flex-auto md:flex-col {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
         
         @if (request()->graphic)
             @include('role.partials.calendar-graphic')
