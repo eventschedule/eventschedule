@@ -330,6 +330,67 @@
             display: inline-block !important;
         }
 
+        /* EasyMDE Dark Mode Styles */
+        .dark .editor-toolbar {
+            background-color: #1f2937 !important;
+            border-bottom: 1px solid #374151 !important;
+        }
+
+        .dark .editor-toolbar button,
+        .dark .editor-toolbar a,
+        .dark .editor-toolbar .fa,
+        .dark .editor-toolbar i {
+            color: #d1d5db !important;
+        }
+
+        .dark .editor-toolbar button:hover,
+        .dark .editor-toolbar a:hover {
+            background-color: #374151 !important;
+            color: #f9fafb !important;
+        }
+
+        .dark .editor-toolbar button.active,
+        .dark .editor-toolbar a.active {
+            background-color: #4b5563 !important;
+            color: #f9fafb !important;
+        }
+
+        .dark .editor-toolbar .separator {
+            border-left: 1px solid #4b5563 !important;
+        }
+
+        .dark .editor-toolbar button:before,
+        .dark .editor-toolbar a:before {
+            color: #d1d5db !important;
+        }
+
+        .dark .editor-toolbar button:hover:before,
+        .dark .editor-toolbar a:hover:before {
+            color: #f9fafb !important;
+        }
+
+        .dark .CodeMirror .editor-toolbar > * {
+            color: #d1d5db !important;
+        }
+
+        .dark .editor-toolbar > * {
+            color: #d1d5db !important;
+        }
+
+        .dark .editor-toolbar > button > i,
+        .dark .editor-toolbar > a > i {
+            color: #d1d5db !important;
+        }
+
+        .dark .CodeMirror {
+            background-color: #111827 !important;
+            color: #f9fafb !important;
+        }
+
+        .dark .CodeMirror-cursor {
+            border-color: #f9fafb !important;
+        }
+
         .custom-content * {
             all: revert;
         }
@@ -411,10 +472,78 @@
 
     </script>
 
+    <script {!! nonce_attr() !!}>
+        // Theme Management
+        (function() {
+            const THEME_STORAGE_KEY = 'theme';
+            const THEMES = {
+                LIGHT: 'light',
+                DARK: 'dark',
+                SYSTEM: 'system'
+            };
+
+            function getSystemTheme() {
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+
+            function applyTheme(theme) {
+                const html = document.documentElement;
+                const actualTheme = theme === THEMES.SYSTEM ? getSystemTheme() : theme;
+                
+                if (actualTheme === 'dark') {
+                    html.classList.add('dark');
+                } else {
+                    html.classList.remove('dark');
+                }
+            }
+
+            function initTheme() {
+                const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+                const theme = storedTheme || THEMES.SYSTEM;
+                
+                // Apply theme immediately to prevent flash
+                applyTheme(theme);
+                
+                // Watch for system theme changes if in system mode
+                if (theme === THEMES.SYSTEM || !storedTheme) {
+                    watchSystemTheme();
+                }
+            }
+
+            function watchSystemTheme() {
+                const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                mediaQuery.addEventListener('change', function(e) {
+                    const currentTheme = localStorage.getItem(THEME_STORAGE_KEY) || THEMES.SYSTEM;
+                    if (currentTheme === THEMES.SYSTEM) {
+                        applyTheme(THEMES.SYSTEM);
+                    }
+                });
+            }
+
+            function setTheme(theme) {
+                localStorage.setItem(THEME_STORAGE_KEY, theme);
+                applyTheme(theme);
+                
+                if (theme === THEMES.SYSTEM) {
+                    watchSystemTheme();
+                }
+            }
+
+            // Initialize theme on page load
+            initTheme();
+
+            // Expose setTheme globally for theme toggle
+            window.setTheme = setTheme;
+            window.getCurrentTheme = function() {
+                return localStorage.getItem(THEME_STORAGE_KEY) || THEMES.SYSTEM;
+            };
+        })();
+    </script>
+
     {{ isset($head) ? $head : '' }}
 
 </head> 
-<body class="font-sans antialiased h-full bg-gray-50">
+<body class="font-sans antialiased h-full bg-gray-50 dark:bg-gray-900">
 
     {{ $slot }}
 

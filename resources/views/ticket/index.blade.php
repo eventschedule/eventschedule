@@ -7,21 +7,21 @@
                 <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                     <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
                         <div class="overflow-x-auto" style="overflow-x: auto; scrollbar-width: thin;">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead class="bg-gray-50 dark:bg-gray-800">
                                     <tr>
                                         <th scope="col"
-                                            class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                                            class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 sm:pl-6">
                                             {{ __('messages.event') }}
                                         </th>
                                         <th scope="col" 
-                                            class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                                            class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 sm:pl-6">
                                             {{ __('messages.venue') }}
                                         </th>
-                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
                                             {{ __('messages.date') }}
                                         </th>
-                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
                                             {{ __('messages.status') }}
                                         </th>
                                         <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
@@ -29,28 +29,28 @@
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-200 bg-white">
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                                     @foreach ($sales as $sale)
-                                        <tr class="bg-white hover:bg-gray-50 transition-colors duration-150">
-                                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                                        <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:pl-6">
                                                 <a href="{{ $sale->getEventUrl() }}"
                                                     target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">{{ $sale->event->name }}
                                                 </a>
                                             </td>
-                                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:pl-6">
                                                 @if ($sale->event->venue && $sale->event->venue->isClaimed())
                                                     <a href="{{ $sale->event->venue->getGuestUrl() }}"   
-                                                        target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">
+                                                        target="_blank" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline">
                                                         {{ $sale->event->venue->getDisplayName(false) }}
                                                     </a>
                                                 @else
                                                     {{ $sale->event->getVenueDisplayName(false) }}
                                                 @endif
                                             </td>
-                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                                                 {{ $sale->event->localStartsAt(true, $sale->event_date) }}
                                             </td>
-                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                                                 @if($sale->status === 'paid')
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -86,7 +86,7 @@
                                                 @endif
                                             </td>
                                             <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                                <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" target="_blank" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors duration-150">
+                                                <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" target="_blank" class="inline-flex items-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                                                     {{ __('messages.view_ticket') }}                                        
                                                 </a>
                                             </td>
@@ -102,13 +102,13 @@
             <!-- Mobile List View -->
             <div class="md:hidden space-y-4">
                 @foreach ($sales as $sale)
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow duration-200">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow duration-200">
                         <div class="space-y-4">
                             <!-- Header with Status -->
                             <div class="flex items-start justify-between">
                                 <div class="flex-1">
-                                    <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ $sale->event->name }}</h3>
-                                    <a href="{{ $sale->getEventUrl() }}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm">{{ __('messages.view_event') }}</a>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">{{ $sale->event->name }}</h3>
+                                    <a href="{{ $sale->getEventUrl() }}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm">{{ __('messages.view_event') }}</a>
                                 </div>
                                 <div class="ml-4">
                                     @if($sale->status === 'paid')
@@ -148,21 +148,21 @@
                             </div>
 
                             <!-- Event Info -->
-                            <div class="bg-gray-50 rounded-lg p-3">
-                                <div class="text-sm font-medium text-gray-700 mb-1">{{ __('messages.venue') }}</div>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                                <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.venue') }}</div>
                                 @if ($sale->event->venue && $sale->event->venue->isClaimed())
-                                    <a href="{{ $sale->event->venue->getGuestUrl() }}" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium">
+                                    <a href="{{ $sale->event->venue->getGuestUrl() }}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">
                                         {{ $sale->event->venue->getDisplayName(false) }}
                                     </a>
                                 @else
-                                    <span class="text-gray-900">{{ $sale->event->getVenueDisplayName(false) }}</span>
+                                    <span class="text-gray-900 dark:text-gray-100">{{ $sale->event->getVenueDisplayName(false) }}</span>
                                 @endif
                             </div>
 
                             <!-- Date Info -->
-                            <div class="bg-gray-50 rounded-lg p-3">
-                                <div class="text-sm font-medium text-gray-700 mb-1">{{ __('messages.date') }}</div>
-                                <div class="text-gray-900">{{ $sale->event->localStartsAt(true, $sale->event_date) }}</div>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                                <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.date') }}</div>
+                                <div class="text-gray-900 dark:text-gray-100">{{ $sale->event->localStartsAt(true, $sale->event_date) }}</div>
                             </div>
 
                             <!-- Actions -->
@@ -186,8 +186,8 @@
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                 </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">{{ __('messages.no_tickets') }}</h3>
-                <p class="mt-1 text-sm text-gray-500">{{ __('messages.no_tickets_description') }}</p>
+                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.no_tickets') }}</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_tickets_description') }}</p>
             </div>
         @endif
     </div>

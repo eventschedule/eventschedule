@@ -127,12 +127,12 @@
                 </div>
             @endif
             <div class="min-w-0 flex-1">
-                <h2 class="mt-2 text-xl font-bold leading-7 text-gray-900 sm:truncate sm:text-2xl sm:tracking-tight">
+                <h2 class="mt-2 text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
                     {{ $role->name }}</h2>
 
                 <div class="mt-1 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6">
                     @if($role->email)
-                    <div class="mt-2 flex items-center text-sm text-gray-500">
+                    <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
                         <svg class="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400" viewBox="0 0 24 24" fill="currentColor"
                             aria-hidden="true">
                             <path
@@ -147,8 +147,8 @@
                     @endif
 
                     @if($role->phone)
-                    <div class="mt-2 flex items-center text-sm text-gray-500">
-                        <svg class="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400" viewBox="0 0 24 24" fill="currentColor"
+                    <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                        <svg class="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="currentColor"
                             aria-hidden="true">
                             <path
                                 d="M6.62,10.79C8.06,13.62 10.38,15.94 13.21,17.38L15.41,15.18C15.69,14.9 16.08,14.82 16.43,14.93C17.55,15.3 18.75,15.5 20,15.5A1,1 0 0,1 21,16.5V20A1,1 0 0,1 20,21A17,17 0 0,1 3,4A1,1 0 0,1 4,3H7.5A1,1 0 0,1 8.5,4C8.5,5.25 8.7,6.45 9.07,7.57C9.18,7.92 9.1,8.31 8.82,8.59L6.62,10.79Z" />
@@ -162,8 +162,8 @@
                     @endif
 
                     @if($role->website)
-                    <div class="mt-2 flex items-center text-sm text-gray-500">
-                        <svg class="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400" viewBox="0 0 24 24" fill="currentColor"
+                    <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                        <svg class="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="currentColor"
                             aria-hidden="true">
                             <path
                                 d="M10.59,13.41C11,13.8 11,14.44 10.59,14.83C10.2,15.22 9.56,15.22 9.17,14.83C7.22,12.88 7.22,9.71 9.17,7.76V7.76L12.71,4.22C14.66,2.27 17.83,2.27 19.78,4.22C21.73,6.17 21.73,9.34 19.78,11.29L18.29,12.78C18.3,11.96 18.17,11.14 17.89,10.36L18.36,9.88C19.54,8.71 19.54,6.81 18.36,5.64C17.19,4.46 15.29,4.46 14.12,5.64L10.59,9.17C9.41,10.34 9.41,12.24 10.59,13.41M13.41,9.17C13.8,8.78 14.44,8.78 14.83,9.17C16.78,11.12 16.78,14.29 14.83,16.24V16.24L11.29,19.78C9.34,21.73 6.17,21.73 4.22,19.78C2.27,17.83 2.27,14.66 4.22,12.71L5.71,11.22C5.7,12.04 5.83,12.86 6.11,13.65L5.64,14.12C4.46,15.29 4.46,17.19 5.64,18.36C6.81,19.54 8.71,19.54 9.88,18.36L13.41,14.83C14.59,13.66 14.59,11.76 13.41,10.59C13,10.2 13,9.56 13.41,9.17Z" />
@@ -184,8 +184,8 @@
                 <span class="block">
                     <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}">
                         <button type="button"
-                            class="w-full sm:w-auto inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                            <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor"
+                            class="w-full sm:w-auto inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="currentColor"
                                 aria-hidden="true">
                                 <path
                                     d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
@@ -198,9 +198,9 @@
                     <a href="{{ route('role.view_guest', (now()->year == $year && now()->month == $month) ? ['subdomain' => $role->subdomain] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'month' => $month] : ['subdomain' => $role->subdomain, 'year' => $year, 'month' => $month])) }}"
                         target="_blank">
                         <button type="button" {{ ! $role->email_verified_at ? 'disabled' : '' }}
-                            class="w-full sm:w-auto inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm 
-                             ring-1 ring-inset ring-gray-300 hover:bg-gray-50 {{ ! $role->email_verified_at ? 'disabled:cursor-not-allowed' : '' }}">
-                            <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor"
+                            class="w-full sm:w-auto inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm 
+                             ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 {{ ! $role->email_verified_at ? 'disabled:cursor-not-allowed' : '' }}">
+                            <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="currentColor"
                                 aria-hidden="true">
                                 <path
                                     d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
@@ -214,18 +214,18 @@
             {{-- Actions dropdown (always visible) --}}
             <div class="mt-2 md:ml-3">
                 <div class="relative inline-block text-left w-full">
-                    <button type="button" onclick="onPopUpClick('role-actions-pop-up-menu', event)" class="inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="role-actions-menu-button" aria-expanded="true" aria-haspopup="true">
+                    <button type="button" onclick="onPopUpClick('role-actions-pop-up-menu', event)" class="inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700" id="role-actions-menu-button" aria-expanded="true" aria-haspopup="true">
                         {{ __('messages.actions') }}
-                        <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <svg class="-mr-1 h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                         </svg>
                     </button>
-                    <div id="role-actions-pop-up-menu" class="pop-up-menu hidden absolute right-0 z-10 mt-2 w-64 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="role-actions-menu-button" tabindex="-1">
+                    <div id="role-actions-pop-up-menu" class="pop-up-menu hidden absolute right-0 z-10 mt-2 w-64 origin-top-right divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="role-actions-menu-button" tabindex="-1">
                         <div class="py-1" role="none" onclick="onPopUpClick('role-actions-pop-up-menu', event)">
                             {{-- Show edit/view options only when desktop buttons are hidden (mobile) --}}
                             <div class="md:hidden">
-                                <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
-                                    <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300" role="menuitem" tabindex="-1">
+                                    <svg class="mr-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                         <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
                                     </svg>
                                     <div>
