@@ -158,8 +158,10 @@
                         type="button"
                         onclick="setTheme('light'); updateThemeButtons();"
                         id="theme-light"
-                        class="flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
-                        aria-label="Light theme">
+                        data-theme="light"
+                        class="theme-btn flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+                        aria-label="Light theme"
+                        aria-pressed="false">
                         <svg class="h-4 w-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
@@ -168,8 +170,10 @@
                         type="button"
                         onclick="setTheme('dark'); updateThemeButtons();"
                         id="theme-dark"
-                        class="flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
-                        aria-label="Dark theme">
+                        data-theme="dark"
+                        class="theme-btn flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+                        aria-label="Dark theme"
+                        aria-pressed="false">
                         <svg class="h-4 w-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                         </svg>
@@ -178,8 +182,10 @@
                         type="button"
                         onclick="setTheme('system'); updateThemeButtons();"
                         id="theme-system"
-                        class="flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
-                        aria-label="System theme">
+                        data-theme="system"
+                        class="theme-btn flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+                        aria-label="System theme"
+                        aria-pressed="false">
                         <svg class="h-4 w-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
@@ -190,30 +196,71 @@
     </ul>
 </nav>
 
+<style {!! nonce_attr() !!}>
+    .theme-btn.active {
+        background-color: #ffffff !important;
+        color: #111827 !important;
+    }
+    .theme-btn:not(.active) {
+        background-color: transparent !important;
+        color: #9ca3af !important;
+    }
+</style>
+
 <script {!! nonce_attr() !!}>
     function updateThemeButtons() {
-        const theme = window.getCurrentTheme ? window.getCurrentTheme() : 'system';
-        const buttons = {
-            'light': document.getElementById('theme-light'),
-            'dark': document.getElementById('theme-dark'),
-            'system': document.getElementById('theme-system')
-        };
+        // Get current theme - use localStorage directly as fallback
+        let theme = 'system';
+        if (window.getCurrentTheme) {
+            theme = window.getCurrentTheme();
+        } else if (typeof Storage !== 'undefined') {
+            theme = localStorage.getItem('theme') || 'system';
+        }
         
-        Object.keys(buttons).forEach(key => {
-            if (buttons[key]) {
-                if (key === theme) {
-                    buttons[key].classList.add('bg-gray-700', 'text-white');
-                    buttons[key].classList.remove('text-gray-400');
-                } else {
-                    buttons[key].classList.remove('bg-gray-700', 'text-white');
-                    buttons[key].classList.add('text-gray-400');
-                }
+        // Get all theme buttons
+        const buttons = document.querySelectorAll('.theme-btn');
+        
+        buttons.forEach(button => {
+            const buttonTheme = button.getAttribute('data-theme');
+            if (buttonTheme === theme) {
+                button.classList.add('active');
+                button.setAttribute('aria-pressed', 'true');
+            } else {
+                button.classList.remove('active');
+                button.setAttribute('aria-pressed', 'false');
             }
         });
     }
     
-    // Update buttons on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        updateThemeButtons();
+    // Make function globally available
+    window.updateThemeButtons = updateThemeButtons;
+    
+    // Update buttons on page load - try multiple times to ensure it runs
+    function initThemeButtons() {
+        const tryUpdate = function() {
+            const buttons = document.querySelectorAll('.theme-btn');
+            if (buttons.length === 3) {
+                updateThemeButtons();
+            } else {
+                setTimeout(tryUpdate, 1);
+            }
+        };
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(tryUpdate, 1);
+            });
+        } else {
+            setTimeout(tryUpdate, 1);
+        }
+    }
+    
+    initThemeButtons();
+    
+    // Listen for storage changes (when theme changes in another tab/window)
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'theme') {
+            updateThemeButtons();
+        }
     });
 </script>

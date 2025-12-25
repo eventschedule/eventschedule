@@ -550,7 +550,7 @@
                 });
             }
 
-            function setTheme(theme) {
+            function setThemeInternal(theme) {
                 localStorage.setItem(THEME_STORAGE_KEY, theme);
                 applyTheme(theme);
                 
@@ -563,10 +563,26 @@
             initTheme();
 
             // Expose setTheme globally for theme toggle
-            window.setTheme = setTheme;
+            window.setTheme = function(theme) {
+                setThemeInternal(theme);
+                // Update buttons after a short delay to ensure DOM is ready
+                setTimeout(function() {
+                    if (typeof window.updateThemeButtons === 'function') {
+                        window.updateThemeButtons();
+                    }
+                }, 10);
+            };
             window.getCurrentTheme = function() {
                 return localStorage.getItem(THEME_STORAGE_KEY) || THEMES.SYSTEM;
             };
+            
+            // Update buttons after theme system is initialized
+            // Use a longer delay to ensure navigation script has loaded
+            setTimeout(function() {
+                if (typeof window.updateThemeButtons === 'function') {
+                    window.updateThemeButtons();
+                }
+            }, 300);
         })();
     </script>
 
