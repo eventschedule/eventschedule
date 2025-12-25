@@ -75,7 +75,7 @@
         </script>
 
         <style>
-            button {
+            form button {
                 min-width: 100px;
             }
             button:disabled {
