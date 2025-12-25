@@ -330,65 +330,88 @@
             display: inline-block !important;
         }
 
-        /* EasyMDE Dark Mode Styles */
+        /* EasyMDE Dark Mode Styles - Using custom Tailwind colors */
         .dark .editor-toolbar {
-            background-color: #1f2937 !important;
-            border-bottom: 1px solid #374151 !important;
+            background-color: #252526 !important; /* gray-800 */
+            border-bottom: 1px solid #2d2d30 !important; /* gray-700 */
         }
 
         .dark .editor-toolbar button,
         .dark .editor-toolbar a,
         .dark .editor-toolbar .fa,
         .dark .editor-toolbar i {
-            color: #d1d5db !important;
+            color: #d1d5db !important; /* gray-300 */
         }
 
         .dark .editor-toolbar button:hover,
         .dark .editor-toolbar a:hover {
-            background-color: #374151 !important;
-            color: #f9fafb !important;
+            background-color: #2d2d30 !important; /* gray-700 */
+            color: #f9fafb !important; /* gray-50 */
         }
 
         .dark .editor-toolbar button.active,
         .dark .editor-toolbar a.active {
-            background-color: #4b5563 !important;
-            color: #f9fafb !important;
+            background-color: #3e3e42 !important; /* gray-600 */
+            color: #f9fafb !important; /* gray-50 */
         }
 
         .dark .editor-toolbar .separator {
-            border-left: 1px solid #4b5563 !important;
+            border-left: 1px solid #3e3e42 !important; /* gray-600 */
         }
 
         .dark .editor-toolbar button:before,
         .dark .editor-toolbar a:before {
-            color: #d1d5db !important;
+            color: #d1d5db !important; /* gray-300 */
         }
 
         .dark .editor-toolbar button:hover:before,
         .dark .editor-toolbar a:hover:before {
-            color: #f9fafb !important;
+            color: #f9fafb !important; /* gray-50 */
         }
 
         .dark .CodeMirror .editor-toolbar > * {
-            color: #d1d5db !important;
+            color: #d1d5db !important; /* gray-300 */
         }
 
         .dark .editor-toolbar > * {
-            color: #d1d5db !important;
+            color: #d1d5db !important; /* gray-300 */
         }
 
         .dark .editor-toolbar > button > i,
         .dark .editor-toolbar > a > i {
-            color: #d1d5db !important;
+            color: #d1d5db !important; /* gray-300 */
         }
 
         .dark .CodeMirror {
-            background-color: #111827 !important;
-            color: #f9fafb !important;
+            background-color: #1e1e1e !important; /* gray-900 */
+            color: #f9fafb !important; /* gray-50 */
         }
 
         .dark .CodeMirror-cursor {
-            border-color: #f9fafb !important;
+            border-color: #f9fafb !important; /* gray-50 */
+        }
+
+        .dark .CodeMirror-selected {
+            background-color: #3e3e42 !important; /* gray-600 */
+        }
+
+        .dark .CodeMirror-line::selection,
+        .dark .CodeMirror-line > span::selection,
+        .dark .CodeMirror-line > span > span::selection {
+            background-color: #3e3e42 !important; /* gray-600 */
+        }
+
+        .dark .CodeMirror-gutters {
+            background-color: #252526 !important; /* gray-800 */
+            border-right: 1px solid #2d2d30 !important; /* gray-700 */
+        }
+
+        .dark .CodeMirror-linenumber {
+            color: #6b7280 !important; /* gray-500 */
+        }
+
+        .dark .CodeMirror-focused .CodeMirror-selected {
+            background-color: #3e3e42 !important; /* gray-600 */
         }
 
         .custom-content * {
