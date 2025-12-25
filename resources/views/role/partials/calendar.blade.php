@@ -275,8 +275,8 @@
                                 :class="event.can_edit ? '{{ (isset($role) && $role->isRtl()) ? 'hover:pl-8' : 'hover:pr-8' }}' : ''"
                                 v-show="isEventVisible(event)">
                                 <a :href="getEventUrl(event, '{{ $currentDate->format('Y-m-d') }}')"
-                                    class="flex has-tooltip" 
-                                    :data-tooltip="getEventTooltip(event)"
+                                    class="flex event-link-popup" 
+                                    :data-event-id="event.id"
                                     @click.stop {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
                                     <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900 {{ (isset($role) && $role->isRtl()) ? 'rtl' : '' }} truncate">
                                         <span :class="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'" 
@@ -379,7 +379,30 @@
 
     </div>
 
-<div id="tooltip" class="tooltip"></div>
+<!-- Event Popup Component -->
+<div id="event-popup" class="event-popup">
+    <div class="event-popup-content">
+        <img id="event-popup-image" class="event-popup-image" style="display: none;" />
+        <div class="event-popup-body">
+            <h3 id="event-popup-title" class="event-popup-title"></h3>
+            <div class="event-popup-details">
+                <div id="event-popup-venue" class="event-popup-detail" style="display: none;">
+                    <svg class="event-popup-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
+                    </svg>
+                    <span id="event-popup-venue-text"></span>
+                </div>
+                <div id="event-popup-time" class="event-popup-detail" style="display: none;">
+                    <svg class="event-popup-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" clip-rule="evenodd" />
+                    </svg>
+                    <span id="event-popup-time-text"></span>
+                </div>
+            </div>
+            <p id="event-popup-description" class="event-popup-description" style="display: none;"></p>
+        </div>
+    </div>
+</div>
 
 <script src="{{ asset('js/vue.global.prod.js') }}"></script>
 <script {!! nonce_attr() !!}>
@@ -401,7 +424,8 @@ const calendarApp = createApp({
             route: '{{ $route }}',
             embed: {{ isset($embed) && $embed ? 'true' : 'false' }},
             isRtl: {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'true' : 'false' }},
-            userTimezone: '{{ auth()->check() && auth()->user()->timezone ? auth()->user()->timezone : null }}'
+            userTimezone: '{{ auth()->check() && auth()->user()->timezone ? auth()->user()->timezone : null }}',
+            popupTimeout: null
         }
     },
     computed: {
@@ -626,15 +650,15 @@ const calendarApp = createApp({
             
             return url;
         },
-        getEventTooltip(event) {
+        getEventPopupData(event) {
             const time = this.getEventTime(event);
-            let tooltip = `<b>${event.name}</b><br/>`;
-            if (event.venue_name) {
-                tooltip += `${event.venue_name} • ${time}`;
-            } else {
-                tooltip += time;
-            }
-            return tooltip;
+            return {
+                name: event.name || '',
+                venue_name: event.venue_name || '',
+                time: time || '',
+                image_url: event.image_url || '',
+                description: '' // Description not currently in event data
+            };
         },
         getEventDisplayName(event) {
             if (this.subdomain && this.isRoleAMember(event)) {
@@ -697,27 +721,173 @@ const calendarApp = createApp({
                 default: return 'th';
             }
         },
-        initTooltips() {
-            // Reinitialize tooltips after Vue updates
+        initPopups() {
+            // Initialize popup event listeners after Vue updates
             this.$nextTick(() => {
-                const tooltipElements = document.querySelectorAll('.has-tooltip');
-                tooltipElements.forEach(el => {
-                    el.addEventListener('mouseenter', this.showTooltip);
-                    el.addEventListener('mouseleave', this.hideTooltip);
+                const eventLinks = document.querySelectorAll('.event-link-popup');
+                eventLinks.forEach(el => {
+                    el.addEventListener('mouseenter', (e) => {
+                        const eventId = el.getAttribute('data-event-id');
+                        const event = this.allEvents.find(ev => ev.id === eventId);
+                        if (event) {
+                            this.showEventPopup(event, el, e);
+                        }
+                    });
+                    el.addEventListener('mouseleave', () => {
+                        this.hideEventPopup();
+                    });
+                    el.addEventListener('mousemove', (e) => {
+                        if (this.popupTimeout) {
+                            clearTimeout(this.popupTimeout);
+                        }
+                        this.popupTimeout = setTimeout(() => {
+                            this.updatePopupPosition(e);
+                        }, 10);
+                    });
                 });
             });
         },
-        showTooltip(e) {
-            const tooltip = document.getElementById('tooltip');
-            const tooltipText = e.currentTarget.dataset.tooltip;
-            tooltip.innerHTML = tooltipText;
-            tooltip.style.display = 'block';
-            tooltip.style.left = e.pageX + 10 + 'px';
-            tooltip.style.top = e.pageY + 10 + 'px';
+        showEventPopup(event, element, e) {
+            // Clear any existing timeout
+            if (this.popupTimeout) {
+                clearTimeout(this.popupTimeout);
+            }
+
+            // Get popup data
+            const popupData = this.getEventPopupData(event);
+
+            // Update popup content
+            const popup = document.getElementById('event-popup');
+            if (!popup) return;
+
+            const titleEl = document.getElementById('event-popup-title');
+            const imageEl = document.getElementById('event-popup-image');
+            const venueEl = document.getElementById('event-popup-venue');
+            const venueTextEl = document.getElementById('event-popup-venue-text');
+            const timeEl = document.getElementById('event-popup-time');
+            const timeTextEl = document.getElementById('event-popup-time-text');
+            const descriptionEl = document.getElementById('event-popup-description');
+
+            if (titleEl) titleEl.textContent = popupData.name || '';
+
+            if (imageEl) {
+                if (popupData.image_url) {
+                    imageEl.src = popupData.image_url;
+                    imageEl.style.display = 'block';
+                } else {
+                    imageEl.style.display = 'none';
+                }
+            }
+
+            if (venueEl && venueTextEl) {
+                if (popupData.venue_name) {
+                    venueTextEl.textContent = popupData.venue_name;
+                    venueEl.style.display = 'flex';
+                } else {
+                    venueEl.style.display = 'none';
+                }
+            }
+
+            if (timeEl && timeTextEl) {
+                if (popupData.time) {
+                    timeTextEl.textContent = popupData.time;
+                    timeEl.style.display = 'flex';
+                } else {
+                    timeEl.style.display = 'none';
+                }
+            }
+
+            if (descriptionEl) {
+                if (popupData.description) {
+                    descriptionEl.textContent = popupData.description;
+                    descriptionEl.style.display = 'block';
+                } else {
+                    descriptionEl.style.display = 'none';
+                }
+            }
+
+            // Show popup
+            popup.classList.add('show');
+            this.updatePopupPosition(e, element);
         },
-        hideTooltip() {
-            const tooltip = document.getElementById('tooltip');
-            tooltip.style.display = 'none';
+        hideEventPopup() {
+            if (this.popupTimeout) {
+                clearTimeout(this.popupTimeout);
+            }
+            const popup = document.getElementById('event-popup');
+            if (popup) {
+                popup.classList.remove('show');
+            }
+        },
+        updatePopupPosition(e, element = null) {
+            const popup = document.getElementById('event-popup');
+            if (!popup || !popup.classList.contains('show')) return;
+
+            const popupContent = popup.querySelector('.event-popup-content');
+            if (!popupContent) return;
+
+            const popupWidth = popupContent.offsetWidth || 320;
+            const popupHeight = popupContent.offsetHeight || 200;
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
+            const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+
+            let left, top;
+            const offset = 15;
+
+            // Use mouse position if available, otherwise use element position
+            if (e) {
+                left = e.pageX + offset;
+                top = e.pageY + offset;
+            } else if (element) {
+                const rect = element.getBoundingClientRect();
+                left = rect.left + scrollX + rect.width / 2;
+                top = rect.top + scrollY + rect.height + offset;
+            } else {
+                return;
+            }
+
+            // Adjust horizontal position if popup would go off-screen
+            if (left + popupWidth > viewportWidth + scrollX) {
+                if (e) {
+                    left = e.pageX - popupWidth - offset;
+                } else if (element) {
+                    const rect = element.getBoundingClientRect();
+                    left = rect.left + scrollX - popupWidth - offset;
+                }
+                // If still off-screen, align to right edge
+                if (left < scrollX) {
+                    left = viewportWidth + scrollX - popupWidth - 10;
+                }
+            }
+
+            // Adjust vertical position if popup would go off-screen
+            if (top + popupHeight > viewportHeight + scrollY) {
+                if (e) {
+                    top = e.pageY - popupHeight - offset;
+                } else if (element) {
+                    const rect = element.getBoundingClientRect();
+                    top = rect.top + scrollY - popupHeight - offset;
+                }
+                // If still off-screen, align to bottom edge
+                if (top < scrollY) {
+                    top = viewportHeight + scrollY - popupHeight - 10;
+                }
+            }
+
+            // Ensure popup doesn't go off left edge
+            if (left < scrollX) {
+                left = scrollX + 10;
+            }
+
+            // Ensure popup doesn't go off top edge
+            if (top < scrollY) {
+                top = scrollY + 10;
+            }
+
+            popup.style.left = left + 'px';
+            popup.style.top = top + 'px';
         },
         updateUrlWithGroup(newGroupSlug) {
             if (!newGroupSlug) {
@@ -751,8 +921,13 @@ const calendarApp = createApp({
         }
     },
     mounted() {
-        // Initialize tooltip functionality
-        this.initTooltips();
+        // Initialize popup functionality
+        this.initPopups();
+        
+        // Reinitialize popups when events change
+        this.$watch('filteredEvents', () => {
+            this.initPopups();
+        });
         
         // Handle past events button
         this.$nextTick(() => {

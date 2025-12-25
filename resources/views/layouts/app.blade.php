@@ -146,6 +146,108 @@
             z-index: 9999;
         }
 
+        /* Event Popup with Glassmorphism */
+        .event-popup {
+            position: fixed;
+            display: none;
+            z-index: 10000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .event-popup.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .event-popup-content {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            max-width: 320px;
+            min-width: 280px;
+            pointer-events: auto;
+        }
+
+        .dark .event-popup-content {
+            background: linear-gradient(135deg, rgba(31, 41, 55, 0.95) 0%, rgba(17, 24, 39, 0.9) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .event-popup-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .event-popup-body {
+            padding: 16px;
+        }
+
+        .event-popup-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            margin: 0 0 12px 0;
+            line-height: 1.4;
+        }
+
+        .dark .event-popup-title {
+            color: #f9fafb;
+        }
+
+        .event-popup-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .event-popup-detail {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .dark .event-popup-detail {
+            color: #d1d5db;
+        }
+
+        .event-popup-icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            color: #9ca3af;
+        }
+
+        .dark .event-popup-icon {
+            color: #6b7280;
+        }
+
+        .event-popup-description {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.5;
+            margin: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .dark .event-popup-description {
+            color: #d1d5db;
+        }
+
         /* EasyMDE Toolbar Fixes */
         .editor-toolbar {
             background-color: #f8f9fa !important; /* Temporarily change to light gray for debugging */
