@@ -99,7 +99,7 @@
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 
         {{-- Month and Year Title: Always visible and positioned first. --}}
-        <h1 class="text-lg font-semibold leading-6 flex-shrink-0 hidden md:block text-gray-900 dark:text-gray-100">
+        <h1 class="text-2xl font-semibold leading-6 flex-shrink-0 hidden md:block text-gray-900 dark:text-gray-100">
             <time datetime="{{ sprintf('%04d-%02d', $year, $month) }}">{{ Carbon\Carbon::create($year, $month, 1)->format('F Y') }}</time>
         </h1>
 
@@ -110,7 +110,7 @@
             <div class="flex flex-row gap-2 w-full md:w-auto">
                 {{-- Schedule Select --}}
                 @if(isset($role) && $role->groups && $role->groups->count() > 1)
-                    <select v-model="selectedGroup" class="border-gray-300 dark:border-gray-600 rounded-md shadow-sm h-9 text-sm flex-1 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
+                    <select v-model="selectedGroup" class="border-gray-300 dark:border-gray-600 rounded-md shadow-sm h-11 text-base flex-1 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
                         <option value="">{{ __('messages.all_schedules') }}</option>
                         @foreach($role->groups as $group)
                             <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
@@ -120,7 +120,7 @@
 
                 {{-- Category Select --}}
                 @if(count($uniqueCategoryIds ?? []) > 1)
-                    <select v-model="selectedCategory" class="border-gray-300 dark:border-gray-600 rounded-md shadow-sm h-9 text-sm flex-1 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
+                    <select v-model="selectedCategory" class="border-gray-300 dark:border-gray-600 rounded-md shadow-sm h-11 text-base flex-1 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
                         <option value="">{{ __('messages.all_categories') }}</option>
                         <option v-for="category in availableCategories" :key="category.id" :value="category.id" v-text="category.name"></option>
                     </select>
@@ -130,8 +130,8 @@
                         {{-- Save Button --}}
             @if ($route == 'admin' && $role->email_verified_at)
                 @if ($tab == 'availability')
-                    <button type="button" id="saveButton" disabled class="w-full md:w-auto inline-flex items-center justify-center rounded-md shadow-sm bg-[#4E81FA] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#3A6BE0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50">
-                        <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <button type="button" id="saveButton" disabled class="w-full md:w-auto inline-flex items-center justify-center rounded-md shadow-sm bg-[#4E81FA] px-4 py-3 text-base font-semibold text-white shadow-sm hover:bg-[#3A6BE0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA] disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50">
+                        <svg class="-ml-0.5 mr-1.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M6.5 20Q4.22 20 2.61 18.43 1 16.85 1 14.58 1 12.63 2.17 11.1 3.35 9.57 5.25 9.15 5.88 6.85 7.75 5.43 9.63 4 12 4 14.93 4 16.96 6.04 19 8.07 19 11 20.73 11.2 21.86 12.5 23 13.78 23 15.5 23 17.38 21.69 18.69 20.38 20 18.5 20H13Q12.18 20 11.59 19.41 11 18.83 11 18V12.85L9.4 14.4L8 13L12 9L16 13L14.6 14.4L13 12.85V18H18.5Q19.55 18 20.27 17.27 21 16.55 21 15.5 21 14.45 20.27 13.73 19.55 13 18.5 13H17V11Q17 8.93 15.54 7.46 14.08 6 12 6 9.93 6 8.46 7.46 7 8.93 7 11H6.5Q5.05 11 4.03 12.03 3 13.05 3 14.5 3 15.95 4.03 17 5.05 18 6.5 18H9V20M12 13Z" />
                         </svg>
                         {{ __('messages.save') }}
@@ -139,9 +139,9 @@
                 @endif
             @elseif ($route == 'home')
                 <div style="font-family: sans-serif" class="relative inline-block text-left w-full md:w-auto">
-                    <button type="button" onclick="onPopUpClick('calendar-pop-up-menu', event)" class="inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-500 dark:text-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                    <button type="button" onclick="onPopUpClick('calendar-pop-up-menu', event)" class="inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-5 py-3 text-base font-semibold text-gray-500 dark:text-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700" id="menu-button" aria-expanded="true" aria-haspopup="true">
                         {{ __('messages.new_schedule') }}
-                        <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? '-ml-1' : '-mr-1' }} h-5 w-5 text-gray-400 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? '-ml-1' : '-mr-1' }} h-6 w-6 text-gray-400 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                         </svg>
                     </button>
@@ -181,18 +181,18 @@
 
             {{-- Month Navigation Controls --}}
             <div class="flex items-center bg-white dark:bg-gray-800 rounded-md shadow-sm hidden md:flex">
-                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}" class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 dark:border-gray-600 pr-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
+                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}" class="flex h-11 w-14 items-center justify-center rounded-l-md border-y border-l border-gray-300 dark:border-gray-600 pr-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:pr-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
                     <span class="sr-only">{{ __('messages.previous_month') }}</span>
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
                         <path fill-rule="evenodd" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" clip-rule="evenodd" />
                     </svg>
                 </a>
-                <a href="{{ $route == 'home' ? route('home') : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => now()->year, 'month' => now()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => now()->year, 'month' => now()->month]) }}" class="flex h-9 items-center justify-center border-y border-gray-300 dark:border-gray-600 px-3.5 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 focus:relative">
-                    <span class="h-5 flex items-center">{{ __('messages.this_month') }}</span>
+                <a href="{{ $route == 'home' ? route('home') : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => now()->year, 'month' => now()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => now()->year, 'month' => now()->month]) }}" class="flex h-11 items-center justify-center border-y border-gray-300 dark:border-gray-600 px-4 text-base font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 focus:relative">
+                    <span class="h-6 flex items-center">{{ __('messages.this_month') }}</span>
                 </a>
-                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) }}" class="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 dark:border-gray-600 pl-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
+                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) }}" class="flex h-11 w-14 items-center justify-center rounded-r-md border-y border-r border-gray-300 dark:border-gray-600 pl-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:pl-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
                     <span class="sr-only">{{ __('messages.next_month') }}</span>
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
                         <path fill-rule="evenodd" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" clip-rule="evenodd" />
                     </svg>
                 </a>
@@ -201,8 +201,8 @@
             {{-- Add Event Button --}}
             @if ($route == 'admin' && $role->email_verified_at && $tab == 'schedule')
                 <a href="{{ route('event.create', ['subdomain' => $role->subdomain]) }}" class="w-full md:w-auto">
-                    <button type="button" class="w-full inline-flex items-center justify-center rounded-md shadow-sm bg-[#4E81FA] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#3A6BE0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]">
-                        <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? '-mr-0.5 ml-1.5' : '-ml-0.5 mr-1.5' }} h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <button type="button" class="w-full inline-flex items-center justify-center rounded-md shadow-sm bg-[#4E81FA] px-4 py-3 text-base font-semibold text-white shadow-sm hover:bg-[#3A6BE0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]">
+                        <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? '-mr-0.5 ml-1.5' : '-ml-0.5 mr-1.5' }} h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
                         </svg>
                         {{ __('messages.add_event') }}

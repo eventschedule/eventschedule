@@ -100,83 +100,75 @@
                                 </td>
                                 <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                     <div class="flex items-center justify-end gap-3">
-                                        <div class="relative" x-data="{ 
-                                            open: false,
-                                            positionDropdown() {
-                                                if (!this.open) return;
-                                                const button = this.$refs.button;
-                                                const dropdown = this.$refs.dropdown;
-                                                const rect = button.getBoundingClientRect();
-                                                
-                                                dropdown.style.position = 'fixed';
-                                                dropdown.style.top = `${rect.bottom + 4}px`;
-                                                dropdown.style.left = `${rect.left}px`;
-                                                dropdown.style.zIndex = '1000';
-                                            }
-                                        }">
-                                            <button @click="open = !open; $nextTick(() => positionDropdown())" 
-                                                    x-ref="button"
-                                                    type="button" 
-                                                    class="inline-flex items-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                                                {{ __('messages.select_action') }}
-                                                <svg class="ml-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <div class="relative inline-block text-left">
+                                            <button type="button" onclick="onPopUpClick('sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', event)" class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700" id="sale-actions-menu-button-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" aria-expanded="true" aria-haspopup="true">
+                                                {{ __('messages.actions') }}
+                                                <svg class="-mr-1 ml-2 h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                                     <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                                                 </svg>
                                             </button>
-
-                                            <div x-show="open" 
-                                                 x-ref="dropdown"
-                                                 @click.away="open = false"
-                                                 class="w-48 origin-top-right rounded-md bg-white dark:bg-gray-800 py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-700 focus:outline-none" 
-                                                 role="menu" 
-                                                 x-cloak
-                                                 aria-orientation="vertical">
-                                                
-                                                <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" 
-                                                   target="_blank" 
-                                                   @click="open = false"
-                                                   class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left transition-colors duration-150"
-                                                   role="menuitem">
-                                                    {{ __('messages.view_ticket') }}
-                                                </a>
-
-                                                <button @click="open = false; resendEmail('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}')" 
-                                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left transition-colors duration-150" 
-                                                        role="menuitem">
-                                                    {{ __('messages.send_email') }}
-                                                </button>
-
-                                                @if($sale->status === 'unpaid')
-                                                    <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_paid')" 
-                                                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left transition-colors duration-150" 
-                                                            role="menuitem">
-                                                        {{ __('messages.mark_paid') }}
+                                            <div id="sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" class="pop-up-menu hidden absolute right-0 z-10 mt-2 w-64 origin-top-right divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="sale-actions-menu-button-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" tabindex="-1">
+                                                <div class="py-2" role="none" onclick="onPopUpClick('sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', event)">
+                                                    <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" target="_blank" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                                                        <svg class="mr-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                                            <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
+                                                        </svg>
+                                                        <div>
+                                                            {{ __('messages.view_ticket') }}
+                                                        </div>
+                                                    </a>
+                                                    <button onclick="onPopUpClick('sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', event); resendEmail('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}')" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors w-full text-left" role="menuitem" tabindex="0">
+                                                        <svg class="mr-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                                            <path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" />
+                                                        </svg>
+                                                        <div>
+                                                            {{ __('messages.send_email') }}
+                                                        </div>
                                                     </button>
-                                                @endif
-
-                                                @if(false && $sale->status === 'paid' && $sale->payment_method != 'cash')
-                                                    <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'refund')" 
-                                                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left transition-colors duration-150" 
-                                                            role="menuitem">
-                                                        {{ __('messages.refund') }}
+                                                    @if($sale->status === 'unpaid')
+                                                    <button onclick="onPopUpClick('sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', event); handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_paid')" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors w-full text-left" role="menuitem" tabindex="0">
+                                                        <svg class="mr-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                                            <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+                                                        </svg>
+                                                        <div>
+                                                            {{ __('messages.mark_paid') }}
+                                                        </div>
                                                     </button>
-                                                @endif
-
-                                                @if(in_array($sale->status, ['unpaid', 'paid']))
-                                                    <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'cancel')" 
-                                                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left transition-colors duration-150" 
-                                                            role="menuitem">
-                                                        {{ __('messages.cancel') }}
+                                                    @endif
+                                                    @if(false && $sale->status === 'paid' && $sale->payment_method != 'cash')
+                                                    <button onclick="onPopUpClick('sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', event); handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'refund')" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors w-full text-left" role="menuitem" tabindex="0">
+                                                        <svg class="mr-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                                            <path d="M12,18A6,6 0 0,1 6,12C6,11 6.25,10.03 6.7,9.2L5.24,7.74C4.46,8.97 4,10.43 4,12A8,8 0 0,0 12,20C13.57,20 15.03,19.54 16.26,18.76L14.8,17.3C13.97,17.75 13,18 12,18M20,12A8,8 0 0,0 12,4C10.43,4 8.97,4.46 7.74,5.24L9.2,6.7C10.03,6.25 11,6 12,6A6,6 0 0,1 18,12C18,13 17.75,13.97 17.3,14.8L18.76,16.26C19.54,15.03 20,13.57 20,12M14.8,17.3L16.26,18.76L18.76,16.26L17.3,14.8L14.8,17.3M9.2,6.7L7.74,5.24L5.24,7.74L6.7,9.2L9.2,6.7Z" />
+                                                        </svg>
+                                                        <div>
+                                                            {{ __('messages.refund_ticket') }}
+                                                        </div>
                                                     </button>
-                                                @endif
-                                                
-                                                @if(! $sale->is_deleted)
-                                                <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'delete')" 
-                                                        class="block px-4 py-2 text-sm text-red-700 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left transition-colors duration-150" 
-                                                        role="menuitem">
-                                                    {{ __('messages.delete') }}
-                                                </button>
-                                                @endif
+                                                    @endif
+                                                    @if(in_array($sale->status, ['unpaid', 'paid']))
+                                                    <button onclick="onPopUpClick('sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', event); handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'cancel')" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors w-full text-left" role="menuitem" tabindex="0">
+                                                        <svg class="mr-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                                            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+                                                        </svg>
+                                                        <div>
+                                                            {{ __('messages.cancel_ticket') }}
+                                                        </div>
+                                                    </button>
+                                                    @endif
+                                                    @if(! $sale->is_deleted)
+                                                    <div class="py-2" role="none">
+                                                        <div class="border-t border-gray-100 dark:border-gray-700"></div>
+                                                    </div>
+                                                    <button onclick="onPopUpClick('sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', event); handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'delete')" class="group flex items-center px-5 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300 focus:bg-red-50 dark:focus:bg-red-900/20 focus:text-red-700 dark:focus:text-red-300 focus:outline-none transition-colors w-full text-left" role="menuitem" tabindex="0">
+                                                        <svg class="mr-3 h-5 w-5 text-red-400 dark:text-red-500 group-hover:text-red-500 dark:group-hover:text-red-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                                            <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+                                                        </svg>
+                                                        <div>
+                                                            {{ __('messages.delete') }}
+                                                        </div>
+                                                    </button>
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

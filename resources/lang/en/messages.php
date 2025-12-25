@@ -668,4 +668,7 @@ return [
     'time' => 'Time',
     'view_your_tickets' => 'View Your Tickets',
     'ticket_details' => 'Ticket Details',
+    'send_email' => 'Send Email',
+    'refund_ticket' => 'Refund Ticket',
+    'cancel_ticket' => 'Cancel Ticket',
 ];
