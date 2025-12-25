@@ -152,8 +152,8 @@
         </li>
 
         <li>
-            <div class="px-2 py-2">
-                <div class="flex gap-1 rounded-lg bg-gray-800/50 p-1" role="radiogroup" aria-label="Theme selection">
+            <div class="-mx-2 py-2">
+                <div class="flex gap-1 rounded-lg bg-gray-800/50 p-1.5 w-full" role="radiogroup" aria-label="Theme selection">
                     <button
                         type="button"
                         onclick="setTheme('light'); updateThemeButtons();"
