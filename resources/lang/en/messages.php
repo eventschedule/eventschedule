@@ -6,6 +6,7 @@ return [
     'event_deleted' => 'Successfully deleted event',
     'edit_event' => 'Edit Event',
     'add_event' => 'Add Event',
+    'clone_event' => 'Clone Event',
     'sign_up' => 'Sign Up',
     'event_updated' => 'Successfully updated event',
     'request_accepted' => 'Request has been accepted',

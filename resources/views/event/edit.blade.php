@@ -186,9 +186,50 @@
 
 <div id="app">
 
-  <h2 class="pt-2 my-4 text-xl font-bold leading-7 text-gray-900 dark:text-gray-100x sm:truncate sm:text-2xl sm:tracking-tight">
-    {{ $title }}
-  </h2>
+  <div class="pt-2 my-4 flex items-center justify-between">
+    <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100x sm:truncate sm:text-2xl sm:tracking-tight">
+      {{ $title }}
+    </h2>
+    
+    @if ($event->exists)
+    {{-- Actions dropdown --}}
+    <div class="mt-2 md:ml-3">
+        <div class="relative inline-block text-left">
+            <button type="button" onclick="onPopUpClick('event-actions-pop-up-menu', event)" class="inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700" id="event-actions-menu-button" aria-expanded="true" aria-haspopup="true">
+                {{ __('messages.actions') }}
+                <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                </svg>
+            </button>
+            <div id="event-actions-pop-up-menu" class="pop-up-menu hidden absolute right-0 z-10 mt-2 w-64 origin-top-right divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="event-actions-menu-button" tabindex="-1">
+                <div class="py-1" role="none" onclick="onPopUpClick('event-actions-pop-up-menu', event)">
+                    <a href="{{ route('event.clone', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem" tabindex="-1">
+                        <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
+                        </svg>
+                        <div>
+                            {{ __('messages.clone_event') }}
+                        </div>
+                    </a>
+                    @if ($event->user_id == $user->id)
+                    <div class="py-1" role="none">
+                        <div class="border-t border-gray-100 dark:border-gray-700"></div>
+                    </div>
+                    <a href="#" onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('event.delete', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}'; } return false;" class="group flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem" tabindex="-1">
+                        <svg class="mr-3 h-5 w-5 text-red-400 group-hover:text-red-500 dark:group-hover:text-red-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+                        </svg>
+                        <div>
+                            {{ __('messages.delete') }}
+                        </div>
+                    </a>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+  </div>
 
   <form method="POST"
         @submit="validateForm"
@@ -783,13 +824,17 @@
                             <x-input-label class="mb-2" for="curators" :value="__(count($curators) > 1 ? 'messages.add_to_schedules' : 'messages.add_to_schedule')" />
                             
                             @foreach($curators as $curator)
+                            @php
+                                $isClonedCurator = isset($clonedCurators) && $clonedCurators->contains(function($c) use ($curator) { return $c->id == $curator->id; });
+                                $isCuratorChecked = (! $event->exists && ($role->subdomain == $curator->subdomain || session('pending_request') == $curator->subdomain)) || $event->curators->contains($curator->id) || $isClonedCurator;
+                            @endphp
                             <div class="mb-4">
                                 <div class="flex items-center mb-2 h-6">
                                     <input type="checkbox" 
                                            id="curator_{{ $curator->encodeId() }}" 
                                            name="curators[]" 
                                            value="{{ $curator->encodeId() }}"
-                                           {{ (! $event->exists && ($role->subdomain == $curator->subdomain || session('pending_request') == $curator->subdomain)) || $event->curators->contains($curator->id) ? 'checked' : '' }}
+                                           {{ $isCuratorChecked ? 'checked' : '' }}
                                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
                                            @change="toggleCuratorGroupSelection('{{ $curator->encodeId() }}')">
                                     <label for="curator_{{ $curator->encodeId() }}" class="ml-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -817,7 +862,7 @@
                                 </div>
                                 
                                 @if($curator->groups && count($curator->groups) > 0)
-                                <div id="curator_group_{{ $curator->encodeId() }}" class="ml-6 mb-2" style="display: none;">
+                                <div id="curator_group_{{ $curator->encodeId() }}" class="ml-6 mb-2" style="display: {{ $isCuratorChecked ? 'block' : 'none' }};">
                                     <select id="curator_group_{{ $curator->encodeId() }}" 
                                             name="curator_groups[{{ $curator->encodeId() }}]" 
                                             class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
@@ -830,6 +875,8 @@
                                                     if ($selectedGroupId) {
                                                         $selectedGroupId = \App\Utils\UrlUtils::encodeId($selectedGroupId);
                                                     }
+                                                } elseif (isset($clonedCuratorGroups) && isset($clonedCuratorGroups[$curator->encodeId()])) {
+                                                    $selectedGroupId = $clonedCuratorGroups[$curator->encodeId()];
                                                 }
                                             @endphp
                                             <option value="{{ \App\Utils\UrlUtils::encodeId($group->id) }}" {{ old('curator_groups.' . $curator->encodeId(), $selectedGroupId) == \App\Utils\UrlUtils::encodeId($group->id) ? 'selected' : '' }}>{{ $group->translatedName() }}</option>
@@ -1105,15 +1152,6 @@
                 <div class="flex gap-4">
                     <x-primary-button>{{ __('messages.save') }}</x-primary-button>                    
                     <x-cancel-button></x-cancel-button>
-                </div>
-
-                <div>
-                    @if ($event->exists)
-                    <x-delete-button
-                        :url="route('event.delete', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)])"
-                       >
-                    </x-delete-button>
-                    @endif
                 </div>
             </div>
         </div>
@@ -1636,10 +1674,18 @@
     mounted() {
       this.showMemberTypeRadio = this.selectedMembers.length === 0;
 
+      const isCloned = @json($isCloned ?? false);
+
       if (this.event.id) {
+        // Existing event - use event data
         this.isInPerson = !!this.event.venue || !!this.selectedVenue;
         this.isOnline = !!this.event.event_url;
+      } else if (isCloned) {
+        // Cloned event - use cloned data, don't load from localStorage
+        this.isInPerson = !!this.selectedVenue;
+        this.isOnline = !!this.event.event_url;
       } else {
+        // New event - load from localStorage
         this.loadPreferences();
 
         if (!this.isInPerson && !this.isOnline) {
@@ -1649,7 +1695,11 @@
 
       if (this.event.id) {
         this.eventName = this.event.name;
+      } else if (isCloned && this.event.name) {
+        // Cloned event - preserve the cloned event name
+        this.eventName = this.event.name;
       } else if (this.selectedMembers.length === 1) {
+        // New event with single member - use member name
         this.eventName = this.selectedMembers[0].name;
       }
 

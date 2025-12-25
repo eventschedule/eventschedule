@@ -129,6 +129,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/resend-invite/{hash}', [RoleController::class, 'resendInvite'])->name('role.resend_invite');
     Route::post('/{subdomain}/store-event', [EventController::class, 'store'])->name('event.store');    
     Route::get('/{subdomain}/edit-event/{hash}', [EventController::class, 'edit'])->name('event.edit');
+    Route::get('/{subdomain}/clone-event/{hash}', [EventController::class, 'clone'])->name('event.clone');
     Route::get('/{subdomain}/delete-event/{hash}', [EventController::class, 'delete'])->name('event.delete');
     Route::put('/{subdomain}/update-event/{hash}', [EventController::class, 'update'])->name('event.update');
     Route::get('/{subdomain}/delete-event-image', [EventController::class, 'deleteImage'])->name('event.delete_image');
