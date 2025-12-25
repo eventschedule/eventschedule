@@ -235,26 +235,26 @@
     // Make function globally available
     window.updateThemeButtons = updateThemeButtons;
     
-    // Update buttons on page load - try multiple times to ensure it runs
+    // Update buttons immediately on page load
     function initThemeButtons() {
-        const tryUpdate = function() {
-            const buttons = document.querySelectorAll('.theme-btn');
-            if (buttons.length === 3) {
-                updateThemeButtons();
-            } else {
-                setTimeout(tryUpdate, 1);
-            }
-        };
-        
-        if (document.readyState === 'loading') {
+        const buttons = document.querySelectorAll('.theme-btn');
+        if (buttons.length === 3) {
+            // Buttons are already in DOM, update immediately
+            updateThemeButtons();
+        } else if (document.readyState === 'loading') {
+            // DOM is still loading, wait for it
             document.addEventListener('DOMContentLoaded', function() {
-                setTimeout(tryUpdate, 1);
+                updateThemeButtons();
             });
         } else {
-            setTimeout(tryUpdate, 1);
+            // DOM is ready but buttons might not be rendered yet, use requestAnimationFrame
+            requestAnimationFrame(function() {
+                updateThemeButtons();
+            });
         }
     }
     
+    // Initialize immediately
     initThemeButtons();
     
     // Listen for storage changes (when theme changes in another tab/window)

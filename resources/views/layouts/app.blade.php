@@ -577,12 +577,19 @@
             };
             
             // Update buttons after theme system is initialized
-            // Use a longer delay to ensure navigation script has loaded
-            setTimeout(function() {
+            // Use requestAnimationFrame for immediate update on next paint
+            requestAnimationFrame(function() {
                 if (typeof window.updateThemeButtons === 'function') {
                     window.updateThemeButtons();
+                } else {
+                    // If navigation script hasn't loaded yet, try again after a short delay
+                    setTimeout(function() {
+                        if (typeof window.updateThemeButtons === 'function') {
+                            window.updateThemeButtons();
+                        }
+                    }, 10);
                 }
-            }, 300);
+            });
         })();
     </script>
 
