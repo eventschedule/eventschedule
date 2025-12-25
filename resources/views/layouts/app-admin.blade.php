@@ -47,7 +47,7 @@
                     </div>
 
                     <!-- Sidebar component, swap this element with another sidebar if you like -->
-                    <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 dark:bg-[#141414] px-6 pb-4 ring-1 ring-white/10">
+                    <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 dark:bg-[#121212] px-6 pb-4 ring-1 ring-white/10">
 
                         @include('layouts.navigation')                        
 
@@ -59,7 +59,7 @@
         <!-- Static sidebar for desktop -->
         <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
             <!-- Sidebar component, swap this element with another sidebar if you like -->
-            <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 dark:bg-[#141414] px-6 pb-4">
+            <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 dark:bg-[#121212] px-6 pb-4">
 
                 @include('layouts.navigation')
 
