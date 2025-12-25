@@ -232,8 +232,8 @@
                                         {{ __('messages.edit_' . strtolower($role->type)) }}
                                     </div>
                                 </a>
-                                <a href="{{ route('role.view_guest', (now()->year == $year && now()->month == $month) ? ['subdomain' => $role->subdomain] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'month' => $month] : ['subdomain' => $role->subdomain, 'year' => $year, 'month' => $month])) }}" target="_blank" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
-                                    <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <a href="{{ route('role.view_guest', (now()->year == $year && now()->month == $month) ? ['subdomain' => $role->subdomain] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'month' => $month] : ['subdomain' => $role->subdomain, 'year' => $year, 'month' => $month])) }}" target="_blank" class="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300" role="menuitem" tabindex="-1">
+                                    <svg class="mr-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                         <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
                                     </svg>
                                     <div>
@@ -242,8 +242,8 @@
                                 </a>
                             </div>
                             @if ($tab == 'schedule')
-                            <a href="{{ route('event.show_import', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
-                                <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <a href="{{ route('event.show_import', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300" role="menuitem" tabindex="-1">
+                                <svg class="mr-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path d="M14,12L10,8V11H2V13H10V16M20,18V6C20,4.89 19.1,4 18,4H6A2,2 0 0,0 4,6V9H6V6H18V18H6V15H4V18A2,2 0 0,0 6,20H18A2,2 0 0,0 20,18Z" />
                                 </svg>
                                 <div>
@@ -251,8 +251,8 @@
                                 </div>
                             </a>
                             @if (auth()->user()->google_token && $role->google_calendar_id)
-                            <a href="#" onclick="syncEventsFromDropdown()" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
-                                <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <a href="#" onclick="syncEventsFromDropdown()" class="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300" role="menuitem" tabindex="-1">
+                                <svg class="mr-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path d="M12,18A6,6 0 0,1 6,12C6,11 6.25,10.03 6.7,9.2L5.24,7.74C4.46,8.97 4,10.43 4,12A8,8 0 0,0 12,20C13.57,20 15.03,19.54 16.26,18.76L14.8,17.3C13.97,17.75 13,18 12,18M20,12A8,8 0 0,0 12,4C10.43,4 8.97,4.46 7.74,5.24L9.2,6.7C10.03,6.25 11,6 12,6A6,6 0 0,1 18,12C18,13 17.75,13.97 17.3,14.8L18.76,16.26C19.54,15.03 20,13.57 20,12M14.8,17.3L16.26,18.76L18.76,16.26L17.3,14.8L14.8,17.3M9.2,6.7L7.74,5.24L5.24,7.74L6.7,9.2L9.2,6.7M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z" />
                                 </svg>
                                 <div>
@@ -260,16 +260,16 @@
                                 </div>
                             </a>
                             @endif
-                            <a href="#" onclick="handleEventsGraphicClick()" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
-                                <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <a href="#" onclick="handleEventsGraphicClick()" class="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300" role="menuitem" tabindex="-1">
+                                <svg class="mr-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path d="M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19M8.5,13.5L11,16.5L14.5,12L19,18H5L8.5,13.5Z" />
                                 </svg>
                                 <div>
                                     {{ __('messages.events_graphic') }}
                                 </div>
                             </a>
-                            <a href="#" onclick="openEmbedModal()" class="group flex items-center px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">
-                                <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <a href="#" onclick="openEmbedModal()" class="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300" role="menuitem" tabindex="-1">
+                                <svg class="mr-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path d="M12.89,3L14.85,3.4L11.11,21L9.15,20.6L12.89,3M19.59,12L16,8.41V5.58L22.42,12L16,18.41V15.58L19.59,12M1.58,12L8,5.58V8.41L4.41,12L8,15.58V18.41L1.58,12Z" />
                                 </svg>
                                 <div>
@@ -279,10 +279,10 @@
                             @endif
                             @if ($role->exists && $role->user_id == auth()->user()->id)
                             <div class="py-1" role="none">
-                                <div class="border-t border-gray-100"></div>
+                                <div class="border-t border-gray-100 dark:border-gray-700"></div>
                             </div>
-                            <a href="#" onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete', ['subdomain' => $role->subdomain]) }}'; } return false;" class="group flex items-center px-4 py-2 text-sm text-red-600 hover:text-red-700" role="menuitem" tabindex="-1">
-                                <svg class="mr-3 h-5 w-5 text-red-400 group-hover:text-red-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <a href="#" onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete', ['subdomain' => $role->subdomain]) }}'; } return false;" class="group flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300" role="menuitem" tabindex="-1">
+                                <svg class="mr-3 h-5 w-5 text-red-400 dark:text-red-500 group-hover:text-red-500 dark:group-hover:text-red-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
                                 </svg>
                                 <div>
