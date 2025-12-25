@@ -141,23 +141,58 @@ class EventController extends Controller
         $event->user_id = $user->id;
         $selectedMembers = [];
         
-        if ($role->default_tickets) {
-            $defaultTickets = json_decode($role->default_tickets, true);
-            $event->ticket_currency_code = $defaultTickets['currency_code'] ?? 'USD';
-            $event->payment_method = $defaultTickets['payment_method'] ?? 'cash';
-            $event->payment_instructions = $defaultTickets['payment_instructions'] ?? null;
-            $event->expire_unpaid_tickets = $defaultTickets['expire_unpaid_tickets'] ?? false;
-            $event->ticket_notes = $defaultTickets['ticket_notes'] ?? null;
-            $event->total_tickets_mode = $defaultTickets['total_tickets_mode'] ?? 'individual';
-            $event->tickets = $defaultTickets['tickets'] ?? [new Ticket()];
+        // Check if we're cloning an event
+        $clonedData = session('cloned_event');
+        if ($clonedData) {
+            // Populate event with cloned data
+            foreach ($clonedData['event'] as $key => $value) {
+                $event->$key = $value;
+            }
+            $event->user_id = $user->id;
+            $event->creator_role_id = $role->id;
+            
+            // Set cloned tickets
+            $event->tickets = array_map(function($ticketData) {
+                $ticket = new Ticket();
+                foreach ($ticketData as $key => $value) {
+                    $ticket->$key = $value;
+                }
+                return $ticket;
+            }, $clonedData['tickets']);
+            
+            // Set cloned venue
+            if ($clonedData['venue_id']) {
+                $venueId = UrlUtils::decodeId($clonedData['venue_id']);
+                $venue = Role::find($venueId);
+            } else {
+                $venue = null;
+            }
+            
+            // Set cloned members
+            $selectedMembers = $clonedData['selected_members'] ?? [];
+            
+            // Clear cloned data from session
+            session()->forget('cloned_event');
         } else {
-            $event->ticket_currency_code = 'USD';
-            $event->payment_method = 'cash';
-            $event->tickets = [new Ticket()];
-        }
+            // Default behavior for new event
+            if ($role->default_tickets) {
+                $defaultTickets = json_decode($role->default_tickets, true);
+                $event->ticket_currency_code = $defaultTickets['currency_code'] ?? 'USD';
+                $event->payment_method = $defaultTickets['payment_method'] ?? 'cash';
+                $event->payment_instructions = $defaultTickets['payment_instructions'] ?? null;
+                $event->expire_unpaid_tickets = $defaultTickets['expire_unpaid_tickets'] ?? false;
+                $event->ticket_notes = $defaultTickets['ticket_notes'] ?? null;
+                $event->total_tickets_mode = $defaultTickets['total_tickets_mode'] ?? 'individual';
+                $event->tickets = $defaultTickets['tickets'] ?? [new Ticket()];
+            } else {
+                $event->ticket_currency_code = 'USD';
+                $event->payment_method = 'cash';
+                $event->tickets = [new Ticket()];
+            }
 
-        if ($schedule) {
-            $selectedMembers = [$schedule->toData()];
+            if ($schedule) {
+                $selectedMembers = [$schedule->toData()];
+            }
         }
 
         if ($request->date) {
@@ -192,6 +227,25 @@ class EventController extends Controller
         $currencies = file_get_contents(base_path('storage/currencies.json'));
         $currencies = json_decode($currencies);
 
+        // Prepare curator data for cloned event
+        $clonedCurators = collect([]);
+        $clonedCuratorGroups = [];
+        if ($clonedData && isset($clonedData['curators'])) {
+            foreach ($clonedData['curators'] as $curatorId) {
+                $curatorIdDecoded = UrlUtils::decodeId($curatorId);
+                $curator = Role::find($curatorIdDecoded);
+                if ($curator) {
+                    $clonedCurators->push($curator);
+                    if (isset($clonedData['curator_groups'][$curatorId])) {
+                        $clonedCuratorGroups[$curatorId] = $clonedData['curator_groups'][$curatorId];
+                    }
+                }
+            }
+        }
+
+        // Check if this is a cloned event
+        $isCloned = $clonedData !== null;
+
         return view('event/edit', [
             'role' => $role,
             'effectiveRole' => $role,
@@ -206,6 +260,9 @@ class EventController extends Controller
             'members' => $members,
             'currencies' => $currencies,
             'event_categories' => get_translated_categories(),
+            'clonedCurators' => $clonedCurators,
+            'clonedCuratorGroups' => $clonedCuratorGroups,
+            'isCloned' => $isCloned,
         ]);
     }
 
@@ -224,6 +281,89 @@ class EventController extends Controller
         }
 
         return redirect(route('event.edit', ['subdomain' => $subdomain, 'hash' => $hash]));
+    }
+
+    public function clone(Request $request, $subdomain, $hash)
+    {
+        if (! is_hosted_or_admin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $event_id = UrlUtils::decodeId($hash);
+        $event = Event::with(['tickets', 'roles', 'creatorRole', 'curators'])->findOrFail($event_id);
+        $user = $request->user();
+
+        if (! $user->canEditEvent($event)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! $role->email_verified_at) {
+            return redirect()->back()->with('error', __('messages.email_not_verified'));
+        }
+
+        // Prepare cloned event data (copy fillable fields)
+        $clonedEventData = [];
+        $fillableFields = $event->getFillable();
+        foreach ($fillableFields as $field) {
+            if (!in_array($field, ['id', 'slug'])) {
+                $clonedEventData[$field] = $event->$field;
+            }
+        }
+
+        // Reset fields that shouldn't be cloned
+        $clonedEventData['flyer_image_url'] = null;
+
+        // Clone tickets (reset sold quantities)
+        $clonedTickets = [];
+        foreach ($event->tickets as $ticket) {
+            $clonedTickets[] = [
+                'type' => $ticket->type,
+                'quantity' => $ticket->quantity,
+                'price' => $ticket->price,
+                'description' => $ticket->description,
+                // sold is not cloned
+            ];
+        }
+        if (empty($clonedTickets)) {
+            $clonedTickets = [new \App\Models\Ticket()];
+        }
+
+        // Prepare venue and members
+        $venue = $event->venue;
+        $selectedMembers = [];
+        foreach ($event->roles as $each) {
+            if ($each->isTalent()) {
+                $selectedMembers[] = $each->toData();
+            }
+        }
+
+        // Prepare curator data
+        $curatorIds = [];
+        $curatorGroups = [];
+        foreach ($event->curators as $curator) {
+            $curatorId = UrlUtils::encodeId($curator->id);
+            $curatorIds[] = $curatorId;
+            $groupId = $event->getGroupIdForSubdomain($curator->subdomain);
+            if ($groupId) {
+                $curatorGroups[$curatorId] = UrlUtils::encodeId($groupId);
+            }
+        }
+
+        // Store cloned data in session
+        session([
+            'cloned_event' => [
+                'event' => $clonedEventData,
+                'tickets' => $clonedTickets,
+                'venue_id' => $venue ? UrlUtils::encodeId($venue->id) : null,
+                'selected_members' => $selectedMembers,
+                'curators' => $curatorIds,
+                'curator_groups' => $curatorGroups,
+            ]
+        ]);
+
+        return redirect(route('event.create', ['subdomain' => $subdomain]));
     }
 
     public function edit(Request $request, $subdomain, $hash)
