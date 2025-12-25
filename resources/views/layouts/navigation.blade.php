@@ -198,8 +198,8 @@
 
 <style {!! nonce_attr() !!}>
     .theme-btn.active {
-        background-color: #ffffff !important;
-        color: #111827 !important;
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        color: #ffffff !important;
     }
     .theme-btn:not(.active) {
         background-color: transparent !important;
