@@ -221,15 +221,15 @@
         @else
         <div class="{{ $tab == 'availability' ? 'hidden md:block' : '' }} {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }}"> 
             <div
-                class="grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center text-xs font-semibold leading-6 text-gray-700">
+                class="grid grid-cols-7 gap-px border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-800 text-center text-xs font-semibold leading-6 text-gray-700 dark:text-gray-300">
                 @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $day)
-                <div class="flex justify-center bg-white py-2">
+                <div class="flex justify-center bg-white dark:bg-gray-700 py-2">
                     {{ __('messages.' . $day) }}
                 </div>
                 @endforeach
             </div>
         </div>
-        <div class="bg-gray-200 text-xs leading-6 text-gray-700 {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }}">
+        <div class="bg-gray-200 dark:bg-gray-800 text-xs leading-6 text-gray-700 dark:text-gray-300 {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }}">
             <div class="w-full grid grid-cols-7 grid-rows-{{ $totalWeeks }} gap-px">
                 @while ($currentDate->lte($endOfMonth))
                 @if ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at)
@@ -241,16 +241,16 @@
                     }
                 }
                 @endphp
-                <div class="cursor-pointer relative {{ count($unavailable) ? ($currentDate->month == $month ? 'bg-orange-50 hover:bg-gray-100 hover:border-gray-300' : 'bg-orange-50 hover:bg-gray-100 hover:border-gray-300 text-gray-500') : ($currentDate->month == $month ? 'bg-white hover:bg-gray-100 hover:border-gray-300' : 'bg-gray-50 text-gray-500 hover:bg-gray-100 hover:border-gray-300') }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300"
+                <div class="cursor-pointer relative {{ count($unavailable) ? ($currentDate->month == $month ? 'bg-orange-50 dark:bg-orange-900/30 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-orange-50 dark:bg-orange-900/30 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-500 dark:text-gray-400') : ($currentDate->month == $month ? 'bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600') }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600"
                     onclick="window.location = '{{ route('event.create', ['subdomain' => $role->subdomain, 'date' => $currentDate->format('Y-m-d')]) }}';">
                     @elseif ($route == 'admin' && $tab == 'availability' && $role->email_verified_at)
-                        <div class="{{ $tab == 'availability' && $currentDate->month != $month ? 'hidden md:block' : '' }} cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white hover:bg-gray-100 hover:border-gray-300' : 'bg-gray-50 text-gray-500' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 day-element" data-date="{{ $currentDate->format('Y-m-d') }}">
+                        <div class="{{ $tab == 'availability' && $currentDate->month != $month ? 'hidden md:block' : '' }} cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600 day-element" data-date="{{ $currentDate->format('Y-m-d') }}">
                         @if (is_array($datesUnavailable) && in_array($currentDate->format('Y-m-d'), $datesUnavailable))
                             <div class="day-x"></div>
                         @endif
                     @else
                     <div
-                        class="relative {{ $currentDate->month == $month ? 'bg-white' : 'bg-gray-50 text-gray-500' }} px-3 py-2 min-h-[100px] border-1 border-transparent">
+                        class="relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-3 py-2 min-h-[100px] border-1 border-transparent">
                         @endif
                         <div class="flex justify-between">
                         @if ($route == 'admin')
@@ -269,7 +269,7 @@
                             </div>
                         @endif
                         </div>
-                        <ol class="mt-4 divide-y divide-gray-100 text-sm leading-6 md:col-span-7 xl:col-span-8">
+                        <ol class="mt-4 divide-y divide-gray-100 dark:divide-gray-700 text-sm leading-6 md:col-span-7 xl:col-span-8">
                             <li v-for="event in getEventsForDate('{{ $currentDate->format('Y-m-d') }}')" :key="event.id" 
                                 class="relative group" 
                                 :class="event.can_edit ? '{{ (isset($role) && $role->isRtl()) ? 'hover:pl-8' : 'hover:pr-8' }}' : ''"
@@ -278,12 +278,12 @@
                                     class="flex event-link-popup" 
                                     :data-event-id="event.id"
                                     @click.stop {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
-                                    <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900 {{ (isset($role) && $role->isRtl()) ? 'rtl' : '' }} truncate">
+                                    <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900 dark:text-gray-100 {{ (isset($role) && $role->isRtl()) ? 'rtl' : '' }} truncate">
                                         <span :class="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'" 
                                               class="hover:underline truncate" v-text="getEventDisplayName(event)">
                                         </span>
                                         <span v-if="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1" 
-                                              class="text-gray-400 truncate" v-text="getEventTime(event)">
+                                              class="text-gray-400 dark:text-gray-500 truncate" v-text="getEventTime(event)">
                                         </span>
                                     </p>
                                 </a>
@@ -312,16 +312,16 @@
                     </button>
                 </div>
                 <ol id="mobileEventsList"
-                    class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow ring-1 ring-black ring-opacity-5">
+                    class="divide-y divide-gray-100 dark:divide-gray-700 overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-sm shadow ring-1 ring-black ring-opacity-5 dark:ring-gray-700">
                     <template v-for="event in mobileEventsList" :key="'mobile-' + event.uniqueKey">
                         <a v-if="isEventVisible(event)" :href="getEventUrl(event)" 
                            {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}>
                             <li class="relative flex items-center py-6 px-4 {{ (isset($force_mobile) && $force_mobile) ? '' : 'xl:static' }} event-item {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'space-x-reverse' : '' }} space-x-6"
                                 :class="isPastEvent(event.occurrenceDate) ? 'past-event hidden' : ''">
                                 <div class="flex-auto pl-4">
-                                    <h3 class="{{ (isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pl-16' : 'pr-16') }} font-semibold text-gray-900" v-text="event.name">
+                                    <h3 class="{{ (isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pl-16' : 'pr-16') }} font-semibold text-gray-900 dark:text-gray-100" v-text="event.name">
                                     </h3>
-                                    <dl class="{{ (isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pl-16' : 'pr-16') }} mt-2 flex flex-col text-gray-500 {{ (isset($force_mobile) && $force_mobile) ? '' : 'xl:flex-row' }}">
+                                    <dl class="{{ (isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pl-16' : 'pr-16') }} mt-2 flex flex-col text-gray-500 dark:text-gray-400 {{ (isset($force_mobile) && $force_mobile) ? '' : 'xl:flex-row' }}">
                                         <div class="flex items-start {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'space-x-reverse' : '' }} space-x-3">
                                             <dt class="mt-0.5">
                                                 <span class="sr-only">Date</span>
@@ -339,7 +339,7 @@
                                             </dd>
                                         </div>
                                         <div v-if="event.venue_name"
-                                            class="mt-2 flex items-start {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'space-x-reverse' : '' }} space-x-3 {{ (isset($force_mobile) && $force_mobile) ? '' : (isset($role) && $role->isRtl() && ! session()->has('translate') ? 'xl:mr-3.5 xl:mt-0 xl:border-r xl:border-gray-400 xl:border-opacity-50 xl:pr-3.5' : 'xl:ml-3.5 xl:mt-0 xl:border-l xl:border-gray-400 xl:border-opacity-50 xl:pl-3.5') }}">
+                                            class="mt-2 flex items-start {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'space-x-reverse' : '' }} space-x-3 {{ (isset($force_mobile) && $force_mobile) ? '' : (isset($role) && $role->isRtl() && ! session()->has('translate') ? 'xl:mr-3.5 xl:mt-0 xl:border-r xl:border-gray-400 dark:xl:border-gray-600 xl:border-opacity-50 xl:pr-3.5' : 'xl:ml-3.5 xl:mt-0 xl:border-l xl:border-gray-400 dark:xl:border-gray-600 xl:border-opacity-50 xl:pl-3.5') }}">
                                             <dt class="mt-0.5">
                                                 <span class="sr-only">Location</span>
                                                 <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"
@@ -369,7 +369,7 @@
             </div>
             <div v-else-if="{{ $tab != 'availability' ? 'true' : 'false' }}" class="p-10 max-w-5xl mx-auto px-4">
                 <div class="flex justify-center items-center pb-6 w-full">
-                    <div class="text-2xl text-center">
+                    <div class="text-2xl text-center text-gray-900 dark:text-gray-100">
                         {{ __('messages.no_scheduled_events') }}
                     </div>
                 </div>
