@@ -14,7 +14,7 @@
 
 <x-slot name="head">
   <style>
-    button {
+    form button {
       min-width: 100px;
       min-height: 40px;
     }
