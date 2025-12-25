@@ -333,7 +333,7 @@
         /* EasyMDE Dark Mode Styles - Using custom Tailwind colors */
         .dark .editor-toolbar {
             background-color: #252526 !important; /* gray-800 */
-            border-bottom: 1px solid #2d2d30 !important; /* gray-700 */
+            border: none !important;
         }
 
         .dark .editor-toolbar button,
@@ -385,6 +385,7 @@
         .dark .CodeMirror {
             background-color: #1e1e1e !important; /* gray-900 */
             color: #f9fafb !important; /* gray-50 */
+            border: none !important;
         }
 
         .dark .CodeMirror-cursor {
@@ -412,6 +413,12 @@
 
         .dark .CodeMirror-focused .CodeMirror-selected {
             background-color: #3e3e42 !important; /* gray-600 */
+        }
+
+        .dark .EasyMDEContainer,
+        .dark .EasyMDEContainer .CodeMirror,
+        .dark .EasyMDEContainer .CodeMirror-focused {
+            border: none !important;
         }
 
         .custom-content * {
