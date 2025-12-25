@@ -529,13 +529,13 @@
 
             function initTheme() {
                 const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-                const theme = storedTheme || THEMES.SYSTEM;
+                const theme = storedTheme || THEMES.DARK;
                 
                 // Apply theme immediately to prevent flash
                 applyTheme(theme);
                 
                 // Watch for system theme changes if in system mode
-                if (theme === THEMES.SYSTEM || !storedTheme) {
+                if (theme === THEMES.SYSTEM) {
                     watchSystemTheme();
                 }
             }
@@ -543,7 +543,7 @@
             function watchSystemTheme() {
                 const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
                 mediaQuery.addEventListener('change', function(e) {
-                    const currentTheme = localStorage.getItem(THEME_STORAGE_KEY) || THEMES.SYSTEM;
+                    const currentTheme = localStorage.getItem(THEME_STORAGE_KEY);
                     if (currentTheme === THEMES.SYSTEM) {
                         applyTheme(THEMES.SYSTEM);
                     }
@@ -573,7 +573,7 @@
                 }, 10);
             };
             window.getCurrentTheme = function() {
-                return localStorage.getItem(THEME_STORAGE_KEY) || THEMES.SYSTEM;
+                return localStorage.getItem(THEME_STORAGE_KEY) || THEMES.DARK;
             };
             
             // Update buttons after theme system is initialized
