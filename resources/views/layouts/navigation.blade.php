@@ -159,7 +159,7 @@
                         onclick="setTheme('light'); updateThemeButtons();"
                         id="theme-light"
                         data-theme="light"
-                        class="theme-btn flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+                        class="theme-btn flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 hover:scale-105 active:scale-95 transition-all duration-200"
                         aria-label="Light theme"
                         aria-pressed="false">
                         <svg class="h-4 w-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -171,7 +171,7 @@
                         onclick="setTheme('dark'); updateThemeButtons();"
                         id="theme-dark"
                         data-theme="dark"
-                        class="theme-btn flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+                        class="theme-btn flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 hover:scale-105 active:scale-95 transition-all duration-200"
                         aria-label="Dark theme"
                         aria-pressed="false">
                         <svg class="h-4 w-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -183,7 +183,7 @@
                         onclick="setTheme('system'); updateThemeButtons();"
                         id="theme-system"
                         data-theme="system"
-                        class="theme-btn flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+                        class="theme-btn flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 hover:scale-105 active:scale-95 transition-all duration-200"
                         aria-label="System theme"
                         aria-pressed="false">
                         <svg class="h-4 w-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -201,9 +201,17 @@
         background-color: rgba(255, 255, 255, 0.15) !important;
         color: #ffffff !important;
     }
+    .theme-btn.active:hover {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+        color: #ffffff !important;
+    }
     .theme-btn:not(.active) {
         background-color: transparent !important;
         color: #9ca3af !important;
+    }
+    .theme-btn:not(.active):hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
     }
 </style>
 
