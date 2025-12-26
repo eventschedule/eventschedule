@@ -251,8 +251,39 @@
         <x-text-input name="venue_country_code" type="hidden" v-model="venueCountryCode" />                                                                
 
         <div class="py-5">
-            <div class="max-w-7xl mx-auto space-y-6">
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+            <div class="max-w-7xl mx-auto lg:grid lg:grid-cols-12 lg:gap-6">
+                <!-- Sidebar Navigation (hidden on small screens, visible on lg+) -->
+                <div class="hidden lg:block lg:col-span-3">
+                    <div class="sticky top-6">
+                        <nav class="space-y-1">
+                            <a href="#section-event-venue" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-event-venue">
+                                {{ __('messages.event_venue') }}
+                            </a>
+                            <a href="#section-event-participants" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-event-participants">
+                                {{ __('messages.event_participants') }}
+                            </a>
+                            @if (! $role->isVenue() || $user->isMember($role->subdomain) || $user->canEditEvent($event))
+                            <a href="#section-event-details" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-event-details">
+                                {{ __('messages.event_details') }}
+                            </a>
+                            @endif
+                            @if ($event->user_id == $user->id)
+                            <a href="#section-event-tickets" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-event-tickets">
+                                {{ __('messages.event_tickets') }}
+                            </a>
+                            @endif
+                            @if ($event->exists && $event->canBeSyncedToGoogleCalendarForSubdomain(request()->subdomain))
+                            <a href="#section-google-calendar-sync" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-google-calendar-sync">
+                                {{ __('messages.google_calendar_sync') }}
+                            </a>
+                            @endif
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Main Content Area -->
+                <div class="lg:col-span-9 space-y-6 lg:space-y-0">
+                <div id="section-event-venue" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                             {{ __('messages.event_venue') }}
@@ -448,7 +479,7 @@
                 </div>
 
 
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                <div id="section-event-participants" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                             {{ __('messages.event_participants') . ($role->isVenue() ? ' - ' . __('messages.optional') : '') }}
@@ -623,7 +654,7 @@
                 </div>
 
                 @if (! $role->isVenue() || $user->isMember($role->subdomain) || $user->canEditEvent($event))
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                <div id="section-event-details" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                             {{ __('messages.event_details') }}
@@ -893,7 +924,7 @@
                 </div>
 
                     @if ($event->user_id == $user->id)
-                    <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                    <div id="section-event-tickets" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                         <div class="max-w-xl">                                                
                             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                                 {{ __('messages.event_tickets') }}
@@ -1093,7 +1124,7 @@
 
         
             @if ($event->exists && $event->canBeSyncedToGoogleCalendarForSubdomain(request()->subdomain))
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+            <div id="section-google-calendar-sync" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                 <div class="max-w-xl">                                                
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                         {{ __('messages.google_calendar_sync') }}
@@ -1138,6 +1169,9 @@
                 </div>
             </div>
             @endif
+
+                </div> <!-- End of main content area -->
+            </div> <!-- End of grid container -->
 
         <div class="max-w-7xl mx-auto space-y-6 pt-4">
             <p class="text-base dark:text-gray-400 text-gray-600 pb-2">
@@ -1779,6 +1813,99 @@
       alert('Error: ' + error.message);
     });
   }
+
+// Section navigation functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const sectionLinks = document.querySelectorAll('.section-nav-link');
+    const sections = document.querySelectorAll('.section-content');
+    
+    // Function to show a specific section and hide others
+    function showSection(sectionId) {
+        sections.forEach(section => {
+            if (section.id === sectionId) {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+        });
+        
+        // Update active link
+        sectionLinks.forEach(link => {
+            if (link.getAttribute('data-section') === sectionId) {
+                link.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-gray-100');
+                link.classList.remove('text-gray-700', 'dark:text-gray-300');
+            } else {
+                link.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-gray-100');
+                link.classList.add('text-gray-700', 'dark:text-gray-300');
+            }
+        });
+        
+        // Update URL hash
+        if (history.pushState) {
+            history.pushState(null, null, '#' + sectionId);
+        } else {
+            window.location.hash = sectionId;
+        }
+    }
+    
+    // Handle navigation link clicks
+    sectionLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const sectionId = this.getAttribute('data-section');
+            showSection(sectionId);
+        });
+    });
+    
+    // Check if we're on a large screen
+    function isLargeScreen() {
+        return window.matchMedia('(min-width: 1024px)').matches;
+    }
+    
+    // Initialize: show first section on large screens, all on small screens
+    function initializeSections() {
+        if (isLargeScreen()) {
+            // Check URL hash first
+            const hash = window.location.hash.replace('#', '');
+            if (hash && document.getElementById(hash)) {
+                showSection(hash);
+            } else {
+                // Show first section
+                const firstSection = sections[0];
+                if (firstSection) {
+                    showSection(firstSection.id);
+                }
+            }
+        } else {
+            // On small screens, show all sections
+            sections.forEach(section => {
+                section.style.display = 'block';
+            });
+        }
+    }
+    
+    // Handle window resize
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            initializeSections();
+        }, 250);
+    });
+    
+    // Handle hash changes
+    window.addEventListener('hashchange', function() {
+        if (isLargeScreen()) {
+            const hash = window.location.hash.replace('#', '');
+            if (hash && document.getElementById(hash)) {
+                showSection(hash);
+            }
+        }
+    });
+    
+    // Initialize on page load
+    initializeSections();
+});
 </script>
 
 </x-app-admin-layout>

@@ -462,8 +462,53 @@
         @endif
 
         <div class="py-5">
-            <div class="max-w-7xl mx-auto space-y-6">
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+            <div class="max-w-7xl mx-auto lg:grid lg:grid-cols-12 lg:gap-6">
+                <!-- Sidebar Navigation (hidden on small screens, visible on lg+) -->
+                <div class="hidden lg:block lg:col-span-3">
+                    <div class="sticky top-6">
+                        <nav class="space-y-1">
+                            <a href="#section-details" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-details">
+                                {{ __('messages.' . $role->type . '_details') }}
+                            </a>
+                            @if ($role->isVenue())
+                            <a href="#section-venue-address" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-venue-address">
+                                {{ __('messages.venue_address') }}
+                            </a>
+                            @endif
+                            <a href="#section-contact-info" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-contact-info">
+                                {{ __('messages.contact_info') }}
+                            </a>
+                            <a href="#section-schedule-style" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-schedule-style">
+                                {{ __('messages.schedule_style') }}
+                            </a>
+                            <a href="#section-schedule-settings" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-schedule-settings">
+                                {{ __('messages.schedule_settings') }}
+                            </a>
+                            <a href="#section-subschedules" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-subschedules">
+                                {{ __('messages.subschedules') }}
+                            </a>
+                            @if (! config('app.hosted'))
+                            <a href="#section-auto-import" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-auto-import">
+                                {{ __('messages.auto_import_settings') }}
+                            </a>
+                            @endif
+                            @if (! $role->exists || $role->user_id == auth()->user()->id)
+                            <a href="#section-google-calendar" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-google-calendar">
+                                {{ __('messages.google_calendar_integration') }}
+                            </a>
+                            @endif
+                            @if (config('app.hosted'))
+                            <a href="#section-email-settings" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-email-settings">
+                                {{ __('messages.email_settings') }}
+                            </a>
+                            @endif
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Main Content Area -->
+                <div class="lg:col-span-9 space-y-6 lg:space-y-0">
+                <div id="section-details" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
@@ -497,93 +542,11 @@
                                 class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">{{ old('description', $role->description) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="profile_image" :value="__('messages.square_profile_image')" />
-                            <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full text-gray-900 dark:text-gray-100"
-                                :value="old('profile_image')" accept="image/png, image/jpeg" />
-                            <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
-                            <p id="profile_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
-                                {{ __('messages.image_size_warning') }}
-                            </p>
-
-                            <img id="profile_image_preview" src="#" alt="Profile Image Preview" style="max-height:120px; display:none;" class="pt-3" />
-
-                            @if ($role->profile_image_url)
-                            <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="pt-3" />
-                            <a href="#"
-                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'profile']) }}'; }"
-                                class="hover:underline text-gray-900 dark:text-gray-100">
-                                {{ __('messages.delete_image') }}
-                            </a>
-                            @endif
-                        </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="header_image" :value="__('messages.header_image')" />
-                            <div class="color-select-container">
-                                <select id="header_image" name="header_image"
-                                    class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
-                                    oninput="updatePreview(); updateHeaderNavButtons(); toggleCustomHeaderInput();">
-                                    @foreach($headers as $header => $name)
-                                    <option value="{{ $header }}"
-                                        {{ $role->header_image == $header ? 'SELECTED' : '' }}>
-                                        {{ $name }}</option>
-                                    @endforeach
-                                </select>
-
-                                <button type="button" 
-                                        id="prev_header" 
-                                        class="color-nav-button" 
-                                        onclick="changeHeaderImage(-1)"
-                                        title="{{ __('messages.previous') }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                                    </svg>
-                                </button>
-                                                                                
-                                <button type="button" 
-                                        id="next_header" 
-                                        class="color-nav-button" 
-                                        onclick="changeHeaderImage(1)"
-                                        title="{{ __('messages.next') }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <div id="custom_header_input" style="display:none" class="mt-2">
-                                <input id="header_image_url" name="header_image_url" type="file" 
-                                    class="mt-1 block w-full text-gray-900 dark:text-gray-100" 
-                                    :value="old('header_image_url')" 
-                                    accept="image/png, image/jpeg" />
-                                <x-input-error class="mt-2" :messages="$errors->get('header_image_url')" />
-                                <p id="header_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
-                                    {{ __('messages.image_size_warning') }}
-                                </p>
-                            </div>
-
-                            <img id="header_image_preview" 
-                                src="{{ $role->header_image ? asset('images/headers/' . $role->header_image . '.png') : $role->header_image_url }}" 
-                                alt="Header Image Preview" 
-                                style="max-height:120px; {{ $role->header_image || $role->header_image_url ? '' : 'display:none;' }}" 
-                                class="pt-3" />
-
-                            @if ($role->header_image_url)
-                            <a href="#" id="delete_header_image" style="display: {{ $role->header_image ? 'none' : 'block' }};"
-                                onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}'; }"
-                                class="hover:underline text-gray-900 dark:text-gray-100">
-                                {{ __('messages.delete_image') }}
-                            </a>
-                            @endif
-
-                        </div>
                     </div>
                 </div>
 
                 @if ($role->isVenue())
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                <div id="section-venue-address" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
@@ -642,7 +605,7 @@
                 </div>
                 @endif
 
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                <div id="section-contact-info" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
@@ -702,7 +665,7 @@
                     </div>
                 </div>
 
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="address">
+                <div id="section-schedule-style" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div>
 
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
@@ -920,7 +883,7 @@
 
                 </div>
 
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="address">
+                <div id="section-schedule-settings" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
@@ -1046,7 +1009,7 @@
                     </div>
                 </div>
 
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="address">
+                <div id="section-subschedules" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
@@ -1120,7 +1083,7 @@
                 </div>
 
                 @if (! config('app.hosted'))
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="import-settings">
+                <div id="section-auto-import" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
@@ -1196,7 +1159,7 @@
                 @endif
 
                 @if (! $role->exists || $role->user_id == auth()->user()->id)
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                <div id="section-google-calendar" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div class="max-w-xl">
 
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
@@ -1307,7 +1270,7 @@
                 @endif
 
                 @if (config('app.hosted'))
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg" id="email-settings">
+                <div id="section-email-settings" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div class="max-w-xl">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                     {{ __('messages.email_settings') }}
@@ -1380,8 +1343,8 @@
                 @endif
                 @endif
                     
-            </div>            
-        </div>
+                </div> <!-- End of main content area -->
+            </div> <!-- End of grid container -->
 
         <div class="max-w-7xl mx-auto space-y-6 mt-8">
             @if (! $role->exists)
@@ -1905,5 +1868,98 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+});
+
+// Section navigation functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const sectionLinks = document.querySelectorAll('.section-nav-link');
+    const sections = document.querySelectorAll('.section-content');
+    
+    // Function to show a specific section and hide others
+    function showSection(sectionId) {
+        sections.forEach(section => {
+            if (section.id === sectionId) {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+        });
+        
+        // Update active link
+        sectionLinks.forEach(link => {
+            if (link.getAttribute('data-section') === sectionId) {
+                link.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-gray-100');
+                link.classList.remove('text-gray-700', 'dark:text-gray-300');
+            } else {
+                link.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-gray-100');
+                link.classList.add('text-gray-700', 'dark:text-gray-300');
+            }
+        });
+        
+        // Update URL hash
+        if (history.pushState) {
+            history.pushState(null, null, '#' + sectionId);
+        } else {
+            window.location.hash = sectionId;
+        }
+    }
+    
+    // Handle navigation link clicks
+    sectionLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const sectionId = this.getAttribute('data-section');
+            showSection(sectionId);
+        });
+    });
+    
+    // Check if we're on a large screen
+    function isLargeScreen() {
+        return window.matchMedia('(min-width: 1024px)').matches;
+    }
+    
+    // Initialize: show first section on large screens, all on small screens
+    function initializeSections() {
+        if (isLargeScreen()) {
+            // Check URL hash first
+            const hash = window.location.hash.replace('#', '');
+            if (hash && document.getElementById(hash)) {
+                showSection(hash);
+            } else {
+                // Show first section
+                const firstSection = sections[0];
+                if (firstSection) {
+                    showSection(firstSection.id);
+                }
+            }
+        } else {
+            // On small screens, show all sections
+            sections.forEach(section => {
+                section.style.display = 'block';
+            });
+        }
+    }
+    
+    // Handle window resize
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            initializeSections();
+        }, 250);
+    });
+    
+    // Handle hash changes
+    window.addEventListener('hashchange', function() {
+        if (isLargeScreen()) {
+            const hash = window.location.hash.replace('#', '');
+            if (hash && document.getElementById(hash)) {
+                showSection(hash);
+            }
+        }
+    });
+    
+    // Initialize on page load
+    initializeSections();
 });
 </script>
