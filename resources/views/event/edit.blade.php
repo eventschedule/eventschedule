@@ -1891,10 +1891,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update active link
         sectionLinks.forEach(link => {
             if (link.getAttribute('data-section') === sectionId) {
-                link.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-white', 'dark:text-white', 'font-bold', 'border-[#4E81FA]');
+                link.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[#4E81FA]');
                 link.classList.remove('text-gray-700', 'dark:text-gray-300', 'font-semibold', 'border-transparent');
             } else {
-                link.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-white', 'dark:text-white', 'font-bold', 'border-[#4E81FA]');
+                link.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'font-bold', 'border-[#4E81FA]');
                 link.classList.add('text-gray-700', 'dark:text-gray-300', 'font-semibold', 'border-transparent');
             }
         });
