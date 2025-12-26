@@ -221,7 +221,7 @@
         @else
         <div class="{{ $tab == 'availability' ? 'hidden md:block' : '' }} {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }}"> 
             <div
-                class="grid grid-cols-7 gap-px border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-center text-xs font-semibold leading-6 text-gray-700 dark:text-gray-300">
+                class="grid grid-cols-7 gap-px border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-800 text-center text-xs font-semibold leading-6 text-gray-700 dark:text-gray-300">
                 @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $day)
                 <div class="flex justify-center bg-white dark:bg-[#1A1A1A] py-2">
                     {{ __('messages.' . $day) }}
