@@ -2,7 +2,7 @@
     <div>
         
         <!-- Feedback Form -->
-        <div class="mb-6 mt-2 w-full">
+        <div class="mb-6 w-full">
             <form id="feedback-form" class="w-full">
                 @csrf
                 <div class="relative w-full">
