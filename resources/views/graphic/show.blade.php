@@ -98,7 +98,10 @@
                     })
                     .catch(error => {
                         console.error('Error loading graphic:', error);
-                        errorDiv.textContent = error.message || '{{ __("messages.error_loading_graphic") }}';
+                        const errorTextDiv = document.getElementById('errorMessageText');
+                        if (errorTextDiv) {
+                            errorTextDiv.textContent = error.message || '{{ __("messages.error_loading_graphic") }}';
+                        }
                         errorDiv.classList.remove('hidden');
                         spinner.classList.add('hidden');
                     });
@@ -134,7 +137,7 @@
                     </div>
                     <div class="ml-3">
                         <h3 class="text-sm font-medium text-red-800 dark:text-red-300">{{ __('messages.error') }}</h3>
-                        <div class="mt-2 text-sm text-red-700 dark:text-red-400"></div>
+                        <div id="errorMessageText" class="mt-2 text-sm text-red-700 dark:text-red-200"></div>
                     </div>
                 </div>
             </div>
