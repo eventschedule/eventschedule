@@ -300,7 +300,7 @@
                             <x-text-input id="event_name" name="name" type="text" class="mt-1 block w-full"
                                 :value="old('name', $event->name)"
                                 v-model="eventName"
-                                required autocomplete="off" />
+                                autofocus required autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                             @if ($event->exists)
                             <div class="text-sm text-gray-500 flex items-center gap-2">
@@ -679,7 +679,7 @@
                         <div v-if="isOnline">
                             <x-input-label for="event_url" :value="__('messages.event_url')" />
                             <x-text-input id="event_url" name="event_url" type="url" class="mt-1 block w-full"
-                                v-model="event.event_url" autofocus autocomplete="off" />
+                                v-model="event.event_url" autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('event_url')" />
                         </div>
                         <div v-if="!isOnline">
@@ -706,7 +706,7 @@
                                             <div class="flex mt-1">
                                                 <x-text-input v-bind:id="'edit_member_name_' + member.id" 
                                                     v-bind:name="'members[' + member.id + '][name]'" type="text" class="mr-2 block w-full"
-                                                    v-model="selectedMembers.find(m => m.id === member.id).name" required autofocus
+                                                    v-model="selectedMembers.find(m => m.id === member.id).name" required
                                                     @keydown.enter.prevent="editMember()" autocomplete="off" />
                                                 <x-primary-button @click="editMember()" type="button">
                                                     {{ __('messages.done') }}
