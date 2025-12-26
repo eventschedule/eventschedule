@@ -6,6 +6,7 @@ return [
     'event_deleted' => 'Evento excluído com sucesso',
     'edit_event' => 'Editar Evento',
     'add_event' => 'Adicionar Evento',
+    'clone_event' => 'Clonar Evento',
     'sign_up' => 'Inscrever-se',
     'event_updated' => 'Evento atualizado com sucesso',
     'request_accepted' => 'Parabéns! Sua solicitação para se apresentar em :venue foi aceita.',
@@ -145,6 +146,7 @@ return [
     'solid' => 'Sólido',
     'background_color' => 'Cor de fundo',
     'custom' => 'Personalizado',
+    'participants' => 'Participantes',
     'event_participants' => 'Participantes do evento',
     'manage' => 'Gerenciar',
     'please_select_venue_or_participant' => 'Por favor, selecione um local ou participante',
@@ -657,4 +659,7 @@ return [
     'time' => 'Hora',
     'view_your_tickets' => 'Ver Seus Ingressos',
     'ticket_details' => 'Detalhes do Ingresso',
+    'send_email' => 'Enviar E-mail',
+    'refund_ticket' => 'Reembolsar Ingresso',
+    'cancel_ticket' => 'Cancelar Ingresso',
 ];

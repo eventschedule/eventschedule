@@ -6,6 +6,7 @@ return [
     'event_deleted' => 'تم حذف الحدث بنجاح',
     'edit_event' => 'تعديل الحدث',
     'add_event' => 'إضافة حدث',
+    'clone_event' => 'استنساخ الحدث',
     'sign_up' => 'تسجيل',
     'event_updated' => 'تم تحديث الحدث بنجاح',
     'request_accepted' => 'تم قبول الطلب',
@@ -287,6 +288,7 @@ return [
     'solid' => 'صلب',
     'background_color' => 'لون الخلفية',
     'custom' => 'مخصص',
+    'participants' => 'المشاركون',
     'event_participants' => 'مشاركون في الفعالية',
     'manage' => 'إدارة',
     'please_select_venue_or_participant' => 'يرجى اختيار مكان أو مشارك',
@@ -659,4 +661,7 @@ return [
     'time' => 'الوقت',
     'view_your_tickets' => 'عرض تذاكرك',
     'ticket_details' => 'تفاصيل التذكرة',
+    'send_email' => 'إرسال بريد إلكتروني',
+    'refund_ticket' => 'استرداد التذكرة',
+    'cancel_ticket' => 'إلغاء التذكرة',
 ];
