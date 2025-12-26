@@ -223,13 +223,13 @@
             <div
                 class="grid grid-cols-7 gap-px border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-center text-xs font-semibold leading-6 text-gray-700 dark:text-gray-300">
                 @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $day)
-                <div class="flex justify-center bg-white dark:bg-gray-700 py-2">
+                <div class="flex justify-center bg-white dark:bg-[#1A1A1A] py-2">
                     {{ __('messages.' . $day) }}
                 </div>
                 @endforeach
             </div>
         </div>
-        <div class="bg-gray-200 dark:bg-gray-700 text-xs leading-6 text-gray-700 dark:text-gray-300 {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }}">
+        <div class="bg-gray-200 dark:bg-[#1A1A1A] text-xs leading-6 text-gray-700 dark:text-gray-300 {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }}">
             <div class="w-full grid grid-cols-7 grid-rows-{{ $totalWeeks }} gap-px">
                 @while ($currentDate->lte($endOfMonth))
                 @if ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at)
