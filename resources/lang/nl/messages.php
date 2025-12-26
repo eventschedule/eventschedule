@@ -6,6 +6,7 @@ return [
     'event_deleted' => 'Evenement succesvol verwijderd',
     'edit_event' => 'Evenement Bewerken',
     'add_event' => 'Evenement Toevoegen',
+    'clone_event' => 'Evenement Klonen',
     'sign_up' => 'Aanmelden',
     'event_updated' => 'Evenement succesvol bijgewerkt',
     'request_accepted' => 'Gefeliciteerd! Je verzoek om op te treden bij :venue is geaccepteerd.',
@@ -144,6 +145,7 @@ return [
     'solid' => 'Solide',
     'background_color' => 'Achtergrondkleur',
     'custom' => 'Aangepast',
+    'participants' => 'Deelnemers',
     'event_participants' => 'Evenementdeelnemers',
     'manage' => 'Beheren',
     'please_select_venue_or_participant' => 'Selecteer een locatie of deelnemer',
@@ -656,4 +658,7 @@ return [
     'time' => 'Tijd',
     'view_your_tickets' => 'Bekijk Je Tickets',
     'ticket_details' => 'Ticket Details',
+    'send_email' => 'E-mail Versturen',
+    'refund_ticket' => 'Ticket Terugbetalen',
+    'cancel_ticket' => 'Ticket Annuleren',
 ];

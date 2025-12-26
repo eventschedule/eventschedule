@@ -7,6 +7,7 @@ return [
     'event_deleted' => 'האירוע נמחק בהצלחה',
     'edit_event' => 'ערוך אירוע',
     'add_event' => 'הוסף אירוע',
+    'clone_event' => 'שכפל אירוע',
     'sign_up' => 'הרשמה',
     'event_updated' => 'האירוע עודכן בהצלחה',
     'request_accepted' => 'מזל טוב! בקשתך להופיע ב:venue התקבלה.',
@@ -139,6 +140,7 @@ return [
     'solid' => 'מלא',
     'background_color' => 'צבע רקע',
     'custom' => 'מותאם אישית',
+    'participants' => 'משתתפים',
     'event_participants' => 'משתתפי האירוע',
     'manage' => 'ניהול',
     'please_select_venue_or_participant' => 'נא לבחור מקום או משתתף',
@@ -651,4 +653,7 @@ return [
     'time' => 'שעה',
     'view_your_tickets' => 'צפה בכרטיסים שלך',
     'ticket_details' => 'פרטי הכרטיס',
+    'send_email' => 'שלח דוא"ל',
+    'refund_ticket' => 'החזר כרטיס',
+    'cancel_ticket' => 'בטל כרטיס',
 ];
