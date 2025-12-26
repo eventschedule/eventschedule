@@ -749,7 +749,7 @@ class RoleController extends Controller
         $data = [
             'role' => $role,
             'user' => auth()->user(),
-            'title' => __('messages.new_' . $role->type),
+            'title' => __('messages.new_schedule'),
             'gradients' => $gradientOptions,
             'backgrounds' => $backgroundOptions,
             'headers' => $headerOptions,
@@ -981,7 +981,7 @@ class RoleController extends Controller
         $data = [
             'user' => auth()->user(),
             'role' => $role,
-            'title' => __('messages.edit_' . $role->type),
+            'title' => __('messages.edit_schedule'),
             'gradients' => $gradientOptions,
             'backgrounds' => $backgroundOptions,
             'headers' => $headerOptions,
