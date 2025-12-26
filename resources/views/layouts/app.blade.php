@@ -447,6 +447,19 @@
             padding: 0.75rem 1rem !important;
         }
 
+        /* Exception for country picker - needs proper padding for flag */
+        /* Default mode: flag on right */
+        .country-select input,
+        .country-select input[type="text"] {
+            padding-right: 36px !important;
+        }
+        /* Inside mode: flag on left */
+        .country-select.inside input,
+        .country-select.inside input[type="text"] {
+            padding-left: 52px !important;
+            padding-right: 6px !important;
+        }
+
 
     </style>
 
