@@ -256,20 +256,20 @@
                 <div class="hidden lg:block lg:col-span-3">
                     <div class="sticky top-6">
                         <nav class="space-y-1">
-                            <a href="#section-event-venue" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-event-venue">
-                                {{ __('messages.event_venue') }}
-                            </a>
-                            <a href="#section-event-participants" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-event-participants">
-                                {{ __('messages.event_participants') }}
-                            </a>
                             @if (! $role->isVenue() || $user->isMember($role->subdomain) || $user->canEditEvent($event))
                             <a href="#section-event-details" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-event-details">
-                                {{ __('messages.event_details') }}
+                                {{ __('messages.details') }}
                             </a>
                             @endif
+                            <a href="#section-event-venue" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-event-venue">
+                                {{ __('messages.venue') }}
+                            </a>
+                            <a href="#section-event-participants" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-event-participants">
+                                {{ __('messages.participants') }}
+                            </a>
                             @if ($event->user_id == $user->id)
                             <a href="#section-event-tickets" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-event-tickets">
-                                {{ __('messages.event_tickets') }}
+                                {{ __('messages.tickets') }}
                             </a>
                             @endif
                             @if ($event->exists && $event->canBeSyncedToGoogleCalendarForSubdomain(request()->subdomain))
@@ -283,381 +283,11 @@
 
                 <!-- Main Content Area -->
                 <div class="lg:col-span-9 space-y-6 lg:space-y-0">
-                <div id="section-event-venue" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
-                    <div class="max-w-xl">                                                
-                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('messages.event_venue') }}
-                        </h2>
-
-                        <div class="mb-6">
-                            <fieldset>
-                                <div class="flex items-center space-x-6">
-                                    <div class="flex items-center">
-                                        <input id="in_person" name="event_type" type="checkbox" v-model="isInPerson"
-                                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
-                                            @change="onChangeVenueType('in_person')">
-                                        <label for="in_person" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
-                                            {{ __('messages.in_person') }}
-                                        </label>
-                                    </div>
-                                    <div class="flex items-center pl-3">
-                                        <input id="online" name="event_type" type="checkbox" v-model="isOnline"
-                                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
-                                            @change="onChangeVenueType('online')">
-                                        <label for="online" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
-                                            {{ __('messages.online') }}
-                                        </label>
-                                    </div>
-                                </div>
-                            </fieldset>
-                        </div>
-
-                        <x-text-input name="venue_id" v-bind:value="selectedVenue.id" type="hidden" />
-
-                        <div v-if="isInPerson">
-                            <div v-if="!selectedVenue || showVenueAddressFields" class="mb-6">
-                                <div v-if="!selectedVenue">
-                                    <fieldset v-if="Object.keys(venues).length > 0">                                
-                                        <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
-                                            <div v-if="Object.keys(venues).length > 0" class="flex items-center">
-                                                <input id="use_existing_venue" name="venue_type" type="radio" value="use_existing" v-model="venueType"
-                                                    class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
-                                                <label for="use_existing_venue"
-                                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
-                                            </div>
-                                            <div class="flex items-center">
-                                                <input id="create_new_venue" name="venue_type" type="radio" value="create_new" v-model="venueType"
-                                                    class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
-                                                <label for="create_new_venue"
-                                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.create_new') }}</label>
-                                            </div>
-                                        </div>
-                                    </fieldset>
-
-                                    <div v-if="venueType === 'use_existing'">
-                                        <select id="selected_venue"
-                                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}"
-                                                v-model="selectedVenue">
-                                                <option value="" disabled selected>{{ __('messages.please_select') }}</option>                                
-                                                <option v-for="venue in venues" :key="venue.id" :value="venue">
-                                                    @{{ venue.name || venue.address1 }} <template v-if="venue.email">(@{{ venue.email }})</template>
-                                                </option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div v-if="showAddressFields()">
-                                    <div class="mb-6">
-                                        <x-input-label for="venue_name" :value="__('messages.name')" />
-                                        <x-text-input id="venue_name" name="venue_name" type="text"
-                                            class="mt-1 block w-full" v-model="venueName" autocomplete="off" />
-                                        <x-input-error class="mt-2" :messages="$errors->get('venue_name')" />
-                                    </div>
-
-                                    <div class="mb-6">
-                                        <x-input-label for="venue_email" :value="__('messages.email')" />
-                                        <div class="flex mt-1">
-                                            <x-text-input id="venue_email" name="venue_email" type="email" class="block w-full"
-                                                @blur="searchVenues" v-model="venueEmail" autocomplete="off" />
-                                        </div>
-                                        @if (config('app.hosted'))
-                                        <p class="mt-2 text-sm text-gray-500">
-                                            {{ __('messages.an_email_will_be_sent') }}
-                                        </p>
-                                        @endif
-                                        <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
-                                    </div>
-
-                                    <div v-if="venueSearchResults.length" class="mb-6">
-                                        <div class="space-y-2">
-                                            <div v-for="venue in venueSearchResults" :key="venue.id" class="flex items-center justify-between">
-                                                <div class="flex items-center">
-                                                    <span class="text-sm text-gray-900 dark:text-gray-100 truncate">
-                                                        <a :href="venue.url" target="_blank" class="hover:underline">@{{ venue.name }}</a>:
-                                                        @{{ venue.address1 }}
-                                                    </span>
-                                                </div>
-                                                <x-primary-button @click="selectVenue(venue)" type="button">
-                                                    {{ __('messages.select') }}
-                                                </x-primary-button>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-6">
-                                        <x-input-label for="venue_address1" :value="__('messages.street_address')" />
-                                        <x-text-input id="venue_address1" name="venue_address1" type="text"
-                                            class="mt-1 block w-full" v-model="venueAddress1" autocomplete="off" />
-                                        <x-input-error class="mt-2" :messages="$errors->get('venue_address1')" />
-                                    </div>
-
-                                    <div class="mb-6">
-                                        <x-input-label for="venue_city" :value="__('messages.city')" />
-                                        <x-text-input id="venue_city" name="venue_city" type="text" class="mt-1 block w-full"
-                                            v-model="venueCity" autocomplete="off" />
-                                        <x-input-error class="mt-2" :messages="$errors->get('venue_city')" />
-                                    </div>
-
-                                    <div class="mb-6">
-                                        <x-input-label for="venue_state" :value="__('messages.state_province')" />
-                                        <x-text-input id="venue_state" name="venue_state" type="text" class="mt-1 block w-full"
-                                            v-model="venueState" autocomplete="off" />
-                                        <x-input-error class="mt-2" :messages="$errors->get('venue_state')" />
-                                    </div>
-
-                                    <div class="mb-6">
-                                        <x-input-label for="venue_postal_code" :value="__('messages.postal_code')" />
-                                        <x-text-input id="venue_postal_code" name="venue_postal_code" type="text"
-                                            class="mt-1 block w-full" v-model="venuePostalCode" autocomplete="off" />
-                                        <x-input-error class="mt-2" :messages="$errors->get('venue_postal_code')" />
-                                    </div>
-
-                                    <div class="mb-6">
-                                        <x-input-label for="venue_country" :value="__('messages.country')" />
-                                        <x-text-input id="venue_country" name="venue_country" type="text" class="mt-1 block w-full"
-                                            onchange="onChangeCountry()" autocomplete="off" />
-                                        <x-input-error class="mt-2" :messages="$errors->get('country')" />
-                                        <input type="hidden" id="venue_country_code" name="venue_country_code" 
-                                            v-model="venueCountryCode"/>
-                                    </div>
-
-                                    <div class="mb-6">
-                                        <div class="flex items-center space-x-4">
-                                            <x-secondary-button id="view_map_button" onclick="viewMap()">{{ __('messages.view_map') }}</x-secondary-button>
-                                            @if (config('services.google.backend'))
-                                            <x-secondary-button id="validate_button" onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
-                                            <x-secondary-button id="accept_button" onclick="acceptAddress(event)" class="hidden">{{ __('messages.accept') }}</x-secondary-button>
-                                            @endif
-                                            <x-primary-button v-if="showVenueAddressFields" type="button" @click="updateSelectedVenue()">{{ __('messages.done') }}</x-primary-button>
-                                        </div>
-                                    </div>
-
-                                    <div id="address_response" class="mb-6 hidden text-gray-900 dark:text-gray-100"></div>
-
-                                </div>
-                            </div>
-
-              
-                            <div v-else class="mb-6">
-                                <div class="flex justify-between w-full">
-                                    <div class="flex items-center">
-                                        <span class="text-sm text-gray-900 dark:text-gray-100">
-                                            <template v-if="selectedVenue.url">
-                                                <a :href="selectedVenue.url" target="_blank" class="hover:underline">@{{ venueName || venueAddress1 }}</a>
-                                            </template>
-                                            <template v-else>
-                                                @{{ venueName || venueAddress1 }}
-                                            </template>
-                                            <template v-if="venueEmail">
-                                                (<a :href="'mailto:' + venueEmail" class="hover:underline">@{{ venueEmail }}</a>)
-                                            </template>
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <x-secondary-button v-if="!selectedVenue.user_id" @click="editSelectedVenue" type="button" class="mr-2">
-                                            {{ __('messages.edit') }}
-                                        </x-secondary-button>
-                                        <x-secondary-button @click="clearSelectedVenue" type="button">
-                                            {{ __('messages.remove') }}
-                                        </x-secondary-button>
-                                    </div>
-                                </div>
-                            </div>                        
-
-                        </div>
-
-                        <div v-if="isOnline">
-                            <x-input-label for="event_url" :value="__('messages.event_url')" />
-                            <x-text-input id="event_url" name="event_url" type="url" class="mt-1 block w-full"
-                                v-model="event.event_url" autofocus autocomplete="off" />
-                            <x-input-error class="mt-2" :messages="$errors->get('event_url')" />
-                        </div>
-                        <div v-if="!isOnline">
-                            <input type="hidden" name="event_url" value="" />
-                        </div>
-                    </div>
-                </div>
-
-
-                <div id="section-event-participants" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
-                    <div class="max-w-xl">                                                
-                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('messages.event_participants') . ($role->isVenue() ? ' - ' . __('messages.optional') : '') }}
-                            <span v-if="selectedMembers.length > 1">(@{{ selectedMembers.length }})</span>
-                        </h2>
-
-                        <div>
-                            <div v-if="selectedMembers && selectedMembers.length > 0" class="mb-6">
-                                <div v-for="member in selectedMembers" :key="member.id" class="flex items-center justify-between mb-2">
-                                    <input type="hidden" v-bind:name="'members[' + member.id + '][email]'" v-bind:value="member.email" />
-                                    <div v-show="editMemberId === member.id" class="w-full">
-                                        <div class="mb-6">
-                                            <x-input-label :value="__('messages.name') . ' *'" />
-                                            <div class="flex mt-1">
-                                                <x-text-input v-bind:id="'edit_member_name_' + member.id" 
-                                                    v-bind:name="'members[' + member.id + '][name]'" type="text" class="mr-2 block w-full"
-                                                    v-model="selectedMembers.find(m => m.id === member.id).name" required autofocus
-                                                    @keydown.enter.prevent="editMember()" autocomplete="off" />
-                                                <x-primary-button @click="editMember()" type="button">
-                                                    {{ __('messages.done') }}
-                                                </x-primary-button>
-                                            </div>
-                                            <x-input-error class="mt-2" :messages="$errors->get('member_name')" />
-                                        </div>
-
-                                        <div class="mb-6">  
-                                            <x-input-label for="edit_member_email" :value="__('messages.email')" />
-                                            <x-text-input v-bind:id="'edit_member_email_' + member.id" 
-                                                v-bind:name="'members[' + member.id + '][email]'" type="email" class="mr-2 block w-full" 
-                                                v-model="selectedMembers.find(m => m.id === member.id).email" @keydown.enter.prevent="editMember()" autocomplete="off" />
-                                        </div>
-
-                                        <div class="mb-6">
-                                            <x-input-label for="edit_member_youtube_url" :value="__('messages.youtube_video_url')" />
-                                            <x-text-input v-bind:id="'edit_member_youtube_url_' + member.id" 
-                                                v-bind:name="'members[' + member.id + '][youtube_url]'" type="url" class="mr-2 block w-full" 
-                                                v-model="selectedMembers.find(m => m.id === member.id).youtube_url" @keydown.enter.prevent="editMember()" autocomplete="off" />
-                                        </div>
-
-                                    </div>
-                                    <div v-show="editMemberId !== member.id" class="flex justify-between w-full">
-                                        <div class="flex items-center">
-                                            <span class="text-sm text-gray-900 dark:text-gray-100 truncate">
-                                                <template v-if="member.url">
-                                                    <a :href="member.url" target="_blank" class="hover:underline">@{{ member.name }}</a>
-                                                </template>
-                                                <template v-else>
-                                                    @{{ member.name }}
-                                                </template>
-                                                <template v-if="member.email">
-                                                    (<a :href="'mailto:' + member.email" class="hover:underline">@{{ member.email }}</a>)
-                                                </template>
-                                            </span>
-                                            <a v-if="member.youtube_url" :href="member.youtube_url" target="_blank" class="ml-2">
-                                                <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                                                </svg>
-                                            </a>
-                                        </div>
-                                        <div>
-                                            <x-secondary-button v-if="!member.user_id" @click="editMember(member)" type="button" class="mr-2">
-                                                {{ __('messages.edit') }}
-                                            </x-secondary-button>
-                                            <x-secondary-button @click="removeMember(member)" type="button">
-                                                {{ __('messages.remove') }}
-                                            </x-secondary-button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div v-if="showMemberTypeRadio">
-                                <fieldset>                                
-                                    <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
-                                        <div v-if="Object.keys(members).length > 0" class="flex items-center">
-                                            <input id="use_existing_members" name="member_type" type="radio" value="use_existing" v-model="memberType"
-                                                class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
-                                            <label for="use_existing_members"
-                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
-                                        </div>
-                                        <div v-if="Object.keys(members).length == 0" class="flex items-center">
-                                            <input id="use_existing_members" name="member_type" type="radio" value="use_existing" v-model="memberType"
-                                                class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
-                                            <label for="use_existing_members"
-                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.none') }}</label>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <input id="create_new_members" name="member_type" type="radio" value="create_new" v-model="memberType"
-                                                class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
-                                            <label for="create_new_members"
-                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.create_new') }}</label>
-                                        </div>
-                                    </div>
-                                </fieldset>
-
-                                <div v-if="memberType === 'use_existing' && Object.keys(members).length > 0">
-                                    <select v-model="selectedMember" @change="addExistingMember" id="selected_member"
-                                        class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
-                                        <option value="" disabled selected>{{ __('messages.please_select') }}</option>
-                                        <option v-for="member in filteredMembers" :key="member.id" :value="member">
-                                            @{{ member.name }} <template v-if="member.email">(@{{ member.email }})</template>
-                                        </option>
-                                    </select>
-                                </div>
-
-                                <div v-if="memberType === 'create_new'"> 
-                                    <div class="mb-6">
-                                        <x-input-label for="member_name" :value="__('messages.name') . ' *'" />
-                                        <div class="flex mt-1">
-                                            <x-text-input id="member_name" @keydown.enter.prevent="addMember"
-                                                v-model="memberName" type="text" class="mr-2 block w-full" required autocomplete="off" />
-                                            <x-primary-button @click="addMember" type="button">
-                                                {{ __('messages.add') }}
-                                            </x-primary-button>
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-6">
-                                        <x-input-label for="member_email" :value="__('messages.email')" />
-                                        <div class="flex mt-1">
-                                            <x-text-input id="member_email" name="member_email" type="email" class="mr-2 block w-full"
-                                            @keydown.enter.prevent="addMember" @blur="searchMembers" v-model="memberEmail" autocomplete="off" />
-                                        </div>
-                                        @if (config('app.hosted'))
-                                        <p class="mt-2 text-sm text-gray-500">
-                                            {{ __('messages.an_email_will_be_sent') }}
-                                        </p>
-                                        @endif
-                                        <x-input-error class="mt-2" :messages="$errors->get('member_email')" />
-                                    </div>
-
-                                    <div v-if="memberSearchResults.length" class="mb-6">
-                                        <div class="space-y-2">
-                                            <div v-for="member in memberSearchResults" :key="member.id" class="flex items-center justify-between">
-                                                <div class="flex items-center">
-                                                    <span class="text-sm text-gray-900 dark:text-gray-100">
-                                                        <a :href="member.url" target="_blank" class="hover:underline">@{{ member.name }}</a>
-                                                        <template v-if="member.email">
-                                                            (<a :href="'mailto:' + member.email" class="hover:underline">@{{ member.email }}</a>)
-                                                        </template>
-                                                    </span>
-                                                    <a v-if="member.youtube_url" :href="member.youtube_url" target="_blank" class="ml-2">
-                                                        <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                                                        </svg>
-                                                    </a>
-                                                </div>
-                                                <x-primary-button @click="selectMember(member)" type="button">
-                                                    {{ __('messages.select') }}
-                                                </x-primary-button>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-6">
-                                        <x-input-label for="member_youtube_url" :value="__('messages.youtube_video_url')" />
-                                        <x-text-input id="member_youtube_url" @keydown.enter.prevent="addMember"
-                                            v-model="memberYoutubeUrl" type="url" class="mr-2 block w-full" autocomplete="off" />
-                                    </div>
-                                
-                                </div>
-                                
-                            </div>
-
-                            <div v-if="!showMemberTypeRadio" class="mt-4 flex justify-end">
-                                <x-secondary-button @click="showAddMemberForm" type="button">
-                                    {{ __('messages.add') }}
-                                </x-secondary-button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 @if (! $role->isVenue() || $user->isMember($role->subdomain) || $user->canEditEvent($event))
-                <div id="section-event-details" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <div id="section-event-details" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('messages.event_details') }}
+                            {{ __('messages.details') }}
                         </h2>
 
                         <div class="mb-6">
@@ -922,12 +552,382 @@
 
                     </div>
                 </div>
+                @endif
+                <div id="section-event-venue" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                    <div class="max-w-xl">                                                
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                            {{ __('messages.venue') }}
+                        </h2>
+
+                        <div class="mb-6">
+                            <fieldset>
+                                <div class="flex items-center space-x-6">
+                                    <div class="flex items-center">
+                                        <input id="in_person" name="event_type" type="checkbox" v-model="isInPerson"
+                                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
+                                            @change="onChangeVenueType('in_person')">
+                                        <label for="in_person" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                            {{ __('messages.in_person') }}
+                                        </label>
+                                    </div>
+                                    <div class="flex items-center pl-3">
+                                        <input id="online" name="event_type" type="checkbox" v-model="isOnline"
+                                            class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded"
+                                            @change="onChangeVenueType('online')">
+                                        <label for="online" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                            {{ __('messages.online') }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <x-text-input name="venue_id" v-bind:value="selectedVenue.id" type="hidden" />
+
+                        <div v-if="isInPerson">
+                            <div v-if="!selectedVenue || showVenueAddressFields" class="mb-6">
+                                <div v-if="!selectedVenue">
+                                    <fieldset v-if="Object.keys(venues).length > 0">                                
+                                        <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
+                                            <div v-if="Object.keys(venues).length > 0" class="flex items-center">
+                                                <input id="use_existing_venue" name="venue_type" type="radio" value="use_existing" v-model="venueType"
+                                                    class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                                <label for="use_existing_venue"
+                                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input id="create_new_venue" name="venue_type" type="radio" value="create_new" v-model="venueType"
+                                                    class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                                <label for="create_new_venue"
+                                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.create_new') }}</label>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+
+                                    <div v-if="venueType === 'use_existing'">
+                                        <select id="selected_venue"
+                                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}"
+                                                v-model="selectedVenue">
+                                                <option value="" disabled selected>{{ __('messages.please_select') }}</option>                                
+                                                <option v-for="venue in venues" :key="venue.id" :value="venue">
+                                                    @{{ venue.name || venue.address1 }} <template v-if="venue.email">(@{{ venue.email }})</template>
+                                                </option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div v-if="showAddressFields()">
+                                    <div class="mb-6">
+                                        <x-input-label for="venue_name" :value="__('messages.name')" />
+                                        <x-text-input id="venue_name" name="venue_name" type="text"
+                                            class="mt-1 block w-full" v-model="venueName" autocomplete="off" />
+                                        <x-input-error class="mt-2" :messages="$errors->get('venue_name')" />
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <x-input-label for="venue_email" :value="__('messages.email')" />
+                                        <div class="flex mt-1">
+                                            <x-text-input id="venue_email" name="venue_email" type="email" class="block w-full"
+                                                @blur="searchVenues" v-model="venueEmail" autocomplete="off" />
+                                        </div>
+                                        @if (config('app.hosted'))
+                                        <p class="mt-2 text-sm text-gray-500">
+                                            {{ __('messages.an_email_will_be_sent') }}
+                                        </p>
+                                        @endif
+                                        <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
+                                    </div>
+
+                                    <div v-if="venueSearchResults.length" class="mb-6">
+                                        <div class="space-y-2">
+                                            <div v-for="venue in venueSearchResults" :key="venue.id" class="flex items-center justify-between">
+                                                <div class="flex items-center">
+                                                    <span class="text-sm text-gray-900 dark:text-gray-100 truncate">
+                                                        <a :href="venue.url" target="_blank" class="hover:underline">@{{ venue.name }}</a>:
+                                                        @{{ venue.address1 }}
+                                                    </span>
+                                                </div>
+                                                <x-primary-button @click="selectVenue(venue)" type="button">
+                                                    {{ __('messages.select') }}
+                                                </x-primary-button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <x-input-label for="venue_address1" :value="__('messages.street_address')" />
+                                        <x-text-input id="venue_address1" name="venue_address1" type="text"
+                                            class="mt-1 block w-full" v-model="venueAddress1" autocomplete="off" />
+                                        <x-input-error class="mt-2" :messages="$errors->get('venue_address1')" />
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <x-input-label for="venue_city" :value="__('messages.city')" />
+                                        <x-text-input id="venue_city" name="venue_city" type="text" class="mt-1 block w-full"
+                                            v-model="venueCity" autocomplete="off" />
+                                        <x-input-error class="mt-2" :messages="$errors->get('venue_city')" />
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <x-input-label for="venue_state" :value="__('messages.state_province')" />
+                                        <x-text-input id="venue_state" name="venue_state" type="text" class="mt-1 block w-full"
+                                            v-model="venueState" autocomplete="off" />
+                                        <x-input-error class="mt-2" :messages="$errors->get('venue_state')" />
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <x-input-label for="venue_postal_code" :value="__('messages.postal_code')" />
+                                        <x-text-input id="venue_postal_code" name="venue_postal_code" type="text"
+                                            class="mt-1 block w-full" v-model="venuePostalCode" autocomplete="off" />
+                                        <x-input-error class="mt-2" :messages="$errors->get('venue_postal_code')" />
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <x-input-label for="venue_country" :value="__('messages.country')" />
+                                        <x-text-input id="venue_country" name="venue_country" type="text" class="mt-1 block w-full"
+                                            onchange="onChangeCountry()" autocomplete="off" />
+                                        <x-input-error class="mt-2" :messages="$errors->get('country')" />
+                                        <input type="hidden" id="venue_country_code" name="venue_country_code" 
+                                            v-model="venueCountryCode"/>
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <div class="flex items-center space-x-4">
+                                            <x-secondary-button id="view_map_button" onclick="viewMap()">{{ __('messages.view_map') }}</x-secondary-button>
+                                            @if (config('services.google.backend'))
+                                            <x-secondary-button id="validate_button" onclick="onValidateClick()">{{ __('messages.validate_address') }}</x-secondary-button>
+                                            <x-secondary-button id="accept_button" onclick="acceptAddress(event)" class="hidden">{{ __('messages.accept') }}</x-secondary-button>
+                                            @endif
+                                            <x-primary-button v-if="showVenueAddressFields" type="button" @click="updateSelectedVenue()">{{ __('messages.done') }}</x-primary-button>
+                                        </div>
+                                    </div>
+
+                                    <div id="address_response" class="mb-6 hidden text-gray-900 dark:text-gray-100"></div>
+
+                                </div>
+                            </div>
+
+              
+                            <div v-else class="mb-6">
+                                <div class="flex justify-between w-full">
+                                    <div class="flex items-center">
+                                        <span class="text-sm text-gray-900 dark:text-gray-100">
+                                            <template v-if="selectedVenue.url">
+                                                <a :href="selectedVenue.url" target="_blank" class="hover:underline">@{{ venueName || venueAddress1 }}</a>
+                                            </template>
+                                            <template v-else>
+                                                @{{ venueName || venueAddress1 }}
+                                            </template>
+                                            <template v-if="venueEmail">
+                                                (<a :href="'mailto:' + venueEmail" class="hover:underline">@{{ venueEmail }}</a>)
+                                            </template>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <x-secondary-button v-if="!selectedVenue.user_id" @click="editSelectedVenue" type="button" class="mr-2">
+                                            {{ __('messages.edit') }}
+                                        </x-secondary-button>
+                                        <x-secondary-button @click="clearSelectedVenue" type="button">
+                                            {{ __('messages.remove') }}
+                                        </x-secondary-button>
+                                    </div>
+                                </div>
+                            </div>                        
+
+                        </div>
+
+                        <div v-if="isOnline">
+                            <x-input-label for="event_url" :value="__('messages.event_url')" />
+                            <x-text-input id="event_url" name="event_url" type="url" class="mt-1 block w-full"
+                                v-model="event.event_url" autofocus autocomplete="off" />
+                            <x-input-error class="mt-2" :messages="$errors->get('event_url')" />
+                        </div>
+                        <div v-if="!isOnline">
+                            <input type="hidden" name="event_url" value="" />
+                        </div>
+                    </div>
+                </div>
+
+
+                <div id="section-event-participants" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                    <div class="max-w-xl">                                                
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                            {{ __('messages.participants') . ($role->isVenue() ? ' - ' . __('messages.optional') : '') }}
+                            <span v-if="selectedMembers.length > 1">(@{{ selectedMembers.length }})</span>
+                        </h2>
+
+                        <div>
+                            <div v-if="selectedMembers && selectedMembers.length > 0" class="mb-6">
+                                <div v-for="member in selectedMembers" :key="member.id" class="flex items-center justify-between mb-2">
+                                    <input type="hidden" v-bind:name="'members[' + member.id + '][email]'" v-bind:value="member.email" />
+                                    <div v-show="editMemberId === member.id" class="w-full">
+                                        <div class="mb-6">
+                                            <x-input-label :value="__('messages.name') . ' *'" />
+                                            <div class="flex mt-1">
+                                                <x-text-input v-bind:id="'edit_member_name_' + member.id" 
+                                                    v-bind:name="'members[' + member.id + '][name]'" type="text" class="mr-2 block w-full"
+                                                    v-model="selectedMembers.find(m => m.id === member.id).name" required autofocus
+                                                    @keydown.enter.prevent="editMember()" autocomplete="off" />
+                                                <x-primary-button @click="editMember()" type="button">
+                                                    {{ __('messages.done') }}
+                                                </x-primary-button>
+                                            </div>
+                                            <x-input-error class="mt-2" :messages="$errors->get('member_name')" />
+                                        </div>
+
+                                        <div class="mb-6">  
+                                            <x-input-label for="edit_member_email" :value="__('messages.email')" />
+                                            <x-text-input v-bind:id="'edit_member_email_' + member.id" 
+                                                v-bind:name="'members[' + member.id + '][email]'" type="email" class="mr-2 block w-full" 
+                                                v-model="selectedMembers.find(m => m.id === member.id).email" @keydown.enter.prevent="editMember()" autocomplete="off" />
+                                        </div>
+
+                                        <div class="mb-6">
+                                            <x-input-label for="edit_member_youtube_url" :value="__('messages.youtube_video_url')" />
+                                            <x-text-input v-bind:id="'edit_member_youtube_url_' + member.id" 
+                                                v-bind:name="'members[' + member.id + '][youtube_url]'" type="url" class="mr-2 block w-full" 
+                                                v-model="selectedMembers.find(m => m.id === member.id).youtube_url" @keydown.enter.prevent="editMember()" autocomplete="off" />
+                                        </div>
+
+                                    </div>
+                                    <div v-show="editMemberId !== member.id" class="flex justify-between w-full">
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-900 dark:text-gray-100 truncate">
+                                                <template v-if="member.url">
+                                                    <a :href="member.url" target="_blank" class="hover:underline">@{{ member.name }}</a>
+                                                </template>
+                                                <template v-else>
+                                                    @{{ member.name }}
+                                                </template>
+                                                <template v-if="member.email">
+                                                    (<a :href="'mailto:' + member.email" class="hover:underline">@{{ member.email }}</a>)
+                                                </template>
+                                            </span>
+                                            <a v-if="member.youtube_url" :href="member.youtube_url" target="_blank" class="ml-2">
+                                                <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                        <div>
+                                            <x-secondary-button v-if="!member.user_id" @click="editMember(member)" type="button" class="mr-2">
+                                                {{ __('messages.edit') }}
+                                            </x-secondary-button>
+                                            <x-secondary-button @click="removeMember(member)" type="button">
+                                                {{ __('messages.remove') }}
+                                            </x-secondary-button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div v-if="showMemberTypeRadio">
+                                <fieldset>                                
+                                    <div class="mt-2 mb-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
+                                        <div v-if="Object.keys(members).length > 0" class="flex items-center">
+                                            <input id="use_existing_members" name="member_type" type="radio" value="use_existing" v-model="memberType"
+                                                class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                            <label for="use_existing_members"
+                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.use_existing') }}</label>
+                                        </div>
+                                        <div v-if="Object.keys(members).length == 0" class="flex items-center">
+                                            <input id="use_existing_members" name="member_type" type="radio" value="use_existing" v-model="memberType"
+                                                class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                            <label for="use_existing_members"
+                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.none') }}</label>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input id="create_new_members" name="member_type" type="radio" value="create_new" v-model="memberType"
+                                                class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                            <label for="create_new_members"
+                                                class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.create_new') }}</label>
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <div v-if="memberType === 'use_existing' && Object.keys(members).length > 0">
+                                    <select v-model="selectedMember" @change="addExistingMember" id="selected_member"
+                                        class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                        <option value="" disabled selected>{{ __('messages.please_select') }}</option>
+                                        <option v-for="member in filteredMembers" :key="member.id" :value="member">
+                                            @{{ member.name }} <template v-if="member.email">(@{{ member.email }})</template>
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div v-if="memberType === 'create_new'"> 
+                                    <div class="mb-6">
+                                        <x-input-label for="member_name" :value="__('messages.name') . ' *'" />
+                                        <div class="flex mt-1">
+                                            <x-text-input id="member_name" @keydown.enter.prevent="addMember"
+                                                v-model="memberName" type="text" class="mr-2 block w-full" required autocomplete="off" />
+                                            <x-primary-button @click="addMember" type="button">
+                                                {{ __('messages.add') }}
+                                            </x-primary-button>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <x-input-label for="member_email" :value="__('messages.email')" />
+                                        <div class="flex mt-1">
+                                            <x-text-input id="member_email" name="member_email" type="email" class="mr-2 block w-full"
+                                            @keydown.enter.prevent="addMember" @blur="searchMembers" v-model="memberEmail" autocomplete="off" />
+                                        </div>
+                                        @if (config('app.hosted'))
+                                        <p class="mt-2 text-sm text-gray-500">
+                                            {{ __('messages.an_email_will_be_sent') }}
+                                        </p>
+                                        @endif
+                                        <x-input-error class="mt-2" :messages="$errors->get('member_email')" />
+                                    </div>
+
+                                    <div v-if="memberSearchResults.length" class="mb-6">
+                                        <div class="space-y-2">
+                                            <div v-for="member in memberSearchResults" :key="member.id" class="flex items-center justify-between">
+                                                <div class="flex items-center">
+                                                    <span class="text-sm text-gray-900 dark:text-gray-100">
+                                                        <a :href="member.url" target="_blank" class="hover:underline">@{{ member.name }}</a>
+                                                        <template v-if="member.email">
+                                                            (<a :href="'mailto:' + member.email" class="hover:underline">@{{ member.email }}</a>)
+                                                        </template>
+                                                    </span>
+                                                    <a v-if="member.youtube_url" :href="member.youtube_url" target="_blank" class="ml-2">
+                                                        <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                                        </svg>
+                                                    </a>
+                                                </div>
+                                                <x-primary-button @click="selectMember(member)" type="button">
+                                                    {{ __('messages.select') }}
+                                                </x-primary-button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <x-input-label for="member_youtube_url" :value="__('messages.youtube_video_url')" />
+                                        <x-text-input id="member_youtube_url" @keydown.enter.prevent="addMember"
+                                            v-model="memberYoutubeUrl" type="url" class="mr-2 block w-full" autocomplete="off" />
+                                    </div>
+                                
+                                </div>
+                                
+                            </div>
+
+                            <div v-if="!showMemberTypeRadio" class="mt-4 flex justify-end">
+                                <x-secondary-button @click="showAddMemberForm" type="button">
+                                    {{ __('messages.add') }}
+                                </x-secondary-button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                     @if ($event->user_id == $user->id)
                     <div id="section-event-tickets" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                         <div class="max-w-xl">                                                
                             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                                {{ __('messages.event_tickets') }}
+                                {{ __('messages.tickets') }}
                             </h2>
 
                             <div class="mb-6">
@@ -1120,7 +1120,6 @@
                         </div>
                     </div>
                     @endif
-                @endif
 
         
             @if ($event->exists && $event->canBeSyncedToGoogleCalendarForSubdomain(request()->subdomain))
