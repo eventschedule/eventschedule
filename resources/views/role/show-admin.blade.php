@@ -120,14 +120,14 @@
             </nav>
         </div>
         -->
-        <div class="mt-2 flex items-top justify-between">
+        <div class="flex items-top justify-between">
             @if ($role->profile_image_url)
                 <div class="pr-4">
                     <img src="{{ $role->profile_image_url }}" class="rounded-lg h-14 w-14 flex-none">
                 </div>
             @endif
             <div class="min-w-0 flex-1">
-                <h2 class="mt-2 text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
+                <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
                     {{ $role->name }}</h2>
 
                 <div class="mt-1 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6">

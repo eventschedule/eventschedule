@@ -146,7 +146,7 @@
                 </div>
             </div>
 
-            <main class="py-6">
+            <main class="py-10">
                 <div class="px-4 sm:px-6 lg:px-8">
 
                     @if ($errors->any())
