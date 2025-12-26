@@ -267,28 +267,28 @@
                     <div class="sticky top-6">
                         <nav class="space-y-1">
                             @if (! $role->isVenue() || $user->isMember($role->subdomain) || $user->canEditEvent($event))
-                            <a href="#section-event-details" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-event-details">
+                            <a href="#section-details" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-details">
                                 {{ __('messages.details') }}
                             </a>
                             @endif
-                            <a href="#section-event-venue" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-event-venue">
+                            <a href="#section-venue" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-venue">
                                 {{ __('messages.venue') }}
                             </a>
-                            <a href="#section-event-participants" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-event-participants">
+                            <a href="#section-participants" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-participants">
                                 {{ __('messages.participants') }}
                             </a>
                             @if (! $role->isCurator())
-                            <a href="#section-event-recurring" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-event-recurring">
+                            <a href="#section-recurring" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-recurring">
                                 {{ __('messages.recurring') }}
                             </a>
                             @endif
                             @if ($event->user_id == $user->id)
-                            <a href="#section-event-tickets" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-event-tickets">
+                            <a href="#section-tickets" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-tickets">
                                 {{ __('messages.tickets') }}
                             </a>
                             @endif
                             @if ($event->exists && $event->canBeSyncedToGoogleCalendarForSubdomain(request()->subdomain))
-                            <a href="#section-google-calendar-sync" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-google-calendar-sync">
+                            <a href="#section-google-calendar" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-google-calendar">
                                 {{ __('messages.google_calendar_sync') }}
                             </a>
                             @endif
@@ -299,7 +299,7 @@
                 <!-- Main Content Area -->
                 <div class="lg:col-span-9 space-y-6 lg:space-y-0">
                 @if (! $role->isVenue() || $user->isMember($role->subdomain) || $user->canEditEvent($event))
-                <div id="section-event-details" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
+                <div id="section-details" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                             {{ __('messages.details') }}
@@ -503,7 +503,7 @@
                     </div>
                 </div>
                 @endif
-                <div id="section-event-venue" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <div id="section-venue" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                             {{ __('messages.venue') }}
@@ -699,7 +699,7 @@
                 </div>
 
 
-                <div id="section-event-participants" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <div id="section-participants" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                             {{ __('messages.participants') . ($role->isVenue() ? ' - ' . __('messages.optional') : '') }}
@@ -874,7 +874,7 @@
                 </div>
 
                 @if (! $role->isCurator())
-                <div id="section-event-recurring" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                <div id="section-recurring" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                             {{ __('messages.recurring') }}
@@ -948,7 +948,7 @@
                 @endif
 
                     @if ($event->user_id == $user->id)
-                    <div id="section-event-tickets" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                    <div id="section-tickets" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                         <div class="max-w-xl">                                                
                             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                                 {{ __('messages.tickets') }}
@@ -1147,7 +1147,7 @@
 
         
             @if ($event->exists && $event->canBeSyncedToGoogleCalendarForSubdomain(request()->subdomain))
-            <div id="section-google-calendar-sync" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+            <div id="section-google-calendar" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                 <div class="max-w-xl">                                                
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                         {{ __('messages.google_calendar_sync') }}
