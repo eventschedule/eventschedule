@@ -1,5 +1,5 @@
 <x-app-admin-layout>
-    <div class="py-5">
+    <div>
         
         <!-- Feedback Form -->
         <div class="mb-6 mt-2 w-full">

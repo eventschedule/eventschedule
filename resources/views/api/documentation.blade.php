@@ -1,5 +1,5 @@
 <x-app-admin-layout>
-    <div class="py-12">
+    <div>
         <script {!! nonce_attr() !!}>
             function copyCode(button) {
                 // Find the closest parent div that contains both the button and the pre element

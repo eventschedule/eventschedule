@@ -1,6 +1,6 @@
 <x-app-admin-layout>
 
-    <div class="mt-8 flow-root">
+    <div class="flow-root">
         @if($sales->count() > 0)
             <!-- Desktop Table View -->
             <div class="hidden md:block -mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
