@@ -719,6 +719,88 @@
                             -->
 
                             
+                            
+                            <div class="mb-6">
+                                <x-input-label for="profile_image" :value="__('messages.square_profile_image')" />
+                                <input id="profile_image" name="profile_image" type="file" class="mt-1 block w-full text-gray-900 dark:text-gray-100"
+                                    :value="old('profile_image')" accept="image/png, image/jpeg" />
+                                <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
+                                <p id="profile_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                                    {{ __('messages.image_size_warning') }}
+                                </p>
+
+                                <img id="profile_image_preview" src="#" alt="Profile Image Preview" style="max-height:120px; display:none;" class="pt-3" />
+
+                                @if ($role->profile_image_url)
+                                <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="pt-3" />
+                                <a href="#"
+                                    onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'profile']) }}'; }"
+                                    class="hover:underline text-gray-900 dark:text-gray-100">
+                                    {{ __('messages.delete_image') }}
+                                </a>
+                                @endif
+                            </div>
+
+                            <div class="mb-6">
+                                <x-input-label for="header_image" :value="__('messages.header_image')" />
+                                <div class="color-select-container">
+                                    <select id="header_image" name="header_image"
+                                        class="flex-grow border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"
+                                        oninput="updatePreview(); updateHeaderNavButtons(); toggleCustomHeaderInput();">
+                                        @foreach($headers as $header => $name)
+                                        <option value="{{ $header }}"
+                                            {{ $role->header_image == $header ? 'SELECTED' : '' }}>
+                                            {{ $name }}</option>
+                                        @endforeach
+                                    </select>
+
+                                    <button type="button" 
+                                            id="prev_header" 
+                                            class="color-nav-button" 
+                                            onclick="changeHeaderImage(-1)"
+                                            title="{{ __('messages.previous') }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                        </svg>
+                                    </button>
+                                                                                    
+                                    <button type="button" 
+                                            id="next_header" 
+                                            class="color-nav-button" 
+                                            onclick="changeHeaderImage(1)"
+                                            title="{{ __('messages.next') }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <div id="custom_header_input" style="display:none" class="mt-2">
+                                    <input id="header_image_url" name="header_image_url" type="file" 
+                                        class="mt-1 block w-full text-gray-900 dark:text-gray-100" 
+                                        :value="old('header_image_url')" 
+                                        accept="image/png, image/jpeg" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('header_image_url')" />
+                                    <p id="header_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                                        {{ __('messages.image_size_warning') }}
+                                    </p>
+                                </div>
+
+                                <img id="header_image_preview" 
+                                    src="{{ $role->header_image ? asset('images/headers/' . $role->header_image . '.png') : $role->header_image_url }}" 
+                                    alt="Header Image Preview" 
+                                    style="max-height:120px; {{ $role->header_image || $role->header_image_url ? '' : 'display:none;' }}" 
+                                    class="pt-3" />
+
+                                @if ($role->header_image_url)
+                                <a href="#" id="delete_header_image" style="display: {{ $role->header_image ? 'none' : 'block' }};"
+                                    onclick="var confirmed = confirm('{{ __('messages.are_you_sure') }}'); if (confirmed) { location.href = '{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}'; }"
+                                    class="hover:underline text-gray-900 dark:text-gray-100">
+                                    {{ __('messages.delete_image') }}
+                                </a>
+                                @endif
+
+                            </div>
 
                             <div class="mb-6">
                                 <x-input-label :value="__('messages.background')" />
