@@ -1,6 +1,6 @@
 <x-app-admin-layout>
 
-    <div class="mt-8 flow-root">
+    <div class="flow-root">
         <div class="flex flex-col sm:flex-row sm:justify-between gap-4">
             <div class="flex-1">
                 <div class="relative">

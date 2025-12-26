@@ -27,7 +27,7 @@
     
     </x-slot>
 
-    <div id="app" class="max-w-2xl mx-auto px-4 py-8">
+    <div id="app" class="max-w-2xl mx-auto px-4">
         <div class="bg-white rounded-lg shadow-lg p-6">
             <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">{{ __('messages.scan_ticket') }}</h2>
             

@@ -82,7 +82,7 @@
 
     </form>
 
-    <div class="pt-2">
+    <div>
         <!--
         <div>
             <nav class="sm:hidden" aria-label="Back">
