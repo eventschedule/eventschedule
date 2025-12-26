@@ -267,6 +267,11 @@
                             <a href="#section-event-participants" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-event-participants">
                                 {{ __('messages.participants') }}
                             </a>
+                            @if (! $role->isCurator())
+                            <a href="#section-event-recurring" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-event-recurring">
+                                {{ __('messages.recurring') }}
+                            </a>
+                            @endif
                             @if ($event->user_id == $user->id)
                             <a href="#section-event-tickets" class="section-nav-link block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" data-section="section-event-tickets">
                                 {{ __('messages.tickets') }}
@@ -360,71 +365,6 @@
                             </select>
                             <x-input-error class="mt-2" :messages="$errors->get('category_id')" />
                         </div>
-
-                        @if (! $role->isCurator())
-                        <div class="mb-6 sm:flex sm:items-center sm:space-x-10">
-                            <div class="flex items-center">
-                                <input id="one_time" name="schedule_type" type="radio" value="one_time" onchange="onChangeDateType()" {{ $event->days_of_week ? '' : 'CHECKED' }}
-                                    class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
-                                <label for="one_time"
-                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.one_time') }}</label>
-                            </div>
-                            <div class="flex items-center">
-                                <input id="recurring" name="schedule_type" type="radio" value="recurring" onchange="onChangeDateType()"  {{ $event->days_of_week ? 'CHECKED' : '' }}
-                                    class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
-                                <label for="recurring"
-                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.recurring') }}</label>
-                            </div>
-                        </div>
-
-                        <div id="days_of_week_div" class="mb-6 {{ ! $event || ! $event->days_of_week ? 'hidden' : '' }}">
-                            <x-input-label :value="__('messages.days_of_week')" />
-                            @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $index => $day)
-                            <label for="days_of_week_{{ $index }}" class="mr-3 text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">
-                                <input type="checkbox" id="days_of_week_{{ $index }}" name="days_of_week_{{ $index }}" class="h-4 w-4 rounded border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]"
-                                    {{ $event && $event->days_of_week && $event->days_of_week[$index] == '1' ? 'checked' : '' }}/> &nbsp;
-                                {{ __('messages.' . $day) }}
-                            </label>
-                            @endforeach
-                        </div>
-
-                        <div v-if="isRecurring" id="recurring_end_div" class="mb-6">
-                            <x-input-label :value="__('messages.recurring_end')" />
-                            <div class="mt-2 space-y-4">
-                                <div class="flex items-center">
-                                    <input id="recurring_end_never" name="recurring_end_type" type="radio" value="never" v-model="event.recurring_end_type"
-                                        class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
-                                    <label for="recurring_end_never"
-                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.never') }}</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input id="recurring_end_on_date" name="recurring_end_type" type="radio" value="on_date" v-model="event.recurring_end_type"
-                                        class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
-                                    <label for="recurring_end_on_date"
-                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.on_date') }}</label>
-                                </div>
-                                <div v-if="event.recurring_end_type === 'on_date'" class="ml-7">
-                                    <x-text-input type="text" id="recurring_end_date" name="recurring_end_value" class="datepicker-end-date mt-1 block w-full"
-                                        value="{{ old('recurring_end_value', $event->recurring_end_value) }}"
-                                        autocomplete="off" />
-                                    <x-input-error class="mt-2" :messages="$errors->get('recurring_end_value')" />
-                                </div>
-                                <div class="flex items-center">
-                                    <input id="recurring_end_after_events" name="recurring_end_type" type="radio" value="after_events" v-model="event.recurring_end_type"
-                                        class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
-                                    <label for="recurring_end_after_events"
-                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.after_events') }}</label>
-                                </div>
-                                <div v-if="event.recurring_end_type === 'after_events'" class="ml-7">
-                                    <x-text-input type="number" id="recurring_end_count" name="recurring_end_value" class="mt-1 block w-full"
-                                        :value="old('recurring_end_value', $event->recurring_end_value)"
-                                        v-model="event.recurring_end_value"
-                                        min="1" autocomplete="off" />
-                                    <x-input-error class="mt-2" :messages="$errors->get('recurring_end_value')" />
-                                </div>
-                            </div>
-                        </div>
-                        @endif
 
                         <div class="mb-6">
                             <x-input-label for="starts_at"
@@ -923,6 +863,80 @@
                     </div>
                 </div>
 
+                @if (! $role->isCurator())
+                <div id="section-event-recurring" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
+                    <div class="max-w-xl">                                                
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
+                            {{ __('messages.recurring') }}
+                        </h2>
+
+                        <div class="mb-6 sm:flex sm:items-center sm:space-x-10">
+                            <div class="flex items-center">
+                                <input id="one_time" name="schedule_type" type="radio" value="one_time" onchange="onChangeDateType()" {{ $event->days_of_week ? '' : 'CHECKED' }}
+                                    class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                <label for="one_time"
+                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.one_time') }}</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="recurring" name="schedule_type" type="radio" value="recurring" onchange="onChangeDateType()"  {{ $event->days_of_week ? 'CHECKED' : '' }}
+                                    class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                <label for="recurring"
+                                    class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.recurring') }}</label>
+                            </div>
+                        </div>
+
+                        <div id="days_of_week_div" class="mb-6 {{ ! $event || ! $event->days_of_week ? 'hidden' : '' }}">
+                            <x-input-label :value="__('messages.days_of_week')" />
+                            @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $index => $day)
+                            <label for="days_of_week_{{ $index }}" class="mr-3 text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">
+                                <input type="checkbox" id="days_of_week_{{ $index }}" name="days_of_week_{{ $index }}" class="h-4 w-4 rounded border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]"
+                                    {{ $event && $event->days_of_week && $event->days_of_week[$index] == '1' ? 'checked' : '' }}/> &nbsp;
+                                {{ __('messages.' . $day) }}
+                            </label>
+                            @endforeach
+                        </div>
+
+                        <div v-if="isRecurring" id="recurring_end_div" class="mb-6">
+                            <x-input-label :value="__('messages.recurring_end')" />
+                            <div class="mt-2 space-y-4">
+                                <div class="flex items-center">
+                                    <input id="recurring_end_never" name="recurring_end_type" type="radio" value="never" v-model="event.recurring_end_type"
+                                        class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                    <label for="recurring_end_never"
+                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.never') }}</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="recurring_end_on_date" name="recurring_end_type" type="radio" value="on_date" v-model="event.recurring_end_type"
+                                        class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                    <label for="recurring_end_on_date"
+                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.on_date') }}</label>
+                                </div>
+                                <div v-if="event.recurring_end_type === 'on_date'" class="ml-7">
+                                    <x-text-input type="text" id="recurring_end_date" name="recurring_end_value" class="datepicker-end-date mt-1 block w-full"
+                                        value="{{ old('recurring_end_value', $event->recurring_end_value) }}"
+                                        autocomplete="off" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('recurring_end_value')" />
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="recurring_end_after_events" name="recurring_end_type" type="radio" value="after_events" v-model="event.recurring_end_type"
+                                        class="h-4 w-4 border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                                    <label for="recurring_end_after_events"
+                                        class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.after_events') }}</label>
+                                </div>
+                                <div v-if="event.recurring_end_type === 'after_events'" class="ml-7">
+                                    <x-text-input type="number" id="recurring_end_count" name="recurring_end_value" class="mt-1 block w-full"
+                                        :value="old('recurring_end_value', $event->recurring_end_value)"
+                                        v-model="event.recurring_end_value"
+                                        min="1" autocomplete="off" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('recurring_end_value')" />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                @endif
+
                     @if ($event->user_id == $user->id)
                     <div id="section-event-tickets" class="section-content p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md sm:rounded-lg lg:mt-0">
                         <div class="max-w-xl">                                                
@@ -1119,7 +1133,7 @@
                             @endif
                         </div>
                     </div>
-                    @endif
+                @endif
 
         
             @if ($event->exists && $event->canBeSyncedToGoogleCalendarForSubdomain(request()->subdomain))
