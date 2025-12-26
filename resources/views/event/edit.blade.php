@@ -1898,13 +1898,45 @@
     });
   }
 
+// Prevent browser from restoring scroll position
+if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+}
+
+// Scroll to top immediately (before DOMContentLoaded)
+window.scrollTo(0, 0);
+document.documentElement.scrollTop = 0;
+if (document.body) {
+    document.body.scrollTop = 0;
+}
+
 // Section navigation functionality
 document.addEventListener('DOMContentLoaded', function() {
     const sectionLinks = document.querySelectorAll('.section-nav-link');
     const sections = document.querySelectorAll('.section-content');
     
+    // Ensure we're at the top
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    
+    // Prevent browser from scrolling to hash on page load
+    if (window.location.hash) {
+        // Temporarily remove hash to prevent auto-scroll
+        const hash = window.location.hash;
+        history.replaceState(null, null, ' ');
+        window.scrollTo(0, 0);
+        // Restore hash without scrolling
+        setTimeout(function() {
+            if (history.pushState) {
+                history.replaceState(null, null, hash);
+            }
+            window.scrollTo(0, 0);
+        }, 0);
+    }
+    
     // Function to show a specific section and hide others
-    function showSection(sectionId) {
+    function showSection(sectionId, preventScroll = false) {
         sections.forEach(section => {
             if (section.id === sectionId) {
                 section.style.display = 'block';
@@ -1930,6 +1962,11 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             window.location.hash = sectionId;
         }
+        
+        // Prevent scroll if requested
+        if (preventScroll) {
+            window.scrollTo(0, 0);
+        }
     }
     
     // Handle navigation link clicks
@@ -1952,12 +1989,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // Check URL hash first
             const hash = window.location.hash.replace('#', '');
             if (hash && document.getElementById(hash)) {
-                showSection(hash);
+                showSection(hash, true); // Prevent scroll on initial load
             } else {
                 // Show first section
                 const firstSection = sections[0];
                 if (firstSection) {
-                    showSection(firstSection.id);
+                    showSection(firstSection.id, true); // Prevent scroll on initial load
                 }
             }
         } else {
@@ -1989,6 +2026,39 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize on page load
     initializeSections();
+    
+    // Scroll to top on page load - use multiple methods to ensure it works
+    function scrollToTop() {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+    }
+    
+    // Scroll immediately
+    scrollToTop();
+    
+    // Scroll after a short delay to override any hash navigation
+    setTimeout(scrollToTop, 0);
+    setTimeout(scrollToTop, 10);
+    setTimeout(scrollToTop, 50);
+    
+    // Use requestAnimationFrame to ensure it happens after layout
+    requestAnimationFrame(function() {
+        scrollToTop();
+        requestAnimationFrame(scrollToTop);
+    });
+});
+
+// Also scroll to top when window fully loads (backup)
+window.addEventListener('load', function() {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    
+    // Additional scroll after load
+    setTimeout(function() {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }, 0);
 });
 </script>
 
