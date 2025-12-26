@@ -1088,7 +1088,7 @@
 
                                 <div class="mb-6">
                                     <div v-for="(ticket, index) in tickets" :key="index" 
-                                        :class="{'mt-4 p-4 border rounded-lg': tickets.length > 1, 'mt-4': tickets.length === 1}">
+                                        :class="{'mt-4 p-4 border border-gray-300 dark:border-gray-700 rounded-lg': tickets.length > 1, 'mt-4': tickets.length === 1}">
                                         <input type="hidden" v-bind:name="`tickets[${index}][id]`" v-model="ticket.id">
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
