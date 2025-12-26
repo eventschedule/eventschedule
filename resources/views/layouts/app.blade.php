@@ -434,6 +434,20 @@
             white-space: pre-wrap;
         }
 
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        input[type="url"],
+        select,
+        textarea {
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-size: 1.15rem !important;
+            line-height: 1.5 !important;
+            padding: 0.75rem 1rem !important;
+        }
+
+
     </style>
 
     <script {!! nonce_attr() !!}>
