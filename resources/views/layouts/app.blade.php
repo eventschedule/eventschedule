@@ -340,79 +340,79 @@
         .dark .editor-toolbar a,
         .dark .editor-toolbar .fa,
         .dark .editor-toolbar i {
-            color: #d1d5db !important; /* gray-300 */
+            color: #d4d4d4 !important; /* gray-300 */
         }
 
         .dark .editor-toolbar button:hover,
         .dark .editor-toolbar a:hover {
             background-color: #1A1A1A !important; /* Match sidebar dark gray */
-            color: #f9fafb !important; /* gray-50 */
+            color: #f9f9f9 !important; /* gray-50 */
         }
 
         .dark .editor-toolbar button.active,
         .dark .editor-toolbar a.active {
-            background-color: #3e3e42 !important; /* gray-600 */
-            color: #f9fafb !important; /* gray-50 */
+            background-color: #525252 !important; /* gray-600 */
+            color: #f9f9f9 !important; /* gray-50 */
         }
 
         .dark .editor-toolbar .separator {
-            border-left: 1px solid #3e3e42 !important; /* gray-600 */
+            border-left: 1px solid #525252 !important; /* gray-600 */
         }
 
         .dark .editor-toolbar button:before,
         .dark .editor-toolbar a:before {
-            color: #d1d5db !important; /* gray-300 */
+            color: #d4d4d4 !important; /* gray-300 */
         }
 
         .dark .editor-toolbar button:hover:before,
         .dark .editor-toolbar a:hover:before {
-            color: #f9fafb !important; /* gray-50 */
+            color: #f9f9f9 !important; /* gray-50 */
         }
 
         .dark .CodeMirror .editor-toolbar > * {
-            color: #d1d5db !important; /* gray-300 */
+            color: #d4d4d4 !important; /* gray-300 */
         }
 
         .dark .editor-toolbar > * {
-            color: #d1d5db !important; /* gray-300 */
+            color: #d4d4d4 !important; /* gray-300 */
         }
 
         .dark .editor-toolbar > button > i,
         .dark .editor-toolbar > a > i {
-            color: #d1d5db !important; /* gray-300 */
+            color: #d4d4d4 !important; /* gray-300 */
         }
 
         .dark .CodeMirror {
-            background-color: #1e1e1e !important; /* gray-900 */
-            color: #f9fafb !important; /* gray-50 */
+            background-color: #222222 !important; /* gray-900 - match standard text inputs */
+            color: #f9f9f9 !important; /* gray-50 */
             border: none !important;
         }
 
         .dark .CodeMirror-cursor {
-            border-color: #f9fafb !important; /* gray-50 */
+            border-color: #f9f9f9 !important; /* gray-50 */
         }
 
         .dark .CodeMirror-selected {
-            background-color: #3e3e42 !important; /* gray-600 */
+            background-color: #525252 !important; /* gray-600 */
         }
 
         .dark .CodeMirror-line::selection,
         .dark .CodeMirror-line > span::selection,
         .dark .CodeMirror-line > span > span::selection {
-            background-color: #3e3e42 !important; /* gray-600 */
+            background-color: #525252 !important; /* gray-600 */
         }
 
         .dark .CodeMirror-gutters {
-            background-color: #252526 !important; /* gray-800 */
-            border-right: 1px solid #2d2d30 !important; /* gray-700 */
+            background-color: #2B2B2B !important; /* gray-800 */
+            border-right: 1px solid #404040 !important; /* gray-700 */
         }
 
         .dark .CodeMirror-linenumber {
-            color: #6b7280 !important; /* gray-500 */
+            color: #737373 !important; /* gray-500 */
         }
 
         .dark .CodeMirror-focused .CodeMirror-selected {
-            background-color: #3e3e42 !important; /* gray-600 */
+            background-color: #525252 !important; /* gray-600 */
         }
 
         .dark .EasyMDEContainer {
