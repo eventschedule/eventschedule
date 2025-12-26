@@ -10,14 +10,14 @@
             </div>
             
             <div class="text-right">
-                <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100x sm:truncate sm:text-2xl sm:tracking-tight">
+                <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
                     {{ __('messages.import_events') }}
                 </h2>
             </div>
         @else
             <!-- LTR Layout: Title on left, cancel button on right -->
             <div>
-                <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100x sm:truncate sm:text-2xl sm:tracking-tight">
+                <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
                     {{ __('messages.import_events') }}
                 </h2>
             </div>
