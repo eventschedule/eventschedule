@@ -332,7 +332,7 @@
 
         /* EasyMDE Dark Mode Styles - Using custom Tailwind colors */
         .dark .editor-toolbar {
-            background-color: #2d2d30 !important; /* gray-700 - subtle distinction from editor */
+            background-color: #1A1A1A !important; /* Match sidebar dark gray */
             border: none !important;
         }
 
@@ -345,7 +345,7 @@
 
         .dark .editor-toolbar button:hover,
         .dark .editor-toolbar a:hover {
-            background-color: #2d2d30 !important; /* gray-700 */
+            background-color: #1A1A1A !important; /* Match sidebar dark gray */
             color: #f9fafb !important; /* gray-50 */
         }
 
