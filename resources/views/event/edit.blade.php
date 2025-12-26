@@ -261,7 +261,7 @@
         <x-text-input name="venue_country_code" type="hidden" v-model="venueCountryCode" />                                                                
 
         <div class="py-5">
-            <div class="max-w-7xl mx-auto lg:grid lg:grid-cols-12 lg:gap-6">
+            <div class="mx-auto lg:grid lg:grid-cols-12 lg:gap-6">
                 <!-- Sidebar Navigation (hidden on small screens, visible on lg+) -->
                 <div class="hidden lg:block lg:col-span-3">
                     <div class="sticky top-6">
@@ -1257,7 +1257,7 @@
                 </div> <!-- End of main content area -->
             </div> <!-- End of grid container -->
 
-        <div class="max-w-7xl mx-auto space-y-6 pt-4">
+        <div class="mx-auto space-y-6 pt-4">
             <p class="text-base dark:text-gray-400 text-gray-600 pb-2">
                 @if ($event->exists)
                     {{ __('messages.event_created_by', ['user' => $event->user->name]) }}
