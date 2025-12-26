@@ -18,6 +18,16 @@
       min-width: 100px;
       min-height: 40px;
     }
+    
+    /* Hide all sections except the first one on desktop by default */
+    @media (min-width: 1024px) {
+      .section-content {
+        display: none;
+      }
+      .section-content:first-of-type {
+        display: block;
+      }
+    }
   </style>
   <script src="{{ asset('js/vue.global.prod.js') }}"></script>
   <script {!! nonce_attr() !!}>

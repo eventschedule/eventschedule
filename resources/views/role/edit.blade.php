@@ -23,6 +23,16 @@
         .country-select {
             width: 100%;
         }
+        
+        /* Hide all sections except the first one on desktop by default */
+        @media (min-width: 1024px) {
+            .section-content {
+                display: none;
+            }
+            .section-content:first-of-type {
+                display: block;
+            }
+        }
 
         #preview {
             border: 1px solid #dbdbdb;
