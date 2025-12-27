@@ -82,10 +82,10 @@ trait AccountSetupTrait
     protected function createTestEventWithTickets(Browser $browser, string $talentName = 'Talent', string $venueName = 'Venue', string $eventName = 'Test Event'): void
     {
         $browser->visit('/' . strtolower(str_replace(' ', '-', $talentName)) . '/add-event?date=' . date('Y-m-d', strtotime('+3 days')))
-                //->click('a[data-section="section-venue"]')
-                //->pause(1000)
-                //->select('#selected_venue')
-                //->type('name', $eventName)
+                ->type('name', $eventName)
+                ->click('a[data-section="section-venue"]')
+                ->pause(1000)
+                ->select('#selected_venue')
                 ->click('a[data-section="section-tickets"]')
                 ->waitFor('#tickets_enabled', 5)
                 ->check('tickets_enabled')
