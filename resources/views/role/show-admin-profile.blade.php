@@ -21,7 +21,7 @@
                 <h4 class="font-bold mb-2 flex justify-between items-center text-gray-900 dark:text-gray-100">
                     {{ __('messages.youtube_videos') }}
                     <button type="button"
-                        class="inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                        class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-700 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                         onclick="showAdd('youtube_links')">
                         {{ __('messages.add') }}
                     </button>
@@ -69,7 +69,7 @@
                 <h4 class="font-bold mb-2 flex justify-between items-center text-gray-900 dark:text-gray-100">
                     {{ __('messages.social_links') }}
                     <button type="button"
-                        class="inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                        class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-700 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                         onclick="showAdd('social_links')">
                         {{ __('messages.add') }}
                     </button>
@@ -117,7 +117,7 @@
                 <h4 class="font-bold mb-2 flex justify-between items-center text-gray-900 dark:text-gray-100">
                     {{ __('messages.payment_links') }}
                     <button type="button"
-                        class="inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                        class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-700 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                         onclick="showAdd('payment_links')">
                         {{ __('messages.add') }}
                     </button>
