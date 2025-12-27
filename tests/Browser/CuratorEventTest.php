@@ -117,10 +117,12 @@ class CuratorEventTest extends DuskTestCase
     {
         // Create an event and add it to both curators
         $browser->visit('/talent/add-event?date=' . date('Y-m-d'))
+                ->type('duration', '2')                
+                ->click('a[data-section="section-venue"]')
+                ->pause(1000)
                 ->select('#selected_venue')
-                ->type('duration', '2')
-                
-                ->scrollIntoView('input[name="curators[]"]')
+                ->click('a[data-section="section-schedules"]')
+                ->pause(1000)
                 // Use curator names to find and check the checkboxes
                 ->script("
                     var labels = document.querySelectorAll('label[for^=\"curator_\"]');
