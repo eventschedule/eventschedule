@@ -52,6 +52,7 @@ trait AccountSetupTrait
                 ->clear('name')
                 ->type('name', $name)
                 ->pause(1000)
+                ->scrollIntoView('button[type="submit"]')
                 ->click('button[type="submit"]')
                 ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 5)
                 ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
