@@ -30,13 +30,14 @@ trait AccountSetupTrait
     protected function createTestVenue(Browser $browser, string $name = 'Venue', string $address = '123 Test St'): void
     {
         $browser->visit('/new/venue')
-                ->waitForText('New Venue', 5)
+                ->waitForText('New Schedule', 5)
                 ->clear('name')
                 ->type('name', $name)
                 ->pause(1000)
+                ->click('a[data-section="section-address"]')
+                ->pause(1000)
                 ->type('address1', $address)
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
+                ->click('button[type="submit"]')
                 ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 5)
                 ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
     }
@@ -47,12 +48,11 @@ trait AccountSetupTrait
     protected function createTestTalent(Browser $browser, string $name = 'Talent'): void
     {
         $browser->visit('/new/talent')
-                ->waitForText('New Talent', 5)
+                ->waitForText('New Schedule', 5)
                 ->clear('name')
                 ->type('name', $name)
                 ->pause(1000)
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
+                ->click('button[type="submit"]')
                 ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 5)
                 ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
     }
@@ -63,14 +63,13 @@ trait AccountSetupTrait
     protected function createTestCurator(Browser $browser, string $name = 'Curator'): void
     {
         $browser->visit('/new/curator')
-                ->waitForText('New Curator', 5)
+                ->waitForText('New Schedule', 5)
                 ->clear('name')
                 ->type('name', $name)
                 ->pause(1000)
                 ->scrollIntoView('input[name="accept_requests"]')
                 ->check('accept_requests')
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
+                ->click('button[type="submit"]')
                 ->waitForLocation('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule', 5)
                 ->assertPathIs('/' . strtolower(str_replace(' ', '-', $name)) . '/schedule');
     }
@@ -81,15 +80,17 @@ trait AccountSetupTrait
     protected function createTestEventWithTickets(Browser $browser, string $talentName = 'Talent', string $venueName = 'Venue', string $eventName = 'Test Event'): void
     {
         $browser->visit('/' . strtolower(str_replace(' ', '-', $talentName)) . '/add-event?date=' . date('Y-m-d', strtotime('+3 days')))
-                ->select('#selected_venue')
-                ->type('name', $eventName)
-                ->scrollIntoView('input[name="tickets_enabled"]')
+                //->click('a[data-section="section-venue"]')
+                //->pause(1000)
+                //->select('#selected_venue')
+                //->type('name', $eventName)
+                ->click('a[data-section="section-tickets"]')
+                ->pause(1000)
                 ->check('tickets_enabled')
                 ->type('tickets[0][price]', '10')
                 ->type('tickets[0][quantity]', '50')
                 ->type('tickets[0][description]', 'General admission ticket')                    
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
+                ->click('button[type="submit"]')
                 ->waitForLocation('/' . strtolower(str_replace(' ', '-', $talentName)) . '/schedule', 5)
                 ->assertSee($venueName);
     }
