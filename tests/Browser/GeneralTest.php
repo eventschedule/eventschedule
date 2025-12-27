@@ -72,6 +72,10 @@ class GeneralTest extends DuskTestCase
 
             // Create/edit event
             $browser->visit('/talent/add-event?date=' . date('Y-m-d'))
+                    ->waitForText('Details', 5)
+                    // Navigate to venue section
+                    ->click('a[data-section="section-venue"]')
+                    ->waitFor('#selected_venue', 5)
                     ->select('#selected_venue')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
@@ -80,7 +84,14 @@ class GeneralTest extends DuskTestCase
             
             // Create/edit event
             $browser->visit('/venue/add-event?date=' . date('Y-m-d'))
+                    ->waitForText('Details', 5)
+                    // Navigate to participants section
+                    ->click('a[data-section="section-participants"]')
+                    ->waitFor('#selected_member', 5)
                     ->select('#selected_member')
+                    // Navigate back to details section for name field
+                    ->click('a[data-section="section-details"]')
+                    ->waitFor('input[name="name"]', 5)
                     ->type('name', 'Venue Event')
                     ->scrollIntoView('button[type="submit"]')
                     ->press('SAVE')
