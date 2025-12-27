@@ -416,7 +416,7 @@
         }
 
         .dark .EasyMDEContainer {
-            border: 1px solid #404040 !important; /* gray-700 - match form inputs */
+            border: 1px solid #2d2d30 !important; /* gray-700 - match form inputs */
             border-radius: 0.375rem !important; /* rounded-md */
         }
 
