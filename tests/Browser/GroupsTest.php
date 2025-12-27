@@ -56,8 +56,10 @@ class GroupsTest extends DuskTestCase
     protected function createGroups(Browser $browser): void
     {
         $browser->visit('/talent/edit')
-                ->waitForText('Subschedules', 5)
-                ->scrollIntoView('#address')
+                ->waitForText('Details', 5);
+        
+        // Click on the Subschedules navigation link to show that section
+        $browser->click('a[data-section="section-subschedules"]')
                 ->waitForText('Subschedules', 5);
         
         // Add first sub-schedule
@@ -71,8 +73,10 @@ class GroupsTest extends DuskTestCase
         
         // Add second sub-schedule
         $browser->visit('/talent/edit')
-                ->waitForText('Subschedules', 5)
-                ->scrollIntoView('#address')
+                ->waitForText('Details', 5);
+        
+        // Click on the Subschedules navigation link to show that section
+        $browser->click('a[data-section="section-subschedules"]')
                 ->waitForText('Subschedules', 5)
                 ->scrollIntoView('input[name*="groups"][name*="name"]:last-of-type');
         
