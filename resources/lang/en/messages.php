@@ -672,4 +672,5 @@ return [
     'send_email' => 'Send Email',
     'refund_ticket' => 'Refund Ticket',
     'cancel_ticket' => 'Cancel Ticket',
+    'view_api_documentation' => 'View API Documentation',
 ];
