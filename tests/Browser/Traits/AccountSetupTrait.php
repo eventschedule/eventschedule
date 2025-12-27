@@ -31,9 +31,13 @@ trait AccountSetupTrait
     {
         $browser->visit('/new/venue')
                 ->waitForText('New Schedule', 5)
+                ->waitFor('input[name="name"]', 5)
                 ->clear('name')
                 ->type('name', $name)
                 ->pause(1000)
+                // Navigate to address section for venue
+                ->click('a[data-section="section-address"]')
+                ->waitFor('input[name="address1"]', 5)
                 ->type('address1', $address)
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
@@ -48,6 +52,7 @@ trait AccountSetupTrait
     {
         $browser->visit('/new/talent')
                 ->waitForText('New Schedule', 5)
+                ->waitFor('input[name="name"]', 5)
                 ->clear('name')
                 ->type('name', $name)
                 ->pause(1000)
@@ -64,9 +69,11 @@ trait AccountSetupTrait
     {
         $browser->visit('/new/curator')
                 ->waitForText('New Schedule', 5)
+                ->waitFor('input[name="name"]', 5)
                 ->clear('name')
                 ->type('name', $name)
                 ->pause(1000)
+                ->waitFor('input[name="accept_requests"]', 5)
                 ->scrollIntoView('input[name="accept_requests"]')
                 ->check('accept_requests')
                 ->scrollIntoView('button[type="submit"]')
