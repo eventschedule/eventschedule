@@ -4,10 +4,15 @@
             {{ __('API Settings') }}
         </h2>
 
-        <p class="mt-1 text-sm text-gray-600">
-            {{ __('Manage your API access settings.') }}
-            <a href="{{ route('api.documentation') }}" class="text-indigo-600 hover:text-indigo-900">
-                {{ __('View API Documentation') }}
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <a href="{{ route('api.documentation') }}" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:underline">
+                <span class="inline-flex items-center">
+                    {{ __('messages.view_api_documentation') }}
+                    <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"/>
+                        <path fill="currentColor" d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"/>
+                    </svg>
+                </span>
             </a>
         </p>
     </header>
