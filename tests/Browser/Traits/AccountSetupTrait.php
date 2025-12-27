@@ -30,14 +30,10 @@ trait AccountSetupTrait
     protected function createTestVenue(Browser $browser, string $name = 'Venue', string $address = '123 Test St'): void
     {
         $browser->visit('/new/venue')
-                ->waitForText('New Schedule', 5)
-                ->waitFor('input[name="name"]', 5)
+                ->waitForText('New Venue', 5)
                 ->clear('name')
                 ->type('name', $name)
                 ->pause(1000)
-                // Navigate to address section for venue
-                ->click('a[data-section="section-address"]')
-                ->waitFor('input[name="address1"]', 5)
                 ->type('address1', $address)
                 ->scrollIntoView('button[type="submit"]')
                 ->press('SAVE')
@@ -51,8 +47,7 @@ trait AccountSetupTrait
     protected function createTestTalent(Browser $browser, string $name = 'Talent'): void
     {
         $browser->visit('/new/talent')
-                ->waitForText('New Schedule', 5)
-                ->waitFor('input[name="name"]', 5)
+                ->waitForText('New Talent', 5)
                 ->clear('name')
                 ->type('name', $name)
                 ->pause(1000)
@@ -68,12 +63,10 @@ trait AccountSetupTrait
     protected function createTestCurator(Browser $browser, string $name = 'Curator'): void
     {
         $browser->visit('/new/curator')
-                ->waitForText('New Schedule', 5)
-                ->waitFor('input[name="name"]', 5)
+                ->waitForText('New Curator', 5)
                 ->clear('name')
                 ->type('name', $name)
                 ->pause(1000)
-                ->waitFor('input[name="accept_requests"]', 5)
                 ->scrollIntoView('input[name="accept_requests"]')
                 ->check('accept_requests')
                 ->scrollIntoView('button[type="submit"]')
