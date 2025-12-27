@@ -70,10 +70,8 @@ class GroupsTest extends DuskTestCase
         
         // Add second sub-schedule
         $browser->visit('/talent/edit')
-                ->waitForText('Subschedules', 5)
-                ->scrollIntoView('#address')
-                ->waitForText('Subschedules', 5)
-                ->scrollIntoView('input[name*="groups"][name*="name"]:last-of-type');
+                ->click('a[data-section="section-subschedules"]')
+                ->waitFor('#group-items', 5);
         
         $browser->script("addGroupField();");
         
