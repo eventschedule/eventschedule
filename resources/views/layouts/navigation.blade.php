@@ -218,11 +218,11 @@
 <script {!! nonce_attr() !!}>
     function updateThemeButtons() {
         // Get current theme - use localStorage directly as fallback
-        let theme = 'dark';
+        let theme = 'system';
         if (window.getCurrentTheme) {
             theme = window.getCurrentTheme();
         } else if (typeof Storage !== 'undefined') {
-            theme = localStorage.getItem('theme') || 'dark';
+            theme = localStorage.getItem('theme') || 'system';
         }
         
         // Get all theme buttons

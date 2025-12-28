@@ -560,7 +560,7 @@
 
             function initTheme() {
                 const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-                const theme = storedTheme || THEMES.DARK;
+                const theme = storedTheme || THEMES.SYSTEM;
                 
                 // Apply theme immediately to prevent flash
                 applyTheme(theme);
@@ -604,7 +604,7 @@
                 }, 10);
             };
             window.getCurrentTheme = function() {
-                return localStorage.getItem(THEME_STORAGE_KEY) || THEMES.DARK;
+                return localStorage.getItem(THEME_STORAGE_KEY) || THEMES.SYSTEM;
             };
             
             // Update buttons after theme system is initialized
