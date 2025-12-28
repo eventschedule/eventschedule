@@ -25,10 +25,13 @@
         });
 
         @if (config('app.hosted'))
+        var lockedEmail = null;
+
         function sendVerificationCode() {
                 var email = document.getElementById('email').value;
                 var sendCodeBtn = document.getElementById('send-code-btn');
                 var codeMessage = document.getElementById('code-message');
+                var emailInput = document.getElementById('email');
 
                 if (!email) {
                     codeMessage.innerHTML = '<span class="text-red-600">' + '{{ __('messages.please_enter_email_address') }}' + '</span>';
@@ -64,6 +67,11 @@
                     sendCodeBtn.innerHTML = '{{ __('messages.send_code') }}';
                     
                     if (data.success) {
+                        // Lock the email field after successful code send
+                        lockedEmail = email.toLowerCase();
+                        emailInput.disabled = true;
+                        emailInput.setAttribute('readonly', 'readonly');
+                        emailInput.classList.add('bg-gray-100', 'dark:bg-gray-700', 'cursor-not-allowed');
                         codeMessage.innerHTML = '<span class="text-green-600">' + data.message + '</span>';
                         // Enable code input
                         document.getElementById('verification_code').focus();
@@ -110,13 +118,19 @@
                 }, true); // Use capture phase
             }
 
-            // Allow Enter key in email field to send code
+            // Allow Enter key in email field to send code (only if not locked)
             var emailInput = document.getElementById('email');
             if (emailInput) {
                 emailInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
+                    if (e.key === 'Enter' && !this.disabled) {
                         e.preventDefault();
                         sendVerificationCode();
+                    }
+                });
+                // Prevent changes to email field if it's locked
+                emailInput.addEventListener('input', function(e) {
+                    if (lockedEmail && this.value.toLowerCase() !== lockedEmail) {
+                        this.value = lockedEmail;
                     }
                 });
             }
