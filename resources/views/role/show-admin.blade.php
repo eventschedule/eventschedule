@@ -446,4 +446,6 @@ function syncEventsFromDropdown() {
 }
 </script>
 
+@include('components.embed-modal')
+
 </x-app-admin-layout>
