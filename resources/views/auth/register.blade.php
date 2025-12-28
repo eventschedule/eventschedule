@@ -24,6 +24,7 @@
             @endif
         });
 
+        @if (config('app.hosted') && ! config('app.is_testing'))
         function sendVerificationCode() {
                 var email = document.getElementById('email').value;
                 var sendCodeBtn = document.getElementById('send-code-btn');
@@ -103,6 +104,7 @@
                 });
             }
         });
+        @endif
 
         @if (! config('app.hosted'))
 
@@ -236,6 +238,7 @@
         <!-- Email Address -->
         <div class="mt-4">
             <x-input-label for="email" :value="__('messages.email')" />
+            @if (config('app.hosted') && ! config('app.is_testing'))
             <div class="flex gap-2">
                 <x-text-input id="email" class="block mt-1 flex-1" type="email" name="email" :value="old('email', base64_decode(request()->email))" required
                     autocomplete="email" />
@@ -244,16 +247,22 @@
                 </x-primary-button>
             </div>
             <div id="code-message" class="mt-2 text-sm"></div>
+            @else
+            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', base64_decode(request()->email))" required
+                autocomplete="email" />
+            @endif
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
         <!-- Verification Code -->
+        @if (config('app.hosted') && ! config('app.is_testing'))
         <div class="mt-4">
             <x-input-label for="verification_code" :value="__('messages.verification_code')" />
             <x-text-input id="verification_code" class="block mt-1 w-full" type="text" name="verification_code" 
                 maxlength="6" pattern="[0-9]{6}" required autocomplete="off" />
             <x-input-error :messages="$errors->get('verification_code')" class="mt-2" />
         </div>
+        @endif
 
         <!-- Password -->
         <div class="mt-4">
