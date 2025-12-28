@@ -16,6 +16,10 @@ use App\Rules\NoFakeEmail;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Artisan;
 use Dotenv\Dotenv;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\SignupVerificationCode;
+use Illuminate\Http\JsonResponse;
 
 
 class RegisteredUserController extends Controller
@@ -34,6 +38,57 @@ class RegisteredUserController extends Controller
         }
 
         return view('auth.register');
+    }
+
+    /**
+     * Send verification code to email address.
+     */
+    public function sendVerificationCode(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => ['required', 'string', 'email', 'max:255'],
+        ]);
+
+        $email = strtolower($request->email);
+
+        // Check if email is already registered
+        if (User::where('email', $email)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.email_already_registered'),
+            ], 422);
+        }
+
+        // Rate limiting: max 5 codes per hour per email
+        $attemptsKey = 'signup_code_attempts_' . $email;
+        $attempts = Cache::get($attemptsKey, 0);
+
+        if ($attempts >= 5) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.code_rate_limit'),
+            ], 429);
+        }
+
+        // Generate 6-digit code
+        $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        // Store code in cache for 10 minutes
+        $codeKey = 'signup_code_' . $email;
+        Cache::put($codeKey, $code, now()->addMinutes(10));
+
+        // Increment attempts counter (expires in 1 hour)
+        Cache::put($attemptsKey, $attempts + 1, now()->addHour());
+
+        // Send notification to email (using a temporary user object for notification)
+        $tempUser = new User();
+        $tempUser->email = $email;
+        Notification::route('mail', $email)->notify(new SignupVerificationCode($code));
+
+        return response()->json([
+            'success' => true,
+            'message' => __('messages.code_sent'),
+        ]);
     }
 
     /**
@@ -114,7 +169,7 @@ class RegisteredUserController extends Controller
             return redirect()->route('login');
         }
 
-        $request->validate([
+        $validationRules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => array_merge(
                 ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
@@ -122,7 +177,24 @@ class RegisteredUserController extends Controller
             ),
             'password' => ['required', 'string', 'min:8'],
             'language_code' => ['nullable', 'string', 'in:' . implode(',', config('app.supported_languages', ['en']))],
-        ]);
+            'verification_code' => ['required', 'string', 'size:6'],
+        ];
+
+        $request->validate($validationRules);
+
+        // Validate verification code
+        $email = strtolower($request->email);
+        $codeKey = 'signup_code_' . $email;
+        $cachedCode = Cache::get($codeKey);
+
+        if (!$cachedCode || $cachedCode !== $request->verification_code) {
+            throw ValidationException::withMessages([
+                'verification_code' => [__('messages.code_invalid')],
+            ]);
+        }
+
+        // Code is valid, remove it from cache
+        Cache::forget($codeKey);
 
         $user = User::create([
             'name' => $request->name,
@@ -132,10 +204,9 @@ class RegisteredUserController extends Controller
             'language_code' => $request->language_code ?? 'en',
         ]);
 
-        if (! config('app.hosted') || config('app.is_testing')) {
-            $user->email_verified_at = now();
-            $user->save();
-        }
+        // Mark email as verified since code was validated
+        $user->email_verified_at = now();
+        $user->save();
 
         event(new Registered($user));
 

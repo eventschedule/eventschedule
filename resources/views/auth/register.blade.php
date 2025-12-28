@@ -24,6 +24,84 @@
             @endif
         });
 
+        function sendVerificationCode() {
+                var email = document.getElementById('email').value;
+                var sendCodeBtn = document.getElementById('send-code-btn');
+                var codeMessage = document.getElementById('code-message');
+
+                if (!email) {
+                    codeMessage.innerHTML = '<span class="text-red-600">' + '{{ __('messages.please_enter_email_address') }}' + '</span>';
+                    return;
+                }
+
+                // Validate email format
+                var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    codeMessage.innerHTML = '<span class="text-red-600">' + '{{ __('messages.invalid_email_address') }}' + '</span>';
+                    return;
+                }
+
+                // Disable button and show loading
+                sendCodeBtn.disabled = true;
+                sendCodeBtn.innerHTML = '{{ __('messages.sending') }}...';
+                codeMessage.innerHTML = '';
+
+                fetch('{{ route('sign_up.send_code') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        email: email
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        codeMessage.innerHTML = '<span class="text-green-600">' + data.message + '</span>';
+                        // Enable code input
+                        document.getElementById('verification_code').focus();
+                    } else {
+                        codeMessage.innerHTML = '<span class="text-red-600">' + data.message + '</span>';
+                        sendCodeBtn.disabled = false;
+                        sendCodeBtn.innerHTML = '{{ __('messages.send_code') }}';
+                    }
+                })
+                .catch(error => {
+                    codeMessage.innerHTML = '<span class="text-red-600">' + '{{ __('messages.error_sending_code') }}' + '</span>';
+                    sendCodeBtn.disabled = false;
+                    sendCodeBtn.innerHTML = '{{ __('messages.send_code') }}';
+                });
+            }
+
+        // Attach event listener to send code button
+        document.addEventListener('DOMContentLoaded', function() {
+            var sendCodeBtn = document.getElementById('send-code-btn');
+            if (sendCodeBtn) {
+                sendCodeBtn.addEventListener('click', sendVerificationCode);
+            }
+
+            // Allow Enter key in email field to send code
+            var emailInput = document.getElementById('email');
+            if (emailInput) {
+                emailInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        sendVerificationCode();
+                    }
+                });
+            }
+
+            // Format verification code input (numbers only)
+            var codeInput = document.getElementById('verification_code');
+            if (codeInput) {
+                codeInput.addEventListener('input', function(e) {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+            }
+        });
+
         @if (! config('app.hosted'))
 
             function testConnection() {
@@ -141,7 +219,7 @@
             </div>
 
             </div>
-            <div class="w-full sm:max-w-sm mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
+            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
 
         @endif
 
@@ -156,9 +234,23 @@
         <!-- Email Address -->
         <div class="mt-4">
             <x-input-label for="email" :value="__('messages.email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', base64_decode(request()->email))" required
-                autocomplete="email" />
+            <div class="flex gap-2">
+                <x-text-input id="email" class="block mt-1 flex-1" type="email" name="email" :value="old('email', base64_decode(request()->email))" required
+                    autocomplete="email" />
+                <x-primary-button type="button" id="send-code-btn" class="mt-1 whitespace-nowrap">
+                    {{ __('messages.send_code') }}
+                </x-primary-button>
+            </div>
+            <div id="code-message" class="mt-2 text-sm"></div>
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        </div>
+
+        <!-- Verification Code -->
+        <div class="mt-4">
+            <x-input-label for="verification_code" :value="__('messages.verification_code')" />
+            <x-text-input id="verification_code" class="block mt-1 w-full" type="text" name="verification_code" 
+                maxlength="6" pattern="[0-9]{6}" placeholder="000000" required autocomplete="off" />
+            <x-input-error :messages="$errors->get('verification_code')" class="mt-2" />
         </div>
 
         <!-- Password -->
