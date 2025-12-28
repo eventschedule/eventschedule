@@ -4,8 +4,11 @@ namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Queue\SerializesModels;
 
 class SignupVerificationCode extends Notification
 {
@@ -34,14 +37,54 @@ class SignupVerificationCode extends Notification
     /**
      * Get the mail representation of the notification.
      */
-    public function toMail(object $notifiable): MailMessage
+    public function toMail(object $notifiable)
     {
-        return (new MailMessage)
-                    ->subject(__('messages.signup_verification_code_subject'))
-                    ->line(__('messages.signup_verification_code_intro'))
-                    ->line(__('messages.your_verification_code') . ': **' . $this->code . '**')
-                    ->line(__('messages.signup_verification_code_expiry'))
-                    ->line(__('messages.thank_you_for_using'));
+        // Get email from notifiable (handles both User objects and AnonymousNotifiable from route)
+        $email = null;
+        
+        if (method_exists($notifiable, 'getEmailForVerification')) {
+            $email = $notifiable->getEmailForVerification();
+        } elseif (method_exists($notifiable, 'routeNotificationFor')) {
+            $email = $notifiable->routeNotificationFor('mail');
+        } elseif (isset($notifiable->email)) {
+            $email = $notifiable->email;
+        }
+        
+        return new class($this->code, $email) extends Mailable
+        {
+            use SerializesModels;
+            
+            protected $code;
+            protected $email;
+
+            public function __construct($code, $email)
+            {
+                $this->code = $code;
+                $this->email = $email;
+                
+                // Set the recipient
+                if ($this->email) {
+                    $this->to($this->email);
+                }
+            }
+
+            public function envelope(): Envelope
+            {
+                return new Envelope(
+                    subject: __('messages.signup_verification_code_subject'),
+                );
+            }
+
+            public function content(): Content
+            {
+                return new Content(
+                    view: 'emails.signup_verification_code',
+                    with: [
+                        'code' => $this->code,
+                    ]
+                );
+            }
+        };
     }
 
     /**

@@ -177,24 +177,30 @@ class RegisteredUserController extends Controller
             ),
             'password' => ['required', 'string', 'min:8'],
             'language_code' => ['nullable', 'string', 'in:' . implode(',', config('app.supported_languages', ['en']))],
-            'verification_code' => ['required', 'string', 'size:6'],
         ];
+
+        // Add verification code validation for hosted mode only
+        if (config('app.hosted') && ! config('app.is_testing')) {
+            $validationRules['verification_code'] = ['required', 'string', 'size:6'];
+        }
 
         $request->validate($validationRules);
 
-        // Validate verification code
-        $email = strtolower($request->email);
-        $codeKey = 'signup_code_' . $email;
-        $cachedCode = Cache::get($codeKey);
+        // Validate verification code for hosted mode only
+        if (config('app.hosted') && ! config('app.is_testing')) {
+            $email = strtolower($request->email);
+            $codeKey = 'signup_code_' . $email;
+            $cachedCode = Cache::get($codeKey);
 
-        if (!$cachedCode || $cachedCode !== $request->verification_code) {
-            throw ValidationException::withMessages([
-                'verification_code' => [__('messages.code_invalid')],
-            ]);
+            if (!$cachedCode || $cachedCode !== $request->verification_code) {
+                throw ValidationException::withMessages([
+                    'verification_code' => [__('messages.code_invalid')],
+                ]);
+            }
+
+            // Code is valid, remove it from cache
+            Cache::forget($codeKey);
         }
-
-        // Code is valid, remove it from cache
-        Cache::forget($codeKey);
 
         $user = User::create([
             'name' => $request->name,
@@ -204,9 +210,11 @@ class RegisteredUserController extends Controller
             'language_code' => $request->language_code ?? 'en',
         ]);
 
-        // Mark email as verified since code was validated
-        $user->email_verified_at = now();
-        $user->save();
+        // Mark email as verified if code was validated (hosted mode) or in non-hosted/testing mode
+        if ((config('app.hosted') && ! config('app.is_testing')) || ! config('app.hosted') || config('app.is_testing')) {
+            $user->email_verified_at = now();
+            $user->save();
+        }
 
         event(new Registered($user));
 
