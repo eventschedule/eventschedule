@@ -81,6 +81,11 @@ class User extends Authenticatable implements MustVerifyEmail
     
     public function sendEmailVerificationNotification()
     {
+        // Don't send if email is already verified
+        if ($this->hasVerifiedEmail()) {
+            return;
+        }
+
         // Only send verification email if user is subscribed
         if ($this->is_subscribed !== false) {
             $this->notify(new CustomVerifyEmail('user'));
