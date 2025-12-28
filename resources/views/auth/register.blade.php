@@ -24,7 +24,7 @@
             @endif
         });
 
-        @if (config('app.hosted') && ! config('app.is_testing'))
+        @if (config('app.hosted'))
         function sendVerificationCode() {
                 var email = document.getElementById('email').value;
                 var sendCodeBtn = document.getElementById('send-code-btn');
@@ -82,7 +82,32 @@
         document.addEventListener('DOMContentLoaded', function() {
             var sendCodeBtn = document.getElementById('send-code-btn');
             if (sendCodeBtn) {
-                sendCodeBtn.addEventListener('click', sendVerificationCode);
+                // Ensure button type is button, not submit
+                sendCodeBtn.setAttribute('type', 'button');
+                // Remove any form association
+                sendCodeBtn.setAttribute('form', '');
+                // Add additional click handler as backup
+                sendCodeBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    sendVerificationCode();
+                    return false;
+                }, true); // Use capture phase
+            }
+
+            // Prevent form submission when send code button is clicked
+            var form = document.querySelector('form[action="{{ route('sign_up') }}"]');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    var submitter = e.submitter || document.activeElement;
+                    if (submitter && (submitter.id === 'send-code-btn' || submitter.closest('#send-code-btn'))) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        return false;
+                    }
+                }, true); // Use capture phase
             }
 
             // Allow Enter key in email field to send code
@@ -238,13 +263,13 @@
         <!-- Email Address -->
         <div class="mt-4">
             <x-input-label for="email" :value="__('messages.email')" />
-            @if (config('app.hosted') && ! config('app.is_testing'))
+            @if (config('app.hosted'))
             <div class="flex gap-2">
                 <x-text-input id="email" class="block mt-1 flex-1" type="email" name="email" :value="old('email', base64_decode(request()->email))" required
                     autocomplete="email" />
-                <x-primary-button type="button" id="send-code-btn" class="mt-1 whitespace-nowrap">
+                <button type="button" id="send-code-btn" onclick="event.preventDefault(); event.stopPropagation(); sendVerificationCode(); return false;" class="mt-1 whitespace-nowrap inline-flex items-center justify-center px-6 py-3 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-sm text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                     {{ __('messages.send_code') }}
-                </x-primary-button>
+                </button>
             </div>
             <div id="code-message" class="mt-2 text-sm"></div>
             @else
@@ -255,7 +280,7 @@
         </div>
 
         <!-- Verification Code -->
-        @if (config('app.hosted') && ! config('app.is_testing'))
+        @if (config('app.hosted'))
         <div class="mt-4">
             <x-input-label for="verification_code" :value="__('messages.verification_code')" />
             <x-text-input id="verification_code" class="block mt-1 w-full" type="text" name="verification_code" 
