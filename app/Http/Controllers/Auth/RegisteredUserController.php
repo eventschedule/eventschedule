@@ -77,6 +77,9 @@ class RegisteredUserController extends Controller
         $codeKey = 'signup_code_' . $email;
         Cache::put($codeKey, $code, now()->addMinutes(10));
 
+        // Store reverse mapping (code -> email) for validation
+        Cache::put('signup_code_email_' . $code, $email, now()->addMinutes(10));
+
         // Increment attempts counter (expires in 1 hour)
         Cache::put($attemptsKey, $attempts + 1, now()->addHour());
 
@@ -198,8 +201,17 @@ class RegisteredUserController extends Controller
                 ]);
             }
 
+            // Validate that the email matches the email the code was originally sent to
+            $originalEmail = Cache::get('signup_code_email_' . $request->verification_code);
+            if (!$originalEmail || strtolower($originalEmail) !== $email) {
+                throw ValidationException::withMessages([
+                    'verification_code' => [__('messages.code_invalid')],
+                ]);
+            }
+
             // Code is valid, remove it from cache
             Cache::forget($codeKey);
+            Cache::forget('signup_code_email_' . $request->verification_code);
         }
 
         $user = User::create([
