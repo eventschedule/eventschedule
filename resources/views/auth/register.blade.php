@@ -58,14 +58,16 @@
                 })
                 .then(response => response.json())
                 .then(data => {
+                    // Always re-enable button and restore text
+                    sendCodeBtn.disabled = false;
+                    sendCodeBtn.innerHTML = '{{ __('messages.send_code') }}';
+                    
                     if (data.success) {
                         codeMessage.innerHTML = '<span class="text-green-600">' + data.message + '</span>';
                         // Enable code input
                         document.getElementById('verification_code').focus();
                     } else {
                         codeMessage.innerHTML = '<span class="text-red-600">' + data.message + '</span>';
-                        sendCodeBtn.disabled = false;
-                        sendCodeBtn.innerHTML = '{{ __('messages.send_code') }}';
                     }
                 })
                 .catch(error => {
@@ -249,7 +251,7 @@
         <div class="mt-4">
             <x-input-label for="verification_code" :value="__('messages.verification_code')" />
             <x-text-input id="verification_code" class="block mt-1 w-full" type="text" name="verification_code" 
-                maxlength="6" pattern="[0-9]{6}" placeholder="000000" required autocomplete="off" />
+                maxlength="6" pattern="[0-9]{6}" required autocomplete="off" />
             <x-input-error :messages="$errors->get('verification_code')" class="mt-2" />
         </div>
 
