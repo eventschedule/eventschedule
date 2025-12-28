@@ -1,6 +1,6 @@
 <x-app-admin-layout>
 
-    <div class="flex justify-between items-center gap-6">
+    <div class="flex justify-between items-center gap-6 pb-6">
         @if (is_rtl())
             <!-- RTL Layout: Cancel button on left, title on right -->
             <div class="flex items-center gap-3">
