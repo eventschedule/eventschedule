@@ -951,7 +951,3 @@ const calendarApp = createApp({
 const calendarAppInstance = calendarApp.mount('#calendar-app');
 window.calendarVueApp = calendarAppInstance;
 </script>
-
-@if ($route == 'admin' && $role->email_verified_at && $tab == 'schedule')
-    @include('components.embed-modal')
-@endif
