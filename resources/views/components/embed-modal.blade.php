@@ -70,7 +70,8 @@
                                     {{ __('messages.preview') }}
                                 </label>                                
                                 <div class="border border-gray-300 dark:border-gray-700 rounded-md p-2 bg-gray-50 dark:bg-gray-900" style="height: 300px; overflow: auto;">
-                                    <iframe src="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'embed' => 'true']) }}" 
+                                    <iframe id="embed-preview-iframe" 
+                                            data-src="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'embed' => 'true']) }}"
                                             width="100%" height="800" frameborder="0" 
                                             style="border: none; border-radius: 4px;"></iframe>
                                 </div>
@@ -94,6 +95,12 @@
 function openEmbedModal() {
     document.getElementById('embed-modal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
+    
+    // Load iframe only when modal is opened
+    const iframe = document.getElementById('embed-preview-iframe');
+    if (iframe && !iframe.src) {
+        iframe.src = iframe.getAttribute('data-src');
+    }
 }
 
 function closeEmbedModal() {
