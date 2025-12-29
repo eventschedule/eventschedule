@@ -33,8 +33,8 @@
         @if($schedules->isEmpty() && $venues->isEmpty() && $curators->isEmpty() && auth()->user()->tickets()->count() === 0)
         <div class="mb-8">
             <!-- Header Panel -->
-            <div class="relative bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 border border-blue-100/50 rounded-3xl p-10 mb-8 overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-radial from-transparent via-blue-50/30 to-indigo-100/40 rounded-3xl"></div>
+            <div class="relative bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-800 dark:via-blue-900 dark:to-indigo-900 border border-blue-100/50 dark:border-blue-800/50 rounded-md p-10 mb-8 overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-radial from-transparent via-blue-50/30 to-indigo-100/40 dark:via-blue-900/30 dark:to-indigo-900/40 rounded-md"></div>
                 <div class="relative text-center">
                     <h2 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4 tracking-tight">Welcome {{ auth()->user()->firstName() }}, let's get started...</h2>
                     <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed font-medium">{{ __('messages.create_your_first_schedule') }}</p>
@@ -42,12 +42,12 @@
             </div>
             
             <!-- Schedule Types Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Talent Card -->
-                <div class="group relative bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg p-6 border border-purple-100 hover:border-purple-200 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                    <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-indigo-500/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="group relative bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-md p-6 border border-purple-100 dark:border-purple-800/50 hover:border-purple-200 dark:hover:border-purple-700 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                    <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-indigo-500/5 dark:from-purple-500/10 dark:to-indigo-500/10 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div class="relative">
-                        <div class="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
+                        <div class="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-md mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
                             <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z"/>
                             </svg>
@@ -66,10 +66,10 @@
                 </div>
 
                 <!-- Venue Card -->
-                <div class="group relative bg-gradient-to-br from-emerald-50 to-teal-50 rounded-lg p-6 border border-emerald-100 hover:border-emerald-200 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-500/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="group relative bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-md p-6 border border-emerald-100 dark:border-emerald-800/50 hover:border-emerald-200 dark:hover:border-emerald-700 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-500/5 dark:from-emerald-500/10 dark:to-teal-500/10 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div class="relative">
-                        <div class="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
+                        <div class="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-md mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
                             <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z"/>
                             </svg>
@@ -88,10 +88,10 @@
                 </div>
 
                 <!-- Curator Card -->
-                <div class="group relative bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg p-6 border border-amber-100 hover:border-amber-200 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                    <div class="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-orange-500/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="group relative bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 rounded-md p-6 border border-amber-100 dark:border-amber-800/50 hover:border-amber-200 dark:hover:border-amber-700 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                    <div class="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-orange-500/5 dark:from-amber-500/10 dark:to-orange-500/10 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div class="relative">
-                        <div class="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
+                        <div class="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-md mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
                             <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12,19.2C9.5,19.2 7.29,17.92 6,16C6.03,14 10,12.9 12,12.9C14,12.9 17.97,14 18,16C16.71,17.92 14.5,19.2 12,19.2M12,5A3,3 0 0,1 15,8A3,3 0 0,1 12,11A3,3 0 0,1 9,8A3,3 0 0,1 12,5M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12C22,6.47 17.5,2 12,2Z"/>
                             </svg>
