@@ -2,6 +2,7 @@
     <div>
         
         <!-- Feedback Form -->
+        @if (config('app.hosted'))
         <div class="mb-6 w-full">
             <form id="feedback-form" class="w-full">
                 @csrf
@@ -26,6 +27,7 @@
                 </div>
             </form>
         </div>
+        @endif
         
         <!-- Get Started Panel -->
         @if($schedules->isEmpty() && $venues->isEmpty() && $curators->isEmpty() && auth()->user()->tickets()->count() === 0)
