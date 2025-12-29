@@ -2128,7 +2128,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Field to section mapping
         const fieldSectionMap = {
             'name': 'section-details',
-            'address1': 'section-address'
+            'address1': 'section-address',
+            'email': 'section-contact-info'
         };
 
         // Function to find section containing a field
@@ -2168,7 +2169,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Handle invalid event on required fields
-        const requiredFields = ['name'];
+        const requiredFields = ['name', 'email'];
         const address1Field = document.getElementById('address1');
         if (address1Field && address1Field.hasAttribute('required')) {
             requiredFields.push('address1');
@@ -2232,7 +2233,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Add input listeners to clear error state when fields become valid
-        const monitoredFields = ['name', 'address1'];
+        const monitoredFields = ['name', 'address1', 'email'];
         monitoredFields.forEach(fieldId => {
             const field = document.getElementById(fieldId);
             if (field) {
