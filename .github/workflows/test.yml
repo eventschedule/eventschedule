@@ -80,9 +80,11 @@ jobs:
           APP_ENV: local
           APP_URL: http://127.0.0.1:8000
   
-      - name: Upload Dusk Screenshots
+      - name: Upload Dusk Screenshots and Logs
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: dusk-screenshots
-          path: tests/Browser/screenshots
+          path: |
+            tests/Browser/screenshots
+            storage/logs
