@@ -101,7 +101,7 @@
               <button
                   type="button"
                   style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
-                  class="inline-flex items-center rounded-md px-6 py-3 hover:opacity-90 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 h-12"
+                  class="inline-flex items-center rounded-md px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 h-12"
                 >
                   {{ __('messages.add_event') }}
                 </button>
@@ -114,7 +114,7 @@
                   <button
                     type="button"
                     style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
-                    class="inline-flex items-center rounded-md px-6 py-3 hover:opacity-90 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 h-12"
+                    class="inline-flex items-center rounded-md px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 h-12"
                   >
                     {{ __('messages.follow') }}
                   </button>

@@ -685,4 +685,7 @@ return [
     'code_rate_limit' => 'Too many code requests. Please try again later.',
     'email_already_registered' => 'This email is already registered.',
     'error_sending_code' => 'Error sending verification code. Please try again.',
+    'theme_light' => 'Light',
+    'theme_dark' => 'Dark',
+    'theme_system' => 'System',
 ];
