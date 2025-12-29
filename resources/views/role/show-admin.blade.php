@@ -190,7 +190,7 @@
                                 <path
                                     d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
                             </svg>
-                            {{ __('messages.edit_' . strtolower($role->type)) }}
+                            {{ __('messages.edit_schedule') }}
                         </button>
                     </a>
                 </span>
@@ -205,7 +205,7 @@
                                 <path
                                     d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
                             </svg>
-                            {{ __('messages.view_' . strtolower($role->type)) }}
+                            {{ __('messages.view_schedule') }}
                         </button>
                     </a>
                 </span>
@@ -229,7 +229,7 @@
                                         <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
                                     </svg>
                                     <div>
-                                        {{ __('messages.edit_' . strtolower($role->type)) }}
+                                        {{ __('messages.edit_schedule') }}
                                     </div>
                                 </a>
                                 <a href="{{ route('role.view_guest', (now()->year == $year && now()->month == $month) ? ['subdomain' => $role->subdomain] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'month' => $month] : ['subdomain' => $role->subdomain, 'year' => $year, 'month' => $month])) }}" target="_blank" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
@@ -237,7 +237,7 @@
                                         <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
                                     </svg>
                                     <div>
-                                        {{ __('messages.view_' . strtolower($role->type)) }}
+                                        {{ __('messages.view_schedule') }}
                                     </div>
                                 </a>
                             </div>
