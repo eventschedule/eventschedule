@@ -1051,7 +1051,7 @@
                                         @endif
                                     </select>
                                     <div class="text-xs pt-1">
-                                        <a href="{{ route('profile.edit') }}" class="hover:underline text-gray-600 dark:text-gray-400" target="_blank">
+                                        <a href="{{ route('profile.edit') }}#section-payment-methods" class="hover:underline text-gray-600 dark:text-gray-400" target="_blank">
                                             {{ __('messages.manage_payment_methods') }}
                                         </a>
                                     </div>
@@ -1073,7 +1073,7 @@
                                     </select>
                                     @if (! $user->stripe_completed_at && ! $user->invoiceninja_api_key && ! $user->payment_url)
                                     <div class="text-xs pt-1">
-                                        <a href="{{ route('profile.edit') }}" class="hover:underline text-gray-600 dark:text-gray-400" target="_blank">
+                                        <a href="{{ route('profile.edit') }}#section-payment-methods" class="hover:underline text-gray-600 dark:text-gray-400" target="_blank">
                                             {{ __('messages.manage_payment_methods') }}
                                         </a>
                                     </div>

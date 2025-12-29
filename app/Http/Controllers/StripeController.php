@@ -31,7 +31,7 @@ class StripeController extends Controller
         $link = AccountLink::create([
             'account' => $accountId,
             'return_url' => route('stripe.complete'),
-            'refresh_url' => route('profile.edit'),
+            'refresh_url' => route('profile.edit') . '#section-payment-methods',
             'type' => 'account_onboarding',
         ]);
 
@@ -45,7 +45,7 @@ class StripeController extends Controller
         $user->stripe_completed_at = null;
         $user->save();
 
-        return redirect()->route('profile.edit')->with('message', __('messages.stripe_unlinked'));
+        return redirect()->to(route('profile.edit') . '#section-payment-methods')->with('message', __('messages.stripe_unlinked'));
     }
 
     public function complete()
@@ -60,11 +60,11 @@ class StripeController extends Controller
                 $user->stripe_completed_at = now();
                 $user->save();
                 
-                return redirect()->route('profile.edit')->with('message', __('messages.stripe_connected'));
+                return redirect()->to(route('profile.edit') . '#section-payment-methods')->with('message', __('messages.stripe_connected'));
             }
         }
 
-        return redirect()->route('profile.edit')->with('error', __('messages.failed_to_connect_stripe'));
+        return redirect()->to(route('profile.edit') . '#section-payment-methods')->with('error', __('messages.failed_to_connect_stripe'));
     }
 
     public function webhook(Request $request)

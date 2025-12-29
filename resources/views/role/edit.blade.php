@@ -1404,7 +1404,7 @@
                             @endif
                         </div>
                         @else
-                        <a href="{{ route('profile.edit') }}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline inline-flex items-center">
+                        <a href="{{ route('profile.edit') }}#section-google-calendar" target="_blank" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline inline-flex items-center">
                             {{ __('messages.connect_google_calendar') }}
                             <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill="currentColor" d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"/>

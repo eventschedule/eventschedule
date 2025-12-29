@@ -185,9 +185,9 @@ class ProfileController extends Controller
 
                 $invoiceNinja->createWebhook(route('invoiceninja.webhook', ['secret' => $user->invoiceninja_webhook_secret]));
 
-                return Redirect::route('profile.edit')->with('message', __('messages.invoiceninja_connected'));
+                return Redirect::to(route('profile.edit') . '#section-payment-methods')->with('message', __('messages.invoiceninja_connected'));
             } catch (\Exception $e) {
-                return Redirect::route('profile.edit')->with('error', __('messages.error_invoiceninja_connection'));
+                return Redirect::to(route('profile.edit') . '#section-payment-methods')->with('error', __('messages.error_invoiceninja_connection'));
             }
         }
 
@@ -196,10 +196,10 @@ class ProfileController extends Controller
             $user->payment_secret = strtolower(\Str::random(32));
             $user->save();
 
-            return Redirect::route('profile.edit')->with('message', __('messages.payment_url_connected'));
+            return Redirect::to(route('profile.edit') . '#section-payment-methods')->with('message', __('messages.payment_url_connected'));
         }
 
-        return Redirect::route('profile.edit')->with('status', 'payments-updated');
+        return Redirect::to(route('profile.edit') . '#section-payment-methods')->with('status', 'payments-updated');
     }
 
     public function unlinkPaymentUrl(Request $request): RedirectResponse
@@ -209,6 +209,6 @@ class ProfileController extends Controller
         $user->payment_secret = null;
         $user->save();
 
-        return Redirect::route('profile.edit')->with('message', __('messages.payment_url_unlinked'));
+        return Redirect::to(route('profile.edit') . '#section-payment-methods')->with('message', __('messages.payment_url_unlinked'));
     }
 }
