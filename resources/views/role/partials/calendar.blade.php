@@ -230,6 +230,13 @@
             </div>
         </div>
         <div class="bg-gray-200 dark:bg-gray-700 text-xs leading-6 text-gray-700 dark:text-gray-300 rounded-b-md overflow-hidden {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }}">
+            @php
+            // Get first role for home route (only calculate once)
+            $firstRole = null;
+            if ($route == 'home' && auth()->check()) {
+                $firstRole = auth()->user()->member()->where('email_verified_at', '!=', null)->first();
+            }
+            @endphp
             <div class="w-full grid grid-cols-7 grid-rows-{{ $totalWeeks }} gap-px">
                 @while ($currentDate->lte($endOfMonth))
                 @if ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at)
@@ -247,6 +254,14 @@
                         <div class="{{ $tab == 'availability' && $currentDate->month != $month ? 'hidden md:block' : '' }} cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600 day-element" data-date="{{ $currentDate->format('Y-m-d') }}">
                         @if (is_array($datesUnavailable) && in_array($currentDate->format('Y-m-d'), $datesUnavailable))
                             <div class="day-x"></div>
+                        @endif
+                    @elseif ($route == 'home' && auth()->check())
+                        @if ($firstRole)
+                        <div class="cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600"
+                            onclick="window.location = '{{ route('event.create', ['subdomain' => $firstRole->subdomain, 'date' => $currentDate->format('Y-m-d')]) }}';">
+                        @else
+                        <div
+                            class="relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-3 py-2 min-h-[100px] border-1 border-transparent">
                         @endif
                     @else
                     <div
