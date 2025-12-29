@@ -69,7 +69,6 @@
                     if (data.success) {
                         // Lock the email field after successful code send
                         lockedEmail = email.toLowerCase();
-                        emailInput.disabled = true;
                         emailInput.setAttribute('readonly', 'readonly');
                         emailInput.classList.add('bg-gray-100', 'dark:bg-gray-700', 'cursor-not-allowed');
                         codeMessage.innerHTML = '<span class="text-green-600 dark:text-green-400">' + data.message + '</span>';
@@ -122,7 +121,7 @@
             var emailInput = document.getElementById('email');
             if (emailInput) {
                 emailInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter' && !this.disabled) {
+                    if (e.key === 'Enter' && !this.readOnly) {
                         e.preventDefault();
                         sendVerificationCode();
                     }
