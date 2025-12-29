@@ -80,7 +80,7 @@ When bidirectional sync is enabled:
 ### For Users
 
 1. **Connect Google Calendar**:
-   - Go to your profile page (`/account`)
+   - Go to your settings page (`/settings`)
    - Scroll to the "Google Calendar Integration" section
    - Click "Connect Google Calendar"
    - Authorize the application in the Google OAuth flow

@@ -102,7 +102,7 @@ trait AccountSetupTrait
      */
     protected function enableApi(Browser $browser): string
     {
-        $browser->visit('/account')
+        $browser->visit('/settings')
                 ->scrollIntoView('#enable_api');
         $browser->script("document.getElementById('enable_api').checked = true;");
         $browser->press('Save')
