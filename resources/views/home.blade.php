@@ -1,34 +1,6 @@
 <x-app-admin-layout>
     <div>
         
-        <!-- Feedback Form -->
-        @if (config('app.hosted'))
-        <div class="mb-6 w-full">
-            <form id="feedback-form" class="w-full">
-                @csrf
-                <div class="relative w-full">
-                    <textarea 
-                        id="feedback-textarea"
-                        name="feedback" 
-                        placeholder="{{ __('messages.feedback_placeholder') }}"
-                        class="w-full px-4 py-2 pr-12 pb-10 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                        rows="2"
-                    ></textarea>
-                    <button 
-                        type="button"
-                        id="feedback-submit-btn"
-                        class="absolute bottom-2 right-2 p-2 mb-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all opacity-0 pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed"
-                        style="transition: opacity 0.2s ease-in-out;"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
-                        </svg>
-                    </button>
-                </div>
-            </form>
-        </div>
-        @endif
-        
         <!-- Get Started Panel -->
         @if($schedules->isEmpty() && $venues->isEmpty() && $curators->isEmpty() && auth()->user()->tickets()->count() === 0)
         <div class="mb-8">
@@ -106,6 +78,31 @@
                     </div>
                 </div>
             </div>
+        </div>
+        @elseif (config('app.hosted'))
+        <div class="mb-6 w-full">
+            <form id="feedback-form" class="w-full">
+                @csrf
+                <div class="relative w-full">
+                    <textarea 
+                        id="feedback-textarea"
+                        name="feedback" 
+                        placeholder="{{ __('messages.feedback_placeholder') }}"
+                        class="w-full px-4 py-2 pr-12 pb-10 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                        rows="2"
+                    ></textarea>
+                    <button 
+                        type="button"
+                        id="feedback-submit-btn"
+                        class="absolute bottom-2 right-2 p-2 mb-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all opacity-0 pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed"
+                        style="transition: opacity 0.2s ease-in-out;"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                        </svg>
+                    </button>
+                </div>
+            </form>
         </div>
         @endif
 
