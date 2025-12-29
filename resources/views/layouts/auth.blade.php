@@ -49,13 +49,34 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    <!-- Dark Mode Detection -->
+    <script {!! nonce_attr() !!}>
+        // Apply dark mode based on system preference
+        (function() {
+            function applySystemTheme() {
+                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (isDark) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            }
+            
+            // Apply immediately to prevent flash
+            applySystemTheme();
+            
+            // Watch for system theme changes
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applySystemTheme);
+        })();
+    </script>
+
     {{ isset($head) ? $head : '' }}
 </head>
 
-<body class="font-sans text-gray-900 antialiased">
+<body class="font-sans text-gray-900 dark:text-gray-100 antialiased">
     <div class="min-h-screen flex flex-col sm:justify-center items-center pt-10 bg-gray-100 dark:bg-gray-900">
         <a href="https://eventschedule.com" target="_blank">
-            <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+            <x-application-logo class="w-20 h-20 fill-current text-gray-500 dark:text-gray-400" />
         </a>
 
         <div class="flex flex-col lg:flex-row lg:gap-8">

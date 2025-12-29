@@ -34,14 +34,14 @@
                 var emailInput = document.getElementById('email');
 
                 if (!email) {
-                    codeMessage.innerHTML = '<span class="text-red-600">' + '{{ __('messages.please_enter_email_address') }}' + '</span>';
+                    codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + '{{ __('messages.please_enter_email_address') }}' + '</span>';
                     return;
                 }
 
                 // Validate email format
                 var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(email)) {
-                    codeMessage.innerHTML = '<span class="text-red-600">' + '{{ __('messages.invalid_email_address') }}' + '</span>';
+                    codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + '{{ __('messages.invalid_email_address') }}' + '</span>';
                     return;
                 }
 
@@ -72,15 +72,15 @@
                         emailInput.disabled = true;
                         emailInput.setAttribute('readonly', 'readonly');
                         emailInput.classList.add('bg-gray-100', 'dark:bg-gray-700', 'cursor-not-allowed');
-                        codeMessage.innerHTML = '<span class="text-green-600">' + data.message + '</span>';
+                        codeMessage.innerHTML = '<span class="text-green-600 dark:text-green-400">' + data.message + '</span>';
                         // Enable code input
                         document.getElementById('verification_code').focus();
                     } else {
-                        codeMessage.innerHTML = '<span class="text-red-600">' + data.message + '</span>';
+                        codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + data.message + '</span>';
                     }
                 })
                 .catch(error => {
-                    codeMessage.innerHTML = '<span class="text-red-600">' + '{{ __('messages.error_sending_code') }}' + '</span>';
+                    codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + '{{ __('messages.error_sending_code') }}' + '</span>';
                     sendCodeBtn.disabled = false;
                     sendCodeBtn.innerHTML = '{{ __('messages.send_code') }}';
                 });
@@ -155,7 +155,7 @@
                 var password = document.getElementById('database_password').value;
 
                 // Show loading state
-                document.getElementById('test-result').innerHTML = '<span class="text-gray-500"><svg class="inline-block w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Testing...</span>';
+                document.getElementById('test-result').innerHTML = '<span class="text-gray-500 dark:text-gray-400"><svg class="inline-block w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Testing...</span>';
 
                 fetch('{{ route('app.test_database') }}', {
                     method: 'POST',
@@ -174,17 +174,17 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        document.getElementById('test-result').innerHTML = '<span class="text-green-600"><svg class="inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Connection successful!</span>';
+                        document.getElementById('test-result').innerHTML = '<span class="text-green-600 dark:text-green-400"><svg class="inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Connection successful!</span>';
                         // Enable register button on successful connection
                         document.querySelector('button[type="submit"]').disabled = false;
                     } else {
-                        document.getElementById('test-result').innerHTML = '<span class="text-red-600"><svg class="inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg> ' + data.error + '</span>';
+                        document.getElementById('test-result').innerHTML = '<span class="text-red-600 dark:text-red-400"><svg class="inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg> ' + data.error + '</span>';
                         // Disable register button on failed connection
                         document.querySelector('button[type="submit"]').disabled = true;
                     }
                 })
                 .catch(error => {
-                    document.getElementById('test-result').innerHTML = '<span class="text-red-600"><svg class="inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg> Error testing connection</span>';
+                    document.getElementById('test-result').innerHTML = '<span class="text-red-600 dark:text-red-400"><svg class="inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg> Error testing connection</span>';
                     // Disable register button on error
                     document.querySelector('button[type="submit"]').disabled = true;
                 });
@@ -322,7 +322,7 @@
             <div class="relative flex items-start">
                 <div class="flex h-6 items-center">
                     <input id="terms" name="terms" type="checkbox" required
-                        class="h-4 w-4 rounded border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] dark:focus:ring-offset-gray-800">
                 </div>
                 <div class="ml-3 text-sm leading-6">
                     <label for="terms" class="font-medium text-gray-900 dark:text-gray-300">
@@ -346,7 +346,7 @@
             <div class="relative flex items-start">
                 <div class="flex h-6 items-center">
                     <input id="report_errors" name="report_errors" type="checkbox" value="1"
-                        class="h-4 w-4 rounded border-gray-300 text-[#4E81FA] focus:ring-[#4E81FA]">
+                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] dark:focus:ring-offset-gray-800">
                 </div>
                 <div class="ml-3 text-sm leading-6">
                     <label for="report_errors" class="font-medium text-gray-900 dark:text-gray-300">
