@@ -31,7 +31,7 @@ class ApiSettingsController extends Controller
         
         $user->save();
         
-        return back()
+        return redirect()->to(route('profile.edit') . '#section-api')
             ->with('message', 'API settings updated successfully')
             ->with('show_new_api_key', $showNewKey);
     }

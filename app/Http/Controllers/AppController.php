@@ -10,7 +10,7 @@ class AppController extends Controller
     public function update(UpdaterManager $updater)
     {
         if (config('app.hosted')) {
-            return redirect()->back()->with('error', 'Not authorized');
+            return redirect()->to(route('profile.edit') . '#section-app')->with('error', 'Not authorized');
         }
 
         try {
@@ -23,13 +23,13 @@ class AppController extends Controller
                 
                 Artisan::call('migrate', ['--force' => true]);
             } else {
-                return redirect()->back()->with('error', __('messages.no_new_version_available'));
+                return redirect()->to(route('profile.edit') . '#section-app')->with('error', __('messages.no_new_version_available'));
             }                
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()->to(route('profile.edit') . '#section-app')->with('error', $e->getMessage());
         }
 
-        return redirect()->back()->with('message', __('messages.app_updated'));
+        return redirect()->to(route('profile.edit') . '#section-app')->with('message', __('messages.app_updated'));
     }
 
     public function setup()
