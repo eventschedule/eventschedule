@@ -44,7 +44,7 @@ class GeneralTest extends DuskTestCase
 
             // Create/edit venue using the trait
             $this->createTestVenue($browser);
-            $browser->clickLink('Edit Venue')
+            $browser->clickLink('Edit Schedule')
                     ->assertPathIs('/venue/edit')
                     ->click('a[data-section="section-contact-info"]')
                     ->waitFor('#website', 5)
@@ -56,7 +56,7 @@ class GeneralTest extends DuskTestCase
 
             // Create/edit talent using the trait
             $this->createTestTalent($browser);
-            $browser->clickLink('Edit Talent')
+            $browser->clickLink('Edit Schedule')
                     ->assertPathIs('/talent/edit')
                     ->click('a[data-section="section-contact-info"]')
                     ->waitFor('#website', 5)
