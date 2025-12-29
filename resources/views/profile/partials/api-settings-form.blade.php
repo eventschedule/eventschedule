@@ -5,7 +5,7 @@
         </h2>
 
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            <a href="{{ route('api.documentation') }}" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:underline">
+            <x-link href="{{ route('api.documentation') }}" target="_blank">
                 <span class="inline-flex items-center">
                     {{ __('messages.view_api_documentation') }}
                     <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 24 24">
@@ -13,7 +13,7 @@
                         <path fill="currentColor" d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"/>
                     </svg>
                 </span>
-            </a>
+            </x-link>
         </p>
     </header>
 

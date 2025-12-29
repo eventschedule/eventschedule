@@ -29,13 +29,13 @@
           class="text-[12px] uppercase font-extrabold leading-[1.2] text-center color-[#151B26]"
         >
         @if ($event->event_url)
-          <a href="{{ $event->event_url }}" target="_blank">
+          <x-link href="{{ $event->event_url }}" target="_blank">
             {{ \App\Utils\UrlUtils::clean($event->event_url) }}
-          </a>
+          </x-link>
         @elseif ($event->venue)
-          <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event->venue->bestAddress()) }}" target="_blank">
+          <x-link href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event->venue->bestAddress()) }}" target="_blank">
             {{ $event->venue->shortAddress() }}
-        </a>
+          </x-link>
         @endif
       </p>
 

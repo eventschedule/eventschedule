@@ -108,7 +108,7 @@
                             <div class="flex items-start justify-between">
                                 <div class="flex-1">
                                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">{{ $sale->event->name }}</h3>
-                                    <a href="{{ $sale->getEventUrl() }}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm">{{ __('messages.view_event') }}</a>
+                                    <x-link href="{{ $sale->getEventUrl() }}" target="_blank" class="text-sm">{{ __('messages.view_event') }}</x-link>
                                 </div>
                                 <div class="ml-4">
                                     @if($sale->status === 'paid')
@@ -151,9 +151,9 @@
                             <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
                                 <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.venue') }}</div>
                                 @if ($sale->event->venue && $sale->event->venue->isClaimed())
-                                    <a href="{{ $sale->event->venue->getGuestUrl() }}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">
+                                    <x-link href="{{ $sale->event->venue->getGuestUrl() }}" target="_blank" class="font-medium">
                                         {{ $sale->event->venue->getDisplayName(false) }}
-                                    </a>
+                                    </x-link>
                                 @else
                                     <span class="text-gray-900 dark:text-gray-100">{{ $sale->event->getVenueDisplayName(false) }}</span>
                                 @endif

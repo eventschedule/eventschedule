@@ -15,9 +15,9 @@
         
         @if (config('app.hosted'))
             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                <a href="https://stripe.com" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">
+                <x-link href="https://stripe.com" target="_blank">
                     Stripe Connect
-                </a>
+                </x-link>
             </h2>
 
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
@@ -46,9 +46,9 @@
         @endif
 
         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 pt-4">
-            <a href="https://invoiceninja.com" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">
+            <x-link href="https://invoiceninja.com" target="_blank">
                 Invoice Ninja
-            </a>
+            </x-link>
         </h2>
 
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
@@ -65,9 +65,9 @@
         @else
 
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                <a href="https://invoiceninja.com/partner-perks/event-schedule/" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">
+                <x-link href="https://invoiceninja.com/partner-perks/event-schedule/" target="_blank">
                     {{ __('messages.invoiceninja_offer') }}
-                </a>  
+                </x-link>  
             </p>
 
             <div class="pt-4">

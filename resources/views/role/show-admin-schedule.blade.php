@@ -11,7 +11,7 @@
         @foreach($unscheduled as $event)
         @if(! $event->starts_at)
         <li class="col-span-1 flex flex-col divide-y divide-gray-200 dark:divide-gray-700 rounded-lg bg-white dark:bg-gray-800 text-center shadow">
-            <a href="{{ $event->role()->getGuestUrl() }}" target="_blank">
+            <x-link href="{{ $event->role()->getGuestUrl() }}" target="_blank" class="block">
                 <div class="flex flex-1 flex-col p-8">
                     @if ($event->role()->profile_image_url)
                     <img class="mx-auto rounded-lg h-32 w-32 flex-shrink-0 object-cover"
@@ -23,7 +23,7 @@
                         <dd class="text-sm text-gray-500 dark:text-gray-400 line-clamp-3">{{ $event->role()->description }}</dd>
                     </dl>
                 </div>
-            </a>
+            </x-link>
             <div>
                 <div class="-mt-px flex divide-x divide-gray-200 dark:divide-gray-700">
                     <div class="flex w-0 flex-1 cursor-pointer"

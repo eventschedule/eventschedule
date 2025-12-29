@@ -328,12 +328,12 @@
                     <label for="terms" class="font-medium text-gray-900 dark:text-gray-300">
                         @if (config('app.hosted'))                        
                             {!! str_replace([':terms', ':privacy'], [
-                                '<a href="https://www.eventschedule.com/terms-of-service" target="_blank" class="hover:underline"> ' . __('messages.terms_of_service') . '</a>', 
-                                '<a href="https://www.eventschedule.com/privacy" target="_blank" class="hover:underline">' . __('messages.privacy_policy') . '</a>'
+                                '<a href="https://www.eventschedule.com/terms-of-service" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center"> ' . __('messages.terms_of_service') . '<svg class="ml-1 h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>', 
+                                '<a href="https://www.eventschedule.com/privacy" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center">' . __('messages.privacy_policy') . '<svg class="ml-1 h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>'
                             ], __('messages.i_accept_the_terms_and_privacy')) !!}
                         @else
                             {!! str_replace([':terms'], [
-                                '<a href="https://www.eventschedule.com/self-hosting-terms-of-service" target="_blank" class="hover:underline"> ' . __('messages.terms_of_service') . '</a>', 
+                                '<a href="https://www.eventschedule.com/self-hosting-terms-of-service" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center"> ' . __('messages.terms_of_service') . '<svg class="ml-1 h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>', 
                             ], __('messages.i_accept_the_terms')) !!}
                         @endif
                     </label>

@@ -27,13 +27,13 @@
     <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.no_followers') }}</h3>
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.share_your_event_schedule_link') }}</p>
     <div class="mt-3">
-        <a href="{{ $role->getGuestUrl() }}" target="_blank" class="hover:underline">
+        <x-link href="{{ $role->getGuestUrl() }}" target="_blank">
             @if (config('app.hosted'))
                 {{ $role->subdomain . '.eventschedule.com' }}
             @else
                 {{ config('app.url') . '/' . $role->subdomain }}
             @endif
-        </a>
+        </x-link>
     </div>
 </div>
 
@@ -71,9 +71,9 @@
                                             $firstRole = $follower->roles->first();
                                         @endphp                 
                                         @if ($firstRole->isClaimed())
-                                            <a href="{{ $firstRole->getGuestUrl() }}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline">
+                                            <x-link href="{{ $firstRole->getGuestUrl() }}" target="_blank">
                                                 {{ $firstRole->name }}
-                                            </a>
+                                            </x-link>
                                         @endif
                                     @endif
                                 </td>

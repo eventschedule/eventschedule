@@ -349,9 +349,9 @@
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                             @if ($event->exists)
                             <div class="text-sm text-gray-500 flex items-center gap-2">
-                                <a href="{{ $event->getGuestUrl($subdomain, $isUnique ? false : null) }}" target="_blank" class="hover:underline">
+                                <x-link href="{{ $event->getGuestUrl($subdomain, $isUnique ? false : null) }}" target="_blank">
                                     {{ \App\Utils\UrlUtils::clean($event->getGuestUrl($subdomain, $isUnique ? false : null)) }}
-                                </a>
+                                </x-link>
                                 <button type="button" onclick="copyEventUrl(this)" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
@@ -1022,9 +1022,9 @@
                                         {{ __('messages.enable_tickets') }}
                                         @if (! $role->isPro())
                                         <div class="text-xs pt-1">
-                                            <a href="{{ route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan']) }}" class="hover:underline text-gray-600 dark:text-gray-400" target="_blank">
+                                            <x-link href="{{ route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan']) }}" target="_blank">
                                                 {{ __('messages.requires_pro_plan') }}
-                                            </a>
+                                            </x-link>
                                         </div>
                                         @endif
                                     </label>
@@ -1051,9 +1051,9 @@
                                         @endif
                                     </select>
                                     <div class="text-xs pt-1">
-                                        <a href="{{ route('profile.edit') }}#section-payment-methods" class="hover:underline text-gray-600 dark:text-gray-400" target="_blank">
+                                        <x-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank">
                                             {{ __('messages.manage_payment_methods') }}
-                                        </a>
+                                        </x-link>
                                     </div>
                                 </div>
                                 @endif
@@ -1073,9 +1073,9 @@
                                     </select>
                                     @if (! $user->stripe_completed_at && ! $user->invoiceninja_api_key && ! $user->payment_url)
                                     <div class="text-xs pt-1">
-                                        <a href="{{ route('profile.edit') }}#section-payment-methods" class="hover:underline text-gray-600 dark:text-gray-400" target="_blank">
+                                        <x-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank">
                                             {{ __('messages.manage_payment_methods') }}
-                                        </a>
+                                        </x-link>
                                     </div>
                                     @endif
                                 </div>

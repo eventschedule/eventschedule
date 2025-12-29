@@ -41,10 +41,10 @@
                             </x-url-icon>
                         </div>
                         <div>
-                            <a href="{{ $link->url }}" target="_blank">
+                            <x-link href="{{ $link->url }}" target="_blank" class="block">
                                 <h4 class="text-lg font-bold break-words line-clamp-2 text-gray-900 dark:text-gray-100">{{ $link->name }}</h4>
                                 <img src="{{ $link->thumbnail_url }}"/>
-                            </a>
+                            </x-link>
                             <button type="button"
                                 class="mt-3 inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                                 onclick="removeLink('youtube_links', '{{ $link->url }}')">
@@ -88,12 +88,12 @@
                             </x-url-icon>
                         </div>
                         <div>
-                            <a href="{{ $link->url }}" target="_blank">
+                            <x-link href="{{ $link->url }}" target="_blank" class="block">
                                 <h4 class="text-lg font-bold break-words line-clamp-2 text-gray-900 dark:text-gray-100">
                                     {{ \App\Utils\UrlUtils::getBrand($link->url) }}</h4>
                                 <p class="mt-1 line-clamp-2 break-all text-gray-600 dark:text-gray-400">{{ \App\Utils\UrlUtils::clean($link->url) }}
                                 </p>
-                            </a>
+                            </x-link>
                             <button type="button"
                                 class="mt-3 inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                                 onclick="removeLink('social_links', '{{ $link->url }}')">
@@ -135,12 +135,12 @@
                             </x-url-icon>
                         </div>
                         <div>
-                            <a href="{{ $link->url }}" target="_blank">
+                            <x-link href="{{ $link->url }}" target="_blank" class="block">
                                 <h4 class="text-lg font-bold break-words line-clamp-2 text-gray-900 dark:text-gray-100">
                                     {{ \App\Utils\UrlUtils::getBrand($link->url) }}</h4>
                                 <p class="mt-1 line-clamp-2 break-all text-gray-600 dark:text-gray-400">{{ \App\Utils\UrlUtils::clean($link->url) }}
                                 </p>
-                            </a>
+                            </x-link>
                             <button type="button"
                                 class="mt-3 inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                                 onclick="removeLink('payment_links', '{{ $link->url }}')">

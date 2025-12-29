@@ -974,7 +974,7 @@
                                         </button>
                                     </div>
                                     <div class="text-xs pt-1">
-                                        <a href="https://uigradients.com" target="_blank" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.gradients_from', ['name' => 'uiGradients']) }}</a>
+                                        <x-link href="https://uigradients.com" target="_blank">{{ __('messages.gradients_from', ['name' => 'uiGradients']) }}</x-link>
                                     </div>
                                     <x-input-error class="mt-2" :messages="$errors->get('background_colors')" />
 
@@ -1032,9 +1032,9 @@
                         <div class="mb-6" id="url-display">
                             <x-input-label :value="__('messages.schedule_url')" />
                             <p class="text-sm text-gray-500 flex items-center gap-2 mt-1">
-                                <a href="{{ $role->getGuestUrl() }}" target="_blank" class="hover:underline">
+                                <x-link href="{{ $role->getGuestUrl() }}" target="_blank">
                                     {{ \App\Utils\UrlUtils::clean($role->getGuestUrl()) }}
-                                </a>
+                                </x-link>
                                 <button type="button" onclick="copyRoleUrl(this)" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
@@ -1176,9 +1176,9 @@
                                             @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
                                             <div class="mb-4" id="group-url-display-{{ is_object($group) ? $group->id : $i }}">
                                                 <p class="text-sm text-gray-500 flex items-center gap-2">
-                                                    <a href="{{ $role->getGuestUrl() }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" target="_blank" class="hover:underline">
+                                                    <x-link href="{{ $role->getGuestUrl() }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" target="_blank">
                                                         {{ \App\Utils\UrlUtils::clean($role->getGuestUrl()) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}
-                                                    </a>
+                                                    </x-link>
                                                     <button type="button" onclick="copyGroupUrl(this, '{{ $role->getGuestUrl() }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}')" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
@@ -1404,13 +1404,9 @@
                             @endif
                         </div>
                         @else
-                        <a href="{{ route('profile.edit') }}#section-google-calendar" target="_blank" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline inline-flex items-center">
+                        <x-link href="{{ route('profile.edit') }}#section-google-calendar" target="_blank">
                             {{ __('messages.connect_google_calendar') }}
-                            <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill="currentColor" d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"/>
-                                <path fill="currentColor" d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"/>
-                            </svg>
-                        </a>
+                        </x-link>
                         @endif
                     </div>
                 </div>
