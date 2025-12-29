@@ -74,6 +74,20 @@
             background: #f3f4f6;
         }
 
+        .section-nav-link.validation-error {
+            border-left-color: #dc2626 !important;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .section-nav-link.validation-error {
+                border-left-color: #ef4444 !important;
+            }
+        }
+
+        .dark .section-nav-link.validation-error {
+            border-left-color: #ef4444 !important;
+        }
+
         </style>
 
         <script {!! nonce_attr() !!}>
@@ -2107,5 +2121,133 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize on page load
     initializeSections();
+
+    // Form validation error handling
+    const form = document.querySelector('form');
+    if (form) {
+        // Field to section mapping
+        const fieldSectionMap = {
+            'name': 'section-details',
+            'address1': 'section-address'
+        };
+
+        // Function to find section containing a field
+        function findSectionForField(fieldId) {
+            const field = document.getElementById(fieldId);
+            if (!field) return null;
+            
+            // Find the section containing this field
+            let parent = field.closest('.section-content');
+            if (parent) {
+                return parent.id;
+            }
+            
+            // Fallback to mapping
+            return fieldSectionMap[fieldId] || null;
+        }
+
+        // Function to highlight section navigation link
+        function highlightSectionError(sectionId) {
+            if (!sectionId) return;
+            
+            const sectionLink = document.querySelector(`.section-nav-link[data-section="${sectionId}"]`);
+            if (sectionLink) {
+                sectionLink.classList.add('validation-error');
+            }
+        }
+
+        // Function to clear section error highlight
+        function clearSectionError(fieldId) {
+            const sectionId = findSectionForField(fieldId);
+            if (!sectionId) return;
+            
+            const sectionLink = document.querySelector(`.section-nav-link[data-section="${sectionId}"]`);
+            if (sectionLink) {
+                sectionLink.classList.remove('validation-error');
+            }
+        }
+
+        // Handle invalid event on required fields
+        const requiredFields = ['name'];
+        const address1Field = document.getElementById('address1');
+        if (address1Field && address1Field.hasAttribute('required')) {
+            requiredFields.push('address1');
+        }
+
+        requiredFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.addEventListener('invalid', function(e) {
+                    // Only handle on large screens where sections are hidden
+                    if (!isLargeScreen()) {
+                        return;
+                    }
+                    
+                    const sectionId = findSectionForField(fieldId);
+                    if (sectionId) {
+                        // Highlight the navigation link (don't change the displayed section)
+                        highlightSectionError(sectionId);
+                    }
+                }, true); // Use capture phase to run before browser's default handling
+            }
+        });
+
+        // Form submit handler - check validity before submission
+        form.addEventListener('submit', function(e) {
+            // Only check on large screens where sections are hidden
+            if (!isLargeScreen()) {
+                return; // Let browser handle validation normally
+            }
+
+            // Check if form is valid
+            if (!form.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Find first invalid field
+                let firstInvalidField = null;
+                let firstInvalidSection = null;
+
+                for (const fieldId of requiredFields) {
+                    const field = document.getElementById(fieldId);
+                    if (field && !field.checkValidity()) {
+                        firstInvalidField = field;
+                        firstInvalidSection = findSectionForField(fieldId);
+                        break;
+                    }
+                }
+
+                if (firstInvalidField && firstInvalidSection) {
+                    // Highlight the navigation link (don't change the displayed section)
+                    highlightSectionError(firstInvalidSection);
+                    
+                    // Trigger validation on the field to show browser message
+                    setTimeout(() => {
+                        firstInvalidField.focus();
+                        firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstInvalidField.reportValidity();
+                    }, 100);
+                }
+            }
+        });
+
+        // Add input listeners to clear error state when fields become valid
+        const monitoredFields = ['name', 'address1'];
+        monitoredFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.addEventListener('input', function() {
+                    if (this.checkValidity()) {
+                        clearSectionError(fieldId);
+                    }
+                });
+                field.addEventListener('change', function() {
+                    if (this.checkValidity()) {
+                        clearSectionError(fieldId);
+                    }
+                });
+            }
+        });
+    }
 });
 </script>
