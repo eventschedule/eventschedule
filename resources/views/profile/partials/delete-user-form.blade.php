@@ -15,7 +15,7 @@
     >{{ __('messages.delete_account') }}</x-danger-button>
 
     <x-modal name="confirm-user-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable>
-        <form method="post" action="{{ route('profile.destroy') }}" class="p-6">
+        <form method="post" action="{{ route('profile.destroy') }}" class="p-6" onkeydown="if(event.key === 'Enter') { event.preventDefault(); return false; }">
             @csrf
             @method('delete')
 
