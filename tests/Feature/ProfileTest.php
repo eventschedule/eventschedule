@@ -16,7 +16,7 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->get('/account');
+            ->get('/settings');
 
         $response->assertOk();
     }
@@ -27,7 +27,7 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->patch('/account', [
+            ->patch('/settings', [
                 'name' => 'Test User',
                 'email' => 'test@gmail.com',
                 'timezone' => 'America/Los_Angeles',
@@ -36,7 +36,7 @@ class ProfileTest extends TestCase
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/account');
+            ->assertRedirect('/settings');
 
         $user->refresh();
 
@@ -53,7 +53,7 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->patch('/account', [
+            ->patch('/settings', [
                 'name' => 'Test User',
                 'email' => $user->email,
                 'timezone' => 'America/Los_Angeles',
@@ -62,7 +62,7 @@ class ProfileTest extends TestCase
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/account');
+            ->assertRedirect('/settings');
 
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
@@ -73,7 +73,7 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->delete('/account', [
+            ->delete('/settings', [
                 'password' => 'password',
             ]);
 
@@ -91,14 +91,14 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->from('/account')
-            ->delete('/account', [
+            ->from('/settings')
+            ->delete('/settings', [
                 'password' => 'wrong-password',
             ]);
 
         $response
             ->assertSessionHasErrorsIn('userDeletion', 'password')
-            ->assertRedirect('/account');
+                ->assertRedirect('/settings');
 
         $this->assertNotNull($user->fresh());
     }

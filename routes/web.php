@@ -90,10 +90,10 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::post('/sales/action/{sale_id}', [TicketController::class, 'handleAction'])->name('sales.action');
     Route::post('/sales/resend-email/{sale_id}', [TicketController::class, 'resendEmail'])->name('sales.resend_email');
     
-    Route::get('/account', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/account', [ProfileController::class, 'update'])->name('profile.update');
-    Route::patch('/account/payments', [ProfileController::class, 'updatePayments'])->name('profile.update_payments');
-    Route::delete('/account', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/settings', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/settings', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/settings/payments', [ProfileController::class, 'updatePayments'])->name('profile.update_payments');
+    Route::delete('/settings', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/stripe/link', [StripeController::class, 'link'])->name('stripe.link');
     Route::get('/stripe/unlink', [StripeController::class, 'unlink'])->name('stripe.unlink');
