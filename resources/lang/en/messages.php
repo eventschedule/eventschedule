@@ -433,6 +433,7 @@ return [
     'add_to_schedule' => 'Add to Schedule',
     'upgrade_to_pro' => 'Upgrade to Pro to add members',
     'member_already_exists' => 'Member already exists',
+    'payment_methods' => 'Payment Methods',
     'ticket_payment_methods' => 'Ticket Payment Methods',
     'ticket_payment_methods_help' => 'Integrate a payment processor for online ticket sales',
     'stripe_help' => 'Accept credit cards, ACH, and more',
