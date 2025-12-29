@@ -9,9 +9,9 @@
     <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.no_requests') }}</h3>
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.share_your_sign_up_link_to_get_more_requests') }}</p>
     <div class="mt-3">
-        <a href="{{ route('event.sign_up', ['subdomain' => $role->subdomain]) }}" target="_blank" class="hover:underline">
+        <x-link href="{{ route('event.sign_up', ['subdomain' => $role->subdomain]) }}" target="_blank">
             {{ \App\Utils\UrlUtils::clean(route('event.sign_up', ['subdomain' => $role->subdomain])) }}
-        </a>
+        </x-link>
     </div>
 </div>
 
@@ -27,7 +27,7 @@
                     <img class="mx-auto rounded-lg h-24 w-24 object-cover mb-4" src="{{ $event->role()->profile_image_url }}" alt="Profile Image">
                 @endif
                 @if ($event->role() && $event->role()->getGuestUrl())
-                    <a href="{{ $event->role() ? $event->role()->getGuestUrl() : '#' }}" target="_blank" class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1 hover:text-blue-600 dark:hover:text-blue-400 hover:underline">{{ $event->role() ? $event->role()->name : $event->translatedName() }}</a>
+                    <x-link href="{{ $event->role() ? $event->role()->getGuestUrl() : '#' }}" target="_blank" class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1 hover:text-blue-600 dark:hover:text-blue-400">{{ $event->role() ? $event->role()->name : $event->translatedName() }}</x-link>
                 @else
                     <span class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">{{ $event->role() ? $event->role()->name : $event->translatedName() }}</span>
                 @endif
@@ -36,7 +36,7 @@
                     <img class="mx-auto rounded-lg h-24 w-24 object-cover mb-4" src="{{ $event->venue->profile_image_url }}" alt="Profile Image">
                 @endif
                 @if ($event->venue && $event->venue->getGuestUrl())
-                    <a href="{{ $event->venue ? $event->venue->getGuestUrl() : '#' }}" target="_blank" class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1 hover:text-blue-600 dark:hover:text-blue-400 hover:underline">{{ $event->venue ? $event->venue->name : $event->translatedName() }}</a>
+                    <x-link href="{{ $event->venue ? $event->venue->getGuestUrl() : '#' }}" target="_blank" class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1 hover:text-blue-600 dark:hover:text-blue-400">{{ $event->venue ? $event->venue->name : $event->translatedName() }}</x-link>
                 @else
                     <span class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">{{ $event->venue ? $event->venue->name : $event->translatedName() }}</span>
                 @endif

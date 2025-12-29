@@ -52,13 +52,13 @@
                                     @if ($sale->transaction_reference == __('messages.manual_payment'))
                                         <span class="text-gray-600 dark:text-gray-400">{{ __('messages.manual_payment') }}</span>
                                     @elseif ($sale->payment_method == 'invoiceninja')
-                                        <a href="https://app.invoicing.co/#/invoices/{{ $sale->transaction_reference }}/edit" target="_blank" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline">
+                                        <x-link href="https://app.invoicing.co/#/invoices/{{ $sale->transaction_reference }}/edit" target="_blank">
                                             {{ $sale->transaction_reference }}
-                                        </a>
+                                        </x-link>
                                     @elseif ($sale->payment_method == 'stripe')
-                                        <a href="https://dashboard.stripe.com/payments/{{ $sale->transaction_reference }}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline">
+                                        <x-link href="https://dashboard.stripe.com/payments/{{ $sale->transaction_reference }}" target="_blank">
                                             {{ $sale->transaction_reference }}
-                                        </a>
+                                        </x-link>
                                     @else
                                         <span class="font-mono text-sm">{{ $sale->transaction_reference }}</span>
                                     @endif
@@ -233,7 +233,7 @@
                 <!-- Event Info -->
                 <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
                     <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.event') }}</div>
-                    <a href="{{ $sale->getEventUrl() }}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">{{ $sale->event->name }}</a>
+                    <x-link href="{{ $sale->getEventUrl() }}" target="_blank" class="font-medium">{{ $sale->event->name }}</x-link>
                 </div>
 
                 <!-- Payment Details -->
@@ -250,13 +250,13 @@
                             @if ($sale->transaction_reference == __('messages.manual_payment'))
                                 <span class="text-gray-600 dark:text-gray-400">{{ __('messages.manual_payment') }}</span>
                             @elseif ($sale->payment_method == 'invoiceninja')
-                                <a href="https://app.invoicing.co/#/invoices/{{ $sale->transaction_reference }}/edit" target="_blank" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 break-all">
+                                <x-link href="https://app.invoicing.co/#/invoices/{{ $sale->transaction_reference }}/edit" target="_blank" class="break-all">
                                     {{ $sale->transaction_reference }}
-                                </a>
+                                </x-link>
                             @elseif ($sale->payment_method == 'stripe')
-                                <a href="https://dashboard.stripe.com/payments/{{ $sale->transaction_reference }}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 break-all">
+                                <x-link href="https://dashboard.stripe.com/payments/{{ $sale->transaction_reference }}" target="_blank" class="break-all">
                                     {{ $sale->transaction_reference }}
-                                </a>
+                                </x-link>
                             @else
                                 <span class="font-mono text-sm break-all">{{ $sale->transaction_reference }}</span>
                             @endif

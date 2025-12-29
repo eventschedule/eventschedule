@@ -205,7 +205,9 @@ class UrlUtils
             $url = rtrim($matches[0], '.,!?:;'); // Remove any trailing punctuation
             $displayUrl = preg_replace('/^https?:\/\/(www\.)?/', '', $url); // Remove http(s):// and www. from display text
             $displayUrl = rtrim($displayUrl, '/'); // Remove trailing slashes from display text
-            return '<a href="' . htmlspecialchars($url, ENT_QUOTES) . '" target="_blank" style="text-decoration: underline; color: #4E81FA; cursor: pointer;">' . htmlspecialchars($displayUrl, ENT_QUOTES) . '</a>';
+            $escapedUrl = htmlspecialchars($url, ENT_QUOTES);
+            $escapedDisplay = htmlspecialchars($displayUrl, ENT_QUOTES);
+            return '<a href="' . $escapedUrl . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center">' . $escapedDisplay . '<svg class="ml-1 h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>';
         }, $text);
         
         return $text;

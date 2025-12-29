@@ -222,7 +222,7 @@
                     d="M16.669 15.6739C16.4501 16.8413 16.1267 17.9171 15.7104 18.8368C15.2966 19.7512 14.7849 20.5247 14.1793 21.0789C13.5708 21.6358 12.831 22 12.0001 22C17.2707 22 21.5889 17.9226 21.9724 12.75H16.9868C16.9512 13.6778 16.8445 14.7381 16.669 15.6739Z"
                   />
                 </svg>
-                <a href="{{ $role->website }}" class="hover:underline text-sm" target="_blank">{{ App\Utils\UrlUtils::clean($role->website) }}</a>
+                <x-link href="{{ $role->website }}" target="_blank" class="text-sm">{{ App\Utils\UrlUtils::clean($role->website) }}</x-link>
               </div>
               @endif
               @if($role->isVenue())
@@ -241,11 +241,9 @@
                     d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z"
                     />
                  </svg>
-                 <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($role->bestAddress()) }}" target="_blank">
-                  <p class="text-sm hover:underline">
+                 <x-link href="https://www.google.com/maps/search/?api=1&query={{ urlencode($role->bestAddress()) }}" target="_blank" class="text-sm">
                     {{ $role->shortAddress() }}
-                  </p>
-                </a>
+                 </x-link>
               </div>
               @endif
             </div>
