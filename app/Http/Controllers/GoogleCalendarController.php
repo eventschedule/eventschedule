@@ -64,7 +64,7 @@ class GoogleCalendarController extends Controller
             $code = $request->get('code');
             
             if (!$code) {
-                return redirect()->route('profile.edit')
+                return redirect()->to(route('profile.edit') . '#section-google-calendar')
                     ->with('error', 'Google authorization failed. Please try again.');
             }
 
@@ -72,7 +72,7 @@ class GoogleCalendarController extends Controller
                         
             if (isset($token['error'])) {
                 Log::error('Google OAuth error', ['error' => $token['error']]);
-                return redirect()->route('profile.edit')
+                return redirect()->to(route('profile.edit') . '#section-google-calendar')
                     ->with('error', 'Google authorization failed: ' . $token['error_description']);
             }
 
@@ -85,7 +85,7 @@ class GoogleCalendarController extends Controller
                 'google_token_expires_at' => now()->addSeconds($token['expires_in']),
             ]);
             
-            return redirect()->route('profile.edit')
+            return redirect()->to(route('profile.edit') . '#section-google-calendar')
                 ->with('message', 'Google Calendar connected successfully!');
 
         } catch (\Exception $e) {
@@ -94,7 +94,7 @@ class GoogleCalendarController extends Controller
                 'user_id' => Auth::id(),
             ]);
 
-            return redirect()->route('profile.edit')
+            return redirect()->to(route('profile.edit') . '#section-google-calendar')
                 ->with('error', 'Failed to connect Google Calendar. Please try again.');
         }
     }
@@ -107,7 +107,7 @@ class GoogleCalendarController extends Controller
         $user = Auth::user();
         
         if (!$user->google_token) {
-            return redirect()->route('profile.edit')
+            return redirect()->to(route('profile.edit') . '#section-google-calendar')
                 ->with('error', 'Google Calendar not connected. Please connect first.');
         }
         
@@ -156,7 +156,7 @@ class GoogleCalendarController extends Controller
             'google_token_expires_at' => null,
         ]);
 
-        return redirect()->route('profile.edit')
+        return redirect()->to(route('profile.edit') . '#section-google-calendar')
             ->with('message', 'Google Calendar disconnected successfully.');
     }
 
