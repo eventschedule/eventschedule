@@ -144,61 +144,45 @@
             @php
                 // Use translation if available, otherwise fall back to event methods
                 $eventName = (isset($translation) && $translation && $translation->name_translated) ? $translation->name_translated : $event->translatedName();
-                $eventDescription = (isset($translation) && $translation && $translation->description_translated) ? $translation->description_translated : $event->translatedDescription();
-                $eventDescription = trim(strip_tags($eventDescription));
+                $eventDescriptionRaw = (isset($translation) && $translation && $translation->description_translated) ? $translation->description_translated : $event->translatedDescription();
+                $eventDescription = trim(strip_tags($eventDescriptionRaw));
+                if (empty($eventDescription)) {
+                    $eventDescription = $event->translatedName() . ' - ' . __('messages.event');
+                }
                 $eventUrl = $event->getGuestUrl();
                 $eventImage = $event->getImageUrl();
                 $startDate = $event->getSchemaStartDate($date ?? null);
                 $endDate = $event->getSchemaEndDate($date ?? null);
                 $location = $event->getSchemaLocation();
                 $offers = $event->getSchemaOffers();
-                
-                // Get organizer
-                $organizer = null;
-                if ($event->venue && $event->venue->isClaimed()) {
-                    $organizer = [
-                        '@type' => 'Organization',
-                        'name' => $event->venue->translatedName(),
-                        'url' => $event->venue->getGuestUrl(),
-                    ];
-                } elseif ($event->role() && $event->role()->isClaimed()) {
-                    $organizer = [
-                        '@type' => 'Person',
-                        'name' => $event->role()->translatedName(),
-                        'url' => $event->role()->getGuestUrl(),
-                    ];
-                }
+                $organizer = $event->getSchemaOrganizer();
+                $performers = $event->getSchemaPerformers();
+                $eventStatus = $event->getSchemaEventStatus();
             @endphp
 
             <script type="application/ld+json">
             {
                 "@context": "https://schema.org",
                 "@type": "Event",
-                "name": {!! json_encode($eventName, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
-                @if ($eventDescription)
-                ,
-                "description": {!! json_encode($eventDescription, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
-                @endif
-                ,
+                "name": {!! json_encode($eventName, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
+                "description": {!! json_encode($eventDescription, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
                 "startDate": {!! json_encode($startDate, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
-                "endDate": {!! json_encode($endDate, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                "endDate": {!! json_encode($endDate, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
+                "url": {!! json_encode($eventUrl, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
+                "eventStatus": {!! json_encode($eventStatus, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
+                "organizer": {!! json_encode($organizer, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!},
+                "offers": {!! json_encode(count($offers) === 1 ? $offers[0] : $offers, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
                 @if ($eventImage)
                 ,
                 "image": {!! json_encode($eventImage, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
                 @endif
-                ,
-                "url": {!! json_encode($eventUrl, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
                 @if ($location)
                 ,
                 "location": {!! json_encode($location, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
                 @endif
-                @if ($organizer)
+                @if ($performers)
                 ,
-                "organizer": {!! json_encode($organizer, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
-                @endif
-                @if ($offers && !empty($offers))
-                ,
-                "offers": {!! json_encode(count($offers) === 1 ? $offers[0] : $offers, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+                "performer": {!! json_encode(count($performers) === 1 ? $performers[0] : $performers, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
                 @endif
             }
             </script>
