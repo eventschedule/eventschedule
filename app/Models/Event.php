@@ -911,38 +911,139 @@ class Event extends Model
 
     /**
      * Get offers schema data for JSON-LD (tickets)
+     * Always returns at least a default free offer if no tickets are available
      */
     public function getSchemaOffers()
     {
-        if (!$this->tickets_enabled || !$this->isPro() || $this->tickets->isEmpty()) {
-            return null;
+        $url = $this->getGuestUrl();
+        
+        if ($this->tickets_enabled && $this->isPro() && !$this->tickets->isEmpty()) {
+            $offers = [];
+            $currency = $this->ticket_currency_code ?: 'USD';
+
+            foreach ($this->tickets as $ticket) {
+                $offer = [
+                    '@type' => 'Offer',
+                    'price' => (float) $ticket->price,
+                    'priceCurrency' => $currency,
+                    'url' => $url . (strpos($url, '?') !== false ? '&' : '?') . 'tickets=true',
+                    'availability' => 'https://schema.org/InStock',
+                ];
+
+                if ($ticket->name) {
+                    $offer['name'] = $ticket->name;
+                }
+
+                if ($ticket->quantity > 0) {
+                    $offer['inventoryLevel'] = $ticket->quantity;
+                }
+
+                $offers[] = $offer;
+            }
+
+            return $offers;
         }
 
-        $offers = [];
-        $currency = $this->ticket_currency_code ?: 'USD';
-        $url = $this->getGuestUrl();
-
-        foreach ($this->tickets as $ticket) {
-            $offer = [
+        // Return default free offer if no tickets
+        return [
+            [
                 '@type' => 'Offer',
-                'price' => (float) $ticket->price,
-                'priceCurrency' => $currency,
-                'url' => $url . (strpos($url, '?') !== false ? '&' : '?') . 'tickets=true',
+                'price' => '0',
+                'priceCurrency' => 'USD',
+                'url' => $url,
                 'availability' => 'https://schema.org/InStock',
+            ]
+        ];
+    }
+
+    /**
+     * Get performers schema data for JSON-LD
+     */
+    public function getSchemaPerformers()
+    {
+        $performers = [];
+        $members = $this->members();
+
+        foreach ($members as $member) {
+            $performer = [
+                '@type' => 'Person',
+                'name' => $member->translatedName(),
             ];
 
-            if ($ticket->name) {
-                $offer['name'] = $ticket->name;
+            if ($member->getGuestUrl()) {
+                $performer['url'] = $member->getGuestUrl();
             }
 
-            if ($ticket->quantity > 0) {
-                $offer['inventoryLevel'] = $ticket->quantity;
-            }
-
-            $offers[] = $offer;
+            $performers[] = $performer;
         }
 
-        return $offers;
+        return !empty($performers) ? $performers : null;
+    }
+
+    /**
+     * Get event status for JSON-LD
+     */
+    public function getSchemaEventStatus()
+    {
+        if (!$this->starts_at) {
+            return 'https://schema.org/EventScheduled';
+        }
+
+        // For most events, EventScheduled is the appropriate status
+        // Only use EventPostponed or EventCancelled if explicitly set
+        // Since we don't have explicit status tracking, default to EventScheduled
+        return 'https://schema.org/EventScheduled';
+    }
+
+    /**
+     * Get organizer schema data for JSON-LD
+     * Always returns an organizer (with fallback if needed)
+     */
+    public function getSchemaOrganizer()
+    {
+        if ($this->venue && $this->venue->isClaimed()) {
+            return [
+                '@type' => 'Organization',
+                'name' => $this->venue->translatedName(),
+                'url' => $this->venue->getGuestUrl(),
+            ];
+        } elseif ($this->role() && $this->role()->isClaimed()) {
+            return [
+                '@type' => 'Person',
+                'name' => $this->role()->translatedName(),
+                'url' => $this->role()->getGuestUrl(),
+            ];
+        } elseif ($this->creatorRole) {
+            // Fallback to creator role
+            return [
+                '@type' => $this->creatorRole->isVenue() ? 'Organization' : 'Person',
+                'name' => $this->creatorRole->translatedName(),
+                'url' => $this->creatorRole->getGuestUrl(),
+            ];
+        }
+
+        // Final fallback - use event name as organizer
+        return [
+            '@type' => 'Organization',
+            'name' => $this->translatedName(),
+        ];
+    }
+
+    /**
+     * Get description for JSON-LD
+     * Always returns a description (with fallback if needed)
+     */
+    public function getSchemaDescription()
+    {
+        $description = $this->translatedDescription();
+        $description = trim(strip_tags($description));
+        
+        if (empty($description)) {
+            // Fallback description
+            return $this->translatedName() . ' - ' . __('messages.event');
+        }
+
+        return $description;
     }
 
     /**
