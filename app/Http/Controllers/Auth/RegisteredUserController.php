@@ -45,8 +45,15 @@ class RegisteredUserController extends Controller
      */
     public function sendVerificationCode(Request $request): JsonResponse
     {
+        $emailValidationRules = ['required', 'string', 'email', 'max:255'];
+        
+        // Add fake email validation for hosted mode
+        if (config('app.hosted')) {
+            $emailValidationRules[] = new NoFakeEmail;
+        }
+        
         $request->validate([
-            'email' => ['required', 'string', 'email', 'max:255'],
+            'email' => $emailValidationRules,
         ]);
 
         $email = strtolower($request->email);

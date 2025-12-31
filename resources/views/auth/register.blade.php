@@ -79,42 +79,56 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
                     },
                     body: JSON.stringify({
                         email: email
                     })
                 })
-                .then(response => response.json())
-                .then(data => {
+                .then(response => {
                     // Always re-enable button and restore text
                     sendCodeBtn.disabled = false;
                     sendCodeBtn.innerHTML = '{{ __('messages.send_code') }}';
                     
-                    if (data.success) {
-                        // Lock the email field after successful code send
-                        lockedEmail = email.toLowerCase();
-                        emailInput.setAttribute('readonly', 'readonly');
-                        emailInput.classList.add('bg-gray-100', 'dark:bg-gray-700', 'cursor-not-allowed');
-                        codeMessage.innerHTML = '<span class="text-green-600 dark:text-green-400">' + data.message + '</span>';
-                        // Show the rest of the form fields
-                        var nameField = document.getElementById('name-field');
-                        var passwordField = document.getElementById('password-field');
-                        var verificationCodeField = document.getElementById('verification-code-field');
-                        var termsField = document.getElementById('terms-field');
-                        var submitSection = document.getElementById('submit-section');
-                        if (nameField) nameField.style.display = 'block';
-                        if (passwordField) passwordField.style.display = 'block';
-                        if (verificationCodeField) verificationCodeField.style.display = 'block';
-                        if (termsField) termsField.style.display = 'block';
-                        if (submitSection) submitSection.style.display = 'flex';
-                        // Enable code input and focus on it
-                        if (verificationCodeField) {
-                            document.getElementById('verification_code').focus();
+                    return response.json().then(data => {
+                        // Check if response is successful
+                        if (response.ok && data.success) {
+                            // Lock the email field after successful code send
+                            lockedEmail = email.toLowerCase();
+                            emailInput.setAttribute('readonly', 'readonly');
+                            emailInput.classList.add('bg-gray-100', 'dark:bg-gray-700', 'cursor-not-allowed');
+                            codeMessage.innerHTML = '<span class="text-green-600 dark:text-green-400">' + data.message + '</span>';
+                            // Show the rest of the form fields
+                            var nameField = document.getElementById('name-field');
+                            var passwordField = document.getElementById('password-field');
+                            var verificationCodeField = document.getElementById('verification-code-field');
+                            var termsField = document.getElementById('terms-field');
+                            var submitSection = document.getElementById('submit-section');
+                            if (nameField) nameField.style.display = 'block';
+                            if (passwordField) passwordField.style.display = 'block';
+                            if (verificationCodeField) verificationCodeField.style.display = 'block';
+                            if (termsField) termsField.style.display = 'block';
+                            if (submitSection) submitSection.style.display = 'flex';
+                            // Enable code input and focus on it
+                            if (verificationCodeField) {
+                                document.getElementById('verification_code').focus();
+                            }
+                        } else {
+                            // Handle validation errors or other errors
+                            var errorMessage = data.message || '{{ __('messages.error_sending_code') }}';
+                            
+                            // Check for Laravel validation errors (422 status)
+                            if (data.errors && data.errors.email) {
+                                errorMessage = Array.isArray(data.errors.email) ? data.errors.email[0] : data.errors.email;
+                            }
+                            
+                            codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + errorMessage + '</span>';
                         }
-                    } else {
-                        codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + data.message + '</span>';
-                    }
+                    }).catch(function(jsonError) {
+                        // If JSON parsing fails, show generic error
+                        codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + '{{ __('messages.error_sending_code') }}' + '</span>';
+                    });
                 })
                 .catch(error => {
                     codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + '{{ __('messages.error_sending_code') }}' + '</span>';
