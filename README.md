@@ -8,7 +8,7 @@
 ---
 
 <p>
-    An open-source platform to create calendars, sell tickets and streamline event check-ins with QR codes
+    An open-source platform to share events, sell tickets and bring communities together.
 </p>
 
 * Sample Schedule: [openmicnight.eventschedule.com](https://openmicnight.eventschedule.com)
