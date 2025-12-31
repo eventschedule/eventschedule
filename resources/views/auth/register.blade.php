@@ -27,6 +27,31 @@
         @if (config('app.hosted'))
         var lockedEmail = null;
 
+        // Show all fields if form is reloaded with validation errors or if code was already sent
+        document.addEventListener('DOMContentLoaded', function() {
+            var verificationCodeInput = document.getElementById('verification_code');
+            var emailInput = document.getElementById('email');
+            var hasErrors = @json($errors->any());
+            // If verification code field has a value (from old input), email is readonly, or there are validation errors, show all fields
+            if (verificationCodeInput && (verificationCodeInput.value || emailInput.readOnly || hasErrors)) {
+                var nameField = document.getElementById('name-field');
+                var passwordField = document.getElementById('password-field');
+                var verificationCodeField = document.getElementById('verification-code-field');
+                var termsField = document.getElementById('terms-field');
+                var submitSection = document.getElementById('submit-section');
+                if (nameField) nameField.style.display = 'block';
+                if (passwordField) passwordField.style.display = 'block';
+                if (verificationCodeField) verificationCodeField.style.display = 'block';
+                if (termsField) termsField.style.display = 'block';
+                if (submitSection) submitSection.style.display = 'flex';
+                // If email is readonly, lock it
+                if (emailInput.readOnly) {
+                    lockedEmail = emailInput.value.toLowerCase();
+                    emailInput.classList.add('bg-gray-100', 'dark:bg-gray-700', 'cursor-not-allowed');
+                }
+            }
+        });
+
         function sendVerificationCode() {
                 var email = document.getElementById('email').value;
                 var sendCodeBtn = document.getElementById('send-code-btn');
@@ -72,8 +97,21 @@
                         emailInput.setAttribute('readonly', 'readonly');
                         emailInput.classList.add('bg-gray-100', 'dark:bg-gray-700', 'cursor-not-allowed');
                         codeMessage.innerHTML = '<span class="text-green-600 dark:text-green-400">' + data.message + '</span>';
-                        // Enable code input
-                        document.getElementById('verification_code').focus();
+                        // Show the rest of the form fields
+                        var nameField = document.getElementById('name-field');
+                        var passwordField = document.getElementById('password-field');
+                        var verificationCodeField = document.getElementById('verification-code-field');
+                        var termsField = document.getElementById('terms-field');
+                        var submitSection = document.getElementById('submit-section');
+                        if (nameField) nameField.style.display = 'block';
+                        if (passwordField) passwordField.style.display = 'block';
+                        if (verificationCodeField) verificationCodeField.style.display = 'block';
+                        if (termsField) termsField.style.display = 'block';
+                        if (submitSection) submitSection.style.display = 'flex';
+                        // Enable code input and focus on it
+                        if (verificationCodeField) {
+                            document.getElementById('verification_code').focus();
+                        }
                     } else {
                         codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + data.message + '</span>';
                     }
@@ -265,14 +303,6 @@
 
         @endif
 
-        <!-- Name -->
-        <div class="mt-4">
-            <x-input-label for="name" :value="__('messages.full_name')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required
-                autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
-        </div>
-
         <!-- Email Address -->
         <div class="mt-4">
             <x-input-label for="email" :value="__('messages.email')" />
@@ -292,18 +322,16 @@
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        <!-- Verification Code -->
-        @if (config('app.hosted'))
-        <div class="mt-4">
-            <x-input-label for="verification_code" :value="__('messages.verification_code')" />
-            <x-text-input id="verification_code" class="block mt-1 w-full" type="text" name="verification_code" 
-                maxlength="6" pattern="[0-9]{6}" required autocomplete="off" />
-            <x-input-error :messages="$errors->get('verification_code')" class="mt-2" />
+        <!-- Name -->
+        <div class="mt-4" id="name-field" @if(config('app.hosted')) style="display: none;" @endif>
+            <x-input-label for="name" :value="__('messages.full_name')" />
+            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required
+                autofocus autocomplete="name" />
+            <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
-        @endif
 
         <!-- Password -->
-        <div class="mt-4">
+        <div class="mt-4" id="password-field" @if(config('app.hosted')) style="display: none;" @endif>
             <x-input-label for="password" :value="__('messages.password')" />
 
             <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required minlength="8"
@@ -312,12 +340,22 @@
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
+        <!-- Verification Code -->
+        @if (config('app.hosted'))
+        <div class="mt-4" id="verification-code-field" style="display: none;">
+            <x-input-label for="verification_code" :value="__('messages.verification_code')" />
+            <x-text-input id="verification_code" class="block mt-1 w-full" type="text" name="verification_code" 
+                :value="old('verification_code')" maxlength="6" pattern="[0-9]{6}" required autocomplete="off" />
+            <x-input-error :messages="$errors->get('verification_code')" class="mt-2" />
+        </div>
+        @endif
+
         <!-- Honeypot field -->
         <div class="hidden">
             <input type="text" name="website" autocomplete="off" tabindex="-1">
         </div>
 
-        <div class="mt-8">
+        <div class="mt-8" id="terms-field" @if(config('app.hosted')) style="display: none;" @endif>
             <div class="relative flex items-start">
                 <div class="flex h-6 items-center">
                     <input id="terms" name="terms" type="checkbox" required
@@ -356,13 +394,17 @@
         </div>
         @endif
         
-        <div class="flex items-center justify-between mt-8">
-            @if (config('app.hosted'))
+        @if (config('app.hosted'))
+        <div class="mt-8">
             <a class="hover:underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4E81FA] dark:focus:ring-offset-gray-800"
                 href="{{ route('login') }}">
                 {{ __('messages.already_registered') }}
             </a>
-            @else
+        </div>
+        @endif
+        
+        <div class="flex items-center justify-between mt-8" id="submit-section" @if(config('app.hosted')) style="display: none;" @endif>
+            @if (! config('app.hosted'))
             <div></div>
             @endif
 
