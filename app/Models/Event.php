@@ -866,9 +866,14 @@ class Event extends Model
             return null;
         }
 
+        $venueName = $this->venue->translatedName();
+        if (empty($venueName)) {
+            $venueName = $this->translatedName(); // Fallback to event name
+        }
+
         $location = [
             '@type' => 'Place',
-            'name' => $this->venue->translatedName(),
+            'name' => $venueName,
         ];
 
         // Add address if available
@@ -916,6 +921,7 @@ class Event extends Model
     public function getSchemaOffers()
     {
         $url = $this->getGuestUrl();
+        $validFrom = $this->getSchemaStartDate(); // Use event start date as validFrom
         
         if ($this->tickets_enabled && $this->isPro() && !$this->tickets->isEmpty()) {
             $offers = [];
@@ -928,6 +934,7 @@ class Event extends Model
                     'priceCurrency' => $currency,
                     'url' => $url . (strpos($url, '?') !== false ? '&' : '?') . 'tickets=true',
                     'availability' => 'https://schema.org/InStock',
+                    'validFrom' => $validFrom,
                 ];
 
                 if ($ticket->name) {
@@ -952,6 +959,7 @@ class Event extends Model
                 'priceCurrency' => 'USD',
                 'url' => $url,
                 'availability' => 'https://schema.org/InStock',
+                'validFrom' => $validFrom,
             ]
         ];
     }
