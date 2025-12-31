@@ -43,7 +43,7 @@
                 if (passwordField) passwordField.style.display = 'block';
                 if (verificationCodeField) verificationCodeField.style.display = 'block';
                 if (termsField) termsField.style.display = 'block';
-                if (submitSection) submitSection.style.display = 'flex';
+                if (submitSection) submitSection.style.display = 'block';
                 // If email is readonly, lock it
                 if (emailInput.readOnly) {
                     lockedEmail = emailInput.value.toLowerCase();
@@ -109,7 +109,7 @@
                             if (passwordField) passwordField.style.display = 'block';
                             if (verificationCodeField) verificationCodeField.style.display = 'block';
                             if (termsField) termsField.style.display = 'block';
-                            if (submitSection) submitSection.style.display = 'flex';
+                            if (submitSection) submitSection.style.display = 'block';
                             // Focus on the name field
                             var nameInput = document.getElementById('name');
                             if (nameInput) {
@@ -409,7 +409,7 @@
         </div>
         @endif
         
-        <div class="flex items-center justify-between mt-8" id="submit-section" @if(config('app.hosted')) style="display: none;" @endif>
+        <div class="flex items-center justify-between mt-8">
             @if (config('app.hosted'))
             <a class="hover:underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4E81FA] dark:focus:ring-offset-gray-800"
                 href="{{ route('login') }}">
@@ -419,9 +419,11 @@
             <div></div>
             @endif
 
-            <x-primary-button class="@if(config('app.hosted')) ml-auto @else ml-4 @endif">
-                {{ __('messages.sign_up') }}
-            </x-primary-button>
+            <div id="submit-section" @if(config('app.hosted')) style="display: none;" @endif>
+                <x-primary-button>
+                    {{ __('messages.sign_up') }}
+                </x-primary-button>
+            </div>
         </div>
     </form>
 </x-auth-layout>
