@@ -408,21 +408,17 @@
         </div>
         @endif
         
-        @if (config('app.hosted'))
-        <div class="mt-8">
+        <div class="flex items-center justify-between mt-8" id="submit-section" @if(config('app.hosted')) style="display: none;" @endif>
+            @if (config('app.hosted'))
             <a class="hover:underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4E81FA] dark:focus:ring-offset-gray-800"
                 href="{{ route('login') }}">
                 {{ __('messages.already_registered') }}
             </a>
-        </div>
-        @endif
-        
-        <div class="flex items-center justify-between mt-8" id="submit-section" @if(config('app.hosted')) style="display: none;" @endif>
-            @if (! config('app.hosted'))
+            @else
             <div></div>
             @endif
 
-            <x-primary-button class="ml-4">
+            <x-primary-button class="@if(config('app.hosted')) ml-auto @else ml-4 @endif">
                 {{ __('messages.sign_up') }}
             </x-primary-button>
         </div>
