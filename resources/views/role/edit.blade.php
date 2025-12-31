@@ -1501,6 +1501,8 @@
                     <div id="test-email-result" class="mt-2 hidden"></div>
                 </div>
                 @endif
+                    </div>
+                </div>
                 @endif
                     
                 </div> <!-- End of main content area -->
