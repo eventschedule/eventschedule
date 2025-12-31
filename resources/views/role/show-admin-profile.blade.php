@@ -41,7 +41,7 @@
                             </x-url-icon>
                         </div>
                         <div>
-                            <x-link href="{{ $link->url }}" target="_blank" class="block">
+                            <x-link href="{{ $link->url }}" target="_blank" hideIcon class="block">
                                 <h4 class="text-lg font-bold break-words line-clamp-2 text-gray-900 dark:text-gray-100">{{ $link->name }}</h4>
                                 <img src="{{ $link->thumbnail_url }}"/>
                             </x-link>
@@ -88,7 +88,7 @@
                             </x-url-icon>
                         </div>
                         <div>
-                            <x-link href="{{ $link->url }}" target="_blank" class="block">
+                            <x-link href="{{ $link->url }}" target="_blank" hideIcon class="block">
                                 <h4 class="text-lg font-bold break-words line-clamp-2 text-gray-900 dark:text-gray-100">
                                     {{ \App\Utils\UrlUtils::getBrand($link->url) }}</h4>
                                 <p class="mt-1 line-clamp-2 break-all text-gray-600 dark:text-gray-400">{{ \App\Utils\UrlUtils::clean($link->url) }}
@@ -135,7 +135,7 @@
                             </x-url-icon>
                         </div>
                         <div>
-                            <x-link href="{{ $link->url }}" target="_blank" class="block">
+                            <x-link href="{{ $link->url }}" target="_blank" hideIcon class="block">
                                 <h4 class="text-lg font-bold break-words line-clamp-2 text-gray-900 dark:text-gray-100">
                                     {{ \App\Utils\UrlUtils::getBrand($link->url) }}</h4>
                                 <p class="mt-1 line-clamp-2 break-all text-gray-600 dark:text-gray-400">{{ \App\Utils\UrlUtils::clean($link->url) }}
