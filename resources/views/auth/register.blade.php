@@ -110,9 +110,10 @@
                             if (verificationCodeField) verificationCodeField.style.display = 'block';
                             if (termsField) termsField.style.display = 'block';
                             if (submitSection) submitSection.style.display = 'flex';
-                            // Enable code input and focus on it
-                            if (verificationCodeField) {
-                                document.getElementById('verification_code').focus();
+                            // Focus on the name field
+                            var nameInput = document.getElementById('name');
+                            if (nameInput) {
+                                nameInput.focus();
                             }
                         } else {
                             // Handle validation errors or other errors
