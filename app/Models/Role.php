@@ -366,10 +366,10 @@ class Role extends Model implements MustVerifyEmail
     {
         $subdomain = Str::slug($name);
 
-        if (strlen($subdomain) <= 2 && $role->language_code != 'en') {            
+        if (strlen($subdomain) <= 2) {            
             $translated = GeminiUtils::translate($name, 'auto', 'en');
 
-            if ($translated) {
+            if ($translated && strlen($translated) > 2) {
                 $subdomain = Str::slug($translated);
             }
         }

@@ -862,56 +862,65 @@ class Event extends Model
      */
     public function getSchemaLocation()
     {
-        if (!$this->venue) {
-            return null;
-        }
-
-        $venueName = $this->venue->translatedName();
-        if (empty($venueName)) {
-            $venueName = $this->translatedName(); // Fallback to event name
-        }
-
-        $location = [
-            '@type' => 'Place',
-            'name' => $venueName,
-        ];
-
-        // Add address if available
-        $address = [];
-        if ($this->venue->translatedAddress1()) {
-            $address['streetAddress'] = $this->venue->translatedAddress1();
-            if ($this->venue->translatedAddress2()) {
-                $address['streetAddress'] .= ', ' . $this->venue->translatedAddress2();
+        // Always return a location object (required by Google)
+        // Use venue if available, otherwise fallback to organizer or event name
+        if ($this->venue) {
+            $venueName = $this->venue->translatedName();
+            if (empty($venueName)) {
+                $venueName = $this->translatedName(); // Fallback to event name
             }
-        }
-        if ($this->venue->translatedCity()) {
-            $address['addressLocality'] = $this->venue->translatedCity();
-        }
-        if ($this->venue->translatedState()) {
-            $address['addressRegion'] = $this->venue->translatedState();
-        }
-        if ($this->venue->postal_code) {
-            $address['postalCode'] = $this->venue->postal_code;
-        }
-        if ($this->venue->country_code) {
-            $address['addressCountry'] = $this->venue->country_code;
-        }
 
-        if (!empty($address)) {
-            $address['@type'] = 'PostalAddress';
-            $location['address'] = $address;
-        }
-
-        // Add geo coordinates if available
-        if ($this->venue->geo_lat && $this->venue->geo_lon) {
-            $location['geo'] = [
-                '@type' => 'GeoCoordinates',
-                'latitude' => (float) $this->venue->geo_lat,
-                'longitude' => (float) $this->venue->geo_lon,
+            $location = [
+                '@type' => 'Place',
+                'name' => $venueName,
             ];
+
+            // Add address if available
+            $address = [];
+            if ($this->venue->translatedAddress1()) {
+                $address['streetAddress'] = $this->venue->translatedAddress1();
+                if ($this->venue->translatedAddress2()) {
+                    $address['streetAddress'] .= ', ' . $this->venue->translatedAddress2();
+                }
+            }
+            if ($this->venue->translatedCity()) {
+                $address['addressLocality'] = $this->venue->translatedCity();
+            }
+            if ($this->venue->translatedState()) {
+                $address['addressRegion'] = $this->venue->translatedState();
+            }
+            if ($this->venue->postal_code) {
+                $address['postalCode'] = $this->venue->postal_code;
+            }
+            if ($this->venue->country_code) {
+                $address['addressCountry'] = $this->venue->country_code;
+            }
+
+            if (!empty($address)) {
+                $address['@type'] = 'PostalAddress';
+                $location['address'] = $address;
+            }
+
+            // Add geo coordinates if available
+            if ($this->venue->geo_lat && $this->venue->geo_lon) {
+                $location['geo'] = [
+                    '@type' => 'GeoCoordinates',
+                    'latitude' => (float) $this->venue->geo_lat,
+                    'longitude' => (float) $this->venue->geo_lon,
+                ];
+            }
+
+            return $location;
         }
 
-        return $location;
+        // Fallback: use organizer name if available
+        $organizer = $this->getSchemaOrganizer();
+        $locationName = $organizer['name'] ?? $this->translatedName();
+
+        return [
+            '@type' => 'Place',
+            'name' => $locationName,
+        ];
     }
 
     /**
