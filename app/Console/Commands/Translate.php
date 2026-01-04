@@ -88,26 +88,32 @@ class Translate extends Command
             ->where(function($query) {
                 $query->where(function($q) {
                         $q->whereNotNull('name')
+                          ->where('name', '!=', '')
                           ->whereNull('name_en');
                     })
                     ->orWhere(function($q) {
                         $q->whereNotNull('description')
+                          ->where('description', '!=', '')
                           ->whereNull('description_en');
                     })
                     ->orWhere(function($q) {
                         $q->whereNotNull('address1')
+                          ->where('address1', '!=', '')
                           ->whereNull('address1_en');
                     })
                     ->orWhere(function($q) {
                         $q->whereNotNull('city')
+                          ->where('city', '!=', '')
                           ->whereNull('city_en');
                     })
                     ->orWhere(function($q) {
                         $q->whereNotNull('state')
+                          ->where('state', '!=', '')
                           ->whereNull('state_en');
                     })
                     ->orWhere(function($q) {
                         $q->whereNotNull('request_terms')
+                          ->where('request_terms', '!=', '')
                           ->whereNull('request_terms_en');
                     });
             });
@@ -146,6 +152,7 @@ class Translate extends Command
                 $this->info("Role request_terms_en: {$role->request_terms_en}");
             }
             
+            /*
             if ($role->language_code == 'en') {
                 $role->name_en = '';
                 $role->description_en = '';
@@ -161,6 +168,7 @@ class Translate extends Command
                 }
                 continue;
             }
+            */
 
             if ($role->name && !$role->name_en) {
                 $translated = GeminiUtils::translate($role->name, $role->language_code, 'en');
@@ -270,10 +278,12 @@ class Translate extends Command
             ->where(function($query) {
                 $query->where(function($q) {
                         $q->whereNotNull('name')
+                          ->where('name', '!=', '')
                           ->whereNull('name_en');
                     })
                     ->orWhere(function($q) {
                         $q->whereNotNull('description')
+                          ->where('description', '!=', '')
                           ->whereNull('description_en');
                     });
             });
