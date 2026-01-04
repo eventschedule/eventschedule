@@ -131,6 +131,21 @@ class Translate extends Command
         foreach ($roles as $role) {
             if ($debug) {
                 $this->info("\nProcessing role ID: {$role->id}, Name: {$role->name}, Language: {$role->language_code}");
+
+                $this->info("Role name: {$role->name}");
+                $this->info("Role name_en: {$role->name_en}");
+                $this->info("Role description: {$role->description}");
+                $this->info("Role description_en: {$role->description_en}");
+                $this->info("Role address1: {$role->address1}");
+                $this->info("Role address1_en: {$role->address1_en}");
+                $this->info("Role address2: {$role->address2}");
+                $this->info("Role address2_en: {$role->address2_en}");
+                $this->info("Role city: {$role->city}");
+                $this->info("Role city_en: {$role->city_en}");
+                $this->info("Role state: {$role->state}");
+                $this->info("Role state_en: {$role->state_en}");
+                $this->info("Role request_terms: {$role->request_terms}");
+                $this->info("Role request_terms_en: {$role->request_terms_en}");
             }
             
             if ($role->language_code == 'en') {
