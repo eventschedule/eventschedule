@@ -50,6 +50,7 @@ class NotifyRequestChanges extends Command
 
             // Only notify if current count is greater than last notified count
             if ($currentRequestCount > $lastNotifiedCount) {
+                                
                 // Get all team members (users with level != 'follower')
                 $teamMembers = $role->members()->get();
 
@@ -59,10 +60,10 @@ class NotifyRequestChanges extends Command
                         return $member->id !== $owner->id ? $member->email : null;
                     })->filter()->values()->toArray();
 
-                    $owner->notify(new NewRequestsNotification($role, $currentRequestCount, $ccEmails));
+                    //$owner->notify(new NewRequestsNotification($role, $currentRequestCount, $ccEmails));
                     
-                    $role->last_notified_request_count = $currentRequestCount;
-                    $role->save();
+                    //$role->last_notified_request_count = $currentRequestCount;
+                    //$role->save();
 
                     $notifiedCount++;
                     \Log::info("Notified team members for role {$role->name} ({$role->subdomain}) - {$currentRequestCount} pending requests");
