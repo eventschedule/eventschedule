@@ -33,7 +33,7 @@ class NotifyRequestChanges extends Command
         // Get all roles that have pending requests
         // Pending requests are events where is_accepted is null in the event_role pivot table
         $roles = Role::whereHas('events', function ($query) {
-            $query->whereNull('is_accepted');
+            $query->whereNull('event_role.is_accepted');
         })->get();
 
         $notifiedCount = 0;
@@ -41,8 +41,8 @@ class NotifyRequestChanges extends Command
         foreach ($roles as $role) {
             // Count current pending requests for this role
             $currentRequestCount = Event::whereHas('roles', function ($query) use ($role) {
-                $query->where('role_id', $role->id)
-                    ->whereNull('is_accepted');
+                $query->where('event_role.role_id', $role->id)
+                    ->whereNull('event_role.is_accepted');
             })->count();
 
             // Get last notified count (default to 0 if null)
