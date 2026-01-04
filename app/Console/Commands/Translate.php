@@ -83,28 +83,33 @@ class Translate extends Command
         $debug = $this->option('debug');
 
         // Get all roles that don't have English translations
-        $query = Role::where(function($query) {
-                $query->whereNotNull('name')
-                      ->whereNull('name_en');
-            })
-            ->orWhere(function($query) {
-                $query->whereNotNull('description')
-                      ->whereNull('description_en');
-            })
-            ->orWhere(function($query) {
-                $query->whereNotNull('address1')
-                      ->whereNull('address1_en');
-            })
-            ->orWhere(function($query) {
-                $query->whereNotNull('city')
-                      ->whereNull('city_en');
-            })
-            ->orWhere(function($query) {
-                $query->whereNotNull('state')
-                      ->whereNull('state_en');
-            })->orWhere(function($query) {
-                $query->whereNotNull('request_terms')
-                      ->whereNull('request_terms_en');
+        // Exclude English roles upfront to avoid processing them
+        $query = Role::where('language_code', '!=', 'en')
+            ->where(function($query) {
+                $query->where(function($q) {
+                        $q->whereNotNull('name')
+                          ->whereNull('name_en');
+                    })
+                    ->orWhere(function($q) {
+                        $q->whereNotNull('description')
+                          ->whereNull('description_en');
+                    })
+                    ->orWhere(function($q) {
+                        $q->whereNotNull('address1')
+                          ->whereNull('address1_en');
+                    })
+                    ->orWhere(function($q) {
+                        $q->whereNotNull('city')
+                          ->whereNull('city_en');
+                    })
+                    ->orWhere(function($q) {
+                        $q->whereNotNull('state')
+                          ->whereNull('state_en');
+                    })
+                    ->orWhere(function($q) {
+                        $q->whereNotNull('request_terms')
+                          ->whereNull('request_terms_en');
+                    });
             });
         
         if ($roleId) {
@@ -145,51 +150,86 @@ class Translate extends Command
             }
 
             if ($role->name && !$role->name_en) {
-                $role->name_en = GeminiUtils::translate($role->name, $role->language_code, 'en');
+                $translated = GeminiUtils::translate($role->name, $role->language_code, 'en');
+                $role->name_en = $translated ?? '';
                 if ($debug) {
-                    $this->info("Translated name from {$role->language_code} to en: '{$role->name}' → '{$role->name_en}'");
+                    if ($translated) {
+                        $this->info("Translated name from {$role->language_code} to en: '{$role->name}' → '{$role->name_en}'");
+                    } else {
+                        $this->warn("Translation failed for name, setting to empty string");
+                    }
                 }
             }
 
             if ($role->description && !$role->description_en) {
-                $role->description_en = GeminiUtils::translate($role->description, $role->language_code, 'en');
+                $translated = GeminiUtils::translate($role->description, $role->language_code, 'en');
+                $role->description_en = $translated ?? '';
                 if ($debug) {
-                    $this->info("Translated description from {$role->language_code} to en: '{$role->description}' → '{$role->description_en}'");
+                    if ($translated) {
+                        $this->info("Translated description from {$role->language_code} to en: '{$role->description}' → '{$role->description_en}'");
+                    } else {
+                        $this->warn("Translation failed for description, setting to empty string");
+                    }
                 }
             }
 
             if ($role->address1 && !$role->address1_en) {
-                $role->address1_en = GeminiUtils::translate($role->address1, $role->language_code, 'en');
+                $translated = GeminiUtils::translate($role->address1, $role->language_code, 'en');
+                $role->address1_en = $translated ?? '';
                 if ($debug) {
-                    $this->info("Translated address1 from {$role->language_code} to en: '{$role->address1}' → '{$role->address1_en}'");
+                    if ($translated) {
+                        $this->info("Translated address1 from {$role->language_code} to en: '{$role->address1}' → '{$role->address1_en}'");
+                    } else {
+                        $this->warn("Translation failed for address1, setting to empty string");
+                    }
                 }
             }
 
             if ($role->address2 && !$role->address2_en) {
-                $role->address2_en = GeminiUtils::translate($role->address2, $role->language_code, 'en');
+                $translated = GeminiUtils::translate($role->address2, $role->language_code, 'en');
+                $role->address2_en = $translated ?? '';
                 if ($debug) {
-                    $this->info("Translated address2 from {$role->language_code} to en: '{$role->address2}' → '{$role->address2_en}'");
+                    if ($translated) {
+                        $this->info("Translated address2 from {$role->language_code} to en: '{$role->address2}' → '{$role->address2_en}'");
+                    } else {
+                        $this->warn("Translation failed for address2, setting to empty string");
+                    }
                 }
             }
 
             if ($role->city && !$role->city_en) {
-                $role->city_en = GeminiUtils::translate($role->city, $role->language_code, 'en');
+                $translated = GeminiUtils::translate($role->city, $role->language_code, 'en');
+                $role->city_en = $translated ?? '';
                 if ($debug) {
-                    $this->info("Translated city from {$role->language_code} to en: '{$role->city}' → '{$role->city_en}'");
+                    if ($translated) {
+                        $this->info("Translated city from {$role->language_code} to en: '{$role->city}' → '{$role->city_en}'");
+                    } else {
+                        $this->warn("Translation failed for city, setting to empty string");
+                    }
                 }
             }
 
             if ($role->state && !$role->state_en) {
-                $role->state_en = GeminiUtils::translate($role->state, $role->language_code, 'en');
+                $translated = GeminiUtils::translate($role->state, $role->language_code, 'en');
+                $role->state_en = $translated ?? '';
                 if ($debug) {
-                    $this->info("Translated state from {$role->language_code} to en: '{$role->state}' → '{$role->state_en}'");
+                    if ($translated) {
+                        $this->info("Translated state from {$role->language_code} to en: '{$role->state}' → '{$role->state_en}'");
+                    } else {
+                        $this->warn("Translation failed for state, setting to empty string");
+                    }
                 }
             }
 
             if ($role->request_terms && !$role->request_terms_en) {
-                $role->request_terms_en = GeminiUtils::translate($role->request_terms, $role->language_code, 'en');
+                $translated = GeminiUtils::translate($role->request_terms, $role->language_code, 'en');
+                $role->request_terms_en = $translated ?? '';
                 if ($debug) {
-                    $this->info("Translated request terms from {$role->language_code} to en: '{$role->request_terms}' → '{$role->request_terms_en}'");
+                    if ($translated) {
+                        $this->info("Translated request terms from {$role->language_code} to en: '{$role->request_terms}' → '{$role->request_terms_en}'");
+                    } else {
+                        $this->warn("Translation failed for request_terms, setting to empty string");
+                    }
                 }
             }
 
@@ -214,14 +254,16 @@ class Translate extends Command
 
         // Get all events that don't have English translations
         $query = Event::with('roles')
-        ->where(function($query) {
-            $query->whereNotNull('name')
-                ->whereNull('name_en');
-        })
-        ->orWhere(function($query) {
-            $query->whereNotNull('description')
-                ->whereNull('description_en');
-        });
+            ->where(function($query) {
+                $query->where(function($q) {
+                        $q->whereNotNull('name')
+                          ->whereNull('name_en');
+                    })
+                    ->orWhere(function($q) {
+                        $q->whereNotNull('description')
+                          ->whereNull('description_en');
+                    });
+            });
         
         if ($eventId) {
             $query->where('id', $eventId);
@@ -258,16 +300,26 @@ class Translate extends Command
             }
 
             if ($event->name && !$event->name_en) {
-                $event->name_en = GeminiUtils::translate($event->name, $event->getLanguageCode(), 'en');
+                $translated = GeminiUtils::translate($event->name, $event->getLanguageCode(), 'en');
+                $event->name_en = $translated ?? '';
                 if ($debug) {
-                    $this->info("Translated name from {$event->getLanguageCode()} to en: '{$event->name}' → '{$event->name_en}'");
+                    if ($translated) {
+                        $this->info("Translated name from {$event->getLanguageCode()} to en: '{$event->name}' → '{$event->name_en}'");
+                    } else {
+                        $this->warn("Translation failed for event name, setting to empty string");
+                    }
                 }
             }
 
             if ($event->description && !$event->description_en) {
-                $event->description_en = GeminiUtils::translate($event->description, $event->getLanguageCode(), 'en');
-                if ($debug) {                    
-                    $this->info("Translated description from {$event->getLanguageCode()} to en: '{$event->description}' → '{$event->description_en}'");
+                $translated = GeminiUtils::translate($event->description, $event->getLanguageCode(), 'en');
+                $event->description_en = $translated ?? '';
+                if ($debug) {
+                    if ($translated) {
+                        $this->info("Translated description from {$event->getLanguageCode()} to en: '{$event->description}' → '{$event->description_en}'");
+                    } else {
+                        $this->warn("Translation failed for event description, setting to empty string");
+                    }
                 }
             }                
 
@@ -338,20 +390,30 @@ class Translate extends Command
             if ($eventRole->event->name && !$eventRole->name_translated) {
                 $fromLang = $eventRole->event->getLanguageCode();
                 $toLang = $eventRole->role->language_code;
-                $eventRole->name_translated = GeminiUtils::translate($eventRole->event->name, $fromLang, $toLang) ?? '';
+                $translated = GeminiUtils::translate($eventRole->event->name, $fromLang, $toLang);
+                $eventRole->name_translated = $translated ?? '';
                 if ($debug) {
-                    $this->info("Translated event name from {$fromLang} to {$toLang}");
-                    $this->info("Original: '{$eventRole->event->name}' → Translated: '{$eventRole->name_translated}'");
+                    if ($translated) {
+                        $this->info("Translated event name from {$fromLang} to {$toLang}");
+                        $this->info("Original: '{$eventRole->event->name}' → Translated: '{$eventRole->name_translated}'");
+                    } else {
+                        $this->warn("Translation failed for event name, setting to empty string");
+                    }
                 }
             }
 
             if ($eventRole->event->description && !$eventRole->description_translated) {
                 $fromLang = $eventRole->event->getLanguageCode();
                 $toLang = $eventRole->role->language_code;
-                $eventRole->description_translated = GeminiUtils::translate($eventRole->event->description, $fromLang, $toLang) ?? '';
+                $translated = GeminiUtils::translate($eventRole->event->description, $fromLang, $toLang);
+                $eventRole->description_translated = $translated ?? '';
                 if ($debug) {
-                    $this->info("Translated event description from {$fromLang} to {$toLang}");
-                    $this->info("Original length: " . strlen($eventRole->event->description) . ", Translated length: " . strlen($eventRole->description_translated));
+                    if ($translated) {
+                        $this->info("Translated event description from {$fromLang} to {$toLang}");
+                        $this->info("Original length: " . strlen($eventRole->event->description) . ", Translated length: " . strlen($eventRole->description_translated));
+                    } else {
+                        $this->warn("Translation failed for event description, setting to empty string");
+                    }
                 }
             }
 
