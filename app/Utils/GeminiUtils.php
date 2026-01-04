@@ -522,6 +522,10 @@ class GeminiUtils
 
     public static function translate($text, $from = 'auto', $to = 'en')
     {
+        if (empty($text)) {
+            return '';
+        }
+
         $prompt = "Translate this text from {$from} to {$to}. Return only the translation as a JSON string:\n{$text}";
         
         $response = self::sendRequest($prompt);
