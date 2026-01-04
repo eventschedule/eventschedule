@@ -48,6 +48,11 @@ class NotifyRequestChanges extends Command
             // Get last notified count (default to 0 if null)
             $lastNotifiedCount = $role->last_notified_request_count ?? 0;
 
+            // Check that role requires approving requests
+            if (! $role->accept_requests || ! $role->require_approval) {
+                continue;
+            }
+
             // Only notify if current count is greater than last notified count
             if ($currentRequestCount > $lastNotifiedCount) {
                                 
