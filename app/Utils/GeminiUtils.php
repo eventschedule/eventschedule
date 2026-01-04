@@ -77,15 +77,19 @@ class GeminiUtils
                 if (str_contains($errorMessage, 'quota') || str_contains($errorMessage, 'Quota exceeded')) {
                     // Log to Sentry but don't throw - return null so user doesn't see error
                     $exception = new \Exception("Gemini API quota exceeded: " . $errorMessage);
-                    \Sentry\captureException($exception, [
-                        'level' => 'error',
-                        'tags' => ['service' => 'gemini', 'error_type' => 'quota_exceeded'],
-                        'extra' => [
+                    
+                    \Sentry\withScope(function (\Sentry\State\Scope $scope) use ($exception, $httpCode, $response, $prompt): void {
+                        $scope->setLevel(\Sentry\Severity::error());
+                        $scope->setTag('service', 'gemini');
+                        $scope->setTag('error_type', 'quota_exceeded');
+                        $scope->setContext('gemini_api', [
                             'http_code' => $httpCode,
                             'response' => $response,
                             'prompt_preview' => substr($prompt, 0, 100),
-                        ],
-                    ]);
+                        ]);
+                        \Sentry\captureException($exception);
+                    });
+                    
                     return null;
                 }
                 
