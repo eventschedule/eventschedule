@@ -138,8 +138,6 @@ class Translate extends Command
                 $this->info("Role description_en: {$role->description_en}");
                 $this->info("Role address1: {$role->address1}");
                 $this->info("Role address1_en: {$role->address1_en}");
-                $this->info("Role address2: {$role->address2}");
-                $this->info("Role address2_en: {$role->address2_en}");
                 $this->info("Role city: {$role->city}");
                 $this->info("Role city_en: {$role->city_en}");
                 $this->info("Role state: {$role->state}");
