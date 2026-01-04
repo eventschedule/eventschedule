@@ -71,7 +71,25 @@ class GeminiUtils
             // Try to extract the specific error message from the response
             $errorData = json_decode($response, true);
             if (json_last_error() === JSON_ERROR_NONE && isset($errorData['error']['message'])) {
-                throw new \Exception($errorData['error']['message']);
+                $errorMessage = $errorData['error']['message'];
+                
+                // Check if this is a quota exceeded error
+                if (str_contains($errorMessage, 'quota') || str_contains($errorMessage, 'Quota exceeded')) {
+                    // Log to Sentry but don't throw - return null so user doesn't see error
+                    $exception = new \Exception("Gemini API quota exceeded: " . $errorMessage);
+                    \Sentry\captureException($exception, [
+                        'level' => 'error',
+                        'tags' => ['service' => 'gemini', 'error_type' => 'quota_exceeded'],
+                        'extra' => [
+                            'http_code' => $httpCode,
+                            'response' => $response,
+                            'prompt_preview' => substr($prompt, 0, 100),
+                        ],
+                    ]);
+                    return null;
+                }
+                
+                throw new \Exception($errorMessage);
             }
             
             throw new \Exception('Gemini API request failed with status code: ' . $httpCode);
@@ -230,6 +248,11 @@ class GeminiUtils
 
         // Use gemini-1.5-flash for both text and image inputs
         $data = self::sendRequest($prompt, $imageData);
+
+        // Handle quota exceeded or other errors gracefully
+        if ($data === null || empty($data)) {
+            return [];
+        }
 
         foreach ($data as $key => $item) {
 
@@ -498,6 +521,12 @@ class GeminiUtils
         $prompt = "Translate this text from {$from} to {$to}. Return only the translation as a JSON string:\n{$text}";
         
         $response = self::sendRequest($prompt);
+        
+        // Handle quota exceeded or other errors gracefully
+        if ($response === null || empty($response)) {
+            return null;
+        }
+        
         $response = $response[0];
 
         $value = null;
@@ -545,6 +574,11 @@ class GeminiUtils
 
         try {
             $response = self::sendRequest($prompt);
+            
+            // Handle quota exceeded or other errors gracefully
+            if ($response === null || empty($response)) {
+                return [];
+            }
             
             // sendRequest returns an array, get the first item
             if (!empty($response) && is_array($response)) {
@@ -746,6 +780,11 @@ class GeminiUtils
 
         try {
             $data = self::sendRequest($prompt);
+            
+            // Handle quota exceeded or other errors gracefully
+            if ($data === null || empty($data)) {
+                throw new \Exception('Gemini API quota exceeded or unavailable');
+            }
             
             if (isset($data[0])) {
                 $result = $data[0];
