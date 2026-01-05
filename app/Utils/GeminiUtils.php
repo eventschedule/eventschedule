@@ -13,7 +13,7 @@ class GeminiUtils
 {
     private static function sendRequest($prompt, $imageData = null)
     {
-        if (str_starts_with($prompt, 'Translate') && false) {
+        if (str_starts_with($prompt, 'Translate')) {
             $model = 'gemini-2.0-flash';
         } else {
             $model = 'gemini-2.5-flash';
