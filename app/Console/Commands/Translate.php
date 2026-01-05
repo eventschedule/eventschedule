@@ -352,7 +352,7 @@ class Translate extends Command
                 continue;
             } 
 
-            if ($eventRole->event->name && !$eventRole->name_translated) {
+            if (! $eventRole->name_translated) {
                 $fromLang = $eventRole->event->getLanguageCode();
                 $toLang = $eventRole->role->language_code;
                 $eventRole->name_translated = GeminiUtils::translate($eventRole->event->name, $fromLang, $toLang);
@@ -361,7 +361,7 @@ class Translate extends Command
                 }
             }
 
-            if ($eventRole->event->description && !$eventRole->description_translated) {
+            if (! $eventRole->description_translated) {
                 $fromLang = $eventRole->event->getLanguageCode();
                 $toLang = $eventRole->role->language_code;
                 $eventRole->description_translated = GeminiUtils::translate($eventRole->event->description, $fromLang, $toLang);
