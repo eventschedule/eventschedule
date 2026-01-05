@@ -54,7 +54,7 @@ class NotifyRequestChanges extends Command
             }
 
             // Only notify if current count is greater than last notified count
-            if ($currentRequestCount > $lastNotifiedCount) {
+            if ($currentRequestCount != $lastNotifiedCount) {
                                 
                 // Get all team members (users with level != 'follower')
                 $teamMembers = $role->members()->get();
