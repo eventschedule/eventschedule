@@ -158,86 +158,51 @@ class Translate extends Command
             */
 
             if ($role->name && !$role->name_en) {
-                $translated = GeminiUtils::translate($role->name, $role->language_code, 'en');
-                $role->name_en = $translated ?? '';
+                $role->name_en = GeminiUtils::translate($role->name, $role->language_code, 'en');
                 if ($debug) {
-                    if ($translated) {
-                        $this->info("Translated name from {$role->language_code} to en: '{$role->name}' → '{$role->name_en}'");
-                    } else {
-                        $this->warn("Translation failed for name, setting to empty string");
-                    }
+                    $this->info("Translated name from {$role->language_code} to en: '{$role->name}' → '{$role->name_en}'");
                 }
             }
 
             if ($role->description && !$role->description_en) {
-                $translated = GeminiUtils::translate($role->description, $role->language_code, 'en');
-                $role->description_en = $translated ?? '';
+                $role->description_en = GeminiUtils::translate($role->description, $role->language_code, 'en');
                 if ($debug) {
-                    if ($translated) {
-                        $this->info("Translated description from {$role->language_code} to en: '{$role->description}' → '{$role->description_en}'");
-                    } else {
-                        $this->warn("Translation failed for description, setting to empty string");
-                    }
+                    $this->info("Translated description from {$role->language_code} to en: '{$role->description}' → '{$role->description_en}'");
                 }
             }
 
             if ($role->address1 && !$role->address1_en) {
-                $translated = GeminiUtils::translate($role->address1, $role->language_code, 'en');
-                $role->address1_en = $translated ?? '';
+                $role->address1_en = GeminiUtils::translate($role->address1, $role->language_code, 'en');
                 if ($debug) {
-                    if ($translated) {
-                        $this->info("Translated address1 from {$role->language_code} to en: '{$role->address1}' → '{$role->address1_en}'");
-                    } else {
-                        $this->warn("Translation failed for address1, setting to empty string");
-                    }
+                    $this->info("Translated address1 from {$role->language_code} to en: '{$role->address1}' → '{$role->address1_en}'");
                 }
             }
 
             if ($role->address2 && !$role->address2_en) {
-                $translated = GeminiUtils::translate($role->address2, $role->language_code, 'en');
-                $role->address2_en = $translated ?? '';
+                $role->address2_en = GeminiUtils::translate($role->address2, $role->language_code, 'en');
                 if ($debug) {
-                    if ($translated) {
-                        $this->info("Translated address2 from {$role->language_code} to en: '{$role->address2}' → '{$role->address2_en}'");
-                    } else {
-                        $this->warn("Translation failed for address2, setting to empty string");
-                    }
+                    $this->info("Translated address2 from {$role->language_code} to en: '{$role->address2}' → '{$role->address2_en}'");
                 }
             }
 
             if ($role->city && !$role->city_en) {
-                $translated = GeminiUtils::translate($role->city, $role->language_code, 'en');
-                $role->city_en = $translated ?? '';
+                $role->city_en = GeminiUtils::translate($role->city, $role->language_code, 'en');
                 if ($debug) {
-                    if ($translated) {
-                        $this->info("Translated city from {$role->language_code} to en: '{$role->city}' → '{$role->city_en}'");
-                    } else {
-                        $this->warn("Translation failed for city, setting to empty string");
-                    }
+                    $this->info("Translated city from {$role->language_code} to en: '{$role->city}' → '{$role->city_en}'");
                 }
             }
 
             if ($role->state && !$role->state_en) {
-                $translated = GeminiUtils::translate($role->state, $role->language_code, 'en');
-                $role->state_en = $translated ?? '';
+                $role->state_en = GeminiUtils::translate($role->state, $role->language_code, 'en');
                 if ($debug) {
-                    if ($translated) {
-                        $this->info("Translated state from {$role->language_code} to en: '{$role->state}' → '{$role->state_en}'");
-                    } else {
-                        $this->warn("Translation failed for state, setting to empty string");
-                    }
+                    $this->info("Translated state from {$role->language_code} to en: '{$role->state}' → '{$role->state_en}'");
                 }
             }
 
             if ($role->request_terms && !$role->request_terms_en) {
-                $translated = GeminiUtils::translate($role->request_terms, $role->language_code, 'en');
-                $role->request_terms_en = $translated ?? '';
+                $role->request_terms_en = GeminiUtils::translate($role->request_terms, $role->language_code, 'en');
                 if ($debug) {
-                    if ($translated) {
-                        $this->info("Translated request terms from {$role->language_code} to en: '{$role->request_terms}' → '{$role->request_terms_en}'");
-                    } else {
-                        $this->warn("Translation failed for request_terms, setting to empty string");
-                    }
+                    $this->info("Translated request terms from {$role->language_code} to en: '{$role->request_terms}' → '{$role->request_terms_en}'");
                 }
             }
 
@@ -310,26 +275,16 @@ class Translate extends Command
             }
 
             if ($event->name && !$event->name_en) {
-                $translated = GeminiUtils::translate($event->name, $event->getLanguageCode(), 'en');
-                $event->name_en = $translated ?? '';
+                $event->name_en = GeminiUtils::translate($event->name, $event->getLanguageCode(), 'en');
                 if ($debug) {
-                    if ($translated) {
-                        $this->info("Translated name from {$event->getLanguageCode()} to en: '{$event->name}' → '{$event->name_en}'");
-                    } else {
-                        $this->warn("Translation failed for event name, setting to empty string");
-                    }
+                    $this->info("Translated name from {$event->getLanguageCode()} to en: '{$event->name}' → '{$event->name_en}'");
                 }
             }
 
             if ($event->description && !$event->description_en) {
-                $translated = GeminiUtils::translate($event->description, $event->getLanguageCode(), 'en');
-                $event->description_en = $translated ?? '';
+                $event->description_en = GeminiUtils::translate($event->description, $event->getLanguageCode(), 'en');
                 if ($debug) {
-                    if ($translated) {
-                        $this->info("Translated description from {$event->getLanguageCode()} to en: '{$event->description}' → '{$event->description_en}'");
-                    } else {
-                        $this->warn("Translation failed for event description, setting to empty string");
-                    }
+                    $this->info("Translated description from {$event->getLanguageCode()} to en: '{$event->description}' → '{$event->description_en}'");
                 }
             }                
 
@@ -400,30 +355,18 @@ class Translate extends Command
             if ($eventRole->event->name && !$eventRole->name_translated) {
                 $fromLang = $eventRole->event->getLanguageCode();
                 $toLang = $eventRole->role->language_code;
-                $translated = GeminiUtils::translate($eventRole->event->name, $fromLang, $toLang);
-                $eventRole->name_translated = $translated ?? '';
+                $eventRole->name_translated = GeminiUtils::translate($eventRole->event->name, $fromLang, $toLang);
                 if ($debug) {
-                    if ($translated) {
-                        $this->info("Translated event name from {$fromLang} to {$toLang}");
-                        $this->info("Original: '{$eventRole->event->name}' → Translated: '{$eventRole->name_translated}'");
-                    } else {
-                        $this->warn("Translation failed for event name, setting to empty string");
-                    }
+                    $this->info("Translated event name from {$fromLang} to {$toLang}: '{$eventRole->event->name}' → '{$eventRole->name_translated}'");
                 }
             }
 
             if ($eventRole->event->description && !$eventRole->description_translated) {
                 $fromLang = $eventRole->event->getLanguageCode();
                 $toLang = $eventRole->role->language_code;
-                $translated = GeminiUtils::translate($eventRole->event->description, $fromLang, $toLang);
-                $eventRole->description_translated = $translated ?? '';
+                $eventRole->description_translated = GeminiUtils::translate($eventRole->event->description, $fromLang, $toLang);
                 if ($debug) {
-                    if ($translated) {
-                        $this->info("Translated event description from {$fromLang} to {$toLang}");
-                        $this->info("Original length: " . strlen($eventRole->event->description) . ", Translated length: " . strlen($eventRole->description_translated));
-                    } else {
-                        $this->warn("Translation failed for event description, setting to empty string");
-                    }
+                    $this->info("Translated event description from {$fromLang} to {$toLang}: '{$eventRole->event->description}' → '{$eventRole->description_translated}'");
                 }
             }
 
