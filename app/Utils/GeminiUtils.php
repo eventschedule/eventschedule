@@ -72,6 +72,7 @@ class GeminiUtils
             $errorData = json_decode($response, true);
             if (json_last_error() === JSON_ERROR_NONE && isset($errorData['error']['message'])) {
                 $errorMessage = $errorData['error']['message'];
+                $errorStatus = $errorData['error']['status'] ?? null;
                 
                 // Check if this is a quota exceeded error
                 if (str_contains($errorMessage, 'quota') || str_contains($errorMessage, 'Quota exceeded')) {
@@ -84,6 +85,30 @@ class GeminiUtils
                         $scope->setTag('error_type', 'quota_exceeded');
                         $scope->setContext('gemini_api', [
                             'http_code' => $httpCode,
+                            'response' => $response,
+                            'prompt_preview' => substr($prompt, 0, 100),
+                        ]);
+                        \Sentry\captureException($exception);
+                    });
+                    
+                    return null;
+                }
+                
+                // Check if this is a model overloaded/unavailable error (503 or UNAVAILABLE status)
+                if ($httpCode === 503 || 
+                    $errorStatus === 'UNAVAILABLE' || 
+                    str_contains(strtolower($errorMessage), 'overloaded') ||
+                    str_contains(strtolower($errorMessage), 'overload')) {
+                    // Log to Sentry but don't throw - return null so user doesn't see error
+                    $exception = new \Exception("Gemini API model overloaded: " . $errorMessage);
+                    
+                    \Sentry\withScope(function (\Sentry\State\Scope $scope) use ($exception, $httpCode, $response, $prompt, $errorStatus): void {
+                        $scope->setLevel(\Sentry\Severity::warning());
+                        $scope->setTag('service', 'gemini');
+                        $scope->setTag('error_type', 'model_overloaded');
+                        $scope->setContext('gemini_api', [
+                            'http_code' => $httpCode,
+                            'status' => $errorStatus,
                             'response' => $response,
                             'prompt_preview' => substr($prompt, 0, 100),
                         ]);
