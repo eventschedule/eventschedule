@@ -14,9 +14,11 @@ class GeminiUtils
     private static function sendRequest($prompt, $imageData = null)
     {
         if (str_starts_with($prompt, 'Translate')) {
-            $model = 'gemini-2.0-flash';
+            //$model = 'gemini-2.0-flash';
+            $model = 'gemini-2.5-flash-lite';
         } else {
-            $model = 'gemini-2.5-flash';
+            //$model = 'gemini-2.5-flash';
+            $model = 'gemini-3.0-flash';
         }
         
         $apiKey = config('services.google.gemini_key');
