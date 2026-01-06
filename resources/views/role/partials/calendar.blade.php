@@ -644,7 +644,20 @@ const calendarApp = createApp({
             // For recurring events, use the occurrence date (the date being viewed)
             // For mobile view, use occurrenceDate if available (already set for recurring events)
             // For desktop view, use the passed occurrenceDate parameter
-            const dateToUse = occurrenceDate || event.occurrenceDate || event.utc_date;
+            // Always ensure we use UTC date - prefer event.utc_date, otherwise convert to UTC
+            let dateToUse = event.utc_date;
+            
+            if (!dateToUse) {
+                // If utc_date is not available, use occurrenceDate or event.occurrenceDate
+                const dateStr = occurrenceDate || event.occurrenceDate;
+                if (dateStr) {
+                    // Parse the date string as UTC to ensure it's always UTC
+                    // Date strings in Y-m-d format are treated as UTC dates
+                    const [year, month, day] = dateStr.split('-').map(Number);
+                    const utcDate = new Date(Date.UTC(year, month - 1, day));
+                    dateToUse = utcDate.toISOString().split('T')[0];
+                }
+            }
             
             if (dateToUse) {
                 queryParams.push('date=' + dateToUse);
