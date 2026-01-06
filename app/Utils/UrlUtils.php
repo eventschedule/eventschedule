@@ -199,18 +199,22 @@ class UrlUtils
 
     public static function convertUrlsToLinks($text)
     {
-        // Convert URLs to links while preserving the rest of the text
-        $pattern = '/\bhttps?:\/\/[^\s<>]+/i';
-        $text = preg_replace_callback($pattern, function($matches) {
-            $url = rtrim($matches[0], '.,!?:;'); // Remove any trailing punctuation
-            $displayUrl = preg_replace('/^https?:\/\/(www\.)?/', '', $url); // Remove http(s):// and www. from display text
-            $displayUrl = rtrim($displayUrl, '/'); // Remove trailing slashes from display text
-            $escapedUrl = htmlspecialchars($url, ENT_QUOTES);
-            $escapedDisplay = htmlspecialchars($displayUrl, ENT_QUOTES);
-            return '<a href="' . $escapedUrl . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center">' . $escapedDisplay . '<svg class="ml-1 h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>';
+        // Regex pattern to find <a> tags OR standalone URLs
+        // Group 1: Matches <a> tags (to be ignored)
+        // Group 2: Matches URLs (to be converted)
+        $pattern = '/(<a[^>]*>.*?<\/a>)|(?<![=\'"])\b(https?|ftp):\/\/([^\s<]+)/i';
+
+        return preg_replace_callback($pattern, function($matches) {
+            // If the first group is matched, it means we found an <a> tag.
+            // Return it as-is without changes.
+            if (!empty($matches[1])) {
+                return $matches[1];
+            }
+
+            // Otherwise, it's a standalone URL. Wrap it in an <a> tag.
+            $url = $matches[0];
+            return '<a href="' . $url . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . $url . '</a>';
         }, $text);
-        
-        return $text;
     }
 
     public static function getUrlMetadata($url)

@@ -41,6 +41,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 "|",
                 {
+                    name: "link",
+                    action: function(editor) {
+                        EasyMDE.drawLink(editor);
+                    },
+                    className: "editor-button-text",
+                    title: "Link",
+                    text: "🔗"
+                },
+                {
                     name: "quote",
                     action: EasyMDE.toggleBlockquote,
                     className: "editor-button-text",
