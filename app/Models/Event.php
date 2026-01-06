@@ -896,9 +896,16 @@ class Event extends Model
                 $address['addressCountry'] = $this->venue->country_code;
             }
 
+            // Always include address field (required by Google)
+            // If we have address data, use it; otherwise provide minimal address
             if (!empty($address)) {
                 $address['@type'] = 'PostalAddress';
                 $location['address'] = $address;
+            } else {
+                // Provide minimal address object to satisfy Google's requirement
+                $location['address'] = [
+                    '@type' => 'PostalAddress',
+                ];
             }
 
             // Add geo coordinates if available
@@ -917,10 +924,56 @@ class Event extends Model
         $organizer = $this->getSchemaOrganizer();
         $locationName = $organizer['name'] ?? $this->translatedName();
 
-        return [
+        $location = [
             '@type' => 'Place',
             'name' => $locationName,
         ];
+
+        // Try to get address from organizer role if available
+        $address = [];
+        $organizerRole = null;
+        
+        // Check if organizer is a role with address information
+        if ($this->role() && $this->role()->isClaimed()) {
+            $organizerRole = $this->role();
+        } elseif ($this->creatorRole) {
+            $organizerRole = $this->creatorRole;
+        }
+
+        if ($organizerRole) {
+            if ($organizerRole->translatedAddress1()) {
+                $address['streetAddress'] = $organizerRole->translatedAddress1();
+                if ($organizerRole->translatedAddress2()) {
+                    $address['streetAddress'] .= ', ' . $organizerRole->translatedAddress2();
+                }
+            }
+            if ($organizerRole->translatedCity()) {
+                $address['addressLocality'] = $organizerRole->translatedCity();
+            }
+            if ($organizerRole->translatedState()) {
+                $address['addressRegion'] = $organizerRole->translatedState();
+            }
+            if ($organizerRole->postal_code) {
+                $address['postalCode'] = $organizerRole->postal_code;
+            }
+            if ($organizerRole->country_code) {
+                $address['addressCountry'] = $organizerRole->country_code;
+            }
+        }
+
+        // Always include address field (required by Google)
+        // If we have address data, use it; otherwise provide minimal address
+        if (!empty($address)) {
+            $address['@type'] = 'PostalAddress';
+            $location['address'] = $address;
+        } else {
+            // Provide minimal address object to satisfy Google's requirement
+            $location['address'] = [
+                '@type' => 'PostalAddress',
+            ];
+        }
+
+        return $location;
     }
 
     /**
