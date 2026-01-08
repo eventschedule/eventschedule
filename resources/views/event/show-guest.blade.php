@@ -581,6 +581,7 @@
         </div>
         @endif
 
+        @if (config('app.hosted') && ! $event->isPro())
         <div class="p-6 rounded-xl flex flex-col gap-6 bg-[#F5F9FE] dark:bg-gray-800 {{ $role->isRtl() ? 'rtl' : '' }}">
           <h4 class="text-[24px] leading-snug font-semibold text-gray-900 dark:text-gray-100">
             {{ __('messages.create_your_own_event_schedule') }}
@@ -598,6 +599,7 @@
             </button>
           </a>
         </div>
+        @endif
 
         <!-- Calendar section moved here and modified to show mobile view -->
         <div class="p-6 rounded-xl flex flex-col gap-6 bg-[#F5F9FE] dark:bg-gray-800 {{ $role->isRtl() ? 'rtl' : '' }}">
