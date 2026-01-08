@@ -644,11 +644,14 @@ const calendarApp = createApp({
             // For recurring events, use the occurrence date (the date being viewed)
             // For mobile view, use occurrenceDate if available (already set for recurring events)
             // For desktop view, use the passed occurrenceDate parameter
-            // Always ensure we use UTC date - prefer event.utc_date, otherwise convert to UTC
-            let dateToUse = event.utc_date;
+            // Always ensure we use UTC date
+            let dateToUse = null;
             
-            if (!dateToUse) {
-                // If utc_date is not available, use occurrenceDate or event.occurrenceDate
+            // Check if this is a recurring event
+            const isRecurring = event.days_of_week && event.days_of_week.length > 0;
+            
+            if (isRecurring) {
+                // For recurring events, prioritize the occurrence date over the original start date
                 const dateStr = occurrenceDate || event.occurrenceDate;
                 if (dateStr) {
                     // Parse the date string as UTC to ensure it's always UTC
@@ -656,7 +659,13 @@ const calendarApp = createApp({
                     const [year, month, day] = dateStr.split('-').map(Number);
                     const utcDate = new Date(Date.UTC(year, month - 1, day));
                     dateToUse = utcDate.toISOString().split('T')[0];
+                } else {
+                    // Fallback to utc_date if occurrence date is not available
+                    dateToUse = event.utc_date;
                 }
+            } else {
+                // For non-recurring events, use utc_date
+                dateToUse = event.utc_date;
             }
             
             if (dateToUse) {
