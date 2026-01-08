@@ -356,8 +356,17 @@ class Event extends Model
         }
     }
 
-    public function canSellTickets()
+    public function canSellTickets($date = null)
     {
+        // For recurring events, check if the specific occurrence is in the past
+        if ($this->days_of_week && $date) {
+            $startDateTime = $this->getStartDateTime($date, true);
+            if ($startDateTime->isPast()) {
+                return false;
+            }
+        }
+        
+        // For non-recurring events, check if the event start time is in the past
         if (! $this->days_of_week && $this->starts_at) {
             if (Carbon::parse($this->starts_at)->isPast()) {
                 return false;
