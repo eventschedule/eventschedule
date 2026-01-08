@@ -321,10 +321,10 @@
       >
         <p class="text-[#F5F9FE] text-base text-center">
             <!-- Per the AAL license, please do not remove the link to Event Schedule -->
-            {!! str_replace(':link', '<a href="https://www.eventschedule.com" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}
+            {!! str_replace(':link', '<a href="https://www.eventschedule.com" target="_blank" class="text-white hover:underline">eventschedule.com</a>',  __('messages.try_event_schedule')) !!}
             @if (config('app.hosted'))
                 •
-                {!! __('messages.supported_by', ['link' => '<a href="https://invoiceninja.com" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline" title="Leading small-business platform to manage invoices, expenses & tasks">Invoice Ninja</a>']) !!}
+                {!! __('messages.supported_by', ['link' => '<a href="https://invoiceninja.com" target="_blank" class="text-white hover:underline" title="Leading small-business platform to manage invoices, expenses & tasks">Invoice Ninja</a>']) !!}
             @endif
         </p>
       </div>
