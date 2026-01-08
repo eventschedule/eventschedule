@@ -102,7 +102,7 @@
                         id="feedback-textarea"
                         name="feedback" 
                         placeholder="{{ __('messages.feedback_placeholder') }}"
-                        class="w-full px-4 py-2 pr-12 pb-10 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                        class="w-full px-4 py-2 pr-12 pb-10 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 min-h-[135px] sm:min-h-0"
                         rows="2"
                     ></textarea>
                     <button 
