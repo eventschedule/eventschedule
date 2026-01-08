@@ -79,6 +79,14 @@ class TicketController extends Controller
         $event = Event::findOrFail(UrlUtils::decodeId($request->event_id));
         $user = auth()->user();
 
+        // Check if trying to buy tickets for a past recurring event occurrence
+        if ($event->days_of_week && $request->event_date) {
+            $startDateTime = $event->getStartDateTime($request->event_date, true);
+            if ($startDateTime->isPast()) {
+                return back()->with('error', __('messages.cannot_buy_tickets_past_event'));
+            }
+        }
+
         // Validate basic required fields for all checkout requests
         $request->validate([
             'name' => ['required', 'string', 'max:255'],

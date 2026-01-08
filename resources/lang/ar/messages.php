@@ -356,6 +356,7 @@ return [
     'error_invoiceninja_connection' => 'خطأ: فشل الاتصال بـ Invoice Ninja',
     'ticket_not_found' => 'لم يتم العثور على التذكرة',
     'tickets_not_available' => 'التذاكر غير متوفرة لهذا الحدث',
+    'cannot_buy_tickets_past_event' => 'لا يمكن شراء التذاكر للأحداث في الماضي.',
     'sold_reserved' => 'مباع/محجوز',
     'this_ticket_is_not_valid' => 'هذه التذكرة غير صالحة',
     'this_ticket_is_not_valid_for_today' => 'هذه التذكرة غير صالحة لهذا اليوم',

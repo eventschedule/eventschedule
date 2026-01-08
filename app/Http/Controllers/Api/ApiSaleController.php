@@ -38,6 +38,14 @@ class ApiSaleController extends Controller
             return response()->json(['error' => 'Event does not have tickets enabled or is not a Pro account'], 422);
         }
 
+        // Check if trying to buy tickets for a past recurring event occurrence
+        if ($event->days_of_week && $request->event_date) {
+            $startDateTime = $event->getStartDateTime($request->event_date, true);
+            if ($startDateTime->isPast()) {
+                return response()->json(['error' => 'Cannot buy tickets for events in the past.'], 422);
+            }
+        }
+
         // Validate tickets - support both ticket ID and ticket type
         $ticketIds = [];
         foreach ($request->tickets as $ticketIdentifier => $quantity) {

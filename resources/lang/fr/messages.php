@@ -361,6 +361,7 @@ return [
     'error_invoiceninja_connection' => 'Erreur : Échec de la connexion à Invoice Ninja',
     'ticket_not_found' => 'Billet introuvable',
     'tickets_not_available' => 'Billets non disponibles pour cet événement',
+    'cannot_buy_tickets_past_event' => 'Impossible d\'acheter des billets pour des événements passés.',
     'sold_reserved' => 'Vendu/Réservé',
     'this_ticket_is_not_valid' => 'Ce billet n\'est pas valide',
     'this_ticket_is_not_valid_for_today' => 'Ce billet n\'est pas valide pour aujourd\'hui',
