@@ -13,10 +13,10 @@
                 function toggleMenu() {
                     const isOpen = sidebar.getAttribute('data-state') === 'open';
                     if (isOpen) {
-                        $('#sidebar').show();
+                        $('#sidebar').hide();
                         sidebar.setAttribute('data-state', 'closed');
                     } else {
-                        $('#sidebar').hide();
+                        $('#sidebar').show();
                         sidebar.setAttribute('data-state', 'open');
                     }
                 }
