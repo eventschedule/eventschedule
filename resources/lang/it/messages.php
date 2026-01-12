@@ -682,4 +682,5 @@ return [
     'theme_light' => 'Chiaro',
     'theme_dark' => 'Scuro',
     'theme_system' => 'Sistema',
+    'custom_css' => 'CSS Personalizzato',
 ];

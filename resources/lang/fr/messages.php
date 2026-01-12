@@ -681,4 +681,5 @@ return [
     'theme_light' => 'Clair',
     'theme_dark' => 'Sombre',
     'theme_system' => 'Système',
+    'custom_css' => 'CSS Personnalisé',
 ];

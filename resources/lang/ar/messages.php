@@ -682,4 +682,5 @@ return [
     'theme_light' => 'فاتح',
     'theme_dark' => 'داكن',
     'theme_system' => 'النظام',
+    'custom_css' => 'CSS مخصص',
 ];

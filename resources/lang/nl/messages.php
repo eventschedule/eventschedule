@@ -679,4 +679,5 @@ return [
     'theme_light' => 'Licht',
     'theme_dark' => 'Donker',
     'theme_system' => 'Systeem',
+    'custom_css' => 'Aangepaste CSS',
 ];
