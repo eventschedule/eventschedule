@@ -28,6 +28,7 @@ class RoleCreateRequest extends FormRequest
             'profile_image' => ['image', 'max:2500', new SquareImage],
             'background_image_url' => ['image', 'max:2500'],
             'header_image_url' => ['image', 'max:2500'],
+            'custom_css' => ['nullable', 'string', 'max:10000'],
         ];
     }
 }

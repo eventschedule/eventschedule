@@ -138,6 +138,10 @@
             @endif
         }
 
+        @if ($role->custom_css)
+        {!! $role->custom_css !!}
+        @endif
+
         </style>
 
         @if ($event && $event->exists && $event->starts_at)
