@@ -685,4 +685,5 @@ return [
     'theme_light' => 'Hell',
     'theme_dark' => 'Dunkel',
     'theme_system' => 'System',
+    'custom_css' => 'Benutzerdefiniertes CSS',
 ];

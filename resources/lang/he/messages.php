@@ -674,4 +674,5 @@ return [
     'theme_light' => 'בהיר',
     'theme_dark' => 'כהה',
     'theme_system' => 'מערכת',
+    'custom_css' => 'CSS מותאם אישית',
 ];
