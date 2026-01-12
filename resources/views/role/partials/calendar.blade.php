@@ -860,70 +860,62 @@ const calendarApp = createApp({
             const popup = document.getElementById('event-popup');
             if (!popup || !popup.classList.contains('show')) return;
 
-            const popupContent = popup.querySelector('.event-popup-content');
-            if (!popupContent) return;
-
-            const popupWidth = popupContent.offsetWidth || 320;
-            const popupHeight = popupContent.offsetHeight || 200;
-            const viewportWidth = window.innerWidth;
-            const viewportHeight = window.innerHeight;
-
-            let left, top;
-            const offset = 15;
-
-            // Use mouse position if available, otherwise use element position
-            // Since popup is position: fixed, use clientX/clientY (viewport-relative) instead of pageX/pageY
-            if (e) {
-                left = e.clientX + offset;
-                top = e.clientY + offset;
-            } else if (element) {
-                const rect = element.getBoundingClientRect();
-                left = rect.left + rect.width / 2;
-                top = rect.top + rect.height + offset;
-            } else {
-                return;
+            // 1. One-time setup for performance (GPU acceleration)
+            if (popup.style.position !== 'fixed') {
+                Object.assign(popup.style, {
+                    position: 'fixed',
+                    top: '0',
+                    left: '0',
+                    willChange: 'transform',
+                    pointerEvents: 'none' // Prevents flickering when mouse overlaps popup
+                });
             }
 
-            // Adjust horizontal position if popup would go off-screen
-            if (left + popupWidth > viewportWidth) {
+            // 2. Throttle the update to the browser's refresh rate (rAF)
+            if (popup._ticking) return;
+            popup._ticking = true;
+
+            window.requestAnimationFrame(() => {
+                popup._ticking = false;
+                
+                const content = popup.querySelector('.event-popup-content') || popup;
+                
+                // 3. Cache dimensions (Layout Reads)
+                const pW = content.offsetWidth || 320;
+                const pH = content.offsetHeight || 200;
+                const vW = window.innerWidth;
+                const vH = window.innerHeight;
+                const offset = 15;
+
+                let left, top;
+
+                // 4. Calculate Raw Position
                 if (e) {
-                    left = e.clientX - popupWidth - offset;
+                    left = e.clientX + offset;
+                    top = e.clientY + offset;
                 } else if (element) {
                     const rect = element.getBoundingClientRect();
-                    left = rect.left - popupWidth - offset;
+                    left = rect.left + rect.width / 2;
+                    top = rect.top + rect.height + offset;
+                } else {
+                    return;
                 }
-                // If still off-screen, align to right edge
-                if (left < 0) {
-                    left = viewportWidth - popupWidth - 10;
+
+                // 5. Boundary Logic (Flip if hitting right/bottom edges)
+                if (left + pW > vW) {
+                    left = e ? e.clientX - pW - offset : left - pW - (offset * 2);
                 }
-            }
-
-            // Adjust vertical position if popup would go off-screen
-            if (top + popupHeight > viewportHeight) {
-                if (e) {
-                    top = e.clientY - popupHeight - offset;
-                } else if (element) {
-                    const rect = element.getBoundingClientRect();
-                    top = rect.top - popupHeight - offset;
+                if (top + pH > vH) {
+                    top = e ? e.clientY - pH - offset : top - pH - (offset * 2);
                 }
-                // If still off-screen, align to bottom edge
-                if (top < 0) {
-                    top = viewportHeight - popupHeight - 10;
-                }
-            }
 
-            // Ensure popup doesn't go off left edge
-            if (left < 0) {
-                left = 10;
-            }
+                // 6. Hard Constraints (Keep inside viewport)
+                left = Math.max(10, Math.min(left, vW - pW - 10));
+                top = Math.max(10, Math.min(top, vH - pH - 10));
 
-            // Ensure popup doesn't go off top edge
-            if (top < 0) {
-                top = 10;
-            }
-
-            popup.style.left = left + 'px';
-            popup.style.top = top + 'px';
+                // 7. Apply via Transform (GPU Composite instead of Layout/Reflow)
+                popup.style.transform = `translate3d(${Math.round(left)}px, ${Math.round(top)}px, 0)`;
+            });
         },
         updateUrlWithGroup(newGroupSlug) {
             if (!newGroupSlug) {
