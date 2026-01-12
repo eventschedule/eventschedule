@@ -11,6 +11,7 @@ use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use App\Notifications\VerifyEmail as CustomVerifyEmail;
 use App\Utils\GeminiUtils;
+use App\Utils\CssUtils;
 
 class Role extends Model implements MustVerifyEmail
 {
@@ -69,6 +70,7 @@ class Role extends Model implements MustVerifyEmail
         'request_terms_en',
         'last_notified_request_count',
         'email_settings',
+        'custom_css',
     ];
 
     /**
@@ -100,6 +102,11 @@ class Role extends Model implements MustVerifyEmail
 
             $model->description_html = MarkdownUtils::convertToHtml($model->description);
             $model->description_html_en = MarkdownUtils::convertToHtml($model->description_en);
+            
+            if (isset($model->custom_css)) {
+                $model->custom_css = CssUtils::sanitizeCss($model->custom_css);
+            }
+            
             if ($model->accent_color == '#ffffff') {
                 $model->accent_color = '#000000';
             }

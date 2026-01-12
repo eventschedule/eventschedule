@@ -1077,34 +1077,48 @@ class Event extends Model
     /**
      * Get organizer schema data for JSON-LD
      * Always returns an organizer (with fallback if needed)
+     * Ensures both "name" and "url" fields are always present
      */
     public function getSchemaOrganizer()
     {
+        $eventUrl = $this->getGuestUrl();
+        $eventName = $this->translatedName() ?: 'Event Organizer';
+        
         if ($this->venue && $this->venue->isClaimed()) {
+            $name = $this->venue->translatedName();
+            $url = $this->venue->getGuestUrl();
+            
             return [
                 '@type' => 'Organization',
-                'name' => $this->venue->translatedName(),
-                'url' => $this->venue->getGuestUrl(),
+                'name' => $name ?: $eventName,
+                'url' => $url ?: $eventUrl,
             ];
         } elseif ($this->role() && $this->role()->isClaimed()) {
+            $name = $this->role()->translatedName();
+            $url = $this->role()->getGuestUrl();
+            
             return [
                 '@type' => 'Person',
-                'name' => $this->role()->translatedName(),
-                'url' => $this->role()->getGuestUrl(),
+                'name' => $name ?: $eventName,
+                'url' => $url ?: $eventUrl,
             ];
         } elseif ($this->creatorRole) {
             // Fallback to creator role
+            $name = $this->creatorRole->translatedName();
+            $url = $this->creatorRole->getGuestUrl();
+            
             return [
                 '@type' => $this->creatorRole->isVenue() ? 'Organization' : 'Person',
-                'name' => $this->creatorRole->translatedName(),
-                'url' => $this->creatorRole->getGuestUrl(),
+                'name' => $name ?: $eventName,
+                'url' => $url ?: $eventUrl,
             ];
         }
 
         // Final fallback - use event name as organizer
         return [
             '@type' => 'Organization',
-            'name' => $this->translatedName(),
+            'name' => $eventName,
+            'url' => $eventUrl,
         ];
     }
 

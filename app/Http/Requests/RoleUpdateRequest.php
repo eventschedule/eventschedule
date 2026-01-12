@@ -38,6 +38,7 @@ class RoleUpdateRequest extends FormRequest
             'email_settings.password' => ['nullable', 'string', 'max:255'],
             'email_settings.from_address' => ['nullable', 'email', 'max:255'],
             'email_settings.from_name' => ['nullable', 'string', 'max:255'],
+            'custom_css' => ['nullable', 'string', 'max:10000'],
         ];
     }
 }

@@ -28,7 +28,7 @@
             />
             @endif
           </div>
-          <div class="px-6 lg:px-16 pb-4 relative z-10">
+          <div id="schedule-header" class="px-6 lg:px-16 pb-4 relative z-10">
             @if ($role->profile_image_url)
             <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] -ml-2 mb-6 bg-[#F5F9FE] dark:bg-gray-800 flex items-center justify-center">
               <img
