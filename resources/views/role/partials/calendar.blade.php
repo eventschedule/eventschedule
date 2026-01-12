@@ -867,60 +867,59 @@ const calendarApp = createApp({
             const popupHeight = popupContent.offsetHeight || 200;
             const viewportWidth = window.innerWidth;
             const viewportHeight = window.innerHeight;
-            const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
-            const scrollY = window.pageYOffset || document.documentElement.scrollTop;
 
             let left, top;
             const offset = 15;
 
             // Use mouse position if available, otherwise use element position
+            // Since popup is position: fixed, use clientX/clientY (viewport-relative) instead of pageX/pageY
             if (e) {
-                left = e.pageX + offset;
-                top = e.pageY + offset;
+                left = e.clientX + offset;
+                top = e.clientY + offset;
             } else if (element) {
                 const rect = element.getBoundingClientRect();
-                left = rect.left + scrollX + rect.width / 2;
-                top = rect.top + scrollY + rect.height + offset;
+                left = rect.left + rect.width / 2;
+                top = rect.top + rect.height + offset;
             } else {
                 return;
             }
 
             // Adjust horizontal position if popup would go off-screen
-            if (left + popupWidth > viewportWidth + scrollX) {
+            if (left + popupWidth > viewportWidth) {
                 if (e) {
-                    left = e.pageX - popupWidth - offset;
+                    left = e.clientX - popupWidth - offset;
                 } else if (element) {
                     const rect = element.getBoundingClientRect();
-                    left = rect.left + scrollX - popupWidth - offset;
+                    left = rect.left - popupWidth - offset;
                 }
                 // If still off-screen, align to right edge
-                if (left < scrollX) {
-                    left = viewportWidth + scrollX - popupWidth - 10;
+                if (left < 0) {
+                    left = viewportWidth - popupWidth - 10;
                 }
             }
 
             // Adjust vertical position if popup would go off-screen
-            if (top + popupHeight > viewportHeight + scrollY) {
+            if (top + popupHeight > viewportHeight) {
                 if (e) {
-                    top = e.pageY - popupHeight - offset;
+                    top = e.clientY - popupHeight - offset;
                 } else if (element) {
                     const rect = element.getBoundingClientRect();
-                    top = rect.top + scrollY - popupHeight - offset;
+                    top = rect.top - popupHeight - offset;
                 }
                 // If still off-screen, align to bottom edge
-                if (top < scrollY) {
-                    top = viewportHeight + scrollY - popupHeight - 10;
+                if (top < 0) {
+                    top = viewportHeight - popupHeight - 10;
                 }
             }
 
             // Ensure popup doesn't go off left edge
-            if (left < scrollX) {
-                left = scrollX + 10;
+            if (left < 0) {
+                left = 10;
             }
 
             // Ensure popup doesn't go off top edge
-            if (top < scrollY) {
-                top = scrollY + 10;
+            if (top < 0) {
+                top = 10;
             }
 
             popup.style.left = left + 'px';
