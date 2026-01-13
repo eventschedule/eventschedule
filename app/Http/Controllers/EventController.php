@@ -190,6 +190,15 @@ class EventController extends Controller
                 $event->tickets = [new Ticket()];
             }
 
+            // Load the last event created by the user with a category set and set its category
+            $lastEvent = Event::where('user_id', $user->id)
+                ->whereNotNull('category_id')
+                ->orderBy('id', 'desc')
+                ->first();
+            if ($lastEvent) {
+                $event->category_id = $lastEvent->category_id;
+            }
+
             if ($schedule) {
                 $selectedMembers = [$schedule->toData()];
             }
