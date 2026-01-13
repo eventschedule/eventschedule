@@ -509,7 +509,7 @@
 
             @if (session('message'))
             Toastify({
-                text: "{{ session('message') }}",
+                text: {!! json_encode(session('message'), JSON_UNESCAPED_UNICODE) !!},
                 duration: 3000,
                 position: 'center',
                 stopOnFocus: true,
@@ -519,7 +519,7 @@
             }).showToast();
             @elseif (session('error'))
             Toastify({
-                text: "{{ session('error') }}",
+                text: {!! json_encode(session('error'), JSON_UNESCAPED_UNICODE) !!},
                 close: true,
                 duration: 10000,
                 position: 'center',
