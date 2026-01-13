@@ -3,7 +3,11 @@
 @php
     $isExternal = ($target ?? $attributes->get('target')) === '_blank';
     $showIcon = $isExternal && !$hideIcon;
-    $baseClasses = 'text-blue-600 dark:text-blue-400 hover:underline';
+    // Check if user provided a text color class
+    $userClasses = $attributes->get('class', '');
+    $hasTextColor = preg_match('/\btext-(white|black|gray|red|blue|green|yellow|purple|pink|indigo|orange)-\d+\b/', $userClasses) || 
+                    preg_match('/\btext-(white|black|gray|red|blue|green|yellow|purple|pink|indigo|orange)\b/', $userClasses);
+    $baseClasses = $hasTextColor ? 'hover:underline' : 'text-blue-600 dark:text-blue-400 hover:underline';
     // Check if user provided a display class (block, inline-block, etc.)
     $hasDisplayClass = $attributes->has('class') && preg_match('/\b(block|inline-block|flex|inline-flex)\b/', $attributes->get('class'));
     $classes = $hasDisplayClass ? $baseClasses : $baseClasses . ' inline-flex items-center';

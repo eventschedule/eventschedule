@@ -172,7 +172,7 @@
                     $venueUrl .= '?' . http_build_query($queryParams);
                   }
                 @endphp
-                <a href="{{ $venueUrl }}" class="text-sm hover:underline">
+                <a href="{{ $venueUrl }}" class="text-sm text-white hover:underline">
                   {{ $event->venue->translatedName() }}
                 </a>
               @else
