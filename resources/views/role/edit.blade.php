@@ -161,12 +161,12 @@
                         let warningMessage = '';
 
                         if (fileSize > 2.5) {
-                            warningMessage += "{{ __('messages.image_size_warning') }}";
+                            warningMessage += {!! json_encode(__('messages.image_size_warning'), JSON_UNESCAPED_UNICODE) !!};
                         }
 
                         if (width !== height && previewId == 'profile_image_preview') {
                             if (warningMessage) warningMessage += " ";
-                            warningMessage += "{{ __('messages.image_not_square') }}";
+                            warningMessage += {!! json_encode(__('messages.image_not_square'), JSON_UNESCAPED_UNICODE) !!};
                         }
 
                         if (warningElement) {
@@ -286,7 +286,7 @@
             var name = $('#name').val();
 
             if (! name) {
-                name = "{{ __('messages.preview') }}";
+                name = {!! json_encode(__('messages.preview'), JSON_UNESCAPED_UNICODE) !!};
             } else if (name.length > 10) {
                 name = name.substring(0, 10) + '...';
             }
@@ -334,7 +334,7 @@
         }
 
         function onValidateClick() {
-            $('#address_response').text("{{ __('messages.searching') }}...").show();
+            $('#address_response').text({!! json_encode(__('messages.searching'), JSON_UNESCAPED_UNICODE) !!} + '...').show();
             $('#accept_button').hide();
             var country = $('#country').countrySelect('getSelectedCountryData');
             $.post({
@@ -354,11 +354,11 @@
                         $('#accept_button').show();
                         $('#address_response').data('validated_address', response['data']);
                     } else {
-                        $('#address_response').text("{{ __('messages.address_not_found') }}");    
+                        $('#address_response').text({!! json_encode(__('messages.address_not_found'), JSON_UNESCAPED_UNICODE) !!});    
                     }
                 },
                 error: function(xhr, status, error) {
-                    $('#address_response').text("{{ __('messages.an_error_occurred') }}");
+                    $('#address_response').text({!! json_encode(__('messages.an_error_occurred'), JSON_UNESCAPED_UNICODE) !!});
                 }
             });
         }
@@ -376,7 +376,7 @@
                 var url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address);
                 window.open(url, '_blank');
             } else {
-                alert("{{ __('messages.please_enter_address') }}");
+                alert({!! json_encode(__('messages.please_enter_address'), JSON_UNESCAPED_UNICODE) !!});
             }
         }
 
@@ -544,7 +544,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                                 </svg>
-                                {{ __('messages.google_calendar_integration') }}
+                                Google Calendar
                             </a>
                             @endif
                             @if (config('app.hosted'))
@@ -1332,7 +1332,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                             </svg>
-                            {{ __('messages.google_calendar_integration') }}
+                            Google Calendar
                         </h2>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
                             {{ __('messages.sync_events_between_schedules') }}
@@ -1644,14 +1644,14 @@ function testImport() {
     const cities = Array.from(cityInputs).map(input => input.value.trim()).filter(city => city);
     
     if (urls.length === 0 && cities.length === 0) {
-        alert('{{ __("messages.please_enter_urls_or_cities") }}');
+        alert({!! json_encode(__('messages.please_enter_urls_or_cities'), JSON_UNESCAPED_UNICODE) !!});
         return;
     }
     
     // Show loading state
     const button = event.target;
     const originalText = button.textContent;
-    button.textContent = '{{ __("messages.testing") }}...';
+    button.textContent = {!! json_encode(__('messages.testing'), JSON_UNESCAPED_UNICODE) !!} + '...';
     button.disabled = true;
     
     // Only test import if we have a subdomain (existing role)
@@ -1687,7 +1687,7 @@ function testImport() {
     });
     @else
     // For new roles, just show a message
-    alert('{{ __("messages.save_role_first_to_test_import") }}');
+    alert({!! json_encode(__('messages.save_role_first_to_test_import'), JSON_UNESCAPED_UNICODE) !!});
     button.textContent = originalText;
     button.disabled = false;
     @endif
@@ -1806,7 +1806,7 @@ function loadGoogleCalendars() {
             return response.json();
         })
         .then(data => {
-            select.innerHTML = '<option value="">{{ __("messages.select_a_calendar") }}</option>';
+            select.innerHTML = '<option value="">' + {!! json_encode(__('messages.select_a_calendar'), JSON_UNESCAPED_UNICODE) !!} + '</option>';
             
             if (data.calendars && Array.isArray(data.calendars)) {
                 data.calendars.forEach(calendar => {
@@ -1819,20 +1819,20 @@ function loadGoogleCalendars() {
                     select.appendChild(option);
                 });
             } else {
-                select.innerHTML = '<option value="">{{ __("messages.no_calendars_available") }}</option>';
+                select.innerHTML = '<option value="">' + {!! json_encode(__('messages.no_calendars_available'), JSON_UNESCAPED_UNICODE) !!} + '</option>';
             }
         })
         .catch(error => {
             console.error('Error loading calendars:', error);
-            let errorMessage = '{{ __("messages.error_loading_calendars") }}';
+            let errorMessage = {!! json_encode(__('messages.error_loading_calendars'), JSON_UNESCAPED_UNICODE) !!};
             
             if (error.message.includes('401')) {
-                errorMessage = '{{ __("messages.google_calendar_not_connected") }}';
+                errorMessage = {!! json_encode(__('messages.google_calendar_not_connected'), JSON_UNESCAPED_UNICODE) !!};
             } else if (error.message.includes('403')) {
-                errorMessage = '{{ __("messages.access_denied_calendar") }}';
+                errorMessage = {!! json_encode(__('messages.access_denied_calendar'), JSON_UNESCAPED_UNICODE) !!};
             }
             
-            select.innerHTML = `<option value="">${errorMessage}</option>`;
+            select.innerHTML = '<option value="">' + errorMessage + '</option>';
         });
 }
 
@@ -1965,7 +1965,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (!email) {
                 testEmailResult.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
-                testEmailResult.textContent = '{{ __("messages.please_enter_from_address") }}';
+                testEmailResult.textContent = {!! json_encode(__('messages.please_enter_from_address'), JSON_UNESCAPED_UNICODE) !!};
                 testEmailResult.classList.remove('hidden');
                 return;
             }
@@ -1974,7 +1974,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
                 testEmailResult.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
-                testEmailResult.textContent = '{{ __("messages.invalid_email_address") }}';
+                testEmailResult.textContent = {!! json_encode(__('messages.invalid_email_address'), JSON_UNESCAPED_UNICODE) !!};
                 testEmailResult.classList.remove('hidden');
                 return;
             }
@@ -1998,7 +1998,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Disable button and show loading
             sendTestEmailBtn.disabled = true;
-            sendTestEmailBtn.textContent = '{{ __("messages.sending") }}...';
+            sendTestEmailBtn.textContent = {!! json_encode(__('messages.sending'), JSON_UNESCAPED_UNICODE) !!} + '...';
             testEmailResult.classList.add('hidden');
             
             // Send AJAX request
@@ -2017,22 +2017,22 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 sendTestEmailBtn.disabled = false;
-                sendTestEmailBtn.textContent = '{{ __("messages.send_test_email") }}';
+                sendTestEmailBtn.textContent = {!! json_encode(__('messages.send_test_email'), JSON_UNESCAPED_UNICODE) !!};
                 
                 if (data.success) {
                     testEmailResult.className = 'mt-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-800 dark:text-green-200';
-                    testEmailResult.textContent = data.message || '{{ __("messages.test_email_sent") }}';
+                    testEmailResult.textContent = data.message || {!! json_encode(__('messages.test_email_sent'), JSON_UNESCAPED_UNICODE) !!};
                 } else {
                     testEmailResult.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
-                    testEmailResult.textContent = data.error || '{{ __("messages.failed_to_send_test_email") }}';
+                    testEmailResult.textContent = data.error || {!! json_encode(__('messages.failed_to_send_test_email'), JSON_UNESCAPED_UNICODE) !!};
                 }
                 testEmailResult.classList.remove('hidden');
             })
             .catch(error => {
                 sendTestEmailBtn.disabled = false;
-                sendTestEmailBtn.textContent = '{{ __("messages.send_test_email") }}';
+                sendTestEmailBtn.textContent = {!! json_encode(__('messages.send_test_email'), JSON_UNESCAPED_UNICODE) !!};
                 testEmailResult.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
-                testEmailResult.textContent = '{{ __("messages.failed_to_send_test_email") }}';
+                testEmailResult.textContent = {!! json_encode(__('messages.failed_to_send_test_email'), JSON_UNESCAPED_UNICODE) !!};
                 testEmailResult.classList.remove('hidden');
                 console.error('Error:', error);
             });
