@@ -1300,7 +1300,8 @@ class RoleController extends Controller
 
     public function qrCode($subdomain)
     {
-        $url = route('role.follow', ['subdomain' => $subdomain]);
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $url = $role->getGuestUrl();
 
         $qrCode = QrCode::create($url)            
             ->setSize(300)
