@@ -312,6 +312,7 @@ return [
     'role_has_been_deleted_details' => ':type :name נמחק על ידי :user.',
     'message_sent' => 'ההודעה נשלחה בהצלחה',
     'an_email_will_be_sent' => 'התראה תישלח בהודעת דוא"ל',
+    'send_email_to_notify_them' => 'שלח הודעת דוא"ל כדי להודיע להם',
     'open_sidebar' => 'פתח סרגל צד',
     'close_sidebar' => 'סגור סרגל צד',
     'no_scheduled_events' => 'אין אירועים שנקבעו',

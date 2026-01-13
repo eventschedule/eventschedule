@@ -182,6 +182,7 @@ return [
     'role_has_been_deleted_details' => 'Der :type :name wurde von :user gelöscht.',
     'message_sent' => 'Nachricht erfolgreich gesendet',
     'an_email_will_be_sent' => 'Eine E-Mail-Benachrichtigung wird gesendet, um sie zu informieren',
+    'send_email_to_notify_them' => 'Eine E-Mail senden, um sie zu benachrichtigen',
     'open_sidebar' => 'Seitenleiste öffnen',
     'close_sidebar' => 'Seitenleiste schließen',
     'no_scheduled_events' => 'Keine geplanten Veranstaltungen',

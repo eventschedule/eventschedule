@@ -555,12 +555,18 @@
                                             <x-text-input id="venue_email" name="venue_email" type="email" class="block w-full"
                                                 @blur="searchVenues" v-model="venueEmail" autocomplete="off" />
                                         </div>
-                                        @if (config('app.hosted'))
-                                        <p class="mt-2 text-sm text-gray-500">
-                                            {{ __('messages.an_email_will_be_sent') }}
-                                        </p>
-                                        @endif
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
+                                        @if (config('app.hosted'))
+                                        <div v-if="(venueType === 'create_new' || (!selectedVenue.user_id && venueEmail)) && venueEmail" class="mt-2">
+                                            <div class="flex items-center">
+                                                <input id="send_email_to_venue" name="send_email_to_venue" type="checkbox" v-model="sendEmailToVenue"
+                                                    class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                                                <label for="send_email_to_venue" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                                    {{ __('messages.send_email_to_notify_them') }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                        @endif
                                     </div>
 
                                     <div v-if="venueSearchResults.length" class="mb-6">
@@ -708,6 +714,20 @@
                                             <x-text-input v-bind:id="'edit_member_email_' + member.id" 
                                                 v-bind:name="'members[' + member.id + '][email]'" type="email" class="mr-2 block w-full" 
                                                 v-model="selectedMembers.find(m => m.id === member.id).email" @keydown.enter.prevent="editMember()" autocomplete="off" />
+                                            @if (config('app.hosted'))
+                                            <div v-if="selectedMembers.find(m => m.id === member.id).email && !member.user_id" class="mt-2">
+                                                <div class="flex items-center">
+                                                    <input type="checkbox" 
+                                                        :id="'send_email_to_edit_member_' + member.id" 
+                                                        :name="'send_email_to_members[' + selectedMembers.find(m => m.id === member.id).email + ']'" 
+                                                        v-model="sendEmailToMembers[selectedMembers.find(m => m.id === member.id).email]"
+                                                        class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                                                    <label :for="'send_email_to_edit_member_' + member.id" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                                        {{ __('messages.send_email_to_notify_them') }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            @endif
                                         </div>
 
                                         <div class="mb-6">
@@ -719,23 +739,39 @@
 
                                     </div>
                                     <div v-show="editMemberId !== member.id" class="flex justify-between w-full">
-                                        <div class="flex items-center">
-                                            <span class="text-sm text-gray-900 dark:text-gray-100 truncate">
-                                                <template v-if="member.url">
-                                                    <a :href="member.url" target="_blank" class="hover:underline">@{{ member.name }}</a>
-                                                </template>
-                                                <template v-else>
-                                                    @{{ member.name }}
-                                                </template>
-                                                <template v-if="member.email">
-                                                    (<a :href="'mailto:' + member.email" class="hover:underline">@{{ member.email }}</a>)
-                                                </template>
-                                            </span>
-                                            <a v-if="member.youtube_url" :href="member.youtube_url" target="_blank" class="ml-2">
-                                                <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                                                </svg>
-                                            </a>
+                                        <div class="flex-1">
+                                            <div class="flex items-center">
+                                                <span class="text-sm text-gray-900 dark:text-gray-100 truncate">
+                                                    <template v-if="member.url">
+                                                        <a :href="member.url" target="_blank" class="hover:underline">@{{ member.name }}</a>
+                                                    </template>
+                                                    <template v-else>
+                                                        @{{ member.name }}
+                                                    </template>
+                                                    <template v-if="member.email">
+                                                        (<a :href="'mailto:' + member.email" class="hover:underline">@{{ member.email }}</a>)
+                                                    </template>
+                                                </span>
+                                                <a v-if="member.youtube_url" :href="member.youtube_url" target="_blank" class="ml-2">
+                                                    <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                                    </svg>
+                                                </a>
+                                            </div>
+                                            @if (config('app.hosted'))
+                                            <div v-if="((member.id && member.id.toString().startsWith('new_')) || (!member.user_id)) && member.email" class="mt-2">
+                                                <div class="flex items-center">
+                                                    <input type="checkbox" 
+                                                        :id="'send_email_to_member_' + member.id" 
+                                                        :name="'send_email_to_members[' + member.email + ']'" 
+                                                        v-model="sendEmailToMembers[member.email]"
+                                                        class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                                                    <label :for="'send_email_to_member_' + member.id" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                                        {{ __('messages.send_email_to_notify_them') }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            @endif
                                         </div>
                                         <div>
                                             <x-secondary-button v-if="!member.user_id" @click="editMember(member)" type="button" class="mr-2">
@@ -801,12 +837,20 @@
                                             <x-text-input id="member_email" name="member_email" type="email" class="mr-2 block w-full"
                                             @keydown.enter.prevent="addMember" @blur="searchMembers" v-model="memberEmail" autocomplete="off" />
                                         </div>
-                                        @if (config('app.hosted'))
-                                        <p class="mt-2 text-sm text-gray-500">
-                                            {{ __('messages.an_email_will_be_sent') }}
-                                        </p>
-                                        @endif
                                         <x-input-error class="mt-2" :messages="$errors->get('member_email')" />
+                                        @if (config('app.hosted'))
+                                        <div v-if="memberEmail" class="mt-2">
+                                            <div class="flex items-center">
+                                                <input id="send_email_to_new_member" 
+                                                    type="checkbox" 
+                                                    v-model="sendEmailToNewMember"
+                                                    class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                                                <label for="send_email_to_new_member" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                                    {{ __('messages.send_email_to_notify_them') }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                        @endif
                                     </div>
 
                                     <div v-if="memberSearchResults.length" class="mb-6">
@@ -1347,6 +1391,9 @@
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
         soldLabel: "{{ __('messages.sold_reserved') }}",
         isRecurring: @json($event->days_of_week ? true : false),
+        sendEmailToVenue: false,
+        sendEmailToMembers: {},
+        sendEmailToNewMember: false,
       }
     },
     methods: {
@@ -1445,6 +1492,10 @@
       selectMember(member) {
         if (! this.selectedMembers.some(m => m.id === member.id)) {
           this.selectedMembers.push(member);
+          // Initialize sendEmailToMembers for selected member if they don't have user_id and have email
+          if (!member.user_id && member.email) {
+            this.$set(this.sendEmailToMembers, member.email, false);
+          }
         }        
         this.memberSearchResults = [];
         this.memberEmail = "";
@@ -1454,6 +1505,10 @@
       },
       removeMember(member) {
         this.selectedMembers = this.selectedMembers.filter(m => m.id !== member.id);
+        // Remove from sendEmailToMembers
+        if (member.email && this.sendEmailToMembers[member.email] !== undefined) {
+          delete this.sendEmailToMembers[member.email];
+        }
         if (this.selectedMembers.length === 0) {
           this.showMemberTypeRadio = true;
         }
@@ -1505,14 +1560,23 @@
         };
 
         this.selectedMembers.push(newMember);
+        // Initialize sendEmailToMembers for new member using the checkbox value
+        if (newMember.email) {
+          this.$set(this.sendEmailToMembers, newMember.email, this.sendEmailToNewMember);
+        }
         this.memberEmail = "";
         this.memberName = "";
         this.memberYoutubeUrl = "";
+        this.sendEmailToNewMember = false;
         this.showMemberTypeRadio = false;
       },
       addExistingMember() {
         if (this.selectedMember && !this.selectedMembers.some(m => m.id === this.selectedMember.id)) {
           this.selectedMembers.push(this.selectedMember);
+          // Initialize sendEmailToMembers for selected member if they don't have user_id and have email
+          if (!this.selectedMember.user_id && this.selectedMember.email) {
+            this.$set(this.sendEmailToMembers, this.selectedMember.email, false);
+          }
           this.$nextTick(() => {
             this.selectedMember = "";
           });
@@ -1546,10 +1610,15 @@
         };
 
         this.selectedMembers.push(newMember);
+        // Initialize sendEmailToMembers for new member using the checkbox value
+        if (newMember.email) {
+          this.$set(this.sendEmailToMembers, newMember.email, this.sendEmailToNewMember);
+        }
         this.memberSearchResults = [];
         this.memberName = "";
         this.memberEmail = "";
         this.memberYoutubeUrl = "";
+        this.sendEmailToNewMember = false;
         this.showMemberTypeRadio = false;
       },
       setFocusBasedOnMemberType() {
@@ -1782,9 +1851,23 @@
         this.savePreferences();
       },
       selectedMembers: {
-        handler(newValue) {
+        handler(newValue, oldValue) {
           if (!this.eventName && newValue.length === 1) {
             this.eventName = newValue[0].name;
+          }
+          
+          // Clean up sendEmailToMembers for removed members
+          // Note: Email changes are handled by the checkbox binding using the current email
+          if (oldValue && Array.isArray(oldValue)) {
+            oldValue.forEach(oldMember => {
+              const newMember = newValue.find(m => m.id === oldMember.id);
+              if (!newMember && oldMember.email) {
+                // Member was removed - clean up
+                if (this.sendEmailToMembers[oldMember.email] !== undefined) {
+                  delete this.sendEmailToMembers[oldMember.email];
+                }
+              }
+            });
           }
         },
         deep: true
@@ -1842,6 +1925,13 @@
       if (this.event.recurring_end_type === 'on_date') {
         this.initializeRecurringEndDatePicker();
       }
+      
+      // Initialize sendEmailToMembers for existing selectedMembers
+      this.selectedMembers.forEach(member => {
+        if (((member.id && member.id.toString().startsWith('new_')) || !member.user_id) && member.email) {
+          this.$set(this.sendEmailToMembers, member.email, false);
+        }
+      });
     }
   }).mount('#app')
 

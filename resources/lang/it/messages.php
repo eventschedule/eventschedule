@@ -415,6 +415,7 @@ return [
     'role_has_been_deleted_details' => ':type :name è stato eliminato da :user.',
     'message_sent' => 'Messaggio inviato con successo',
     'an_email_will_be_sent' => 'Verrà inviata una notifica email per informarli',
+    'send_email_to_notify_them' => 'Invia un\'email per notificarli',
     'open_sidebar' => 'Apri barra laterale',
     'close_sidebar' => 'Chiudi barra laterale',
     'no_scheduled_events' => 'Nessun evento programmato',
