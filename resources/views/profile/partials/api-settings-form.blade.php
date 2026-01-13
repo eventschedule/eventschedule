@@ -72,9 +72,7 @@
         @endif
 
         <div class="flex items-center gap-4">
-            <button type="submit" class="px-4 py-2 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 rounded-md hover:bg-gray-700 dark:hover:bg-gray-300">
-                {{ __('Save') }}
-            </button>
+            <x-primary-button>{{ __('Save') }}</x-primary-button>
 
             @if (session('success'))
                 <p class="text-sm text-gray-600 dark:text-gray-400">{{ session('success') }}</p>
