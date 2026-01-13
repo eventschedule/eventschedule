@@ -105,7 +105,8 @@ trait AccountSetupTrait
         $browser->visit('/settings#section-api')
                 ->scrollIntoView('#enable_api');
         $browser->script("document.getElementById('enable_api').checked = true;");
-        $browser->press('Save')
+        $browser->scrollIntoView('button[type="submit"]')
+                ->click('button[type="submit"]')
                 ->waitForText('API settings updated successfully', 5);
         
         // Get the API key from the page - it should be visible after enabling
