@@ -531,7 +531,7 @@
 
                                     <div v-if="venueType === 'use_existing'">
                                         <select id="selected_venue"
-                                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}"
+                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm {{ $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}"
                                                 v-model="selectedVenue">
                                                 <option value="" disabled selected>{{ __('messages.please_select') }}</option>                                
                                                 <option v-for="venue in venues" :key="venue.id" :value="venue">
@@ -811,7 +811,7 @@
 
                                 <div v-if="memberType === 'use_existing' && Object.keys(members).length > 0">
                                     <select v-model="selectedMember" @change="addExistingMember" id="selected_member"
-                                        class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                         <option value="" disabled selected>{{ __('messages.please_select') }}</option>
                                         <option v-for="member in filteredMembers" :key="member.id" :value="member">
                                             @{{ member.name }} <template v-if="member.email">(@{{ member.email }})</template>
