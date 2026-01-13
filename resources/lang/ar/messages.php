@@ -181,6 +181,7 @@ return [
     'role_has_been_deleted_details' => ':type :name تم حذفه بواسطة :user.',
     'message_sent' => 'تم إرسال الرسالة بنجاح',
     'an_email_will_be_sent' => 'سيتم إرسال إشعار عبر البريد الإلكتروني لإبلاغهم',
+    'send_email_to_notify_them' => 'إرسال بريد إلكتروني لإشعارهم',
     'open_sidebar' => 'فتح الشريط الجانبي',
     'close_sidebar' => 'إغلاق الشريط الجانبي',
     'no_scheduled_events' => 'لا توجد أحداث مجدولة',

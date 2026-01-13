@@ -407,6 +407,7 @@ return [
     'role_has_been_deleted_details' => ':type :name is verwijderd door :user.',
     'message_sent' => 'Bericht succesvol verzonden',
     'an_email_will_be_sent' => 'Er wordt een e-mailmelding verzonden om hen te informeren',
+    'send_email_to_notify_them' => 'Stuur een e-mail om hen te informeren',
     'open_sidebar' => 'Zijbalk openen',
     'close_sidebar' => 'Zijbalk sluiten',
     'no_scheduled_events' => 'Geen geplande evenementen',

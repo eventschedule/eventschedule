@@ -413,6 +413,7 @@ return [
     'role_has_been_deleted_details' => ':type :name foi excluído por :user.',
     'message_sent' => 'Mensagem enviada com sucesso',
     'an_email_will_be_sent' => 'Um e-mail de notificação será enviado para informá-los',
+    'send_email_to_notify_them' => 'Enviar um e-mail para notificá-los',
     'open_sidebar' => 'Abrir barra lateral',
     'close_sidebar' => 'Fechar barra lateral',
     'no_scheduled_events' => 'Nenhum evento agendado',

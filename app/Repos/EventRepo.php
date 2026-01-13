@@ -326,12 +326,29 @@ class EventRepo
         }
 
         if (config('app.hosted')) {
+            $sendEmailToMembers = $request->input('send_email_to_members', []);
+            
             foreach ($roles as $role) {
                 if ($event->wasRecentlyCreated && ! $role->isClaimed() && $role->is_subscribed && $role->email) {
+                    $shouldSendEmail = false;
+                    
                     if ($role->isVenue()) {
-                        // Mail::to($role->email)->send(new ClaimVenue($event));
+                        // Check if send_email_to_venue checkbox is checked
+                        // Checkbox values can be "1", "on", or true - all are truthy
+                        $shouldSendEmail = !empty($request->input('send_email_to_venue', false));
                     } elseif ($role->isTalent()) {
-                        Mail::to($role->email)->send(new ClaimRole($event));
+                        // Check if this role's email is in the send_email_to_members array
+                        // The array uses email addresses as keys
+                        // Checkbox values can be "1", "on", or true - all are truthy
+                        $shouldSendEmail = !empty($sendEmailToMembers[$role->email]);
+                    }
+                    
+                    if ($shouldSendEmail) {
+                        if ($role->isVenue()) {
+                            Mail::to($role->email)->send(new ClaimVenue($event));
+                        } elseif ($role->isTalent()) {
+                            Mail::to($role->email)->send(new ClaimRole($event));
+                        }
                     }
                 }
             }

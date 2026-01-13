@@ -196,6 +196,7 @@ return [
     'role_has_been_deleted_details' => 'The :type :name has been deleted by :user.',
     'message_sent' => 'Successfully sent message',
     'an_email_will_be_sent' => 'An email notification will be sent to inform them',
+    'send_email_to_notify_them' => 'Send an email to notify them',
     'open_sidebar' => 'Open sidebar',
     'close_sidebar' => 'Close Sidebar',
     'no_scheduled_events' => 'No scheduled events',
