@@ -104,11 +104,42 @@ trait AccountSetupTrait
     {
         $browser->visit('/settings#section-api')
                 ->waitFor('#enable_api', 5)
-                ->scrollIntoView('#enable_api')
-                ->check('enable_api')
-                ->click('button[type="submit"]')
-                ->waitForText('API settings updated successfully', 5)
-                ->pause(1000);
+                ->scrollIntoView('#enable_api');
+        
+        // Check if already enabled, if not enable it
+        $isChecked = $browser->script("return document.getElementById('enable_api').checked;");
+        if (!$isChecked[0]) {
+            // Use Dusk's check method instead of JavaScript for better reliability
+            $browser->check('enable_api');
+            // Wait a moment for any UI updates
+            $browser->pause(500);
+        }
+        
+        // Find and click the submit button in the API settings form using JavaScript
+        // This is more reliable when the button might not be immediately interactable via Dusk
+        $browser->script("
+            const checkbox = document.getElementById('enable_api');
+            const form = checkbox.closest('form');
+            const submitButton = form.querySelector('button[type=\"submit\"]');
+            if (submitButton) {
+                submitButton.scrollIntoView({ block: 'center', behavior: 'instant' });
+            }
+        ");
+        
+        // Wait a moment for scroll to complete, then click
+        $browser->pause(300);
+        
+        // Click the button using JavaScript to avoid interactability issues
+        $browser->script("
+            const checkbox = document.getElementById('enable_api');
+            const form = checkbox.closest('form');
+            const submitButton = form.querySelector('button[type=\"submit\"]');
+            if (submitButton) {
+                submitButton.click();
+            }
+        ");
+        
+        $browser->waitForText('API settings updated successfully', 5);
         
         // Get the API key from the page - it should be visible after enabling
         $browser->waitFor('#api_key', 5);
