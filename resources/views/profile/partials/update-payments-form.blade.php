@@ -38,14 +38,14 @@
 
             @if (! $user->stripe_completed_at)
                 <div class="mt-4">
-                    <x-secondary-button onclick="window.location.href='{{ route('stripe.link') }}'">
+                    <x-primary-button type="button" onclick="window.location.href='{{ route('stripe.link') }}'">
                         {{ __('messages.connect_stripe') }}
-                    </x-secondary-button>
+                    </x-primary-button>
                 </div>
             @endif
         @endif
 
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 pt-4">
+        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mt-8">
             <x-link href="https://invoiceninja.com" target="_blank">
                 Invoice Ninja
             </x-link>
