@@ -8,7 +8,7 @@
     {"value": "HKD", "label": "Hong Kong Dollar"},
     {"value": "INR", "label": "Indian Rupee"},
     {"value": "MYR", "label": "Malaysian Ringgit"},
-    {"value": "NIS", "label": "Israeli New Shekel"},
+    {"value": "ILS", "label": "Israeli New Shekel"},
     {"value": "NZD", "label": "New Zealand Dollar"},
     {"value": "SGD", "label": "Singapore Dollar"},
     {"value": "ZAR", "label": "South African Rand"},
