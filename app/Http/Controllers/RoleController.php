@@ -344,13 +344,21 @@ class RoleController extends Controller
             $year = now()->year;
         }    
 
-        $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
-        $endOfMonth = $startOfMonth->copy()->addMonths(3)->endOfMonth();
+        // Get timezone from user or role
+        $timezone = $user->timezone ?? $role->timezone ?? 'UTC';
+        
+        // Calculate month boundaries in user's/role's timezone, then convert to UTC for database query
+        $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
+        $endOfMonth = $startOfMonth->copy()->addMonths(3)->endOfMonth()->endOfDay();
+        
+        // Convert to UTC for database query
+        $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
+        $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
 
         if ($role->isCurator()) {
             $events = Event::with('roles')
-                ->where(function ($query) use ($startOfMonth, $endOfMonth) {
-                    $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
+                ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
+                    $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
                         ->orWhereNotNull('days_of_week');
                 })
                 ->whereIn('id', function ($query) use ($role) {
@@ -363,8 +371,8 @@ class RoleController extends Controller
                 ->get();
         } else {
             $events = Event::with('roles')
-                ->where(function ($query) use ($startOfMonth, $endOfMonth) {
-                    $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
+                ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
+                    $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
                         ->orWhereNotNull('days_of_week');
                 })
                 ->where(function ($query) use ($role) {
@@ -477,14 +485,23 @@ class RoleController extends Controller
                 $year = now()->year;
             }
 
-            $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
-            $endOfMonth = $startOfMonth->copy()->endOfMonth();
+            // Get timezone from user or role
+            $user = $request->user();
+            $timezone = $user->timezone ?? $role->timezone ?? 'UTC';
+            
+            // Calculate month boundaries in user's/role's timezone, then convert to UTC for database query
+            $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
+            $endOfMonth = $startOfMonth->copy()->endOfMonth()->endOfDay();
+            
+            // Convert to UTC for database query
+            $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
+            $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
 
             if ($tab == 'schedule') {
                 if ($role->isCurator()) {
                     $events = Event::with('roles')
-                        ->where(function ($query) use ($startOfMonth, $endOfMonth) {
-                            $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
+                        ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
+                            $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
                                 ->orWhereNotNull('days_of_week');
                         })
                         ->whereIn('id', function ($query) use ($role) {
@@ -503,8 +520,8 @@ class RoleController extends Controller
                                     ->where('is_accepted', true);
                             });
                         })
-                        ->where(function ($query) use ($startOfMonth, $endOfMonth) {
-                            $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
+                        ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
+                            $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
                                 ->orWhereNotNull('days_of_week');
                         })
                         ->orderBy('starts_at')

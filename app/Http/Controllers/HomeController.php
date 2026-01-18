@@ -52,10 +52,17 @@ class HomeController extends Controller
             $year = now()->year;
         }
 
-        $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
-        $endOfMonth = $startOfMonth->copy()->endOfMonth();
-
         $user = $request->user();
+        $timezone = $user->timezone ?? 'UTC';
+        
+        // Calculate month boundaries in user's timezone, then convert to UTC for database query
+        $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
+        $endOfMonth = $startOfMonth->copy()->endOfMonth()->endOfDay();
+        
+        // Convert to UTC for database query
+        $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
+        $endOfMonthUtc = $endOfMonth->copy()->setTimezone('UTC');
+        
         $roleIds = $user->roles()->pluck('roles.id');
         
         $events = Event::with('roles')
@@ -71,8 +78,8 @@ class HomeController extends Controller
                     $query->where('user_id', $user->id);
                 });
             })
-            ->where(function ($query) use ($startOfMonth, $endOfMonth) {
-                $query->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
+            ->where(function ($query) use ($startOfMonthUtc, $endOfMonthUtc) {
+                $query->whereBetween('starts_at', [$startOfMonthUtc, $endOfMonthUtc])
                     ->orWhereNotNull('days_of_week');
             })
             ->orderBy('starts_at')
