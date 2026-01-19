@@ -32,18 +32,7 @@ if (config('app.hosted')) {
         });
     }
 
-    // Marketing pages - demo subdomain
-    Route::domain('demo.eventschedule.com')->group(function () {
-        Route::get('/', [MarketingController::class, 'index'])->name('marketing.index');
-        Route::get('/features', [MarketingController::class, 'features'])->name('marketing.features');
-        Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
-        Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
-        Route::get('/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
-        Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
-        Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
-    });
-
-    Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app|demo).*'])->group(function () {
+    Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app).*'])->group(function () {
         Route::get('/request', [RoleController::class, 'request'])->name('role.request');
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
         Route::get('/guest-add', [EventController::class, 'showGuestImport'])->name('event.guest_import');
@@ -214,22 +203,22 @@ Route::get('/tmp/event-image/{filename?}', function ($filename = null) {
     abort(404);
 })->name('event.tmp_image');
 
+// Marketing pages - /demo prefix (password protected in hosted mode)
+Route::prefix('demo')->group(function () {
+    Route::get('/', [MarketingController::class, 'index'])->name('marketing.index');
+    Route::get('/features', [MarketingController::class, 'features'])->name('marketing.features');
+    Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
+    Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
+    Route::get('/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
+    Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
+    Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
+});
+
 if (config('app.hosted')) {
-    Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app|demo).*'])->group(function () {
+    Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app).*'])->group(function () {
         Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');
     });
 } else {
-    // Marketing pages - /demo prefix for self-hosted
-    Route::prefix('demo')->group(function () {
-        Route::get('/', [MarketingController::class, 'index'])->name('marketing.index');
-        Route::get('/features', [MarketingController::class, 'features'])->name('marketing.features');
-        Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
-        Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
-        Route::get('/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
-        Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
-        Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
-    });
-
     Route::get('/{subdomain}/request', [RoleController::class, 'request'])->name('role.request');
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
     Route::get('/{subdomain}/guest-add', [EventController::class, 'showGuestImport'])->name('event.guest_import');
