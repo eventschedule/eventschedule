@@ -17,13 +17,6 @@ use App\Http\Controllers\MarketingController;
 use Illuminate\Support\Facades\Route;
 
 if (config('app.hosted')) {
-    // Redirect non-www to www for marketing pages
-    Route::domain('eventschedule.com')->group(function () {
-        Route::get('{path?}', function ($path = null) {
-            return redirect('https://www.eventschedule.com/' . ($path ?: ''), 301);
-        })->where('path', '.*');
-    });
-
     if (config('app.env') != 'local') {
         Route::domain('blog.eventschedule.com')->group(function () {
             Route::get('/', [BlogController::class, 'index'])->name('blog.index');
@@ -215,8 +208,8 @@ if (config('app.hosted')) {
         Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
         Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
     } else {
-        // Hosted mode: show marketing pages at root URLs on www.eventschedule.com
-        Route::domain('www.eventschedule.com')->group(function () {
+        // Hosted mode: show marketing pages at root URLs on eventschedule.com
+        Route::domain('eventschedule.com')->group(function () {
             Route::get('/', [MarketingController::class, 'index'])->name('marketing.index');
             Route::get('/features', [MarketingController::class, 'features'])->name('marketing.features');
             Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');

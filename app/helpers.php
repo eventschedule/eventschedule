@@ -100,13 +100,13 @@ if (!function_exists('is_rtl')) {
 if (!function_exists('marketing_url')) {
     /**
      * Generate a URL for marketing pages
-     * In hosted mode, returns www.eventschedule.com URLs
+     * In hosted mode, returns eventschedule.com URLs
      * In self-hosted mode, redirects are handled by routes
      */
     function marketing_url(string $path = '/'): string
     {
         if (config('app.hosted')) {
-            return 'https://www.eventschedule.com' . ($path === '/' ? '' : $path);
+            return 'https://eventschedule.com' . ($path === '/' ? '' : $path);
         }
 
         return url($path);
