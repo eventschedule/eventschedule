@@ -96,3 +96,20 @@ if (!function_exists('is_rtl')) {
         return in_array($locale, ['ar', 'he']);
     }
 }
+
+if (!function_exists('marketing_url')) {
+    /**
+     * Generate a URL for marketing pages
+     * In hosted mode, returns demo.eventschedule.com URLs
+     * In self-hosted mode, returns /demo prefix URLs
+     */
+    function marketing_url(string $path = '/'): string
+    {
+        if (config('app.hosted')) {
+            $baseUrl = 'https://demo.eventschedule.com';
+            return $baseUrl . ($path === '/' ? '' : $path);
+        }
+
+        return url('/demo' . ($path === '/' ? '' : $path));
+    }
+}
