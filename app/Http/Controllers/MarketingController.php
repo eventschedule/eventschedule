@@ -72,6 +72,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Self-Hosting Terms of Service page
+     */
+    public function selfHostingTerms()
+    {
+        return view('marketing.self-hosting-terms');
+    }
+
+    /**
      * Get user personas data
      */
     protected function getPersonas(): array
