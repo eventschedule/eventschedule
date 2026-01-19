@@ -220,6 +220,19 @@ if (config('app.hosted')) {
             Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
             Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
         });
+
+        // Redirect www.eventschedule.com marketing pages to non-www
+        Route::domain('www.eventschedule.com')->group(function () {
+            Route::get('/', fn() => redirect('https://eventschedule.com/', 301));
+            Route::get('/features', fn() => redirect('https://eventschedule.com/features', 301));
+            Route::get('/pricing', fn() => redirect('https://eventschedule.com/pricing', 301));
+            Route::get('/about', fn() => redirect('https://eventschedule.com/about', 301));
+            Route::get('/ticketing', fn() => redirect('https://eventschedule.com/ticketing', 301));
+            Route::get('/integrations', fn() => redirect('https://eventschedule.com/integrations', 301));
+            Route::get('/privacy', fn() => redirect('https://eventschedule.com/privacy', 301));
+            Route::get('/terms-of-service', fn() => redirect('https://eventschedule.com/terms-of-service', 301));
+            Route::get('/self-hosting-terms-of-service', fn() => redirect('https://eventschedule.com/self-hosting-terms-of-service', 301));
+        });
     }
 } else {
     // Self-hosted mode: redirect marketing URLs to login
