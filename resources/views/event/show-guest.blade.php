@@ -602,8 +602,8 @@
         @endif
 
         <!-- Calendar section moved here and modified to show mobile view -->
-        <div class="p-6 rounded-xl flex flex-col gap-6 bg-[#F5F9FE] dark:bg-gray-800 {{ $role->isRtl() ? 'rtl' : '' }}">
-          <div class="w-full">
+        <div class="-mx-5 px-5 py-6 sm:mx-0 sm:p-6 sm:rounded-xl flex flex-col gap-6 bg-[#F5F9FE] dark:bg-gray-800 {{ $role->isRtl() ? 'rtl' : '' }}">
+          <div class="w-full overflow-hidden">
             @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule'), 'force_mobile' => true])
           </div>
         </div>
