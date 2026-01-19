@@ -326,21 +326,21 @@
                         {{ __('messages.show_past_events') }}
                     </button>
                 </div>
-                <div id="mobileEventsList" class="space-y-4">
+                <div id="mobileEventsList" class="space-y-6">
                     <template v-for="(group, groupIndex) in eventsGroupedByDate" :key="'date-' + group.date">
                         {{-- Date Group --}}
                         <div :class="isPastEvent(group.date) ? 'past-event hidden' : ''">
                             {{-- Date Header --}}
-                            <div class="px-4 pb-2 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'text-right' : '' }}">
+                            <div class="px-4 pb-4 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'text-right' : '' }}">
                                 <div class="font-semibold text-gray-900 dark:text-gray-100" v-text="formatDateHeader(group.date)" {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'dir=rtl' : '' }}></div>
                             </div>
                             {{-- Events for this date --}}
-                            <div class="space-y-3">
+                            <div class="space-y-4">
                                 <template v-for="event in group.events" :key="'mobile-' + event.uniqueKey">
                                     <div v-if="isEventVisible(event)"
                                          @click="navigateToEvent(event, $event)"
                                          class="block cursor-pointer">
-                                        <div class="event-item bg-white dark:bg-gray-800 rounded-lg shadow-sm ring-1 ring-black ring-opacity-5 dark:ring-gray-700 overflow-hidden"
+                                        <div class="event-item bg-white dark:bg-gray-700 rounded-lg shadow-sm ring-1 ring-black ring-opacity-5 dark:ring-gray-600 overflow-hidden"
                                             :class="isPastEvent(event.occurrenceDate) ? 'past-event hidden' : ''">
                                             <div class="flex {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}">
                                                 {{-- Content Section --}}
