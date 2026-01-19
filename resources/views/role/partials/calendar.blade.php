@@ -329,8 +329,8 @@
                 <div id="mobileEventsList">
                     <template v-for="group in eventsGroupedByDate" :key="'date-' + group.date">
                         {{-- Date Header --}}
-                        <div class="flex items-center mb-3 mt-6 first:mt-0" :class="isPastEvent(group.date) ? 'past-event hidden' : ''">
-                            <div class="font-semibold text-gray-700 dark:text-gray-300 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'text-right' : '' }}" v-text="formatDateHeader(group.date)"></div>
+                        <div class="flex items-center mb-3 mt-6 first:mt-0 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}" :class="isPastEvent(group.date) ? 'past-event hidden' : ''">
+                            <div class="font-semibold text-gray-700 dark:text-gray-300" v-text="formatDateHeader(group.date)" {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'dir=rtl' : '' }}></div>
                             <div class="flex-1 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'mr-3' : 'ml-3' }} h-px bg-gray-200 dark:bg-gray-700"></div>
                         </div>
                         {{-- Events for this date --}}
@@ -430,6 +430,7 @@ const calendarApp = createApp({
             route: '{{ $route }}',
             embed: {{ isset($embed) && $embed ? 'true' : 'false' }},
             isRtl: {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'true' : 'false' }},
+            languageCode: '{{ session()->has('translate') ? 'en' : (isset($role) && $role->language_code ? $role->language_code : 'en') }}',
             userTimezone: '{{ auth()->check() && auth()->user()->timezone ? auth()->user()->timezone : null }}',
             popupTimeout: null
         }
@@ -758,13 +759,11 @@ const calendarApp = createApp({
             if (!dateStr) return '';
             const [year, month, day] = dateStr.split('-').map(Number);
             const eventDate = new Date(year, month - 1, day);
-            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                              'July', 'August', 'September', 'October', 'November', 'December'];
-            const dayName = dayNames[eventDate.getDay()];
-            const monthName = monthNames[eventDate.getMonth()];
-            const dayNum = eventDate.getDate();
-            return `${dayName}, ${monthName} ${dayNum}`;
+            return eventDate.toLocaleDateString(this.languageCode, {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric'
+            });
         },
         getDaySuffix(day) {
             if (day >= 11 && day <= 13) return 'th';
