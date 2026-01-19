@@ -214,7 +214,7 @@
 </header>
 @endif
 
-    <div class="{{ ($tab == 'availability' || (isset($embed) && $embed) || (isset($force_mobile) && $force_mobile)) ? '' : 'hidden' }} md:shadow-sm md:ring-1 md:ring-black md:ring-opacity-5 md:dark:border md:dark:border-gray-700 md:rounded-md md:overflow-hidden md:flex md:flex-auto md:flex-col {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
+    <div class="{{ ($tab == 'availability' || (isset($embed) && $embed) || (isset($force_mobile) && $force_mobile)) ? '' : 'hidden' }} {{ (isset($force_mobile) && $force_mobile) ? '' : 'md:shadow-sm md:ring-1 md:ring-black md:ring-opacity-5 md:dark:border md:dark:border-gray-700 md:rounded-md md:overflow-hidden md:flex md:flex-auto md:flex-col' }} {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
 
         @if (request()->graphic)
             @include('role.partials.calendar-graphic')
@@ -321,18 +321,16 @@
         @if (! isset($embed) || ! $embed)
         <div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">            
             <div v-if="mobileEventsList.length">
-                <div class="text-center">
-                    <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden mb-4">
-                        {{ __('messages.show_past_events') }}
-                    </button>
-                </div>
+                <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden mb-4 w-full text-center">
+                    {{ __('messages.show_past_events') }}
+                </button>
                 <div id="mobileEventsList" class="space-y-6">
                     <template v-for="(group, groupIndex) in eventsGroupedByDate" :key="'date-' + group.date">
                         {{-- Date Group --}}
                         <div :class="isPastEvent(group.date) ? 'past-event hidden' : ''">
                             {{-- Date Header --}}
-                            <div class="sticky top-0 z-10 bg-white dark:bg-gray-800 -mx-4 px-4">
-                                <div class="px-4 pt-3 pb-5 flex items-center gap-4">
+                            <div class="sticky top-0 z-10 bg-inherit -mx-4 px-4">
+                                <div class="px-4 pb-5 flex items-center gap-4" :class="groupIndex > 0 ? 'pt-3' : ''">
                                     <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
                                     <div class="font-semibold text-gray-900 dark:text-gray-100 text-center" v-text="formatDateHeader(group.date)" {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'dir=rtl' : '' }}></div>
                                     <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
