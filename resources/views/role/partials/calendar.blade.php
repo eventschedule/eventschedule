@@ -319,7 +319,7 @@
 
 
         @if (! isset($embed) || ! $embed)
-        <div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }} mt-4">            
+        <div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">            
             <div v-if="mobileEventsList.length">
                 <div class="text-center">
                     <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden mb-4">
@@ -330,16 +330,16 @@
                     <template v-for="(group, groupIndex) in eventsGroupedByDate" :key="'date-' + group.date">
                         {{-- Date Group --}}
                         <div :class="isPastEvent(group.date) ? 'past-event hidden' : ''">
-                            {{-- Date Header Panel --}}
-                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm ring-1 ring-black ring-opacity-5 dark:ring-gray-700 px-4 py-3 mb-2 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'text-right' : '' }}">
+                            {{-- Date Header --}}
+                            <div class="px-4 pb-2 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'text-right' : '' }}">
                                 <div class="font-semibold text-gray-900 dark:text-gray-100" v-text="formatDateHeader(group.date)" {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'dir=rtl' : '' }}></div>
                             </div>
                             {{-- Events for this date --}}
-                            <div class="space-y-2">
+                            <div class="space-y-3">
                                 <template v-for="event in group.events" :key="'mobile-' + event.uniqueKey">
-                                    <a v-if="isEventVisible(event)" :href="getEventUrl(event)"
-                                       {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}
-                                       class="block">
+                                    <div v-if="isEventVisible(event)"
+                                         @click="navigateToEvent(event, $event)"
+                                         class="block cursor-pointer">
                                         <div class="event-item bg-white dark:bg-gray-800 rounded-lg shadow-sm ring-1 ring-black ring-opacity-5 dark:ring-gray-700 overflow-hidden"
                                             :class="isPastEvent(event.occurrenceDate) ? 'past-event hidden' : ''">
                                             <div class="flex {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}">
@@ -370,7 +370,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </a>
+                                    </div>
                                 </template>
                             </div>
                         </div>
@@ -693,6 +693,19 @@ const calendarApp = createApp({
             }
             
             return url;
+        },
+        navigateToEvent(event, e) {
+            // Don't navigate if clicking on the edit link
+            if (e.target.closest('a')) return;
+
+            const url = this.getEventUrl(event);
+            const openInNewTab = this.embed || this.route === 'admin';
+
+            if (openInNewTab) {
+                window.open(url, '_blank');
+            } else {
+                window.location.href = url;
+            }
         },
         getEventPopupData(event) {
             const time = this.getEventTime(event);
