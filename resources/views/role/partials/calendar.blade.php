@@ -342,11 +342,11 @@
                                     <div v-if="isEventVisible(event)"
                                          @click="navigateToEvent(event, $event)"
                                          class="block cursor-pointer">
-                                        <div class="event-item bg-white dark:bg-gray-700 rounded-lg shadow-sm ring-1 ring-black ring-opacity-5 dark:ring-gray-600 overflow-hidden"
+                                        <div class="event-item bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-600"
                                             :class="isPastEvent(event.occurrenceDate) ? 'past-event hidden' : ''">
                                             <div class="flex {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}">
                                                 {{-- Content Section --}}
-                                                <div class="flex-1 py-3 px-4 flex flex-col justify-center min-w-0 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'text-right' : '' }}">
+                                                <div class="flex-1 py-3 px-4 flex flex-col min-w-0 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'text-right' : '' }}">
                                                     <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" v-text="event.name"></h3>
                                                     <div class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}">
                                                         <svg class="h-4 w-4 text-gray-400 flex-shrink-0 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'ml-2' : 'mr-2' }}" viewBox="0 0 20 20" fill="currentColor">
@@ -360,11 +360,13 @@
                                                         </svg>
                                                         <span class="truncate" v-text="event.venue_name" {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'dir=rtl' : '' }}></span>
                                                     </div>
-                                                    <a v-if="event.can_edit" :href="event.edit_url"
-                                                        class="mt-1.5 text-sm text-[#4E81FA] hover:underline font-medium"
-                                                        @click.stop>
-                                                        {{ __('messages.edit') }}
-                                                    </a>
+                                                    <div v-if="event.can_edit" class="mt-auto pt-3">
+                                                        <a :href="event.edit_url"
+                                                            class="inline-flex items-center px-4 py-1.5 text-sm font-medium text-[#4E81FA] bg-transparent border border-[#4E81FA] rounded-md hover:bg-[#4E81FA] hover:text-white transition-colors duration-200"
+                                                            @click.stop>
+                                                            {{ __('messages.edit') }}
+                                                        </a>
+                                                    </div>
                                                 </div>
                                                 {{-- Image Section --}}
                                                 <div v-if="event.image_url" class="flex-shrink-0 w-24 self-stretch">
