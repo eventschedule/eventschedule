@@ -331,10 +331,12 @@
                         {{-- Date Group --}}
                         <div :class="isPastEvent(group.date) ? 'past-event hidden' : ''">
                             {{-- Date Header --}}
-                            <div class="px-4 pb-4 flex items-center gap-4">
-                                <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
-                                <div class="font-semibold text-gray-900 dark:text-gray-100 text-center" v-text="formatDateHeader(group.date)" {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'dir=rtl' : '' }}></div>
-                                <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+                            <div class="sticky top-0 z-10 bg-white dark:bg-gray-800 -mx-4 px-4">
+                                <div class="px-4 py-3 flex items-center gap-4">
+                                    <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+                                    <div class="font-semibold text-gray-900 dark:text-gray-100 text-center" v-text="formatDateHeader(group.date)" {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'dir=rtl' : '' }}></div>
+                                    <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+                                </div>
                             </div>
                             {{-- Events for this date --}}
                             <div class="space-y-4">
