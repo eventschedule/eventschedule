@@ -258,6 +258,24 @@
                     </div>
                 </div>
 
+                <!-- Embeddable -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-900/50 to-pink-900/50 border border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                        </svg>
+                        Embed
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Embed anywhere</h3>
+                    <p class="text-gray-400 mb-6">Add your schedule to any website with a simple embed code or iframe.</p>
+
+                    <div class="bg-black/40 rounded-xl p-4 font-mono text-sm">
+                        <div class="text-gray-500 mb-2">&lt;!-- Your Schedule --&gt;</div>
+                        <div class="text-rose-300">&lt;iframe src="..."&gt;</div>
+                        <div class="text-rose-300">&lt;/iframe&gt;</div>
+                    </div>
+                </div>
+
                 <!-- Calendar Sync -->
                 <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/50 to-cyan-900/50 border border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm font-medium mb-4">
