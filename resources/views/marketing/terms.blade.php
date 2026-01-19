@@ -6,7 +6,7 @@
     <section class="py-16 bg-gray-50 dark:bg-gray-800/50">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Terms of Service</h1>
-            <p class="text-gray-600 dark:text-gray-400">Last updated: {{ date('F j, Y') }}</p>
+            <p class="text-gray-600 dark:text-gray-400">Event Schedule LLC</p>
         </div>
     </section>
 
@@ -14,95 +14,98 @@
     <section class="py-16">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="prose prose-lg dark:prose-invert max-w-none">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">1. Acceptance of Terms</h2>
                 <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    By accessing or using Event Schedule ("the Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service.
+                    By Creating an Account with Event Schedule you are agreeing to the following terms. These Terms of Service apply to all websites, subdomains and URL extensions, including but not limited to eventschedule.com, owned by Event Schedule LLC. By utilizing the eventschedule.com website you are agreeing to the following terms of service & conditions of use and constitute a binding agreement. If you do not agree to the below terms & conditions, do not use the Event Schedule platform.
                 </p>
 
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">2. Eligibility</h2>
-                <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    You must be at least 13 years old to use the Service. By using the Service, you represent and warrant that you meet this age requirement. If you are under 18, you must have your parent or guardian's permission to use the Service.
-                </p>
-
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">3. Account Registration</h2>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Definitions</h2>
                 <p class="text-gray-600 dark:text-gray-300 mb-4">
-                    To use certain features of the Service, you must register for an account. When you register, you agree to:
+                    Users who create accounts to offer events and/or services on eventschedule.com are defined as "User Accounts" which include "Hosts", "Talent", "Venues", "Curators" or "Influences."
                 </p>
-                <ul class="list-disc pl-6 text-gray-600 dark:text-gray-300 mb-6 space-y-2">
-                    <li>Provide accurate and complete information</li>
-                    <li>Maintain the security of your password</li>
-                    <li>Accept responsibility for all activities under your account</li>
-                    <li>Notify us immediately of any unauthorized use</li>
-                </ul>
+                <p class="text-gray-600 dark:text-gray-300 mb-6">
+                    Clients who use eventschedule.com services to view and/or book events are defined as "Attendees" or "Guests".
+                </p>
 
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">4. Acceptable Use</h2>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Account Eligibility</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-6">
+                    By agreeing to these Terms, you represent and warrant to us: (i) that you are at least eighteen (18) years of age; (ii) that you have not previously been suspended or removed from the Website and (iii) that your use of the Website is in compliance with any and all applicable laws and regulations.
+                </p>
+
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Personal Responsibility</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-6">
+                    User Accounts are responsible for all activity occurring within their account and saved profile and events including all laws relating to personal & public data, privacy, personal information, international copyright and trademark laws.
+                </p>
+
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Profile & Event Legality</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-6">
+                    Your profile and event data and its transfer must not violate any applicable local, state, federal and international laws and regulations ("Laws") (including without limitation those relating to export control or electronic communications).
+                </p>
+
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Your Event Obligations</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-6">
+                    You are solely responsible for, and Event Schedule disclaims all liability for, the provision of any goods or services promoted and/or sold to your customers and/or attendees as part of your use of the Event Schedule platform, and any obligations you may owe to your clients.
+                </p>
+
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Customer Service</h2>
                 <p class="text-gray-600 dark:text-gray-300 mb-4">
-                    You agree not to use the Service to:
+                    Customer service for your own event is your responsibility. We provide customer service to you, the account user, for use of the Event Schedule platform.
                 </p>
-                <ul class="list-disc pl-6 text-gray-600 dark:text-gray-300 mb-6 space-y-2">
-                    <li>Violate any laws or regulations</li>
-                    <li>Infringe on intellectual property rights</li>
-                    <li>Post false, misleading, or fraudulent content</li>
-                    <li>Harass, abuse, or harm others</li>
-                    <li>Distribute malware or harmful code</li>
-                    <li>Interfere with the proper operation of the Service</li>
-                    <li>Attempt to gain unauthorized access to our systems</li>
-                </ul>
-
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">5. User Content</h2>
                 <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    You retain ownership of content you post on the Service. By posting content, you grant us a non-exclusive, worldwide, royalty-free license to use, display, and distribute that content in connection with the Service. You are responsible for ensuring you have the right to post any content you share.
+                    You are solely responsible for all customer service policies and issues relating to your profile and events. In performing customer service for your profile or event, you will always present yourself as a separate entity from Event Schedule.
                 </p>
 
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">6. Ticketing and Payments</h2>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Data Ownership & Access</h2>
                 <p class="text-gray-600 dark:text-gray-300 mb-4">
-                    If you sell tickets through the Service:
+                    The User owns all data generated in their eventschedule.com account.
                 </p>
-                <ul class="list-disc pl-6 text-gray-600 dark:text-gray-300 mb-6 space-y-2">
-                    <li>You are responsible for fulfilling your obligations to ticket purchasers</li>
-                    <li>You must comply with all applicable laws regarding ticket sales</li>
-                    <li>You agree to Stripe's terms of service for payment processing</li>
-                    <li>We are not responsible for disputes between you and ticket purchasers</li>
-                </ul>
-
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">7. Intellectual Property</h2>
                 <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    The Service and its original content, features, and functionality are owned by Event Schedule and are protected by international copyright, trademark, and other intellectual property laws. Event Schedule is open source software licensed under the Attribution Assurance License (AAL).
+                    Event Schedule will not access, modify or distribute User account data.
                 </p>
 
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">8. Termination</h2>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Platform Service & Data Use</h2>
                 <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    We may terminate or suspend your account at any time, without prior notice or liability, for any reason, including breach of these Terms. Upon termination, your right to use the Service will immediately cease.
+                    You hereby grant Event Schedule a non-exclusive, fully sublicensable, worldwide, royalty-free right to collect, use, copy, store, and transmit data solely for the purpose of providing services to User Accounts.
                 </p>
 
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">9. Disclaimer of Warranties</h2>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Limited License & Termination of Use</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-4">
+                    Event Schedule grants Users & Clients a limited license to access eventschedule.com This limited license may be revoked if deemed legally necessary, without notice to the User or Client and penalty to Event Schedule.
+                </p>
                 <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. WE DO NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, SECURE, OR ERROR-FREE.
+                    You will lose your license to use the Service if you violate any provision of this Agreement. Event Schedule's policy is to investigate violations of this Agreement before terminating/deactivating accounts, however the decision to terminate any User account is the sole discretion of Event Schedule.
                 </p>
 
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">10. Limitation of Liability</h2>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Limitation of Liability</h2>
                 <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    IN NO EVENT SHALL EVENT SCHEDULE BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOSS OF PROFITS, DATA, OR USE, ARISING OUT OF OR IN CONNECTION WITH THESE TERMS OR THE SERVICE.
+                    To the maximum extent permitted by applicable law, in no event shall Event Schedule or its suppliers be liable for any special, incidental, indirect, or consequential damages whatsoever (including, but not limited to, damages for loss of profits, loss of data or other information, for business interruption, for personal injury, loss of privacy arising out of or in any way related to the use of or inability to use the Service, third-party software and/or third-party hardware used with the Service, or otherwise in connection with any provision of this Terms), even if the Company or any supplier has been advised of the possibility of such damages and even if the remedy fails of its essential purpose.
                 </p>
 
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">11. Indemnification</h2>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">"As Is" and "As Available" Disclaimer</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-4">
+                    Without limiting the foregoing, neither Event Schedule nor any of the company's provider makes any representation or warranty of any kind, express or implied: (i) as to the operation or availability of the Service, or the information, content, and materials or products included thereon; (ii) that the Service will be uninterrupted or error-free; (iii) as to the accuracy, reliability, or currency of any information or content provided through the Service; or (iv) that the Service, its servers, the content, or e-mails sent from or on behalf of the Company are free of viruses, scripts, trojan horses, worms, malware, timebombs or other harmful components.
+                </p>
                 <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    You agree to indemnify and hold harmless Event Schedule and its officers, directors, employees, and agents from any claims, damages, losses, liabilities, and expenses arising out of your use of the Service or violation of these Terms.
+                    Some jurisdictions do not allow the exclusion of certain types of warranties or limitations on applicable statutory rights of a consumer, so some or all of the above exclusions and limitations may not apply to You. But in such a case the exclusions and limitations set forth in this section shall be applied to the greatest extent enforceable under applicable law.
                 </p>
 
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">12. Governing Law</h2>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">United States Legal Compliance</h2>
                 <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which Event Schedule operates, without regard to its conflict of law provisions.
+                    You represent and warrant that (i) You are not located in a country that is subject to the United States government embargo, or that has been designated by the United States government as a "terrorist supporting" country, and (ii) You are not listed on any United States government list of prohibited or restricted parties.
                 </p>
 
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">13. Changes to Terms</h2>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Governing Law</h2>
                 <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    We reserve the right to modify these Terms at any time. We will notify users of any material changes by posting the new Terms on this page. Your continued use of the Service after any changes constitutes acceptance of the new Terms.
+                    The laws of the United States of America, State of Florida, shall govern these Terms of Service & Conditions of Use. Your use of Event Schedule may also be subject to other local, state, national, or international laws.
                 </p>
 
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">14. Contact Us</h2>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Right to Amend</h2>
                 <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    If you have any questions about these Terms, please contact us at legal@eventschedule.com.
+                    Event Schedule may amend this Agreement upon notice to you, which may be provided through email, your account dashboard, and/or the Event Schedule website. You agree that any changes to this Agreement will be binding on you 7 days after the amendment is made (or, if a longer period if required by applicable law). If you elect to not accept the changes to this Agreement, you must immediately cancel/cease using the Event Schedule platform.
+                </p>
+
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Communication & Resolution</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-6">
+                    Questions regarding the terms & conditions of Event Schedule account(s), contact: <a href="mailto:legal@eventschedule.com" class="text-blue-600 dark:text-blue-400 hover:underline">legal@eventschedule.com</a>
                 </p>
             </div>
         </div>
