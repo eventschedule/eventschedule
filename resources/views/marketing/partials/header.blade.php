@@ -18,6 +18,9 @@
                 <a href="{{ marketing_url('/ticketing') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/ticketing') || request()->is('ticketing') ? 'text-blue-600 dark:text-blue-400 font-medium' : '' }}">
                     Ticketing
                 </a>
+                <a href="{{ marketing_url('/integrations') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/integrations') || request()->is('integrations') ? 'text-blue-600 dark:text-blue-400 font-medium' : '' }}">
+                    Integrations
+                </a>
                 <a href="{{ marketing_url('/about') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors {{ request()->is('*/about') || request()->is('about') ? 'text-blue-600 dark:text-blue-400 font-medium' : '' }}">
                     About
                 </a>
@@ -65,6 +68,9 @@
                 </a>
                 <a href="{{ marketing_url('/ticketing') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
                     Ticketing
+                </a>
+                <a href="{{ marketing_url('/integrations') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
+                    Integrations
                 </a>
                 <a href="{{ marketing_url('/about') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
                     About
