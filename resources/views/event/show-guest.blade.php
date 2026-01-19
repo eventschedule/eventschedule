@@ -2,15 +2,12 @@
 
   <main>
     @php
-      $eventRole = $event->roles->where('id', $role->id)->first();
-      $eventIsAccepted = $eventRole->pivot->is_accepted;
-      $hasAnyPendingRole = $event->roles->contains(function ($eventRole) {
-        return $eventRole->pivot->is_accepted === null;
-      });
+    $eventRole = $event->roles->where('id', $role->id)->first();
+    $eventIsAccepted = $eventRole->pivot->is_accepted;
     @endphp
   
 
-  @if ($hasAnyPendingRole)
+  @if ($eventIsAccepted === null)
   <div class="w-full bg-amber-50 border-b border-amber-200 py-6">
     <div class="container mx-auto px-5">
       <div class="flex items-center justify-center text-amber-800">
