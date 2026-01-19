@@ -1,6 +1,7 @@
 <x-marketing-layout>
     <x-slot name="title">Features - Event Schedule</x-slot>
     <x-slot name="description">Discover all the features that make Event Schedule the best way to manage events, sell tickets, and engage your audience.</x-slot>
+    <x-slot name="keywords">event management features, online ticketing, QR code check-in, Google Calendar sync, AI event parsing, custom domain events, recurring events, event API</x-slot>
 
     <style>
         .text-gradient {
