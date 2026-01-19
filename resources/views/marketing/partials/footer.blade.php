@@ -37,13 +37,11 @@
                             About
                         </a>
                     </li>
-                    @if(config('app.hosted'))
                     <li>
-                        <a href="https://blog.eventschedule.com" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                        <a href="https://blog.eventschedule.com" target="_blank" rel="noopener" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                             Blog
                         </a>
                     </li>
-                    @endif
                     <li>
                         <a href="https://invoiceninja.com" target="_blank" rel="noopener" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                             Invoice Ninja
