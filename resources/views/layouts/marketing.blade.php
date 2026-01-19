@@ -16,11 +16,7 @@
     <!-- SEO Meta Tags -->
     <link rel="canonical" href="{{ url()->current() }}">
     <meta name="description" content="{{ $description ?? 'The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.' }}">
-    @if(config('app.hosted'))
-    <meta name="robots" content="noindex, nofollow">
-    @else
     <meta name="robots" content="index, follow">
-    @endif
     <meta name="author" content="Event Schedule">
     <meta name="keywords" content="{{ $keywords ?? 'event schedule, event calendar, ticketing, QR check-in, event management, venues, performers, sell tickets' }}">
 

@@ -17,14 +17,6 @@ use App\Http\Controllers\MarketingController;
 use Illuminate\Support\Facades\Route;
 
 if (config('app.hosted')) {
-    
-    // Redirect all requests to eventschedule.com to www.eventschedule.com
-    Route::group(['domain' => 'eventschedule.com'], function () {
-        Route::get('{path?}', function ($path = null) {
-            return redirect('https://www.eventschedule.com/' . ($path ? $path : ''), 301);
-        })->where('path', '.*');
-    });
-
     if (config('app.env') != 'local') {
         Route::domain('blog.eventschedule.com')->group(function () {
             Route::get('/', [BlogController::class, 'index'])->name('blog.index');
@@ -203,16 +195,25 @@ Route::get('/tmp/event-image/{filename?}', function ($filename = null) {
     abort(404);
 })->name('event.tmp_image');
 
-// Marketing pages - /demo prefix (password protected in hosted mode)
-Route::prefix('demo')->group(function () {
-    Route::get('/', [MarketingController::class, 'index'])->name('marketing.index');
-    Route::get('/features', [MarketingController::class, 'features'])->name('marketing.features');
-    Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
-    Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
-    Route::get('/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
-    Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
-    Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
-});
+// Marketing pages
+if (config('app.hosted')) {
+    // Hosted mode: show marketing pages at root URLs on www.eventschedule.com
+    Route::domain('www.eventschedule.com')->group(function () {
+        Route::get('/', [MarketingController::class, 'index'])->name('marketing.index');
+        Route::get('/features', [MarketingController::class, 'features'])->name('marketing.features');
+        Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
+        Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
+        Route::get('/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
+        Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
+        Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
+    });
+} else {
+    // Self-hosted mode: redirect marketing URLs to login
+    Route::get('/features', fn() => redirect()->route('login'));
+    Route::get('/pricing', fn() => redirect()->route('login'));
+    Route::get('/about', fn() => redirect()->route('login'));
+    Route::get('/ticketing', fn() => redirect()->route('login'));
+}
 
 if (config('app.hosted')) {
     Route::domain('{subdomain}.eventschedule.com')->where(['subdomain' => '^(?!www|app).*'])->group(function () {
