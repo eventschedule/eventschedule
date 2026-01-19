@@ -56,6 +56,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Integrations page
+     */
+    public function integrations()
+    {
+        return view('marketing.integrations');
+    }
+
+    /**
      * Privacy Policy page
      */
     public function privacy()
