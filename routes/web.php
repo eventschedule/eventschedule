@@ -204,6 +204,7 @@ if (config('app.hosted')) {
         Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
         Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
         Route::get('/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
+        Route::get('/integrations', [MarketingController::class, 'integrations'])->name('marketing.integrations');
         Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
         Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
         Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
@@ -214,6 +215,7 @@ if (config('app.hosted')) {
     Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
     Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
     Route::get('/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
+    Route::get('/integrations', [MarketingController::class, 'integrations'])->name('marketing.integrations');
     Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
     Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
     Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
@@ -223,6 +225,7 @@ if (config('app.hosted')) {
     Route::get('/pricing', fn() => redirect()->route('login'));
     Route::get('/about', fn() => redirect()->route('login'));
     Route::get('/ticketing', fn() => redirect()->route('login'));
+    Route::get('/integrations', fn() => redirect()->route('login'));
 }
 
 if (config('app.hosted')) {
