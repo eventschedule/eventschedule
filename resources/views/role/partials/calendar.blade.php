@@ -214,12 +214,12 @@
 </header>
 @endif
 
-    <div class="{{ ($tab == 'availability' || (isset($embed) && $embed) || (isset($force_mobile) && $force_mobile)) ? '' : 'hidden' }} shadow-sm ring-1 ring-black ring-opacity-5 dark:border dark:border-gray-700 rounded-md overflow-hidden md:flex md:flex-auto md:flex-col {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
-        
+    <div class="{{ ($tab == 'availability' || (isset($embed) && $embed) || (isset($force_mobile) && $force_mobile)) ? '' : 'hidden' }} md:shadow-sm md:ring-1 md:ring-black md:ring-opacity-5 md:dark:border md:dark:border-gray-700 md:rounded-md md:overflow-hidden md:flex md:flex-auto md:flex-col {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
+
         @if (request()->graphic)
             @include('role.partials.calendar-graphic')
         @else
-        <div class="{{ $tab == 'availability' ? 'hidden md:block' : '' }} {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }}"> 
+        <div class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }}">
             <div
                 class="grid grid-cols-7 gap-px border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-center text-xs font-semibold leading-6 text-gray-700 dark:text-gray-300 rounded-t-md overflow-hidden">
                 @foreach (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as $day)
@@ -229,7 +229,7 @@
                 @endforeach
             </div>
         </div>
-        <div class="bg-gray-200 dark:bg-gray-700 text-xs leading-6 text-gray-700 dark:text-gray-300 rounded-b-md overflow-hidden {{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }}">
+        <div class="hidden md:block bg-gray-200 dark:bg-gray-700 text-xs leading-6 text-gray-700 dark:text-gray-300 rounded-b-md overflow-hidden {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }}">
             @php
             // Get first role for home route (only calculate once)
             $firstRole = null;
@@ -319,58 +319,60 @@
 
 
         @if (! isset($embed) || ! $embed)
-        <div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }} mt-2 -mx-4 sm:-mx-6 lg:-mx-8">
+        <div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }} mt-4">            
             <div v-if="mobileEventsList.length">
-                <div class="text-center px-4">
+                <div class="text-center">
                     <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden mb-4">
                         {{ __('messages.show_past_events') }}
                     </button>
                 </div>
-                <div id="mobileEventsList">
+                <div id="mobileEventsList" class="space-y-4">
                     <template v-for="(group, groupIndex) in eventsGroupedByDate" :key="'date-' + group.date">
-                        {{-- Date Header --}}
-                        <div class="flex items-center mb-3 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pr-2 pl-3 flex-row-reverse' : 'pl-2 pr-3' }}" :class="[isPastEvent(group.date) ? 'past-event hidden' : '', groupIndex > 0 ? 'mt-6' : '']">
-                            <div class="font-semibold text-gray-700 dark:text-gray-300" v-text="formatDateHeader(group.date)" {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'dir=rtl' : '' }}></div>
-                            <div class="flex-1 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'mr-3' : 'ml-3' }} h-px bg-gray-200 dark:bg-gray-700"></div>
-                        </div>
-                        {{-- Events for this date --}}
-                        <div>
-                            <template v-for="event in group.events" :key="'mobile-' + event.uniqueKey">
-                                <a v-if="isEventVisible(event)" :href="getEventUrl(event)"
-                                   {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}
-                                   class="block">
-                                    <div class="event-item bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"
-                                        :class="isPastEvent(event.occurrenceDate) ? 'past-event hidden' : ''">
-                                        <div class="flex {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}">
-                                            {{-- Content Section --}}
-                                            <div class="flex-1 py-3 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pr-2 pl-3' : 'pl-2 pr-3' }} flex flex-col justify-center min-w-0 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'text-right' : '' }}">
-                                                <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" v-text="event.name"></h3>
-                                                <div class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}">
-                                                    <svg class="h-4 w-4 text-gray-400 flex-shrink-0 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'ml-2' : 'mr-2' }}" viewBox="0 0 20 20" fill="currentColor">
-                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
-                                                    </svg>
-                                                    <span v-text="getEventTime(event)"></span>
+                        {{-- Date Group --}}
+                        <div :class="isPastEvent(group.date) ? 'past-event hidden' : ''">
+                            {{-- Date Header Panel --}}
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm ring-1 ring-black ring-opacity-5 dark:ring-gray-700 px-4 py-3 mb-2 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'text-right' : '' }}">
+                                <div class="font-semibold text-gray-900 dark:text-gray-100" v-text="formatDateHeader(group.date)" {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'dir=rtl' : '' }}></div>
+                            </div>
+                            {{-- Events for this date --}}
+                            <div class="space-y-2">
+                                <template v-for="event in group.events" :key="'mobile-' + event.uniqueKey">
+                                    <a v-if="isEventVisible(event)" :href="getEventUrl(event)"
+                                       {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}
+                                       class="block">
+                                        <div class="event-item bg-white dark:bg-gray-800 rounded-lg shadow-sm ring-1 ring-black ring-opacity-5 dark:ring-gray-700 overflow-hidden"
+                                            :class="isPastEvent(event.occurrenceDate) ? 'past-event hidden' : ''">
+                                            <div class="flex {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}">
+                                                {{-- Content Section --}}
+                                                <div class="flex-1 py-3 px-4 flex flex-col justify-center min-w-0 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'text-right' : '' }}">
+                                                    <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" v-text="event.name"></h3>
+                                                    <div class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}">
+                                                        <svg class="h-4 w-4 text-gray-400 flex-shrink-0 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'ml-2' : 'mr-2' }}" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        <span v-text="getEventTime(event)"></span>
+                                                    </div>
+                                                    <div v-if="event.venue_name" class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}">
+                                                        <svg class="h-4 w-4 text-gray-400 flex-shrink-0 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'ml-2' : 'mr-2' }}" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        <span class="truncate" v-text="event.venue_name" {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'dir=rtl' : '' }}></span>
+                                                    </div>
+                                                    <a v-if="event.can_edit" :href="event.edit_url"
+                                                        class="mt-1.5 text-sm text-[#4E81FA] hover:underline font-medium"
+                                                        @click.stop>
+                                                        {{ __('messages.edit') }}
+                                                    </a>
                                                 </div>
-                                                <div v-if="event.venue_name" class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}">
-                                                    <svg class="h-4 w-4 text-gray-400 flex-shrink-0 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'ml-2' : 'mr-2' }}" viewBox="0 0 20 20" fill="currentColor">
-                                                        <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
-                                                    </svg>
-                                                    <span class="truncate" v-text="event.venue_name" {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'dir=rtl' : '' }}></span>
+                                                {{-- Image Section --}}
+                                                <div v-if="event.image_url" class="flex-shrink-0 w-24 self-stretch">
+                                                    <img :src="event.image_url" class="w-full h-full object-cover" :alt="event.name">
                                                 </div>
-                                                <a v-if="event.can_edit" :href="event.edit_url"
-                                                    class="mt-1.5 text-sm text-[#4E81FA] hover:underline font-medium"
-                                                    @click.stop>
-                                                    {{ __('messages.edit') }}
-                                                </a>
-                                            </div>
-                                            {{-- Image Section --}}
-                                            <div v-if="event.image_url" class="flex-shrink-0 w-24 self-stretch {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pl-2' : 'pr-2' }}">
-                                                <img :src="event.image_url" class="w-full h-full object-cover" :alt="event.name">
                                             </div>
                                         </div>
-                                    </div>
-                                </a>
-                            </template>
+                                    </a>
+                                </template>
+                            </div>
                         </div>
                     </template>
                 </div>
@@ -383,7 +385,6 @@
         </div>
         @endif
 
-    </div>
 
 <!-- Event Popup Component -->
 <div id="event-popup" class="event-popup">
