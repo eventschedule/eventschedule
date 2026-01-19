@@ -7,23 +7,70 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <link rel="icon" href="{{ asset('images/favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}">
 
     @if (config('app.hosted') || config('app.report_errors'))
         <script src="{{ config('app.sentry_js_dsn') }}" crossorigin="anonymous"></script>
     @endif
 
+    <!-- SEO Meta Tags -->
     <link rel="canonical" href="{{ url()->current() }}">
     <meta name="description" content="{{ $description ?? 'The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.' }}">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Event Schedule">
+    <meta name="keywords" content="{{ $keywords ?? 'event schedule, event calendar, ticketing, QR check-in, event management, venues, performers, sell tickets' }}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ str_replace('http://', 'https://', request()->url()) }}">
     <meta property="og:title" content="{{ $title ?? 'Event Schedule' }}">
     <meta property="og:description" content="{{ $description ?? 'The simple and free way to share your event schedule' }}">
     <meta property="og:image" content="{{ config('app.url') }}/images/background.jpg">
-    <meta property="og:url" content="{{ str_replace('http://', 'https://', request()->url()) }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:site_name" content="Event Schedule">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ str_replace('http://', 'https://', request()->url()) }}">
     <meta name="twitter:title" content="{{ $title ?? 'Event Schedule' }}">
     <meta name="twitter:description" content="{{ $description ?? 'The simple and free way to share your event schedule' }}">
     <meta name="twitter:image" content="{{ config('app.url') }}/images/background.jpg">
     <meta name="twitter:image:alt" content="Event Schedule">
-    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Event Schedule",
+        "url": "{{ config('app.url') }}",
+        "description": "{{ $description ?? 'The simple and free way to share your event schedule' }}",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "{{ config('app.url') }}/search?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Event Schedule",
+        "url": "{{ config('app.url') }}",
+        "logo": "{{ config('app.url') }}/images/dark_logo.png",
+        "sameAs": [
+            "https://github.com/eventschedule/eventschedule"
+        ],
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "email": "support@eventschedule.com",
+            "contactType": "customer service"
+        }
+    }
+    </script>
 
     @if (config('services.google.analytics') && (! auth()->user() || ! auth()->user()->isAdmin()))
     <!-- Google tag (gtag.js) -->

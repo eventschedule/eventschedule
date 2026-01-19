@@ -1,6 +1,7 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule - The simple way to share your event schedule</x-slot>
     <x-slot name="description">The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.</x-slot>
+    <x-slot name="keywords">event schedule, event calendar, free event management, ticketing platform, QR check-in, venue calendar, performer schedule, sell tickets online, event organizer software</x-slot>
 
     <style>
         /* Animations */
