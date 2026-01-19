@@ -69,8 +69,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 
                 <!-- Free Plan -->
-                <div class="pricing-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-white/10 p-8 lg:p-10">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-500/20 text-gray-300 text-sm font-medium mb-6">
+                <div class="pricing-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-white/10 p-8 lg:p-10 flex flex-col">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-500/20 text-gray-300 text-sm font-medium mb-6 self-start">
                         Forever Free
                     </div>
 
@@ -133,13 +133,13 @@
                         </li>
                     </ul>
 
-                    <a href="{{ route('sign_up') }}" class="block w-full text-center px-6 py-4 bg-white/10 hover:bg-white/20 border border-white/10 text-white font-semibold rounded-2xl transition-all">
+                    <a href="{{ route('sign_up') }}" class="mt-auto block w-full text-center px-6 py-4 bg-white/10 hover:bg-white/20 border border-white/10 text-white font-semibold rounded-2xl transition-all">
                         Get Started Free
                     </a>
                 </div>
 
                 <!-- Pro Plan -->
-                <div class="pricing-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-indigo-900/50 border-2 border-violet-500/50 p-8 lg:p-10">
+                <div class="pricing-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-indigo-900/50 border-2 border-violet-500/50 p-8 lg:p-10 flex flex-col">
                     <!-- First Year Free Banner -->
                     <div class="bg-gradient-to-r from-violet-500 to-indigo-500 text-white text-center py-3 px-4 -mx-8 lg:-mx-10 -mt-8 lg:-mt-10 mb-8">
                         <div class="text-lg font-bold">First Year FREE</div>
@@ -213,7 +213,7 @@
                         </li>
                     </ul>
 
-                    <a href="{{ route('sign_up') }}" class="block w-full text-center px-6 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold rounded-2xl transition-all shadow-lg shadow-violet-500/25">
+                    <a href="{{ route('sign_up') }}" class="mt-auto block w-full text-center px-6 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold rounded-2xl transition-all shadow-lg shadow-violet-500/25">
                         Start Free Trial
                     </a>
                 </div>
@@ -278,15 +278,6 @@
                     </h3>
                     <p class="text-gray-600">
                         No! We don't charge any fees on ticket sales. You only pay the standard Stripe processing fees (typically 2.9% + $0.30 per transaction).
-                    </p>
-                </div>
-
-                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">
-                        Can I use my own domain?
-                    </h3>
-                    <p class="text-gray-600">
-                        Yes, with the Pro plan you can use your own custom domain (like events.yourdomain.com) for your schedule.
                     </p>
                 </div>
             </div>
