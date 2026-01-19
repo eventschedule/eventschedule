@@ -360,7 +360,7 @@
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Open Source & API</h3>
-                    <p class="text-gray-600 text-sm">Self-host on your own server. Full REST API for custom integrations. MIT licensed.</p>
+                    <p class="text-gray-600 text-sm">Self-host on your own server. Full REST API for custom integrations. AAL licensed.</p>
                 </div>
 
             </div>
@@ -410,7 +410,7 @@
                         </svg>
                     </div>
                     <div class="text-2xl font-bold text-white mb-1">Open source</div>
-                    <p class="text-gray-400 text-sm">Self-host on your own server. MIT licensed.</p>
+                    <p class="text-gray-400 text-sm">Self-host on your own server. AAL licensed.</p>
                 </div>
             </div>
         </div>
