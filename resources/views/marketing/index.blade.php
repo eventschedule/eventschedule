@@ -184,7 +184,7 @@
                 </div>
 
                 <!-- Right side - Screenshot carousel -->
-                <div class="relative screenshot-carousel overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-violet-500/20 lg:col-span-2">
+                <div class="relative screenshot-carousel overflow-hidden rounded-2xl shadow-2xl shadow-black/50 ring-1 ring-white/10 lg:col-span-2">
                     <div class="flex animate-scroll-step">
                         @php
                         $screenshots = [
@@ -199,8 +199,8 @@
                         ];
                         @endphp
                         @foreach($screenshots as $screenshot)
-                        <div class="flex-shrink-0 w-full">
-                            <img src="{{ url($screenshot) }}" alt="Event Schedule Example" class="w-full h-auto" loading="lazy" />
+                        <div class="flex-shrink-0 w-full overflow-hidden">
+                            <img src="{{ url($screenshot) }}" alt="Event Schedule Example" class="block w-full h-auto scale-[1.02]" loading="lazy" />
                         </div>
                         @endforeach
                     </div>
