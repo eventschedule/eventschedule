@@ -101,11 +101,11 @@ if (!function_exists('marketing_url')) {
     /**
      * Generate a URL for marketing pages
      * In hosted mode, returns eventschedule.com URLs
-     * In self-hosted mode, redirects are handled by routes
+     * In testing/self-hosted mode, returns local URLs
      */
     function marketing_url(string $path = '/'): string
     {
-        if (config('app.hosted')) {
+        if (config('app.hosted') && !config('app.is_testing')) {
             return 'https://eventschedule.com' . ($path === '/' ? '' : $path);
         }
 
