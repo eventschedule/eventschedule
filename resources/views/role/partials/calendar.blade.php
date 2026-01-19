@@ -319,9 +319,9 @@
 
 
         @if (! isset($embed) || ! $embed)
-        <div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }} mt-2 px-1">
+        <div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }} mt-2 -mx-4 sm:-mx-6 lg:-mx-8">
             <div v-if="mobileEventsList.length">
-                <div class="text-center">
+                <div class="text-center px-4">
                     <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden mb-4">
                         {{ __('messages.show_past_events') }}
                     </button>
@@ -329,17 +329,17 @@
                 <div id="mobileEventsList">
                     <template v-for="(group, groupIndex) in eventsGroupedByDate" :key="'date-' + group.date">
                         {{-- Date Header --}}
-                        <div class="flex items-center mb-3 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}" :class="[isPastEvent(group.date) ? 'past-event hidden' : '', groupIndex > 0 ? 'mt-6' : '']">
+                        <div class="flex items-center mb-3 px-3 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}" :class="[isPastEvent(group.date) ? 'past-event hidden' : '', groupIndex > 0 ? 'mt-6' : '']">
                             <div class="font-semibold text-gray-700 dark:text-gray-300" v-text="formatDateHeader(group.date)" {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'dir=rtl' : '' }}></div>
                             <div class="flex-1 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'mr-3' : 'ml-3' }} h-px bg-gray-200 dark:bg-gray-700"></div>
                         </div>
                         {{-- Events for this date --}}
-                        <div class="space-y-3">
+                        <div>
                             <template v-for="event in group.events" :key="'mobile-' + event.uniqueKey">
                                 <a v-if="isEventVisible(event)" :href="getEventUrl(event)"
                                    {{ ((isset($embed) && $embed) || $route == 'admin') ? 'target="blank"' : '' }}
                                    class="block">
-                                    <div class="event-item bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+                                    <div class="event-item bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"
                                         :class="isPastEvent(event.occurrenceDate) ? 'past-event hidden' : ''">
                                         <div class="flex {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}">
                                             {{-- Content Section --}}
