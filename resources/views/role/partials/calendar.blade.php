@@ -319,17 +319,17 @@
 
 
         @if (! isset($embed) || ! $embed)
-        <div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }} mt-4 px-1">
+        <div class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }} mt-2 px-1">
             <div v-if="mobileEventsList.length">
-                <div class="mb-4 text-center">
-                    <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden">
+                <div class="text-center">
+                    <button id="showPastEventsBtn" class="text-[#4E81FA] font-medium hidden mb-4">
                         {{ __('messages.show_past_events') }}
                     </button>
                 </div>
                 <div id="mobileEventsList">
-                    <template v-for="group in eventsGroupedByDate" :key="'date-' + group.date">
+                    <template v-for="(group, groupIndex) in eventsGroupedByDate" :key="'date-' + group.date">
                         {{-- Date Header --}}
-                        <div class="flex items-center mb-3 mt-6 first:mt-0 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}" :class="isPastEvent(group.date) ? 'past-event hidden' : ''">
+                        <div class="flex items-center mb-3 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}" :class="[isPastEvent(group.date) ? 'past-event hidden' : '', groupIndex > 0 ? 'mt-6' : '']">
                             <div class="font-semibold text-gray-700 dark:text-gray-300" v-text="formatDateHeader(group.date)" {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'dir=rtl' : '' }}></div>
                             <div class="flex-1 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'mr-3' : 'ml-3' }} h-px bg-gray-200 dark:bg-gray-700"></div>
                         </div>
