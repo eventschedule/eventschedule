@@ -353,7 +353,7 @@
 
         @if($role->translatedDescription())
         <div
-          class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-4 mb-6 {{ $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}"
+          class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-4 mb-6 {{ rtl_class($role, 'rtl') }}"
         >
           <div class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100">
             {{ __('messages.about') }}

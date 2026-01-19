@@ -110,7 +110,7 @@
             <div class="flex flex-row gap-2 w-full md:w-auto">
                 {{-- Schedule Select --}}
                 @if(isset($role) && $role->groups && $role->groups->count() > 1)
-                    <select v-model="selectedGroup" style="color: rgb(107 114 128) !important; font-size: 1rem !important; font-weight: 700 !important; line-height: 1.5 !important; padding-top: 0.75rem !important; padding-bottom: 0.75rem !important;" class="border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 dark:text-gray-300 px-3 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
+                    <select v-model="selectedGroup" style="color: rgb(107 114 128) !important; font-size: 1rem !important; font-weight: 700 !important; line-height: 1.5 !important; padding-top: 0.75rem !important; padding-bottom: 0.75rem !important;" class="border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 dark:text-gray-300 px-3 {{ rtl_class($role ?? null, 'rtl') }}">
                         <option value="">{{ __('messages.all_schedules') }}</option>
                         @foreach($role->groups as $group)
                             <option value="{{ $group->slug }}">{{ $group->translatedName() }}</option>
@@ -120,7 +120,7 @@
 
                 {{-- Category Select --}}
                 @if(count($uniqueCategoryIds ?? []) > 1)
-                    <select v-model="selectedCategory" style="color: rgb(107 114 128) !important; font-size: 1rem !important; font-weight: 700 !important; line-height: 1.5 !important; padding-top: 0.75rem !important; padding-bottom: 0.75rem !important;" class="border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 dark:text-gray-300 px-3 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
+                    <select v-model="selectedCategory" style="color: rgb(107 114 128) !important; font-size: 1rem !important; font-weight: 700 !important; line-height: 1.5 !important; padding-top: 0.75rem !important; padding-bottom: 0.75rem !important;" class="border-gray-300 dark:border-gray-600 rounded-md shadow-sm flex-1 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 dark:text-gray-300 px-3 {{ rtl_class($role ?? null, 'rtl') }}">
                         <option value="">{{ __('messages.all_categories') }}</option>
                         <option v-for="category in availableCategories" :key="category.id" :value="category.id" v-text="category.name"></option>
                     </select>
@@ -141,14 +141,14 @@
                 <div style="font-family: sans-serif" class="relative inline-block text-left w-full md:w-auto">
                     <button type="button" onclick="onPopUpClick('calendar-pop-up-menu', event)" class="inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-800 px-5 py-3 text-base font-bold text-gray-500 dark:text-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700" id="menu-button" aria-expanded="true" aria-haspopup="true">
                         {{ __('messages.new_schedule') }}
-                        <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? '-ml-1' : '-mr-1' }} h-6 w-6 text-gray-400 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <svg class="{{ rtl_class($role ?? null, '-ml-1', '-mr-1') }} h-6 w-6 text-gray-400 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                         </svg>
                     </button>
-                    <div id="calendar-pop-up-menu" class="pop-up-menu hidden absolute {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'left-0' : 'right-0' }} z-10 mt-2 w-64 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                    <div id="calendar-pop-up-menu" class="pop-up-menu hidden absolute {{ rtl_class($role ?? null, 'left-0', 'right-0') }} z-10 mt-2 w-64 {{ rtl_class($role ?? null, 'origin-top-left', 'origin-top-right') }} divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-600 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                         <div class="py-1" role="none" onclick="onPopUpClick('calendar-pop-up-menu', event)">
                         <a href="{{ route('new', ['type' => 'talent']) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700" role="menuitem" tabindex="-1">
-                                <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'ml-3' : 'mr-3' }} h-5 w-5 text-gray-400 dark:text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <svg class="{{ rtl_class($role ?? null, 'ml-3', 'mr-3') }} h-5 w-5 text-gray-400 dark:text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                 <path d="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z"/>
                                 </svg>                        
                                 <div>
@@ -202,7 +202,7 @@
             @if ($route == 'admin' && $role->email_verified_at && $tab == 'schedule')
                 <a href="{{ route('event.create', ['subdomain' => $role->subdomain]) }}" class="w-full md:w-auto">
                     <button type="button" class="w-full inline-flex items-center justify-center rounded-md shadow-sm bg-[#4E81FA] px-4 py-3 text-base font-semibold text-white transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]">
-                        <svg class="{{ isset($role) && $role->isRtl() && ! session()->has('translate') ? '-mr-0.5 ml-1.5' : '-ml-0.5 mr-1.5' }} h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
+                        <svg class="{{ rtl_class($role ?? null, '-mr-0.5 ml-1.5', '-ml-0.5 mr-1.5') }} h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
                         </svg>
                         {{ __('messages.add_event') }}
@@ -214,7 +214,7 @@
 </header>
 @endif
 
-    <div class="{{ ($tab == 'availability' || (isset($embed) && $embed) || (isset($force_mobile) && $force_mobile)) ? '' : 'hidden' }} {{ (isset($force_mobile) && $force_mobile) ? '' : 'md:shadow-sm md:ring-1 md:ring-black md:ring-opacity-5 md:dark:border md:dark:border-gray-700 md:rounded-md md:overflow-hidden md:flex md:flex-auto md:flex-col' }} {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'rtl' : '' }}">
+    <div class="{{ ($tab == 'availability' || (isset($embed) && $embed) || (isset($force_mobile) && $force_mobile)) ? '' : 'hidden' }} {{ (isset($force_mobile) && $force_mobile) ? '' : 'md:shadow-sm md:ring-1 md:ring-black md:ring-opacity-5 md:dark:border md:dark:border-gray-700 md:rounded-md md:overflow-hidden md:flex md:flex-auto md:flex-col' }} {{ rtl_class($role ?? null, 'rtl') }}">
 
         @if (request()->graphic)
             @include('role.partials.calendar-graphic')
@@ -287,13 +287,13 @@
                         <ol class="mt-4 divide-y divide-gray-100 dark:divide-gray-700 text-sm leading-6 md:col-span-7 xl:col-span-8">
                             <li v-for="event in getEventsForDate('{{ $currentDate->format('Y-m-d') }}')" :key="event.id" 
                                 class="relative group" 
-                                :class="event.can_edit ? '{{ (isset($role) && $role->isRtl()) ? 'hover:pl-8' : 'hover:pr-8' }}' : ''"
+                                :class="event.can_edit ? '{{ rtl_class($role ?? null, 'hover:pl-8', 'hover:pr-8') }}' : ''"
                                 v-show="isEventVisible(event)">
                                 <a :href="getEventUrl(event, '{{ $currentDate->format('Y-m-d') }}')"
                                     class="flex event-link-popup" 
                                     :data-event-id="event.id"
                                     @click.stop {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
-                                    <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900 dark:text-gray-100 {{ (isset($role) && $role->isRtl()) ? 'rtl' : '' }} truncate">
+                                    <p class="flex-auto font-medium group-hover:text-[#4E81FA] text-gray-900 dark:text-gray-100 {{ rtl_class($role ?? null, 'rtl') }} truncate">
                                         <span :class="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'" 
                                               class="hover:underline truncate" v-text="getEventDisplayName(event)">
                                         </span>
@@ -303,7 +303,7 @@
                                     </p>
                                 </a>
                                 <a v-if="event.can_edit" :href="event.edit_url"
-                                    class="absolute {{ (isset($role) && $role->isRtl()) ? 'left-0' : 'right-0' }} top-0 hidden group-hover:inline-block text-[#4E81FA] hover:text-[#4E81FA] hover:underline"
+                                    class="absolute {{ rtl_class($role ?? null, 'left-0', 'right-0') }} top-0 hidden group-hover:inline-block text-[#4E81FA] hover:text-[#4E81FA] hover:underline"
                                     @click.stop>
                                     {{ __('messages.edit') }}
                                 </a>
@@ -332,7 +332,7 @@
                             <div class="sticky top-0 z-10 -mx-4 px-4 {{ (isset($force_mobile) && $force_mobile) ? 'bg-[#F5F9FE] dark:bg-gray-800' : 'bg-white dark:bg-gray-800' }}">
                                 <div class="px-4 pb-5 flex items-center gap-4" :class="groupIndex > 0 ? 'pt-3' : ''">
                                     <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
-                                    <div class="font-semibold text-gray-900 dark:text-gray-100 text-center" v-text="formatDateHeader(group.date)" {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'dir=rtl' : '' }}></div>
+                                    <div class="font-semibold text-gray-900 dark:text-gray-100 text-center" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl') }}></div>
                                     <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
                                 </div>
                             </div>
@@ -344,21 +344,21 @@
                                          class="block cursor-pointer">
                                         <div class="event-item bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-600"
                                             :class="isPastEvent(event.occurrenceDate) ? 'past-event hidden' : ''">
-                                            <div class="flex {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}">
+                                            <div class="flex {{ rtl_class($role ?? null, 'flex-row-reverse') }}">
                                                 {{-- Content Section --}}
-                                                <div class="flex-1 py-3 px-4 flex flex-col min-w-0 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'text-right' : '' }}">
+                                                <div class="flex-1 py-3 px-4 flex flex-col min-w-0 {{ rtl_class($role ?? null, 'text-right') }}">
                                                     <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" v-text="event.name"></h3>
-                                                    <div class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}">
-                                                        <svg class="h-4 w-4 text-gray-400 flex-shrink-0 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'ml-2' : 'mr-2' }}" viewBox="0 0 20 20" fill="currentColor">
+                                                    <div class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400 {{ rtl_class($role ?? null, 'flex-row-reverse') }}">
+                                                        <svg class="h-4 w-4 text-gray-400 flex-shrink-0 {{ rtl_class($role ?? null, 'ml-2', 'mr-2') }}" viewBox="0 0 20 20" fill="currentColor">
                                                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
                                                         </svg>
                                                         <span v-text="getEventTime(event)"></span>
                                                     </div>
-                                                    <div v-if="event.venue_name" class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}">
-                                                        <svg class="h-4 w-4 text-gray-400 flex-shrink-0 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'ml-2' : 'mr-2' }}" viewBox="0 0 20 20" fill="currentColor">
+                                                    <div v-if="event.venue_name" class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400 {{ rtl_class($role ?? null, 'flex-row-reverse') }}">
+                                                        <svg class="h-4 w-4 text-gray-400 flex-shrink-0 {{ rtl_class($role ?? null, 'ml-2', 'mr-2') }}" viewBox="0 0 20 20" fill="currentColor">
                                                             <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
                                                         </svg>
-                                                        <span class="truncate" v-text="event.venue_name" {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'dir=rtl' : '' }}></span>
+                                                        <span class="truncate" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl') }}></span>
                                                     </div>
                                                     <div v-if="event.can_edit" class="mt-auto pt-3">
                                                         <a :href="event.edit_url"
@@ -434,7 +434,7 @@ const calendarApp = createApp({
             subdomain: '{{ isset($subdomain) ? $subdomain : '' }}',
             route: '{{ $route }}',
             embed: {{ isset($embed) && $embed ? 'true' : 'false' }},
-            isRtl: {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'true' : 'false' }},
+            isRtl: {{ isset($role) && $role->isRtl() ? 'true' : 'false' }},
             languageCode: '{{ session()->has('translate') ? 'en' : (isset($role) && $role->language_code ? $role->language_code : 'en') }}',
             userTimezone: '{{ auth()->check() && auth()->user()->timezone ? auth()->user()->timezone : null }}',
             popupTimeout: null
