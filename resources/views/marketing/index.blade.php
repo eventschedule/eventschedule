@@ -163,7 +163,7 @@
 
                     <!-- Subheadline -->
                     <p class="text-xl md:text-2xl text-gray-400 max-w-xl mb-12 animate-reveal delay-200">
-                        Create a public event calendar, sell tickets and run QR check-ins. Built for venues, performers and local communities.
+                        Event calendars, ticketing, and check-ins for venues, performers, and communities.
                     </p>
 
                     <!-- CTA Buttons -->
@@ -284,7 +284,7 @@
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">AI-Powered</h3>
-                    <p class="text-gray-600 text-sm">Auto-extract event details with AI parsing. Translate your entire schedule into 30+ languages instantly.</p>
+                    <p class="text-gray-600 text-sm">Auto-extract event details with AI parsing. Translate your entire schedule instantly.</p>
                 </div>
 
                 <!-- Calendar Sync -->

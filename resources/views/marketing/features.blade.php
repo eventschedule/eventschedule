@@ -89,7 +89,7 @@
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span class="text-sm text-gray-300">20+ powerful features</span>
+                <span class="text-sm text-gray-300">Everything you need</span>
             </div>
 
             <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
@@ -98,7 +98,7 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
-                Everything you need to create calendars, sell tickets, and check in attendees. No bloat. No complexity.
+                One simple tool for calendars, tickets, and check-ins.
             </p>
 
             <div class="flex flex-wrap justify-center gap-4">
@@ -246,13 +246,13 @@
                         </div>
                         <div class="bg-black/30 rounded-2xl p-6 border border-white/10">
                             <h4 class="text-lg font-semibold text-white mb-3">Instant Translation</h4>
-                            <p class="text-gray-400 text-sm mb-4">Translate your entire schedule into 30+ languages with one click.</p>
+                            <p class="text-gray-400 text-sm mb-4">Translate your entire schedule with one click.</p>
                             <div class="flex flex-wrap gap-2">
                                 <span class="px-3 py-1.5 bg-white/10 rounded-lg text-sm text-white">English</span>
                                 <span class="px-3 py-1.5 bg-white/10 rounded-lg text-sm text-white">Espa&ntilde;ol</span>
                                 <span class="px-3 py-1.5 bg-white/10 rounded-lg text-sm text-white">Fran&ccedil;ais</span>
                                 <span class="px-3 py-1.5 bg-white/10 rounded-lg text-sm text-white">&#20013;&#25991;</span>
-                                <span class="px-3 py-1.5 bg-amber-500/30 rounded-lg text-sm text-amber-300">+26 more</span>
+                                <span class="px-3 py-1.5 bg-amber-500/30 rounded-lg text-sm text-amber-300">+ more</span>
                             </div>
                         </div>
                     </div>
