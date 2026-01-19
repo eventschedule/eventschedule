@@ -309,6 +309,28 @@
                     </div>
                 </div>
 
+                <!-- Recurring Events -->
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/50 to-purple-900/50 border border-white/10 p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Repeat
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Recurring events</h3>
+                    <p class="text-gray-400 mb-6">Set it once, runs forever. Daily, weekly, monthly, or custom patterns.</p>
+
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3 text-sm">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-500/30 flex items-center justify-center text-indigo-300 font-medium">M</div>
+                            <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-gray-500 font-medium">T</div>
+                            <div class="w-8 h-8 rounded-lg bg-indigo-500/30 flex items-center justify-center text-indigo-300 font-medium">W</div>
+                            <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-gray-500 font-medium">T</div>
+                            <div class="w-8 h-8 rounded-lg bg-indigo-500/30 flex items-center justify-center text-indigo-300 font-medium">F</div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
