@@ -141,9 +141,9 @@
                 <!-- Pro Plan -->
                 <div class="pricing-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-indigo-900/50 border-2 border-violet-500/50 p-8 lg:p-10">
                     <!-- First Year Free Banner -->
-                    <div class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-center py-3 px-4 -mx-8 lg:-mx-10 -mt-8 lg:-mt-10 mb-8">
+                    <div class="bg-gradient-to-r from-violet-500 to-indigo-500 text-white text-center py-3 px-4 -mx-8 lg:-mx-10 -mt-8 lg:-mt-10 mb-8">
                         <div class="text-lg font-bold">First Year FREE</div>
-                        <div class="text-sm text-emerald-100">No credit card required to start</div>
+                        <div class="text-sm text-violet-100">No credit card required to start</div>
                     </div>
 
                     <div class="mb-8">
