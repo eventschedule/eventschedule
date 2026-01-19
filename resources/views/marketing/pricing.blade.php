@@ -140,12 +140,10 @@
 
                 <!-- Pro Plan -->
                 <div class="pricing-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900/50 to-indigo-900/50 border-2 border-violet-500/50 p-8 lg:p-10">
-                    <div class="absolute top-0 right-0 bg-gradient-to-r from-violet-500 to-indigo-500 text-white text-sm font-medium px-4 py-1 rounded-bl-2xl">
-                        Most Popular
-                    </div>
-
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 text-sm font-medium mb-6">
-                        First Year Free
+                    <!-- First Year Free Banner -->
+                    <div class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-center py-3 px-4 -mx-8 lg:-mx-10 -mt-8 lg:-mt-10 mb-8">
+                        <div class="text-lg font-bold">First Year FREE</div>
+                        <div class="text-sm text-emerald-100">No credit card required to start</div>
                     </div>
 
                     <div class="mb-8">
@@ -153,7 +151,7 @@
                             <span class="text-6xl font-bold text-white">$5</span>
                             <span class="text-gray-400">/month</span>
                         </div>
-                        <p class="text-gray-400">After first year (billed yearly)</p>
+                        <p class="text-gray-400">or $50/year — after your free year</p>
                     </div>
 
                     <ul class="space-y-4 mb-10">
