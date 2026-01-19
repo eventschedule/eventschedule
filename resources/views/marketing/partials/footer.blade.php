@@ -20,6 +20,11 @@
                             Ticketing
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ marketing_url('/integrations') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                            Integrations
+                        </a>
+                    </li>
                 </ul>
             </div>
 
