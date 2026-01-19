@@ -97,6 +97,19 @@ if (!function_exists('is_rtl')) {
     }
 }
 
+if (!function_exists('rtl_class')) {
+    /**
+     * Return RTL or LTR class based on role's RTL setting
+     */
+    function rtl_class(?object $role, string $rtlClass, string $ltrClass = ''): string
+    {
+        if ($role && method_exists($role, 'isRtl') && $role->isRtl()) {
+            return $rtlClass;
+        }
+        return $ltrClass;
+    }
+}
+
 if (!function_exists('marketing_url')) {
     /**
      * Generate a URL for marketing pages
