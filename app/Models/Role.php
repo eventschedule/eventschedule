@@ -413,6 +413,12 @@ class Role extends Model implements MustVerifyEmail
             'docs',
             'api',
             'faq',
+            'demo',
+            'marketing',
+            'features',
+            'pricing',
+            'about',
+            'ticketing',
         ];
 
         if (config('app.hosted') && in_array($subdomain, $reserved)) {
