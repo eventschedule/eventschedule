@@ -7,6 +7,20 @@ use Illuminate\Http\Request;
 class MarketingController extends Controller
 {
     /**
+     * Constructor - check password in hosted mode
+     */
+    public function __construct()
+    {
+        // In hosted mode, require password to access marketing pages (preview mode)
+        if (config('app.hosted')) {
+            $password = request()->query('password');
+            if ($password !== 'donut') {
+                abort(404);
+            }
+        }
+    }
+
+    /**
      * Home page
      */
     public function index()

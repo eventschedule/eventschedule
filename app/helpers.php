@@ -100,16 +100,17 @@ if (!function_exists('is_rtl')) {
 if (!function_exists('marketing_url')) {
     /**
      * Generate a URL for marketing pages
-     * In hosted mode, returns demo.eventschedule.com URLs
-     * In self-hosted mode, returns /demo prefix URLs
+     * Returns /demo prefix URLs for both hosted and self-hosted modes
      */
     function marketing_url(string $path = '/'): string
     {
-        if (config('app.hosted')) {
-            $baseUrl = 'https://demo.eventschedule.com';
-            return $baseUrl . ($path === '/' ? '' : $path);
+        $url = url('/demo' . ($path === '/' ? '' : $path));
+
+        // In hosted mode, preserve the password parameter if present
+        if (config('app.hosted') && request()->has('password')) {
+            $url .= '?password=' . request()->get('password');
         }
 
-        return url('/demo' . ($path === '/' ? '' : $path));
+        return $url;
     }
 }
