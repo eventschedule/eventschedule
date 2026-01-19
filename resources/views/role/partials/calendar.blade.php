@@ -329,7 +329,7 @@
                 <div id="mobileEventsList">
                     <template v-for="(group, groupIndex) in eventsGroupedByDate" :key="'date-' + group.date">
                         {{-- Date Header --}}
-                        <div class="flex items-center mb-3 px-3 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}" :class="[isPastEvent(group.date) ? 'past-event hidden' : '', groupIndex > 0 ? 'mt-6' : '']">
+                        <div class="flex items-center mb-3 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pr-2 pl-3 flex-row-reverse' : 'pl-2 pr-3' }}" :class="[isPastEvent(group.date) ? 'past-event hidden' : '', groupIndex > 0 ? 'mt-6' : '']">
                             <div class="font-semibold text-gray-700 dark:text-gray-300" v-text="formatDateHeader(group.date)" {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'dir=rtl' : '' }}></div>
                             <div class="flex-1 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'mr-3' : 'ml-3' }} h-px bg-gray-200 dark:bg-gray-700"></div>
                         </div>
@@ -343,7 +343,7 @@
                                         :class="isPastEvent(event.occurrenceDate) ? 'past-event hidden' : ''">
                                         <div class="flex {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}">
                                             {{-- Content Section --}}
-                                            <div class="flex-1 p-3 flex flex-col justify-center min-w-0 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'text-right' : '' }}">
+                                            <div class="flex-1 py-3 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pr-2 pl-3' : 'pl-2 pr-3' }} flex flex-col justify-center min-w-0 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'text-right' : '' }}">
                                                 <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" v-text="event.name"></h3>
                                                 <div class="mt-1.5 flex items-center text-sm text-gray-500 dark:text-gray-400 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'flex-row-reverse' : '' }}">
                                                     <svg class="h-4 w-4 text-gray-400 flex-shrink-0 {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'ml-2' : 'mr-2' }}" viewBox="0 0 20 20" fill="currentColor">
@@ -364,7 +364,7 @@
                                                 </a>
                                             </div>
                                             {{-- Image Section --}}
-                                            <div v-if="event.image_url" class="flex-shrink-0 w-24 self-stretch">
+                                            <div v-if="event.image_url" class="flex-shrink-0 w-24 self-stretch {{ isset($role) && $role->isRtl() && ! session()->has('translate') ? 'pl-2' : 'pr-2' }}">
                                                 <img :src="event.image_url" class="w-full h-full object-cover" :alt="event.name">
                                             </div>
                                         </div>
