@@ -29,7 +29,7 @@
             <!-- Right side buttons -->
             <div class="flex items-center space-x-4">
                 <!-- Auth buttons -->
-                <div class="hidden sm:flex items-center space-x-3">
+                <div class="hidden sm:flex items-center space-x-4">
                     @auth
                         <a href="{{ route('home') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
                             Dashboard
