@@ -17,6 +17,13 @@ use App\Http\Controllers\MarketingController;
 use Illuminate\Support\Facades\Route;
 
 if (config('app.hosted')) {
+    // Redirect non-www to www for marketing pages
+    Route::domain('eventschedule.com')->group(function () {
+        Route::get('{path?}', function ($path = null) {
+            return redirect('https://www.eventschedule.com/' . ($path ?: ''), 301);
+        })->where('path', '.*');
+    });
+
     if (config('app.env') != 'local') {
         Route::domain('blog.eventschedule.com')->group(function () {
             Route::get('/', [BlogController::class, 'index'])->name('blog.index');
