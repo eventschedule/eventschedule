@@ -385,7 +385,7 @@
                         </svg>
                     </div>
                     <h3 class="font-semibold text-gray-900 mb-2">Self-Hosted</h3>
-                    <p class="text-gray-600 text-sm">Run on your own server. MIT licensed.</p>
+                    <p class="text-gray-600 text-sm">Run on your own server. AAL licensed.</p>
                 </div>
 
             </div>
@@ -405,7 +405,7 @@
                     Free and open source
                 </h2>
                 <p class="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-                    Event Schedule is MIT licensed. Self-host on your own server, contribute to the codebase, or just use it free forever.
+                    Event Schedule is AAL licensed. Self-host on your own server, contribute to the codebase, or just use it free forever.
                 </p>
                 <a href="https://github.com/eventschedule/eventschedule" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

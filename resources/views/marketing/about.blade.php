@@ -174,7 +174,7 @@
                     Free and open source
                 </h2>
                 <p class="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-                    Event Schedule is MIT licensed. Self-host on your own server, contribute to the codebase, or just use it free forever.
+                    Event Schedule is AAL licensed. Self-host on your own server, contribute to the codebase, or just use it free forever.
                 </p>
 
                 <div class="flex flex-wrap justify-center gap-4">

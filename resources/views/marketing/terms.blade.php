@@ -67,7 +67,7 @@
 
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">7. Intellectual Property</h2>
                 <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    The Service and its original content, features, and functionality are owned by Event Schedule and are protected by international copyright, trademark, and other intellectual property laws. Event Schedule is open source software licensed under the MIT License.
+                    The Service and its original content, features, and functionality are owned by Event Schedule and are protected by international copyright, trademark, and other intellectual property laws. Event Schedule is open source software licensed under the Attribution Assurance License (AAL).
                 </p>
 
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">8. Termination</h2>
