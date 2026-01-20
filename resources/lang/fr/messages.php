@@ -366,6 +366,8 @@ return [
     'tickets_not_available' => 'Billets non disponibles pour cet événement',
     'cannot_buy_tickets_past_event' => 'Impossible d\'acheter des billets pour des événements passés.',
     'sold_reserved' => 'Vendu/Réservé',
+    'guests' => 'Invités',
+    'scan_for_entry' => 'Scanner pour entrer',
     'this_ticket_is_not_valid' => 'Ce billet n\'est pas valide',
     'this_ticket_is_not_valid_for_today' => 'Ce billet n\'est pas valide pour aujourd\'hui',
     'you_are_not_authorized_to_scan_this_ticket' => 'Vous n\'êtes pas autorisé à scanner ce billet',

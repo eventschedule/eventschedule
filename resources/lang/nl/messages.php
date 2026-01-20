@@ -217,6 +217,8 @@ return [
     'tickets_not_available' => 'Tickets niet beschikbaar voor dit evenement',
     'cannot_buy_tickets_past_event' => 'Kan geen tickets kopen voor evenementen in het verleden.',
     'sold_reserved' => 'Verkocht/Gereserveerd',
+    'guests' => 'Gasten',
+    'scan_for_entry' => 'Scan voor toegang',
     'this_ticket_is_not_valid' => 'Dit ticket is niet geldig',
     'this_ticket_is_not_valid_for_today' => 'Dit ticket is niet geldig voor vandaag',
     'you_are_not_authorized_to_scan_this_ticket' => 'Je bent niet geautoriseerd om dit ticket te scannen',

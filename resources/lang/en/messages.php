@@ -412,6 +412,8 @@ return [
     'cannot_buy_tickets_past_event' => 'Cannot buy tickets for events in the past.',
     'sold_reserved' => 'Sold/Reserved',
     'attendee' => 'Attendee',
+    'guests' => 'Guests',
+    'scan_for_entry' => 'Scan for entry',
     'this_ticket_is_not_valid' => 'This ticket is not valid',
     'this_ticket_is_not_valid_for_today' => 'This ticket is not valid for today',
     'you_are_not_authorized_to_scan_this_ticket' => 'You are not authorized to scan this ticket',

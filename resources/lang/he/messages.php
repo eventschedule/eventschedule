@@ -187,6 +187,8 @@ return [
     'tickets_not_available' => 'כרטיסים לאירוע זה אינם זמינים',
     'cannot_buy_tickets_past_event' => 'לא ניתן לקנות כרטיסים לאירועים בעבר.',
     'sold_reserved' => 'נמכר/שמור',
+    'guests' => 'אורחים',
+    'scan_for_entry' => 'סרוק לכניסה',
     'this_ticket_is_not_valid' => 'כרטיס זה לא חוקי',
     'this_ticket_is_not_valid_for_today' => 'כרטיס זה לא חוקי להיום',
     'you_are_not_authorized_to_scan_this_ticket' => 'אין לך הרשאה לסרוק כרטיס זה',
