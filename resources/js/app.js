@@ -7,6 +7,29 @@ Alpine.start();
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.css';
 
+// Import flatpickr locales for all supported languages
+import { Spanish } from 'flatpickr/dist/l10n/es.js';
+import { German } from 'flatpickr/dist/l10n/de.js';
+import { French } from 'flatpickr/dist/l10n/fr.js';
+import { Italian } from 'flatpickr/dist/l10n/it.js';
+import { Portuguese } from 'flatpickr/dist/l10n/pt.js';
+import { Hebrew } from 'flatpickr/dist/l10n/he.js';
+import { Dutch } from 'flatpickr/dist/l10n/nl.js';
+import { Arabic } from 'flatpickr/dist/l10n/ar.js';
+
+// Map Laravel locale codes to flatpickr locale objects
+window.flatpickrLocales = {
+    en: null,
+    es: Spanish,
+    de: German,
+    fr: French,
+    it: Italian,
+    pt: Portuguese,
+    he: Hebrew,
+    nl: Dutch,
+    ar: Arabic
+};
+
 //import Toastify from 'toastify-js';
 //import 'toastify-js/src/toastify.css';
 

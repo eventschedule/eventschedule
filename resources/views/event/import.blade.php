@@ -605,23 +605,26 @@
 
     // Function to initialize flatpickr on datepicker elements
     function initializeFlatpickr() {
+        var fpLocale = window.flatpickrLocales ? window.flatpickrLocales[window.appLocale] : null;
+        var localeConfig = fpLocale ? { locale: fpLocale } : {};
+
         // Select all elements with datepicker_X class
         document.querySelectorAll('[class*="datepicker_"]').forEach(element => {
             // Destroy existing flatpickr instance if it exists
             if (element._flatpickr) {
                 element._flatpickr.destroy();
             }
-            
+
             // Create new flatpickr instance with EXACT same configuration as edit.blade.php
-            var f = flatpickr(element, {
+            var f = flatpickr(element, Object.assign({
                 allowInput: true,
                 enableTime: true,
                 altInput: true,
-                time_24hr: "{{ $role && $role->use_24_hour_time ? 'true' : 'false' }}",
+                time_24hr: {{ $role && $role->use_24_hour_time ? 'true' : 'false' }},
                 altFormat: "{{ $role && $role->use_24_hour_time ? 'M j, Y • H:i' : 'M j, Y • h:i K' }}",
                 dateFormat: "Y-m-d H:i:S",
-            });
-            
+            }, localeConfig));
+
             // Prevent keyboard input as per edit view
             if (f && f._input) {
                 f._input.onkeydown = () => false;

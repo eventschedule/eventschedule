@@ -46,27 +46,30 @@
   <script src="{{ asset('js/vue.global.prod.js') }}"></script>
   <script {!! nonce_attr() !!}>
     document.addEventListener('DOMContentLoaded', function() {
-        var f = flatpickr('.datepicker', {
+        var fpLocale = window.flatpickrLocales ? window.flatpickrLocales[window.appLocale] : null;
+        var localeConfig = fpLocale ? { locale: fpLocale } : {};
+
+        var f = flatpickr('.datepicker', Object.assign({
             allowInput: true,
             enableTime: true,
             altInput: true,
-            time_24hr: "{{ $role && $role->use_24_hour_time ? 'true' : 'false' }}",
+            time_24hr: {{ $role && $role->use_24_hour_time ? 'true' : 'false' }},
             altFormat: "{{ $role && $role->use_24_hour_time ? 'M j, Y • H:i' : 'M j, Y • h:i K' }}",
             dateFormat: "Y-m-d H:i:S",
-        });
+        }, localeConfig));
         // https://github.com/flatpickr/flatpickr/issues/892#issuecomment-604387030
         f._input.onkeydown = () => false;
 
         // Initialize recurring end date picker if it exists on page load
         var endDateInput = document.querySelector('.datepicker-end-date');
         if (endDateInput && endDateInput.value) {
-            var endDatePicker = flatpickr(endDateInput, {
+            var endDatePicker = flatpickr(endDateInput, Object.assign({
                 allowInput: true,
                 enableTime: false,
                 altInput: true,
                 altFormat: "M j, Y",
                 dateFormat: "Y-m-d",
-            });
+            }, localeConfig));
             if (endDatePicker._input) {
                 endDatePicker._input.onkeydown = () => false;
             }
