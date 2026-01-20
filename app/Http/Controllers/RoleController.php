@@ -1324,7 +1324,7 @@ class RoleController extends Controller
     public function qrCode($subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
-        $url = $role->getGuestUrl();
+        $url = $role->custom_domain ? 'https://' . $role->custom_domain : $role->getGuestUrl();
 
         $qrCode = QrCode::create($url)            
             ->setSize(300)
