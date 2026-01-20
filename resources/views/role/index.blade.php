@@ -30,13 +30,13 @@
                             <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                                 @foreach ($roles as $role)
                                 <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:pl-6">
+                                    <td class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:pl-6 max-w-xs">
                                         @if ($role->isClaimed())
                                         <a href="{{ $role->getGuestUrl() }}"
-                                            target="_blank" class="hover:underline">{{ $role->getDisplayName(false) }}
+                                            target="_blank" class="hover:underline break-words">{{ $role->getDisplayName(false) }}
                                         </a>
                                         @else
-                                        <p class="text-sm text-gray-500">
+                                        <p class="text-sm text-gray-500 break-words">
                                             {{ $role->getDisplayName(false) }}
                                         </p>
                                         @endif

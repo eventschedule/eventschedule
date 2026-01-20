@@ -301,7 +301,7 @@
             <!-- Password -->
             <div class="mt-4">
                 <x-input-label for="database_password" :value="__('messages.password')" />
-                <x-text-input id="database_password" class="block mt-1 w-full" type="password" name="database_password" :value="old('database_password')"
+                <x-password-input id="database_password" class="block mt-1 w-full" name="database_password" :value="old('database_password')"
                     autocomplete="off" />
                 <x-input-error :messages="$errors->get('database_password')" class="mt-2" />
             </div>
@@ -346,7 +346,7 @@
         <div class="mt-4" id="password-field" @if(config('app.hosted')) style="display: none;" @endif>
             <x-input-label for="password" :value="__('messages.password')" />
 
-            <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required minlength="8"
+            <x-password-input id="password" class="block mt-1 w-full" name="password" required minlength="8"
                 autocomplete="new-password" />
 
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
