@@ -80,7 +80,7 @@
             <div class="pt-4">
                 <x-input-label for="invoiceninja_api_url" :value="__('messages.api_url')" />
                 <x-text-input id="invoiceninja_api_url" name="invoiceninja_api_url" type="url" class="mt-1 block w-full" 
-                    :value="old('invoiceninja_api_url', $user->invoiceninja_api_url)" placeholder="https://invoicing.co" />
+                    :value="old('invoiceninja_api_url', $user->invoiceninja_api_url)" />
                 <x-input-error class="mt-2" :messages="$errors->get('invoiceninja_api_url')" />
             </div>
 
@@ -122,7 +122,7 @@
         @else
             <div class="mt-4">
                 <x-text-input id="payment_url" name="payment_url" type="url" class="mt-1 block w-full" 
-                    :value="old('payment_url', $user->payment_url)" placeholder="https://your-payment-gateway.com/pay" autocomplete="off" required />
+                    :value="old('payment_url', $user->payment_url)" autocomplete="off" required />
                 <x-input-error class="mt-2" :messages="$errors->get('payment_url')" />
             </div>
 
