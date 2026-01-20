@@ -6,9 +6,11 @@ use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
+use App\Mail\SupportEmail;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use App\Notifications\DeletedUserNotification;
@@ -89,9 +91,19 @@ class ProfileController extends Controller
     {
         $request->validateWithBag('userDeletion', [
             'password' => ['required', 'current_password'],
+            'feedback' => ['nullable', 'string', 'max:2000'],
         ]);
 
         $user = $request->user();
+
+        // Send feedback email if provided (before logout so we have user data)
+        if ($request->filled('feedback')) {
+            Mail::to('contact@eventschedule.com')->send(new SupportEmail(
+                $user->name ?? $user->email,
+                $user->email,
+                'Account Deletion Feedback: ' . $request->feedback
+            ));
+        }
 
         Auth::logout();
 
