@@ -25,10 +25,19 @@ class SecurityHeaders
 
         // Add security headers
         $response->headers->set('X-Content-Type-Options', 'nosniff');
-        
-        // Allow embedding when embed parameter is present
-        if ($request->has('embed') && ($request->embed === 'true' || $request->embed === '1')) {
-            $response->headers->set('X-Frame-Options', 'ALLOW-FROM *');
+
+        // Only allow embedding on specific embeddable routes (e.g., public calendar views)
+        // The embed parameter must be present AND the route must be in the allowed list
+        $embeddableRoutes = ['role.view', 'role.events', 'role.calendar'];
+        $currentRouteName = $request->route()?->getName();
+        $isEmbeddable = $request->has('embed')
+            && ($request->embed === 'true' || $request->embed === '1')
+            && in_array($currentRouteName, $embeddableRoutes);
+
+        if ($isEmbeddable) {
+            // ALLOW-FROM is deprecated; modern browsers use CSP frame-ancestors
+            // Remove X-Frame-Options to let CSP take precedence
+            $response->headers->remove('X-Frame-Options');
         } else {
             $response->headers->set('X-Frame-Options', 'DENY');
         }
@@ -61,9 +70,10 @@ class SecurityHeaders
             ];
         } else {
             // Stricter CSP for production
+            // Note: 'unsafe-inline' is still needed for inline event handlers; consider refactoring to use nonces
             $csp = [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-eval' 'unsafe-inline' *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com unpkg.com js.sentry-cdn.com browser.sentry-cdn.com *.sentry.io",
+                "script-src 'self' 'unsafe-inline' *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com unpkg.com js.sentry-cdn.com browser.sentry-cdn.com *.sentry.io",
                 "style-src 'self' 'unsafe-inline' *.googleapis.com *.gstatic.com *.bootstrapcdn.com rsms.me",
                 "img-src 'self' data: *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com *.ytimg.com eventschedule.nyc3.cdn.digitaloceanspaces.com",
                 "font-src 'self' data: *.googleapis.com *.gstatic.com *.bootstrapcdn.com rsms.me",
@@ -75,8 +85,8 @@ class SecurityHeaders
             ];
         }
         
-        // Allow frame-ancestors when embedding
-        if ($request->has('embed') && ($request->embed === 'true' || $request->embed === '1')) {
+        // Allow frame-ancestors only on validated embeddable routes
+        if ($isEmbeddable) {
             $csp[] = "frame-ancestors *";
         } else {
             $csp[] = "frame-ancestors 'none'";

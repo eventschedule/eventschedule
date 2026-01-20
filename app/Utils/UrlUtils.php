@@ -213,7 +213,16 @@ class UrlUtils
 
             // Otherwise, it's a standalone URL. Wrap it in an <a> tag.
             $url = $matches[0];
-            return '<a href="' . $url . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . $url . '</a>';
+
+            // Block javascript: and data: URLs to prevent XSS
+            $lowerUrl = strtolower(trim($url));
+            if (str_starts_with($lowerUrl, 'javascript:') || str_starts_with($lowerUrl, 'data:')) {
+                return htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
+            }
+
+            // Escape URL for safe HTML attribute and display
+            $escapedUrl = htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
+            return '<a href="' . $escapedUrl . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . $escapedUrl . '</a>';
         }, $text);
     }
 

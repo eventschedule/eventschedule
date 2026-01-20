@@ -131,13 +131,22 @@ class RegisteredUserController extends Controller
             $envPath = base_path('.env');
             $envContent = file_get_contents($envPath);
 
-            // Sanitize input values to prevent injection
-            $sanitizedHost = addslashes($request->database_host);
+            // Sanitize input values to prevent .env injection
+            // addslashes() is insufficient - we must also block newlines and special chars
+            $sanitizeEnvValue = function($value) {
+                // Remove any newlines, carriage returns, and null bytes which could inject new env vars
+                $value = str_replace(["\r", "\n", "\0"], '', $value);
+                // Escape backslashes and double quotes for .env format
+                $value = str_replace(['\\', '"'], ['\\\\', '\\"'], $value);
+                return $value;
+            };
+
+            $sanitizedHost = $sanitizeEnvValue($request->database_host);
             $sanitizedPort = (int) $request->database_port;
-            $sanitizedName = addslashes($request->database_name);
-            $sanitizedUsername = addslashes($request->database_username);
-            $sanitizedPassword = addslashes($request->database_password);
-            $sanitizedUrl = addslashes($url);
+            $sanitizedName = $sanitizeEnvValue($request->database_name);
+            $sanitizedUsername = $sanitizeEnvValue($request->database_username);
+            $sanitizedPassword = $sanitizeEnvValue($request->database_password);
+            $sanitizedUrl = $sanitizeEnvValue($url);
 
             $envContent = preg_replace('/APP_ENV=.*/', 'APP_ENV=production', $envContent);
             $envContent = preg_replace('/APP_URL=.*/', 'APP_URL="' . $sanitizedUrl . '"', $envContent);                        
