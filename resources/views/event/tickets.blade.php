@@ -123,14 +123,14 @@
 
         <div class="mb-6">
             <label for="name" class="text-gray-900 dark:text-gray-100">{{ __('messages.name') . ' *' }}</label>
-            <input type="text" name="name" id="name" class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" 
+            <input type="text" name="name" id="name" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
                 v-model="name" required autofocus autocomplete="name" />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
 
         <div class="mb-12">
             <label for="email" class="text-gray-900 dark:text-gray-100">{{ __('messages.email') . ' *' }}</label>
-            <input type="email" name="email" id="email" class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" 
+            <input type="email" name="email" id="email" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
                 v-model="email" required autocomplete="email" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
@@ -148,7 +148,7 @@
                     <div class="mt-6" v-if="createAccount">
                         <label for="password" class="text-gray-900 dark:text-gray-100">{{ __('messages.password') . ' *' }}</label>
                         <div class="relative mt-1" x-data="{ show: false }">
-                            <input :type="show ? 'text' : 'password'" name="password" id="password" class="block w-full pr-10 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                            <input :type="show ? 'text' : 'password'" name="password" id="password" class="block w-full pr-10 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"
                                 v-model="password" required autocomplete="new-password" />
                             <button
                                 type="button"
@@ -182,7 +182,7 @@
                     :id="`event_custom_${fieldKey}`"
                     v-model="eventCustomValues[fieldKey]"
                     :required="field.required"
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
+                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" />
                 <!-- Multiline text -->
                 <textarea v-else-if="field.type === 'multiline_string'"
                     :name="`event_custom_values[${fieldKey}]`"
@@ -190,14 +190,14 @@
                     v-model="eventCustomValues[fieldKey]"
                     :required="field.required"
                     rows="3"
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"></textarea>
+                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"></textarea>
                 <!-- Yes/No switch -->
                 <div v-else-if="field.type === 'switch'" class="mt-1">
                     <select :name="`event_custom_values[${fieldKey}]`"
                         :id="`event_custom_${fieldKey}`"
                         v-model="eventCustomValues[fieldKey]"
                         :required="field.required"
-                        class="block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                         <option value="">{{ __('messages.please_select') }}</option>
                         <option value="Yes">{{ __('messages.yes') }}</option>
                         <option value="No">{{ __('messages.no') }}</option>
@@ -209,21 +209,21 @@
                     :id="`event_custom_${fieldKey}`"
                     v-model="eventCustomValues[fieldKey]"
                     :required="field.required"
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
+                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" />
                 <!-- Dropdown -->
                 <select v-else-if="field.type === 'dropdown'"
                     :name="`event_custom_values[${fieldKey}]`"
                     :id="`event_custom_${fieldKey}`"
                     v-model="eventCustomValues[fieldKey]"
                     :required="field.required"
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                     <option value="">{{ __('messages.please_select') }}</option>
                     <option v-for="option in (field.options || '').split(',')" :key="option.trim()" :value="option.trim()">@{{ option.trim() }}</option>
                 </select>
             </div>
         </div>
 
-        <div v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-8">
+        <div v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-4 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-l-4 border-[#4E81FA]">
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">@{{ ticket.type }}</h3>
@@ -233,10 +233,10 @@
                 <div>
                     <p v-if="getAvailableQuantity(ticket) === 0" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sold_out') }}</p>
                     <p v-else>
-                    <select 
+                    <select
                         v-model="ticket.selectedQty"
                         @change="updateTicketQuantities"
-                        class="block w-24 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        class="block w-24 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA] text-center font-medium"
                         :name="`tickets[${ticket.id}]`" :id="`ticket-${index}`"
                     >
                         <option value="0">0</option>
@@ -260,7 +260,7 @@
                         :id="`ticket_custom_${ticket.id}_${fieldKey}`"
                         v-model="ticket.custom_values[fieldKey]"
                         :required="field.required"
-                        class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
+                        class="mt-1 block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" />
                     <!-- Multiline text -->
                     <textarea v-else-if="field.type === 'multiline_string'"
                         :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
@@ -268,14 +268,14 @@
                         v-model="ticket.custom_values[fieldKey]"
                         :required="field.required"
                         rows="2"
-                        class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"></textarea>
+                        class="mt-1 block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]"></textarea>
                     <!-- Yes/No switch -->
                     <div v-else-if="field.type === 'switch'" class="mt-1">
                         <select :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
                             :id="`ticket_custom_${ticket.id}_${fieldKey}`"
                             v-model="ticket.custom_values[fieldKey]"
                             :required="field.required"
-                            class="block w-full text-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                            class="block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                             <option value="">{{ __('messages.please_select') }}</option>
                             <option value="Yes">{{ __('messages.yes') }}</option>
                             <option value="No">{{ __('messages.no') }}</option>
@@ -287,14 +287,14 @@
                         :id="`ticket_custom_${ticket.id}_${fieldKey}`"
                         v-model="ticket.custom_values[fieldKey]"
                         :required="field.required"
-                        class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
+                        class="mt-1 block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]" />
                     <!-- Dropdown -->
                     <select v-else-if="field.type === 'dropdown'"
                         :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
                         :id="`ticket_custom_${ticket.id}_${fieldKey}`"
                         v-model="ticket.custom_values[fieldKey]"
                         :required="field.required"
-                        class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        class="mt-1 block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[#4E81FA] focus:ring-[#4E81FA]">
                         <option value="">{{ __('messages.please_select') }}</option>
                         <option v-for="option in (field.options || '').split(',')" :key="option.trim()" :value="option.trim()">@{{ option.trim() }}</option>
                     </select>
@@ -302,22 +302,23 @@
             </div>
         </div>
 
-        <hr/>
-        
-        <div class="my-4 text-lg font-bold text-gray-900 dark:text-gray-100">
-            Total: @{{ formatPrice(totalAmount) }}
+        <div class="mt-6 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600 dark:text-gray-400">Total</span>
+                <span class="text-xl font-bold text-gray-900 dark:text-gray-100">@{{ formatPrice(totalAmount) }}</span>
+            </div>
         </div>
 
         <div class="flex justify-center items-center py-4 gap-8">
-            <button 
-                type="submit" 
-                class="mt-4 inline-flex gap-x-1.5 rounded-md bg-white dark:bg-gray-700 px-6 py-3 text-lg font-semibold text-gray-500 dark:text-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white dark:disabled:hover:bg-gray-700"
+            <button
+                type="submit"
+                class="mt-4 inline-flex gap-x-1.5 rounded-md bg-[#4E81FA] px-6 py-3 text-lg font-semibold text-white shadow-sm hover:bg-[#3D6FE8] transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-sm disabled:bg-gray-400"
                 :disabled="!hasSelectedTickets"
             >
                 {{ strtoupper(__('messages.checkout')) }}
             </button>
             
-            <a href="{{ request()->fullUrlWithQuery(['tickets' => false]) }}" class="hover:underline mt-4 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+            <a href="{{ request()->fullUrlWithQuery(['tickets' => false]) }}" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                 {{ strtoupper(__('messages.cancel')) }}
             </a>
         </div>

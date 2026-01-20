@@ -139,19 +139,6 @@
                             </div>
                         </div>
                     @endif
-                    @if($archives->count() > 0)
-                        <div class="bg-white border border-blue-100 rounded-lg shadow-sm p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Archives</h3>
-                            <div class="space-y-2">
-                                @foreach($archives as $archive)
-                                    <a href="{{ route('blog.index', ['year' => $archive->year, 'month' => $archive->month]) }}" 
-                                       class="block text-sm text-gray-600 hover:text-gray-900 transition-colors">
-                                        {{ $archive->month_name }} {{ $archive->year }} ({{ $archive->count }})
-                                    </a>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
                     <!-- About -->
                     <div class="bg-blue-100 border border-blue-200 rounded-lg shadow-sm p-6">
                         <h3 class="text-lg font-semibold text-blue-900 mb-2">About Our Blog</h3>
