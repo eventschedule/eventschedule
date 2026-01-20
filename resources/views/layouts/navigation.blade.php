@@ -45,17 +45,6 @@
                 @endif
 
                 <li>
-                    <a href="{{ route('sales') }}"
-                        class="group flex gap-x-4 items-center rounded-md p-2 text-lg font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('sales') ? 'bg-gray-800 text-white' : '' }}">
-                        <svg class="h-8 w-8 shrink-0" viewBox="0 0 24 24"
-                            fill="{{ request()->is('sales') ? '#ccc' : '#666' }}" aria-hidden="true">
-                            <path d="M20,8H4V6H20M20,18H4V12H20M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" />
-                        </svg>
-                        {{ __('messages.sales') }}
-                    </a>
-                </li>
-
-                <li>
                     <a href="{{ route('analytics') }}"
                         class="group flex gap-x-4 items-center rounded-md p-2 text-lg font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('analytics') ? 'bg-gray-800 text-white' : '' }}">
                         <svg class="h-8 w-8 shrink-0" viewBox="0 0 24 24"
@@ -63,6 +52,17 @@
                             <path d="M22,21H2V3H4V19H6V10H10V19H12V6H16V19H18V14H22V21Z" />
                         </svg>
                         {{ __('messages.analytics') }}
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{{ route('sales') }}"
+                        class="group flex gap-x-4 items-center rounded-md p-2 text-lg font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('sales') ? 'bg-gray-800 text-white' : '' }}">
+                        <svg class="h-8 w-8 shrink-0" viewBox="0 0 24 24"
+                            fill="{{ request()->is('sales') ? '#ccc' : '#666' }}" aria-hidden="true">
+                            <path d="M20,8H4V6H20M20,18H4V12H20M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" />
+                        </svg>
+                        {{ __('messages.sales') }}
                     </a>
                 </li>
 
