@@ -26,7 +26,7 @@ class RoleUpdateRequest extends FormRequest
                 ['required', 'string', 'email', 'max:255'],
                 config('app.hosted') ? [new NoFakeEmail] : []
             ),
-            'new_subdomain' => ['required', 'string', 'max:255', 'max:50'],
+            'new_subdomain' => ['required', 'string', 'max:50'],
             'custom_domain' => ['nullable', 'string', 'url', 'max:255'],
             'profile_image' => ['image', 'max:2500', new SquareImage],
             'background_image_url' => ['image', 'max:2500'],
