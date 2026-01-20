@@ -727,4 +727,6 @@ return [
     'text' => 'Text',
     'download' => 'Download',
     'copy' => 'Copy',
+    'deletion_feedback_label' => 'Why are you leaving?',
+    'deletion_feedback_placeholder' => 'Optional: Tell us why you\'re deleting your account...',
 ];
