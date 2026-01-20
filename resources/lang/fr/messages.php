@@ -739,4 +739,6 @@ return [
     'yes' => 'Oui',
     'no' => 'Non',
     'field_required_error' => 'Ce champ est obligatoire',
+    'venue_name' => 'Nom du Lieu',
+    'matched_existing_venue' => 'Lieu existant trouvé',
 ];
