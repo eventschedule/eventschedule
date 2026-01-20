@@ -161,8 +161,8 @@
         @endif
     </div>
 
-    {{-- Chart.js CDN --}}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    {{-- Chart.js --}}
+    <script src="{{ asset('js/chart.min.js') }}" {!! nonce_attr() !!}></script>
 
     <script {!! nonce_attr() !!}>
         function filterByRole(roleId) {
@@ -176,16 +176,22 @@
         }
 
         @if ($totalViews > 0)
-        // Dark mode detection
-        const isDarkMode = document.documentElement.classList.contains('dark') ||
-            (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.classList.contains('light'));
+        function initCharts() {
+            if (typeof Chart === 'undefined') {
+                setTimeout(initCharts, 50);
+                return;
+            }
 
-        const textColor = isDarkMode ? '#9CA3AF' : '#6B7280';
-        const gridColor = isDarkMode ? '#374151' : '#E5E7EB';
+            // Dark mode detection
+            const isDarkMode = document.documentElement.classList.contains('dark') ||
+                (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.classList.contains('light'));
 
-        // Views Over Time Chart
-        const viewsCtx = document.getElementById('viewsChart').getContext('2d');
-        new Chart(viewsCtx, {
+            const textColor = isDarkMode ? '#9CA3AF' : '#6B7280';
+            const gridColor = isDarkMode ? '#374151' : '#E5E7EB';
+
+            // Views Over Time Chart
+            const viewsCtx = document.getElementById('viewsChart').getContext('2d');
+            new Chart(viewsCtx, {
             type: 'line',
             data: {
                 labels: {!! json_encode($viewsByPeriod->pluck('period')->toArray()) !!},
@@ -342,6 +348,14 @@
             }
         });
         @endif
+        }
+
+        // Initialize charts when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initCharts);
+        } else {
+            initCharts();
+        }
         @endif
     </script>
 
