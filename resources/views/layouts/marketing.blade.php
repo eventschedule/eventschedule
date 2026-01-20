@@ -62,7 +62,12 @@
         "url": "{{ config('app.url') }}",
         "logo": "{{ config('app.url') }}/images/dark_logo.png",
         "sameAs": [
-            "https://github.com/eventschedule/eventschedule"
+            "https://github.com/eventschedule/eventschedule",
+            "https://www.facebook.com/appeventschedule",
+            "https://www.instagram.com/eventschedule/",
+            "https://youtube.com/@EventSchedule",
+            "https://x.com/ScheduleEvent",
+            "https://www.linkedin.com/company/eventschedule/"
         ],
         "contactPoint": {
             "@type": "ContactPoint",

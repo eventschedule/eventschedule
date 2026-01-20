@@ -14,9 +14,9 @@ use Illuminate\Support\Facades\DB;
 class AnalyticsService
 {
     /**
-     * Record a page view
+     * Record a page view (returns null if bot detected)
      */
-    public function recordView(Role $role, ?Event $event, Request $request): PageView
+    public function recordView(Role $role, ?Event $event, Request $request): ?PageView
     {
         return PageView::recordView($role, $event, $request);
     }
