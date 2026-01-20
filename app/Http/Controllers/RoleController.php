@@ -22,6 +22,7 @@ use App\Models\Event;
 use App\Models\User;
 use App\Models\RoleUser;
 use App\Models\EventRole;
+use App\Models\PageView;
 use App\Utils\UrlUtils;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
@@ -152,6 +153,9 @@ class RoleController extends Controller
                 }
             }
         }
+
+        // Delete analytics data
+        PageView::where('role_id', $role->id)->delete();
 
         $role->delete();
         
