@@ -45,13 +45,49 @@
                 <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2">
                   {{ $role->translatedName() }}
                 </h3>
-                @if (auth()->user() && auth()->user()->isMember($role->subdomain))
-                <a 
-                  href="{{ config('app.url') . route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false) }}"
-                  class="text-sm font-medium text-[#4E81FA] hover:underline inline-block"
-                >
-                  {{ __('messages.edit_schedule') }}
-                </a>
+                {{-- Compact icon links for email, website, and social --}}
+                @php
+                    $hasEmail = $role->email && $role->show_email;
+                    $hasWebsite = $role->website;
+                    $hasSocial = $role->social_links && $role->social_links != '[]';
+                @endphp
+                @if($hasEmail || $hasWebsite || $hasSocial)
+                <div class="flex flex-row gap-2 items-center justify-center sm:justify-start mt-3">
+                    @if($hasEmail)
+                    <a href="mailto:{{ $role->email }}"
+                       class="w-8 h-8 rounded-full flex justify-center items-center shadow-sm hover:shadow-md hover:scale-110 transition-all duration-200"
+                       style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
+                       title="{{ $role->email }}">
+                        <svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24">
+                            <path fill="white" fill-rule="evenodd" clip-rule="evenodd" d="M3.17157 5.17157C2 6.34315 2 8.22876 2 12C2 15.7712 2 17.6569 3.17157 18.8284C4.34315 20 6.22876 20 10 20H14C17.7712 20 19.6569 20 20.8284 18.8284C22 17.6569 22 15.7712 22 12C22 8.22876 22 6.34315 20.8284 5.17157C19.6569 4 17.7712 4 14 4H10C6.22876 4 4.34315 4 3.17157 5.17157ZM18.5762 7.51986C18.8413 7.83807 18.7983 8.31099 18.4801 8.57617L16.2837 10.4066C15.3973 11.1452 14.6789 11.7439 14.0448 12.1517C13.3843 12.5765 12.7411 12.8449 12 12.8449C11.2589 12.8449 10.6157 12.5765 9.95518 12.1517C9.32112 11.7439 8.60271 11.1452 7.71636 10.4066L5.51986 8.57617C5.20165 8.31099 5.15866 7.83807 5.42383 7.51986C5.68901 7.20165 6.16193 7.15866 6.48014 7.42383L8.63903 9.22291C9.57199 10.0004 10.2197 10.5384 10.7666 10.8901C11.2959 11.2306 11.6549 11.3449 12 11.3449C12.3451 11.3449 12.7041 11.2306 13.2334 10.8901C13.7803 10.5384 14.428 10.0004 15.361 9.22291L17.5199 7.42383C17.8381 7.15866 18.311 7.20165 18.5762 7.51986Z"/>
+                        </svg>
+                    </a>
+                    @endif
+                    @if($hasWebsite)
+                    <a href="{{ $role->website }}" target="_blank"
+                       class="w-8 h-8 rounded-full flex justify-center items-center shadow-sm hover:shadow-md hover:scale-110 transition-all duration-200"
+                       style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
+                       title="{{ App\Utils\UrlUtils::clean($role->website) }}">
+                        <svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24">
+                            <path fill="white" fill-rule="evenodd" clip-rule="evenodd" d="M12 2C17.52 2 22 6.48 22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12C2 6.48 6.48 2 12 2ZM11 19.93C7.05 19.44 4 16.08 4 12C4 11.38 4.08 10.79 4.21 10.21L9 15V16C9 17.1 9.9 18 11 18V19.93ZM17.9 17.39C17.64 16.58 16.9 16 16 16H15V13C15 12.45 14.55 12 14 12H8V10H10C10.55 10 11 9.55 11 9V7H13C14.1 7 15 6.1 15 5V4.59C17.93 5.78 20 8.65 20 12C20 14.08 19.2 15.97 17.9 17.39Z"/>
+                        </svg>
+                    </a>
+                    @endif
+                    @if($hasSocial)
+                        @foreach (json_decode($role->social_links) as $link)
+                        @if ($link)
+                        <a href="{{ $link->url }}" target="_blank"
+                           class="w-8 h-8 rounded-full flex justify-center items-center shadow-sm hover:shadow-md hover:scale-110 transition-all duration-200"
+                           style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
+                           title="{{ App\Utils\UrlUtils::clean($link->url) }}">
+                            <x-url-icon class="w-[18px] h-[18px]">
+                                {{ \App\Utils\UrlUtils::clean($link->url) }}
+                            </x-url-icon>
+                        </a>
+                        @endif
+                        @endforeach
+                    @endif
+                </div>
                 @endif
               </div>
               
@@ -92,6 +128,20 @@
               </div>
               @endif
                     
+              @if (auth()->user() && auth()->user()->isMember($role->subdomain))
+              <a
+                href="{{ config('app.url') . route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false) }}"
+                class="inline-flex items-center justify-center flex-shrink-0"
+              >
+                <button
+                  type="button"
+                  style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
+                  class="inline-flex items-center rounded-md px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                >
+                  {{ __('messages.edit_schedule') }}
+                </button>
+              </a>
+              @endif
               @if (config('app.hosted') || config('app.is_testing'))
               @if (($role->isCurator() || $role->isVenue()) && $role->accept_requests)
               <a
@@ -101,12 +151,13 @@
               <button
                   type="button"
                   style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
-                  class="inline-flex items-center rounded-md px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 h-12"
+                  class="inline-flex items-center rounded-md px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
-                  {{ __('messages.add_event') }}
+                  {{ __('messages.submit_event') }}
                 </button>
               </a>
-              @elseif (! auth()->user() || ! auth()->user()->isMember($role->subdomain))
+              @endif
+              @if (! auth()->user() || ! auth()->user()->isConnected($role->subdomain))
                 <a
                   href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
                   class="inline-flex items-center justify-center flex-shrink-0"
@@ -114,9 +165,9 @@
                   <button
                     type="button"
                     style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
-                    class="inline-flex items-center rounded-md px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 h-12"
+                    class="inline-flex items-center rounded-md px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                   >
-                    {{ __('messages.follow') }}
+                    {{ __('messages.subscribe') }}
                   </button>
                 </a>
                 @endif
@@ -145,8 +196,6 @@
             @php
                 $contactItems = [];
                 if($role->phone) $contactItems[] = 'phone';
-                if($role->email && $role->show_email) $contactItems[] = 'email';
-                if($role->website) $contactItems[] = 'website';
                 if($role->isVenue()) $contactItems[] = 'venue';
                 $totalItems = count($contactItems);
               @endphp
@@ -171,58 +220,6 @@
                 <a href="tel:{{ $role->phone }}" class="text-sm"
                   >{{ $role->phone }}</a
                 >
-              </div>
-              @endif
-              @if($role->email && $role->show_email)
-              <div
-                class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] dark:text-gray-300 fill-[#33383C] dark:fill-gray-300 hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 {{ $totalItems > 2 ? 'sm:after:content-[\'\'] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-[#33383C] dark:sm:after:bg-gray-300' : '' }}"
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M3.17157 5.17157C2 6.34315 2 8.22876 2 12C2 15.7712 2 17.6569 3.17157 18.8284C4.34315 20 6.22876 20 10 20H14C17.7712 20 19.6569 20 20.8284 18.8284C22 17.6569 22 15.7712 22 12C22 8.22876 22 6.34315 20.8284 5.17157C19.6569 4 17.7712 4 14 4H10C6.22876 4 4.34315 4 3.17157 5.17157ZM18.5762 7.51986C18.8413 7.83807 18.7983 8.31099 18.4801 8.57617L16.2837 10.4066C15.3973 11.1452 14.6789 11.7439 14.0448 12.1517C13.3843 12.5765 12.7411 12.8449 12 12.8449C11.2589 12.8449 10.6157 12.5765 9.95518 12.1517C9.32112 11.7439 8.60271 11.1452 7.71636 10.4066L5.51986 8.57617C5.20165 8.31099 5.15866 7.83807 5.42383 7.51986C5.68901 7.20165 6.16193 7.15866 6.48014 7.42383L8.63903 9.22291C9.57199 10.0004 10.2197 10.5384 10.7666 10.8901C11.2959 11.2306 11.6549 11.3449 12 11.3449C12.3451 11.3449 12.7041 11.2306 13.2334 10.8901C13.7803 10.5384 14.428 10.0004 15.361 9.22291L17.5199 7.42383C17.8381 7.15866 18.311 7.20165 18.5762 7.51986Z"
-                  />
-                </svg>
-                <a href="mailto:{{ $role->email }}" class="text-sm"
-                  >{{ $role->email }}</a
-                >
-              </div>
-              @endif
-              @if($role->website)
-              <div
-                class="flex flex-row gap-2 items-center relative duration-300 text-[#33383C] dark:text-gray-300 fill-[#33383C] dark:fill-gray-300 hover:text-[#4E81FA] hover:fill-[#4E81FA] sm:pr-4 {{ $totalItems > 3 ? 'sm:after:content-[\'\'] sm:after:block sm:after:absolute sm:after:right-0 sm:after:top-[50%] sm:after:translate-y-[-50%] sm:after:h-[12px] sm:after:w-[1px] sm:after:bg-[#33383C] dark:sm:after:bg-gray-300' : '' }}"
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M2.02783 11.25C2.41136 6.07745 6.72957 2 12.0001 2C11.1693 2 10.4295 2.36421 9.82093 2.92113C9.21541 3.47525 8.70371 4.24878 8.28983 5.16315C7.87352 6.08292 7.55013 7.15868 7.33126 8.32611C7.1558 9.26194 7.04903 10.2485 7.01344 11.25H2.02783ZM2.02783 12.75H7.01344C7.04903 13.7515 7.1558 14.7381 7.33126 15.6739C7.55013 16.8413 7.87351 17.9171 8.28983 18.8368C8.70371 19.7512 9.21541 20.5247 9.82093 21.0789C10.4295 21.6358 11.1693 22 12.0001 22C6.72957 22 2.41136 17.9226 2.02783 12.75Z"
-                  />
-                  <path
-                    d="M12.0001 3.39535C11.7251 3.39535 11.3699 3.51236 10.9567 3.89042C10.5406 4.27126 10.1239 4.86815 9.75585 5.68137C9.3902 6.4892 9.09329 7.46441 8.88897 8.55419C8.72806 9.41242 8.62824 10.3222 8.59321 11.25H15.4071C15.372 10.3222 15.2722 9.41242 15.1113 8.5542C14.907 7.46441 14.6101 6.48921 14.2444 5.68137C13.8763 4.86815 13.4597 4.27126 13.0435 3.89042C12.6304 3.51236 12.2751 3.39535 12.0001 3.39535Z"
-                  />
-                  <path
-                    d="M8.88897 15.4458C9.09329 16.5356 9.3902 17.5108 9.75585 18.3186C10.1239 19.1319 10.5406 19.7287 10.9567 20.1096C11.3698 20.4876 11.7251 20.6047 12.0001 20.6047C12.2751 20.6047 12.6304 20.4876 13.0435 20.1096C13.4597 19.7287 13.8763 19.1319 14.2444 18.3186C14.6101 17.5108 14.907 16.5356 15.1113 15.4458C15.2722 14.5876 15.372 13.6778 15.4071 12.75H8.59321C8.62824 13.6778 8.72806 14.5876 8.88897 15.4458Z"
-                  />
-                  <path
-                    d="M12.0001 2C12.831 2 13.5708 2.36421 14.1793 2.92113C14.7849 3.47525 15.2966 4.24878 15.7104 5.16315C16.1267 6.08292 16.4501 7.15868 16.669 8.32612C16.8445 9.26194 16.9512 10.2485 16.9868 11.25H21.9724C21.5889 6.07745 17.2707 2 12.0001 2Z"
-                  />
-                  <path
-                    d="M16.669 15.6739C16.4501 16.8413 16.1267 17.9171 15.7104 18.8368C15.2966 19.7512 14.7849 20.5247 14.1793 21.0789C13.5708 21.6358 12.831 22 12.0001 22C17.2707 22 21.5889 17.9226 21.9724 12.75H16.9868C16.9512 13.6778 16.8445 14.7381 16.669 15.6739Z"
-                  />
-                </svg>
-                <x-link href="{{ $role->website }}" target="_blank" hideIcon class="text-sm">{{ App\Utils\UrlUtils::clean($role->website) }}</x-link>
               </div>
               @endif
               @if($role->isVenue())
@@ -396,30 +393,6 @@
         @endif
       @endif
 
-      @if ($role->social_links && $role->social_links != '[]')
-      <div 
-        class="bg-[#F5F9FE] dark:bg-gray-800 rounded-lg px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6"
-      >
-        <h3 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-6">
-          {{ __('messages.social_media') }}
-        </h3>
-        <div class="flex flex-row gap-4 items-center">
-          @foreach (json_decode($role->social_links) as $link)
-          @if ($link)
-            <a 
-              href="{{ $link->url }}" target="_blank"
-              style="background-color: {{ $role->accent_color ?? '#4E81FA' }}"
-              class="w-[44px] h-[44px] rounded-full flex justify-center items-center hover:opacity-90 duration-300"
-              >
-              <x-url-icon>
-                {{ \App\Utils\UrlUtils::clean($link->url) }}
-              </x-url-icon>
-            </a>
-          @endif
-          @endforeach
-        </div>
-      </div>
-      @endif
     </div>
   </main>
 
