@@ -48,8 +48,8 @@ class AnalyticsController extends Controller
         // Get views by schedule
         $viewsBySchedule = $analytics->getViewsBySchedule($user, $start, $end);
 
-        // Get recent views
-        $recentViews = $analytics->getRecentViews($user, 50, $selectedRoleId);
+        // Get recent views (paginated)
+        $recentViews = $analytics->getRecentViews($user, 25, $selectedRoleId);
 
         return view('analytics.index', compact(
             'roles',

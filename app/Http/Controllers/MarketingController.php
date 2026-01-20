@@ -88,6 +88,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Self-Host page
+     */
+    public function selfHost()
+    {
+        return view('marketing.selfhost');
+    }
+
+    /**
      * Get user personas data
      */
     protected function getPersonas(): array

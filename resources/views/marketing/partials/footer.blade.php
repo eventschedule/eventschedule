@@ -25,6 +25,11 @@
                             Integrations
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ marketing_url('/selfhost') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                            Selfhost
+                        </a>
+                    </li>
                 </ul>
             </div>
 
