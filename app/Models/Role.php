@@ -451,10 +451,16 @@ class Role extends Model implements MustVerifyEmail
             $subdomain = '';
         }
 
-        if (strlen($subdomain) <= 2) {            
+        if (strlen($subdomain) <= 2) {
             return strtolower(\Str::random(8));
         }
-    
+
+        // Truncate to max 50 characters, ensuring we don't cut in the middle of a hyphenated word
+        if (strlen($subdomain) > 50) {
+            $subdomain = substr($subdomain, 0, 50);
+            $subdomain = rtrim($subdomain, '-');
+        }
+
         return $subdomain;
     }
 
