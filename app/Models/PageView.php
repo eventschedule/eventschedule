@@ -83,11 +83,119 @@ class PageView extends Model
     }
 
     /**
-     * Record a page view
+     * Check if user agent is a bot/crawler
      */
-    public static function recordView(Role $role, ?Event $event, Request $request): self
+    public static function isBot(?string $userAgent): bool
+    {
+        if (!$userAgent) {
+            return false;
+        }
+
+        $botPatterns = [
+            // Major search engines
+            'googlebot',
+            'bingbot',
+            'slurp',           // Yahoo
+            'duckduckbot',
+            'baiduspider',
+            'yandexbot',
+            'sogou',
+            'exabot',
+            'facebot',
+            'facebookexternalhit',
+
+            // Social media crawlers
+            'twitterbot',
+            'linkedinbot',
+            'pinterest',
+            'whatsapp',
+            'telegrambot',
+            'slackbot',
+            'discordbot',
+
+            // SEO and analytics tools
+            'semrushbot',
+            'ahrefsbot',
+            'mj12bot',
+            'dotbot',
+            'rogerbot',
+            'screaming frog',
+            'seokicks',
+
+            // Generic bot patterns
+            'bot',
+            'spider',
+            'crawl',
+            'scraper',
+            'fetch',
+            'headless',
+            'phantom',
+            'selenium',
+            'puppeteer',
+            'playwright',
+
+            // Monitoring and uptime
+            'pingdom',
+            'uptimerobot',
+            'statuscake',
+            'site24x7',
+            'newrelic',
+            'datadog',
+
+            // Libraries and tools
+            'curl',
+            'wget',
+            'python-requests',
+            'python-urllib',
+            'java/',
+            'libwww',
+            'httpunit',
+            'nutch',
+            'go-http-client',
+            'okhttp',
+            'axios',
+            'node-fetch',
+
+            // Preview generators
+            'preview',
+            'embed',
+            'thumbnail',
+
+            // Other known bots
+            'applebot',
+            'mediapartners-google',
+            'adsbot',
+            'apis-google',
+            'feedfetcher',
+            'google-read-aloud',
+            'lighthouse',
+            'chrome-lighthouse',
+            'pagespeed',
+            'gtmetrix',
+        ];
+
+        $userAgentLower = strtolower($userAgent);
+
+        foreach ($botPatterns as $pattern) {
+            if (strpos($userAgentLower, $pattern) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Record a page view (returns null if bot detected)
+     */
+    public static function recordView(Role $role, ?Event $event, Request $request): ?self
     {
         $userAgent = $request->userAgent();
+
+        // Skip recording for bots/crawlers
+        if (self::isBot($userAgent)) {
+            return null;
+        }
 
         return self::create([
             'role_id' => $role->id,
