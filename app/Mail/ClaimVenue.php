@@ -71,7 +71,7 @@ class ClaimVenue extends Mailable
         }        
 
         return new Content(
-            markdown: 'mail.venue.claim',
+            view: 'mail.venue.claim',
             with: [
                 'event' => $event,
                 'role' => $role,
