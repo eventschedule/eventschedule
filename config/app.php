@@ -34,6 +34,7 @@ return [
     'hosted' => (bool) env('APP_HOSTED', false),
     'report_errors' => (bool) env('REPORT_ERRORS', false),
     'is_testing' => (bool) env('APP_TESTING', false),
+    'enable_community' => (bool) env('ENABLE_COMMUNITY', false),
 
     /*
     |--------------------------------------------------------------------------

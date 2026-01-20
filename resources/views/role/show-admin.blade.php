@@ -327,7 +327,7 @@
                     {{ __('messages.requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</option>
                 @endif
                 <option value="profile" {{ $tab == 'profile' ? 'selected' : '' }}>{{ __('messages.profile') }}</option>
-                @if (config('app.hosted'))
+                @if (config('app.hosted') || config('app.is_testing') || config('app.enable_community'))
                 <option value="followers" {{ $tab == 'followers' ? 'selected' : '' }}>
                     {{ __('messages.followers') }}{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</option>
                 @endif
@@ -359,7 +359,7 @@
                 @endif
                 <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'profile']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'profile' ? 'border-[#4E81FA] px-3 pb-5 text-base font-medium text-[#4E81FA]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.profile') }}</a>
-                @if (config('app.hosted'))                    
+                @if (config('app.hosted') || config('app.is_testing') || config('app.enable_community'))
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'followers']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'followers' ? 'border-[#4E81FA] px-3 pb-5 text-base font-medium text-[#4E81FA]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.followers') }}{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</a>
                 @endif
