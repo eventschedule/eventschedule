@@ -268,6 +268,32 @@ class Role extends Model implements MustVerifyEmail
         return $str;
     }
 
+    /**
+     * Get a short display string for the venue.
+     * Format priority:
+     * 1. Name | City (if both have values)
+     * 2. Name | Address (else if both have values)
+     * 3. Address (else if address has value)
+     * 4. City (else)
+     */
+    public function shortVenue($translate = true)
+    {
+        $name = $translate ? $this->translatedName() : $this->name;
+        $city = $translate ? $this->translatedCity() : $this->city;
+        $address = $translate ? $this->translatedAddress1() : $this->address1;
+
+        if ($name && $city) {
+            return $name . ' | ' . $city;
+        }
+        if ($name && $address) {
+            return $name . ' | ' . $address;
+        }
+        if ($address) {
+            return $address;
+        }
+        return $city ?: '';
+    }
+
     public function fullAddress()
     {
         $str = '';

@@ -549,7 +549,7 @@ class ListDesign extends AbstractEventDesign
         
         // Venue
         if ($event->venue) {
-            $venue = $event->venue;
+            $venue = $event->venue->shortVenue();
             $this->addText($venue, $textStartX, $textStartY, self::VENUE_FONT_SIZE, $this->c['black'], 'regular');
             $textStartY += self::LINE_HEIGHT;
         }
