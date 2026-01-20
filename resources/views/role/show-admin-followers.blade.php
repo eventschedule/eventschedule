@@ -27,6 +27,11 @@
     <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.no_followers') }}</h3>
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.share_your_event_schedule_link') }}</p>
     <div class="mt-3">
+        @if ($role->custom_domain)
+        <x-link href="https://{{ $role->custom_domain }}" target="_blank">
+            {{ $role->custom_domain }}
+        </x-link>
+        @else
         <x-link href="{{ $role->getGuestUrl() }}" target="_blank">
             @if (config('app.hosted'))
                 {{ $role->subdomain . '.eventschedule.com' }}
@@ -34,6 +39,7 @@
                 {{ config('app.url') . '/' . $role->subdomain }}
             @endif
         </x-link>
+        @endif
     </div>
 </div>
 
