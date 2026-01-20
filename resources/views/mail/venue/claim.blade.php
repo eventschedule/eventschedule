@@ -18,7 +18,7 @@
                 {{ $event->name }}
             </h2>
             <p style="margin: 10px 0; color: #666;">
-                {{ $event->startDateFormatted() }}
+                {{ $event->localStartsAt(true) }}
             </p>
             @if($role)
             <p style="margin: 10px 0; color: #666;">
