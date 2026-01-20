@@ -41,14 +41,18 @@ class NewRequestsNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $subject = __('messages.new_requests_notification_subject', ['name' => $this->role->name, 'count' => $this->requestCount]);
-        $line = __('messages.new_requests_notification_line', ['name' => $this->role->name, 'count' => $this->requestCount]);
+        $actionUrl = route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'requests']);
+        $unsubscribeUrl = route('role.unsubscribe', ['subdomain' => $this->role->subdomain]);
 
         return (new MailMessage)
                     ->subject($subject)
-                    ->line($line)
                     ->cc($this->ccEmails)
-                    ->action(__('messages.view_details'), route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'requests']))
-                    ->line(__('messages.thank_you_for_using'));
+                    ->view('emails.new_requests', [
+                        'role' => $this->role,
+                        'requestCount' => $this->requestCount,
+                        'actionUrl' => $actionUrl,
+                        'unsubscribeUrl' => $unsubscribeUrl,
+                    ]);
     }
 
     /**
