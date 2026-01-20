@@ -26,25 +26,29 @@ abstract class AbstractEventDesign
     // Language and layout
     protected string $lang;
     protected bool $rtl;
-    
+
     // Font configuration
     protected array $fonts = [];
     protected const DEFAULT_FONT_SIZE = 16;
     protected const DEFAULT_LINE_HEIGHT = 1.4;
-    
+
     // Design-specific dimensions
     protected int $totalWidth;
     protected int $totalHeight;
-    
-    public function __construct(Role $role, Collection $events)
+
+    // Direct registration option
+    protected bool $directRegistration;
+
+    public function __construct(Role $role, Collection $events, bool $directRegistration = false)
     {
         // Check if GD extension is available
         if (!extension_loaded('gd')) {
             throw new \RuntimeException('GD extension is required to generate event graphics');
         }
-        
+
         $this->role = $role;
         $this->events = $events->take(self::MAX_EVENTS)->values();
+        $this->directRegistration = $directRegistration;
         
         // Language code only affects RTL layout direction, not font selection
         // Fonts are automatically selected based on text content

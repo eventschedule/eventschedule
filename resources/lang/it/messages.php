@@ -705,4 +705,12 @@ return [
     'schedule' => 'Calendario',
     'device' => 'Dispositivo',
     'date' => 'Data',
+    'subscribe' => 'Iscriviti',
+    'submit_event' => 'Invia Evento',
+    'link_type' => 'Tipo di Link',
+    'link_to_event_page' => 'Link alla Pagina Evento',
+    'link_to_registration' => 'Link Diretto alla Registrazione',
+    'text' => 'Testo',
+    'download' => 'Scarica',
+    'copy' => 'Copia',
 ];

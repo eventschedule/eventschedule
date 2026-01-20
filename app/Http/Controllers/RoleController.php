@@ -288,6 +288,12 @@ class RoleController extends Controller
             }
 
             if ($event) {
+                // Handle direct registration redirect when URL has trailing slash
+                if ($request->attributes->get('has_trailing_slash')) {
+                    app(AnalyticsService::class)->recordView($role, $event, $request);
+                    return redirect($event->registration_url ?: $event->getGuestUrl($subdomain));
+                }
+
                 if (! $date && $event->days_of_week) {
                     $nextDate = now();
                     $daysOfWeek = str_split($event->days_of_week);
@@ -301,7 +307,7 @@ class RoleController extends Controller
                 }
             } else if (!$selectedGroup) {
                 return redirect($role->getGuestUrl());
-            }        
+            }
         }
 
         // Also check for schedule parameter in query string

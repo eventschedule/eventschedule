@@ -705,4 +705,12 @@ return [
     'schedule' => 'الجدول',
     'device' => 'الجهاز',
     'date' => 'التاريخ',
+    'subscribe' => 'اشترك',
+    'submit_event' => 'إرسال فعالية',
+    'link_type' => 'نوع الرابط',
+    'link_to_event_page' => 'رابط لصفحة الحدث',
+    'link_to_registration' => 'رابط مباشر للتسجيل',
+    'text' => 'نص',
+    'download' => 'تحميل',
+    'copy' => 'نسخ',
 ];

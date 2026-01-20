@@ -8,6 +8,7 @@ use App\Http\Middleware\EnsureEmailIsVerified;
 use App\Http\Middleware\HandleBotTraffic;
 use App\Http\Middleware\SanitizeUserAgent;
 use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\DetectTrailingSlash;
 use Sentry\Laravel\Integration;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -26,7 +27,10 @@ return Application::configure(basePath: dirname(__DIR__))
         
         // Sanitize user agent before session middleware processes it
         $middleware->prepend(SanitizeUserAgent::class);
-        
+
+        // Detect trailing slash in URL before Laravel normalizes it
+        $middleware->prepend(DetectTrailingSlash::class);
+
         $middleware->append(SecurityHeaders::class);
         
         $middleware->web(append: [

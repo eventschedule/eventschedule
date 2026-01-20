@@ -708,4 +708,12 @@ return [
     'schedule' => 'Kalender',
     'device' => 'Gerät',
     'date' => 'Datum',
+    'subscribe' => 'Abonnieren',
+    'submit_event' => 'Event Einreichen',
+    'link_type' => 'Link-Typ',
+    'link_to_event_page' => 'Link zur Eventseite',
+    'link_to_registration' => 'Direkt zur Anmeldung',
+    'text' => 'Text',
+    'download' => 'Herunterladen',
+    'copy' => 'Kopieren',
 ];

@@ -13,26 +13,28 @@ class EventGraphicGenerator
     protected Role $role;
     protected Collection $events;
     protected string $layout;
+    protected bool $directRegistration;
     protected AbstractEventDesign $design;
-    
-    public function __construct(Role $role, Collection $events, string $layout = 'grid')
+
+    public function __construct(Role $role, Collection $events, string $layout = 'grid', bool $directRegistration = false)
     {
         $this->role = $role;
         $this->events = $events;
         $this->layout = $layout;
-        
+        $this->directRegistration = $directRegistration;
+
         // Create the appropriate design based on layout
         $this->design = $this->createDesign();
     }
-    
+
     protected function createDesign(): AbstractEventDesign
     {
         switch (strtolower($this->layout)) {
             case 'list':
-                return new ListDesign($this->role, $this->events);
+                return new ListDesign($this->role, $this->events, $this->directRegistration);
             case 'grid':
             default:
-                return new GridDesign($this->role, $this->events);
+                return new GridDesign($this->role, $this->events, $this->directRegistration);
         }
     }
     
@@ -180,7 +182,7 @@ class EventGraphicGenerator
      */
     public function withLayout(string $layout): self
     {
-        return new self($this->role, $this->events, $layout);
+        return new self($this->role, $this->events, $layout, $this->directRegistration);
     }
     
     /**
