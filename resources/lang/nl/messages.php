@@ -737,4 +737,6 @@ return [
     'yes' => 'Ja',
     'no' => 'Nee',
     'field_required_error' => 'Dit veld is verplicht',
+    'venue_name' => 'Naam van de Locatie',
+    'matched_existing_venue' => 'Bestaande locatie gevonden',
 ];

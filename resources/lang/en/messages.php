@@ -759,4 +759,6 @@ return [
     'yes' => 'Yes',
     'no' => 'No',
     'field_required_error' => 'This field is required',
+    'venue_name' => 'Venue Name',
+    'matched_existing_venue' => 'Matched existing venue',
 ];
