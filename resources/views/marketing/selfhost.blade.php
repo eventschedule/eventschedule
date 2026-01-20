@@ -218,17 +218,6 @@
                                 </svg>
                             </div>
                             <div>
-                                <h4 class="font-semibold text-white">Automatic backup before update</h4>
-                                <p class="text-gray-400 text-sm">Your data is safely backed up before any update is applied</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-4">
-                            <div class="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            <div>
                                 <h4 class="font-semibold text-white">Database migrations included</h4>
                                 <p class="text-gray-400 text-sm">Schema changes are applied automatically</p>
                             </div>
@@ -240,8 +229,19 @@
                                 </svg>
                             </div>
                             <div>
-                                <h4 class="font-semibold text-white">Rollback if needed</h4>
-                                <p class="text-gray-400 text-sm">Easy rollback to previous version if something goes wrong</p>
+                                <h4 class="font-semibold text-white">No downtime required</h4>
+                                <p class="text-gray-400 text-sm">Updates complete in seconds with minimal disruption</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <div class="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-white">Version notifications</h4>
+                                <p class="text-gray-400 text-sm">Get notified in your admin panel when updates are available</p>
                             </div>
                         </li>
                     </ul>
