@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Utils\UrlUtils;
+use Illuminate\Database\Eloquent\Model;
 
 class Sale extends Model
 {
@@ -18,6 +18,14 @@ class Sale extends Model
         'status',
         'payment_method',
         'payment_amount',
+        'custom_value1',
+        'custom_value2',
+        'custom_value3',
+        'custom_value4',
+        'custom_value5',
+        'custom_value6',
+        'custom_value7',
+        'custom_value8',
     ];
 
     protected static function booted()
@@ -65,7 +73,7 @@ class Sale extends Model
     public function toApiData()
     {
         $data = new \stdClass;
-        
+
         $data->id = UrlUtils::encodeId($this->id);
         $data->event_id = UrlUtils::encodeId($this->event_id);
         $data->name = $this->name;
@@ -78,7 +86,7 @@ class Sale extends Model
         $data->secret = $this->secret;
         $data->created_at = $this->created_at ? $this->created_at->toISOString() : null;
         $data->updated_at = $this->updated_at ? $this->updated_at->toISOString() : null;
-        
+
         // Include tickets
         $data->tickets = $this->saleTickets->map(function ($saleTicket) {
             return [
@@ -88,9 +96,9 @@ class Sale extends Model
                 'type' => $saleTicket->ticket->type,
             ];
         })->values();
-        
+
         $data->total_quantity = $this->quantity();
-        
+
         return $data;
     }
 }

@@ -301,6 +301,8 @@ return [
     'select_currency' => 'Währung auswählen',
     'add_type' => 'Typ hinzufügen',
     'ticket_notes' => 'Ticketnotizen',
+    'terms_url' => 'AGB-URL',
+    'terms_url_help' => 'Benutzerdefinierte URL für Allgemeine Geschäftsbedingungen für Tickets. Leer lassen für Standard.',
     'price' => 'Preis',
     'quantity' => 'Menge',
     'unlimited' => 'Unbegrenzt',
@@ -475,7 +477,7 @@ return [
     'schedule_url' => 'Zeitplan-URL',
     'back_to_schedule' => 'Zurück zum Zeitplan',
     'all_schedules' => 'Alle Zeitpläne',
-    
+
     // Categories
     'parties_&_festivals' => 'Partys & Festivals',
     'concerts' => 'Konzerte',
@@ -596,7 +598,7 @@ return [
     'create_account_benefits' => 'Erstellen Sie ein Konto, um Ihr Profil zu verwalten und Ihre Veranstaltungen bearbeiten zu können',
     'create_account_link' => ':link um Ihr Profil zu verwalten und Ihre Veranstaltungen bearbeiten zu können',
     'create_an_account' => 'Konto erstellen',
-    
+
     // Google Calendar Integration
     'google_calendar_integration' => 'Google Kalender Integration',
     'connect_google_calendar_description' => 'Verbinden Sie Ihren Google Kalender, um Ihre Veranstaltungen automatisch zu synchronisieren.',
@@ -717,4 +719,23 @@ return [
     'text' => 'Text',
     'download' => 'Herunterladen',
     'copy' => 'Kopieren',
+    'add_custom_field' => 'Benutzerdefiniertes Feld hinzufügen',
+    'add_field' => 'Feld hinzufügen',
+    'custom_field' => 'Benutzerdefiniertes Feld',
+    'custom_fields' => 'Benutzerdefinierte Felder',
+    'field_name' => 'Feldname',
+    'field_type' => 'Typ',
+    'field_options' => 'Optionen',
+    'field_required' => 'Erforderlich',
+    'type_string' => 'Text',
+    'type_multiline_string' => 'Mehrzeiliger Text',
+    'type_switch' => 'Ja/Nein',
+    'type_date' => 'Datum',
+    'type_dropdown' => 'Dropdown',
+    'options_placeholder' => 'Optionen durch Kommas getrennt eingeben',
+    'per_order' => 'Pro Bestellung',
+    'per_ticket' => 'Pro Ticket',
+    'yes' => 'Ja',
+    'no' => 'Nein',
+    'field_required_error' => 'Dieses Feld ist erforderlich',
 ];

@@ -8,11 +8,15 @@
             data() {
                 return {
                     createAccount: @json(old('create_account', false)),
-                    tickets: @json($event->tickets->map(function ($ticket) { 
-                        $data = $ticket->toData(request()->date); 
+                    tickets: @json($event->tickets->map(function ($ticket) {
+                        $data = $ticket->toData(request()->date);
                         $data['selectedQty'] = old('tickets')[$data['id']] ?? 0;
+                        $data['custom_fields'] = $ticket->custom_fields ?? [];
+                        $data['custom_values'] = {};
                         return $data;
                     })),
+                    eventCustomFields: @json($event->custom_fields ?? []),
+                    eventCustomValues: @json(old('event_custom_values', [])),
                     name: @json(old('name', auth()->check() ? auth()->user()->name : '')),
                     email: @json(old('email', auth()->check() ? auth()->user()->email : '')),
                     password: '',
@@ -33,10 +37,13 @@
                     }, 0);
                 },
                 hasSelectedTickets() {
-                    const hasValidForm = this.tickets.some(ticket => ticket.selectedQty > 0) && 
+                    const hasValidForm = this.tickets.some(ticket => ticket.selectedQty > 0) &&
                         this.name.trim() !== '' &&
                         this.email.trim() !== '';
                     return hasValidForm;
+                },
+                hasEventCustomFields() {
+                    return this.eventCustomFields && Object.keys(this.eventCustomFields).length > 0;
                 },
                 isCombinedMode() {
                     return this.totalTicketsMode === 'combined';
@@ -130,7 +137,7 @@
             @if (! auth()->check() && config('app.hosted'))
                 <div class="mt-6">
                     <div class="flex items-center">
-                        <input id="create_account" name="create_account" type="checkbox" 
+                        <input id="create_account" name="create_account" type="checkbox"
                             v-model="createAccount" value="1"
                             class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
                         <label for="create_account" class="ml-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
@@ -140,7 +147,7 @@
 
                     <div class="mt-6" v-if="createAccount">
                         <label for="password" class="text-gray-900 dark:text-gray-100">{{ __('messages.password') . ' *' }}</label>
-                        <input type="password" name="password" id="password" class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" 
+                        <input type="password" name="password" id="password" class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                             v-model="password" required autocomplete="new-password" />
                         <x-input-error class="mt-2" :messages="$errors->get('password')" />
                     </div>
@@ -148,7 +155,59 @@
             @endif
         </div>
 
-    
+        <!-- Event-level Custom Fields -->
+        <div v-if="hasEventCustomFields" class="mb-12">
+            <div v-for="(field, fieldKey) in eventCustomFields" :key="fieldKey" class="mb-4">
+                <label :for="`event_custom_${fieldKey}`" class="text-gray-900 dark:text-gray-100">
+                    @{{ field.name }}@{{ field.required ? ' *' : '' }}
+                </label>
+                <!-- Text input -->
+                <input v-if="field.type === 'string'" type="text"
+                    :name="`event_custom_values[${fieldKey}]`"
+                    :id="`event_custom_${fieldKey}`"
+                    v-model="eventCustomValues[fieldKey]"
+                    :required="field.required"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
+                <!-- Multiline text -->
+                <textarea v-else-if="field.type === 'multiline_string'"
+                    :name="`event_custom_values[${fieldKey}]`"
+                    :id="`event_custom_${fieldKey}`"
+                    v-model="eventCustomValues[fieldKey]"
+                    :required="field.required"
+                    rows="3"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"></textarea>
+                <!-- Yes/No switch -->
+                <div v-else-if="field.type === 'switch'" class="mt-1">
+                    <select :name="`event_custom_values[${fieldKey}]`"
+                        :id="`event_custom_${fieldKey}`"
+                        v-model="eventCustomValues[fieldKey]"
+                        :required="field.required"
+                        class="block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <option value="">{{ __('messages.please_select') }}</option>
+                        <option value="Yes">{{ __('messages.yes') }}</option>
+                        <option value="No">{{ __('messages.no') }}</option>
+                    </select>
+                </div>
+                <!-- Date picker -->
+                <input v-else-if="field.type === 'date'" type="date"
+                    :name="`event_custom_values[${fieldKey}]`"
+                    :id="`event_custom_${fieldKey}`"
+                    v-model="eventCustomValues[fieldKey]"
+                    :required="field.required"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
+                <!-- Dropdown -->
+                <select v-else-if="field.type === 'dropdown'"
+                    :name="`event_custom_values[${fieldKey}]`"
+                    :id="`event_custom_${fieldKey}`"
+                    v-model="eventCustomValues[fieldKey]"
+                    :required="field.required"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                    <option value="">{{ __('messages.please_select') }}</option>
+                    <option v-for="option in (field.options || '').split(',')" :key="option.trim()" :value="option.trim()">@{{ option.trim() }}</option>
+                </select>
+            </div>
+        </div>
+
         <div v-for="(ticket, index) in tickets" :key="ticket.id" class="mb-8">
             <div class="flex items-center justify-between">
                 <div>
@@ -171,6 +230,59 @@
                             </template>
                         </select>
                     </p>
+                </div>
+            </div>
+
+            <!-- Ticket-level Custom Fields (shown when ticket is selected) -->
+            <div v-if="ticket.selectedQty > 0 && ticket.custom_fields && Object.keys(ticket.custom_fields).length > 0" class="mt-4 pl-4 border-l-2 border-gray-200 dark:border-gray-600">
+                <div v-for="(field, fieldKey) in ticket.custom_fields" :key="fieldKey" class="mb-3">
+                    <label :for="`ticket_custom_${ticket.id}_${fieldKey}`" class="text-sm text-gray-900 dark:text-gray-100">
+                        @{{ field.name }}@{{ field.required ? ' *' : '' }}
+                    </label>
+                    <!-- Text input -->
+                    <input v-if="field.type === 'string'" type="text"
+                        :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
+                        :id="`ticket_custom_${ticket.id}_${fieldKey}`"
+                        v-model="ticket.custom_values[fieldKey]"
+                        :required="field.required"
+                        class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
+                    <!-- Multiline text -->
+                    <textarea v-else-if="field.type === 'multiline_string'"
+                        :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
+                        :id="`ticket_custom_${ticket.id}_${fieldKey}`"
+                        v-model="ticket.custom_values[fieldKey]"
+                        :required="field.required"
+                        rows="2"
+                        class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"></textarea>
+                    <!-- Yes/No switch -->
+                    <div v-else-if="field.type === 'switch'" class="mt-1">
+                        <select :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
+                            :id="`ticket_custom_${ticket.id}_${fieldKey}`"
+                            v-model="ticket.custom_values[fieldKey]"
+                            :required="field.required"
+                            class="block w-full text-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                            <option value="">{{ __('messages.please_select') }}</option>
+                            <option value="Yes">{{ __('messages.yes') }}</option>
+                            <option value="No">{{ __('messages.no') }}</option>
+                        </select>
+                    </div>
+                    <!-- Date picker -->
+                    <input v-else-if="field.type === 'date'" type="date"
+                        :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
+                        :id="`ticket_custom_${ticket.id}_${fieldKey}`"
+                        v-model="ticket.custom_values[fieldKey]"
+                        :required="field.required"
+                        class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
+                    <!-- Dropdown -->
+                    <select v-else-if="field.type === 'dropdown'"
+                        :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
+                        :id="`ticket_custom_${ticket.id}_${fieldKey}`"
+                        v-model="ticket.custom_values[fieldKey]"
+                        :required="field.required"
+                        class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <option value="">{{ __('messages.please_select') }}</option>
+                        <option v-for="option in (field.options || '').split(',')" :key="option.trim()" :value="option.trim()">@{{ option.trim() }}</option>
+                    </select>
                 </div>
             </div>
         </div>

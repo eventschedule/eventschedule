@@ -1155,6 +1155,49 @@
                                         class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
                                 </div>
 
+                                <!-- Event-level Custom Fields -->
+                                <div class="mb-6">
+                                    <x-input-label :value="__('messages.custom_fields') . ' (' . __('messages.per_order') . ')'" class="mb-3" />
+
+                                    <div v-if="eventCustomFields && Object.keys(eventCustomFields).length > 0">
+                                        <div v-for="(field, fieldKey) in eventCustomFields" :key="fieldKey" class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-md">
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <x-input-label :value="__('messages.field_name')" class="text-xs" />
+                                                    <x-text-input type="text" v-model="field.name" class="mt-1 block w-full text-sm" required />
+                                                </div>
+                                                <div>
+                                                    <x-input-label :value="__('messages.field_type')" class="text-xs" />
+                                                    <select v-model="field.type" class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                                        <option value="string">{{ __('messages.type_string') }}</option>
+                                                        <option value="multiline_string">{{ __('messages.type_multiline_string') }}</option>
+                                                        <option value="switch">{{ __('messages.type_switch') }}</option>
+                                                        <option value="date">{{ __('messages.type_date') }}</option>
+                                                        <option value="dropdown">{{ __('messages.type_dropdown') }}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="mt-2" v-if="field.type === 'dropdown'">
+                                                <x-input-label :value="__('messages.field_options')" class="text-xs" />
+                                                <x-text-input type="text" v-model="field.options" class="mt-1 block w-full text-sm" :placeholder="__('messages.options_placeholder')" />
+                                            </div>
+                                            <div class="mt-2 flex items-center justify-between">
+                                                <div class="flex items-center">
+                                                    <input type="checkbox" v-model="field.required" :id="`event_field_required_${fieldKey}`" class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                                                    <label :for="`event_field_required_${fieldKey}`" class="ml-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
+                                                </div>
+                                                <x-secondary-button @click="removeEventCustomField(fieldKey)" type="button" class="text-xs py-1 px-2">
+                                                    {{ __('messages.remove') }}
+                                                </x-secondary-button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="custom_fields" :value="JSON.stringify(eventCustomFields || {})">
+                                    <x-secondary-button @click="addEventCustomField" type="button" class="mt-2" v-if="getEventCustomFieldCount() < 8">
+                                        {{ __('messages.add_field') }}
+                                    </x-secondary-button>
+                                </div>
+
                                 <div class="mb-6">
                                     <div v-for="(ticket, index) in tickets" :key="index" 
                                         :class="{'mt-4 p-4 border border-gray-300 dark:border-gray-700 rounded-lg': tickets.length > 1, 'mt-4': tickets.length === 1}">
@@ -1175,7 +1218,10 @@
                                                 <x-text-input v-bind:name="`tickets[${index}][type]`" v-model="ticket.type" 
                                                     class="mt-1 block w-full" required />
                                             </div>
-                                            <div v-if="tickets.length > 1" class="flex items-end">
+                                            <div v-if="tickets.length > 1" class="flex items-end gap-2">
+                                                <x-secondary-button @click="addTicketCustomField(index)" type="button" class="mt-1" v-if="getTicketCustomFieldCount(index) < 8">
+                                                    {{ __('messages.add_field') }}
+                                                </x-secondary-button>
                                                 <x-secondary-button @click="removeTicket(index)" type="button" class="mt-1">
                                                     {{ __('messages.remove') }}
                                                 </x-secondary-button>
@@ -1186,13 +1232,50 @@
                                             <textarea v-bind:name="`tickets[${index}][description]`" v-model="ticket.description" rows="4"
                                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
                                         </div>
+
+                                        <!-- Ticket-level Custom Fields -->
+                                        <div class="mt-4" v-if="ticket.custom_fields && Object.keys(ticket.custom_fields).length > 0">
+                                            <x-input-label :value="__('messages.custom_fields') . ' (' . __('messages.per_ticket') . ')'" />
+                                            <div v-for="(field, fieldKey) in ticket.custom_fields" :key="fieldKey" class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-md">
+                                                <div class="grid grid-cols-2 gap-2">
+                                                    <div>
+                                                        <x-input-label :value="__('messages.field_name')" class="text-xs" />
+                                                        <x-text-input type="text" v-model="field.name" class="mt-1 block w-full text-sm" required />
+                                                    </div>
+                                                    <div>
+                                                        <x-input-label :value="__('messages.field_type')" class="text-xs" />
+                                                        <select v-model="field.type" class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
+                                                            <option value="string">{{ __('messages.type_string') }}</option>
+                                                            <option value="multiline_string">{{ __('messages.type_multiline_string') }}</option>
+                                                            <option value="switch">{{ __('messages.type_switch') }}</option>
+                                                            <option value="date">{{ __('messages.type_date') }}</option>
+                                                            <option value="dropdown">{{ __('messages.type_dropdown') }}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2" v-if="field.type === 'dropdown'">
+                                                    <x-input-label :value="__('messages.field_options')" class="text-xs" />
+                                                    <x-text-input type="text" v-model="field.options" class="mt-1 block w-full text-sm" :placeholder="__('messages.options_placeholder')" />
+                                                </div>
+                                                <div class="mt-2 flex items-center justify-between">
+                                                    <div class="flex items-center">
+                                                        <input type="checkbox" v-model="field.required" :id="`ticket_${index}_field_required_${fieldKey}`" class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300 rounded">
+                                                        <label :for="`ticket_${index}_field_required_${fieldKey}`" class="ml-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
+                                                    </div>
+                                                    <x-secondary-button @click="removeTicketCustomField(index, fieldKey)" type="button" class="text-xs py-1 px-2">
+                                                        {{ __('messages.remove') }}
+                                                    </x-secondary-button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" v-bind:name="`tickets[${index}][custom_fields]`" :value="JSON.stringify(ticket.custom_fields || {})">
                                     </div>
 
                                     <!-- Total Tickets Mode Selection -->
                                     <div v-if="hasSameTicketQuantities && tickets.length > 1" class="mt-6 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
                                         <div class="space-y-3">
                                             <div class="flex items-center">
-                                                <input id="total_tickets_individual" name="total_tickets_mode" type="radio" 
+                                                <input id="total_tickets_individual" name="total_tickets_mode" type="radio"
                                                     value="individual" v-model="event.total_tickets_mode"
                                                     class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300">
                                                 <label for="total_tickets_individual" class="ml-3 block text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -1203,7 +1286,7 @@
                                                 </label>
                                             </div>
                                             <div class="flex items-center">
-                                                <input id="total_tickets_combined" name="total_tickets_mode" type="radio" 
+                                                <input id="total_tickets_combined" name="total_tickets_mode" type="radio"
                                                     value="combined" v-model="event.total_tickets_mode"
                                                     class="h-4 w-4 text-[#4E81FA] focus:ring-[#4E81FA] border-gray-300">
                                                 <label for="total_tickets_combined" class="ml-3 block text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -1216,9 +1299,14 @@
                                         </div>
                                     </div>
 
-                                    <x-secondary-button @click="addTicket" type="button" class="mt-4">
-                                        {{ __('messages.add_type') }}
-                                    </x-secondary-button>
+                                    <div class="flex gap-2 mt-4">
+                                        <x-secondary-button @click="addTicket" type="button">
+                                            {{ __('messages.add_type') }}
+                                        </x-secondary-button>
+                                        <x-secondary-button @click="addTicketCustomField(0)" type="button" v-if="tickets.length === 1 && getTicketCustomFieldCount(0) < 8">
+                                            {{ __('messages.add_field') }}
+                                        </x-secondary-button>
+                                    </div>
                                 </div>
 
                                 <br/>
@@ -1397,11 +1485,12 @@
         eventName: @json($event->name ?? ''),
         tickets: @json($event->tickets ?? [new Ticket()]).map(ticket => ({
           ...ticket,
+          custom_fields: ticket.custom_fields || {},
           /*
           price: new Intl.NumberFormat('{{ app()->getLocale() }}', {
             style: 'currency',
             currency: '{{ $event->ticket_currency_code ?? "USD" }}'
-          }).format(ticket.price).toString().replace(/[^\d.,]/g, '')         
+          }).format(ticket.price).toString().replace(/[^\d.,]/g, '')
           */
          price: new Intl.NumberFormat('{{ app()->getLocale() }}', {
             style: 'decimal',
@@ -1409,6 +1498,7 @@
             maximumFractionDigits: 2
           }).format(ticket.price)
         })),
+        eventCustomFields: @json($event->custom_fields ?? []),
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
         soldLabel: "{{ __('messages.sold_reserved') }}",
         isRecurring: @json($event->days_of_week ? true : false),
@@ -1718,10 +1808,51 @@
             quantity: null,
             price: null,
             description: '',
+            custom_fields: {},
         });
       },
       removeTicket(index) {
         this.tickets.splice(index, 1);
+      },
+      addEventCustomField() {
+        const fieldCount = Object.keys(this.eventCustomFields || {}).length;
+        if (fieldCount >= 8) return;
+        const fieldKey = 'field' + (fieldCount + 1);
+        this.eventCustomFields = {
+          ...this.eventCustomFields,
+          [fieldKey]: { name: '', type: 'string', required: false }
+        };
+      },
+      removeEventCustomField(fieldKey) {
+        const newFields = { ...this.eventCustomFields };
+        delete newFields[fieldKey];
+        this.eventCustomFields = newFields;
+      },
+      getEventCustomFieldCount() {
+        return Object.keys(this.eventCustomFields || {}).length;
+      },
+      addTicketCustomField(ticketIndex) {
+        const ticket = this.tickets[ticketIndex];
+        if (!ticket.custom_fields) {
+          ticket.custom_fields = {};
+        }
+        const fieldCount = Object.keys(ticket.custom_fields).length;
+        if (fieldCount >= 8) return;
+        const fieldKey = 'field' + (fieldCount + 1);
+        ticket.custom_fields = {
+          ...ticket.custom_fields,
+          [fieldKey]: { name: '', type: 'string', required: false }
+        };
+      },
+      removeTicketCustomField(ticketIndex, fieldKey) {
+        const ticket = this.tickets[ticketIndex];
+        const newFields = { ...ticket.custom_fields };
+        delete newFields[fieldKey];
+        ticket.custom_fields = newFields;
+      },
+      getTicketCustomFieldCount(ticketIndex) {
+        const ticket = this.tickets[ticketIndex];
+        return Object.keys(ticket.custom_fields || {}).length;
       },
       toggleExpireUnpaid() {
         if (! this.event.expire_unpaid_tickets) {

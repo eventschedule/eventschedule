@@ -158,6 +158,8 @@ return [
     'select_currency' => 'Seleziona valuta',
     'add_type' => 'Aggiungi tipo',
     'ticket_notes' => 'Note del biglietto',
+    'terms_url' => 'URL termini',
+    'terms_url_help' => 'URL personalizzato per termini e condizioni dei biglietti. Lasciare vuoto per usare il predefinito.',
     'price' => 'Prezzo',
     'quantity' => 'Quantità',
     'unlimited' => 'Illimitato',
@@ -334,7 +336,7 @@ return [
     'schedule_url' => 'URL del Programma',
     'back_to_schedule' => 'Torna al Programma',
     'all_schedules' => 'Tutti i Programmi',
-    
+
     // Categories
     'parties_&_festivals' => 'Feste e Festival',
     'concerts' => 'Concerti',
@@ -355,7 +357,7 @@ return [
     'embed_url' => 'URL di Incorporazione',
     'iframe_code' => 'Codice Iframe',
     'close' => 'Chiudi',
-    
+
     // Missing keys
     'select_a_tab' => 'Seleziona una scheda',
     'requests' => 'Richieste',
@@ -593,7 +595,7 @@ return [
     'create_account_benefits' => 'Crea un account per gestire il tuo profilo e poter modificare i tuoi eventi',
     'create_account_link' => ':link per gestire il tuo profilo e poter modificare i tuoi eventi',
     'create_an_account' => 'Crea un account',
-    
+
     // Google Calendar Integration
     'google_calendar_integration' => 'Integrazione Google Calendar',
     'connect_google_calendar_description' => 'Collega il tuo Google Calendar per sincronizzare automaticamente i tuoi eventi.',
@@ -714,4 +716,23 @@ return [
     'text' => 'Testo',
     'download' => 'Scarica',
     'copy' => 'Copia',
+    'add_custom_field' => 'Aggiungi Campo Personalizzato',
+    'add_field' => 'Aggiungi Campo',
+    'custom_field' => 'Campo Personalizzato',
+    'custom_fields' => 'Campi Personalizzati',
+    'field_name' => 'Nome Campo',
+    'field_type' => 'Tipo',
+    'field_options' => 'Opzioni',
+    'field_required' => 'Obbligatorio',
+    'type_string' => 'Testo',
+    'type_multiline_string' => 'Testo Multilinea',
+    'type_switch' => 'Sì/No',
+    'type_date' => 'Data',
+    'type_dropdown' => 'Menu a Tendina',
+    'options_placeholder' => 'Inserisci opzioni separate da virgole',
+    'per_order' => 'Per Ordine',
+    'per_ticket' => 'Per Biglietto',
+    'yes' => 'Sì',
+    'no' => 'No',
+    'field_required_error' => 'Questo campo è obbligatorio',
 ];

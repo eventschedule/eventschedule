@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use App\Models\EventRole;
-use Illuminate\Database\Eloquent\Model;
+use App\Jobs\SyncEventToGoogleCalendar;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use App\Jobs\SyncEventToGoogleCalendar;
 
 class Event extends Model
 {
@@ -25,6 +24,7 @@ class Event extends Model
         'tickets_enabled',
         'ticket_currency_code',
         'ticket_notes',
+        'terms_url',
         'total_tickets_mode',
         'payment_method',
         'payment_instructions',
@@ -34,10 +34,12 @@ class Event extends Model
         'creator_role_id',
         'recurring_end_type',
         'recurring_end_value',
+        'custom_fields',
     ];
 
     protected $casts = [
         'duration' => 'float',
+        'custom_fields' => 'array',
     ];
 
     /**
@@ -65,7 +67,7 @@ class Event extends Model
 
             if ($model->isDirty('starts_at') && ! $model->days_of_week) {
                 $model->tickets->each(function ($ticket) use ($model) {
-                    if ($ticket->sold) {               
+                    if ($ticket->sold) {
                         $sold = json_decode($ticket->sold, true);
                         if ($oldDate = array_key_first($sold)) {
                             $quantity = $sold[$oldDate];
@@ -80,7 +82,7 @@ class Event extends Model
                 $model->sales->each(function ($sale) use ($model) {
                     $sale->event_date = Carbon::parse($model->starts_at)->format('Y-m-d');
                     $sale->save();
-                });    
+                });
             }
 
             if ($model->isDirty('name') && $model->exists) {
@@ -102,7 +104,7 @@ class Event extends Model
                     $eventRole->description_translated = null;
                     $eventRole->description_html_translated = null;
                     $eventRole->save();
-                }                
+                }
             }
         });
 
@@ -142,14 +144,14 @@ class Event extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
+
     public function venue()
     {
         // Load venue from event_role table where the role is a venue
         return $this->belongsToMany(Role::class, 'event_role', 'event_id', 'role_id')
-                    ->where('roles.type', 'venue')
-                    ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id')
-                    ->using(EventRole::class);
+            ->where('roles.type', 'venue')
+            ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id')
+            ->using(EventRole::class);
     }
 
     public function getVenueAttribute()
@@ -173,7 +175,7 @@ class Event extends Model
             $this->load('roles');
         }
 
-        $role = $this->roles->first(function($role) use ($subdomain) {
+        $role = $this->roles->first(function ($role) use ($subdomain) {
             return $role->subdomain == $subdomain;
         });
 
@@ -191,20 +193,20 @@ class Event extends Model
         if ($this->creatorRole && $this->creatorRole->isCurator()) {
             return $this->creatorRole;
         }
-        
+
         return null;
     }
 
     public function roles()
     {
         return $this->belongsToMany(Role::class)
-                    ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id')
-                    ->using(EventRole::class);
+            ->withPivot('id', 'name_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id')
+            ->using(EventRole::class);
     }
 
     public function curatorBySubdomain($subdomain)
     {
-        return $this->roles->first(function($role) use ($subdomain) {
+        return $this->roles->first(function ($role) use ($subdomain) {
             return $role->subdomain == $subdomain && $role->isCurator();
         });
     }
@@ -216,14 +218,14 @@ class Event extends Model
 
     public function members()
     {
-        return $this->roles->filter(function($role) {
+        return $this->roles->filter(function ($role) {
             return $role->isTalent();
         });
     }
 
     public function role()
     {
-        return $this->roles->first(function($role) {
+        return $this->roles->first(function ($role) {
             return $role->isTalent();
         });
     }
@@ -271,8 +273,8 @@ class Event extends Model
         $role = false;
         $enable24 = false;
 
-        if ($subdomain) {            
-            $role = $this->roles->first(function($role) use ($subdomain) {
+        if ($subdomain) {
+            $role = $this->roles->first(function ($role) use ($subdomain) {
                 return $role->subdomain == $subdomain;
             });
 
@@ -280,15 +282,15 @@ class Event extends Model
                 $enable24 = $role->use_24_hour_time;
             }
         }
-                
+
         if ($user = auth()->user()) {
             // TODO once we track on user
         }
 
         $startAt = $this->getStartDateTime($date, true);
-        
+
         $format = $pretty ? ($enable24 ? 'D, M jS • H:i' : 'D, M jS • g:i A') : 'Y-m-d H:i:s';
-        
+
         // Set locale for date translation if pretty is true and role has language_code
         if ($pretty && $role && $role->language_code) {
             $startAt->setLocale($role->language_code);
@@ -297,20 +299,20 @@ class Event extends Model
         } else {
             $value = $startAt->format($format);
         }
-        
+
         if ($endTime && $this->duration > 0) {
             $startDate = $startAt->format('Y-m-d');
             $startAt->addHours($this->duration);
             $endDate = $startAt->format('Y-m-d');
-            
+
             if ($startDate == $endDate) {
-                $value .= ' ' . __('messages.to') . ' ' . $startAt->format($enable24 ? 'H:i' : 'g:i A');
+                $value .= ' '.__('messages.to').' '.$startAt->format($enable24 ? 'H:i' : 'g:i A');
             } else {
                 if ($pretty && $role && $role->language_code) {
                     $localizedFormat = $enable24 ? 'l, j F • H:i' : 'l, j F • g:i A';
-                    $value = $value . '<br/>' . __('messages.to') . '<br/>' . $startAt->translatedFormat($localizedFormat);
+                    $value = $value.'<br/>'.__('messages.to').'<br/>'.$startAt->translatedFormat($localizedFormat);
                 } else {
-                    $value = $value . '<br/>' . __('messages.to') . '<br/>' . $startAt->format($format);
+                    $value = $value.'<br/>'.__('messages.to').'<br/>'.$startAt->format($format);
                 }
             }
         }
@@ -324,17 +326,17 @@ class Event extends Model
             return false;
         }
 
-        if ($this->days_of_week) {            
+        if ($this->days_of_week) {
             $afterStartDate = Carbon::parse($this->localStartsAt())->isSameDay($date) || Carbon::parse($this->localStartsAt())->lessThanOrEqualTo($date);
             $dayOfWeek = $date->dayOfWeek;
-            
-            if (!$afterStartDate || $this->days_of_week[$dayOfWeek] !== '1') {
+
+            if (! $afterStartDate || $this->days_of_week[$dayOfWeek] !== '1') {
                 return false;
             }
-            
+
             // Check recurring end conditions
             $recurringEndType = $this->recurring_end_type ?? 'never';
-            
+
             if ($recurringEndType === 'on_date' && $this->recurring_end_value) {
                 $endDate = Carbon::createFromFormat('Y-m-d', $this->recurring_end_value)->startOfDay();
                 $checkDate = Carbon::parse($date)->startOfDay();
@@ -345,11 +347,11 @@ class Event extends Model
                 $maxOccurrences = (int) $this->recurring_end_value;
                 $startDate = Carbon::parse($this->localStartsAt())->startOfDay();
                 $checkDate = Carbon::parse($date)->startOfDay();
-                
+
                 // Count occurrences from start date up to and including the check date
                 $occurrenceCount = 0;
                 $currentDate = $startDate->copy();
-                
+
                 while ($currentDate->lte($checkDate)) {
                     $dayOfWeek = $currentDate->dayOfWeek;
                     if ($this->days_of_week[$dayOfWeek] === '1') {
@@ -357,12 +359,12 @@ class Event extends Model
                     }
                     $currentDate->addDay();
                 }
-                
+
                 if ($occurrenceCount > $maxOccurrences) {
                     return false;
                 }
             }
-            
+
             return true;
         } else {
             return Carbon::parse($this->localStartsAt())->isSameDay($date);
@@ -378,7 +380,7 @@ class Event extends Model
                 return false;
             }
         }
-        
+
         // For non-recurring events, check if the event start time is in the past
         if (! $this->days_of_week && $this->starts_at) {
             if (Carbon::parse($this->starts_at)->isPast()) {
@@ -391,7 +393,7 @@ class Event extends Model
 
     public function areTicketsFree()
     {
-        return $this->tickets->every(function($ticket) {
+        return $this->tickets->every(function ($ticket) {
             return $ticket->price == 0;
         });
     }
@@ -405,7 +407,7 @@ class Event extends Model
         } elseif ($this->venue && $this->venue->profile_image_url) {
             return $this->venue->profile_image_url;
         }
-        
+
         return null;
     }
 
@@ -456,19 +458,20 @@ class Event extends Model
         $data = $this->getGuestUrlData($subdomain, $date);
 
         if (! $data['subdomain']) {
-            \Log::error('No subdomain found for event ' . $this->id);
+            \Log::error('No subdomain found for event '.$this->id);
+
             return '';
         }
 
         // Check if the role has a custom domain
-        $role = $this->roles->first(function($role) use ($data) {
+        $role = $this->roles->first(function ($role) use ($data) {
             return $role->subdomain == $data['subdomain'];
         });
 
         if ($role && $role->custom_domain && $useCustomDomain) {
             $url = route('event.view_guest', $data, false);
-            $url = $role->custom_domain . $url;
-            
+            $url = $role->custom_domain.$url;
+
             return explode('?', $url)[0];
         } else {
             return route('event.view_guest', $data);
@@ -479,7 +482,7 @@ class Event extends Model
     {
         $venueSubdomain = $this->venue && $this->venue->isClaimed() ? $this->venue->subdomain : null;
         $roleSubdomain = $this->role() && $this->role()->isClaimed() ? $this->role()->subdomain : null;
-        
+
         if (! $subdomain) {
             $subdomain = $roleSubdomain ? $roleSubdomain : $venueSubdomain;
         }
@@ -493,16 +496,16 @@ class Event extends Model
         if ($venueSubdomain && $roleSubdomain) {
             $slug = $venueSubdomain == $subdomain ? $roleSubdomain : $venueSubdomain;
         }
-        
+
         // TODO supoprt custom_slug
-        
+
         if ($date === null && $this->starts_at) {
             $date = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d');
         }
 
         $data = [
-            'subdomain' => $subdomain, 
-            'slug' => $slug, 
+            'subdomain' => $subdomain,
+            'slug' => $slug,
         ];
 
         if ($date) {
@@ -529,7 +532,7 @@ class Event extends Model
             $str .= $this->getEventUrlDomain();
         }
 
-        $str .=  ' | ' . $this->localStartsAt(true, $date);
+        $str .= ' | '.$this->localStartsAt(true, $date);
 
         return $str;
     }
@@ -544,11 +547,11 @@ class Event extends Model
         $startDate = $startAt->format('Ymd\THis\Z');
         $endDate = $startAt->addSeconds($duration * 3600)->format('Ymd\THis\Z');
 
-        $url = "https://calendar.google.com/calendar/r/eventedit?";
-        $url .= "text=" . urlencode($title);
-        $url .= "&dates=" . $startDate . "/" . $endDate;
-        $url .= "&details=" . urlencode($description);
-        $url .= "&location=" . urlencode($location);
+        $url = 'https://calendar.google.com/calendar/r/eventedit?';
+        $url .= 'text='.urlencode($title);
+        $url .= '&dates='.$startDate.'/'.$endDate;
+        $url .= '&details='.urlencode($description);
+        $url .= '&location='.urlencode($location);
 
         return $url;
     }
@@ -564,14 +567,14 @@ class Event extends Model
         $endDate = $startAt->addSeconds($duration * 3600)->format('Ymd\THis\Z');
 
         $url = "BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\n";
-        $url .= "SUMMARY:" . $title . "\n";
-        $url .= "DESCRIPTION:" . $description . "\n";
-        $url .= "DTSTART:" . $startDate . "\n";
-        $url .= "DTEND:" . $endDate . "\n";
-        $url .= "LOCATION:" . $location . "\n";
+        $url .= 'SUMMARY:'.$title."\n";
+        $url .= 'DESCRIPTION:'.$description."\n";
+        $url .= 'DTSTART:'.$startDate."\n";
+        $url .= 'DTEND:'.$endDate."\n";
+        $url .= 'LOCATION:'.$location."\n";
         $url .= "END:VEVENT\nEND:VCALENDAR";
 
-        return "data:text/calendar;charset=utf8," . urlencode($url);
+        return 'data:text/calendar;charset=utf8,'.urlencode($url);
     }
 
     public function getMicrosoftCalendarUrl($date = null)
@@ -584,13 +587,13 @@ class Event extends Model
         $startDate = $startAt->format('Y-m-d\TH:i:s\Z');
         $endDate = $startAt->addSeconds($duration * 3600)->format('Y-m-d\TH:i:s\Z');
 
-        $url = "https://outlook.live.com/calendar/0/deeplink/compose?";
-        $url .= "subject=" . urlencode($title);
-        $url .= "&body=" . urlencode($description);
-        $url .= "&startdt=" . $startDate;
-        $url .= "&enddt=" . $endDate;
-        $url .= "&location=" . urlencode($location);
-        $url .= "&allday=false";
+        $url = 'https://outlook.live.com/calendar/0/deeplink/compose?';
+        $url .= 'subject='.urlencode($title);
+        $url .= '&body='.urlencode($description);
+        $url .= '&startdt='.$startDate;
+        $url .= '&enddt='.$endDate;
+        $url .= '&location='.urlencode($location);
+        $url .= '&allday=false';
 
         return $url;
     }
@@ -598,10 +601,10 @@ class Event extends Model
     public function getStartDateTime($date = null, $locale = false)
     {
         $timezone = 'UTC';
-        
+
         if ($user = auth()->user()) {
             $timezone = $user->timezone;
-        } else if ($this->creatorRole) {
+        } elseif ($this->creatorRole) {
             $timezone = $this->creatorRole->timezone;
         }
 
@@ -634,9 +637,9 @@ class Event extends Model
         $format = $this->getTimeFormat();
 
         if ($includeYear) {
-            return 'F jS, Y ' . $format;
+            return 'F jS, Y '.$format;
         } else {
-            return 'F jS ' . $format;
+            return 'F jS '.$format;
         }
     }
 
@@ -651,10 +654,11 @@ class Event extends Model
 
         if ($this->duration > 0) {
             $endDate = $date->copy()->addHours($this->duration);
-            return $date->format($use24 ? 'H:i' : 'g:i A') . ' - ' . $endDate->format($use24 ? 'H:i' : 'g:i A');
+
+            return $date->format($use24 ? 'H:i' : 'g:i A').' - '.$endDate->format($use24 ? 'H:i' : 'g:i A');
         } else {
             return $date->format($use24 ? 'H:i' : 'g:i A');
-        }        
+        }
     }
 
     public function getFlyerImageUrlAttribute($value)
@@ -664,15 +668,16 @@ class Event extends Model
         }
 
         if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
-            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $value;
-        } else if (config('filesystems.default') == 'local') {
-            return url('/storage/' . $value);
+            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$value;
+        } elseif (config('filesystems.default') == 'local') {
+            return url('/storage/'.$value);
         } else {
             return $value;
         }
     }
 
-    public function getOtherRole($subdomain) {        
+    public function getOtherRole($subdomain)
+    {
         if ($this->role() && $subdomain == $this->role()->subdomain) {
             return $this->venue;
         } else {
@@ -738,7 +743,7 @@ class Event extends Model
             return false;
         }
 
-        $quantities = $tickets->pluck('quantity')->filter(function($qty) {
+        $quantities = $tickets->pluck('quantity')->filter(function ($qty) {
             return $qty > 0;
         })->unique();
 
@@ -747,7 +752,7 @@ class Event extends Model
 
     public function getSameTicketQuantity()
     {
-        if (!$this->hasSameTicketQuantities()) {
+        if (! $this->hasSameTicketQuantities()) {
             return null;
         }
 
@@ -760,6 +765,7 @@ class Event extends Model
         if ($this->total_tickets_mode === 'combined' && $this->hasSameTicketQuantities()) {
             return $this->getSameTicketQuantity();
         }
+
         return $this->tickets->sum('quantity');
     }
 
@@ -768,7 +774,7 @@ class Event extends Model
      */
     public function getGoogleEventIdForRole($roleId)
     {
-        $eventRole = $this->roles->first(function($role) use ($roleId) {
+        $eventRole = $this->roles->first(function ($role) use ($roleId) {
             return $role->id == $roleId;
         });
 
@@ -788,7 +794,7 @@ class Event extends Model
      */
     public function getGoogleEventIdForSubdomain($subdomain)
     {
-        $role = $this->roles->first(function($role) use ($subdomain) {
+        $role = $this->roles->first(function ($role) use ($subdomain) {
             return $role->subdomain == $subdomain;
         });
 
@@ -800,7 +806,7 @@ class Event extends Model
      */
     public function setGoogleEventIdForSubdomain($subdomain, $googleEventId)
     {
-        $role = $this->roles->first(function($role) use ($subdomain) {
+        $role = $this->roles->first(function ($role) use ($subdomain) {
             return $role->subdomain == $subdomain;
         });
 
@@ -821,7 +827,7 @@ class Event extends Model
                     SyncEventToGoogleCalendar::dispatchSync($this, $role, $action);
                 }
             }
-        }   
+        }
     }
 
     /**
@@ -829,7 +835,7 @@ class Event extends Model
      */
     public function isSyncedToGoogleCalendarForRole($roleId)
     {
-        return !is_null($this->getGoogleEventIdForRole($roleId));
+        return ! is_null($this->getGoogleEventIdForRole($roleId));
     }
 
     /**
@@ -837,7 +843,7 @@ class Event extends Model
      */
     public function isSyncedToGoogleCalendarForSubdomain($subdomain)
     {
-        return !is_null($this->getGoogleEventIdForSubdomain($subdomain));
+        return ! is_null($this->getGoogleEventIdForSubdomain($subdomain));
     }
 
     /**
@@ -845,7 +851,7 @@ class Event extends Model
      */
     public function canBeSyncedToGoogleCalendarForSubdomain($subdomain)
     {
-        $role = $this->roles->first(function($role) use ($subdomain) {
+        $role = $this->roles->first(function ($role) use ($subdomain) {
             return $role->subdomain == $subdomain;
         });
 
@@ -857,7 +863,7 @@ class Event extends Model
      */
     public function getGoogleCalendarSyncStatus(User $user, $roleId = null)
     {
-        if (!$user->google_token) {
+        if (! $user->google_token) {
             return 'not_connected';
         }
 
@@ -875,7 +881,7 @@ class Event extends Model
     {
         $startAt = $this->getStartDateTime($date, $locale);
         $duration = $this->duration > 0 ? $this->duration : 2; // Default to 2 hours if no duration
-        
+
         return $startAt->copy()->addHours($duration);
     }
 
@@ -902,7 +908,7 @@ class Event extends Model
             if ($this->venue->translatedAddress1()) {
                 $address['streetAddress'] = $this->venue->translatedAddress1();
                 if ($this->venue->translatedAddress2()) {
-                    $address['streetAddress'] .= ', ' . $this->venue->translatedAddress2();
+                    $address['streetAddress'] .= ', '.$this->venue->translatedAddress2();
                 }
             }
             if ($this->venue->translatedCity()) {
@@ -920,7 +926,7 @@ class Event extends Model
 
             // Always include address field (required by Google)
             // If we have address data, use it; otherwise provide minimal address
-            if (!empty($address)) {
+            if (! empty($address)) {
                 $address['@type'] = 'PostalAddress';
                 $location['address'] = $address;
             } else {
@@ -954,7 +960,7 @@ class Event extends Model
         // Try to get address from organizer role if available
         $address = [];
         $organizerRole = null;
-        
+
         // Check if organizer is a role with address information
         if ($this->role() && $this->role()->isClaimed()) {
             $organizerRole = $this->role();
@@ -966,7 +972,7 @@ class Event extends Model
             if ($organizerRole->translatedAddress1()) {
                 $address['streetAddress'] = $organizerRole->translatedAddress1();
                 if ($organizerRole->translatedAddress2()) {
-                    $address['streetAddress'] .= ', ' . $organizerRole->translatedAddress2();
+                    $address['streetAddress'] .= ', '.$organizerRole->translatedAddress2();
                 }
             }
             if ($organizerRole->translatedCity()) {
@@ -985,7 +991,7 @@ class Event extends Model
 
         // Always include address field (required by Google)
         // If we have address data, use it; otherwise provide minimal address
-        if (!empty($address)) {
+        if (! empty($address)) {
             $address['@type'] = 'PostalAddress';
             $location['address'] = $address;
         } else {
@@ -1006,8 +1012,8 @@ class Event extends Model
     {
         $url = $this->getGuestUrl();
         $validFrom = $this->getSchemaStartDate(); // Use event start date as validFrom
-        
-        if ($this->tickets_enabled && $this->isPro() && !$this->tickets->isEmpty()) {
+
+        if ($this->tickets_enabled && $this->isPro() && ! $this->tickets->isEmpty()) {
             $offers = [];
             $currency = $this->ticket_currency_code ?: 'USD';
 
@@ -1016,7 +1022,7 @@ class Event extends Model
                     '@type' => 'Offer',
                     'price' => (float) $ticket->price,
                     'priceCurrency' => $currency,
-                    'url' => $url . (strpos($url, '?') !== false ? '&' : '?') . 'tickets=true',
+                    'url' => $url.(strpos($url, '?') !== false ? '&' : '?').'tickets=true',
                     'availability' => 'https://schema.org/InStock',
                     'validFrom' => $validFrom,
                 ];
@@ -1044,7 +1050,7 @@ class Event extends Model
                 'url' => $url,
                 'availability' => 'https://schema.org/InStock',
                 'validFrom' => $validFrom,
-            ]
+            ],
         ];
     }
 
@@ -1069,7 +1075,7 @@ class Event extends Model
             $performers[] = $performer;
         }
 
-        return !empty($performers) ? $performers : null;
+        return ! empty($performers) ? $performers : null;
     }
 
     /**
@@ -1077,7 +1083,7 @@ class Event extends Model
      */
     public function getSchemaEventStatus()
     {
-        if (!$this->starts_at) {
+        if (! $this->starts_at) {
             return 'https://schema.org/EventScheduled';
         }
 
@@ -1096,11 +1102,11 @@ class Event extends Model
     {
         $eventUrl = $this->getGuestUrl();
         $eventName = $this->translatedName() ?: 'Event Organizer';
-        
+
         if ($this->venue && $this->venue->isClaimed()) {
             $name = $this->venue->translatedName();
             $url = $this->venue->getGuestUrl();
-            
+
             return [
                 '@type' => 'Organization',
                 'name' => $name ?: $eventName,
@@ -1109,7 +1115,7 @@ class Event extends Model
         } elseif ($this->role() && $this->role()->isClaimed()) {
             $name = $this->role()->translatedName();
             $url = $this->role()->getGuestUrl();
-            
+
             return [
                 '@type' => 'Person',
                 'name' => $name ?: $eventName,
@@ -1119,7 +1125,7 @@ class Event extends Model
             // Fallback to creator role
             $name = $this->creatorRole->translatedName();
             $url = $this->creatorRole->getGuestUrl();
-            
+
             return [
                 '@type' => $this->creatorRole->isVenue() ? 'Organization' : 'Person',
                 'name' => $name ?: $eventName,
@@ -1143,10 +1149,10 @@ class Event extends Model
     {
         $description = $this->translatedDescription();
         $description = trim(strip_tags($description));
-        
+
         if (empty($description)) {
             // Fallback description
-            return $this->translatedName() . ' - ' . __('messages.event');
+            return $this->translatedName().' - '.__('messages.event');
         }
 
         return $description;
@@ -1158,6 +1164,7 @@ class Event extends Model
     public function getSchemaStartDate($date = null)
     {
         $startAt = $this->getStartDateTime($date, true);
+
         return $startAt->toIso8601String();
     }
 
@@ -1167,6 +1174,7 @@ class Event extends Model
     public function getSchemaEndDate($date = null)
     {
         $endAt = $this->getEndDateTime($date, true);
+
         return $endAt->toIso8601String();
     }
 }

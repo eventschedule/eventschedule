@@ -155,6 +155,8 @@ return [
     'select_currency' => 'Selecteer valuta',
     'add_type' => 'Type toevoegen',
     'ticket_notes' => 'Ticketnotities',
+    'terms_url' => 'Voorwaarden URL',
+    'terms_url_help' => 'Aangepaste URL voor algemene voorwaarden voor tickets. Laat leeg om standaard te gebruiken.',
     'price' => 'Prijs',
     'quantity' => 'Aantal',
     'unlimited' => 'Onbeperkt',
@@ -326,7 +328,7 @@ return [
     'schedule_url' => 'Schema-URL',
     'back_to_schedule' => 'Terug naar Schema',
     'all_schedules' => 'Alle Schema\'s',
-    
+
     // Categories
     'parties_&_festivals' => 'Feesten & Festivals',
     'concerts' => 'Concerten',
@@ -347,7 +349,7 @@ return [
     'embed_url' => 'Insluit-URL',
     'iframe_code' => 'Iframe-code',
     'close' => 'Sluiten',
-    
+
     // Missing keys
     'select_a_tab' => 'Selecteer een tabblad',
     'requests' => 'Verzoeken',
@@ -590,7 +592,7 @@ return [
     'create_account_benefits' => 'Maak een account aan om je profiel te beheren en je evenementen te kunnen bewerken',
     'create_account_link' => ':link om je profiel te beheren en je evenementen te kunnen bewerken',
     'create_an_account' => 'Account aanmaken',
-    
+
     // Google Calendar Integration
     'google_calendar_integration' => 'Google Calendar Integratie',
     'connect_google_calendar_description' => 'Verbind je Google Calendar om je evenementen automatisch te synchroniseren.',
@@ -711,4 +713,23 @@ return [
     'text' => 'Tekst',
     'download' => 'Downloaden',
     'copy' => 'Kopiëren',
+    'add_custom_field' => 'Aangepast Veld Toevoegen',
+    'add_field' => 'Veld Toevoegen',
+    'custom_field' => 'Aangepast Veld',
+    'custom_fields' => 'Aangepaste Velden',
+    'field_name' => 'Veldnaam',
+    'field_type' => 'Type',
+    'field_options' => 'Opties',
+    'field_required' => 'Verplicht',
+    'type_string' => 'Tekst',
+    'type_multiline_string' => 'Meerregelige Tekst',
+    'type_switch' => 'Ja/Nee',
+    'type_date' => 'Datum',
+    'type_dropdown' => 'Dropdown',
+    'options_placeholder' => 'Voer opties in, gescheiden door komma\'s',
+    'per_order' => 'Per Bestelling',
+    'per_ticket' => 'Per Ticket',
+    'yes' => 'Ja',
+    'no' => 'Nee',
+    'field_required_error' => 'Dit veld is verplicht',
 ];

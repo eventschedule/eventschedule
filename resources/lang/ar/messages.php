@@ -299,6 +299,8 @@ return [
     'select_currency' => 'اختر العملة',
     'add_type' => 'إضافة نوع',
     'ticket_notes' => 'ملاحظات التذكرة',
+    'terms_url' => 'رابط الشروط',
+    'terms_url_help' => 'رابط مخصص للشروط والأحكام للتذاكر. اتركه فارغاً لاستخدام الافتراضي.',
     'price' => 'السعر',
     'quantity' => 'الكمية',
     'unlimited' => 'غير محدود',
@@ -472,7 +474,7 @@ return [
     'schedule_url' => 'رابط الجدول',
     'back_to_schedule' => 'العودة إلى الجدول',
     'all_schedules' => 'جميع الجداول',
-    
+
     // Categories
     'parties_&_festivals' => 'الحفلات والمهرجانات',
     'concerts' => 'الحفلات الموسيقية',
@@ -593,7 +595,7 @@ return [
     'create_account_benefits' => 'أنشئ حسابًا لإدارة ملفك الشخصي وتتمكن من تعديل أحداثك',
     'create_account_link' => ':link لإدارة ملفك الشخصي وتتمكن من تعديل أحداثك',
     'create_an_account' => 'أنشئ حسابًا',
-    
+
     // Google Calendar Integration
     'google_calendar_integration' => 'تكامل تقويم جوجل',
     'connect_google_calendar_description' => 'اتصل بتقويم جوجل لمزامنة أحداثك تلقائياً.',
@@ -714,4 +716,23 @@ return [
     'text' => 'نص',
     'download' => 'تحميل',
     'copy' => 'نسخ',
+    'add_custom_field' => 'إضافة حقل مخصص',
+    'add_field' => 'إضافة حقل',
+    'custom_field' => 'حقل مخصص',
+    'custom_fields' => 'حقول مخصصة',
+    'field_name' => 'اسم الحقل',
+    'field_type' => 'النوع',
+    'field_options' => 'الخيارات',
+    'field_required' => 'مطلوب',
+    'type_string' => 'نص',
+    'type_multiline_string' => 'نص متعدد الأسطر',
+    'type_switch' => 'نعم/لا',
+    'type_date' => 'تاريخ',
+    'type_dropdown' => 'قائمة منسدلة',
+    'options_placeholder' => 'أدخل الخيارات مفصولة بفواصل',
+    'per_order' => 'لكل طلب',
+    'per_ticket' => 'لكل تذكرة',
+    'yes' => 'نعم',
+    'no' => 'لا',
+    'field_required_error' => 'هذا الحقل مطلوب',
 ];

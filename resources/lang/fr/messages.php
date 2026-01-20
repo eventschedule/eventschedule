@@ -304,6 +304,8 @@ return [
     'select_currency' => 'Sélectionner la devise',
     'add_type' => 'Ajouter un type',
     'ticket_notes' => 'Notes de billet',
+    'terms_url' => 'URL des conditions',
+    'terms_url_help' => 'URL personnalisée des conditions générales pour les billets. Laisser vide pour utiliser la valeur par défaut.',
     'price' => 'Prix',
     'quantity' => 'Quantité',
     'unlimited' => 'Illimité',
@@ -479,7 +481,7 @@ return [
     'schedule_url' => 'URL du Programme',
     'back_to_schedule' => 'Retour au Programme',
     'all_schedules' => 'Tous les Programmes',
-    
+
     // Categories
     'parties_&_festivals' => 'Fêtes et Festivals',
     'concerts' => 'Concerts',
@@ -592,7 +594,7 @@ return [
     'create_account_benefits' => 'Créez un compte pour gérer votre profil et pouvoir modifier vos événements',
     'create_account_link' => ':link pour gérer votre profil et pouvoir modifier vos événements',
     'create_an_account' => 'Créer un compte',
-    
+
     // Google Calendar Integration
     'google_calendar_integration' => 'Intégration Google Calendar',
     'connect_google_calendar_description' => 'Connectez votre Google Calendar pour synchroniser automatiquement vos événements.',
@@ -713,4 +715,23 @@ return [
     'text' => 'Texte',
     'download' => 'Télécharger',
     'copy' => 'Copier',
+    'add_custom_field' => 'Ajouter un Champ Personnalisé',
+    'add_field' => 'Ajouter un Champ',
+    'custom_field' => 'Champ Personnalisé',
+    'custom_fields' => 'Champs Personnalisés',
+    'field_name' => 'Nom du Champ',
+    'field_type' => 'Type',
+    'field_options' => 'Options',
+    'field_required' => 'Obligatoire',
+    'type_string' => 'Texte',
+    'type_multiline_string' => 'Texte Multiligne',
+    'type_switch' => 'Oui/Non',
+    'type_date' => 'Date',
+    'type_dropdown' => 'Liste Déroulante',
+    'options_placeholder' => 'Entrez les options séparées par des virgules',
+    'per_order' => 'Par Commande',
+    'per_ticket' => 'Par Billet',
+    'yes' => 'Oui',
+    'no' => 'Non',
+    'field_required_error' => 'Ce champ est obligatoire',
 ];

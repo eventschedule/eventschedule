@@ -156,6 +156,8 @@ return [
     'select_currency' => 'Selecionar moeda',
     'add_type' => 'Adicionar tipo',
     'ticket_notes' => 'Notas do ingresso',
+    'terms_url' => 'URL dos termos',
+    'terms_url_help' => 'URL personalizada de termos e condições para ingressos. Deixe em branco para usar o padrão.',
     'price' => 'Preço',
     'quantity' => 'Quantidade',
     'unlimited' => 'Ilimitado',
@@ -332,7 +334,7 @@ return [
     'schedule_url' => 'URL da Agenda',
     'back_to_schedule' => 'Voltar para Agenda',
     'all_schedules' => 'Todas as Agendas',
-    
+
     // Categories
     'parties_&_festivals' => 'Festas e Festivais',
     'concerts' => 'Concertos',
@@ -353,7 +355,7 @@ return [
     'embed_url' => 'URL de Incorporação',
     'iframe_code' => 'Código Iframe',
     'close' => 'Fechar',
-    
+
     // Missing keys
     'select_a_tab' => 'Selecione uma aba',
     'requests' => 'Solicitações',
@@ -591,7 +593,7 @@ return [
     'create_account_benefits' => 'Crie uma conta para gerenciar seu perfil e poder editar seus eventos',
     'create_account_link' => ':link para gerenciar seu perfil e poder editar seus eventos',
     'create_an_account' => 'Criar uma conta',
-    
+
     // Google Calendar Integration
     'google_calendar_integration' => 'Integração Google Calendar',
     'connect_google_calendar_description' => 'Conecte seu Google Calendar para sincronizar automaticamente seus eventos.',
@@ -712,4 +714,23 @@ return [
     'text' => 'Texto',
     'download' => 'Baixar',
     'copy' => 'Copiar',
+    'add_custom_field' => 'Adicionar Campo Personalizado',
+    'add_field' => 'Adicionar Campo',
+    'custom_field' => 'Campo Personalizado',
+    'custom_fields' => 'Campos Personalizados',
+    'field_name' => 'Nome do Campo',
+    'field_type' => 'Tipo',
+    'field_options' => 'Opções',
+    'field_required' => 'Obrigatório',
+    'type_string' => 'Texto',
+    'type_multiline_string' => 'Texto Multilinha',
+    'type_switch' => 'Sim/Não',
+    'type_date' => 'Data',
+    'type_dropdown' => 'Lista Suspensa',
+    'options_placeholder' => 'Digite opções separadas por vírgulas',
+    'per_order' => 'Por Pedido',
+    'per_ticket' => 'Por Ingresso',
+    'yes' => 'Sim',
+    'no' => 'Não',
+    'field_required_error' => 'Este campo é obrigatório',
 ];
