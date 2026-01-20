@@ -681,8 +681,14 @@ class RoleController extends Controller
 
         $roleUser = RoleUser::where('user_id', $userId)
             ->where('role_id', $role->id)
-            ->first();        
+            ->first();
         $roleUser->delete();
+
+        // If user removed themselves, redirect to dashboard instead of team page
+        if ($userId == auth()->id()) {
+            return redirect(route('dashboard'))
+                        ->with('message', __('messages.removed_member'));
+        }
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))
                     ->with('message', __('messages.removed_member'));
