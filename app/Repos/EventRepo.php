@@ -193,6 +193,13 @@ class EventRepo
             }
         }
 
+        // Decode event-level custom_fields from JSON string
+        if ($request->has('custom_fields')) {
+            $request->merge([
+                'custom_fields' => json_decode($request->input('custom_fields'), true)
+            ]);
+        }
+
         $event->fill($request->all());
 
         $days_of_week = '';
