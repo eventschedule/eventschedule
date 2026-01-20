@@ -741,4 +741,5 @@ return [
     'field_required_error' => 'Ce champ est obligatoire',
     'venue_name' => 'Nom du Lieu',
     'matched_existing_venue' => 'Lieu existant trouvé',
+    'matched_venue' => 'Lieu trouvé',
 ];

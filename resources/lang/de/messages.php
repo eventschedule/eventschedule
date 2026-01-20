@@ -745,4 +745,5 @@ return [
     'field_required_error' => 'Dieses Feld ist erforderlich',
     'venue_name' => 'Name des Veranstaltungsortes',
     'matched_existing_venue' => 'Bestehender Veranstaltungsort gefunden',
+    'matched_venue' => 'Veranstaltungsort gefunden',
 ];

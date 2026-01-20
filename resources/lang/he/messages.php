@@ -734,4 +734,5 @@ return [
     'field_required_error' => 'שדה זה נדרש',
     'venue_name' => 'שם המקום',
     'matched_existing_venue' => 'נמצא מקום קיים',
+    'matched_venue' => 'מקום שנמצא',
 ];

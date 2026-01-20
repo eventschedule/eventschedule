@@ -16,15 +16,15 @@
             </div>
             <div class="flex gap-2 items-center">
                 <a href="{{ route('analytics', ['role_id' => $selectedRoleId, 'period' => 'daily']) }}"
-                    class="px-4 py-2 rounded-md text-sm font-medium leading-none flex items-center {{ $period === 'daily' ? 'bg-[#4E81FA] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
+                    class="px-5 py-3 rounded-md text-base font-semibold leading-none flex items-center {{ $period === 'daily' ? 'bg-[#4E81FA] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
                     {{ __('messages.daily') }}
                 </a>
                 <a href="{{ route('analytics', ['role_id' => $selectedRoleId, 'period' => 'weekly']) }}"
-                    class="px-4 py-2 rounded-md text-sm font-medium leading-none flex items-center {{ $period === 'weekly' ? 'bg-[#4E81FA] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
+                    class="px-5 py-3 rounded-md text-base font-semibold leading-none flex items-center {{ $period === 'weekly' ? 'bg-[#4E81FA] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
                     {{ __('messages.weekly') }}
                 </a>
                 <a href="{{ route('analytics', ['role_id' => $selectedRoleId, 'period' => 'monthly']) }}"
-                    class="px-4 py-2 rounded-md text-sm font-medium leading-none flex items-center {{ $period === 'monthly' ? 'bg-[#4E81FA] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
+                    class="px-5 py-3 rounded-md text-base font-semibold leading-none flex items-center {{ $period === 'monthly' ? 'bg-[#4E81FA] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
                     {{ __('messages.monthly') }}
                 </a>
             </div>
