@@ -69,7 +69,11 @@ class AppController extends Controller
 
         \Artisan::call('app:translate');
         \Artisan::call('google:refresh-webhooks');
-        \Artisan::call('app:notify-request-changes');
+
+        $currentHourUtc = (int) now('UTC')->format('H');
+        if ($currentHourUtc === 12) {
+            \Artisan::call('app:notify-request-changes');
+        }
 
         if (! config('app.hosted')) {
             \Artisan::call('app:import-curator-events');
