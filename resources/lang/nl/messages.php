@@ -702,4 +702,12 @@ return [
     'schedule' => 'Agenda',
     'device' => 'Apparaat',
     'date' => 'Datum',
+    'subscribe' => 'Abonneren',
+    'submit_event' => 'Evenement Indienen',
+    'link_type' => 'Link Type',
+    'link_to_event_page' => 'Link naar Evenementpagina',
+    'link_to_registration' => 'Direct naar Registratie',
+    'text' => 'Tekst',
+    'download' => 'Downloaden',
+    'copy' => 'Kopiëren',
 ];

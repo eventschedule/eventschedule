@@ -703,4 +703,12 @@ return [
     'schedule' => 'Calendário',
     'device' => 'Dispositivo',
     'date' => 'Data',
+    'subscribe' => 'Inscrever-se',
+    'submit_event' => 'Enviar Evento',
+    'link_type' => 'Tipo de Link',
+    'link_to_event_page' => 'Link para a Página do Evento',
+    'link_to_registration' => 'Link Direto para Registro',
+    'text' => 'Texto',
+    'download' => 'Baixar',
+    'copy' => 'Copiar',
 ];

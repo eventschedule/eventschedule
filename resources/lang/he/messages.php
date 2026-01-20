@@ -697,4 +697,12 @@ return [
     'schedule' => 'לוח',
     'device' => 'מכשיר',
     'date' => 'תאריך',
+    'subscribe' => 'הירשם',
+    'submit_event' => 'שלח אירוע',
+    'link_type' => 'סוג קישור',
+    'link_to_event_page' => 'קישור לדף האירוע',
+    'link_to_registration' => 'קישור ישיר להרשמה',
+    'text' => 'טקסט',
+    'download' => 'הורדה',
+    'copy' => 'העתקה',
 ];

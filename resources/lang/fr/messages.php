@@ -704,4 +704,12 @@ return [
     'schedule' => 'Calendrier',
     'device' => 'Appareil',
     'date' => 'Date',
+    'subscribe' => 'S\'abonner',
+    'submit_event' => 'Soumettre un Événement',
+    'link_type' => 'Type de Lien',
+    'link_to_event_page' => 'Lien vers la Page Événement',
+    'link_to_registration' => 'Lien Direct vers l\'Inscription',
+    'text' => 'Texte',
+    'download' => 'Télécharger',
+    'copy' => 'Copier',
 ];

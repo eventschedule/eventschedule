@@ -26,7 +26,8 @@ class GraphicController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
         $layout = $request->get('layout', 'grid');
-        
+        $directRegistration = $request->boolean('direct');
+
         // Validate layout parameter
         if (!in_array($layout, ['grid', 'list'])) {
             $layout = 'grid';
@@ -51,7 +52,7 @@ class GraphicController extends Controller
         if (config('services.capturekit.key') && (! config('app.hosted') || $role->id == 19)) {
             $url = $role->getGuestUrl($role->subdomain) . '?embed=true&graphic=true';
             $url = 'https://api.capturekit.dev/capture?&access_key=' . config('services.capturekit.key') . '&viewport_width=950&full_page=true&url=' . urlencode($url);
-            
+
             $ch = curl_init();
             curl_setopt_array($ch, [
                 CURLOPT_URL => $url,
@@ -66,37 +67,37 @@ class GraphicController extends Controller
                     'Accept-Language: en-US,en;q=0.5',
                 ]
             ]);
-            
+
             $imageData = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $error = curl_error($ch);
             curl_close($ch);
-            
+
             if ($error) {
                 \Log::error('CaptureKit cURL error: ' . $error);
                 return redirect()->back()->with('error', 'Failed to generate graphic: ' . $error);
             }
-            
+
             if ($httpCode !== 200) {
                 \Log::error('CaptureKit HTTP error: ' . $httpCode);
                 return redirect()->back()->with('error', 'Failed to generate graphic: HTTP ' . $httpCode);
             }
-            
+
             if (empty($imageData)) {
                 \Log::error('CaptureKit returned empty response');
                 return redirect()->back()->with('error', 'Failed to generate graphic: Empty response');
             }
         } else {
             // Use the service to generate the graphic with the specified layout
-            $generator = new EventGraphicGenerator($role, $events, $layout);
+            $generator = new EventGraphicGenerator($role, $events, $layout, $directRegistration);
             $imageData = $generator->generate();
         }
-         
+
         // Convert image data to base64 for display
         $imageBase64 = base64_encode($imageData);
-        
+
         // Generate event text content
-        $eventText = $this->generateEventText($role, $events);
+        $eventText = $this->generateEventText($role, $events, $directRegistration);
 
         return response()->json([
             'image' => $imageBase64,
@@ -110,7 +111,8 @@ class GraphicController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         $layout = $request->get('layout', 'grid');
-        
+        $directRegistration = $request->boolean('direct');
+
         // Validate layout parameter
         if (!in_array($layout, ['grid', 'list'])) {
             $layout = 'grid';
@@ -135,7 +137,7 @@ class GraphicController extends Controller
         if (config('services.capturekit.key') && (! config('app.hosted') || $role->id == 19)) {
             $url = $role->getGuestUrl($role->subdomain) . '?embed=true&graphic=true';
             $url = 'https://api.capturekit.dev/capture?&access_key=' . config('services.capturekit.key') . '&viewport_width=950&full_page=true&url=' . urlencode($url);
-            
+
             $ch = curl_init();
             curl_setopt_array($ch, [
                 CURLOPT_URL => $url,
@@ -150,29 +152,29 @@ class GraphicController extends Controller
                     'Accept-Language: en-US,en;q=0.5',
                 ]
             ]);
-            
+
             $imageData = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $error = curl_error($ch);
             curl_close($ch);
-            
+
             if ($error) {
                 \Log::error('CaptureKit cURL error: ' . $error);
                 return redirect()->back()->with('error', 'Failed to generate graphic: ' . $error);
             }
-            
+
             if ($httpCode !== 200) {
                 \Log::error('CaptureKit HTTP error: ' . $httpCode);
                 return redirect()->back()->with('error', 'Failed to generate graphic: HTTP ' . $httpCode);
             }
-            
+
             if (empty($imageData)) {
                 \Log::error('CaptureKit returned empty response');
                 return redirect()->back()->with('error', 'Failed to generate graphic: Empty response');
             }
         } else {
             // Use the service to generate the graphic with the specified layout
-            $generator = new EventGraphicGenerator($role, $events, $layout);
+            $generator = new EventGraphicGenerator($role, $events, $layout, $directRegistration);
             $imageData = $generator->generate();
         }
 
@@ -188,16 +190,16 @@ class GraphicController extends Controller
             ->header('Expires', '0');
     }
     
-    private function generateEventText($role, $events)
+    private function generateEventText($role, $events, $directRegistration = false)
     {
         $text = __('messages.upcoming_events') . ":\n\n";
-        
+
         $currentDay = null;
         foreach ($events as $event) {
             $startDate = $event->getStartDateTime(null, true);
             $dayName = $startDate->format('l');
             $dateStr = $event->localStartsAt(true);
-            
+
             // Group events by day
             if ($currentDay !== $dayName) {
                 if ($currentDay !== null) {
@@ -205,25 +207,35 @@ class GraphicController extends Controller
                 }
                 $currentDay = $dayName;
             }
-            
+
             // Format time and event details
             if ($startDate->isToday()) {
                 $text .= __('messages.tonight') . " - {$dateStr}\n";
             } else {
                 $text .= "{$dateStr}\n";
             }
-            
+
             $text .= "*{$event->translatedName()}*\n";
-            
+
             if ($event->venue) {
                 $text .= "{$event->venue->translatedName()}\n";
             }
-            
-            $text .= "{$event->getGuestUrl($role->subdomain, null, true)}\n";
-            
+
+            // Build event URL with optional trailing slash for direct registration
+            $eventUrl = $event->getGuestUrl($role->subdomain, null, true);
+            if ($directRegistration) {
+                // Insert trailing slash before query string if present
+                if (str_contains($eventUrl, '?')) {
+                    $eventUrl = str_replace('?', '/?', $eventUrl);
+                } else {
+                    $eventUrl .= '/';
+                }
+            }
+            $text .= "{$eventUrl}\n";
+
             $text .= "\n";
         }
-        
+
         return $text;
     }    
 }

@@ -713,4 +713,12 @@ return [
     'schedule' => 'Schedule',
     'device' => 'Device',
     'date' => 'Date',
+    'subscribe' => 'Subscribe',
+    'submit_event' => 'Submit Event',
+    'link_type' => 'Link Type',
+    'link_to_event_page' => 'Link to Event Page',
+    'link_to_registration' => 'Link Directly to Registration',
+    'text' => 'Text',
+    'download' => 'Download',
+    'copy' => 'Copy',
 ];

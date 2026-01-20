@@ -701,7 +701,15 @@ class ListDesign extends AbstractEventDesign
     {
         try {
             // Generate the event URL for the QR code
-            $eventUrl = $event->registration_url ?: $event->getGuestUrl($this->role->subdomain);
+            $eventUrl = $event->getGuestUrl($this->role->subdomain);
+            if ($this->directRegistration) {
+                // Insert trailing slash before query string if present
+                if (str_contains($eventUrl, '?')) {
+                    $eventUrl = str_replace('?', '/?', $eventUrl);
+                } else {
+                    $eventUrl .= '/';
+                }
+            }
 
             // Create QR code
             $qrCode = QrCode::create($eventUrl)
