@@ -10,8 +10,7 @@
         <div>
             <x-input-label for="password" :value="__('messages.password')" />
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
+            <x-password-input id="password" class="block mt-1 w-full"
                             name="password"
                             required autocomplete="current-password" />
 
