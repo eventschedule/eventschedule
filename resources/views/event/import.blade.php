@@ -306,11 +306,13 @@
                         </div>
 
                         <!-- Matched venue indicator -->
-                        <div v-if="preview.parsed[idx].venue_id" class="flex items-center text-sm text-green-600 dark:text-green-400">
-                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                            {{ __('messages.matched_existing_venue') }}
+                        <div v-if="preview.parsed[idx].venue_id" class="flex items-center text-sm">
+                            <div class="flex items-center text-green-600 dark:text-green-400">
+                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span>{{ __('messages.matched_venue') }}: <a :href="preview.parsed[idx].venue_url" target="_blank" class="underline hover:no-underline">@{{ preview.parsed[idx].venue_name }}</a></span>
+                            </div>
                         </div>
 
                         <!-- Venue Name -->
@@ -321,7 +323,7 @@
                                 type="text"
                                 class="mt-1 block w-full"
                                 v-model="preview.parsed[idx].venue_name"
-                                v-bind:readonly="preview.parsed[idx].venue_id || savedEvents[idx]"
+                                v-bind:readonly="(preview.parsed[idx].venue_id && !preview.parsed[idx].venue_is_editable) || savedEvents[idx]"
                                 autocomplete="off" />
                         </div>
 
@@ -333,7 +335,7 @@
                                 type="text"
                                 class="mt-1 block w-full"
                                 v-model="preview.parsed[idx].event_address"
-                                v-bind:readonly="preview.parsed[idx].venue_id || savedEvents[idx]"
+                                v-bind:readonly="(preview.parsed[idx].venue_id && !preview.parsed[idx].venue_is_editable) || savedEvents[idx]"
                                 autocomplete="off" />
                         </div>
 
@@ -345,7 +347,7 @@
                                 type="text"
                                 class="mt-1 block w-full"
                                 v-model="preview.parsed[idx].event_city"
-                                v-bind:readonly="preview.parsed[idx].venue_id || savedEvents[idx]"
+                                v-bind:readonly="(preview.parsed[idx].venue_id && !preview.parsed[idx].venue_is_editable) || savedEvents[idx]"
                                 placeholder="{{ $role->isCurator() ? $role->city : '' }}"
                                 autocomplete="off" />
                         </div>
@@ -1055,7 +1057,7 @@
                             venue_state: parsed.event_state,
                             venue_state_en: parsed.event_state_en,
                             venue_postal_code: parsed.event_postal_code,
-                            venue_country_code: parsed.event_country_code,
+                            venue_country_code: parsed.event_country_code || '{{ $role->country_code }}',
                             venue_id: parsed.venue_id,
                             venue_language_code: '{{ $role->language_code }}',
                             members: members,

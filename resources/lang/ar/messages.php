@@ -742,4 +742,5 @@ return [
     'field_required_error' => 'هذا الحقل مطلوب',
     'venue_name' => 'اسم المكان',
     'matched_existing_venue' => 'تم العثور على مكان موجود',
+    'matched_venue' => 'مكان مطابق',
 ];

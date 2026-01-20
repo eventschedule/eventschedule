@@ -56,7 +56,7 @@
         </script>
     </x-slot>
 
-    <div class="pt-8">
+    <div class="flow-root">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
                 <h1 class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-100">Blog Posts</h1>
@@ -66,9 +66,14 @@
             </div>
             @if (config('services.google.gemini_key'))
             <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-                <a href="{{ route('blog.create') }}"
-                   class="block rounded-md bg-blue-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-colors">
-                    Create Post
+                <a href="{{ route('blog.create') }}">
+                    <button type="button"
+                        class="inline-flex items-center justify-center rounded-md shadow-sm bg-[#4E81FA] px-5 py-3 text-base font-semibold text-white transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4E81FA]">
+                        <svg class="-ml-0.5 mr-2 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        Create Post
+                    </button>
                 </a>
             </div>
             @endif

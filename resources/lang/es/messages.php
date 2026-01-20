@@ -741,4 +741,5 @@ return [
     'field_required_error' => 'Este campo es obligatorio',
     'venue_name' => 'Nombre del Lugar',
     'matched_existing_venue' => 'Lugar existente encontrado',
+    'matched_venue' => 'Lugar encontrado',
 ];
