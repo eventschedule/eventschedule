@@ -361,6 +361,8 @@ return [
     'tickets_not_available' => 'التذاكر غير متوفرة لهذا الحدث',
     'cannot_buy_tickets_past_event' => 'لا يمكن شراء التذاكر للأحداث في الماضي.',
     'sold_reserved' => 'مباع/محجوز',
+    'guests' => 'الضيوف',
+    'scan_for_entry' => 'امسح للدخول',
     'this_ticket_is_not_valid' => 'هذه التذكرة غير صالحة',
     'this_ticket_is_not_valid_for_today' => 'هذه التذكرة غير صالحة لهذا اليوم',
     'you_are_not_authorized_to_scan_this_ticket' => 'غير مصرح لك بمسح هذه التذكرة',

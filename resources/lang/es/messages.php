@@ -367,6 +367,8 @@ return [
     'tickets_not_available' => 'No hay entradas disponibles para este evento',
     'cannot_buy_tickets_past_event' => 'No se pueden comprar entradas para eventos pasados.',
     'sold_reserved' => 'Vendido/Reservado',
+    'guests' => 'Invitados',
+    'scan_for_entry' => 'Escanear para entrar',
     'this_ticket_is_not_valid' => 'Esta entrada no es válida',
     'this_ticket_is_not_valid_for_today' => 'Esta entrada no es válida para hoy',
     'you_are_not_authorized_to_scan_this_ticket' => 'No estás autorizado para escanear esta entrada',
