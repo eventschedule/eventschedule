@@ -538,11 +538,13 @@ class EventController extends Controller
 
         if ($user->isMember($subdomain)) {
             $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
+            $role->last_notified_request_count = 0;
+            $role->save();
         }
 
         //$emails = $event->role->members()->pluck('email');
         //Notification::route('mail', $emails)->notify(new RequestAcceptedNotification($event));
-        
+
         return redirect('/' . $subdomain . '/requests')
                     ->with('message', __('messages.request_accepted'));
     }
@@ -560,6 +562,8 @@ class EventController extends Controller
 
         if ($user->isMember($subdomain)) {
             $event->roles()->updateExistingPivot($role->id, ['is_accepted' => false]);
+            $role->last_notified_request_count = 0;
+            $role->save();
         }
 
         //$emails = $event->role->members()->pluck('email');
