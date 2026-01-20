@@ -2,11 +2,21 @@
 
 namespace App\Models;
 
+use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Database\Eloquent\Model;
 
 class Ticket extends Model
 {
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($model) {
+            $model->description_html = MarkdownUtils::convertToHtml($model->description);
+        });
+    }
+
     protected $fillable = [
         'event_id',
         'type',
@@ -52,7 +62,7 @@ class Ticket extends Model
         $data['type'] = $this->type;
         $data['quantity'] = $this->quantity;
         $data['price'] = $this->price;
-        $data['description'] = $this->description ? UrlUtils::convertUrlsToLinks($this->description) : null;
+        $data['description'] = $this->description ? UrlUtils::convertUrlsToLinks($this->description_html ?? $this->description) : null;
 
         $sold = $this->sold ? json_decode($this->sold, true) : [];
         $sold = $sold[$date] ?? 0;
