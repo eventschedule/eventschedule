@@ -34,7 +34,7 @@ class EventRepo
             $user = $currentRole->user;
         }
 
-        if ($request->venue_address1) {
+        if ($request->venue_name || $request->venue_address1 || $request->venue_address2 || $request->venue_city || $request->venue_state || $request->venue_postal_code || $request->venue_email) {
             if (! $venue) {
                 $venue = new Role;
                 $venue->name = $request->venue_name ?? null;
