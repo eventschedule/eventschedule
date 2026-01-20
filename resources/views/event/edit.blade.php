@@ -701,9 +701,9 @@
                                         <div class="mb-6">
                                             <x-input-label :value="__('messages.name') . ' *'" />
                                             <div class="flex mt-1">
-                                                <x-text-input v-bind:id="'edit_member_name_' + member.id" 
+                                                <x-text-input v-bind:id="'edit_member_name_' + member.id"
                                                     v-bind:name="'members[' + member.id + '][name]'" type="text" class="mr-2 block w-full"
-                                                    v-model="selectedMembers.find(m => m.id === member.id).name" required
+                                                    v-model="selectedMembers.find(m => m.id === member.id).name" v-bind:required="editMemberId === member.id"
                                                     @keydown.enter.prevent="editMember()" autocomplete="off" />
                                                 <x-primary-button @click="editMember()" type="button">
                                                     {{ __('messages.done') }}
@@ -1106,7 +1106,7 @@
                                 @if ($user->stripe_completed_at || $user->invoiceninja_api_key || $user->payment_url)
                                 <div class="mb-6">
                                     <x-input-label for="payment_method" :value="__('messages.payment_method')"/>
-                                    <select id="payment_method" name="payment_method" v-model="event.payment_method" required
+                                    <select id="payment_method" name="payment_method" v-model="event.payment_method" :required="event.tickets_enabled"
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                         <option value="cash">Cash</option>
                                         @if ($user->stripe_completed_at)
@@ -1129,7 +1129,7 @@
 
                                 <div class="mb-6">
                                     <x-input-label for="ticket_currency_code" :value="__('messages.currency')"/>
-                                    <select id="ticket_currency_code" name="ticket_currency_code" v-model="event.ticket_currency_code" required
+                                    <select id="ticket_currency_code" name="ticket_currency_code" v-model="event.ticket_currency_code" :required="event.tickets_enabled"
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm">
                                         @foreach ($currencies as $currency)
                                         @if ($loop->index == 2)
@@ -1163,8 +1163,9 @@
                                         <div v-for="(field, fieldKey) in eventCustomFields" :key="fieldKey" class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-md">
                                             <div class="grid grid-cols-2 gap-2">
                                                 <div>
-                                                    <x-input-label :value="__('messages.field_name')" class="text-xs" />
-                                                    <x-text-input type="text" v-model="field.name" class="mt-1 block w-full text-sm" required />
+                                                    <x-input-label :value="__('messages.field_name') . ' *'" class="text-xs" />
+                                                    <x-text-input type="text" v-model="field.name" class="mt-1 block w-full text-sm" v-bind:required="event.tickets_enabled" v-bind:class="{ 'border-red-500': formSubmitAttempted && !field.name }" />
+                                                    <p v-if="formSubmitAttempted && !field.name" class="mt-1 text-xs text-red-600">{{ __('messages.field_name_required') }}</p>
                                                 </div>
                                                 <div>
                                                     <x-input-label :value="__('messages.field_type')" class="text-xs" />
@@ -1215,8 +1216,9 @@
                                             </div>
                                             <div v-if="tickets.length > 1">
                                                 <x-input-label :value="__('messages.type') . ' *'" />
-                                                <x-text-input v-bind:name="`tickets[${index}][type]`" v-model="ticket.type" 
-                                                    class="mt-1 block w-full" required />
+                                                <x-text-input v-bind:name="`tickets[${index}][type]`" v-model="ticket.type"
+                                                    class="mt-1 block w-full" v-bind:required="event.tickets_enabled" v-bind:class="{ 'border-red-500': formSubmitAttempted && tickets.length > 1 && !ticket.type }" />
+                                                <p v-if="formSubmitAttempted && tickets.length > 1 && !ticket.type" class="mt-1 text-xs text-red-600">{{ __('messages.ticket_type_required') }}</p>
                                             </div>
                                             <div v-if="tickets.length > 1" class="flex items-end gap-2">
                                                 <x-secondary-button @click="addTicketCustomField(index)" type="button" class="mt-1" v-if="getTicketCustomFieldCount(index) < 8">
@@ -1239,8 +1241,9 @@
                                             <div v-for="(field, fieldKey) in ticket.custom_fields" :key="fieldKey" class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-md">
                                                 <div class="grid grid-cols-2 gap-2">
                                                     <div>
-                                                        <x-input-label :value="__('messages.field_name')" class="text-xs" />
-                                                        <x-text-input type="text" v-model="field.name" class="mt-1 block w-full text-sm" required />
+                                                        <x-input-label :value="__('messages.field_name') . ' *'" class="text-xs" />
+                                                        <x-text-input type="text" v-model="field.name" class="mt-1 block w-full text-sm" v-bind:required="event.tickets_enabled" v-bind:class="{ 'border-red-500': formSubmitAttempted && !field.name }" />
+                                                        <p v-if="formSubmitAttempted && !field.name" class="mt-1 text-xs text-red-600">{{ __('messages.field_name_required') }}</p>
                                                     </div>
                                                     <div>
                                                         <x-input-label :value="__('messages.field_type')" class="text-xs" />
@@ -1500,6 +1503,7 @@
         })),
         eventCustomFields: @json($event->custom_fields ?? []),
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
+        formSubmitAttempted: false,
         soldLabel: "{{ __('messages.sold_reserved') }}",
         isRecurring: @json($event->days_of_week ? true : false),
         sendEmailToVenue: false,
@@ -1796,9 +1800,33 @@
         @endif
       },
       validateForm(event) {
+        this.formSubmitAttempted = true;
+
         if (! this.isFormValid) {
           event.preventDefault();
           alert("{{ __('messages.please_select_venue_or_participant') }}");
+          return;
+        }
+
+        // Check custom fields if tickets are enabled
+        if (this.event.tickets_enabled) {
+          const hasInvalidEventFields = Object.values(this.eventCustomFields || {}).some(field => !field.name);
+          const hasInvalidTicketFields = this.tickets.some(ticket =>
+            Object.values(ticket.custom_fields || {}).some(field => !field.name)
+          );
+          const hasInvalidTicketTypes = this.tickets.length > 1 && this.tickets.some(ticket => !ticket.type);
+
+          if (hasInvalidEventFields || hasInvalidTicketFields) {
+            event.preventDefault();
+            alert("{{ __('messages.please_fill_in_custom_field_names') }}");
+            return;
+          }
+
+          if (hasInvalidTicketTypes) {
+            event.preventDefault();
+            alert("{{ __('messages.please_fill_in_ticket_types') }}");
+            return;
+          }
         }
       },
       addTicket() {
