@@ -3,49 +3,28 @@
         <source srcset="public/images/dark_logo.png" media="(prefers-color-scheme: light)">
         <img src="public/images/light_logo.png" alt="Event Schedule Logo" width="350" media="(prefers-color-scheme: dark)">
     </picture>
+    <p>
+        An open-source platform to share events, sell tickets and bring communities together.
+    </p>
+    <p>
+        <a href="https://openmicnight.eventschedule.com">View Demo</a> · <a href="https://www.eventschedule.com">Hosted Version</a> · <a href="#installation-guide">Self-Host Guide</a>
+    </p>
 </div>
 
 ---
 
-<p>
-    An open-source platform to share events, sell tickets and bring communities together.
-</p>
+## Getting Started
 
-* Sample Schedule: [openmicnight.eventschedule.com](https://openmicnight.eventschedule.com)
+| | Hosted | Self-Hosted |
+|---|---|---|
+| **Setup** | [Up and running in under 5 minutes](https://www.eventschedule.com) | [Full control over your infrastructure](#installation-guide) |
+| **Infrastructure** | We handle hosting and servers | You manage your own servers |
+| **Updates** | Automatic | One-click updates |
 
-**Choose your setup**
+> [!NOTE]
+> You can use [Softaculous](https://www.softaculous.com/apps/calendars/Event_Schedule) to automatically install the self-hosted app.
 
-- [Hosted](https://www.eventschedule.com): Our hosted version is a Software as a Service (SaaS) solution. You're up and running in under 5 minutes, with no need to worry about hosting or server infrastructure.
-- [Self-Hosted](https://github.com/eventschedule/eventschedule?tab=readme-ov-file#installation-guide): For those who prefer to manage their own hosting and server infrastructure. This version gives you full control and flexibility.
-
-> [!NOTE]  
-> You can use [Softaculous](https://www.softaculous.com/apps/calendars/Event_Schedule) to automatically install the selfhost app.
-
-## Features
-
-- 🗓️ **Event Calendars:** Create and share event calendars effortlessly to keep your audience informed.
-- 🔁 **Recurring Events:** Schedule recurring events which occur on a regular basis.
-- 📋 **Sub-schedules:** Organize events into multiple sub-schedules for better categorization and management.
-- 🔍 **Search Feature:** Powerful search functionality to help users find specific events or content across your schedule.
-- 🎟️ **Sell Tickets Online:** Offer ticket sales directly through the platform with a seamless checkout process.
-- 🎫 **Multiple Ticket Types:** Offer different ticket tiers, such as Standard or VIP, to meet various audience needs.
-- 🔢 **Ticket Quantity Limits:** Set a maximum number of tickets available for each event to manage capacity.
-- ⏳ **Ticket Reservation System:** Allow attendees to reserve tickets with a configurable release time before purchase.
-- 📲 **QR Code Ticketing:** Generate and scan QR codes for easy and secure event check-ins.
-- 💻 **Support for Online Events:** Use the platform to sell tickets to online events.
-- 💳 **Online Payments with Invoice Ninja Integration:** Accept secure online payments via [Invoice Ninja](https://www.invoiceninja.com) or payment links.
-- 📅 **Calendar Integration:** Enable attendees to add events directly to Google, Apple, or Microsoft calendars.
-- 🔄 **Google Calendar Sync:** Automatically sync events between Event Schedule and Google Calendar, with real-time updates via webhooks.
-- 🤖 **AI Event Parsing:** Automatically extract event details using AI to quickly create new events.
-- 🔗 **Third-Party Event Import:** Automatically import events from third-party websites to expand your calendar offerings.
-- 🤖 **AI Translation:** Automatically translate your entire schedule into multiple languages using AI.
-- 👥 **Team Scheduling:** Collaborate with team members to manage availability and coordinate event schedules.
-- 🎨 **Event Graphics Generator:** Create beautiful graphics of your upcoming events with flyers, QR codes, and event details for social media and marketing.
-- 📊 **Built-in Analytics:** Track page views with an integrated analytics dashboard showing views over time, device breakdown, and top events—no external services required.
-- 📝 **Custom Fields:** Collect additional information from ticket buyers with customizable form fields at both event and ticket levels. Supports text, dropdown, date, and yes/no field types.
-- 🎨 **Custom CSS Styling:** Personalize your schedule's appearance with custom CSS to match your brand identity.
-- 🔌 **REST API:** Access and manage your events programmatically through a REST API.
-- 🚀 **Automatic App Updates:** Keep the platform up to date effortlessly with one-click automatic updates.
+## Screenshots
 
 <div style="display: flex; gap: 10px;">
     <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_1.png?raw=true" width="49%" alt="Guest > Schedule">
@@ -56,6 +35,45 @@
     <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_3.png?raw=true" width="49%" alt="Admin > Schedule">
     <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_4.png?raw=true" width="49%" alt="Admin > Event">
 </div>
+
+## Features
+
+### Event Management
+- 🗓️ **Event Calendars:** Create and share event calendars effortlessly to keep your audience informed.
+- 🔁 **Recurring Events:** Schedule recurring events which occur on a regular basis.
+- 📋 **Sub-schedules:** Organize events into multiple sub-schedules for better categorization and management.
+- 🔍 **Search:** Powerful search functionality to help users find specific events or content across your schedule.
+
+### Ticketing & Payments
+- 🎟️ **Sell Tickets Online:** Offer ticket sales directly through the platform with a seamless checkout process.
+- 🎫 **Multiple Ticket Types:** Offer different ticket tiers, such as Standard or VIP, to meet various audience needs.
+- 🔢 **Ticket Quantity Limits:** Set a maximum number of tickets available for each event to manage capacity.
+- ⏳ **Ticket Reservations:** Allow attendees to reserve tickets with a configurable release time before purchase.
+- 📲 **QR Code Ticketing:** Generate and scan QR codes for easy and secure event check-ins.
+- 💻 **Online Events:** Use the platform to sell tickets to online events.
+- 💳 **Online Payments:** Accept secure online payments via [Invoice Ninja](https://www.invoiceninja.com) or payment links.
+
+### Integrations
+- 📅 **Calendar Integration:** Enable attendees to add events directly to Google, Apple, or Microsoft calendars.
+- 🔄 **Google Calendar Sync:** Automatically sync events between Event Schedule and Google Calendar, with real-time updates via webhooks.
+- 🔗 **Third-Party Event Import:** Automatically import events from third-party websites to expand your calendar offerings.
+
+### AI-Powered
+- 🤖 **AI Event Parsing:** Automatically extract event details using AI to quickly create new events.
+- 🤖 **AI Translation:** Automatically translate your entire schedule into multiple languages using AI.
+
+### Collaboration & Marketing
+- 👥 **Team Scheduling:** Collaborate with team members to manage availability and coordinate event schedules.
+- 🎨 **Event Graphics Generator:** Create beautiful graphics of your upcoming events with flyers, QR codes, and event details for social media and marketing.
+- 📊 **Built-in Analytics:** Track page views with an integrated analytics dashboard showing views over time, device breakdown, and top events—no external services required.
+
+### Customization
+- 📝 **Custom Fields:** Collect additional information from ticket buyers with customizable form fields at both event and ticket levels. Supports text, dropdown, date, and yes/no field types.
+- 🎨 **Custom CSS Styling:** Personalize your schedule's appearance with custom CSS to match your brand identity.
+
+### Developer Tools
+- 🔌 **REST API:** Access and manage your events programmatically through a REST API.
+- 🚀 **Automatic App Updates:** Keep the platform up to date effortlessly with one-click automatic updates.
 
 ## Installation Guide
 
@@ -73,7 +91,7 @@ GRANT ALL PRIVILEGES ON eventschedule.* TO 'eventschedule'@'localhost';
 
 ---
 
-### 2. Set Up the Application
+### 2. Download the Application
 
 Copy [eventschedule.zip](https://github.com/eventschedule/eventschedule/releases/latest) to your server and unzip it.
 
@@ -91,7 +109,7 @@ sudo chown -R www-data:www-data storage bootstrap public
 
 ---
 
-### 4. Set Up the Application
+### 4. Configure Environment
 
 Copy the `.env.example` file to `.env` and then access the application at `https://your-domain.com`.
 
