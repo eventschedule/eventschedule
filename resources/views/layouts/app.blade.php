@@ -59,6 +59,19 @@
         event.stopPropagation();
         var menu = $('#' + id);
         if (menu.is(':hidden')) {
+            // Get button position
+            var button = event.currentTarget;
+            var rect = button.getBoundingClientRect();
+
+            // Position dropdown with fixed positioning
+            menu.css({
+                'position': 'fixed',
+                'top': (rect.bottom + 4) + 'px',
+                'right': (window.innerWidth - rect.right) + 'px',
+                'left': 'auto',
+                'z-index': '1000'
+            });
+
             menu.show();
             $(document).on('click', hidePopUp);
         } else {
