@@ -32,6 +32,9 @@ jobs:
           extensions: mbstring, intl, pdo, mysql
           tools: composer, npm
 
+      - name: Check PHP syntax
+        run: find . -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l
+
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-ansi --no-interaction --no-scripts --no-progress
 
