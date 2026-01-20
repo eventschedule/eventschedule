@@ -23,29 +23,29 @@
 
 ## Features
 
-- 🗓️ **Event Calendars:** Create and share event calendars effortlessly to keep your audience informed.  
-- 🎟️ **Sell Tickets Online:** Offer ticket sales directly through the platform with a seamless checkout process.  
-- 💳 **Online Payments with Invoice Ninja Integration:** Accept secure online payments via [Invoice Ninja](https://www.invoiceninja.com) or payment links.
-- 🤖 **AI Event Parsing:** Automatically extract event details using AI to quickly create new events.
-- 🔗 **Third-Party Event Import:** Automatically import events from third-party websites to expand your calendar offerings.
-- 🔁 **Recurring Events:** Schedule recurring events which occur on a regular basis.  
-- 📲 **QR Code Ticketing:** Generate and scan QR codes for easy and secure event check-ins.  
-- 💻 **Support for Online Events:** Use the platform to sell tickets to online events.  
-- 👥 **Team Scheduling:** Collaborate with team members to manage availability and coordinate event schedules.  
-- 🤖 **AI Translation:** Automatically translate your entire schedule into multiple languages using AI.
-- 🎫 **Multiple Ticket Types:** Offer different ticket tiers, such as Standard or VIP, to meet various audience needs.  
-- 🔢 **Ticket Quantity Limits:** Set a maximum number of tickets available for each event to manage capacity.  
-- ⏳ **Ticket Reservation System:** Allow attendees to reserve tickets with a configurable release time before purchase.  
-- 📅 **Calendar Integration:** Enable attendees to add events directly to Google, Apple, or Microsoft calendars. 
-- 🔄 **Google Calendar Sync:** Automatically sync events between Event Schedule and Google Calendar, with real-time updates via webhooks.
+- 🗓️ **Event Calendars:** Create and share event calendars effortlessly to keep your audience informed.
+- 🔁 **Recurring Events:** Schedule recurring events which occur on a regular basis.
 - 📋 **Sub-schedules:** Organize events into multiple sub-schedules for better categorization and management.
 - 🔍 **Search Feature:** Powerful search functionality to help users find specific events or content across your schedule.
+- 🎟️ **Sell Tickets Online:** Offer ticket sales directly through the platform with a seamless checkout process.
+- 🎫 **Multiple Ticket Types:** Offer different ticket tiers, such as Standard or VIP, to meet various audience needs.
+- 🔢 **Ticket Quantity Limits:** Set a maximum number of tickets available for each event to manage capacity.
+- ⏳ **Ticket Reservation System:** Allow attendees to reserve tickets with a configurable release time before purchase.
+- 📲 **QR Code Ticketing:** Generate and scan QR codes for easy and secure event check-ins.
+- 💻 **Support for Online Events:** Use the platform to sell tickets to online events.
+- 💳 **Online Payments with Invoice Ninja Integration:** Accept secure online payments via [Invoice Ninja](https://www.invoiceninja.com) or payment links.
+- 📅 **Calendar Integration:** Enable attendees to add events directly to Google, Apple, or Microsoft calendars.
+- 🔄 **Google Calendar Sync:** Automatically sync events between Event Schedule and Google Calendar, with real-time updates via webhooks.
+- 🤖 **AI Event Parsing:** Automatically extract event details using AI to quickly create new events.
+- 🔗 **Third-Party Event Import:** Automatically import events from third-party websites to expand your calendar offerings.
+- 🤖 **AI Translation:** Automatically translate your entire schedule into multiple languages using AI.
+- 👥 **Team Scheduling:** Collaborate with team members to manage availability and coordinate event schedules.
 - 🎨 **Event Graphics Generator:** Create beautiful graphics of your upcoming events with flyers, QR codes, and event details for social media and marketing.
+- 📊 **Built-in Analytics:** Track page views with an integrated analytics dashboard showing views over time, device breakdown, and top events—no external services required.
+- 📝 **Custom Fields:** Collect additional information from ticket buyers with customizable form fields at both event and ticket levels. Supports text, dropdown, date, and yes/no field types.
+- 🎨 **Custom CSS Styling:** Personalize your schedule's appearance with custom CSS to match your brand identity.
 - 🔌 **REST API:** Access and manage your events programmatically through a REST API.
 - 🚀 **Automatic App Updates:** Keep the platform up to date effortlessly with one-click automatic updates.
-- 📝 **Custom Fields:** Collect additional information from ticket buyers with customizable form fields at both event and ticket levels. Supports text, dropdown, date, and yes/no field types.
-- 📊 **Built-in Analytics:** Track page views with an integrated analytics dashboard showing views over time, device breakdown, and top events—no external services required.
-- 🎨 **Custom CSS Styling:** Personalize your schedule's appearance with custom CSS to match your brand identity.
 
 <div style="display: flex; gap: 10px;">
     <img src="https://github.com/eventschedule/eventschedule/blob/main/public/images/screenshots/screen_1.png?raw=true" width="49%" alt="Guest > Schedule">
