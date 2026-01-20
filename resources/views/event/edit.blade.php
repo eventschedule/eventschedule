@@ -1089,6 +1089,14 @@
                                 </div>
                             </div>
 
+                            <!-- Registration URL (only visible when tickets are disabled) -->
+                            <div class="mb-6" v-show="!event.tickets_enabled">
+                                <x-input-label for="registration_url" :value="__('messages.registration_url')" />
+                                <x-text-input id="registration_url" name="registration_url" type="url" class="mt-1 block w-full"
+                                    v-model="event.registration_url" placeholder="https://" />
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.registration_url_help') }}</p>
+                            </div>
+
                             @if ($role->isPro())
                             <div v-show="event.tickets_enabled">
 

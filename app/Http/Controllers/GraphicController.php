@@ -223,7 +223,7 @@ class GraphicController extends Controller
 
             // Build event URL with optional trailing slash for direct registration
             $eventUrl = $event->getGuestUrl($role->subdomain, null, true);
-            if ($directRegistration) {
+            if ($directRegistration && $event->registration_url) {
                 // Insert trailing slash before query string if present
                 if (str_contains($eventUrl, '?')) {
                     $eventUrl = str_replace('?', '/?', $eventUrl);

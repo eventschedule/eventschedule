@@ -449,6 +449,7 @@ return [
     'invalid_image_type' => 'Type d\'image invalide',
     'multiple_events_detected' => 'Plusieurs événements détectés',
     'registration_url' => 'URL d\'inscription',
+    'registration_url_help' => 'URL externe où les utilisateurs peuvent s\'inscrire à cet événement',
     'talent' => 'Talent',
     'confirm_remove_event' => 'Êtes-vous sûr de vouloir supprimer cet événement ?',
     'event_removed' => 'Événement supprimé avec succès !',
