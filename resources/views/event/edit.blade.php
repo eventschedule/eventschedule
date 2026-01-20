@@ -1096,7 +1096,7 @@
                             <div class="mb-6" v-show="!event.tickets_enabled">
                                 <x-input-label for="registration_url" :value="__('messages.registration_url')" />
                                 <x-text-input id="registration_url" name="registration_url" type="url" class="mt-1 block w-full"
-                                    v-model="event.registration_url" placeholder="https://" />
+                                    v-model="event.registration_url" />
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.registration_url_help') }}</p>
                             </div>
 
@@ -1227,6 +1227,16 @@
                                     <x-input-label for="ticket_notes" :value="__('messages.ticket_notes')" />
                                     <textarea id="ticket_notes" name="ticket_notes" v-model="event.ticket_notes" rows="4"
                                         class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm"></textarea>
+                                </div>
+
+                                <div class="mb-6">
+                                    <x-input-label for="terms_url" :value="__('messages.terms_url')" />
+                                    <x-text-input id="terms_url" name="terms_url" type="url" class="mt-1 block w-full"
+                                        :value="old('terms_url', $event->terms_url)"
+                                        v-model="event.terms_url" />
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                        {{ __('messages.terms_url_help') }}
+                                    </p>
                                 </div>
 
                                 <div v-if="hasLimitedPaidTickets">

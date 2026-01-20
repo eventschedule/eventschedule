@@ -1267,7 +1267,7 @@
                                         <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                                             <div class="mb-4">
                                                 <x-input-label for="import_url_{{ $i }}" :value="__('messages.url')" />
-                                                <x-text-input name="import_urls[]" type="url" class="mt-1 block w-full" :value="$url" placeholder="https://example.com/events" />
+                                                <x-text-input name="import_urls[]" type="url" class="mt-1 block w-full" :value="$url" />
                                             </div>
                                             <div class="flex gap-4 items-center">
                                                 <x-secondary-button onclick="this.parentElement.parentElement.remove()" type="button">
@@ -1752,7 +1752,7 @@ function addImportUrlField() {
     div.innerHTML = `
         <div class="mb-4">
             <label for="import_url_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.url') }}</label>
-            <input name="import_urls[new_${idx}]" type="url" id="import_url_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" placeholder="https://example.com/events" />
+            <input name="import_urls[new_${idx}]" type="url" id="import_url_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[#4E81FA] dark:focus:border-[#4E81FA] focus:ring-[#4E81FA] dark:focus:ring-[#4E81FA] rounded-md shadow-sm" />
         </div>
         <div class="flex gap-4 items-center">
             <button type="button" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4E81FA] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150" onclick="this.parentElement.parentElement.remove()">
