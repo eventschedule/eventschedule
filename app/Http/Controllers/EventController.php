@@ -860,7 +860,32 @@ class EventController extends Controller
     public function uploadImage(Request $request, $subdomain)
     {
         $file = $request->file('image');
-        $filename = '/tmp/event_' . strtolower(Str::random(32)) . '.' . $file->getClientOriginalExtension();
+
+        if (!$file) {
+            return response()->json(['success' => false, 'error' => 'No file uploaded'], 400);
+        }
+
+        // Validate file extension (whitelist only safe image extensions)
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $extension = strtolower($file->getClientOriginalExtension());
+        if (!in_array($extension, $allowedExtensions)) {
+            return response()->json(['success' => false, 'error' => 'Invalid file type. Allowed: jpg, jpeg, png, gif, webp'], 400);
+        }
+
+        // Validate MIME type
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $mimeType = $file->getMimeType();
+        if (!in_array($mimeType, $allowedMimeTypes)) {
+            return response()->json(['success' => false, 'error' => 'Invalid file type'], 400);
+        }
+
+        // Validate that it's actually an image
+        $imageInfo = @getimagesize($file->getPathname());
+        if ($imageInfo === false) {
+            return response()->json(['success' => false, 'error' => 'File is not a valid image'], 400);
+        }
+
+        $filename = '/tmp/event_' . strtolower(Str::random(32)) . '.' . $extension;
         move_uploaded_file($file->getPathname(), $filename);
 
         return response()->json(['success' => true, 'filename' => $filename]);
@@ -869,7 +894,32 @@ class EventController extends Controller
     public function guestUploadImage(Request $request, $subdomain)
     {
         $file = $request->file('image');
-        $filename = '/tmp/event_' . strtolower(Str::random(32)) . '.' . $file->getClientOriginalExtension();
+
+        if (!$file) {
+            return response()->json(['success' => false, 'error' => 'No file uploaded'], 400);
+        }
+
+        // Validate file extension (whitelist only safe image extensions)
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $extension = strtolower($file->getClientOriginalExtension());
+        if (!in_array($extension, $allowedExtensions)) {
+            return response()->json(['success' => false, 'error' => 'Invalid file type. Allowed: jpg, jpeg, png, gif, webp'], 400);
+        }
+
+        // Validate MIME type
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $mimeType = $file->getMimeType();
+        if (!in_array($mimeType, $allowedMimeTypes)) {
+            return response()->json(['success' => false, 'error' => 'Invalid file type'], 400);
+        }
+
+        // Validate that it's actually an image
+        $imageInfo = @getimagesize($file->getPathname());
+        if ($imageInfo === false) {
+            return response()->json(['success' => false, 'error' => 'File is not a valid image'], 400);
+        }
+
+        $filename = '/tmp/event_' . strtolower(Str::random(32)) . '.' . $extension;
         move_uploaded_file($file->getPathname(), $filename);
 
         return response()->json(['success' => true, 'filename' => $filename]);
@@ -882,10 +932,26 @@ class EventController extends Controller
     {
         // Clear the pending request session
         session()->forget('pending_request');
-        
+
         // Get the redirect URL from the form, or fall back to the current URL
         $redirectUrl = $request->input('redirect_url', url()->current());
-        
+
+        // Validate redirect URL to prevent open redirect attacks
+        $parsedUrl = parse_url($redirectUrl);
+        $appHost = parse_url(config('app.url'), PHP_URL_HOST);
+
+        // Only allow redirects to same host or relative paths
+        if (isset($parsedUrl['host']) && $parsedUrl['host'] !== $appHost) {
+            // External redirect not allowed - use home page instead
+            $redirectUrl = url('/');
+        }
+
+        // Block javascript: and data: URLs
+        $lowerUrl = strtolower(trim($redirectUrl));
+        if (str_starts_with($lowerUrl, 'javascript:') || str_starts_with($lowerUrl, 'data:')) {
+            $redirectUrl = url('/');
+        }
+
         return redirect($redirectUrl);
     }
 }

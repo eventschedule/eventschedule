@@ -39,6 +39,12 @@ class AppController extends Controller
 
     public function testDatabase(Request $request)
     {
+        // This endpoint is only available for self-hosted setups (not on hosted platform)
+        // and should only be used during initial configuration
+        if (config('app.hosted')) {
+            return response()->json(['success' => false, 'error' => 'Not available'], 403);
+        }
+
         $host = $request->input('host');
         $port = $request->input('port');
         $database = $request->input('database');
@@ -48,11 +54,14 @@ class AppController extends Controller
         try {
             $connection = @mysqli_connect($host, $username, $password, $database, (int)$port);
             if (!$connection) {
-                throw new \Exception(mysqli_connect_error());
+                // Don't expose detailed MySQL errors - they can reveal server information
+                \Log::warning('Database connection test failed', ['host' => $host, 'error' => mysqli_connect_error()]);
+                return response()->json(['success' => false, 'error' => 'Unable to connect to database. Please check your credentials.']);
             }
             mysqli_close($connection);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'error' => $e->getMessage()]);
+            \Log::warning('Database connection test exception', ['host' => $host, 'error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'error' => 'Unable to connect to database. Please check your credentials.']);
         }
 
         return response()->json(['success' => true]);

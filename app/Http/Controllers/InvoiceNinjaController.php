@@ -30,8 +30,21 @@ class InvoiceNinjaController extends Controller
         return redirect()->back()->with('message', __('messages.invoiceninja_unlinked'));
     }
 
-    public function webhook(Request $request, $secret)
+    public function webhook(Request $request, $secret = null)
     {
+        // Prefer Authorization header over URL parameter for security
+        // (URL secrets appear in logs and Referer headers)
+        $headerSecret = $request->header('X-Webhook-Secret') ?? $request->header('Authorization');
+        if ($headerSecret) {
+            // Remove "Bearer " prefix if present
+            $headerSecret = preg_replace('/^Bearer\s+/i', '', $headerSecret);
+            $secret = $headerSecret;
+        }
+
+        if (!$secret) {
+            return response()->json(['status' => 'error', 'message' => 'Missing webhook secret'], 400);
+        }
+
         $user = User::where('invoiceninja_webhook_secret', $secret)->first();
 
         if (! $user) {

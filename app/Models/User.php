@@ -255,9 +255,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isAdmin(): bool
     {
-        if (config('app.debug')) {
-            return true;
-        } elseif (config('app.hosted')) {
+        // Note: Debug mode should NOT grant admin access - that's a security risk
+        if (config('app.hosted')) {
             return in_array($this->id, [1, 26]);
         } else {
             return $this->id == 1;
