@@ -432,7 +432,7 @@ class Event extends Model
     public function getVenueDisplayName($translate = true)
     {
         if ($this->venue) {
-            return $this->venue->getDisplayName($translate);
+            return $this->venue->shortVenue($translate);
         }
 
         return $this->getEventUrlDomain();
