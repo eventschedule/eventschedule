@@ -8,6 +8,8 @@ use App\Notifications\RequestDeclinedNotification;
 use App\Notifications\RequestAcceptedNotification;
 use App\Notifications\DeletedEventNotification;
 use Illuminate\Support\Facades\Mail;
+use App\Mail\EventAccepted;
+use App\Mail\EventDeclined;
 use Illuminate\Support\Facades\Storage;
 use App\Utils\ColorUtils;
 use Illuminate\Http\Request;
@@ -542,8 +544,13 @@ class EventController extends Controller
             $role->save();
         }
 
-        //$emails = $event->role->members()->pluck('email');
-        //Notification::route('mail', $emails)->notify(new RequestAcceptedNotification($event));
+        // Send email to the talent who created the request
+        if ($event->creatorRole) {
+            $emails = $event->creatorRole->members()->pluck('email')->toArray();
+            if (count($emails) > 0) {
+                Mail::to($emails)->send(new EventAccepted($event, $role));
+            }
+        }
 
         return redirect('/' . $subdomain . '/requests')
                     ->with('message', __('messages.request_accepted'));
@@ -566,8 +573,13 @@ class EventController extends Controller
             $role->save();
         }
 
-        //$emails = $event->role->members()->pluck('email');
-        //Notification::route('mail', $emails)->notify(new RequestDeclinedNotification($event));
+        // Send email to the talent who created the request
+        if ($event->creatorRole) {
+            $emails = $event->creatorRole->members()->pluck('email')->toArray();
+            if (count($emails) > 0) {
+                Mail::to($emails)->send(new EventDeclined($event, $role));
+            }
+        }
 
         if ($request->redirect_to == 'schedule') {
             return redirect('/' . $subdomain . '/schedule')
@@ -575,7 +587,48 @@ class EventController extends Controller
         } else {
             return redirect('/' . $subdomain . '/requests')
                 ->with('message', __('messages.request_declined'));
-        }        
+        }
+    }
+
+    public function acceptAll(Request $request, $subdomain)
+    {
+        if (! auth()->user()->isMember($subdomain)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $user = $request->user();
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        // Get all pending events for this role
+        $pendingEvents = Event::with(['creatorRole'])
+            ->whereHas('roles', function ($query) use ($role) {
+                $query->where('role_id', $role->id)
+                    ->whereNull('is_accepted');
+            })
+            ->get();
+
+        $acceptedCount = 0;
+
+        foreach ($pendingEvents as $event) {
+            if ($user->isMember($subdomain)) {
+                $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
+                $acceptedCount++;
+
+                // Send email to the talent who created the request
+                if ($event->creatorRole) {
+                    $emails = $event->creatorRole->members()->pluck('email')->toArray();
+                    if (count($emails) > 0) {
+                        Mail::to($emails)->send(new EventAccepted($event, $role));
+                    }
+                }
+            }
+        }
+
+        $role->last_notified_request_count = 0;
+        $role->save();
+
+        return redirect('/' . $subdomain . '/requests')
+                    ->with('message', __('messages.all_requests_accepted', ['count' => $acceptedCount]));
     }
 
     public function store(EventCreateRequest $request, $subdomain)

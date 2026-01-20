@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class AnalyticsService
 {
@@ -195,21 +196,20 @@ class AnalyticsService
     }
 
     /**
-     * Get recent views
+     * Get recent views with pagination
      */
-    public function getRecentViews(User $user, int $limit = 50, ?int $roleId = null): Collection
+    public function getRecentViews(User $user, int $perPage = 25, ?int $roleId = null): LengthAwarePaginator
     {
         $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
 
         if ($roleIds->isEmpty()) {
-            return collect();
+            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, $perPage);
         }
 
         return PageView::forRoles($roleIds)
             ->with(['role', 'event'])
             ->orderByDesc('viewed_at')
-            ->limit($limit)
-            ->get();
+            ->paginate($perPage);
     }
 
     /**

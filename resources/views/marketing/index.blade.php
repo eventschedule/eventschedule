@@ -44,6 +44,11 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-5px); }
         }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
 
         .animate-gradient {
             background-size: 200% 200%;
@@ -134,8 +139,8 @@
     <section class="relative min-h-screen flex items-center overflow-hidden bg-[#0a0a0f] noise">
         <!-- Animated gradient orbs -->
         <div class="absolute inset-0 overflow-hidden">
-            <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-violet-600/30 to-indigo-600/30 rounded-full blur-[100px] animate-float"></div>
-            <div class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-gradient-to-r from-fuchsia-600/20 to-pink-600/20 rounded-full blur-[100px] animate-float delay-200"></div>
+            <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-violet-600/30 to-indigo-600/30 rounded-full blur-[100px] animate-pulse-slow"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-gradient-to-r from-fuchsia-600/20 to-pink-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-blue-600/10 to-cyan-600/10 rounded-full blur-[120px]"></div>
         </div>
 

@@ -134,6 +134,7 @@ Route::middleware(['auth', 'verified'])->group(function ()
     Route::get('/{subdomain}/clear-videos/{event_hash}/{role_hash}', [EventController::class, 'clearVideos'])->name('event.clear_videos');
     Route::get('/{subdomain}/requests/accept-event/{hash}', [EventController::class, 'accept'])->name('event.accept');
     Route::get('/{subdomain}/requests/decline-event/{hash}', [EventController::class, 'decline'])->name('event.decline');
+    Route::get('/{subdomain}/requests/accept-all', [EventController::class, 'acceptAll'])->name('event.accept_all');
     Route::post('/{subdomain}/profile/update-links', [RoleController::class, 'updateLinks'])->name('role.update_links');
     Route::post('/{subdomain}/profile/remove-links', [RoleController::class, 'removeLinks'])->name('role.remove_links');
     Route::get('/{subdomain}/followers/qr-code', [RoleController::class, 'qrCode'])->name('role.qr_code');
@@ -209,6 +210,7 @@ if (config('app.hosted')) {
         Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
         Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
         Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
+        Route::get('/selfhost', [MarketingController::class, 'selfHost'])->name('marketing.selfhost');
     } else {
         // Hosted mode: show marketing pages at root URLs on eventschedule.com
         Route::domain('eventschedule.com')->group(function () {
@@ -221,6 +223,7 @@ if (config('app.hosted')) {
             Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
             Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
             Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
+            Route::get('/selfhost', [MarketingController::class, 'selfHost'])->name('marketing.selfhost');
         });
 
         // Redirect www.eventschedule.com marketing pages to non-www
@@ -234,6 +237,7 @@ if (config('app.hosted')) {
             Route::get('/privacy', fn() => redirect('https://eventschedule.com/privacy', 301));
             Route::get('/terms-of-service', fn() => redirect('https://eventschedule.com/terms-of-service', 301));
             Route::get('/self-hosting-terms-of-service', fn() => redirect('https://eventschedule.com/self-hosting-terms-of-service', 301));
+            Route::get('/selfhost', fn() => redirect('https://eventschedule.com/selfhost', 301));
         });
     }
 } else {
@@ -243,6 +247,7 @@ if (config('app.hosted')) {
     Route::get('/about', fn() => redirect()->route('login'));
     Route::get('/ticketing', fn() => redirect()->route('login'));
     Route::get('/integrations', fn() => redirect()->route('login'));
+    Route::get('/selfhost', fn() => redirect()->route('login'));
 }
 
 if (config('app.hosted')) {
@@ -267,7 +272,9 @@ if (config('app.hosted')) {
     Route::get('/{subdomain}/{slug}', [RoleController::class, 'viewGuest'])->name('event.view_guest');
 }
 
-if (config('app.env') == 'local') {
+// Blog routes: use /blog path for local dev and selfhost users
+// Hosted mode uses blog.eventschedule.com subdomain (defined above)
+if (config('app.env') == 'local' || ! config('app.hosted')) {
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 }

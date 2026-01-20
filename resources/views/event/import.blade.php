@@ -10,6 +10,13 @@
     }
 </style>
 
+@if (! config('services.google.gemini_key'))
+<div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg">
+    <div class="max-w-3xl mx-auto">
+        <x-gemini-setup-guide />
+    </div>
+</div>
+@else
 <form method="post"
     action="{{ isset($isGuest) && $isGuest ? route('event.guest_import', ['subdomain' => $role->subdomain]) : route('event.import', ['subdomain' => $role->subdomain]) }}"
     enctype="multipart/form-data"
@@ -133,12 +140,6 @@
                                 </button>
                             </div>
                             <x-input-error class="mt-2" :messages="$errors->get('event_details')" />
-
-                            @if (! config('services.google.gemini_key'))
-                                <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                    {{ __('messages.gemini_key_required') }}
-                                </div>
-                            @endif
 
                             <!-- Error message display -->
                             <div v-if="errorMessage" class="mt-4 p-3 text-sm text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded-md">
@@ -1730,13 +1731,13 @@
             selectVideo(eventIdx, performerIdx, video) {
                 const event = this.preview.parsed[eventIdx];
                 const performer = event.performers[performerIdx];
-                
+
                 if (!performer) return;
-                
+
                 if (!performer.selectedVideos) {
                     Object.assign(performer, { selectedVideos: [] });
                 }
-                
+
                 const index = performer.selectedVideos.findIndex(v => v.id === video.id);
                 if (index > -1) {
                     // Remove video if already selected
@@ -1749,3 +1750,4 @@
         }
     }).mount('#event-import-app')
 </script>
+@endif
