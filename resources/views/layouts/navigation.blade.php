@@ -55,6 +55,17 @@
                     </a>
                 </li>
 
+                <li>
+                    <a href="{{ route('analytics') }}"
+                        class="group flex gap-x-4 items-center rounded-md p-2 text-lg font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white {{ request()->is('analytics') ? 'bg-gray-800 text-white' : '' }}">
+                        <svg class="h-8 w-8 shrink-0" viewBox="0 0 24 24"
+                            fill="{{ request()->is('analytics') ? '#ccc' : '#666' }}" aria-hidden="true">
+                            <path d="M22,21H2V3H4V19H6V10H10V19H12V6H16V19H18V14H22V21Z" />
+                        </svg>
+                        {{ __('messages.analytics') }}
+                    </a>
+                </li>
+
                 @if (config('app.hosted') && auth()->user()->isAdmin())
                 <li>
                     <a href="{{ route('blog.admin.index') }}"
