@@ -26,6 +26,7 @@ use App\Utils\UrlUtils;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
 use App\Services\EmailService;
+use App\Services\AnalyticsService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 
@@ -383,6 +384,11 @@ class RoleController extends Controller
                 });
                         
             $events = $events->orderBy('starts_at')->get();
+        }
+
+        // Track view for analytics (non-member visits only, skip embeds)
+        if (!request()->embed && (!$user || !$user->isMember($subdomain))) {
+            app(AnalyticsService::class)->recordView($role, $event, $request);
         }
 
         $embed = request()->embed;
