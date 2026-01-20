@@ -442,6 +442,7 @@ return [
     'invalid_image_type' => 'نوع الصورة غير صالح',
     'multiple_events_detected' => 'تم اكتشاف عدة أحداث',
     'registration_url' => 'رابط التسجيل',
+    'registration_url_help' => 'رابط خارجي يمكن للمستخدمين التسجيل فيه لهذا الحدث',
     'talent' => 'موهبة',
     'confirm_remove_event' => 'هل أنت متأكد من أنك تريد إزالة هذا الحدث؟',
     'event_removed' => 'تمت إزالة الحدث بنجاح!',

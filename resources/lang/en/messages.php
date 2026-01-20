@@ -482,6 +482,7 @@ return [
     'invalid_image_type' => 'Invalid image type',
     'multiple_events_detected' => 'Multiple events detected',
     'registration_url' => 'Registration URL',
+    'registration_url_help' => 'External URL where users can register for this event',
     'talent' => 'Talent',
     'confirm_remove_event' => 'Are you sure you want to remove this event?',
     'event_removed' => 'Event successfully removed!',

@@ -304,6 +304,7 @@ return [
     'invalid_image_type' => 'Tipo di immagine non valido',
     'multiple_events_detected' => 'Rilevati più eventi',
     'registration_url' => 'URL di registrazione',
+    'registration_url_help' => 'URL esterno dove gli utenti possono registrarsi a questo evento',
     'talent' => 'Talento',
     'confirm_remove_event' => 'Sei sicuro di voler rimuovere questo evento?',
     'event_removed' => 'Evento rimosso con successo!',

@@ -296,6 +296,7 @@ return [
     'invalid_image_type' => 'Ongeldig afbeeldingstype',
     'multiple_events_detected' => 'Meerdere evenementen gedetecteerd',
     'registration_url' => 'Registratie-URL',
+    'registration_url_help' => 'Externe URL waar gebruikers zich kunnen registreren voor dit evenement',
     'talent' => 'Talent',
     'confirm_remove_event' => 'Weet je zeker dat je dit evenement wilt verwijderen?',
     'event_removed' => 'Evenement succesvol verwijderd!',
