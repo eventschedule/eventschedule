@@ -76,6 +76,10 @@
     });
     </script>
 
+    <script {!! nonce_attr() !!}>
+        window.appLocale = "{{ app()->getLocale() }}";
+    </script>
+
     @vite([
     'resources/css/app.css',
     'resources/js/app.js',
