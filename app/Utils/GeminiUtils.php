@@ -2,11 +2,8 @@
 
 namespace App\Utils;
 
-use App\Utils\UrlUtils;
-use App\Utils\ImageUtils;
-use App\Models\Role;
 use App\Models\Event;
-use App\Models\RoleUser;
+use App\Models\Role;
 use Carbon\Carbon;
 
 class GeminiUtils
@@ -18,19 +15,19 @@ class GeminiUtils
         } else {
             $model = 'gemini-2.5-flash';
         }
-        
+
         $apiKey = config('services.google.gemini_key');
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=" . $apiKey;
-        
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=".$apiKey;
+
         $data = [
             'contents' => [
                 [
-                    'parts' => []
-                ]
+                    'parts' => [],
+                ],
             ],
             'generationConfig' => [
-                'response_mime_type' => 'application/json'
-            ]
+                'response_mime_type' => 'application/json',
+            ],
         ];
 
         // Add image data if provided
@@ -39,12 +36,12 @@ class GeminiUtils
             $imageUrl = 'temp_image'; // Placeholder for format detection
             $detectedFormat = ImageUtils::detectImageFormat($imageData, $imageUrl);
             $mimeType = ImageUtils::getImageMimeType($detectedFormat);
-            
+
             $data['contents'][0]['parts'][] = [
                 'inline_data' => [
                     'mime_type' => $mimeType,
-                    'data' => base64_encode($imageData)
-                ]
+                    'data' => base64_encode($imageData),
+                ],
             ];
         }
 
@@ -58,7 +55,7 @@ class GeminiUtils
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
             CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
-            CURLOPT_POSTFIELDS => json_encode($data)
+            CURLOPT_POSTFIELDS => json_encode($data),
         ]);
 
         $response = curl_exec($ch);
@@ -66,19 +63,19 @@ class GeminiUtils
         curl_close($ch);
 
         if ($httpCode !== 200) {
-            \Log::error("Gemini API error response: " . $response);
-            
+            \Log::error('Gemini API error response: '.$response);
+
             // Try to extract the specific error message from the response
             $errorData = json_decode($response, true);
             if (json_last_error() === JSON_ERROR_NONE && isset($errorData['error']['message'])) {
                 $errorMessage = $errorData['error']['message'];
                 $errorStatus = $errorData['error']['status'] ?? null;
-                
+
                 // Check if this is a quota exceeded error
                 if (str_contains($errorMessage, 'quota') || str_contains($errorMessage, 'Quota exceeded')) {
                     // Log to Sentry but don't throw - return null so user doesn't see error
-                    $exception = new \Exception("Gemini API quota exceeded: " . $errorMessage);
-                    
+                    $exception = new \Exception('Gemini API quota exceeded: '.$errorMessage);
+
                     \Sentry\withScope(function (\Sentry\State\Scope $scope) use ($exception, $httpCode, $response, $prompt): void {
                         $scope->setLevel(\Sentry\Severity::error());
                         $scope->setTag('service', 'gemini');
@@ -90,18 +87,18 @@ class GeminiUtils
                         ]);
                         \Sentry\captureException($exception);
                     });
-                    
+
                     return null;
                 }
-                
+
                 // Check if this is a model overloaded/unavailable error (503 or UNAVAILABLE status)
-                if ($httpCode === 503 || 
-                    $errorStatus === 'UNAVAILABLE' || 
+                if ($httpCode === 503 ||
+                    $errorStatus === 'UNAVAILABLE' ||
                     str_contains(strtolower($errorMessage), 'overloaded') ||
                     str_contains(strtolower($errorMessage), 'overload')) {
                     // Log to Sentry but don't throw - return null so user doesn't see error
-                    $exception = new \Exception("Gemini API model overloaded: " . $errorMessage);
-                    
+                    $exception = new \Exception('Gemini API model overloaded: '.$errorMessage);
+
                     \Sentry\withScope(function (\Sentry\State\Scope $scope) use ($exception, $httpCode, $response, $prompt, $errorStatus): void {
                         $scope->setLevel(\Sentry\Severity::warning());
                         $scope->setTag('service', 'gemini');
@@ -114,30 +111,30 @@ class GeminiUtils
                         ]);
                         \Sentry\captureException($exception);
                     });
-                    
+
                     return null;
                 }
-                
+
                 throw new \Exception($errorMessage);
             }
-            
-            throw new \Exception('Gemini API request failed with status code: ' . $httpCode);
+
+            throw new \Exception('Gemini API request failed with status code: '.$httpCode);
         }
 
         $data = json_decode($response, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            \Log::error("Failed to parse Gemini API response: " . $response);
+            \Log::error('Failed to parse Gemini API response: '.$response);
             throw new \Exception('Invalid JSON response from Gemini API');
         }
 
-        if (!isset($data['candidates'][0]['content']['parts'][0]['text'])) {
-            \Log::error("Unexpected Gemini API response structure: " . json_encode($data));
+        if (! isset($data['candidates'][0]['content']['parts'][0]['text'])) {
+            \Log::error('Unexpected Gemini API response structure: '.json_encode($data));
             throw new \Exception('Unexpected response structure from Gemini API');
         }
 
         $text = $data['candidates'][0]['content']['parts'][0]['text'];
         $parsed = json_decode($text, true);
-        
+
         // Handle both array and object response formats
         if (is_array($parsed) && isset($parsed[0])) {
             $data = $parsed;
@@ -145,7 +142,7 @@ class GeminiUtils
             $data = [$parsed];
         }
 
-        //\Log::info("Parsed data: " . json_encode($data));
+        // \Log::info("Parsed data: " . json_encode($data));
 
         return $data;
     }
@@ -154,28 +151,28 @@ class GeminiUtils
     {
         $imageData = null;
         $filename = null;
-        
+
         if ($file) {
             // Check if this is a file created from image data (not a real uploaded file)
-            $isFromImageData = $file->getClientOriginalName() === 'event_image.jpg' || 
-                              $file->getClientOriginalName() === 'event_image.png' || 
-                              $file->getClientOriginalName() === 'event_image.gif' || 
+            $isFromImageData = $file->getClientOriginalName() === 'event_image.jpg' ||
+                              $file->getClientOriginalName() === 'event_image.png' ||
+                              $file->getClientOriginalName() === 'event_image.gif' ||
                               $file->getClientOriginalName() === 'event_image.webp';
-            
+
             if ($isFromImageData) {
                 // File was created from image data, so we can trust it
                 $imageData = file_get_contents($file->getRealPath());
                 $imageUrl = $file->getClientOriginalName();
                 $detectedFormat = ImageUtils::detectImageFormat($imageData, $imageUrl);
-                
+
                 // Check if detected format is supported
                 $allowedFormats = ['jpeg', 'jpg', 'png', 'gif', 'webp'];
-                if (!in_array($detectedFormat, $allowedFormats)) {
+                if (! in_array($detectedFormat, $allowedFormats)) {
                     $imageData = null;
                 } else {
                     // Use the file directly since it's already a temporary file
                     $filename = $file->getRealPath();
-                    
+
                     // Validate that it's actually an image
                     $imageInfo = getimagesize($filename);
                     if ($imageInfo === false) {
@@ -186,29 +183,29 @@ class GeminiUtils
             } else {
                 // This is a real uploaded file, validate it
                 ImageUtils::validateUploadedFile($file);
-                
+
                 // Read file content securely
                 $imageData = file_get_contents($file->getRealPath());
-                
+
                 // Use ImageUtils to detect format and validate
                 $imageUrl = $file->getClientOriginalName();
                 $detectedFormat = ImageUtils::detectImageFormat($imageData, $imageUrl);
-                
+
                 // Check if detected format is supported
                 $allowedFormats = ['jpeg', 'jpg', 'png', 'gif', 'webp'];
-                if (!in_array($detectedFormat, $allowedFormats)) {
+                if (! in_array($detectedFormat, $allowedFormats)) {
                     $imageData = null;
                 } else {
                     // Generate secure filename with correct extension
                     $extension = ImageUtils::getImageExtension($detectedFormat);
-                    $filename = '/tmp/event_' . strtolower(\Str::random(32)) . '.' . $extension;
-                    
+                    $filename = '/tmp/event_'.strtolower(\Str::random(32)).'.'.$extension;
+
                     // Use move_uploaded_file for security
-                    if (!move_uploaded_file($file->getRealPath(), $filename)) {
+                    if (! move_uploaded_file($file->getRealPath(), $filename)) {
                         $imageData = null;
                         $filename = null;
                     }
-                    
+
                     // Validate that it's actually an image
                     $imageInfo = getimagesize($filename);
                     if ($imageInfo === false) {
@@ -249,23 +246,23 @@ class GeminiUtils
             'performer_name_en' => 'English translation, only if the performer name is not English',
             'performer_email' => '',
             'performer_website' => '',
-            'category_name' => 'Choose the most appropriate category from: ' . implode(', ', $categoryNames),
+            'category_name' => 'Choose the most appropriate category from: '.implode(', ', $categoryNames),
         ];
 
         // Build prompt from fields
-        $prompt = "Parse the event details from this " . ($imageData ? "image and " : "") . "message to the following fields, take your time and do the best job possible:\n";
+        $prompt = 'Parse the event details from this '.($imageData ? 'image and ' : '')."message to the following fields, take your time and do the best job possible:\n";
         foreach ($fields as $field => $note) {
-            $prompt .= $field . ($note ? " ({$note})" : "") . ",\n";
+            $prompt .= $field.($note ? " ({$note})" : '').",\n";
         }
         $prompt .= $details;
 
         $now = Carbon::now(auth()->user() ? auth()->user()->timezone : 'UTC');
         $thisMonth = $now->format('M Y');
-        
+
         $prompt .= "\nThe date today is {$now->format('M d, Y')}.";
 
         if ($now->format('n') == 12) {
-            $nextMonth = $now->copy()->addMonth()->format('M Y'); 
+            $nextMonth = $now->copy()->addMonth()->format('M Y');
             $prompt .= "\nThe event date is either {$thisMonth} or {$nextMonth}.";
         } else {
             $nextMonth = $now->copy()->addMonth()->format('M Y');
@@ -303,17 +300,17 @@ class GeminiUtils
                 if (! empty($item['event_city'])) {
                     $data[$key]['event_address'] = $item['event_city'];
                     unset($data[$key]['event_city']);
-                } else if (! empty($item['event_state'])) {
+                } elseif (! empty($item['event_state'])) {
                     $data[$key]['event_address'] = $item['event_state'];
                     unset($data[$key]['event_state']);
                 }
             }
 
             // Convert category name to category ID
-            if (!empty($item['category_name'])) {
+            if (! empty($item['category_name'])) {
                 $categoryName = trim($item['category_name']);
                 $categoryId = null;
-                
+
                 // Try exact match first
                 foreach ($categories as $id => $name) {
                     if (strcasecmp($name, $categoryName) === 0) {
@@ -321,9 +318,9 @@ class GeminiUtils
                         break;
                     }
                 }
-                
+
                 // If no exact match, try partial match
-                if (!$categoryId) {
+                if (! $categoryId) {
                     foreach ($categories as $id => $name) {
                         if (stripos($name, $categoryName) !== false || stripos($categoryName, $name) !== false) {
                             $categoryId = $id;
@@ -331,12 +328,12 @@ class GeminiUtils
                         }
                     }
                 }
-                
+
                 // If still no match, try fuzzy matching
-                if (!$categoryId) {
+                if (! $categoryId) {
                     $bestMatch = null;
                     $bestScore = 0;
-                    
+
                     foreach ($categories as $id => $name) {
                         $score = similar_text(strtolower($name), strtolower($categoryName), $percent);
                         if ($percent > $bestScore) {
@@ -344,26 +341,26 @@ class GeminiUtils
                             $bestMatch = $id;
                         }
                     }
-                    
+
                     // Only use fuzzy match if similarity is above 70%
                     if ($bestScore > 70) {
                         $categoryId = $bestMatch;
                     }
                 }
-                
+
                 $data[$key]['category_id'] = $categoryId;
                 unset($data[$key]['category_name']);
             }
 
             // Convert performer data to array format
-            if (!empty($item['performer_name'])) {
+            if (! empty($item['performer_name'])) {
                 $data[$key]['performers'] = [[
                     'name' => $item['performer_name'],
                     'name_en' => $item['performer_name_en'] ?? '',
                     'email' => $item['performer_email'] ?? '',
                     'website' => $item['performer_website'] ?? '',
                 ]];
-                
+
                 // Remove old single performer fields
                 unset($data[$key]['performer_name']);
                 unset($data[$key]['performer_name_en']);
@@ -375,11 +372,11 @@ class GeminiUtils
         // Combine events with same time and address
         $combinedData = [];
         foreach ($data as $event) {
-            $key = $event['event_date_time'] . '|' . $event['event_address'];
-            
+            $key = $event['event_date_time'].'|'.$event['event_address'];
+
             if (isset($combinedData[$key])) {
                 // Add performer to existing event if not already present
-                if (!empty($event['performers'])) {
+                if (! empty($event['performers'])) {
                     foreach ($event['performers'] as $performer) {
                         $exists = false;
                         foreach ($combinedData[$key]['performers'] as $existingPerformer) {
@@ -388,14 +385,14 @@ class GeminiUtils
                                 break;
                             }
                         }
-                        if (!$exists) {
+                        if (! $exists) {
                             $combinedData[$key]['performers'][] = $performer;
                         }
                     }
                 }
             } else {
                 // Initialize performers array if not set
-                if (!isset($event['performers'])) {
+                if (! isset($event['performers'])) {
                     $event['performers'] = [];
                 }
                 $combinedData[$key] = $event;
@@ -423,27 +420,27 @@ class GeminiUtils
                 $data[$key]['event_address'] = $role->address1;
             } elseif (! empty($item['event_city']) && (! empty($item['venue_name']) || ! empty($item['event_address']))) {
                 $venue = Role::where('is_deleted', false)
-                        ->where('country_code', $role->country_code)
-                        ->where('city', $item['event_city'])
-                        ->where(function($query) use ($item) {
-                            $query->when(! empty($item['venue_name']), function($q) use ($item) {
-                                $q->where('name', $item['venue_name']);
-                            })
-                            ->when(! empty($item['venue_name_en']), function($q) use ($item) {
-                                $q->orWhere('name_en', $item['venue_name_en']); 
+                    ->where('country_code', $role->country_code)
+                    ->where('city', $item['event_city'])
+                    ->where(function ($query) use ($item) {
+                        $query->when(! empty($item['venue_name']), function ($q) use ($item) {
+                            $q->where('name', $item['venue_name']);
+                        })
+                            ->when(! empty($item['venue_name_en']), function ($q) use ($item) {
+                                $q->orWhere('name_en', $item['venue_name_en']);
                             });
-                        })                        
-                        ->where(function($query) use ($item) {
-                            $query->when(! empty($item['event_address']), function($q) use ($item) {
-                                $q->where('address1', $item['event_address']);
-                            })
-                            ->when(! empty($item['event_address_en']), function($q) use ($item) {
-                                $q->orWhere('address1_en', $item['event_address_en']); 
+                    })
+                    ->where(function ($query) use ($item) {
+                        $query->when(! empty($item['event_address']), function ($q) use ($item) {
+                            $q->where('address1', $item['event_address']);
+                        })
+                            ->when(! empty($item['event_address_en']), function ($q) use ($item) {
+                                $q->orWhere('address1_en', $item['event_address_en']);
                             });
-                        })                                                
-                        ->where('type', 'venue')
-                        ->orderBy('id')
-                        ->first();
+                    })
+                    ->where('type', 'venue')
+                    ->orderBy('id')
+                    ->first();
 
                 if ($venue) {
                     $data[$key]['venue_id'] = UrlUtils::encodeId($venue->id);
@@ -459,12 +456,12 @@ class GeminiUtils
             if ($role->isTalent()) {
                 $data[$key]['talent_id'] = UrlUtils::encodeId($role->id);
             } elseif (! empty($item['performers'])) {
-                                
-                foreach ($item['performers'] as $index => $performer) {                    
+
+                foreach ($item['performers'] as $index => $performer) {
                     $talent = Role::where('is_deleted', false)
-                        ->where(function($query) use ($performer) {
+                        ->where(function ($query) use ($performer) {
                             $query->where('name', $performer['name'])
-                                ->when(! empty($performer['name_en']), function($q) use ($performer) {
+                                ->when(! empty($performer['name_en']), function ($q) use ($performer) {
                                     $q->orWhere('name_en', $performer['name_en']);
                                 });
                         })
@@ -484,6 +481,7 @@ class GeminiUtils
                     $eventDate = Carbon::parse($item['event_date_time']);
                 } catch (\Exception $e) {
                     $data[$key]['event_date_time'] = null;
+
                     continue;
                 }
                 if ($eventDate->lt(now()->subDays(3)) || $eventDate->diffInMonths(now()) > 2) {
@@ -505,13 +503,13 @@ class GeminiUtils
                 $timezone = $role->user->timezone;
                 $eventDate = Carbon::parse($item['event_date_time'], $timezone)->setTimezone('UTC');
                 $query = Event::where('starts_at', $eventDate);
-                
+
                 // Check for same venue address
                 if (! empty($item['event_address'])) {
                     $similarByAddress = (clone $query)
-                        ->whereHas('roles', function($q) use ($item) {
+                        ->whereHas('roles', function ($q) use ($item) {
                             $q->where('type', 'venue')
-                              ->where('address1', $item['event_address']);
+                                ->where('address1', $item['event_address']);
                         })
                         ->first();
 
@@ -524,12 +522,12 @@ class GeminiUtils
                 // Check for same performer name
                 if ((! empty($item['performers'][0]['name']) ?? null) && empty($data[$key]['event_url'])) {
                     $similarByPerformer = (clone $query)
-                        ->whereHas('roles', function($q) use ($item) {
+                        ->whereHas('roles', function ($q) use ($item) {
                             $q->where('type', 'talent')
-                              ->where('name', 'like', '%' . $item['performers'][0]['name'] . '%')
-                              ->when(!empty($item['performers'][0]['name_en']), function($q) use ($item) {
-                                  $q->orWhere('name', 'like', '%' . $item['performers'][0]['name_en'] . '%');
-                              });
+                                ->where('name', 'like', '%'.$item['performers'][0]['name'].'%')
+                                ->when(! empty($item['performers'][0]['name_en']), function ($q) use ($item) {
+                                    $q->orWhere('name', 'like', '%'.$item['performers'][0]['name_en'].'%');
+                                });
                         })
                         ->first();
 
@@ -541,7 +539,6 @@ class GeminiUtils
             }
         }
 
-
         return $data;
     }
 
@@ -552,14 +549,14 @@ class GeminiUtils
         }
 
         $prompt = "Translate this text from {$from} to {$to}. Return only the translation as a JSON string:\n{$text}";
-        
+
         $response = self::sendRequest($prompt);
-        
+
         // Handle quota exceeded or other errors gracefully
         if ($response === null || empty($response)) {
             return null;
         }
-        
+
         $response = $response[0];
 
         $value = null;
@@ -569,14 +566,14 @@ class GeminiUtils
                 $value = $response['translation'];
             }
             if (isset($response['en'])) {
-                $value = $response['en']; 
+                $value = $response['en'];
             }
             // If still array, try to extract a string
             if (is_array($value)) {
                 $value = implode(' ', array_filter($value, 'is_string'));
             }
             // If value is still null, try to implode all string values in $response
-            if (!$value) {
+            if (! $value) {
                 $value = implode(' ', array_filter($response, 'is_string'));
             }
         } elseif (is_string($response)) {
@@ -584,8 +581,8 @@ class GeminiUtils
         }
 
         // If value is still not a string, log and set to null
-        if (!is_string($value) || !$value) {
-            \Log::info("Error: translation response: " . json_encode($response) . " => " . $value);
+        if (! is_string($value) || ! $value) {
+            \Log::info('Error: translation response: '.json_encode($response).' => '.$value);
             $value = null;
         }
 
@@ -607,22 +604,22 @@ class GeminiUtils
 
         try {
             $response = self::sendRequest($prompt);
-            
+
             // Handle quota exceeded or other errors gracefully
             if ($response === null || empty($response)) {
                 return [];
             }
-            
+
             // sendRequest returns an array, get the first item
-            if (!empty($response) && is_array($response)) {
+            if (! empty($response) && is_array($response)) {
                 $translations = $response[0];
-                
+
                 if (is_array($translations)) {
                     return $translations;
                 }
             }
         } catch (\Exception $e) {
-            \Log::error('Group name translation failed: ' . $e->getMessage());
+            \Log::error('Group name translation failed: '.$e->getMessage());
         }
 
         // Fallback: return empty translations if API fails
@@ -633,28 +630,28 @@ class GeminiUtils
     {
         // Always limit to maximum 6 videos for consistency
         $maxResults = min($maxResults, 6);
-        
+
         // Validate query input
         if (empty($query) || strlen($query) > 100) {
             return [];
         }
-        
+
         // Validate API key
         $apiKey = config('services.google.backend');
-        if (!$apiKey) {
+        if (! $apiKey) {
             return [];
         }
-        
+
         // First, search for videos
-        $searchUrl = "https://www.googleapis.com/youtube/v3/search"
-            . "?key=" . $apiKey
-            . "&q=" . urlencode($query)
-            . "&type=video"
-            . "&order=relevance"
-            . "&maxResults=" . $maxResults
-            . "&part=snippet"
-            . "&regionCode=IL";        // Israel region
-            
+        $searchUrl = 'https://www.googleapis.com/youtube/v3/search'
+            .'?key='.$apiKey
+            .'&q='.urlencode($query)
+            .'&type=video'
+            .'&order=relevance'
+            .'&maxResults='.$maxResults
+            .'&part=snippet'
+            .'&regionCode=IL';        // Israel region
+
         // Use secure cURL instead of file_get_contents
         $ch = curl_init();
         curl_setopt_array($ch, [
@@ -668,31 +665,32 @@ class GeminiUtils
             CURLOPT_PROTOCOLS => CURLPROTO_HTTPS, // Only HTTPS for Google API
             CURLOPT_MAXFILESIZE => 1048576, // 1MB limit
         ]);
-        
+
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        
+
         if ($response === false || $httpCode !== 200) {
-            \Log::error('Failed to search YouTube: ' . json_encode($response));
+            \Log::error('Failed to search YouTube: '.json_encode($response));
+
             return [];
         }
-        
+
         $data = json_decode($response, true);
 
-        if (!isset($data['items']) || !is_array($data['items'])) {
+        if (! isset($data['items']) || ! is_array($data['items'])) {
             return [];
         }
-        
+
         $videos = [];
         $videoIds = [];
-        
+
         // Extract video IDs and basic info
         foreach ($data['items'] as $item) {
             if (isset($item['id']['videoId']) && isset($item['snippet'])) {
                 $videoId = $item['id']['videoId'];
                 $snippet = $item['snippet'];
-                
+
                 // Validate video ID format
                 if (preg_match('/^[a-zA-Z0-9_-]{11}$/', $videoId)) {
                     $videoIds[] = $videoId;
@@ -702,23 +700,23 @@ class GeminiUtils
                         'description' => html_entity_decode($snippet['description'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8'),
                         'channelTitle' => html_entity_decode($snippet['channelTitle'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8'),
                         'thumbnail' => $snippet['thumbnails']['medium']['url'] ?? null,
-                        'url' => "https://www.youtube.com/watch?v=" . $videoId,
+                        'url' => 'https://www.youtube.com/watch?v='.$videoId,
                         'publishedAt' => $snippet['publishedAt'] ?? null,
                         'viewCount' => 0,
-                        'likeCount' => 0
+                        'likeCount' => 0,
                     ];
                 }
             }
         }
-        
+
         // If we have video IDs, try to get statistics
-        if (!empty($videoIds)) {
+        if (! empty($videoIds)) {
             $videoIdsString = implode(',', $videoIds);
-            $statsUrl = "https://www.googleapis.com/youtube/v3/videos"
-                . "?key=" . $apiKey
-                . "&id=" . $videoIdsString
-                . "&part=statistics";
-                
+            $statsUrl = 'https://www.googleapis.com/youtube/v3/videos'
+                .'?key='.$apiKey
+                .'&id='.$videoIdsString
+                .'&part=statistics';
+
             $ch = curl_init();
             curl_setopt_array($ch, [
                 CURLOPT_URL => $statsUrl,
@@ -731,23 +729,23 @@ class GeminiUtils
                 CURLOPT_PROTOCOLS => CURLPROTO_HTTPS,
                 CURLOPT_MAXFILESIZE => 1048576,
             ]);
-            
+
             $statsResponse = curl_exec($ch);
             $statsHttpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
-            
+
             if ($statsResponse !== false && $statsHttpCode === 200) {
                 $statsData = json_decode($statsResponse, true);
-                
+
                 if (isset($statsData['items']) && is_array($statsData['items'])) {
                     foreach ($statsData['items'] as $item) {
                         if (isset($item['id']) && isset($item['statistics'])) {
                             $videoId = $item['id'];
                             $statistics = $item['statistics'];
-                            
+
                             if (isset($videos[$videoId])) {
-                                $videos[$videoId]['viewCount'] = (int)($statistics['viewCount'] ?? 0);
-                                $videos[$videoId]['likeCount'] = (int)($statistics['likeCount'] ?? 0);
+                                $videos[$videoId]['viewCount'] = (int) ($statistics['viewCount'] ?? 0);
+                                $videos[$videoId]['likeCount'] = (int) ($statistics['likeCount'] ?? 0);
                             }
                         }
                     }
@@ -757,7 +755,7 @@ class GeminiUtils
 
         // Sort videos by view count in descending order
         $sortedVideos = array_values($videos);
-        usort($sortedVideos, function($a, $b) {
+        usort($sortedVideos, function ($a, $b) {
             return $b['viewCount'] - $a['viewCount'];
         });
 
@@ -770,7 +768,7 @@ class GeminiUtils
         // Randomly select a length to vary content length
         $lengths = ['short', 'medium', 'long'];
         $length = $lengths[array_rand($lengths)];
-        
+
         $prompt = "Generate a blog post about '{$topic}' with the following specifications:
         
         Tone: professional
@@ -813,45 +811,80 @@ class GeminiUtils
 
         try {
             $data = self::sendRequest($prompt);
-            
+
             // Handle quota exceeded or other errors gracefully
             if ($data === null || empty($data)) {
                 throw new \Exception('Gemini API quota exceeded or unavailable');
             }
-            
+
             if (isset($data[0])) {
                 $result = $data[0];
-                
+
                 // Ensure all required fields exist
-                $result['title'] = $result['title'] ?? 'Blog Post about ' . $topic;
-                $result['content'] = $result['content'] ?? '<p>Content about ' . $topic . ' will be generated here.</p>';
-                $result['excerpt'] = $result['excerpt'] ?? 'A brief summary about ' . $topic;
+                $result['title'] = $result['title'] ?? 'Blog Post about '.$topic;
+                $result['content'] = $result['content'] ?? '<p>Content about '.$topic.' will be generated here.</p>';
+                $result['excerpt'] = $result['excerpt'] ?? 'A brief summary about '.$topic;
                 $result['tags'] = $result['tags'] ?? ['events', 'scheduling'];
                 $result['meta_title'] = $result['meta_title'] ?? $result['title'];
                 $result['meta_description'] = $result['meta_description'] ?? $result['excerpt'];
                 $result['image_category'] = $result['image_category'] ?? 'general';
-                
+
                 // Select appropriate image based on category
                 $result['featured_image'] = self::selectImageForCategory($result['image_category']);
-                
+
                 return $result;
             }
-            
+
             throw new \Exception('Invalid response structure from Gemini API');
-            
         } catch (\Exception $e) {
-            \Log::error('Failed to generate blog post: ' . $e->getMessage());
-            
+            \Log::error('Failed to generate blog post: '.$e->getMessage());
+
             // Return fallback content
             return [
-                'title' => 'Blog Post about ' . $topic,
-                'content' => '<h1>' . $topic . '</h1><p>This is a placeholder for content about ' . $topic . '. Please edit this content to add your own insights and information.</p>',
-                'excerpt' => 'A brief summary about ' . $topic,
+                'title' => 'Blog Post about '.$topic,
+                'content' => '<h1>'.$topic.'</h1><p>This is a placeholder for content about '.$topic.'. Please edit this content to add your own insights and information.</p>',
+                'excerpt' => 'A brief summary about '.$topic,
                 'tags' => ['events', 'scheduling', 'management'],
-                'meta_title' => 'Blog Post about ' . $topic,
-                'meta_description' => 'A brief summary about ' . $topic,
-                'featured_image' => 'Lets_do_Business.png'
+                'meta_title' => 'Blog Post about '.$topic,
+                'meta_description' => 'A brief summary about '.$topic,
+                'featured_image' => 'Lets_do_Business.png',
             ];
+        }
+    }
+
+    public static function generateBlogTopic($recentTitles)
+    {
+        $titlesText = ! empty($recentTitles) ? implode("\n- ", $recentTitles) : 'No recent posts';
+
+        $prompt = "You are a content strategist for Event Schedule, an event management platform.
+
+Recent blog post titles:
+- {$titlesText}
+
+Suggest ONE new blog post topic that:
+1. Is relevant to event planning, community building, or hosting successful events
+2. Is different from the recent posts listed above
+3. Would be interesting to event organizers and community managers
+
+Return a JSON object with just one field:
+{\"topic\": \"your topic phrase here (5-10 words)\"}";
+
+        try {
+            $data = self::sendRequest($prompt);
+
+            if ($data === null || empty($data)) {
+                return null;
+            }
+
+            if (isset($data[0]['topic'])) {
+                return $data[0]['topic'];
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            \Log::error('Failed to generate blog topic: '.$e->getMessage());
+
+            return null;
         }
     }
 
@@ -867,30 +900,27 @@ class GeminiUtils
             'productivity' => ['5am_Club.png', 'Chess_Vibrancy.png', 'Warming_Up.png'],
             'nature' => ['Nature_Calls.png', 'Flowerful_Life.png'],
             'arts' => ['Literature.png', 'Music_Potential.png', 'The_Stage_Awaits.png'],
-            'general' => ['Lets_do_Business.png', 'All_Hands_on_Deck.png', 'Flowerful_Life.png', 'Chill_Evening.png']
+            'general' => ['Lets_do_Business.png', 'All_Hands_on_Deck.png', 'Flowerful_Life.png', 'Chill_Evening.png'],
         ];
 
         $images = $imageMap[$category] ?? $imageMap['general'];
-        
+
         // Get available header images (already excludes recently used ones)
         $availableImages = \App\Models\BlogPost::getAvailableHeaderImages();
-        
+
         // Filter to only include images from the current category
         $categoryImages = array_intersect_key($availableImages, array_flip($images));
-        
+
         // If no category images are available, use any available image
         if (empty($categoryImages)) {
             $categoryImages = $availableImages;
         }
-        
+
         // If still no images available, fall back to any image from the category
         if (empty($categoryImages)) {
             $categoryImages = array_flip($images);
         }
-        
+
         return array_rand($categoryImages);
     }
-
-    
-    
-}   
+}
